@@ -129,11 +129,12 @@ class Notification extends Model
     public static function sendAttendanceAlert(User $parent, User $student, string $status): self
     {
         $statusLabels = ['absent' => 'غائب', 'late' => 'متأخر'];
+        $statusLabel = $statusLabels[$status] ?? $status;
         return self::create([
             'user_id' => $parent->id,
             'type' => 'attendance_alert',
             'title' => 'تنبيه حضور',
-            'body' => "الطالب {$student->name} {$statusLabels[$status] ?? $status} اليوم",
+            'body' => "الطالب {$student->name} {$statusLabel} اليوم",
             'color' => 'warning',
         ]);
     }
