@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StudentApiController;
 use App\Modules\Auth\Controllers\AuthApiController;
+use App\Modules\Dashboard\Controllers\DashboardApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,15 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', [AuthApiController::class, 'refresh'])->middleware('throttle:auth-login');
     Route::post('logout', [AuthApiController::class, 'logout']);
     Route::get('me', [AuthApiController::class, 'me'])->middleware('jwt');
+});
+
+// Dashboard stats endpoints (card 5). JWT-authenticated.
+Route::middleware('jwt')->prefix('dashboard')->group(function () {
+    Route::get('stats', [DashboardApiController::class, 'stats']);
+    Route::get('interaction-rates', [DashboardApiController::class, 'interactionRates']);
+    Route::get('content-stats', [DashboardApiController::class, 'contentStats']);
+    Route::get('various-stats', [DashboardApiController::class, 'variousStats']);
+    Route::get('weekly-absence', [DashboardApiController::class, 'weeklyAbsence']);
 });
 
 // Legacy Sprint 9 Sanctum routes — kept for backward compatibility.
