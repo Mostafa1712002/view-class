@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StudentApiController;
 use App\Modules\Auth\Controllers\AuthApiController;
 use App\Modules\Dashboard\Controllers\DashboardApiController;
+use App\Modules\Profile\Controllers\ProfileApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,13 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', [AuthApiController::class, 'refresh'])->middleware('throttle:auth-login');
     Route::post('logout', [AuthApiController::class, 'logout']);
     Route::get('me', [AuthApiController::class, 'me'])->middleware('jwt');
+});
+
+// Profile endpoints (card 6). JWT-authenticated.
+Route::middleware('jwt')->prefix('users/me')->group(function () {
+    Route::patch('/', [ProfileApiController::class, 'update']);
+    Route::patch('password', [ProfileApiController::class, 'changePassword']);
+    Route::post('avatar', [ProfileApiController::class, 'updateAvatar']);
 });
 
 // Dashboard stats endpoints (card 5). JWT-authenticated.

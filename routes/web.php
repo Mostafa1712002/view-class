@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Modules\Localization\Controllers\LocaleController;
+use App\Modules\Profile\Controllers\ProfileWebController;
 use Illuminate\Support\Facades\Route;
 
 // Root: show login page directly (per Sprint 1 deliverable — /login and / both reach login)
@@ -29,6 +30,12 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // Protected Routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile (card 6)
+    Route::get('/profile/edit', [ProfileWebController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileWebController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/password', [ProfileWebController::class, 'changePassword'])->name('profile.change-password');
+    Route::post('/profile/avatar', [ProfileWebController::class, 'updateAvatar'])->name('profile.avatar');
 
     // Notifications
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
