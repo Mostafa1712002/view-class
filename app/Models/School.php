@@ -4,19 +4,37 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class School extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
     protected $fillable = [
+        'educational_company_id',
         'name',
+        'name_ar',
+        'name_en',
+        'branch',
+        'sort_order',
+        'educational_track',
+        'stage',
+        'city',
+        'default_language',
         'code',
         'logo',
+        'cover_image',
         'address',
         'phone',
+        'fax',
         'email',
         'website',
+        'facebook',
+        'twitter',
+        'instagram',
+        'linkedin',
         'is_active',
         'settings',
     ];
@@ -25,6 +43,11 @@ class School extends Model
         'is_active' => 'boolean',
         'settings' => 'array',
     ];
+
+    public function educationalCompany(): BelongsTo
+    {
+        return $this->belongsTo(EducationalCompany::class);
+    }
 
     public function users(): HasMany
     {

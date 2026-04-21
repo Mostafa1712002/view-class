@@ -20,15 +20,17 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $data = $request->validate([
+            'email' => ['required'],
             'password' => ['required'],
         ], [
-            'email.required' => 'البريد الإلكتروني مطلوب',
-            'email.email' => 'البريد الإلكتروني غير صحيح',
+            'email.required' => 'اسم المستخدم أو البريد الإلكتروني مطلوب',
             'password.required' => 'كلمة المرور مطلوبة',
         ]);
 
+        $identifier = $data['email'];
+        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $credentials = [$field => $identifier, 'password' => $data['password']];
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {

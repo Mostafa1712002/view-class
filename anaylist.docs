@@ -1,0 +1,111 @@
+i have in path file:///home/mostafa/www/ecommerce-dashboard/html dashboard html css can use it 
+This file structure outlines the comprehensive set of tasks required to develop the View Class Smart Educational Ecosystem using Laravel, integrating all specified details, technical constraints, and workflow requirements derived from the sources and our conversation history.
+
+***
+
+## Project Task Structure: View Class Smart Educational Ecosystem
+
+### Phase 1: Foundational Setup, UI/UX, and User Roles
+
+This phase establishes the framework, navigation, and user identity management.
+
+| Task ID | Component/Module | Specific Implementation Steps (Source Requirements) |
+| :--- | :--- | :--- |
+| **1.1** | **Interface and Navigation** | Implement the main structure (Hero Section, Main Menu). Include key links: "من نحن؟" (About Us), "النظام التعليمي" (Educational System), "اتصل بنا" (Contact Us), "تسجيل دخول" (Login portal), and "السداد الإلكتروني" (E-Payment). |
+| **1.2** | **Language Support** | Implement a language selection option supporting **"العربية"** and **"English"**. |
+| **1.3** | **User Login & Routing** | Establish distinct login sub-links for the three main user accounts: **“مدير النظام”** (System Manager), **“المعلم”** (Teacher), and **“الطالب”** (Student). |
+| **1.4** | **System Administration Setup** | Implement core foundational setup: establishing schools, academic years, adding classes (الفصول), and creating users with defined access permissions. |
+| **1.5** | **Specialized Admin Accounts** | Create specific routing and viewing accounts for administrative hierarchies: Primary Boys/Girls Sections, Intermediate Sections, and a single **Aggregate Account (المجمع كله)**. |
+| **1.6** | **Admissions & Registration** | Implement the **"القبول والتسجيل"** module, featuring an external application form link, and enabling the school principal to follow up on applications. |
+| **1.7** | **Dedicated Support** | Implement the specialized **"دعم فني متخصص"** structure. |
+
+### Phase 2: Core Educational Management and Scheduling
+
+This phase focuses on curriculum definition and the dynamic timetable system, including critical validation logic.
+
+| Task ID | Component/Module | Specific Implementation Steps (Source Requirements) |
+| :--- | :--- | :--- |
+| **2.1** | **Material Management (Dual Source)** | Implement **"إدارة المواد الدراسية"** (Subject Management). |
+| | **2.1.1** | Allow the addition of core/default materials sourced from the platform ("سورس اساسي"). |
+| | **2.1.2** | Allow the addition of **new custom materials** by the school, including the ability to upload an accompanying image. |
+| **2.2** | **Digital Libraries** | Develop **"المكتبات الرقمية"** for visual materials, books, and content classification. Ensure books are directly linked to their corresponding material/subject. |
+| **2.3** | **Dynamic School Schedule** | Implement the dynamic **"الجدول المدرسي"**. |
+| | **2.3.1** | Link teachers to specific classes/periods and allow for data import. |
+| | **2.3.2 (Constraint Logic)** | Implement the **Teacher Quota (نصاب المعلمين) calculation** and reporting. The system **must not accept scheduling more than 35 periods per week** for any teacher. |
+| | **2.3.3** | Generate two user views: the teacher's personal schedule and the student's combined schedule (merging all their assigned teachers' classes). |
+| **2.4** | **Weekly Plan Workflow** | Implement the **"الخطة الأسبوعية"**. |
+| | **2.4.1** | Allow teachers to input the lesson objectives and **homework (الواجب)** under each session. |
+| | **2.4.2** | Implement a feature to export/share the finalized plan (e.g., typically on Thursday) instantly with all student/parent accounts. |
+| | **2.4.3 (Workflow Lock)** | Implement a modification lock: Once exported, the teacher **cannot modify the plan**; changes must be routed to the **Deputy/Agent (الوكيل)** for approval. |
+| **2.5** | **Lesson Preparation Form** | Develop a secure digital form/template (outputting like Word/PDF) for **"تحضير الدروس"** (Lesson Preparation) where the teacher can draft and save material. |
+
+### Phase 3: Assessments, Grading Integrity, and Virtual Learning
+
+This phase focuses on evaluation tools and enforcing fair assessment rules.
+
+| Task ID | Component/Module | Specific Implementation Steps (Source Requirements) |
+| :--- | :--- | :--- |
+| **3.1** | **Question Bank System** | Implement **"بنك الأسئلة"** supporting multiple question types. |
+| | **3.1.1 (Classification)** | Implement a **classification (تصنيف)** feature to distinguish between the **Standard** (created by school teachers) and the specialized **"First" (الأول) Bank**. |
+| | **3.1.2 (Sharing Control)** | Allow teachers to mark questions as **Private (خاصة بشركتك)** or **General/Public (عامة)** for sharing with other schools. |
+| | **3.1.3** | Enable schools to import questions from the public banks when creating tests. |
+| **3.2** | **Assignments and Tests** | Implement **"الواجبات والاختبارات"** featuring automatic correction, publication/submission times, and statistical analysis of results. |
+| **3.3** | **Grade Management Integrity** | Implement **"رصد وإدارة الدرجات"** dynamically based on material and class. |
+| | **3.3.1 (Anti-Manipulation Check)** | Implement logic to **prevent grade manipulation**, such as restricting a teacher from creating an excessive number of assignments to inflate scores. |
+| | **3.3.2 (Targeted Assessment Logic)** | When assigning tests/assignments **to only specific students ("للبعض")**, the score must be calculated as **Bonus Points (نقاط)**, rather than affecting the overall class ratio. |
+| | **3.3.3 (Intent Classification)** | Require the teacher to classify the purpose of targeted assessments as either **Support Plan (خطة دعم)** (remedial) or **Enrichment Plan (خطة إثرائية)** (advanced). |
+| **3.4** | **Virtual Class Integration** | Implement **"الفصول الافتراضية"**. |
+| | **3.4.1** | Integrate with a single Premium Zoom account (or similar service) for scheduling and hosting. |
+| | **3.4.2** | Implement security constraint: Students **cannot enter the session until the teacher (instructor) starts it**. |
+| **3.5** | **Interaction Tools** | Implement **"غرف النقاش"** (Discussion Rooms) for communication between students and teachers. |
+
+### Phase 4: Staff and Student Lifecycle Management
+
+This phase covers administrative workflows, performance tracking, and student promotions.
+
+| Task ID | Component/Module | Specific Implementation Steps (Source Requirements) |
+| :--- | :--- | :--- |
+| **4.1** | **Attendance and Roles** | Implement **"إدارة الحضور والغياب"**. |
+| | **4.1.1** | Create a dedicated user role for **Attendance Recorder (مسجل غياب)** to handle tracking. |
+| | **4.1.2** | Track student attendance, focusing on **tardiness (التأخّير)**. |
+| | **4.1.3** | Implement automated SMS/Email notifications for parents regarding student absence or performance. |
+| | **4.1.4** | Track teacher absence and ensure this data affects their performance evaluation points. |
+| **4.2** | **Teacher Evaluation (Class Visitations)** | Implement the **"الزيارات الصفية"** module, linked to the schedule. |
+| | **4.2.1** | Support three visitor types: **Agent/Director**, **Resident Supervisor**, and **Specialist Supervisor**. |
+| | **4.2.2 (Constraint)** | Ensure the **Specialist Supervisor** can **only view and visit teachers within their specific subject specialization**. |
+| | **4.2.3** | Classify visits as **Support (دعم)** (no grade) or **Evaluation (تقييم)** (assigns a grade affecting teacher points). |
+| **4.3** | **Performance Grading Logic** | Implement the **Educational Outcome Test (اختبار ناتج التعليم)**. |
+| | **4.3.1 (Weighting Logic)** | Ensure the test score contributes exactly **30%** to the teacher's total **Functional Performance Review (تقييم الأداء الوظيفي)** score. |
+| **4.4** | **Student/Teacher Transfer Service** | Implement the critical **"ترحيل"** (Transfer/Promotion) service. |
+| | **4.4.1 (Data Reset Logic)** | Promote students and **reset all academic statistics for the new academic year**. |
+| | **4.4.2 (Reset Exception)** | Exclude students moving into **First Primary Grade** from the general data reset logic (as they reset entirely). |
+| | **4.4.3** | Implement archiving functionality for graduating secondary students (الخريجين). |
+| **4.5** | **Electronic Certificates** | Implement **"الشهادات الإلكترونية"** for achievement and appreciation. |
+| | **4.5.1 (Branding)** | Implement the ability to add the school logo/branding as a **Watermark (وتر مارك)** across the entire certificate background. |
+| | **4.5.2** | Provide customizable design templates (قوالب تصميم) and sharing options (WhatsApp/Email). |
+
+### Phase 5: Reporting, Analytics, and Supplementary Tools
+
+This phase focuses on data visualization, managerial oversight, and auxiliary features.
+
+| Task ID | Component/Module | Specific Implementation Steps (Source Requirements) |
+| :--- | :--- | :--- |
+| **5.1** | **Advanced Reporting** | Develop dynamic, hierarchical, and advanced Reports (التقارير). |
+| | **5.1.1 (Comparative Analysis)** | Implement reports capable of **comparing teacher performance** within the same phase or department (e.g., comparing Arabic teachers in Primary 1, 2, 3). |
+| | **5.1.2 (Cross-Specialization)** | Implement reports capable of comparing performance across different specializations (e.g., Science, Physics, Chemistry). |
+| | **5.1.3 (Progress Tracking)** | Implement reports identifying **weak students (الطلاب الضعاف)** and tracking those who have shown **improvement (معدل تقدم)**. |
+| **5.2** | **Evaluation Models** | Implement dynamic **"نماذج التقييم"** (Evaluation Models). |
+| **5.3** | **Behavior Management** | Implement **"إدارة السلوك"** to track student conduct (positive/negative) and generate notifications for parents. |
+| **5.4** | **Incentive System** | Integrate **Incentive Points (نقاط تحفيز)** for motivating students and teachers. |
+| **5.5** | **Targeted Announcements** | Implement an announcements feature allowing management to send messages targeted to specific sections (e.g., Primary only) or all aggregated sections. |
+
+### Phase 6: Deferred or Future Functionality
+
+These features were identified in the sources but were noted for later development after the core system is stable.
+
+| Task ID | Component/Module | Status (Source Context) |
+| :--- | :--- | :--- |
+| **6.1** | **Virtual Laboratories (المعامل الافتراضية)** | Deferred; high complexity, requiring extensive data preparation and integration. |
+| **6.2** | **E-Canteen (المقصف الإلكتروني)** | Deferred; noted as a future update/enhancement. |
+| **6.3** | **School Clinic (العيادة المدرسية)** | Deferred; used for managing student medical records (سجل طبي) but not immediately required. |
+| **6.4** | **Student Counseling (الإرشاد الطلابي)** | Deferred; requires significant data input and is complex, but relevant to behavior management. |

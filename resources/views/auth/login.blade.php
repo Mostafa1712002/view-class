@@ -100,13 +100,14 @@
                     @csrf
 
                     <div class="mb-3">
-                        <label for="email" class="form-label">البريد الإلكتروني</label>
-                        <input type="email"
+                        <label for="email" class="form-label">اسم المستخدم أو البريد الإلكتروني</label>
+                        <input type="text"
                                class="form-control @error('email') is-invalid @enderror"
                                id="email"
                                name="email"
                                value="{{ old('email') }}"
-                               placeholder="أدخل البريد الإلكتروني"
+                               placeholder="admin أو admin@example.com"
+                               autocomplete="username"
                                autofocus
                                required>
                         @error('email')
