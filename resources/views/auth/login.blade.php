@@ -1,36 +1,23 @@
 <!DOCTYPE html>
-<html class="loading" lang="ar" data-textdirection="rtl">
+@php($dir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr')
+@php($otherLocale = app()->getLocale() === 'ar' ? 'en' : 'ar')
+<html lang="{{ app()->getLocale() }}" dir="{{ $dir }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>تسجيل الدخول - المنصة الذهبية</title>
+    <title>@lang('auth.login_title') — @lang('auth.app_name')</title>
 
-    <!-- Google Fonts - Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <!-- BEGIN: Vendor CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/vendors-rtl.min.css') }}">
-    <!-- END: Vendor CSS-->
-
-    <!-- BEGIN: Theme CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/bootstrap-extended.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/colors.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/components.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/themes/dark-layout.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/themes/semi-dark-layout.min.css') }}">
-    <!-- END: Theme CSS-->
-
-    <!-- BEGIN: Page CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/core/menu/menu-types/vertical-menu.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css-rtl/pages/page-auth.min.css') }}">
-    <!-- END: Page CSS-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    @if($dir === 'rtl')
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    @endif
 
     <style>
         body, html {
-            font-family: 'Cairo', sans-serif !important;
-            direction: rtl;
+            font-family: 'Cairo', 'Segoe UI', sans-serif !important;
+            direction: {{ $dir }};
         }
         .auth-wrapper {
             min-height: 100vh;
@@ -38,75 +25,85 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
         }
         .auth-card {
-            max-width: 450px;
+            max-width: 460px;
             width: 100%;
-            margin: 20px;
+            border-radius: 14px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.18);
         }
-        .brand-logo {
-            margin-bottom: 30px;
-            text-align: center;
+        .brand-logo { margin-bottom: 18px; text-align: center; }
+        .brand-logo h2 { color: #7367f0; font-weight: 700; margin-top: 10px; margin-bottom: 2px; }
+        .brand-logo .version { color: #8c8ca1; font-size: 0.85rem; }
+        .btn-primary { background-color: #7367f0 !important; border-color: #7367f0 !important; }
+        .btn-primary:hover { background-color: #5e50ee !important; border-color: #5e50ee !important; }
+        .form-control:focus { border-color: #7367f0; box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1); }
+        .lang-switch {
+            position: absolute;
+            top: 16px;
+            {{ $dir === 'rtl' ? 'left' : 'right' }}: 16px;
+            color: #fff;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.12);
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-decoration: none;
         }
-        .brand-logo h2 {
-            color: #7367f0;
-            font-weight: 700;
-            margin-top: 10px;
+        .lang-switch:hover { background: rgba(255,255,255,0.22); color: #fff; }
+        .recaptcha-mock {
+            border: 1px solid #d5d5dc;
+            border-radius: 6px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f9f9fa;
+            margin-bottom: 12px;
         }
-        .btn-primary {
-            background-color: #7367f0 !important;
-            border-color: #7367f0 !important;
-        }
-        .btn-primary:hover {
-            background-color: #5e50ee !important;
-            border-color: #5e50ee !important;
-        }
-        .form-control:focus {
-            border-color: #7367f0;
-            box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1);
-        }
+        .recaptcha-mock input { margin: 0; }
     </style>
 </head>
-<body class="blank-page">
+<body>
     <div class="auth-wrapper">
+        <a class="lang-switch" href="{{ route('locale.switch', $otherLocale) }}">
+            {{ $otherLocale === 'ar' ? 'العربية' : 'English' }}
+        </a>
+
         <div class="auth-card card">
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="brand-logo">
-                    <svg viewBox="0 0 139 95" version="1.1" xmlns="http://www.w3.org/2000/svg" height="50">
+                    <svg viewBox="0 0 139 95" height="48" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <linearGradient id="linearGradient-1" x1="100%" y1="10.5120544%" x2="50%" y2="89.4879456%">
-                                <stop stop-color="#7367f0" offset="0%"></stop>
-                                <stop stop-color="#9e95f5" offset="100%"></stop>
+                            <linearGradient id="lg1" x1="100%" y1="10.5%" x2="50%" y2="89.5%">
+                                <stop stop-color="#7367f0" offset="0%"/>
+                                <stop stop-color="#9e95f5" offset="100%"/>
                             </linearGradient>
                         </defs>
-                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                            <g transform="translate(-400.000000, -178.000000)">
-                                <g transform="translate(400.000000, 178.000000)">
-                                    <path d="M-5.68434189e-14,2.84217094e-14 L39.1816085,2.84217094e-14 L69.3453773,32.2519224 L101.428699,2.84217094e-14 L139.53,0 L googletag.87,googletag.57 L81.7554053,googletag.57 L69.3453773,72.2519224 L56.8725,googletag.57 L50.73,googletag.57 Z" fill="url(#linearGradient-1)" opacity="0.2"></path>
-                                    <path d="M69.3453773,32.2519224 L101.428699,1.42108547e-14 L139.53,0 L googletag.87,googletag.57 L81.7554053,googletag.57 L69.3453773,72.2519224 L69.3453773,32.2519224 Z" fill="#7367f0"></path>
-                                    <path d="M69.3453773,32.2519224 L39.1816085,1.42108547e-14 L-5.68434189e-14,1.42108547e-14 L43.67,googletag.57 L56.8725,googletag.57 L69.3453773,72.2519224 L69.3453773,32.2519224 Z" fill="#9e95f5" opacity="0.7"></path>
-                                </g>
-                            </g>
+                        <g fill-rule="evenodd">
+                            <path d="M0,0 L39.18,0 L69.35,32.25 L101.43,0 L139.53,0 L139.53,94.57 L81.76,94.57 L69.35,72.25 L56.87,94.57 L0,94.57 Z" fill="url(#lg1)" opacity="0.2"/>
+                            <path d="M69.35,32.25 L101.43,0 L139.53,0 L139.53,94.57 L81.76,94.57 L69.35,72.25 Z" fill="#7367f0"/>
+                            <path d="M69.35,32.25 L39.18,0 L0,0 L43.67,94.57 L56.87,94.57 L69.35,72.25 Z" fill="#9e95f5" opacity="0.7"/>
                         </g>
                     </svg>
-                    <h2>المنصة الذهبية</h2>
-                    <p class="text-muted">النظام التعليمي الذكي</p>
+                    <h2>@lang('auth.app_name')</h2>
+                    <div class="version">@lang('auth.version_label') 5.3</div>
                 </div>
 
-                <h4 class="card-title mb-1 text-center">مرحباً بك</h4>
-                <p class="card-text mb-4 text-center">يرجى تسجيل الدخول للمتابعة</p>
+                <h4 class="mb-1 text-center">@lang('auth.welcome')</h4>
+                <p class="text-muted mb-4 text-center">@lang('auth.please_login')</p>
 
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
 
                     <div class="mb-3">
-                        <label for="email" class="form-label">اسم المستخدم أو البريد الإلكتروني</label>
+                        <label for="email" class="form-label">@lang('auth.username_or_email')</label>
                         <input type="text"
                                class="form-control @error('email') is-invalid @enderror"
                                id="email"
                                name="email"
                                value="{{ old('email') }}"
-                               placeholder="admin أو admin@example.com"
+                               placeholder="admin"
                                autocomplete="username"
                                autofocus
                                required>
@@ -116,40 +113,33 @@
                     </div>
 
                     <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <label for="password" class="form-label">كلمة المرور</label>
-                        </div>
+                        <label for="password" class="form-label">@lang('auth.password')</label>
                         <input type="password"
                                class="form-control @error('password') is-invalid @enderror"
                                id="password"
                                name="password"
-                               placeholder="أدخل كلمة المرور"
+                               autocomplete="current-password"
                                required>
                         @error('password')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                            <label class="form-check-label" for="remember">تذكرني</label>
-                        </div>
+                    {{-- reCAPTCHA placeholder per spec (UI only, no backend verification yet) --}}
+                    <div class="recaptcha-mock">
+                        <input type="checkbox" id="recaptcha" disabled checked aria-disabled="true">
+                        <label for="recaptcha" class="m-0">@lang('auth.not_a_robot')</label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">تسجيل الدخول</button>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">@lang('auth.remember_me')</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">@lang('auth.sign_in')</button>
                 </form>
             </div>
         </div>
     </div>
-
-    <!-- BEGIN: Vendor JS-->
-    <script src="{{ asset('app-assets/vendors/js/vendors.min.js') }}"></script>
-    <!-- END: Vendor JS-->
-
-    <!-- BEGIN: Theme JS-->
-    <script src="{{ asset('app-assets/js/core/app-menu.min.js') }}"></script>
-    <script src="{{ asset('app-assets/js/core/app.min.js') }}"></script>
-    <!-- END: Theme JS-->
 </body>
 </html>

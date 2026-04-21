@@ -36,20 +36,25 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user();
 
-            if (!$user->is_active) {
+            if (!$user->is_active || ($user->status ?? 'active') !== 'active') {
                 Auth::logout();
                 throw ValidationException::withMessages([
-                    'email' => ['هذا الحساب معطل. يرجى التواصل مع الإدارة.'],
+                    'email' => [trans('auth.account_disabled')],
                 ]);
             }
 
+            $user->forceFill(['last_login_at' => now()])->save();
             $request->session()->regenerate();
+
+            if ($user->language_preference) {
+                $request->session()->put('locale', $user->language_preference);
+            }
 
             return redirect()->intended(route('dashboard'));
         }
 
         throw ValidationException::withMessages([
-            'email' => ['بيانات الدخول غير صحيحة.'],
+            'email' => [trans('auth.invalid_credentials')],
         ]);
     }
 

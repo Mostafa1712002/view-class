@@ -1,0 +1,38 @@
+<?php
+
+return [
+    'title' => 'لوحة التحكم',
+    'students_count' => 'عدد الطلاب',
+    'teachers_count' => 'عدد المعلمين',
+    'parents_count' => 'عدد أولياء الأمور',
+    'admins_count' => 'عدد الإداريين',
+
+    'login_rates' => 'نسب الدخول والتفاعل',
+    'students_login_rate' => 'نسبة دخول الطلاب',
+    'teachers_login_rate' => 'نسبة دخول المعلمين',
+    'parents_login_rate' => 'نسبة دخول أولياء الأمور',
+    'student_teacher_interaction' => 'نسبة تفاعل الطلاب مع المعلمين',
+    'student_content_interaction' => 'نسبة تفاعل الطلاب مع المحتوى',
+
+    'content_stats' => 'إحصاءات المحتوى',
+    'electronic_exams' => 'الاختبارات الإلكترونية',
+    'electronic_assignments' => 'الواجبات الإلكترونية',
+    'videos_files' => 'الفيديوهات والملفات',
+    'content_interaction_rate' => 'نسبة التفاعل مع المحتوى',
+    'view_rate' => 'معدل المشاهدة',
+    'content_interactions' => 'عدد التفاعل مع المحتوى',
+    'exam_submissions' => 'عدد تسليمات الاختبارات',
+    'assignment_submissions' => 'عدد تسليمات الواجبات',
+    'sms_usage' => 'عدد استخدامات الرسائل القصيرة',
+
+    'various_stats' => 'إحصاءات متنوعة',
+    'discussion_rooms' => 'غرف النقاش',
+    'absences' => 'غيابات الطلاب',
+    'preparation_plans' => 'خطط التحضير',
+    'questions_count' => 'عدد الأسئلة',
+    'virtual_classes' => 'الفصول الافتراضية',
+    'scheduled_virtual_classes' => 'الفصول الافتراضية المجدولة',
+
+    'weekly_absence_rate' => 'معدل الغياب الأسبوعي',
+    'latest_schools' => 'آخر المدارس المسجلة',
+];

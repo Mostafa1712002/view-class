@@ -2,12 +2,21 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Modules\Localization\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 
-// Redirect root to login
+// Root: show login page directly (per Sprint 1 deliverable — /login and / both reach login)
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
     return redirect()->route('login');
 });
+
+// Locale switcher — available to guests and authenticated users
+Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
+    ->whereIn('locale', ['ar', 'en'])
+    ->name('locale.switch');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
