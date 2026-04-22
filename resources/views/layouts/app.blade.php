@@ -63,8 +63,10 @@
             display: flex; flex-wrap: nowrap; align-items: center;
             justify-content: space-between; gap: 8px; height: 56px; width: 100%;
         }
-        .shell-nav-left, .shell-nav-center, .shell-nav-right { flex-shrink: 0; }
-        .shell-nav-center { flex: 1 1 auto; justify-content: center; min-width: 0; }
+        .shell-nav-left, .shell-nav-right { flex: 0 0 auto; min-width: 0; }
+        .shell-nav-left { max-width: 30%; }
+        .shell-nav-center { flex: 1 1 auto; justify-content: center; min-width: 0; padding: 0 12px; }
+        .shell-nav-right { max-width: 55%; overflow: visible; }
         .shell-nav-right .nav-link { padding: .5rem .55rem !important; color: #fff !important; }
         .shell-nav-right .nav-link i { color: #fff; }
         .shell-nav-right .user-name { color: #fff; font-size: .85rem; }

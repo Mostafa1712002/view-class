@@ -40,9 +40,9 @@
                 <span class="brand-text ms-1 d-none d-lg-inline text-white">@lang('auth.app_name')</span>
             </a>
             @if($shellSchoolName)
-                <div class="shell-school-meta d-none d-lg-flex text-white ms-3" style="flex-direction:column; line-height:1.1; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    <small class="text-white-50 text-truncate">{{ $shellCompanyName }}</small>
-                    <strong class="text-truncate">{{ $shellSchoolName }}</strong>
+                <div class="shell-school-meta d-none d-xxl-flex text-white ms-3" style="flex-direction:column; line-height:1.1; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    <small class="text-white-50 text-truncate" style="font-size:.7rem;">{{ $shellCompanyName }}</small>
+                    <strong class="text-truncate" style="font-size:.85rem;">{{ $shellSchoolName }}</strong>
                 </div>
             @endif
         </div>
