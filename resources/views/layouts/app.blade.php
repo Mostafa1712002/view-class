@@ -168,7 +168,7 @@
                     theme: 'bootstrap4',
                     width: 'resolve',
                     dir: '{{ $dir }}',
-                    minimumResultsForSearch: 5,
+                    minimumResultsForSearch: 0,  // always show search box
                 });
             });
         })();
