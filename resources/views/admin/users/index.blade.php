@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'إدارة المستخدمين')
+@section('title', __('common.users'))
 
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">المستخدمين</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">@lang('common.users')</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item active">المستخدمين</li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
+                        <li class="breadcrumb-item active">@lang('common.users')</li>
                     </ol>
                 </div>
             </div>
@@ -19,7 +19,7 @@
     </div>
     <div class="content-header-right text-md-left col-md-3 col-12">
         <a href="{{ route('manage.users.create') }}" class="btn btn-primary">
-            <i data-feather="plus"></i> إضافة مستخدم
+            <i data-feather="plus"></i> @lang('common.create')
         </a>
     </div>
 </div>
@@ -84,9 +84,9 @@
                             @endif
                             <td>
                                 @if($user->is_active)
-                                    <span class="badge bg-success">نشط</span>
+                                    <span class="badge bg-success">@lang('common.active')</span>
                                 @else
-                                    <span class="badge bg-secondary">معطل</span>
+                                    <span class="badge bg-secondary">@lang('common.inactive')</span>
                                 @endif
                             </td>
                             <td>
@@ -98,7 +98,7 @@
                                         <i data-feather="edit"></i>
                                     </a>
                                     @if($user->id !== Auth::id())
-                                    <form action="{{ route('manage.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟')">
+                                    <form action="{{ route('manage.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger">

@@ -1,24 +1,24 @@
 @extends('layouts.app')
 
-@section('title', 'إدارة السنوات الدراسية')
+@section('title', __('common.academic_years'))
 
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">السنوات الدراسية</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">@lang('common.academic_years')</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item active">السنوات الدراسية</li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
+                        <li class="breadcrumb-item active">@lang('common.academic_years')</li>
                     </ol>
                 </div>
             </div>
         </div>
     </div>
     <div class="content-header-right text-md-left col-md-3 col-12">
-        <a href="{{ route('manage.academic-years.create') }}" class="btn btn-primary"><i data-feather="plus"></i> إضافة سنة</a>
+        <a href="{{ route('manage.academic-years.create') }}" class="btn btn-primary"><i data-feather="plus"></i> @lang('common.create')</a>
     </div>
 </div>
 
@@ -54,7 +54,7 @@
                                 <div class="btn-group" role="group">
                                     <a href="{{ route('manage.academic-years.show', $year) }}" class="btn btn-sm btn-info"><i data-feather="eye"></i></a>
                                     <a href="{{ route('manage.academic-years.edit', $year) }}" class="btn btn-sm btn-warning"><i data-feather="edit"></i></a>
-                                    <form action="{{ route('manage.academic-years.destroy', $year) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟')">
+                                    <form action="{{ route('manage.academic-years.destroy', $year) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger"><i data-feather="trash-2"></i></button>
                                     </form>

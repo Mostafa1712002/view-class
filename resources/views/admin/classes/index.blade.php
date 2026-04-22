@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'إدارة الفصول')
+@section('title', __('common.classes'))
 
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">الفصول</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">@lang('common.classes')</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item active">الفصول</li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
+                        <li class="breadcrumb-item active">@lang('common.classes')</li>
                     </ol>
                 </div>
             </div>
@@ -19,7 +19,7 @@
     </div>
     <div class="content-header-right text-md-left col-md-3 col-12">
         <a href="{{ route('manage.classes.create') }}" class="btn btn-primary">
-            <i data-feather="plus"></i> إضافة فصل
+            <i data-feather="plus"></i> @lang('common.create')
         </a>
     </div>
 </div>
@@ -56,9 +56,9 @@
                             <td>{{ $class->capacity }}</td>
                             <td>
                                 @if($class->is_active)
-                                    <span class="badge bg-success">نشط</span>
+                                    <span class="badge bg-success">@lang('common.active')</span>
                                 @else
-                                    <span class="badge bg-secondary">معطل</span>
+                                    <span class="badge bg-secondary">@lang('common.inactive')</span>
                                 @endif
                             </td>
                             <td>
@@ -69,7 +69,7 @@
                                     <a href="{{ route('manage.classes.edit', $class) }}" class="btn btn-sm btn-warning">
                                         <i data-feather="edit"></i>
                                     </a>
-                                    <form action="{{ route('manage.classes.destroy', $class) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟')">
+                                    <form action="{{ route('manage.classes.destroy', $class) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger">
@@ -81,7 +81,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center">لا توجد فصول</td>
+                            <td colspan="9" class="text-center">@lang('common.no_data')</td>
                         </tr>
                         @endforelse
                     </tbody>

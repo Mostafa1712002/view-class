@@ -101,7 +101,21 @@
             font-size: 1.15rem; width: 22px; text-align: center;
             margin-{{ $isRtl ? 'left' : 'right' }}: 10px;
         }
-        .main-menu .navigation .has-sub > a::after { opacity: .45; }
+        /* LA 1.3 renamed the font — the theme's original chevron (\f112 + 'LineAwesome') stopped
+           resolving when we upgraded. Re-emit the arrow using LA 1.3's glyph + font name. */
+        .main-menu .navigation li.has-sub > a:not(.mm-next)::after {
+            font-family: 'Line Awesome Free' !important;
+            font-weight: 900 !important;
+            content: "{{ $isRtl ? '\f104' : '\f105' }}" !important;
+            font-size: .95rem;
+            opacity: .55;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            {{ $isRtl ? 'left' : 'right' }}: 14px;
+            transition: transform .2s;
+        }
+        .main-menu .navigation li.has-sub.open > a:not(.mm-next)::after { transform: translateY(-50%) rotate(-90deg); opacity: .85; }
         .main-menu .navigation li ul.menu-content li a {
             padding: .45rem .75rem .45rem 2.2rem; font-size: .87rem; border-radius: 6px;
         }
