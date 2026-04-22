@@ -44,7 +44,7 @@
                                         <tr>
                                             <th>الفترة</th>
                                             <th class="text-center">الأعمال</th>
-                                            <th class="text-center">الاختبار</th>
+                                            <th class="text-center">@lang('common.exam')</th>
                                             <th class="text-center">المشاركة</th>
                                             <th class="text-center">المجموع</th>
                                         </tr>

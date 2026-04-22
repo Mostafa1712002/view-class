@@ -81,8 +81,8 @@
                                     <th>#</th>
                                     <th>اسم الطالب</th>
                                     <th class="text-center">إجمالي</th>
-                                    <th class="text-center text-success">حاضر</th>
-                                    <th class="text-center text-danger">غائب</th>
+                                    <th class="text-center text-success">@lang('common.present')</th>
+                                    <th class="text-center text-danger">@lang('common.absent')</th>
                                     <th class="text-center text-warning">متأخر</th>
                                     <th class="text-center text-info">بعذر</th>
                                     <th class="text-center">نسبة الحضور</th>

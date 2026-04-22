@@ -115,7 +115,7 @@
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th>التاريخ</th>
+                                            <th>@lang('common.created_at')</th>
                                             <th>اليوم</th>
                                             <th class="text-center">@lang('common.status')</th>
                                             <th>الحصة</th>

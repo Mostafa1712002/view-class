@@ -72,8 +72,8 @@
                         <thead>
                             <tr>
                                 <th>الملف</th>
-                                <th>النوع</th>
-                                <th>المادة</th>
+                                <th>@lang('common.type')</th>
+                                <th>@lang('common.subject')</th>
                                 <th>الصف</th>
                                 <th>الحجم</th>
                                 <th>التحميلات</th>

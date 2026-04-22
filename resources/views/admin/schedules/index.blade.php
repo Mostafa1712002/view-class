@@ -75,8 +75,8 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>الفصل</th>
-                        <th>المرحلة</th>
+                        <th>@lang('common.classroom')</th>
+                        <th>@lang('common.section')</th>
                         <th>السنة الدراسية</th>
                         <th>الفصل الدراسي</th>
                         <th>@lang('common.status')</th>

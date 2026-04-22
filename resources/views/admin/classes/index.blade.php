@@ -34,7 +34,7 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>اسم الفصل</th>
+                            <th>@lang('common.classroom')</th>
                             <th>القسم</th>
                             <th>السنة الدراسية</th>
                             <th>الصف</th>

@@ -127,9 +127,9 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>الطالب</th>
+                                    <th>@lang('common.student')</th>
                                     <th class="text-center">@lang('common.status')</th>
-                                    <th class="text-center">الدرجة</th>
+                                    <th class="text-center">@lang('common.grade')</th>
                                     <th class="text-center">تقييم</th>
                                 </tr>
                             </thead>
@@ -185,7 +185,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('common.cancel')</button>
                                                                 <button type="submit" class="btn btn-primary">حفظ التقييم</button>
                                                             </div>
                                                         </form>

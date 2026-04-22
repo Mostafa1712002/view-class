@@ -53,8 +53,8 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>التاريخ</th>
-                <th>الطالب</th>
+                <th>@lang('common.created_at')</th>
+                <th>@lang('common.student')</th>
                 <th>الصف</th>
                 <th>@lang('common.status')</th>
                 <th>ملاحظات</th>

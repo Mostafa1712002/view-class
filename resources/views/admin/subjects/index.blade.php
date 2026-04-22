@@ -31,9 +31,9 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>اسم المادة</th>
+                            <th>@lang('common.subject')</th>
                             <th>الرمز</th>
-                            @if(Auth::user()->isSuperAdmin())<th>المدرسة</th>@endif
+                            @if(Auth::user()->isSuperAdmin())<th>@lang('common.school')</th>@endif
                             <th>نوع المادة</th>
                             <th>المعلمين</th>
                             <th>@lang('common.status')</th>

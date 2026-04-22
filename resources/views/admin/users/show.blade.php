@@ -47,11 +47,11 @@
                             <td>{{ $user->phone ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <th>الجنس</th>
+                            <th>@lang('common.gender')</th>
                             <td>{{ $user->gender == 'male' ? 'ذكر' : ($user->gender == 'female' ? 'أنثى' : '-') }}</td>
                         </tr>
                         <tr>
-                            <th>المدرسة</th>
+                            <th>@lang('common.school')</th>
                             <td>{{ $user->school->name ?? '-' }}</td>
                         </tr>
                         <tr>

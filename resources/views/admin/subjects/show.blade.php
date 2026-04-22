@@ -32,9 +32,9 @@
                     <table class="table">
                         <tr><th>@lang('common.name')</th><td>{{ $subject->name }}</td></tr>
                         <tr><th>الرمز</th><td>{{ $subject->code }}</td></tr>
-                        <tr><th>المدرسة</th><td>{{ $subject->school->name ?? '-' }}</td></tr>
-                        <tr><th>النوع</th><td>{{ $subject->is_core ? 'أساسية' : 'اختيارية' }}</td></tr>
-                        <tr><th>الوصف</th><td>{{ $subject->description ?? '-' }}</td></tr>
+                        <tr><th>@lang('common.school')</th><td>{{ $subject->school->name ?? '-' }}</td></tr>
+                        <tr><th>@lang('common.type')</th><td>{{ $subject->is_core ? 'أساسية' : 'اختيارية' }}</td></tr>
+                        <tr><th>@lang('common.description')</th><td>{{ $subject->description ?? '-' }}</td></tr>
                         <tr><th>@lang('common.status')</th><td>@if($subject->is_active)<span class="badge bg-success">@lang('common.active')</span>@else<span class="badge bg-secondary">@lang('common.inactive')</span>@endif</td></tr>
                     </table>
                 </div>

@@ -70,9 +70,9 @@
                             <th style="width: 50px;"></th>
                             <th>المستخدم</th>
                             <th>الإجراء</th>
-                            <th>الوصف</th>
+                            <th>@lang('common.description')</th>
                             <th>IP</th>
-                            <th>التاريخ</th>
+                            <th>@lang('common.created_at')</th>
                             <th style="width: 80px;"></th>
                         </tr>
                     </thead>

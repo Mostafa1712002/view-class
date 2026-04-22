@@ -60,7 +60,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>الصف</th>
-                                        <th class="text-center">الطلاب</th>
+                                        <th class="text-center">@lang('common.students')</th>
                                         <th class="text-center">المعدل</th>
                                     </tr>
                                 </thead>
@@ -112,7 +112,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>الصف</th>
-                                        <th class="text-center">الطلاب</th>
+                                        <th class="text-center">@lang('common.students')</th>
                                         <th class="text-center">المعدل</th>
                                     </tr>
                                 </thead>
@@ -155,7 +155,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>الصف</th>
-                                <th>المرحلة</th>
+                                <th>@lang('common.section')</th>
                                 <th class="text-center">عدد الطلاب</th>
                                 <th class="text-center">معدل الدرجات</th>
                                 <th class="text-center">نسبة الحضور</th>

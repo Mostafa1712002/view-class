@@ -167,7 +167,7 @@
         <table class="grades">
             <thead>
                 <tr>
-                    <th>المادة</th>
+                    <th>@lang('common.subject')</th>
                     <th>الفترة الأولى</th>
                     <th>الفترة الثانية</th>
                     <th>الفترة الثالثة</th>
@@ -214,8 +214,8 @@
     <table class="grades">
         <tr>
             <th>إجمالي الأيام</th>
-            <th>حاضر</th>
-            <th>غائب</th>
+            <th>@lang('common.present')</th>
+            <th>@lang('common.absent')</th>
             <th>متأخر</th>
             <th>بعذر</th>
             <th>نسبة الحضور</th>

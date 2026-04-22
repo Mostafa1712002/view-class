@@ -25,8 +25,8 @@
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>المعلم</th>
-                                                <th>المادة</th>
+                                                <th>@lang('common.teacher')</th>
+                                                <th>@lang('common.subject')</th>
                                                 <th>@lang('common.email')</th>
                                                 <th class="text-center">إجراء</th>
                                             </tr>

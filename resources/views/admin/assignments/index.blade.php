@@ -67,7 +67,7 @@
                         <thead>
                             <tr>
                                 <th>الواجب</th>
-                                <th>المادة</th>
+                                <th>@lang('common.subject')</th>
                                 <th>الصف</th>
                                 <th>تاريخ التسليم</th>
                                 <th class="text-center">التسليمات</th>

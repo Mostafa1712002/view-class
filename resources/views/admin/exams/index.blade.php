@@ -79,9 +79,9 @@
                         <thead>
                             <tr>
                                 <th>عنوان الاختبار</th>
-                                <th>المادة</th>
+                                <th>@lang('common.subject')</th>
                                 <th>الصف</th>
-                                <th>النوع</th>
+                                <th>@lang('common.type')</th>
                                 <th>الأسئلة</th>
                                 <th>الدرجة الكلية</th>
                                 <th>@lang('common.status')</th>

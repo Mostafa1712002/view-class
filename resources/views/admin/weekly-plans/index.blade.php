@@ -106,9 +106,9 @@
                         <th><input type="checkbox" id="selectAll"></th>
                         @endif
                         <th>#</th>
-                        <th>المعلم</th>
-                        <th>المادة</th>
-                        <th>الفصل</th>
+                        <th>@lang('common.teacher')</th>
+                        <th>@lang('common.subject')</th>
+                        <th>@lang('common.classroom')</th>
                         <th>الأسبوع</th>
                         <th>@lang('common.status')</th>
                         <th>@lang('common.actions')</th>

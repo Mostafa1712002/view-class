@@ -123,8 +123,8 @@
                                     <thead>
                                         <tr>
                                             <th>الشهر</th>
-                                            <th class="text-center">حاضر</th>
-                                            <th class="text-center">غائب</th>
+                                            <th class="text-center">@lang('common.present')</th>
+                                            <th class="text-center">@lang('common.absent')</th>
                                             <th class="text-center">متأخر</th>
                                         </tr>
                                     </thead>
@@ -166,11 +166,11 @@
                                 <table class="table table-hover">
                                     <thead class="table-light sticky-top">
                                         <tr>
-                                            <th>التاريخ</th>
+                                            <th>@lang('common.created_at')</th>
                                             <th>اليوم</th>
                                             <th class="text-center">@lang('common.status')</th>
                                             <th>الصف</th>
-                                            <th>المادة</th>
+                                            <th>@lang('common.subject')</th>
                                             <th>ملاحظات</th>
                                         </tr>
                                     </thead>

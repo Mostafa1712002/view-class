@@ -79,7 +79,7 @@
                                 <th>@lang('common.status')</th>
                                 <th>بدأ في</th>
                                 <th>سلم في</th>
-                                <th>الدرجة</th>
+                                <th>@lang('common.grade')</th>
                                 <th>النسبة</th>
                                 <th>التقدير</th>
                                 <th>النتيجة</th>

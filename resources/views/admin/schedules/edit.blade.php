@@ -136,8 +136,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" id="deletePeriodBtn" style="display: none;">حذف</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">حفظ</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('common.cancel')</button>
+                    <button type="submit" class="btn btn-primary">@lang('common.save')</button>
                 </div>
             </form>
         </div>

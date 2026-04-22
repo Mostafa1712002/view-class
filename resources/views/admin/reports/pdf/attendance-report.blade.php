@@ -148,8 +148,8 @@
                 <tr>
                     <th style="width: 30px;">#</th>
                     <th>اسم الطالب</th>
-                    <th class="th-success" style="width: 50px;">حاضر</th>
-                    <th class="th-danger" style="width: 50px;">غائب</th>
+                    <th class="th-success" style="width: 50px;">@lang('common.present')</th>
+                    <th class="th-danger" style="width: 50px;">@lang('common.absent')</th>
                     <th class="th-warning" style="width: 50px;">متأخر</th>
                     <th class="th-info" style="width: 50px;">بعذر</th>
                     <th style="width: 50px;">الإجمالي</th>

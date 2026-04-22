@@ -39,19 +39,19 @@
                             <td>{{ $section->name }}</td>
                         </tr>
                         <tr>
-                            <th>المدرسة</th>
+                            <th>@lang('common.school')</th>
                             <td>{{ $section->school->name ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <th>الجنس</th>
+                            <th>@lang('common.gender')</th>
                             <td>{{ $section->gender_label }}</td>
                         </tr>
                         <tr>
-                            <th>المرحلة</th>
+                            <th>@lang('common.section')</th>
                             <td>{{ $section->level_label }}</td>
                         </tr>
                         <tr>
-                            <th>الوصف</th>
+                            <th>@lang('common.description')</th>
                             <td>{{ $section->description ?? '-' }}</td>
                         </tr>
                         <tr>

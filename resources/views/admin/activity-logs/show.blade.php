@@ -31,7 +31,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>الوصف</th>
+                            <th>@lang('common.description')</th>
                             <td>{{ $activityLog->description }}</td>
                         </tr>
                         <tr>

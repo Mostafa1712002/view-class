@@ -86,6 +86,15 @@ return [
     'not_found' => 'غير موجود',
 
     // Pagination + misc
+    'gender' => 'الجنس',
+    'grade' => 'الدرجة',
+    'max_grade' => 'الدرجة القصوى',
+    'percentage' => 'النسبة المئوية',
+    'exam' => 'الاختبار',
+    'present' => 'حاضر',
+    'absent' => 'غائب',
+    'late' => 'متأخر',
+
     'showing' => 'عرض',
     'of' => 'من',
     'results' => 'نتيجة',

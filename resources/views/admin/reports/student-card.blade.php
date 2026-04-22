@@ -109,7 +109,7 @@
                     <table class="table table-bordered">
                         <thead class="table-light">
                             <tr>
-                                <th>المادة</th>
+                                <th>@lang('common.subject')</th>
                                 <th class="text-center">الفترة الأولى</th>
                                 <th class="text-center">الفترة الثانية</th>
                                 <th class="text-center">الفترة الثالثة</th>

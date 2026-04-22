@@ -81,6 +81,15 @@ return [
     'unauthorized' => 'Unauthorized',
     'not_found' => 'Not found',
 
+    'gender' => 'Gender',
+    'grade' => 'Grade',
+    'max_grade' => 'Max grade',
+    'percentage' => 'Percentage',
+    'exam' => 'Exam',
+    'present' => 'Present',
+    'absent' => 'Absent',
+    'late' => 'Late',
+
     'showing' => 'Showing',
     'of' => 'of',
     'results' => 'results',

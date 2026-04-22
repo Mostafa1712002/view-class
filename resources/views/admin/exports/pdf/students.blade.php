@@ -53,7 +53,7 @@
                 <th>@lang('common.email')</th>
                 <th>@lang('common.phone')</th>
                 <th>الصف</th>
-                <th>المرحلة</th>
+                <th>@lang('common.section')</th>
             </tr>
         </thead>
         <tbody>

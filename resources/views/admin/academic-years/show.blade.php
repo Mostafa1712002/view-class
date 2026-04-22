@@ -31,7 +31,7 @@
                 <div class="card-body">
                     <table class="table">
                         <tr><th>@lang('common.name')</th><td>{{ $academicYear->name }}</td></tr>
-                        <tr><th>المدرسة</th><td>{{ $academicYear->school->name ?? '-' }}</td></tr>
+                        <tr><th>@lang('common.school')</th><td>{{ $academicYear->school->name ?? '-' }}</td></tr>
                         <tr><th>تاريخ البداية</th><td>{{ $academicYear->start_date->format('Y-m-d') }}</td></tr>
                         <tr><th>تاريخ النهاية</th><td>{{ $academicYear->end_date->format('Y-m-d') }}</td></tr>
                         <tr><th>@lang('common.status')</th><td>@if($academicYear->is_current)<span class="badge bg-success">السنة الحالية</span>@else<span class="badge bg-secondary">سنة سابقة</span>@endif</td></tr>

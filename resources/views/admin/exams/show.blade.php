@@ -188,9 +188,9 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>الطالب</th>
+                                        <th>@lang('common.student')</th>
                                         <th>@lang('common.status')</th>
-                                        <th>الدرجة</th>
+                                        <th>@lang('common.grade')</th>
                                         <th>النسبة</th>
                                         <th>التقدير</th>
                                     </tr>

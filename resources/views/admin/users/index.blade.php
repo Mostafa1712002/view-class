@@ -62,7 +62,7 @@
                             <th>@lang('common.email')</th>
                             <th>الأدوار</th>
                             @if(Auth::user()->isSuperAdmin())
-                            <th>المدرسة</th>
+                            <th>@lang('common.school')</th>
                             @endif
                             <th>@lang('common.status')</th>
                             <th>@lang('common.actions')</th>

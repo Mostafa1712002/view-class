@@ -51,11 +51,11 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>الطالب</th>
-                <th>المادة</th>
-                <th>الاختبار</th>
-                <th>الدرجة</th>
-                <th>الدرجة القصوى</th>
+                <th>@lang('common.student')</th>
+                <th>@lang('common.subject')</th>
+                <th>@lang('common.exam')</th>
+                <th>@lang('common.grade')</th>
+                <th>@lang('common.max_grade')</th>
                 <th>النسبة</th>
             </tr>
         </thead>

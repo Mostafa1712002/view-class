@@ -32,10 +32,10 @@
                         <tr>
                             <th>#</th>
                             <th>اسم السنة</th>
-                            @if(Auth::user()->isSuperAdmin())<th>المدرسة</th>@endif
+                            @if(Auth::user()->isSuperAdmin())<th>@lang('common.school')</th>@endif
                             <th>تاريخ البداية</th>
                             <th>تاريخ النهاية</th>
-                            <th>الفصول</th>
+                            <th>@lang('common.classes')</th>
                             <th>@lang('common.status')</th>
                             <th>@lang('common.actions')</th>
                         </tr>

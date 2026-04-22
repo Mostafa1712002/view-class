@@ -34,13 +34,13 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>اسم القسم</th>
+                            <th>@lang('common.section')</th>
                             @if(Auth::user()->isSuperAdmin())
-                            <th>المدرسة</th>
+                            <th>@lang('common.school')</th>
                             @endif
-                            <th>الجنس</th>
-                            <th>المرحلة</th>
-                            <th>الفصول</th>
+                            <th>@lang('common.gender')</th>
+                            <th>@lang('common.section')</th>
+                            <th>@lang('common.classes')</th>
                             <th>@lang('common.status')</th>
                             <th>@lang('common.actions')</th>
                         </tr>

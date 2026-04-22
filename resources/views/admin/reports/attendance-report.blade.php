@@ -107,8 +107,8 @@
                             <tr>
                                 <th>#</th>
                                 <th>اسم الطالب</th>
-                                <th class="text-center bg-success text-white">حاضر</th>
-                                <th class="text-center bg-danger text-white">غائب</th>
+                                <th class="text-center bg-success text-white">@lang('common.present')</th>
+                                <th class="text-center bg-danger text-white">@lang('common.absent')</th>
                                 <th class="text-center bg-warning">متأخر</th>
                                 <th class="text-center bg-info text-white">بعذر</th>
                                 <th class="text-center">الإجمالي</th>
