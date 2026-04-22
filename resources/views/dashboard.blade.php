@@ -484,5 +484,218 @@
         </div>
     </div>
     @endif
+
+    @if(Auth::user()->isSuperAdmin() || Auth::user()->isSchoolAdmin())
+
+    {{-- ============== Section 2 — نسب الدخول والتفاعل ============== --}}
+    @php
+        $ir = $interactionRates ?? [];
+        $irRows = [
+            ['label' => 'نسبة دخول الطلاب', 'key' => 'studentsLoginRate', 'color' => 'primary'],
+            ['label' => 'نسبة دخول المعلمين', 'key' => 'teachersLoginRate', 'color' => 'info'],
+            ['label' => 'نسبة دخول أولياء الأمور', 'key' => 'parentsLoginRate', 'color' => 'warning'],
+            ['label' => 'نسبة تفاعل الطلاب مع المعلمين', 'key' => 'studentTeacherInteraction', 'color' => 'success'],
+            ['label' => 'نسبة تفاعل الطلاب مع المحتوى', 'key' => 'studentContentInteraction', 'color' => 'danger'],
+        ];
+    @endphp
+    <div class="row">
+        <div class="col-12">
+            <div class="card" id="dashboard-section-interaction-rates">
+                <div class="card-header"><h4 class="card-title">نسب الدخول والتفاعل</h4></div>
+                <div class="card-body">
+                    @foreach($irRows as $row)
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ $row['label'] }}</span>
+                                <span class="text-{{ $row['color'] }} fw-bold">{{ $ir[$row['key']] ?? 0 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-{{ $row['color'] }}" role="progressbar" style="width: {{ $ir[$row['key']] ?? 0 }}%"></div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ============== Section 3 — إحصاءات المحتوى ============== --}}
+    @php
+        $cs = $contentStatsData ?? [];
+        $csTiles = [
+            ['label' => 'الاختبارات الإلكترونية', 'key' => 'electronicExams', 'icon' => 'la-file-text', 'color' => 'primary'],
+            ['label' => 'الواجبات الإلكترونية', 'key' => 'electronicAssignments', 'icon' => 'la-tasks', 'color' => 'info'],
+            ['label' => 'الفيديوهات والملفات', 'key' => 'videosFiles', 'icon' => 'la-video-camera', 'color' => 'warning'],
+            ['label' => 'نسبة التفاعل مع المحتوى', 'key' => 'contentInteractionRate', 'icon' => 'la-heart', 'color' => 'danger', 'suffix' => '%'],
+            ['label' => 'معدل المشاهدة', 'key' => 'viewRate', 'icon' => 'la-eye', 'color' => 'success', 'suffix' => '%'],
+            ['label' => 'عدد التفاعل مع المحتوى', 'key' => 'contentInteractions', 'icon' => 'la-comments', 'color' => 'secondary'],
+            ['label' => 'تسليمات الاختبارات', 'key' => 'examSubmissions', 'icon' => 'la-check', 'color' => 'primary'],
+            ['label' => 'تسليمات الواجبات', 'key' => 'assignmentSubmissions', 'icon' => 'la-check-square', 'color' => 'info'],
+            ['label' => 'استخدام رسائل الجوال', 'key' => 'smsUsage', 'icon' => 'la-mobile-phone', 'color' => 'warning'],
+        ];
+    @endphp
+    <div class="row" id="dashboard-section-content-stats">
+        @foreach($csTiles as $tile)
+            <div class="col-xl-3 col-md-4 col-sm-6 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="avatar bg-light-{{ $tile['color'] }} p-50 mb-1">
+                            <div class="avatar-content"><i class="la {{ $tile['icon'] }} la-2x"></i></div>
+                        </div>
+                        <h2 class="fw-bolder">{{ $cs[$tile['key']] ?? 0 }}{{ $tile['suffix'] ?? '' }}</h2>
+                        <p class="card-text">{{ $tile['label'] }}</p>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- ============== Section 4 — إحصاءات متنوعة ============== --}}
+    @php
+        $vs = $variousStatsData ?? [];
+        $vsTiles = [
+            ['label' => 'غرف النقاش', 'key' => 'discussionRooms', 'icon' => 'la-comments', 'color' => 'primary'],
+            ['label' => 'غيابات الطلاب', 'key' => 'absences', 'icon' => 'la-user-times', 'color' => 'danger'],
+            ['label' => 'خطط التحضير', 'key' => 'preparationPlans', 'icon' => 'la-list-alt', 'color' => 'info'],
+            ['label' => 'الأسئلة', 'key' => 'questionsCount', 'icon' => 'la-question-circle', 'color' => 'warning'],
+            ['label' => 'الفصول الافتراضية', 'key' => 'virtualClasses', 'icon' => 'la-video-camera', 'color' => 'success'],
+            ['label' => 'الفصول الافتراضية المجدولة', 'key' => 'scheduledVirtualClasses', 'icon' => 'la-calendar', 'color' => 'secondary'],
+        ];
+    @endphp
+    <div class="row" id="dashboard-section-various-stats">
+        @foreach($vsTiles as $tile)
+            <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="avatar bg-light-{{ $tile['color'] }} p-50 mb-1">
+                            <div class="avatar-content"><i class="la {{ $tile['icon'] }} la-2x"></i></div>
+                        </div>
+                        <h3 class="fw-bolder">{{ $vs[$tile['key']] ?? 0 }}</h3>
+                        <p class="card-text">{{ $tile['label'] }}</p>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- ============== Section 5 — معدل الغياب الأسبوعي ============== --}}
+    <div class="row">
+        <div class="col-12">
+            <div class="card" id="dashboard-section-weekly-absence">
+                <div class="card-header"><h4 class="card-title">معدل الغياب الأسبوعي</h4></div>
+                <div class="card-body">
+                    <canvas id="weeklyAbsenceChart" height="90"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ============== Section 6 — الأكثر نشاطاً ============== --}}
+    @php $ma = $mostActive ?? []; @endphp
+    <div class="row" id="dashboard-section-most-active">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h4 class="card-title">أكثر الفصول نشاطاً داخل المدرسة</h4></div>
+                <div class="card-body">
+                    @forelse($ma['activeClassesInSchool'] ?? [] as $row)
+                        <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-primary">{{ $row['score'] ?? 0 }}</span></div>
+                    @empty
+                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h4 class="card-title">أكثر المستخدمين نشاطاً داخل المدرسة</h4></div>
+                <div class="card-body">
+                    @forelse($ma['activeUsersInSchool'] ?? [] as $row)
+                        <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-info">{{ $row['score'] ?? 0 }}</span></div>
+                    @empty
+                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h4 class="card-title">أكثر الفصول نشاطاً على مستوى مجموعة المدارس</h4></div>
+                <div class="card-body">
+                    @forelse($ma['activeClassesInCompany'] ?? [] as $row)
+                        <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-warning">{{ $row['score'] ?? 0 }}</span></div>
+                    @empty
+                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h4 class="card-title">أكثر المستخدمين نشاطاً على مستوى مجموعة المدارس</h4></div>
+                <div class="card-body">
+                    @forelse($ma['activeUsersInCompany'] ?? [] as $row)
+                        <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-success">{{ $row['score'] ?? 0 }}</span></div>
+                    @empty
+                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ============== Section 7 — مخطط النشاط الأسبوعي ============== --}}
+    <div class="row">
+        <div class="col-12">
+            <div class="card" id="dashboard-section-weekly-activity">
+                <div class="card-header"><h4 class="card-title">مخطط النشاط الأسبوعي</h4></div>
+                <div class="card-body">
+                    <canvas id="weeklyActivityChart" height="90"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const weeklyAbsence = @json($weeklyAbsence ?? []);
+            const weeklyActivity = @json($weeklyActivity ?? []);
+            const dayLabel = (d) => ({sat:'السبت',sun:'الأحد',mon:'الاثنين',tue:'الثلاثاء',wed:'الأربعاء',thu:'الخميس',fri:'الجمعة'})[d] || d;
+
+            const absCtx = document.getElementById('weeklyAbsenceChart');
+            if (absCtx && window.Chart) {
+                new Chart(absCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: weeklyAbsence.map(r => dayLabel(r.day)),
+                        datasets: [{ label: 'معدل الغياب %', data: weeklyAbsence.map(r => r.rate || 0), backgroundColor: 'rgba(220,53,69,.6)' }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+                });
+            }
+
+            const actCtx = document.getElementById('weeklyActivityChart');
+            const series = weeklyActivity.series || [];
+            if (actCtx && window.Chart) {
+                new Chart(actCtx, {
+                    type: 'line',
+                    data: {
+                        labels: series.map(r => dayLabel(r.day)),
+                        datasets: [
+                            { label: 'أولياء الأمور', data: series.map(r => r.parents || 0), borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,.2)' },
+                            { label: 'الطلاب', data: series.map(r => r.students || 0), borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,.2)' },
+                            { label: 'المعلمين', data: series.map(r => r.teachers || 0), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,.2)' },
+                        ]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+                });
+            }
+        })();
+    </script>
+    @endpush
+
+    @endif
+
 </div>
 @endsection

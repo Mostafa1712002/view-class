@@ -11,6 +11,8 @@ use App\Modules\Dashboard\Repositories\Contracts\DashboardStatsRepository;
 use App\Modules\Dashboard\Repositories\EloquentDashboardStatsRepository;
 use App\Modules\Profile\Repositories\Contracts\ProfileRepository;
 use App\Modules\Profile\Repositories\EloquentProfileRepository;
+use App\Modules\Scope\Repositories\Contracts\ScopeRepository;
+use App\Modules\Scope\Repositories\EloquentScopeRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -20,6 +22,7 @@ class RepositoryServiceProvider extends ServiceProvider
         SessionRepository::class => EloquentSessionRepository::class,
         DashboardStatsRepository::class => EloquentDashboardStatsRepository::class,
         ProfileRepository::class => EloquentProfileRepository::class,
+        ScopeRepository::class => EloquentScopeRepository::class,
     ];
 
     public function register(): void

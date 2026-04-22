@@ -1,435 +1,261 @@
+@php
+    $sidebarUser = auth()->user();
+    $isStaff = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin());
+@endphp
 <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
 
-            <!-- Dashboard -->
+            {{-- Dashboard --}}
             <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <a href="{{ route('dashboard') }}">
                     <i class="la la-home"></i>
-                    <span class="menu-title">لوحة التحكم</span>
+                    <span class="menu-title">@lang('shell.nav_dashboard')</span>
                 </a>
             </li>
 
-            <!-- Communications -->
+            @if($isStaff)
+            {{-- ========== 1. برامج نوعية ========== --}}
             <li class="navigation-header">
-                <span>التواصل</span>
+                <span>@lang('shell.section_programs')</span>
+                <i class="la la-ellipsis-h"></i>
+            </li>
+            <li class="nav-item"><a href="#"><i class="la la-lightbulb-o"></i><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-flag"></i><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-book-reader"></i><span class="menu-title">@lang('shell.nav_speed_reading')</span></a></li>
+
+            {{-- ========== 2. عمليات تعليمية ========== --}}
+            <li class="navigation-header">
+                <span>@lang('shell.section_educational')</span>
                 <i class="la la-ellipsis-h"></i>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
-                <a href="{{ route('notifications.index') }}">
-                    <i class="la la-bell"></i>
-                    <span class="menu-title">الإشعارات</span>
-                    @php
-                        $unreadNotifications = auth()->user()->customNotifications()->unread()->count();
-                    @endphp
-                    @if($unreadNotifications > 0)
-                        <span class="badge badge-pill badge-danger float-right">{{ $unreadNotifications }}</span>
-                    @endif
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('messages.*') ? 'active' : '' }}">
-                <a href="{{ route('messages.index') }}">
-                    <i class="la la-envelope"></i>
-                    <span class="menu-title">الرسائل</span>
-                </a>
-            </li>
-
-            @if(auth()->user()->isSuperAdmin())
-            <!-- System Admin Section -->
-            <li class="navigation-header">
-                <span>إدارة النظام</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.schools.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.schools.index') }}">
-                    <i class="la la-building"></i>
-                    <span class="menu-title">المدارس</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.maintenance.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.maintenance.index') }}">
-                    <i class="la la-wrench"></i>
-                    <span class="menu-title">صيانة النظام</span>
-                </a>
-            </li>
-            @endif
-
-            @if(auth()->user()->isSuperAdmin() || auth()->user()->isSchoolAdmin())
-            <!-- School Admin Section -->
-            <li class="navigation-header">
-                <span>الإدارة التعليمية</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('manage.academic-years.*') ? 'active' : '' }}">
-                <a href="{{ route('manage.academic-years.index') }}">
-                    <i class="la la-calendar"></i>
-                    <span class="menu-title">السنوات الدراسية</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('manage.sections.*') ? 'active' : '' }}">
-                <a href="{{ route('manage.sections.index') }}">
-                    <i class="la la-sitemap"></i>
-                    <span class="menu-title">المراحل الدراسية</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('manage.classes.*') ? 'active' : '' }}">
-                <a href="{{ route('manage.classes.index') }}">
-                    <i class="la la-users"></i>
-                    <span class="menu-title">الفصول</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('manage.subjects.*') ? 'active' : '' }}">
-                <a href="{{ route('manage.subjects.index') }}">
-                    <i class="la la-book"></i>
-                    <span class="menu-title">المواد الدراسية</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('manage.users.*') ? 'active' : '' }}">
-                <a href="{{ route('manage.users.index') }}">
-                    <i class="la la-user"></i>
-                    <span class="menu-title">المستخدمين</span>
-                </a>
-            </li>
-
-            <!-- Schedule and Weekly Plans -->
-            <li class="navigation-header">
-                <span>الجداول والخطط</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('manage.schedules.*') ? 'active' : '' }}">
-                <a href="{{ route('manage.schedules.index') }}">
-                    <i class="la la-calendar-check-o"></i>
-                    <span class="menu-title">الجداول الدراسية</span>
-                </a>
+            {{-- إدارة المواد (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-book"></i><span class="menu-title">@lang('shell.nav_exams_management')</span></a>
+                <ul class="menu-content">
+                    <li class="{{ request()->routeIs('manage.subjects.*') ? 'active' : '' }}"><a href="{{ Route::has('manage.subjects.index') ? route('manage.subjects.index') : '#' }}"><i class="la la-book"></i><span class="menu-item">@lang('shell.nav_subjects')</span></a></li>
+                    <li><a href="#"><i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_questions_bank')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.exams.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><i class="la la-file-text"></i><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>
+                    <li><a href="#"><i class="la la-clock-o"></i><span class="menu-item">@lang('shell.nav_periods')</span></a></li>
+                    <li><a href="#"><i class="la la-book-open"></i><span class="menu-item">@lang('shell.nav_books')</span></a></li>
+                </ul>
             </li>
 
             <li class="nav-item {{ request()->routeIs('manage.weekly-plans.*') ? 'active' : '' }}">
-                <a href="{{ route('manage.weekly-plans.index') }}">
-                    <i class="la la-list-alt"></i>
-                    <span class="menu-title">الخطط الأسبوعية</span>
-                </a>
-            </li>
-
-            <!-- Exams and Grades -->
-            <li class="navigation-header">
-                <span>الاختبارات والدرجات</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.exams.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.exams.index') }}">
-                    <i class="la la-file-text"></i>
-                    <span class="menu-title">الاختبارات</span>
-                </a>
+                <a href="{{ Route::has('manage.weekly-plans.index') ? route('manage.weekly-plans.index') : '#' }}"><i class="la la-list-alt"></i><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a>
             </li>
 
             <li class="nav-item {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.grades.index') }}">
-                    <i class="la la-graduation-cap"></i>
-                    <span class="menu-title">إدخال الدرجات</span>
-                </a>
+                <a href="{{ Route::has('admin.grades.index') ? route('admin.grades.index') : '#' }}"><i class="la la-graduation-cap"></i><span class="menu-title">@lang('shell.nav_grades')</span></a>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('admin.grades.class-report') ? 'active' : '' }}">
-                <a href="{{ route('admin.grades.class-report') }}">
-                    <i class="la la-bar-chart"></i>
-                    <span class="menu-title">تقارير الصفوف</span>
-                </a>
+            <li class="nav-item {{ request()->routeIs('manage.schedules.*') ? 'active' : '' }}">
+                <a href="{{ Route::has('manage.schedules.index') ? route('manage.schedules.index') : '#' }}"><i class="la la-calendar-check-o"></i><span class="menu-title">@lang('shell.nav_schedule')</span></a>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('admin.grades.student-report') ? 'active' : '' }}">
-                <a href="{{ route('admin.grades.student-report') }}">
-                    <i class="la la-user-graduate"></i>
-                    <span class="menu-title">تقارير الطلاب</span>
-                </a>
-            </li>
-
-            <!-- Attendance -->
-            <li class="navigation-header">
-                <span>الحضور والغياب</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.attendance.index') ? 'active' : '' }}">
-                <a href="{{ route('admin.attendance.index') }}">
-                    <i class="la la-check-square"></i>
-                    <span class="menu-title">تسجيل الحضور</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.attendance.daily-report') ? 'active' : '' }}">
-                <a href="{{ route('admin.attendance.daily-report') }}">
-                    <i class="la la-calendar-day"></i>
-                    <span class="menu-title">التقرير اليومي</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.attendance.class-report') ? 'active' : '' }}">
-                <a href="{{ route('admin.attendance.class-report') }}">
-                    <i class="la la-chart-bar"></i>
-                    <span class="menu-title">تقرير الصف</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.attendance.student-report') ? 'active' : '' }}">
-                <a href="{{ route('admin.attendance.student-report') }}">
-                    <i class="la la-user-clock"></i>
-                    <span class="menu-title">تقرير الطالب</span>
-                </a>
-            </li>
-
-            <!-- Reports Section -->
-            <li class="navigation-header">
-                <span>التقارير</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}">
-                <a href="{{ route('admin.reports.index') }}">
-                    <i class="la la-file-alt"></i>
-                    <span class="menu-title">مركز التقارير</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.reports.analytics') ? 'active' : '' }}">
-                <a href="{{ route('admin.reports.analytics') }}">
-                    <i class="la la-chart-line"></i>
-                    <span class="menu-title">الإحصائيات</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.exports.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.exports.index') }}">
-                    <i class="la la-download"></i>
-                    <span class="menu-title">تصدير البيانات</span>
-                </a>
-            </li>
-
-            <!-- Files & Assignments Section -->
-            <li class="navigation-header">
-                <span>الملفات والواجبات</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.files.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.files.index') }}">
-                    <i class="la la-folder-open"></i>
-                    <span class="menu-title">الملفات والمواد</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.assignments.index') }}">
-                    <i class="la la-tasks"></i>
-                    <span class="menu-title">الواجبات</span>
-                </a>
-            </li>
-
-            <!-- Settings Section -->
-            <li class="navigation-header">
-                <span>الإعدادات</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
-                <a href="{{ route('admin.settings.index') }}">
-                    <i class="la la-cog"></i>
-                    <span class="menu-title">إعدادات المدرسة</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.settings.profile') ? 'active' : '' }}">
-                <a href="{{ route('admin.settings.profile') }}">
-                    <i class="la la-user"></i>
-                    <span class="menu-title">الملف الشخصي</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.activity-logs.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.activity-logs.index') }}">
-                    <i class="la la-clipboard-list"></i>
-                    <span class="menu-title">سجل النشاطات</span>
-                </a>
-            </li>
-            @endif
-
-            @if(auth()->user()->isTeacher())
-            <!-- Teacher Section -->
-            <li class="navigation-header">
-                <span>جدولي</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('teacher.schedule') ? 'active' : '' }}">
-                <a href="{{ route('teacher.schedule') }}">
-                    <i class="la la-calendar-check-o"></i>
-                    <span class="menu-title">جدولي</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('teacher.weekly-plans.*') ? 'active' : '' }}">
-                <a href="{{ route('teacher.weekly-plans.index') }}">
-                    <i class="la la-list-alt"></i>
-                    <span class="menu-title">خططي الأسبوعية</span>
-                </a>
-            </li>
-
-            <!-- Teacher Exams and Grades -->
-            <li class="navigation-header">
-                <span>الاختبارات والدرجات</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('teacher.exams.*') ? 'active' : '' }}">
-                <a href="{{ route('teacher.exams.index') }}">
-                    <i class="la la-file-text"></i>
-                    <span class="menu-title">اختباراتي</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('teacher.grades.*') ? 'active' : '' }}">
-                <a href="{{ route('teacher.grades.index') }}">
-                    <i class="la la-graduation-cap"></i>
-                    <span class="menu-title">إدخال الدرجات</span>
-                </a>
-            </li>
-
-            <!-- Teacher Attendance -->
-            <li class="navigation-header">
-                <span>الحضور والغياب</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('teacher.attendance.index') ? 'active' : '' }}">
-                <a href="{{ route('teacher.attendance.index') }}">
-                    <i class="la la-check-square"></i>
-                    <span class="menu-title">تسجيل الحضور</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('teacher.attendance.daily-report') ? 'active' : '' }}">
-                <a href="{{ route('teacher.attendance.daily-report') }}">
-                    <i class="la la-calendar-day"></i>
-                    <span class="menu-title">التقرير اليومي</span>
-                </a>
-            </li>
-            @endif
-
-            @if(auth()->user()->isStudent())
-            <!-- Student Section -->
-            <li class="navigation-header">
-                <span>بوابة الطالب</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
-                <a href="{{ route('student.dashboard') }}">
-                    <i class="la la-home"></i>
-                    <span class="menu-title">لوحة التحكم</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('student.schedule') ? 'active' : '' }}">
-                <a href="{{ route('student.schedule') }}">
-                    <i class="la la-calendar-check-o"></i>
-                    <span class="menu-title">جدولي</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('student.weekly-plans') ? 'active' : '' }}">
-                <a href="{{ route('student.weekly-plans') }}">
-                    <i class="la la-list-alt"></i>
-                    <span class="menu-title">الخطط الأسبوعية</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('student.exams') ? 'active' : '' }}">
-                <a href="{{ route('student.exams') }}">
-                    <i class="la la-file-text"></i>
-                    <span class="menu-title">الاختبارات</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('student.grades') ? 'active' : '' }}">
-                <a href="{{ route('student.grades') }}">
-                    <i class="la la-graduation-cap"></i>
-                    <span class="menu-title">درجاتي</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}">
-                <a href="{{ route('student.attendance') }}">
-                    <i class="la la-check-square"></i>
-                    <span class="menu-title">سجل حضوري</span>
-                </a>
-            </li>
-            @endif
-
-            @if(auth()->user()->isParent())
-            <!-- Parent Section -->
-            <li class="navigation-header">
-                <span>بوابة ولي الأمر</span>
-                <i class="la la-ellipsis-h"></i>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('parent.dashboard') ? 'active' : '' }}">
-                <a href="{{ route('parent.dashboard') }}">
-                    <i class="la la-home"></i>
-                    <span class="menu-title">لوحة التحكم</span>
-                </a>
-            </li>
-
-            @foreach(auth()->user()->children as $child)
-            <li class="nav-item has-sub {{ request()->is('parent/child/'.$child->id.'*') ? 'open' : '' }}">
-                <a href="#">
-                    <i class="la la-user"></i>
-                    <span class="menu-title">{{ $child->name }}</span>
-                </a>
+            {{-- المكتبات (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-bookmark"></i><span class="menu-title">@lang('shell.nav_libraries')</span></a>
                 <ul class="menu-content">
-                    <li class="{{ request()->routeIs('parent.child') && request()->route('child') == $child->id ? 'active' : '' }}">
-                        <a href="{{ route('parent.child', $child) }}">
-                            <i class="la la-info-circle"></i>
-                            <span class="menu-title">التفاصيل</span>
-                        </a>
-                    </li>
-                    <li class="{{ request()->routeIs('parent.child.grades') && request()->route('child') == $child->id ? 'active' : '' }}">
-                        <a href="{{ route('parent.child.grades', $child) }}">
-                            <i class="la la-graduation-cap"></i>
-                            <span class="menu-title">الدرجات</span>
-                        </a>
-                    </li>
-                    <li class="{{ request()->routeIs('parent.child.attendance') && request()->route('child') == $child->id ? 'active' : '' }}">
-                        <a href="{{ route('parent.child.attendance', $child) }}">
-                            <i class="la la-check-square"></i>
-                            <span class="menu-title">الحضور</span>
-                        </a>
-                    </li>
-                    <li class="{{ request()->routeIs('parent.child.schedule') && request()->route('child') == $child->id ? 'active' : '' }}">
-                        <a href="{{ route('parent.child.schedule', $child) }}">
-                            <i class="la la-calendar"></i>
-                            <span class="menu-title">الجدول</span>
-                        </a>
-                    </li>
+                    <li><a href="#"><i class="la la-globe"></i><span class="menu-item">@lang('shell.nav_library_public')</span></a></li>
+                    <li><a href="#"><i class="la la-lock"></i><span class="menu-item">@lang('shell.nav_library_private')</span></a></li>
+                    <li><a href="#"><i class="la la-flask"></i><span class="menu-item">@lang('shell.nav_labs')</span></a></li>
                 </ul>
             </li>
-            @endforeach
 
-            <li class="nav-item {{ request()->routeIs('parent.contact-teacher') ? 'active' : '' }}">
-                <a href="{{ route('parent.contact-teacher') }}">
-                    <i class="la la-envelope"></i>
-                    <span class="menu-title">تواصل مع المعلم</span>
-                </a>
+            <li class="nav-item"><a href="#"><i class="la la-compass"></i><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
+
+            {{-- التقارير (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-file-alt"></i><span class="menu-title">@lang('shell.nav_reports')</span></a>
+                <ul class="menu-content">
+                    <li class="{{ request()->routeIs('admin.reports.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.index') ? route('admin.reports.index') : '#' }}"><i class="la la-clipboard"></i><span class="menu-item">@lang('shell.nav_reports_admin')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.reports.analytics') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.analytics') ? route('admin.reports.analytics') : '#' }}"><i class="la la-chart-line"></i><span class="menu-item">@lang('shell.nav_reports_stats')</span></a></li>
+                    <li><a href="#"><i class="la la-users"></i><span class="menu-item">@lang('shell.nav_reports_users')</span></a></li>
+                </ul>
             </li>
+
+            {{-- المواعيد (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-calendar"></i><span class="menu-title">@lang('shell.nav_appointments')</span></a>
+                <ul class="menu-content">
+                    <li><a href="#"><i class="la la-cog"></i><span class="menu-item">@lang('shell.nav_appointments_settings')</span></a></li>
+                    <li><a href="#"><i class="la la-calendar-check-o"></i><span class="menu-item">@lang('shell.nav_my_appointments')</span></a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item"><a href="#"><i class="la la-poll"></i><span class="menu-title">@lang('shell.nav_surveys')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-star"></i><span class="menu-title">@lang('shell.nav_evaluations')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-map-marker"></i><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
+
+            {{-- غياب الطلاب (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-user-times"></i><span class="menu-title">@lang('shell.nav_attendance_management')</span></a>
+                <ul class="menu-content">
+                    <li><a href="#"><i class="la la-file-alt"></i><span class="menu-item">@lang('shell.nav_attendance_report')</span></a></li>
+                    <li><a href="#"><i class="la la-layer-group"></i><span class="menu-item">@lang('shell.nav_attendance_aggregate')</span></a></li>
+                    <li><a href="#"><i class="la la-list"></i><span class="menu-item">@lang('shell.nav_attendance_list')</span></a></li>
+                    <li><a href="#"><i class="la la-hourglass"></i><span class="menu-item">@lang('shell.nav_late_report')</span></a></li>
+                    <li><a href="#"><i class="la la-gavel"></i><span class="menu-item">@lang('shell.nav_behavior_report')</span></a></li>
+                    <li><a href="#"><i class="la la-tachometer"></i><span class="menu-item">@lang('shell.nav_attendance_dashboard')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.attendance.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.index') ? route('admin.attendance.index') : '#' }}"><i class="la la-check-square"></i><span class="menu-item">@lang('shell.nav_daily_attendance')</span></a></li>
+                    <li><a href="#"><i class="la la-clock-o"></i><span class="menu-item">@lang('shell.nav_period_attendance')</span></a></li>
+                    <li><a href="#"><i class="la la-binoculars"></i><span class="menu-item">@lang('shell.nav_follow_late_absence')</span></a></li>
+                    <li><a href="#"><i class="la la-calendar"></i><span class="menu-item">@lang('shell.nav_days_absence_report')</span></a></li>
+                    <li><a href="#"><i class="la la-layer-group"></i><span class="menu-item">@lang('shell.nav_subjects_absence_summary')</span></a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item"><a href="#"><i class="la la-user-secret"></i><span class="menu-title">@lang('shell.nav_teacher_absence')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-certificate"></i><span class="menu-title">@lang('shell.nav_certificates')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-globe"></i><span class="menu-title">@lang('shell.nav_edu_sites')</span></a></li>
+
+            {{-- ========== 3. عمليات التواصل ========== --}}
+            <li class="navigation-header">
+                <span>@lang('shell.section_communication')</span>
+                <i class="la la-ellipsis-h"></i>
+            </li>
+            <li class="nav-item"><a href="#"><i class="la la-bullhorn"></i><span class="menu-title">@lang('shell.nav_announcements')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-th-large"></i><span class="menu-title">@lang('shell.nav_classified_ads')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-calendar-alt"></i><span class="menu-title">@lang('shell.nav_calendar')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-video-camera"></i><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-comments"></i><span class="menu-title">@lang('shell.nav_discussion_rooms')</span></a></li>
+
+            {{-- صندوق البريد (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="{{ route('messages.index') }}"><i class="la la-inbox"></i><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
+                <ul class="menu-content">
+                    <li><a href="{{ route('messages.create') }}"><i class="la la-edit"></i><span class="menu-item">@lang('shell.nav_mail_new')</span></a></li>
+                    <li class="{{ request()->routeIs('messages.index') ? 'active' : '' }}"><a href="{{ route('messages.index') }}"><i class="la la-inbox"></i><span class="menu-item">@lang('shell.nav_mail_inbox')</span></a></li>
+                    <li><a href="#"><i class="la la-paper-plane"></i><span class="menu-item">@lang('shell.nav_mail_sent')</span></a></li>
+                    <li><a href="#"><i class="la la-file"></i><span class="menu-item">@lang('shell.nav_mail_drafts')</span></a></li>
+                    <li><a href="#"><i class="la la-archive"></i><span class="menu-item">@lang('shell.nav_mail_archive')</span></a></li>
+                    <li><a href="#"><i class="la la-trash"></i><span class="menu-item">@lang('shell.nav_mail_trash')</span></a></li>
+                </ul>
+            </li>
+
+            {{-- رسائل الجوال (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-mobile-phone"></i><span class="menu-title">@lang('shell.nav_sms')</span></a>
+                <ul class="menu-content">
+                    <li><a href="#"><i class="la la-paper-plane"></i><span class="menu-item">@lang('shell.nav_sms_send')</span></a></li>
+                    <li><a href="#"><i class="la la-whatsapp"></i><span class="menu-item">@lang('shell.nav_whatsapp')</span></a></li>
+                    <li><a href="#"><i class="la la-file-excel-o"></i><span class="menu-item">@lang('shell.nav_sms_excel')</span></a></li>
+                    <li><a href="#"><i class="la la-chart-bar"></i><span class="menu-item">@lang('shell.nav_sms_reports')</span></a></li>
+                    <li><a href="#"><i class="la la-copy"></i><span class="menu-item">@lang('shell.nav_sms_templates')</span></a></li>
+                    <li><a href="#"><i class="la la-file"></i><span class="menu-item">@lang('shell.nav_sms_forms')</span></a></li>
+                    <li><a href="#"><i class="la la-cog"></i><span class="menu-item">@lang('shell.nav_sms_settings')</span></a></li>
+                    <li><a href="#"><i class="la la-plus"></i><span class="menu-item">@lang('shell.nav_sms_extra')</span></a></li>
+                </ul>
+            </li>
+
+            {{-- علاقات العملاء (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-handshake"></i><span class="menu-title">@lang('shell.nav_crm')</span></a>
+                <ul class="menu-content">
+                    <li><a href="#"><i class="la la-user-friends"></i><span class="menu-item">@lang('shell.nav_parent_contact')</span></a></li>
+                </ul>
+            </li>
+
+            {{-- ========== 4. إعدادات النظام ========== --}}
+            <li class="navigation-header">
+                <span>@lang('shell.section_system_settings')</span>
+                <i class="la la-ellipsis-h"></i>
+            </li>
+            <li class="nav-item {{ request()->routeIs('admin.schools.*') ? 'active' : '' }}">
+                <a href="{{ Route::has('admin.schools.index') ? route('admin.schools.index') : '#' }}"><i class="la la-building"></i><span class="menu-title">@lang('shell.nav_schools')</span></a>
+            </li>
+
+            {{-- المستخدمين (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="{{ Route::has('manage.users.index') ? route('manage.users.index') : '#' }}"><i class="la la-users"></i><span class="menu-title">@lang('shell.nav_users')</span></a>
+                <ul class="menu-content">
+                    <li><a href="#"><i class="la la-user-shield"></i><span class="menu-item">@lang('shell.nav_users_admin')</span></a></li>
+                    <li><a href="#"><i class="la la-chalkboard-teacher"></i><span class="menu-item">@lang('shell.nav_users_teachers')</span></a></li>
+                    <li><a href="#"><i class="la la-user-friends"></i><span class="menu-item">@lang('shell.nav_users_parents')</span></a></li>
+                    <li><a href="#"><i class="la la-graduation-cap"></i><span class="menu-item">@lang('shell.nav_users_students')</span></a></li>
+                    <li><a href="#"><i class="la la-file-import"></i><span class="menu-item">@lang('shell.nav_users_import_noor')</span></a></li>
+                    <li><a href="#"><i class="la la-id-card"></i><span class="menu-item">@lang('shell.nav_users_cards')</span></a></li>
+                    <li><a href="#"><i class="la la-search"></i><span class="menu-item">@lang('shell.nav_users_search_all')</span></a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item {{ request()->routeIs('manage.academic-years.*') ? 'active' : '' }}">
+                <a href="{{ Route::has('manage.academic-years.index') ? route('manage.academic-years.index') : '#' }}"><i class="la la-calendar"></i><span class="menu-title">@lang('shell.nav_academic_years')</span></a>
+            </li>
+
+            <li class="nav-item"><a href="#"><i class="la la-cutlery"></i><span class="menu-title">@lang('shell.nav_cafeteria')</span></a></li>
+
+            {{-- العيادات (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-medkit"></i><span class="menu-title">@lang('shell.nav_clinic')</span></a>
+                <ul class="menu-content">
+                    <li><a href="#"><i class="la la-hospital"></i><span class="menu-item">@lang('shell.nav_clinic_main')</span></a></li>
+                    <li><a href="#"><i class="la la-virus"></i><span class="menu-item">@lang('shell.nav_diseases')</span></a></li>
+                    <li><a href="#"><i class="la la-pills"></i><span class="menu-item">@lang('shell.nav_medicines')</span></a></li>
+                    <li><a href="#"><i class="la la-syringe"></i><span class="menu-item">@lang('shell.nav_vaccinations')</span></a></li>
+                    <li><a href="#"><i class="la la-notes-medical"></i><span class="menu-item">@lang('shell.nav_medical_records')</span></a></li>
+                    <li><a href="#"><i class="la la-arrow-right"></i><span class="menu-item">@lang('shell.nav_clinic_referrals')</span></a></li>
+                    <li><a href="#"><i class="la la-stethoscope"></i><span class="menu-item">@lang('shell.nav_diagnoses')</span></a></li>
+                </ul>
+            </li>
+
+            {{-- السلوك (مع فرعية) --}}
+            <li class="nav-item has-sub">
+                <a href="#"><i class="la la-balance-scale"></i><span class="menu-title">@lang('shell.nav_behavior')</span></a>
+                <ul class="menu-content">
+                    <li><a href="#"><i class="la la-users"></i><span class="menu-item">@lang('shell.nav_behavior_groups')</span></a></li>
+                    <li><a href="#"><i class="la la-gavel"></i><span class="menu-item">@lang('shell.nav_behaviors')</span></a></li>
+                    <li><a href="#"><i class="la la-cogs"></i><span class="menu-item">@lang('shell.nav_behavior_actions')</span></a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item"><a href="#"><i class="la la-life-ring"></i><span class="menu-title">@lang('shell.nav_support')</span></a></li>
+            <li class="nav-item"><a href="#"><i class="la la-user-plus"></i><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
+            @endif
+
+            @if($sidebarUser && $sidebarUser->isTeacher())
+                <li class="navigation-header">
+                    <span>جدولي</span>
+                    <i class="la la-ellipsis-h"></i>
+                </li>
+                <li class="nav-item {{ request()->routeIs('teacher.schedule') ? 'active' : '' }}">
+                    <a href="{{ route('teacher.schedule') }}"><i class="la la-calendar-check-o"></i><span class="menu-title">جدولي</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('teacher.weekly-plans.*') ? 'active' : '' }}">
+                    <a href="{{ route('teacher.weekly-plans.index') }}"><i class="la la-list-alt"></i><span class="menu-title">خططي الأسبوعية</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('teacher.exams.*') ? 'active' : '' }}">
+                    <a href="{{ route('teacher.exams.index') }}"><i class="la la-file-text"></i><span class="menu-title">اختباراتي</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('teacher.grades.*') ? 'active' : '' }}">
+                    <a href="{{ route('teacher.grades.index') }}"><i class="la la-graduation-cap"></i><span class="menu-title">إدخال الدرجات</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('teacher.attendance.index') ? 'active' : '' }}">
+                    <a href="{{ route('teacher.attendance.index') }}"><i class="la la-check-square"></i><span class="menu-title">تسجيل الحضور</span></a>
+                </li>
+            @endif
+
+            @if($sidebarUser && $sidebarUser->isStudent())
+                <li class="navigation-header">
+                    <span>بوابة الطالب</span>
+                    <i class="la la-ellipsis-h"></i>
+                </li>
+                <li class="nav-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}"><a href="{{ route('student.dashboard') }}"><i class="la la-home"></i><span class="menu-title">لوحة التحكم</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.schedule') ? 'active' : '' }}"><a href="{{ route('student.schedule') }}"><i class="la la-calendar-check-o"></i><span class="menu-title">جدولي</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.exams') ? 'active' : '' }}"><a href="{{ route('student.exams') }}"><i class="la la-file-text"></i><span class="menu-title">الاختبارات</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.grades') ? 'active' : '' }}"><a href="{{ route('student.grades') }}"><i class="la la-graduation-cap"></i><span class="menu-title">درجاتي</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}"><a href="{{ route('student.attendance') }}"><i class="la la-check-square"></i><span class="menu-title">سجل حضوري</span></a></li>
+            @endif
+
+            @if($sidebarUser && $sidebarUser->isParent())
+                <li class="navigation-header">
+                    <span>بوابة ولي الأمر</span>
+                    <i class="la la-ellipsis-h"></i>
+                </li>
+                <li class="nav-item {{ request()->routeIs('parent.dashboard') ? 'active' : '' }}"><a href="{{ route('parent.dashboard') }}"><i class="la la-home"></i><span class="menu-title">لوحة التحكم</span></a></li>
+                <li class="nav-item {{ request()->routeIs('parent.contact-teacher') ? 'active' : '' }}"><a href="{{ route('parent.contact-teacher') }}"><i class="la la-envelope"></i><span class="menu-title">تواصل مع المعلم</span></a></li>
             @endif
 
         </ul>

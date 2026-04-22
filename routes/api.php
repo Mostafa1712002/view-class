@@ -36,6 +36,8 @@ Route::middleware('jwt')->prefix('dashboard')->group(function () {
     Route::get('content-stats', [DashboardApiController::class, 'contentStats']);
     Route::get('various-stats', [DashboardApiController::class, 'variousStats']);
     Route::get('weekly-absence', [DashboardApiController::class, 'weeklyAbsence']);
+    Route::get('most-active', [DashboardApiController::class, 'mostActive']);
+    Route::get('weekly-activity', [DashboardApiController::class, 'weeklyActivity']);
 });
 
 // Legacy Sprint 9 Sanctum routes — kept for backward compatibility.

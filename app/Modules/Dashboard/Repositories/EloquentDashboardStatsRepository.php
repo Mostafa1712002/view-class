@@ -76,4 +76,31 @@ final class EloquentDashboardStatsRepository implements DashboardStatsRepository
             ['day' => 'thu', 'rate' => 0],
         ];
     }
+
+    public function mostActive(?int $schoolId, ?int $companyId): array
+    {
+        // Activity aggregation pipeline is out of scope for Sprint 1.
+        return [
+            'activeClassesInSchool' => [],
+            'activeUsersInSchool' => [],
+            'activeClassesInCompany' => [],
+            'activeUsersInCompany' => [],
+        ];
+    }
+
+    public function weeklyActivity(?int $schoolId): array
+    {
+        return [
+            'parentsRate' => 0,
+            'studentsRate' => 0,
+            'teachersRate' => 0,
+            'series' => [
+                ['day' => 'sun', 'parents' => 0, 'students' => 0, 'teachers' => 0],
+                ['day' => 'mon', 'parents' => 0, 'students' => 0, 'teachers' => 0],
+                ['day' => 'tue', 'parents' => 0, 'students' => 0, 'teachers' => 0],
+                ['day' => 'wed', 'parents' => 0, 'students' => 0, 'teachers' => 0],
+                ['day' => 'thu', 'parents' => 0, 'students' => 0, 'teachers' => 0],
+            ],
+        ];
+    }
 }

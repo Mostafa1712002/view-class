@@ -14,14 +14,24 @@ use App\Models\Subject;
 use App\Models\User;
 use App\Models\WeeklyPlan;
 use App\Models\Assignment;
+use App\Modules\Dashboard\Actions\GetContentStatsAction;
+use App\Modules\Dashboard\Actions\GetInteractionRatesAction;
+use App\Modules\Dashboard\Actions\GetMostActiveAction;
+use App\Modules\Dashboard\Actions\GetWeeklyActivityAction;
+use App\Modules\Dashboard\Repositories\Contracts\DashboardStatsRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
+    public function index(
+        GetInteractionRatesAction $interactionRates,
+        GetContentStatsAction $contentStats,
+        GetMostActiveAction $mostActive,
+        GetWeeklyActivityAction $weeklyActivity,
+        DashboardStatsRepository $statsRepo,
+    ) {
         $user = Auth::user();
         $data = [];
 
@@ -36,6 +46,17 @@ class DashboardController extends Controller
         } elseif ($user->isTeacher()) {
             $data = $this->getTeacherStats($user);
         }
+
+        // Sprint 1 QA round 2 — sections 2-7 are rendered from the same repository the API uses.
+        $schoolId = $user->school_id;
+        $companyId = optional($user->school)->educational_company_id;
+
+        $data['interactionRates'] = $interactionRates->execute($schoolId);
+        $data['contentStatsData'] = $contentStats->execute($schoolId);
+        $data['variousStatsData'] = $statsRepo->variousStats($schoolId);
+        $data['weeklyAbsence'] = $statsRepo->weeklyAbsenceRate($schoolId);
+        $data['mostActive'] = $mostActive->execute($schoolId, $companyId);
+        $data['weeklyActivity'] = $weeklyActivity->execute($schoolId);
 
         return view('dashboard', $data);
     }

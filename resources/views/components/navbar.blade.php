@@ -7,6 +7,25 @@
     $shellSchoolName = $shellSchool ? ($shellLocale === 'en' ? ($shellSchool->name_en ?: $shellSchool->name_ar ?: $shellSchool->name) : ($shellSchool->name_ar ?: $shellSchool->name)) : null;
     $shellCompanyName = $shellCompany ? ($shellLocale === 'en' ? ($shellCompany->name_en ?: $shellCompany->name_ar) : ($shellCompany->name_ar ?: $shellCompany->name_en)) : null;
     $shellCurrentYear = $shellSchool?->academicYears()->where('is_current', true)->first();
+
+    $shellScopeSession = session('scope', [
+        'company_id' => optional($shellSchool)->educational_company_id,
+        'school_id' => $shellUser?->school_id,
+        'academic_year_id' => $shellCurrentYear?->id,
+    ]);
+    $shellScopeCompanies = [];
+    $shellScopeSchools = [];
+    $shellScopeYears = [];
+    if ($shellUser) {
+        try {
+            $scopeRepo = app(\App\Modules\Scope\Repositories\Contracts\ScopeRepository::class);
+            $shellScopeCompanies = $scopeRepo->companiesFor($shellUser);
+            $shellScopeSchools = $scopeRepo->schoolsFor($shellUser, $shellScopeSession['company_id'] ?? null);
+            $shellScopeYears = $scopeRepo->yearsFor($shellUser, $shellScopeSession['school_id'] ?? null);
+        } catch (\Throwable $e) {
+            // Scope selector is a progressive enhancement — never break the shell if the repo fails.
+        }
+    }
 @endphp
 
 <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-semi-light bg-info navbar-shadow">
@@ -33,6 +52,37 @@
                         @endif
                     </li>
                 @endif
+
+                @auth
+                    <li class="nav-item d-none d-lg-flex align-items-center">
+                        <form id="shell-scope-form" method="POST" action="{{ route('scope.set') }}" class="form-inline m-0 p-0">
+                            @csrf
+                            <select name="company_id" class="form-control form-control-sm mx-1" onchange="this.form.submit()" aria-label="@lang('shell.scope_company')">
+                                @foreach($shellScopeCompanies as $c)
+                                    <option value="{{ $c['id'] }}" @selected(($shellScopeSession['company_id'] ?? null) == $c['id'])>
+                                        {{ $shellLocale === 'en' ? ($c['name_en'] ?: $c['name_ar']) : ($c['name_ar'] ?: $c['name_en']) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <select name="school_id" class="form-control form-control-sm mx-1" onchange="this.form.submit()" aria-label="@lang('shell.scope_school')">
+                                <option value="all">@lang('shell.scope_all_schools')</option>
+                                @foreach($shellScopeSchools as $s)
+                                    <option value="{{ $s['id'] }}" @selected(($shellScopeSession['school_id'] ?? null) == $s['id'])>
+                                        {{ $shellLocale === 'en' ? ($s['name_en'] ?: $s['name_ar']) : ($s['name_ar'] ?: $s['name_en']) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <select name="academic_year_id" class="form-control form-control-sm mx-1" onchange="this.form.submit()" aria-label="@lang('shell.scope_semester')">
+                                <option value="all">@lang('shell.scope_all_years')</option>
+                                @foreach($shellScopeYears as $y)
+                                    <option value="{{ $y['id'] }}" @selected(($shellScopeSession['academic_year_id'] ?? null) == $y['id'])>
+                                        {{ $y['name'] }}{{ !empty($y['is_current']) ? ' ★' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </li>
+                @endauth
                 <li class="nav-item d-md-none">
                     <a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile">
                         <i class="la la-ellipsis-v"></i>
@@ -180,6 +230,13 @@
                                 <i class="ft-book"></i> @lang('shell.user_guide')
                             </a>
                             <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header">@lang('shell.font_size')</h6>
+                            <div class="px-2 pb-1 btn-group btn-group-sm shell-font-size-picker" role="group" aria-label="@lang('shell.font_size')">
+                                <button type="button" class="btn btn-outline-secondary" data-font-size="small">@lang('shell.font_size_small')</button>
+                                <button type="button" class="btn btn-outline-secondary" data-font-size="medium">@lang('shell.font_size_medium')</button>
+                                <button type="button" class="btn btn-outline-secondary" data-font-size="large">@lang('shell.font_size_large')</button>
+                            </div>
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ route('logout') }}"
                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="ft-power"></i> @lang('auth.logout')
@@ -209,6 +266,27 @@
             }
             tick();
             setInterval(tick, 60 * 1000);
+        })();
+
+        (function () {
+            const KEY = 'shell.fontSize';
+            const sizes = { small: '87.5%', medium: '100%', large: '115%' };
+            function apply(size) {
+                if (!sizes[size]) size = 'medium';
+                document.documentElement.style.fontSize = sizes[size];
+                document.querySelectorAll('.shell-font-size-picker [data-font-size]').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-font-size') === size);
+                });
+                try { localStorage.setItem(KEY, size); } catch (_) {}
+            }
+            const saved = (function () { try { return localStorage.getItem(KEY) || 'medium'; } catch (_) { return 'medium'; } })();
+            apply(saved);
+            document.addEventListener('click', function (ev) {
+                const btn = ev.target.closest('.shell-font-size-picker [data-font-size]');
+                if (!btn) return;
+                ev.preventDefault();
+                apply(btn.getAttribute('data-font-size'));
+            });
         })();
     </script>
 </nav>
