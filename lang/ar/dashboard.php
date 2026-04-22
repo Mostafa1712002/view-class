@@ -62,4 +62,11 @@ return [
     'day_wed' => 'الأربعاء',
     'day_thu' => 'الخميس',
     'day_fri' => 'الجمعة',
+
+    'school_column' => 'المدرسة',
+    'email_column' => 'البريد',
+    'status_column' => 'الحالة',
+    'created_at_column' => 'تاريخ التسجيل',
+    'status_active' => 'نشط',
+    'status_inactive' => 'غير نشط',
 ];

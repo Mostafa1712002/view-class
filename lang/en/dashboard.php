@@ -62,4 +62,11 @@ return [
     'day_wed' => 'Wednesday',
     'day_thu' => 'Thursday',
     'day_fri' => 'Friday',
+
+    'school_column' => 'School',
+    'email_column' => 'Email',
+    'status_column' => 'Status',
+    'created_at_column' => 'Registered at',
+    'status_active' => 'Active',
+    'status_inactive' => 'Inactive',
 ];

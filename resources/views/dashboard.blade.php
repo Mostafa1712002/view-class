@@ -136,20 +136,20 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>المدرسة</th>
-                                    <th>البريد</th>
-                                    <th>الحالة</th>
-                                    <th>تاريخ التسجيل</th>
+                                    <th>@lang('dashboard.school_column')</th>
+                                    <th>@lang('dashboard.email_column')</th>
+                                    <th>@lang('dashboard.status_column')</th>
+                                    <th>@lang('dashboard.created_at_column')</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($recent_schools as $school)
                                 <tr>
-                                    <td>{{ $school->name }}</td>
+                                    <td>{{ app()->getLocale() === 'en' ? ($school->name_en ?: $school->name_ar ?: $school->name) : ($school->name_ar ?: $school->name) }}</td>
                                     <td>{{ $school->email }}</td>
                                     <td>
                                         <span class="badge bg-{{ $school->is_active ? 'success' : 'secondary' }}">
-                                            {{ $school->is_active ? 'نشط' : 'غير نشط' }}
+                                            {{ $school->is_active ? __('dashboard.status_active') : __('dashboard.status_inactive') }}
                                         </span>
                                     </td>
                                     <td>{{ $school->created_at->format('Y/m/d') }}</td>
