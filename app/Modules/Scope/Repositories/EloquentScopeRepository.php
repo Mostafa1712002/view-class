@@ -16,7 +16,6 @@ final class EloquentScopeRepository implements ScopeRepository
         if ($user->isSuperAdmin()) {
             return EducationalCompany::query()
                 ->where('status', 'active')
-                ->orderBy('sort_order')
                 ->orderBy('name_ar')
                 ->get(['id', 'name_ar', 'name_en'])
                 ->toArray();
