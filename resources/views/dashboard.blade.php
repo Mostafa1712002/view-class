@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'لوحة التحكم')
+@section('title', __('dashboard.page_title'))
 
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">لوحة التحكم</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">@lang('dashboard.page_title')</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item active">لوحة التحكم</li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('dashboard.breadcrumb_home')</a></li>
+                        <li class="breadcrumb-item active">@lang('dashboard.page_title')</li>
                     </ol>
                 </div>
             </div>
@@ -27,12 +27,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="text-white mb-1">مرحباً {{ Auth::user()->name }}</h4>
-                            <p class="mb-0">أهلاً بك في المنصة الذهبية - النظام التعليمي الذكي</p>
+                            <h4 class="text-white mb-1">@lang('dashboard.welcome') {{ Auth::user()->name }}</h4>
+                            <p class="mb-0">@lang('dashboard.welcome_subtitle')</p>
                         </div>
                         <div class="text-end">
                             <p class="mb-0"><i class="la la-calendar me-1"></i>{{ now()->format('Y/m/d') }}</p>
-                            <small>{{ now()->locale('ar')->dayName }}</small>
+                            <small>{{ now()->locale(app()->getLocale())->dayName }}</small>
                         </div>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $schools_count ?? 0 }}</h2>
-                    <p class="card-text">المدارس</p>
+                    <p class="card-text">@lang('dashboard.schools_count')</p>
                 </div>
             </div>
         </div>
@@ -65,7 +65,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $sections_count ?? 0 }}</h2>
-                    <p class="card-text">المراحل</p>
+                    <p class="card-text">@lang('dashboard.sections_count')</p>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $classes_count ?? 0 }}</h2>
-                    <p class="card-text">الفصول</p>
+                    <p class="card-text">@lang('dashboard.classes_count')</p>
                 </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $teachers_count ?? 0 }}</h2>
-                    <p class="card-text">المعلمين</p>
+                    <p class="card-text">@lang('dashboard.teachers_count')</p>
                 </div>
             </div>
         </div>
@@ -104,7 +104,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $students_count ?? 0 }}</h2>
-                    <p class="card-text">الطلاب</p>
+                    <p class="card-text">@lang('dashboard.students_count')</p>
                 </div>
             </div>
         </div>
@@ -117,7 +117,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $subjects_count ?? 0 }}</h2>
-                    <p class="card-text">المواد</p>
+                    <p class="card-text">@lang('dashboard.subjects_count')</p>
                 </div>
             </div>
         </div>
@@ -129,7 +129,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">آخر المدارس المسجلة</h4>
+                    <h4 class="card-title">@lang('dashboard.latest_schools')</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -177,7 +177,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $sections_count ?? 0 }}</h2>
-                    <p class="card-text">المراحل</p>
+                    <p class="card-text">@lang('dashboard.sections_count')</p>
                 </div>
             </div>
         </div>
@@ -190,7 +190,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $classes_count ?? 0 }}</h2>
-                    <p class="card-text">الفصول</p>
+                    <p class="card-text">@lang('dashboard.classes_count')</p>
                 </div>
             </div>
         </div>
@@ -203,7 +203,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $teachers_count ?? 0 }}</h2>
-                    <p class="card-text">المعلمين</p>
+                    <p class="card-text">@lang('dashboard.teachers_count')</p>
                 </div>
             </div>
         </div>
@@ -216,7 +216,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $students_count ?? 0 }}</h2>
-                    <p class="card-text">الطلاب</p>
+                    <p class="card-text">@lang('dashboard.students_count')</p>
                 </div>
             </div>
         </div>
@@ -229,7 +229,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $subjects_count ?? 0 }}</h2>
-                    <p class="card-text">المواد</p>
+                    <p class="card-text">@lang('dashboard.subjects_count')</p>
                 </div>
             </div>
         </div>
@@ -389,7 +389,7 @@
                         </div>
                     </div>
                     <h2 class="fw-bolder">{{ $classes_count ?? 0 }}</h2>
-                    <p class="card-text">الفصول</p>
+                    <p class="card-text">@lang('dashboard.classes_count')</p>
                 </div>
             </div>
         </div>
@@ -487,21 +487,21 @@
 
     @if(Auth::user()->isSuperAdmin() || Auth::user()->isSchoolAdmin())
 
-    {{-- ============== Section 2 — نسب الدخول والتفاعل ============== --}}
+    {{-- ============== Section 2 — Interaction rates ============== --}}
     @php
         $ir = $interactionRates ?? [];
         $irRows = [
-            ['label' => 'نسبة دخول الطلاب', 'key' => 'studentsLoginRate', 'color' => 'primary'],
-            ['label' => 'نسبة دخول المعلمين', 'key' => 'teachersLoginRate', 'color' => 'info'],
-            ['label' => 'نسبة دخول أولياء الأمور', 'key' => 'parentsLoginRate', 'color' => 'warning'],
-            ['label' => 'نسبة تفاعل الطلاب مع المعلمين', 'key' => 'studentTeacherInteraction', 'color' => 'success'],
-            ['label' => 'نسبة تفاعل الطلاب مع المحتوى', 'key' => 'studentContentInteraction', 'color' => 'danger'],
+            ['label' => __('dashboard.students_login_rate'), 'key' => 'studentsLoginRate', 'color' => 'primary'],
+            ['label' => __('dashboard.teachers_login_rate'), 'key' => 'teachersLoginRate', 'color' => 'info'],
+            ['label' => __('dashboard.parents_login_rate'), 'key' => 'parentsLoginRate', 'color' => 'warning'],
+            ['label' => __('dashboard.student_teacher_interaction'), 'key' => 'studentTeacherInteraction', 'color' => 'success'],
+            ['label' => __('dashboard.student_content_interaction'), 'key' => 'studentContentInteraction', 'color' => 'danger'],
         ];
     @endphp
     <div class="row">
         <div class="col-12">
             <div class="card" id="dashboard-section-interaction-rates">
-                <div class="card-header"><h4 class="card-title">نسب الدخول والتفاعل</h4></div>
+                <div class="card-header"><h4 class="card-title">@lang('dashboard.login_rates')</h4></div>
                 <div class="card-body">
                     @foreach($irRows as $row)
                         <div class="mb-2">
@@ -519,19 +519,19 @@
         </div>
     </div>
 
-    {{-- ============== Section 3 — إحصاءات المحتوى ============== --}}
+    {{-- ============== Section 3 — Content stats ============== --}}
     @php
         $cs = $contentStatsData ?? [];
         $csTiles = [
-            ['label' => 'الاختبارات الإلكترونية', 'key' => 'electronicExams', 'icon' => 'la-file-text', 'color' => 'primary'],
-            ['label' => 'الواجبات الإلكترونية', 'key' => 'electronicAssignments', 'icon' => 'la-tasks', 'color' => 'info'],
-            ['label' => 'الفيديوهات والملفات', 'key' => 'videosFiles', 'icon' => 'la-video-camera', 'color' => 'warning'],
-            ['label' => 'نسبة التفاعل مع المحتوى', 'key' => 'contentInteractionRate', 'icon' => 'la-heart', 'color' => 'danger', 'suffix' => '%'],
-            ['label' => 'معدل المشاهدة', 'key' => 'viewRate', 'icon' => 'la-eye', 'color' => 'success', 'suffix' => '%'],
-            ['label' => 'عدد التفاعل مع المحتوى', 'key' => 'contentInteractions', 'icon' => 'la-comments', 'color' => 'secondary'],
-            ['label' => 'تسليمات الاختبارات', 'key' => 'examSubmissions', 'icon' => 'la-check', 'color' => 'primary'],
-            ['label' => 'تسليمات الواجبات', 'key' => 'assignmentSubmissions', 'icon' => 'la-check-square', 'color' => 'info'],
-            ['label' => 'استخدام رسائل الجوال', 'key' => 'smsUsage', 'icon' => 'la-mobile-phone', 'color' => 'warning'],
+            ['label' => __('dashboard.electronic_exams'), 'key' => 'electronicExams', 'icon' => 'la-file-text', 'color' => 'primary'],
+            ['label' => __('dashboard.electronic_assignments'), 'key' => 'electronicAssignments', 'icon' => 'la-tasks', 'color' => 'info'],
+            ['label' => __('dashboard.videos_files'), 'key' => 'videosFiles', 'icon' => 'la-video-camera', 'color' => 'warning'],
+            ['label' => __('dashboard.content_interaction_rate'), 'key' => 'contentInteractionRate', 'icon' => 'la-heart', 'color' => 'danger', 'suffix' => '%'],
+            ['label' => __('dashboard.view_rate'), 'key' => 'viewRate', 'icon' => 'la-eye', 'color' => 'success', 'suffix' => '%'],
+            ['label' => __('dashboard.content_interactions'), 'key' => 'contentInteractions', 'icon' => 'la-comments', 'color' => 'secondary'],
+            ['label' => __('dashboard.exam_submissions'), 'key' => 'examSubmissions', 'icon' => 'la-check', 'color' => 'primary'],
+            ['label' => __('dashboard.assignment_submissions'), 'key' => 'assignmentSubmissions', 'icon' => 'la-check-square', 'color' => 'info'],
+            ['label' => __('dashboard.sms_usage'), 'key' => 'smsUsage', 'icon' => 'la-mobile-phone', 'color' => 'warning'],
         ];
     @endphp
     <div class="row" id="dashboard-section-content-stats">
@@ -550,16 +550,16 @@
         @endforeach
     </div>
 
-    {{-- ============== Section 4 — إحصاءات متنوعة ============== --}}
+    {{-- ============== Section 4 — Various stats ============== --}}
     @php
         $vs = $variousStatsData ?? [];
         $vsTiles = [
-            ['label' => 'غرف النقاش', 'key' => 'discussionRooms', 'icon' => 'la-comments', 'color' => 'primary'],
-            ['label' => 'غيابات الطلاب', 'key' => 'absences', 'icon' => 'la-user-times', 'color' => 'danger'],
-            ['label' => 'خطط التحضير', 'key' => 'preparationPlans', 'icon' => 'la-list-alt', 'color' => 'info'],
-            ['label' => 'الأسئلة', 'key' => 'questionsCount', 'icon' => 'la-question-circle', 'color' => 'warning'],
-            ['label' => 'الفصول الافتراضية', 'key' => 'virtualClasses', 'icon' => 'la-video-camera', 'color' => 'success'],
-            ['label' => 'الفصول الافتراضية المجدولة', 'key' => 'scheduledVirtualClasses', 'icon' => 'la-calendar', 'color' => 'secondary'],
+            ['label' => __('dashboard.discussion_rooms'), 'key' => 'discussionRooms', 'icon' => 'la-comments', 'color' => 'primary'],
+            ['label' => __('dashboard.absences'), 'key' => 'absences', 'icon' => 'la-user-times', 'color' => 'danger'],
+            ['label' => __('dashboard.preparation_plans'), 'key' => 'preparationPlans', 'icon' => 'la-list-alt', 'color' => 'info'],
+            ['label' => __('dashboard.questions_count'), 'key' => 'questionsCount', 'icon' => 'la-question-circle', 'color' => 'warning'],
+            ['label' => __('dashboard.virtual_classes'), 'key' => 'virtualClasses', 'icon' => 'la-video-camera', 'color' => 'success'],
+            ['label' => __('dashboard.scheduled_virtual_classes'), 'key' => 'scheduledVirtualClasses', 'icon' => 'la-calendar', 'color' => 'secondary'],
         ];
     @endphp
     <div class="row" id="dashboard-section-various-stats">
@@ -578,11 +578,11 @@
         @endforeach
     </div>
 
-    {{-- ============== Section 5 — معدل الغياب الأسبوعي ============== --}}
+    {{-- ============== Section 5 — Weekly absence ============== --}}
     <div class="row">
         <div class="col-12">
             <div class="card" id="dashboard-section-weekly-absence">
-                <div class="card-header"><h4 class="card-title">معدل الغياب الأسبوعي</h4></div>
+                <div class="card-header"><h4 class="card-title">@lang('dashboard.weekly_absence_rate')</h4></div>
                 <div class="card-body">
                     <canvas id="weeklyAbsenceChart" height="90"></canvas>
                 </div>
@@ -590,64 +590,64 @@
         </div>
     </div>
 
-    {{-- ============== Section 6 — الأكثر نشاطاً ============== --}}
+    {{-- ============== Section 6 — Most active ============== --}}
     @php $ma = $mostActive ?? []; @endphp
     <div class="row" id="dashboard-section-most-active">
         <div class="col-md-6 mb-3">
             <div class="card h-100">
-                <div class="card-header"><h4 class="card-title">أكثر الفصول نشاطاً داخل المدرسة</h4></div>
+                <div class="card-header"><h4 class="card-title">@lang('dashboard.active_classes_in_school')</h4></div>
                 <div class="card-body">
                     @forelse($ma['activeClassesInSchool'] ?? [] as $row)
                         <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-primary">{{ $row['score'] ?? 0 }}</span></div>
                     @empty
-                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                        <p class="text-muted text-center mb-0">@lang('dashboard.no_data_yet')</p>
                     @endforelse
                 </div>
             </div>
         </div>
         <div class="col-md-6 mb-3">
             <div class="card h-100">
-                <div class="card-header"><h4 class="card-title">أكثر المستخدمين نشاطاً داخل المدرسة</h4></div>
+                <div class="card-header"><h4 class="card-title">@lang('dashboard.active_users_in_school')</h4></div>
                 <div class="card-body">
                     @forelse($ma['activeUsersInSchool'] ?? [] as $row)
                         <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-info">{{ $row['score'] ?? 0 }}</span></div>
                     @empty
-                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                        <p class="text-muted text-center mb-0">@lang('dashboard.no_data_yet')</p>
                     @endforelse
                 </div>
             </div>
         </div>
         <div class="col-md-6 mb-3">
             <div class="card h-100">
-                <div class="card-header"><h4 class="card-title">أكثر الفصول نشاطاً على مستوى مجموعة المدارس</h4></div>
+                <div class="card-header"><h4 class="card-title">@lang('dashboard.active_classes_in_company')</h4></div>
                 <div class="card-body">
                     @forelse($ma['activeClassesInCompany'] ?? [] as $row)
                         <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-warning">{{ $row['score'] ?? 0 }}</span></div>
                     @empty
-                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                        <p class="text-muted text-center mb-0">@lang('dashboard.no_data_yet')</p>
                     @endforelse
                 </div>
             </div>
         </div>
         <div class="col-md-6 mb-3">
             <div class="card h-100">
-                <div class="card-header"><h4 class="card-title">أكثر المستخدمين نشاطاً على مستوى مجموعة المدارس</h4></div>
+                <div class="card-header"><h4 class="card-title">@lang('dashboard.active_users_in_company')</h4></div>
                 <div class="card-body">
                     @forelse($ma['activeUsersInCompany'] ?? [] as $row)
                         <div class="d-flex justify-content-between mb-1"><span>{{ $row['name'] ?? '-' }}</span><span class="badge bg-success">{{ $row['score'] ?? 0 }}</span></div>
                     @empty
-                        <p class="text-muted text-center mb-0">لا توجد بيانات بعد</p>
+                        <p class="text-muted text-center mb-0">@lang('dashboard.no_data_yet')</p>
                     @endforelse
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ============== Section 7 — مخطط النشاط الأسبوعي ============== --}}
+    {{-- ============== Section 7 — Weekly activity ============== --}}
     <div class="row">
         <div class="col-12">
             <div class="card" id="dashboard-section-weekly-activity">
-                <div class="card-header"><h4 class="card-title">مخطط النشاط الأسبوعي</h4></div>
+                <div class="card-header"><h4 class="card-title">@lang('dashboard.section_weekly_activity')</h4></div>
                 <div class="card-body">
                     <canvas id="weeklyActivityChart" height="90"></canvas>
                 </div>
@@ -661,7 +661,16 @@
         (function () {
             const weeklyAbsence = @json($weeklyAbsence ?? []);
             const weeklyActivity = @json($weeklyActivity ?? []);
-            const dayLabel = (d) => ({sat:'السبت',sun:'الأحد',mon:'الاثنين',tue:'الثلاثاء',wed:'الأربعاء',thu:'الخميس',fri:'الجمعة'})[d] || d;
+            const dayLabels = @json([
+                'sat' => __('dashboard.day_sat'),
+                'sun' => __('dashboard.day_sun'),
+                'mon' => __('dashboard.day_mon'),
+                'tue' => __('dashboard.day_tue'),
+                'wed' => __('dashboard.day_wed'),
+                'thu' => __('dashboard.day_thu'),
+                'fri' => __('dashboard.day_fri'),
+            ]);
+            const dayLabel = (d) => dayLabels[d] || d;
 
             const absCtx = document.getElementById('weeklyAbsenceChart');
             if (absCtx && window.Chart) {
@@ -669,7 +678,7 @@
                     type: 'bar',
                     data: {
                         labels: weeklyAbsence.map(r => dayLabel(r.day)),
-                        datasets: [{ label: 'معدل الغياب %', data: weeklyAbsence.map(r => r.rate || 0), backgroundColor: 'rgba(220,53,69,.6)' }]
+                        datasets: [{ label: @json(__('dashboard.absence_rate_label')), data: weeklyAbsence.map(r => r.rate || 0), backgroundColor: 'rgba(220,53,69,.6)' }]
                     },
                     options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
                 });
@@ -683,9 +692,9 @@
                     data: {
                         labels: series.map(r => dayLabel(r.day)),
                         datasets: [
-                            { label: 'أولياء الأمور', data: series.map(r => r.parents || 0), borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,.2)' },
-                            { label: 'الطلاب', data: series.map(r => r.students || 0), borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,.2)' },
-                            { label: 'المعلمين', data: series.map(r => r.teachers || 0), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,.2)' },
+                            { label: @json(__('dashboard.series_parents')), data: series.map(r => r.parents || 0), borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,.2)' },
+                            { label: @json(__('dashboard.series_students')), data: series.map(r => r.students || 0), borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,.2)' },
+                            { label: @json(__('dashboard.series_teachers')), data: series.map(r => r.teachers || 0), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,.2)' },
                         ]
                     },
                     options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }

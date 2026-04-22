@@ -131,4 +131,6 @@ return [
     'nav_admissions' => 'Admissions & registration',
 
     'nav_reports_users' => 'User reports',
+
+    'footer_rights' => 'All rights reserved',
 ];

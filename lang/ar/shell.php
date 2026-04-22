@@ -131,4 +131,6 @@ return [
     'nav_admissions' => 'القبول والتسجيل',
 
     'nav_reports_users' => 'تقارير المستخدمين',
+
+    'footer_rights' => 'جميع الحقوق محفوظة',
 ];
