@@ -133,4 +133,32 @@ return [
     'nav_reports_users' => 'تقارير المستخدمين',
 
     'footer_rights' => 'جميع الحقوق محفوظة',
+
+    'notifications_heading' => 'الإشعارات',
+    'notifications_new' => 'جديد',
+    'notifications_empty' => 'لا توجد إشعارات جديدة',
+    'notifications_view_all' => 'عرض جميع الإشعارات',
+    'user_fallback_name' => 'المستخدم',
+    'role_teacher' => 'المعلم',
+    'role_student' => 'الطالب',
+    'role_parent' => 'ولي الأمر',
+    'role_super_admin' => 'مدير النظام',
+    'role_school_admin' => 'مدير المدرسة',
+
+    // Sidebar headers for teacher/student/parent portals
+    'portal_my_schedule' => 'جدولي',
+    'portal_student' => 'بوابة الطالب',
+    'portal_parent' => 'بوابة ولي الأمر',
+    'portal_tests_grades' => 'الاختبارات والدرجات',
+    'portal_attendance' => 'الحضور والغياب',
+    'portal_my_schedule_link' => 'جدولي',
+    'portal_my_weekly_plans' => 'خططي الأسبوعية',
+    'portal_my_exams' => 'اختباراتي',
+    'portal_enter_grades' => 'إدخال الدرجات',
+    'portal_record_attendance' => 'تسجيل الحضور',
+    'portal_dashboard' => 'لوحة التحكم',
+    'portal_my_grades' => 'درجاتي',
+    'portal_my_attendance' => 'سجل حضوري',
+    'portal_contact_teacher' => 'تواصل مع المعلم',
+    'portal_exams' => 'الاختبارات',
 ];

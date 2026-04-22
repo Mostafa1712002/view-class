@@ -23,7 +23,7 @@
     @else
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @endif
-    <link href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
 
     <!-- BEGIN VENDOR CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset($cssRoot.'/vendors.css') }}">
@@ -57,23 +57,76 @@
             font-family: {{ $isRtl ? "'Cairo', sans-serif" : "'Inter', system-ui, sans-serif" }} !important;
             font-weight: 700;
         }
-        /* Shell polish — tighter header, cleaner sidebar, consistent spacing */
-        .header-navbar { padding: 0 1rem; }
-        .header-navbar .navbar-wrapper { max-width: 100%; }
-        .header-navbar .brand-text { font-size: 1.1rem; margin-{{ $isRtl ? 'right' : 'left' }}: .5rem; }
-        #shell-scope-form .select2-container { margin: 0 .25rem; }
+        /* ============ Header — single row, professional layout ============ */
+        .shell-navbar-row { height: 56px; padding: 0 .75rem; }
+        .shell-navbar-row .navbar-wrapper.shell-row {
+            display: flex; flex-wrap: nowrap; align-items: center;
+            justify-content: space-between; gap: 8px; height: 56px; width: 100%;
+        }
+        .shell-nav-left, .shell-nav-center, .shell-nav-right { flex-shrink: 0; }
+        .shell-nav-center { flex: 1 1 auto; justify-content: center; min-width: 0; }
+        .shell-nav-right .nav-link { padding: .5rem .55rem !important; color: #fff !important; }
+        .shell-nav-right .nav-link i { color: #fff; }
+        .shell-nav-right .user-name { color: #fff; font-size: .85rem; }
+        .shell-nav-right .avatar { width: 32px; height: 32px; }
+        .shell-nav-right .avatar img { width: 32px; height: 32px; object-fit: cover; border-radius: 50%; }
+        .header-navbar .brand-text { font-size: 1.1rem; font-weight: 700; color: #fff; }
+        .header-navbar .brand-logo { height: 32px; }
+
+        /* Select2 tweaks to look at home in a coloured header */
+        #shell-scope-form .select2-container { margin: 0 2px; }
         #shell-scope-form .select2-selection--single {
-            height: 32px; line-height: 32px; border-radius: 6px;
-            border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.15);
+            height: 34px; border-radius: 6px;
+            border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.15);
             color: #fff;
         }
-        #shell-scope-form .select2-selection__rendered { color: #fff !important; line-height: 30px !important; }
-        #shell-scope-form .select2-selection__arrow { height: 30px !important; }
-        .main-menu.menu-light .navigation > li > a { padding: .65rem 1rem; border-radius: 6px; margin: 2px 8px; }
-        .main-menu.menu-light .navigation > li.active > a { background: linear-gradient(118deg, rgba(0,170,255,.2), rgba(0,170,255,.08)); }
-        .main-menu.menu-light .navigation > li > a > i { font-size: 1.1rem; margin-{{ $isRtl ? 'left' : 'right' }}: 10px; }
-        .navigation-header > span { font-weight: 700; letter-spacing: .5px; opacity: .85; }
-        .main-menu .navigation .has-sub > a::after { opacity: .5; }
+        #shell-scope-form .select2-selection__rendered { color: #fff !important; line-height: 32px !important; }
+        #shell-scope-form .select2-selection__arrow { height: 32px !important; }
+        #shell-scope-form .select2-selection__arrow b { border-top-color: #fff !important; }
+
+        /* ============ Sidebar — section differentiation + icon styling ============ */
+        .main-menu.menu-light .navigation > li > a {
+            padding: .55rem .85rem; border-radius: 8px; margin: 2px 10px;
+            font-size: .92rem;
+        }
+        .main-menu.menu-light .navigation > li.active > a {
+            background: linear-gradient(118deg, #1e9ff2 0%, #60bfff 100%);
+            color: #fff !important;
+            box-shadow: 0 4px 18px rgba(30,159,242,.35);
+        }
+        .main-menu.menu-light .navigation > li.active > a i { color: #fff; }
+        .main-menu.menu-light .navigation > li > a > i {
+            font-size: 1.15rem; width: 22px; text-align: center;
+            margin-{{ $isRtl ? 'left' : 'right' }}: 10px;
+        }
+        .main-menu .navigation .has-sub > a::after { opacity: .45; }
+        .main-menu .navigation li ul.menu-content li a {
+            padding: .45rem .75rem .45rem 2.2rem; font-size: .87rem; border-radius: 6px;
+        }
+
+        /* 4 distinct sections — tint the header band + add a coloured edge on children */
+        .main-menu .navigation-header {
+            margin: 14px 10px 6px; padding: 8px 14px;
+            border-radius: 8px; background: #f4f6f8;
+            font-weight: 700; letter-spacing: .3px; font-size: .78rem;
+            text-transform: uppercase; opacity: .95;
+        }
+        .main-menu .navigation-header > span { font-weight: 700; opacity: 1; }
+
+        /* Section 1 — برامج نوعية (purple) */
+        .main-menu .navigation-header.sec-programs { background: linear-gradient(135deg, #e8e0ff, #f3efff); color: #6f42c1; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #6f42c1; }
+        /* Section 2 — عمليات تعليمية (blue) */
+        .main-menu .navigation-header.sec-educational { background: linear-gradient(135deg, #d9edff, #eef7ff); color: #1e88e5; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #1e88e5; }
+        /* Section 3 — عمليات التواصل (orange) */
+        .main-menu .navigation-header.sec-communication { background: linear-gradient(135deg, #fff3e0, #fff8ed); color: #f57c00; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #f57c00; }
+        /* Section 4 — إعدادات النظام (green) */
+        .main-menu .navigation-header.sec-system { background: linear-gradient(135deg, #e1f5e7, #effaf3); color: #2e7d32; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #2e7d32; }
+        /* Section-specific icon tint via data-section attribute on each li */
+        .main-menu li[data-section="programs"] > a > i { color: #6f42c1; }
+        .main-menu li[data-section="educational"] > a > i { color: #1e88e5; }
+        .main-menu li[data-section="communication"] > a > i { color: #f57c00; }
+        .main-menu li[data-section="system"] > a > i { color: #2e7d32; }
+        .main-menu li.active[data-section] > a > i { color: #fff !important; }
     </style>
 
     @stack('styles')
