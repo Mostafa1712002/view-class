@@ -87,6 +87,8 @@ return [
 
     // Pagination + misc
     'gender' => 'الجنس',
+    'stage' => 'المرحلة',
+    'level' => 'المستوى',
     'grade' => 'الدرجة',
     'max_grade' => 'الدرجة القصوى',
     'percentage' => 'النسبة المئوية',

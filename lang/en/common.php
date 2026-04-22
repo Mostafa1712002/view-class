@@ -82,6 +82,8 @@ return [
     'not_found' => 'Not found',
 
     'gender' => 'Gender',
+    'stage' => 'Stage',
+    'level' => 'Level',
     'grade' => 'Grade',
     'max_grade' => 'Max grade',
     'percentage' => 'Percentage',
