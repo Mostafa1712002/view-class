@@ -655,13 +655,9 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script>
-        (function () {
-            const weeklyAbsence = @json($weeklyAbsence ?? []);
-            const weeklyActivity = @json($weeklyActivity ?? []);
-            const dayLabels = @json([
+    @php
+        $chartI18n = [
+            'days' => [
                 'sat' => __('dashboard.day_sat'),
                 'sun' => __('dashboard.day_sun'),
                 'mon' => __('dashboard.day_mon'),
@@ -669,8 +665,21 @@
                 'wed' => __('dashboard.day_wed'),
                 'thu' => __('dashboard.day_thu'),
                 'fri' => __('dashboard.day_fri'),
-            ]);
-            const dayLabel = (d) => dayLabels[d] || d;
+            ],
+            'absenceLabel' => __('dashboard.absence_rate_label'),
+            'parents' => __('dashboard.series_parents'),
+            'students' => __('dashboard.series_students'),
+            'teachers' => __('dashboard.series_teachers'),
+        ];
+    @endphp
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const weeklyAbsence = @json($weeklyAbsence ?? []);
+            const weeklyActivity = @json($weeklyActivity ?? []);
+            const i18n = @json($chartI18n);
+            const dayLabel = (d) => i18n.days[d] || d;
 
             const absCtx = document.getElementById('weeklyAbsenceChart');
             if (absCtx && window.Chart) {
@@ -678,7 +687,7 @@
                     type: 'bar',
                     data: {
                         labels: weeklyAbsence.map(r => dayLabel(r.day)),
-                        datasets: [{ label: @json(__('dashboard.absence_rate_label')), data: weeklyAbsence.map(r => r.rate || 0), backgroundColor: 'rgba(220,53,69,.6)' }]
+                        datasets: [{ label: i18n.absenceLabel, data: weeklyAbsence.map(r => r.rate || 0), backgroundColor: 'rgba(220,53,69,.6)' }]
                     },
                     options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
                 });
@@ -692,9 +701,9 @@
                     data: {
                         labels: series.map(r => dayLabel(r.day)),
                         datasets: [
-                            { label: @json(__('dashboard.series_parents')), data: series.map(r => r.parents || 0), borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,.2)' },
-                            { label: @json(__('dashboard.series_students')), data: series.map(r => r.students || 0), borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,.2)' },
-                            { label: @json(__('dashboard.series_teachers')), data: series.map(r => r.teachers || 0), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,.2)' },
+                            { label: i18n.parents, data: series.map(r => r.parents || 0), borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,.2)' },
+                            { label: i18n.students, data: series.map(r => r.students || 0), borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,.2)' },
+                            { label: i18n.teachers, data: series.map(r => r.teachers || 0), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,.2)' },
                         ]
                     },
                     options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
