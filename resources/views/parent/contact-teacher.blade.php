@@ -27,7 +27,7 @@
                                             <tr>
                                                 <th>المعلم</th>
                                                 <th>المادة</th>
-                                                <th>البريد الإلكتروني</th>
+                                                <th>@lang('common.email')</th>
                                                 <th class="text-center">إجراء</th>
                                             </tr>
                                         </thead>

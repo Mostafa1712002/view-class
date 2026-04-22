@@ -40,8 +40,8 @@
                             <th>الصف</th>
                             <th>الشعبة</th>
                             <th>السعة</th>
-                            <th>الحالة</th>
-                            <th>الإجراءات</th>
+                            <th>@lang('common.status')</th>
+                            <th>@lang('common.actions')</th>
                         </tr>
                     </thead>
                     <tbody>

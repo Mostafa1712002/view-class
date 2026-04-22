@@ -7,10 +7,10 @@
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">{{ $section->name }}</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">{{ $section->name }}</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('manage.sections.index') }}">الأقسام</a></li>
                         <li class="breadcrumb-item active">التفاصيل</li>
                     </ol>
@@ -35,7 +35,7 @@
                 <div class="card-body">
                     <table class="table">
                         <tr>
-                            <th>الاسم</th>
+                            <th>@lang('common.name')</th>
                             <td>{{ $section->name }}</td>
                         </tr>
                         <tr>
@@ -55,12 +55,12 @@
                             <td>{{ $section->description ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <th>الحالة</th>
+                            <th>@lang('common.status')</th>
                             <td>
                                 @if($section->is_active)
-                                    <span class="badge bg-success">نشط</span>
+                                    <span class="badge bg-success">@lang('common.active')</span>
                                 @else
-                                    <span class="badge bg-secondary">معطل</span>
+                                    <span class="badge bg-secondary">@lang('common.inactive')</span>
                                 @endif
                             </td>
                         </tr>

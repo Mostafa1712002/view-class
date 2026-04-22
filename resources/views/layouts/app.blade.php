@@ -101,6 +101,48 @@
             font-size: 1.15rem; width: 22px; text-align: center;
             margin-{{ $isRtl ? 'left' : 'right' }}: 10px;
         }
+        /* ============ Sidebar — prevent menu-title truncation ============ */
+        .main-menu .navigation > li > a .menu-title,
+        .main-menu .navigation li ul.menu-content li a .menu-item {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+        }
+
+        /* ============ Table improvements for sub-pages ============ */
+        .table thead th {
+            background: #f4f6fb;
+            font-weight: 600;
+            font-size: .85rem;
+            letter-spacing: .3px;
+            white-space: nowrap;
+        }
+        .table tbody tr:hover { background: #f8fbff; }
+        .table td, .table th { vertical-align: middle; }
+        .btn-group .btn { border-radius: 6px !important; margin: 0 1px; }
+
+        /* ============ Mobile scope strip (visible on lg, hidden on xl+ where it's in header) ============ */
+        #shell-scope-mobile {
+            background: rgba(0,0,0,.12);
+            padding: 6px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        #shell-scope-mobile select {
+            flex: 1 1 140px;
+            min-width: 120px;
+            max-width: 200px;
+            height: 30px;
+            font-size: .82rem;
+            border: 1px solid rgba(255,255,255,.4);
+            background: rgba(255,255,255,.18);
+            color: #fff;
+            border-radius: 6px;
+        }
+        #shell-scope-mobile select option { color: #333; background: #fff; }
+
         /* LA 1.3 renamed the font — the theme's original chevron (\f112 + 'LineAwesome') stopped
            resolving when we upgraded. Re-emit the arrow using LA 1.3's glyph + font name. */
         .main-menu .navigation li.has-sub > a:not(.mm-next)::after {

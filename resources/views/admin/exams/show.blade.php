@@ -189,7 +189,7 @@
                                 <thead>
                                     <tr>
                                         <th>الطالب</th>
-                                        <th>الحالة</th>
+                                        <th>@lang('common.status')</th>
                                         <th>الدرجة</th>
                                         <th>النسبة</th>
                                         <th>التقدير</th>

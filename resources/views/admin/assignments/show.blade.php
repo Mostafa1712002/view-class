@@ -128,7 +128,7 @@
                             <thead>
                                 <tr>
                                     <th>الطالب</th>
-                                    <th class="text-center">الحالة</th>
+                                    <th class="text-center">@lang('common.status')</th>
                                     <th class="text-center">الدرجة</th>
                                     <th class="text-center">تقييم</th>
                                 </tr>

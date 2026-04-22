@@ -7,10 +7,10 @@
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">الخطة الأسبوعية</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">الخطة الأسبوعية</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('manage.weekly-plans.index') }}">الخطط الأسبوعية</a></li>
                         <li class="breadcrumb-item active">عرض</li>
                     </ol>
@@ -83,7 +83,7 @@
                         <button type="submit" class="btn btn-danger btn-block w-100 mb-1"><i data-feather="lock"></i> قفل الخطة</button>
                     </form>
                     @endif
-                    <form action="{{ route('manage.weekly-plans.destroy', $weeklyPlan) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من الحذف؟')">
+                    <form action="{{ route('manage.weekly-plans.destroy', $weeklyPlan) }}" method="POST" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-outline-danger btn-block w-100"><i data-feather="trash-2"></i> حذف</button>

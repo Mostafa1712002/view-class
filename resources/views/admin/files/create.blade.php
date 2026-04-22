@@ -102,7 +102,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="la la-upload me-1"></i>رفع الملف
                     </button>
-                    <a href="{{ route('admin.files.index') }}" class="btn btn-secondary">إلغاء</a>
+                    <a href="{{ route('admin.files.index') }}" class="btn btn-secondary">@lang('common.cancel')</a>
                 </div>
             </form>
         </div>

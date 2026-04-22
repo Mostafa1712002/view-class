@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'الخطط الأسبوعية')
+@section('title', __('shell.nav_weekly_plan'))
 
 @section('content')
 <div class="container-fluid">

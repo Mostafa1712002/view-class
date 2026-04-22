@@ -196,7 +196,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.exams.index') }}" class="btn btn-light">إلغاء</a>
+                    <a href="{{ route('admin.exams.index') }}" class="btn btn-light">@lang('common.cancel')</a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg me-1"></i>
                         إنشاء الاختبار

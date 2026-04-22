@@ -76,14 +76,14 @@
                             <tr>
                                 <th>#</th>
                                 <th>اسم الطالب</th>
-                                <th>الحالة</th>
+                                <th>@lang('common.status')</th>
                                 <th>بدأ في</th>
                                 <th>سلم في</th>
                                 <th>الدرجة</th>
                                 <th>النسبة</th>
                                 <th>التقدير</th>
                                 <th>النتيجة</th>
-                                <th>الإجراءات</th>
+                                <th>@lang('common.actions')</th>
                             </tr>
                         </thead>
                         <tbody>

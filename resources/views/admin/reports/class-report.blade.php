@@ -81,8 +81,8 @@
                                 <th>اسم الطالب</th>
                                 <th class="text-center">المعدل</th>
                                 <th class="text-center">نسبة الحضور</th>
-                                <th class="text-center">الحالة</th>
-                                <th class="text-center">إجراءات</th>
+                                <th class="text-center">@lang('common.status')</th>
+                                <th class="text-center">@lang('common.actions')</th>
                             </tr>
                         </thead>
                         <tbody>

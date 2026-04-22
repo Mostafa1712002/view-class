@@ -56,7 +56,7 @@
                 <th>التاريخ</th>
                 <th>الطالب</th>
                 <th>الصف</th>
-                <th>الحالة</th>
+                <th>@lang('common.status')</th>
                 <th>ملاحظات</th>
             </tr>
         </thead>

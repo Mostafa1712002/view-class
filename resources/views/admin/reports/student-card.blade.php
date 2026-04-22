@@ -115,7 +115,7 @@
                                 <th class="text-center">الفترة الثالثة</th>
                                 <th class="text-center">الفترة الرابعة</th>
                                 <th class="text-center">المعدل</th>
-                                <th class="text-center">الحالة</th>
+                                <th class="text-center">@lang('common.status')</th>
                             </tr>
                         </thead>
                         <tbody>

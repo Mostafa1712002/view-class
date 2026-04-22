@@ -173,7 +173,7 @@
                     <th>الفترة الثالثة</th>
                     <th>الفترة الرابعة</th>
                     <th>المعدل</th>
-                    <th>الحالة</th>
+                    <th>@lang('common.status')</th>
                 </tr>
             </thead>
             <tbody>

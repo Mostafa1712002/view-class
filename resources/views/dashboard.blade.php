@@ -23,16 +23,16 @@
     <!-- Welcome Card -->
     <div class="row">
         <div class="col-12">
-            <div class="card bg-gradient-primary text-white">
-                <div class="card-body">
+            <div class="card" style="border-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: 4px solid #1e9ff2; background: #f8fbff;">
+                <div class="card-body py-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="text-white mb-1">@lang('dashboard.welcome') {{ Auth::user()->name }}</h4>
-                            <p class="mb-0">@lang('dashboard.welcome_subtitle')</p>
+                            <h4 class="mb-1" style="color: #1a1a2e; font-weight: 700;">@lang('dashboard.welcome'), {{ Auth::user()->name_ar ?? Auth::user()->name_en ?? Auth::user()->name }}</h4>
+                            <p class="mb-0 text-muted">@lang('dashboard.welcome_subtitle')</p>
                         </div>
-                        <div class="text-end">
-                            <p class="mb-0"><i class="la la-calendar me-1"></i>{{ now()->format('Y/m/d') }}</p>
-                            <small>{{ now()->locale(app()->getLocale())->dayName }}</small>
+                        <div class="text-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}">
+                            <p class="mb-0 text-dark fw-bold"><i class="la la-calendar text-primary"></i> {{ now()->format('Y/m/d') }}</p>
+                            <small class="text-muted">{{ now()->locale(app()->getLocale())->dayName }}</small>
                         </div>
                     </div>
                 </div>
@@ -584,7 +584,7 @@
             <div class="card" id="dashboard-section-weekly-absence">
                 <div class="card-header"><h4 class="card-title">@lang('dashboard.weekly_absence_rate')</h4></div>
                 <div class="card-body">
-                    <canvas id="weeklyAbsenceChart" height="90"></canvas>
+                    <div style="position:relative; min-height:200px;"><canvas id="weeklyAbsenceChart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -649,7 +649,7 @@
             <div class="card" id="dashboard-section-weekly-activity">
                 <div class="card-header"><h4 class="card-title">@lang('dashboard.section_weekly_activity')</h4></div>
                 <div class="card-body">
-                    <canvas id="weeklyActivityChart" height="90"></canvas>
+                    <div style="position:relative; min-height:200px;"><canvas id="weeklyActivityChart"></canvas></div>
                 </div>
             </div>
         </div>

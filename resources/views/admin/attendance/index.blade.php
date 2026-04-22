@@ -117,7 +117,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>اسم الطالب</th>
-                                    <th class="text-center">الحالة</th>
+                                    <th class="text-center">@lang('common.status')</th>
                                     <th>وقت الوصول</th>
                                     <th>ملاحظات</th>
                                 </tr>

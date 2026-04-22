@@ -137,7 +137,7 @@
                     <th>اسم الطالب</th>
                     <th style="width: 80px;">المعدل</th>
                     <th style="width: 80px;">نسبة الحضور</th>
-                    <th style="width: 60px;">الحالة</th>
+                    <th style="width: 60px;">@lang('common.status')</th>
                 </tr>
             </thead>
             <tbody>

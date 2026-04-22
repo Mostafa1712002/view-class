@@ -53,9 +53,9 @@ return [
     'section_communication' => 'Communication',
     'section_system_settings' => 'System settings',
 
-    'nav_ana_wa_qadarat' => 'Ana wa Al-Qadarat platform',
+    'nav_ana_wa_qadarat' => 'Ana & Al-Qadarat',
     'nav_alawwal' => 'Al-Awwal',
-    'nav_speed_reading' => 'Speed & vocal reading app',
+    'nav_speed_reading' => 'Speed Reading App',
 
     'nav_exams_management' => 'Subjects management',
     'nav_attendance_management' => 'Student absence',

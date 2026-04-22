@@ -168,7 +168,7 @@
                                         <tr>
                                             <th>التاريخ</th>
                                             <th>اليوم</th>
-                                            <th class="text-center">الحالة</th>
+                                            <th class="text-center">@lang('common.status')</th>
                                             <th>الصف</th>
                                             <th>المادة</th>
                                             <th>ملاحظات</th>

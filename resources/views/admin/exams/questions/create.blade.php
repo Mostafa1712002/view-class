@@ -156,7 +156,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-light">إلغاء</a>
+                    <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-light">@lang('common.cancel')</a>
                     <button type="submit" name="add_another" value="1" class="btn btn-outline-primary">
                         <i class="bi bi-plus-lg me-1"></i>
                         حفظ وإضافة آخر

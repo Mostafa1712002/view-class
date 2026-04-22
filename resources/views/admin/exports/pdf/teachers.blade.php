@@ -49,9 +49,9 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>الاسم</th>
-                <th>البريد الإلكتروني</th>
-                <th>الهاتف</th>
+                <th>@lang('common.name')</th>
+                <th>@lang('common.email')</th>
+                <th>@lang('common.phone')</th>
                 <th>المواد</th>
             </tr>
         </thead>

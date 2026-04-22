@@ -78,7 +78,7 @@
                                 <th>الحجم</th>
                                 <th>التحميلات</th>
                                 <th>رافع الملف</th>
-                                <th class="text-center">إجراءات</th>
+                                <th class="text-center">@lang('common.actions')</th>
                             </tr>
                         </thead>
                         <tbody>

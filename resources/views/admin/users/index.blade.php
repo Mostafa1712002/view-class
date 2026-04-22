@@ -58,14 +58,14 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>الاسم</th>
-                            <th>البريد الإلكتروني</th>
+                            <th>@lang('common.name')</th>
+                            <th>@lang('common.email')</th>
                             <th>الأدوار</th>
                             @if(Auth::user()->isSuperAdmin())
                             <th>المدرسة</th>
                             @endif
-                            <th>الحالة</th>
-                            <th>الإجراءات</th>
+                            <th>@lang('common.status')</th>
+                            <th>@lang('common.actions')</th>
                         </tr>
                     </thead>
                     <tbody>

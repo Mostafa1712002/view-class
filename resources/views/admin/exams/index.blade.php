@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'إدارة الاختبارات')
+@section('title', __('common.exams'))
 
 @section('content')
 <div class="container-fluid">
@@ -84,8 +84,8 @@
                                 <th>النوع</th>
                                 <th>الأسئلة</th>
                                 <th>الدرجة الكلية</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
+                                <th>@lang('common.status')</th>
+                                <th>@lang('common.actions')</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -159,7 +159,7 @@
                                 <th class="text-center">عدد الطلاب</th>
                                 <th class="text-center">معدل الدرجات</th>
                                 <th class="text-center">نسبة الحضور</th>
-                                <th class="text-center">إجراءات</th>
+                                <th class="text-center">@lang('common.actions')</th>
                             </tr>
                         </thead>
                         <tbody>

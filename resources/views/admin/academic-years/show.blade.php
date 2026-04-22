@@ -7,10 +7,10 @@
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">{{ $academicYear->name }}</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">{{ $academicYear->name }}</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('manage.academic-years.index') }}">السنوات الدراسية</a></li>
                         <li class="breadcrumb-item active">التفاصيل</li>
                     </ol>
@@ -30,11 +30,11 @@
                 <div class="card-header"><h4 class="card-title">معلومات السنة الدراسية</h4></div>
                 <div class="card-body">
                     <table class="table">
-                        <tr><th>الاسم</th><td>{{ $academicYear->name }}</td></tr>
+                        <tr><th>@lang('common.name')</th><td>{{ $academicYear->name }}</td></tr>
                         <tr><th>المدرسة</th><td>{{ $academicYear->school->name ?? '-' }}</td></tr>
                         <tr><th>تاريخ البداية</th><td>{{ $academicYear->start_date->format('Y-m-d') }}</td></tr>
                         <tr><th>تاريخ النهاية</th><td>{{ $academicYear->end_date->format('Y-m-d') }}</td></tr>
-                        <tr><th>الحالة</th><td>@if($academicYear->is_current)<span class="badge bg-success">السنة الحالية</span>@else<span class="badge bg-secondary">سنة سابقة</span>@endif</td></tr>
+                        <tr><th>@lang('common.status')</th><td>@if($academicYear->is_current)<span class="badge bg-success">السنة الحالية</span>@else<span class="badge bg-secondary">سنة سابقة</span>@endif</td></tr>
                     </table>
                 </div>
             </div>

@@ -7,10 +7,10 @@
     <div class="content-header-left col-md-9 col-12 mb-2">
         <div class="row breadcrumbs-top">
             <div class="col-12">
-                <h2 class="content-header-title float-right mb-0">إضافة مستخدم</h2>
+                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">إضافة مستخدم</h2>
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('manage.users.index') }}">المستخدمين</a></li>
                         <li class="breadcrumb-item active">إضافة</li>
                     </ol>
@@ -115,7 +115,7 @@
 
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">
-                        <i data-feather="save"></i> حفظ
+                        <i data-feather="save"></i> @lang('common.save')
                     </button>
                     <a href="{{ route('manage.users.index') }}" class="btn btn-secondary">
                         <i data-feather="x"></i> إلغاء

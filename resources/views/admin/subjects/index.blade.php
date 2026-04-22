@@ -36,8 +36,8 @@
                             @if(Auth::user()->isSuperAdmin())<th>المدرسة</th>@endif
                             <th>نوع المادة</th>
                             <th>المعلمين</th>
-                            <th>الحالة</th>
-                            <th>الإجراءات</th>
+                            <th>@lang('common.status')</th>
+                            <th>@lang('common.actions')</th>
                         </tr>
                     </thead>
                     <tbody>

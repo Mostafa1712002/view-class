@@ -113,7 +113,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="la la-save me-1"></i>حفظ الواجب
                     </button>
-                    <a href="{{ route('admin.assignments.index') }}" class="btn btn-secondary">إلغاء</a>
+                    <a href="{{ route('admin.assignments.index') }}" class="btn btn-secondary">@lang('common.cancel')</a>
                 </div>
             </form>
         </div>
