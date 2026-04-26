@@ -34,6 +34,11 @@ class AcademicYear extends Model
         return $this->hasMany(ClassRoom::class);
     }
 
+    public function terms(): HasMany
+    {
+        return $this->hasMany(AcademicTerm::class)->orderBy('sort_order');
+    }
+
     public function scopeCurrent($query)
     {
         return $query->where('is_current', true);
