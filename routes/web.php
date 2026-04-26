@@ -82,6 +82,13 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
         Route::post('academic-years/{year}/terms/{term}/weeks', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'storeWeek'])->name('academic-years.terms.weeks.store');
         Route::delete('academic-years/{year}/terms/{term}/weeks/{week}', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'destroyWeek'])->name('academic-years.terms.weeks.destroy');
         Route::get('grade-levels', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'index'])->name('grade-levels.index');
+        Route::post('grade-levels', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'storeSection'])->name('grade-levels.store');
+        Route::get('grade-levels/{section}/classes', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'showClasses'])->name('grade-levels.classes');
+        Route::post('grade-levels/{section}/classes', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'storeClass'])->name('grade-levels.classes.store');
+        Route::delete('grade-levels/{section}/classes/{class}', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'destroyClass'])->name('grade-levels.classes.destroy');
+        Route::get('grade-levels/{section}/classes/{class}/students', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'showStudents'])->name('grade-levels.classes.students');
+        Route::post('grade-levels/{section}/classes/{class}/students', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'addStudent'])->name('grade-levels.classes.students.add');
+        Route::post('grade-levels/{section}/classes/{class}/students/transfer', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'transferStudents'])->name('grade-levels.classes.students.transfer');
         Route::get('permissions', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'index'])->name('permissions.index');
     });
 });

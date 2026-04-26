@@ -19,6 +19,7 @@ class ClassRoom extends Model
         'academic_year_id',
         'grade_level',
         'division',
+        'lead_teacher_id',
         'capacity',
         'room',
         'is_active',
@@ -37,6 +38,11 @@ class ClassRoom extends Model
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function leadTeacher(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'lead_teacher_id');
     }
 
     public function students(): BelongsToMany
