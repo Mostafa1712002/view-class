@@ -67,6 +67,16 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')->group(function () {
     // Schools Management
     Route::resource('schools', \App\Http\Controllers\Admin\SchoolController::class);
+
+    // Per-school control menu — Sprint 2
+    Route::prefix('schools/{school}')->name('schools.')->group(function () {
+        Route::get('settings', [\App\Http\Controllers\Admin\School\SchoolSettingsController::class, 'show'])->name('settings.show');
+        Route::put('settings', [\App\Http\Controllers\Admin\School\SchoolSettingsController::class, 'update'])->name('settings.update');
+
+        Route::get('academic-years', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'index'])->name('academic-years.index');
+        Route::get('grade-levels', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'index'])->name('grade-levels.index');
+        Route::get('permissions', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'index'])->name('permissions.index');
+    });
 });
 
 // School Admin Routes

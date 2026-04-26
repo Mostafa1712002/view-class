@@ -45,6 +45,7 @@ return [
     'type' => 'Type',
     'description' => 'Description',
     'notes' => 'Notes',
+    'address' => 'Address',
     'count' => 'Count',
     'total' => 'Total',
 

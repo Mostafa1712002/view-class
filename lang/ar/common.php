@@ -47,6 +47,7 @@ return [
     'type' => 'النوع',
     'description' => 'الوصف',
     'notes' => 'ملاحظات',
+    'address' => 'العنوان',
     'count' => 'العدد',
     'total' => 'الإجمالي',
 

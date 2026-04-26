@@ -1,0 +1,89 @@
+<?php
+
+return [
+    // Headings
+    'title' => 'المدارس',
+    'add_school' => 'إضافة مدرسة',
+    'edit_school' => 'تعديل المدرسة',
+    'school_details' => 'بيانات المدرسة',
+    'branches' => 'الفروع',
+    'extra_services' => 'خدمات إضافية',
+
+    // Form fields
+    'name' => 'اسم المدرسة',
+    'name_ar' => 'اسم المدرسة بالعربية',
+    'name_en' => 'اسم المدرسة بالإنجليزية',
+    'branch' => 'الفرع',
+    'sort_order' => 'الترتيب',
+    'educational_track' => 'المسار التعليمي',
+    'track_national' => 'وطني',
+    'track_international' => 'دولي',
+    'track_general' => 'عام',
+    'track_k12' => 'K12',
+    'stage' => 'المرحلة',
+    'city' => 'المدينة',
+    'default_language' => 'اللغة الافتراضية',
+    'lang_ar' => 'العربية',
+    'lang_en' => 'الإنجليزية',
+    'educational_company' => 'الشركة التعليمية',
+    'fax' => 'رقم الفاكس',
+    'website' => 'الموقع الإلكتروني',
+    'logo' => 'شعار المدرسة',
+    'logo_hint' => 'الحد الأقصى ٢ ميجابايت',
+    'social_accounts' => 'حسابات التواصل الاجتماعي',
+    'is_active' => 'المدرسة نشطة',
+
+    // Index columns
+    'sections_count' => 'عدد الصفوف',
+    'classes_count' => 'عدد الفصول',
+    'students_count' => 'عدد الطلاب',
+    'licensed_students_count' => 'عدد الطلاب المرخصين',
+
+    // Control menu
+    'control_menu' => 'قائمة التحكم',
+    'general_settings' => 'الإعدادات العامة',
+    'academic_years' => 'الأعوام الدراسية',
+    'grade_levels' => 'الصفوف الدراسية',
+    'permissions' => 'إدارة الصلاحيات',
+
+    // Settings
+    'settings_school_info' => 'معلومات المدرسة',
+    'school_active' => 'حالة المدرسة',
+    'settings_attendance' => 'إعدادات الغياب',
+    'attendance_auto_biometric' => 'تفعيل احتساب الغياب والحضور والتأخير تلقائياً من خلال نظام البصمة',
+    'attendance_auto_notify' => 'إرسال إشعارات الغياب والتأخير تلقائياً لأولياء الأمور',
+    'settings_messages' => 'إعدادات الرسائل',
+    'messages_supervisors_view' => 'السماح للمشرفين بمشاهدة الرسائل المتبادلة بين المعلمين والطلاب',
+    'messages_students_to_classmates' => 'السماح للطلاب بإرسال رسائل إلى زملائهم في نفس الفصل',
+    'settings_virtual_classes' => 'إعدادات الفصول الافتراضية',
+    'virtual_platform' => 'المنصة المعتمدة',
+    'virtual_external_link' => 'رابط خارجي',
+    'virtual_zoom_note' => 'تفعيل الربط مع Zoom يشترط التواصل مع الدعم الفني',
+    'settings_whatsapp' => 'إعدادات الواتساب',
+    'whatsapp_host' => 'الهوست',
+    'whatsapp_token' => 'التوكن',
+
+    // Academic years sub-screen
+    'add_academic_year' => 'إضافة عام دراسي',
+    'promote_to_new_year' => 'ترحيل لعام دراسي جديد',
+    'study_weeks' => 'الأسابيع الدراسية',
+    'academic_year' => 'العام الدراسي',
+    'year_start' => 'بداية العام',
+    'year_end' => 'نهاية العام',
+    'current' => 'الحالي',
+
+    // Grade levels sub-screen
+    'add_section' => 'إضافة فصل',
+    'assign_grade_levels' => 'تعيين الصفوف الدراسية',
+
+    // Permissions
+    'copy_permissions' => 'نسخ الصلاحيات',
+    'permission_roles' => 'اختر مجموعة (الدور)',
+    'permission_main_functions' => 'الوظائف الرئيسية',
+    'permission_sub_functions' => 'الوظائف الفرعية',
+    'permissions_pick_role' => 'اختر دوراً لعرض الوظائف',
+    'permissions_pick_function' => 'اختر وظيفة لعرض الصلاحيات',
+
+    // Errors
+    'cannot_delete_has_users' => 'لا يمكن حذف المدرسة لوجود مستخدمين مرتبطين بها',
+];
