@@ -171,8 +171,12 @@ return [
     'permission_roles' => 'اختر مجموعة (الدور)',
     'permission_main_functions' => 'الوظائف الرئيسية',
     'permission_sub_functions' => 'الوظائف الفرعية',
-    'permissions_pick_role' => 'اختر دوراً لعرض الوظائف',
+    'permissions_pick_role' => 'اختر دوراً ووظيفة لعرض الصلاحيات',
     'permissions_pick_function' => 'اختر وظيفة لعرض الصلاحيات',
+    'permissions_autosave_hint' => 'الحفظ يتم تلقائياً عند تفعيل أو إلغاء أي صلاحية',
+    'copy_source_school' => 'انسخ من مدرسة',
+    'permissions_copied' => 'تم نسخ الصلاحيات بنجاح',
+    'confirm_copy_permissions' => 'سيتم استبدال الصلاحيات الحالية بالصلاحيات المنسوخة. هل أنت متأكد؟',
 
     // Errors
     'cannot_delete_has_users' => 'لا يمكن حذف المدرسة لوجود مستخدمين مرتبطين بها',

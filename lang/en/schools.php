@@ -171,8 +171,12 @@ return [
     'permission_roles' => 'Pick a role',
     'permission_main_functions' => 'Main functions',
     'permission_sub_functions' => 'Sub functions',
-    'permissions_pick_role' => 'Pick a role to see functions',
+    'permissions_pick_role' => 'Pick a role and function to see permissions',
     'permissions_pick_function' => 'Pick a function to see permissions',
+    'permissions_autosave_hint' => 'Changes are saved automatically as you toggle each permission',
+    'copy_source_school' => 'Copy from school',
+    'permissions_copied' => 'Permissions copied successfully',
+    'confirm_copy_permissions' => 'Existing permissions will be replaced with the copied ones. Continue?',
 
     // Errors
     'cannot_delete_has_users' => 'Cannot delete a school with linked users',
