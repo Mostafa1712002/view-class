@@ -24,7 +24,7 @@
     <div class="card">
         <div class="card-body">
             <div class="d-flex flex-wrap gap-1 mb-3">
-                <a href="{{ route('admin.sections.create') }}" class="btn btn-primary btn-sm"><i class="la la-plus"></i> @lang('schools.add_section')</a>
+                <a href="{{ route('manage.sections.create') }}" class="btn btn-primary btn-sm"><i class="la la-plus"></i> @lang('schools.add_section')</a>
                 <button type="button" class="btn btn-outline-secondary btn-sm" disabled><i class="la la-list-ol"></i> @lang('schools.assign_grade_levels')</button>
             </div>
 
@@ -47,7 +47,7 @@
                                 <td>{{ $section->stage ?? '-' }}</td>
                                 <td>{{ $section->classes_count }}</td>
                                 <td>
-                                    <a href="{{ route('admin.sections.edit', $section) }}" class="btn btn-sm btn-outline-warning"><i class="la la-pen"></i></a>
+                                    <a href="{{ route('manage.sections.edit', $section) }}" class="btn btn-sm btn-outline-warning"><i class="la la-pen"></i></a>
                                 </td>
                             </tr>
                         @empty
