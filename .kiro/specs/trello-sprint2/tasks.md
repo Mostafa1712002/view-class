@@ -54,9 +54,11 @@ Order: Card 20 (schools) → 21 (settings) → 22 (years) → 23 (grades/section
 
 | Phase | Tasks | Done | Status |
 |-------|-------|------|--------|
-| 1 Schools | 8 | 0 | Not started |
-| 2 Settings | 7 | 0 | Not started |
-| 3 Years | 7 | 0 | Not started |
-| 4 Grades/Sections | 7 | 0 | Not started |
-| 5 Permissions | 7 | 0 | Not started |
-| **Total** | **36** | **0** | **0%** |
+| 1 Schools | 8 | 8 | ✅ shipped + tested |
+| 2 Settings | 7 | 7 | ✅ shipped + tested |
+| 3 Years | 7 | 7 | ✅ shipped + tested |
+| 4 Grades/Sections | 7 | 7 | ✅ shipped + tested |
+| 5 Permissions | 7 | 7 | ✅ shipped + tested |
+| **Total** | **36** | **36** | **100%** |
+
+All 5 cards moved to `testing` list. 5 migrations ran on prod (academic_terms, study_weeks, lead_teacher_id on classes, school_role_permissions). 4 new commits on main: 147e021 → 55755d9 → da427cc → c747cd1 → 492185b → 61ef51a.
