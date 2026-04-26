@@ -47,6 +47,50 @@ return [
     'permissions' => 'Permissions',
 
     // Settings
+    'settings_user_edit_perms' => 'User Edit Permissions',
+    'settings_user_edit_perms_hint' => 'Choose which fields each role can edit on their own profile',
+    'settings_weekly_plan' => 'Weekly Plan Settings',
+    'settings_class_reports' => 'Class Settings',
+    'settings_discussion_rooms' => 'Discussion Rooms',
+    'settings_grade_reports' => 'Grade Reports',
+
+    'user_role_student' => 'Student',
+    'user_role_parent' => 'Parent',
+    'user_role_teacher' => 'Teacher',
+    'user_role_other' => 'Other Users',
+    'user_field_username' => 'Username',
+    'user_field_password' => 'Password',
+    'user_field_name' => 'Name',
+    'user_field_avatar' => 'Avatar',
+    'user_field_phone' => 'Phone',
+    'user_field_email' => 'Email',
+
+    'classes_allow_overlap' => 'Allow overlapping class periods',
+    'classes_show_header_footer' => 'Show header and footer in reports',
+
+    'week_start_day' => 'Week Start Day',
+    'working_days' => 'Working Days',
+    'calendar_type' => 'Calendar Type',
+    'calendar_gregorian' => 'Gregorian',
+    'calendar_hijri' => 'Hijri',
+    'target_homework_per_teacher' => 'Target homework per teacher',
+    'weekly_plan_print_header' => 'Print header',
+    'weekly_plan_print_footer' => 'Print footer',
+    'lock_student_reassign' => 'Lock student reassignment / schedule deletion',
+
+    'discussion_teacher_create' => 'Allow teachers to create discussion rooms',
+    'discussion_student_post' => 'Allow students to open topics',
+    'discussion_max_replies' => 'Max replies per student',
+
+    'gpa_system' => 'GPA system',
+    'gpa_100' => '100-point',
+    'gpa_5' => '5-point',
+    'gpa_4' => '4-point',
+
+    'virtual_external_url' => 'External URL',
+    'virtual_student_direct' => 'Students can enter the class directly through the platform',
+    'whatsapp_enabled' => 'Enable WhatsApp service',
+
     'settings_school_info' => 'School Information',
     'school_active' => 'School Status',
     'settings_attendance' => 'Attendance Settings',

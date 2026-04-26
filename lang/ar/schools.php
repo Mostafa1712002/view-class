@@ -47,6 +47,50 @@ return [
     'permissions' => 'إدارة الصلاحيات',
 
     // Settings
+    'settings_user_edit_perms' => 'صلاحيات تعديل بيانات المستخدمين',
+    'settings_user_edit_perms_hint' => 'حدّد لكل دور ما يُسمح له بتعديله من بياناته الشخصية',
+    'settings_weekly_plan' => 'إعدادات الخطط الأسبوعية',
+    'settings_class_reports' => 'إعدادات الحصص',
+    'settings_discussion_rooms' => 'إعدادات غرف النقاش',
+    'settings_grade_reports' => 'إعدادات تقارير الدرجات',
+
+    'user_role_student' => 'طالب',
+    'user_role_parent' => 'ولي أمر',
+    'user_role_teacher' => 'معلم',
+    'user_role_other' => 'باقي المستخدمين',
+    'user_field_username' => 'اسم المستخدم',
+    'user_field_password' => 'كلمة المرور',
+    'user_field_name' => 'الاسم',
+    'user_field_avatar' => 'الصورة الشخصية',
+    'user_field_phone' => 'رقم الهاتف',
+    'user_field_email' => 'البريد الإلكتروني',
+
+    'classes_allow_overlap' => 'السماح بإضافة حصص دراسية في نفس التوقيت',
+    'classes_show_header_footer' => 'إظهار الترويسة والتذييل في التقارير',
+
+    'week_start_day' => 'يوم بداية الأسبوع',
+    'working_days' => 'أيام العمل الرسمية',
+    'calendar_type' => 'نوع التقويم',
+    'calendar_gregorian' => 'ميلادي',
+    'calendar_hijri' => 'هجري',
+    'target_homework_per_teacher' => 'عدد الواجبات المستهدف لكل معلم',
+    'weekly_plan_print_header' => 'ترويسة الطباعة',
+    'weekly_plan_print_footer' => 'تذييل الطباعة',
+    'lock_student_reassign' => 'قفل إعادة إسناد الطالب للحصص أو حذف الجداول الدراسية',
+
+    'discussion_teacher_create' => 'السماح للمعلمين بإنشاء غرف نقاش',
+    'discussion_student_post' => 'السماح للطلاب بفتح مواضيع داخلها',
+    'discussion_max_replies' => 'الحد الأعلى لعدد الردود لكل طالب',
+
+    'gpa_system' => 'نظام التقييم (GPA) المستخدم',
+    'gpa_100' => '100 درجة',
+    'gpa_5' => 'من 5',
+    'gpa_4' => 'من 4',
+
+    'virtual_external_url' => 'الرابط الخارجي',
+    'virtual_student_direct' => 'يمكن للطالب الدخول إلى الحصة من داخل المنصة مباشرة',
+    'whatsapp_enabled' => 'تفعيل خدمة الواتساب',
+
     'settings_school_info' => 'معلومات المدرسة',
     'school_active' => 'حالة المدرسة',
     'settings_attendance' => 'إعدادات الغياب',
