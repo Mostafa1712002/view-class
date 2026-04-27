@@ -49,7 +49,7 @@ class AdminController extends Controller
         $schoolId = $this->activeSchoolId();
         DB::transaction(function () use ($data, $schoolId) {
             $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
-            $user = User::create([
+            $user = User::create($this->withoutNulls([
                 'school_id' => $schoolId,
                 'name' => $data['name'],
                 'name_ar' => $data['name'],
@@ -63,7 +63,7 @@ class AdminController extends Controller
                 'plain_password_for_card' => encrypt($plain),
                 'is_active' => true,
                 'status' => 'active',
-            ]);
+            ]));
             $role = Role::where('slug', 'school-admin')->first();
             if ($role) {
                 $user->roles()->syncWithoutDetaching($role);

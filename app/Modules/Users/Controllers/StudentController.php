@@ -52,7 +52,7 @@ class StudentController extends Controller
 
         $user = DB::transaction(function () use ($data, $schoolId) {
             $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
-            $user = User::create([
+            $user = User::create($this->withoutNulls([
                 'school_id' => $schoolId,
                 'section_id' => $data['section_id'] ?? null,
                 'class_room_id' => $data['class_room_id'] ?? null,
@@ -68,7 +68,7 @@ class StudentController extends Controller
                 'plain_password_for_card' => encrypt($plain),
                 'is_active' => true,
                 'status' => 'active',
-            ]);
+            ]));
 
             $role = Role::where('slug', 'student')->first();
             if ($role) {

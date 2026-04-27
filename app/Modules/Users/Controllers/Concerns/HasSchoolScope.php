@@ -19,4 +19,13 @@ trait HasSchoolScope
         }
         return $u->school_id;
     }
+
+    /**
+     * Drop null entries so columns with NOT NULL + default can fall back
+     * to the legacy schema's default value.
+     */
+    protected function withoutNulls(array $payload): array
+    {
+        return array_filter($payload, static fn ($v) => $v !== null);
+    }
 }
