@@ -51,7 +51,7 @@ class StudentController extends Controller
         $schoolId = $this->activeSchoolId();
 
         $user = DB::transaction(function () use ($data, $schoolId) {
-            $plain = $data['password'] ?: ($data['national_id'] ?? str()->random(8));
+            $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
             $user = User::create([
                 'school_id' => $schoolId,
                 'section_id' => $data['section_id'] ?? null,

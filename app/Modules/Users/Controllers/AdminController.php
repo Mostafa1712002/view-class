@@ -48,7 +48,7 @@ class AdminController extends Controller
         $data = $this->validateAdmin($request);
         $schoolId = $this->activeSchoolId();
         DB::transaction(function () use ($data, $schoolId) {
-            $plain = $data['password'] ?: ($data['national_id'] ?? str()->random(8));
+            $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
             $user = User::create([
                 'school_id' => $schoolId,
                 'name' => $data['name'],
