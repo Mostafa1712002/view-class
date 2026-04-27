@@ -126,13 +126,9 @@ class TeacherController extends Controller
         $teachers = User::query()
             ->whereHas('roles', fn ($r) => $r->where('slug', 'teacher'))
             ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
-            ->withCount(['ledClasses as classes_count' => function ($q) {
-                // ledClasses relation may not exist; fallback to lead_teacher_id
-            }])
             ->orderBy('name')
             ->get();
 
-        // Compute classes count via lead_teacher_id (Sprint 2 addition)
         $classCounts = ClassRoom::query()
             ->select('lead_teacher_id', DB::raw('COUNT(*) as total'))
             ->whereNotNull('lead_teacher_id')

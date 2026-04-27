@@ -53,9 +53,11 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'last_login_at' => 'datetime',
+            'date_of_birth' => 'date',
             'birth_date' => 'date',
             'hire_date' => 'date',
+            'password' => 'hashed',
             'is_active' => 'boolean',
             'notification_preferences' => 'array',
         ];
