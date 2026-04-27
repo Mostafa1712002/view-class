@@ -120,7 +120,7 @@
 - [x] git commits + push to main
 - [x] ssh git pull + migrate + optimize on live
 - [x] MCP smoke test on AR + EN (all 6 routes 200, English titles render)
-- [ ] Move 6 Trello cards to testing + comment
+- [x] Move 6 Trello cards to testing + comment (Arabic)
 
 ---
 
@@ -136,5 +136,5 @@
 | 5. Admins | 6 | 6 | ✅ Done |
 | 6. Cards | 5 | 5 | ✅ Done |
 | 7. Login-as | 3 | 3 | ✅ Done |
-| 8. Ship | 5 | 4 | 🔄 In progress |
-| **Total** | **39** | **38** | **97%** |
+| 8. Ship | 5 | 5 | ✅ Done |
+| **Total** | **39** | **39** | **100%** |
