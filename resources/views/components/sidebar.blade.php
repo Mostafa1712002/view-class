@@ -155,16 +155,40 @@
                 <a href="{{ Route::has('admin.schools.index') ? route('admin.schools.index') : '#' }}"><i class="la la-building"></i><span class="menu-title">@lang('shell.nav_schools')</span></a>
             </li>
 
-            <li class="nav-item has-sub" data-section="system">
-                <a href="{{ Route::has('manage.users.index') ? route('manage.users.index') : '#' }}"><i class="la la-users"></i><span class="menu-title">@lang('shell.nav_users')</span></a>
+            <li class="nav-item has-sub {{ request()->routeIs('admin.users.*') ? 'open' : '' }}" data-section="system">
+                <a href="#"><i class="la la-users"></i><span class="menu-title">@lang('shell.nav_users')</span></a>
                 <ul class="menu-content">
-                    <li><a href="#"><i class="la la-user-shield"></i><span class="menu-item">@lang('shell.nav_users_admin')</span></a></li>
-                    <li><a href="#"><i class="la la-chalkboard-teacher"></i><span class="menu-item">@lang('shell.nav_users_teachers')</span></a></li>
-                    <li><a href="#"><i class="la la-user-friends"></i><span class="menu-item">@lang('shell.nav_users_parents')</span></a></li>
-                    <li><a href="#"><i class="la la-user-graduate"></i><span class="menu-item">@lang('shell.nav_users_students')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.users.students.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.users.students.index') ? route('admin.users.students.index') : '#' }}">
+                            <i class="la la-user-graduate"></i><span class="menu-item">@lang('users.students')</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.users.parents.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.users.parents.index') ? route('admin.users.parents.index') : '#' }}">
+                            <i class="la la-user-friends"></i><span class="menu-item">@lang('users.parents')</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.users.teachers.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.users.teachers.index') ? route('admin.users.teachers.index') : '#' }}">
+                            <i class="la la-chalkboard-teacher"></i><span class="menu-item">@lang('users.teachers')</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.users.admins.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.users.admins.index') ? route('admin.users.admins.index') : '#' }}">
+                            <i class="la la-user-shield"></i><span class="menu-item">@lang('users.admins')</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.users.cards.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.users.cards.index') ? route('admin.users.cards.index') : '#' }}">
+                            <i class="la la-id-card"></i><span class="menu-item">@lang('users.cards')</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.users.job-titles.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.users.job-titles.index') ? route('admin.users.job-titles.index') : '#' }}">
+                            <i class="la la-tag"></i><span class="menu-item">@lang('users.job_titles')</span>
+                        </a>
+                    </li>
                     <li><a href="#"><i class="la la-file-import"></i><span class="menu-item">@lang('shell.nav_users_import_noor')</span></a></li>
-                    <li><a href="#"><i class="la la-id-card"></i><span class="menu-item">@lang('shell.nav_users_cards')</span></a></li>
-                    <li><a href="#"><i class="la la-search"></i><span class="menu-item">@lang('shell.nav_users_search_all')</span></a></li>
                 </ul>
             </li>
 

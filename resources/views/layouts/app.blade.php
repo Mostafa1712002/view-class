@@ -202,6 +202,20 @@
     <!-- BEGIN: Content -->
     <div class="app-content content">
         <div class="content-wrapper">
+            @if(session('impersonator_id'))
+                <form action="{{ route('admin.users.impersonate.stop') }}" method="POST" class="m-0">
+                    @csrf
+                    <div class="alert alert-warning d-flex justify-content-between align-items-center mb-1" style="border:2px solid #f0ad4e;">
+                        <span>
+                            <i class="la la-user-secret"></i>
+                            @lang('users.impersonating_banner', ['name' => auth()->user()?->name])
+                        </span>
+                        <button class="btn btn-sm btn-outline-danger">
+                            @lang('users.stop_impersonating')
+                        </button>
+                    </div>
+                </form>
+            @endif
             <!-- Breadcrumb -->
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">

@@ -13,6 +13,14 @@ use App\Modules\Profile\Repositories\Contracts\ProfileRepository;
 use App\Modules\Profile\Repositories\EloquentProfileRepository;
 use App\Modules\Scope\Repositories\Contracts\ScopeRepository;
 use App\Modules\Scope\Repositories\EloquentScopeRepository;
+use App\Modules\Users\Repositories\Contracts\AdminRepository;
+use App\Modules\Users\Repositories\Contracts\ParentRepository;
+use App\Modules\Users\Repositories\Contracts\StudentRepository;
+use App\Modules\Users\Repositories\Contracts\TeacherRepository;
+use App\Modules\Users\Repositories\EloquentAdminListRepository;
+use App\Modules\Users\Repositories\EloquentParentListRepository;
+use App\Modules\Users\Repositories\EloquentStudentListRepository;
+use App\Modules\Users\Repositories\EloquentTeacherListRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -23,6 +31,10 @@ class RepositoryServiceProvider extends ServiceProvider
         DashboardStatsRepository::class => EloquentDashboardStatsRepository::class,
         ProfileRepository::class => EloquentProfileRepository::class,
         ScopeRepository::class => EloquentScopeRepository::class,
+        StudentRepository::class => EloquentStudentListRepository::class,
+        ParentRepository::class => EloquentParentListRepository::class,
+        TeacherRepository::class => EloquentTeacherListRepository::class,
+        AdminRepository::class => EloquentAdminListRepository::class,
     ];
 
     public function register(): void
