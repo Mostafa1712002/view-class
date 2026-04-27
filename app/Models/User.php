@@ -231,14 +231,4 @@ class User extends Authenticatable
     {
         return $this->belongsTo(JobTitle::class);
     }
-
-    public function children(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(self::class, 'parent_student', 'parent_id', 'student_id');
-    }
-
-    public function parents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(self::class, 'parent_student', 'student_id', 'parent_id');
-    }
 }
