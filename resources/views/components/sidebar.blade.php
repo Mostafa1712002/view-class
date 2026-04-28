@@ -205,7 +205,11 @@
                             <i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_question_bank')</span>
                         </a>
                     </li>
-                    <li><a href="#"><i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_class_periods')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.class-periods.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.class-periods.index') ? route('admin.class-periods.index') : '#' }}">
+                            <i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_class_periods')</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
 

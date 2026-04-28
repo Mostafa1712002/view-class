@@ -213,6 +213,21 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('question-banks/{bankId}/questions/create', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'create'])->name('question-banks.questions.create');
     Route::post('question-banks/{bankId}/questions', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'store'])->name('question-banks.questions.store');
     Route::delete('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'destroy'])->name('question-banks.questions.destroy');
+
+    // Class Periods + Time Slots + Schedule Entries (Sprint 4 phase 3)
+    Route::get('class-periods/time-slots', [\App\Modules\ClassPeriods\Controllers\TimeSlotController::class, 'index'])->name('class-periods.time-slots.index');
+    Route::post('class-periods/time-slots', [\App\Modules\ClassPeriods\Controllers\TimeSlotController::class, 'store'])->name('class-periods.time-slots.store');
+    Route::delete('class-periods/time-slots/{id}', [\App\Modules\ClassPeriods\Controllers\TimeSlotController::class, 'destroy'])->name('class-periods.time-slots.destroy');
+
+    Route::get('class-periods/advanced', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'advanced'])->name('class-periods.advanced');
+
+    Route::get('class-periods', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'index'])->name('class-periods.index');
+    Route::get('class-periods/create', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'create'])->name('class-periods.create');
+    Route::post('class-periods', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'store'])->name('class-periods.store');
+    Route::delete('class-periods/{id}', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'destroy'])->name('class-periods.destroy');
+
+    Route::post('class-periods/schedule-entries', [\App\Modules\ClassPeriods\Controllers\ScheduleEntryController::class, 'store'])->name('class-periods.schedule-entries.store');
+    Route::delete('class-periods/schedule-entries/{id}', [\App\Modules\ClassPeriods\Controllers\ScheduleEntryController::class, 'destroy'])->name('class-periods.schedule-entries.destroy');
 });
 
 // Admin Exams & Grades Routes
