@@ -200,7 +200,11 @@
                             <i class="la la-book-open"></i><span class="menu-item">@lang('sprint4.subjects.plural')</span>
                         </a>
                     </li>
-                    <li><a href="#"><i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_question_bank')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.question-banks.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.question-banks.index') ? route('admin.question-banks.index') : '#' }}">
+                            <i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_question_bank')</span>
+                        </a>
+                    </li>
                     <li><a href="#"><i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_class_periods')</span></a></li>
                 </ul>
             </li>

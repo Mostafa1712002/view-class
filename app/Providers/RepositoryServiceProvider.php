@@ -13,6 +13,8 @@ use App\Modules\Profile\Repositories\Contracts\ProfileRepository;
 use App\Modules\Profile\Repositories\EloquentProfileRepository;
 use App\Modules\Scope\Repositories\Contracts\ScopeRepository;
 use App\Modules\Scope\Repositories\EloquentScopeRepository;
+use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
+use App\Modules\QuestionBanks\Repositories\EloquentQuestionBankRepository;
 use App\Modules\Subjects\Repositories\Contracts\SubjectRepository;
 use App\Modules\Subjects\Repositories\EloquentSubjectRepository;
 use App\Modules\Users\Repositories\Contracts\AdminRepository;
@@ -38,6 +40,7 @@ class RepositoryServiceProvider extends ServiceProvider
         TeacherRepository::class => EloquentTeacherListRepository::class,
         AdminRepository::class => EloquentAdminListRepository::class,
         SubjectRepository::class => EloquentSubjectRepository::class,
+        QuestionBankRepository::class => EloquentQuestionBankRepository::class,
     ];
 
     public function register(): void
