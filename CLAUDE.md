@@ -79,6 +79,23 @@ Use `App\Support\ApiResponse::ok($data)` / `::fail($code, $message, $status)`.
 - **Commits**: conventional subject line; explain the "why" in the body if non-obvious. Never mention AI.
 - **Deploy flow**: commit → push → SSH → `git pull` → `migrate --force` → `view:cache`. No scp.
 
+## Project board (Trello)
+
+Feature cards, bugs, and sprint work for ViewClass live on this single Trello board. Read tasks from here, never invent work that isn't on the board.
+
+- **Board name**: `فيوكلاس`
+- **Board ID**: `69ccec0d70b4de73208c0716`
+- **Short link**: `WBHlx52A`
+- **URL**: https://trello.com/b/WBHlx52A/%D9%81%D9%8A%D9%88%D9%83%D9%84%D8%A7%D8%B3
+- **Lists** (left → right):
+  - `sprint prompt` — `69ccec3d278382c2dfec0481` (new sprint cards waiting to be picked up)
+  - `coding prompt` — `69ccec5e717a8c75e4132bae` (in active development)
+  - `prompt done` — `69ccec6450ee70145325d982` (coding finished, awaiting deploy)
+  - `testing prompt` — `69f0774def6235774c7409c5` (deployed, awaiting QA verification)
+  - `testing done` — `69ccec6e16e7c02381c8ddb0` (QA-verified, closed)
+
+Workflow: pick from `sprint prompt` → move to `coding prompt` while building → ship to live → move to `testing prompt` and add an Arabic QA comment → reassign to the card creator. Developer never advances to `testing done` — only QA does that.
+
 ## Legacy notes
 
 - Primary keys are `int`, not UUID. Full UUID migration was considered out of scope for the currently deployed DB.
