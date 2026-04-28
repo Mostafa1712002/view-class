@@ -228,6 +228,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
     Route::post('class-periods/schedule-entries', [\App\Modules\ClassPeriods\Controllers\ScheduleEntryController::class, 'store'])->name('class-periods.schedule-entries.store');
     Route::delete('class-periods/schedule-entries/{id}', [\App\Modules\ClassPeriods\Controllers\ScheduleEntryController::class, 'destroy'])->name('class-periods.schedule-entries.destroy');
+
+    // School Schedule (Sprint 4 phase 4 — read-only view + PDF)
+    Route::get('school-schedule', [\App\Modules\SchoolSchedule\Controllers\SchoolScheduleController::class, 'index'])->name('school-schedule.index');
+    Route::get('school-schedule/pdf', [\App\Modules\SchoolSchedule\Controllers\SchoolScheduleController::class, 'pdf'])->name('school-schedule.pdf');
 });
 
 // Admin Exams & Grades Routes

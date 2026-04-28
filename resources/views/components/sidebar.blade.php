@@ -213,6 +213,12 @@
                 </ul>
             </li>
 
+            <li class="nav-item {{ request()->routeIs('admin.school-schedule.*') ? 'active' : '' }}" data-section="system">
+                <a href="{{ Route::has('admin.school-schedule.index') ? route('admin.school-schedule.index') : '#' }}">
+                    <i class="la la-calendar-alt"></i><span class="menu-title">@lang('shell.nav_school_schedule')</span>
+                </a>
+            </li>
+
             <li class="nav-item {{ request()->routeIs('manage.academic-years.*') ? 'active' : '' }}" data-section="system">
                 <a href="{{ Route::has('manage.academic-years.index') ? route('manage.academic-years.index') : '#' }}"><i class="la la-calendar"></i><span class="menu-title">@lang('shell.nav_academic_years')</span></a>
             </li>
