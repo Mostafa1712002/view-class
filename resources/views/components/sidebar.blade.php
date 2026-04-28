@@ -192,6 +192,19 @@
                 </ul>
             </li>
 
+            <li class="nav-item has-sub {{ request()->routeIs('admin.subjects.*') ? 'open' : '' }}" data-section="system">
+                <a href="#"><i class="la la-book"></i><span class="menu-title">@lang('sprint4.subjects.page_title')</span></a>
+                <ul class="menu-content">
+                    <li class="{{ request()->routeIs('admin.subjects.index') || request()->routeIs('admin.subjects.create') || request()->routeIs('admin.subjects.edit') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}">
+                            <i class="la la-book-open"></i><span class="menu-item">@lang('sprint4.subjects.plural')</span>
+                        </a>
+                    </li>
+                    <li><a href="#"><i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_question_bank')</span></a></li>
+                    <li><a href="#"><i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_class_periods')</span></a></li>
+                </ul>
+            </li>
+
             <li class="nav-item {{ request()->routeIs('manage.academic-years.*') ? 'active' : '' }}" data-section="system">
                 <a href="{{ Route::has('manage.academic-years.index') ? route('manage.academic-years.index') : '#' }}"><i class="la la-calendar"></i><span class="menu-title">@lang('shell.nav_academic_years')</span></a>
             </li>

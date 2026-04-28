@@ -103,8 +103,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     // Classes Management
     Route::resource('classes', \App\Http\Controllers\Admin\ClassController::class);
 
-    // Subjects Management
-    Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
+    // Subjects Management — legacy resource kept for backward compat;
+    // Sprint 4 group below shadows the index/CRUD routes with the module controller.
+    Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class)
+        ->only(['show']);
 
     // Users Management
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
@@ -176,6 +178,25 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
 Route::middleware(['auth'])->group(function () {
     Route::post('admin/users/impersonate/stop', [\App\Modules\Users\Controllers\ImpersonateController::class, 'stop'])->name('admin.users.impersonate.stop');
+});
+
+// Sprint 4 — Subjects Module
+Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'creditHours'])->name('subjects.credit-hours');
+    Route::patch('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'saveCreditHours'])->name('subjects.credit-hours.save');
+
+    Route::get('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'index'])->name('subjects.index');
+    Route::get('subjects/create', [\App\Modules\Subjects\Controllers\SubjectController::class, 'create'])->name('subjects.create');
+    Route::post('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'store'])->name('subjects.store');
+    Route::get('subjects/{id}/edit', [\App\Modules\Subjects\Controllers\SubjectController::class, 'edit'])->name('subjects.edit');
+    Route::put('subjects/{id}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'update'])->name('subjects.update');
+    Route::delete('subjects/{id}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroy'])->name('subjects.destroy');
+
+    Route::get('subjects/{id}/lesson-tree', [\App\Modules\Subjects\Controllers\SubjectController::class, 'lessonTree'])->name('subjects.lesson-tree');
+    Route::post('subjects/{id}/units', [\App\Modules\Subjects\Controllers\SubjectController::class, 'storeUnit'])->name('subjects.units.store');
+    Route::delete('subjects/{id}/units/{unitId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyUnit'])->name('subjects.units.destroy');
+    Route::post('subjects/{id}/units/{unitId}/lessons', [\App\Modules\Subjects\Controllers\SubjectController::class, 'storeLesson'])->name('subjects.lessons.store');
+    Route::delete('subjects/{id}/units/{unitId}/lessons/{lessonId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyLesson'])->name('subjects.lessons.destroy');
 });
 
 // Admin Exams & Grades Routes
