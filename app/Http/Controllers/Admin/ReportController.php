@@ -462,4 +462,73 @@ class ReportController extends Controller
             'academicYear'
         ));
     }
+
+    // ============================================================
+    // Sprint 5 — Reports module: Administrative / Statistical / User
+    // ============================================================
+
+    public function administrative(Request $request): View
+    {
+        return view('admin.reports.administrative');
+    }
+
+    public function statistical(Request $request): View
+    {
+        return view('admin.reports.statistical');
+    }
+
+    public function userReports(Request $request): View
+    {
+        $tab = $request->get('tab', 'teachers');
+        $user = auth()->user();
+        $schoolId = $user->isSuperAdmin() ? null : $user->school_id;
+
+        $rows = collect();
+        $perPage = 20;
+        if ($tab === 'teachers') {
+            $rows = User::whereHas('roles', fn($q) => $q->where('slug', 'teacher'))
+                ->when($schoolId, fn($q) => $q->where('school_id', $schoolId))
+                ->orderBy('name')
+                ->paginate($perPage);
+        } elseif ($tab === 'students') {
+            $rows = User::whereHas('roles', fn($q) => $q->where('slug', 'student'))
+                ->when($schoolId, fn($q) => $q->where('school_id', $schoolId))
+                ->orderBy('name')
+                ->paginate($perPage);
+        } elseif ($tab === 'parents') {
+            $rows = User::whereHas('roles', fn($q) => $q->where('slug', 'parent'))
+                ->when($schoolId, fn($q) => $q->where('school_id', $schoolId))
+                ->orderBy('name')
+                ->paginate($perPage);
+        }
+
+        return view('admin.reports.user-reports', compact('tab', 'rows'));
+    }
+
+    /**
+     * تقرير المدارس العام — counts per school within the user's scope.
+     */
+    public function schoolsGeneral(Request $request): View
+    {
+        $user = auth()->user();
+        $schoolsQuery = \App\Models\School::query()
+            ->when(!$user->isSuperAdmin(), fn($q) => $q->where('id', $user->school_id));
+
+        $schools = $schoolsQuery->get();
+        $rows = $schools->map(function ($s) {
+            $studentsCount = User::whereHas('roles', fn($q) => $q->where('slug', 'student'))
+                ->where('school_id', $s->id)->count();
+            $teachersCount = User::whereHas('roles', fn($q) => $q->where('slug', 'teacher'))
+                ->where('school_id', $s->id)->count();
+            $classesCount = ClassRoom::whereHas('section', fn($q) => $q->where('school_id', $s->id))->count();
+            return (object) [
+                'school' => $s,
+                'students' => $studentsCount,
+                'teachers' => $teachersCount,
+                'classes' => $classesCount,
+            ];
+        });
+
+        return view('admin.reports.schools-general', compact('rows'));
+    }
 }

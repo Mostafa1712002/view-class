@@ -23,6 +23,9 @@ class WeeklyPlan extends Model
         'is_locked',
         'locked_at',
         'locked_by',
+        'is_prepared',
+        'prepared_at',
+        'attachments',
     ];
 
     protected $casts = [
@@ -30,6 +33,9 @@ class WeeklyPlan extends Model
         'week_end_date' => 'date',
         'is_locked' => 'boolean',
         'locked_at' => 'datetime',
+        'is_prepared' => 'boolean',
+        'prepared_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     // العلاقات

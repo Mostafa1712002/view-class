@@ -120,9 +120,11 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     Route::delete('schedules/{schedule}/periods/{period}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroyPeriod'])->name('schedules.destroy-period');
 
     // Weekly Plans Management
+    Route::get('weekly-plans/pdf', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'pdf'])->name('weekly-plans.pdf');
     Route::resource('weekly-plans', \App\Http\Controllers\Admin\WeeklyPlanController::class);
     Route::post('weekly-plans/{weekly_plan}/lock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'lock'])->name('weekly-plans.lock');
     Route::post('weekly-plans/{weekly_plan}/unlock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'unlock'])->name('weekly-plans.unlock');
+    Route::post('weekly-plans/{weekly_plan}/mark-prepared', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'markPrepared'])->name('weekly-plans.mark-prepared');
     Route::post('weekly-plans/bulk-lock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'bulkLock'])->name('weekly-plans.bulk-lock');
     Route::get('weekly-plans/{weekly_plan}/duplicate', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'duplicate'])->name('weekly-plans.duplicate');
 });
@@ -339,9 +341,23 @@ Route::middleware(['auth', 'role:parent'])->prefix('parent')->name('parent.')->g
     Route::get('contact-teacher', [\App\Http\Controllers\ParentController::class, 'contactTeacher'])->name('contact-teacher');
 });
 
+// Sprint 5 — Grade Reports (report-builder layer above the legacy grades data-entry)
+Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/grade-reports')->name('admin.grade-reports.')->group(function () {
+    Route::get('/', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'index'])->name('index');
+    Route::get('create', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'create'])->name('create');
+    Route::post('/', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'store'])->name('store');
+    Route::get('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'show'])->name('show');
+    Route::delete('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'destroy'])->name('destroy');
+});
+
 // Reports Routes
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/reports')->name('admin.reports.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
+    // Sprint 5 — 3 categorised report views
+    Route::get('administrative', [\App\Http\Controllers\Admin\ReportController::class, 'administrative'])->name('administrative');
+    Route::get('statistical', [\App\Http\Controllers\Admin\ReportController::class, 'statistical'])->name('statistical');
+    Route::get('user-reports', [\App\Http\Controllers\Admin\ReportController::class, 'userReports'])->name('user-reports');
+    Route::get('schools-general', [\App\Http\Controllers\Admin\ReportController::class, 'schoolsGeneral'])->name('schools-general');
     Route::get('student-card', [\App\Http\Controllers\Admin\ReportController::class, 'studentCard'])->name('student-card');
     Route::get('student-card/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'studentCardPdf'])->name('student-card-pdf');
     Route::get('class-report', [\App\Http\Controllers\Admin\ReportController::class, 'classReport'])->name('class-report');

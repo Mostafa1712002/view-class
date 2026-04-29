@@ -43,8 +43,16 @@
                 <a href="{{ Route::has('manage.weekly-plans.index') ? route('manage.weekly-plans.index') : '#' }}"><i class="la la-list-alt"></i><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}" data-section="educational">
-                <a href="{{ Route::has('admin.grades.index') ? route('admin.grades.index') : '#' }}"><i class="la la-graduation-cap"></i><span class="menu-title">@lang('shell.nav_grades')</span></a>
+            <li class="nav-item has-sub {{ (request()->routeIs('admin.grades.*') || request()->routeIs('admin.grade-reports.*')) ? 'active' : '' }}" data-section="educational">
+                <a href="#"><i class="la la-graduation-cap"></i><span class="menu-title">@lang('shell.nav_grades')</span></a>
+                <ul class="menu-content">
+                    <li class="{{ request()->routeIs('admin.grade-reports.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.grade-reports.index') ? route('admin.grade-reports.index') : '#' }}"><i class="la la-file-alt"></i><span class="menu-item">تقارير الدرجات</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.grades.index') ? route('admin.grades.index') : '#' }}"><i class="la la-edit"></i><span class="menu-item">إدخال الدرجات</span></a>
+                    </li>
+                </ul>
             </li>
 
             <li class="nav-item {{ request()->routeIs('manage.schedules.*') ? 'active' : '' }}" data-section="educational">
@@ -62,12 +70,18 @@
 
             <li class="nav-item" data-section="educational"><a href="#"><i class="la la-compass"></i><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
 
-            <li class="nav-item has-sub" data-section="educational">
+            <li class="nav-item has-sub {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" data-section="educational">
                 <a href="#"><i class="la la-chart-bar"></i><span class="menu-title">@lang('shell.nav_reports')</span></a>
                 <ul class="menu-content">
-                    <li class="{{ request()->routeIs('admin.reports.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.index') ? route('admin.reports.index') : '#' }}"><i class="la la-clipboard-list"></i><span class="menu-item">@lang('shell.nav_reports_admin')</span></a></li>
-                    <li class="{{ request()->routeIs('admin.reports.analytics') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.analytics') ? route('admin.reports.analytics') : '#' }}"><i class="la la-chart-line"></i><span class="menu-item">@lang('shell.nav_reports_stats')</span></a></li>
-                    <li><a href="#"><i class="la la-users"></i><span class="menu-item">@lang('shell.nav_reports_users')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.reports.administrative') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.reports.administrative') ? route('admin.reports.administrative') : '#' }}"><i class="la la-clipboard-list"></i><span class="menu-item">@lang('shell.nav_reports_admin')</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.reports.statistical') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.reports.statistical') ? route('admin.reports.statistical') : '#' }}"><i class="la la-chart-line"></i><span class="menu-item">@lang('shell.nav_reports_stats')</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.reports.user-reports') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.reports.user-reports') ? route('admin.reports.user-reports') : '#' }}"><i class="la la-users"></i><span class="menu-item">@lang('shell.nav_reports_users')</span></a>
+                    </li>
                 </ul>
             </li>
 

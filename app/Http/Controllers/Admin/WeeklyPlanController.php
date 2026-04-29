@@ -22,6 +22,13 @@ class WeeklyPlanController extends Controller
     {
         $user = auth()->user();
         $schoolId = $this->getSchoolId();
+        $viewMode = $request->get('view', 'grid'); // 'grid' (Sprint 5 default) or 'list' (legacy)
+
+        // Resolve target week (Sun-Thu). Default = current week.
+        $weekStart = $request->filled('week_start')
+            ? Carbon::parse($request->week_start)->startOfWeek(Carbon::SUNDAY)
+            : Carbon::now()->startOfWeek(Carbon::SUNDAY);
+        $weekEnd = $weekStart->copy()->addDays(4); // Thursday (school week)
 
         $query = WeeklyPlan::with(['teacher', 'subject', 'classRoom.section', 'lockedByUser']);
 
@@ -46,8 +53,8 @@ class WeeklyPlanController extends Controller
             $query->where('class_id', $request->class_id);
         }
 
-        if ($request->filled('week_start_date')) {
-            $query->where('week_start_date', $request->week_start_date);
+        if ($request->filled('grade_level')) {
+            $query->whereHas('classRoom', fn($q) => $q->where('grade_level', $request->grade_level));
         }
 
         if ($request->filled('status')) {
@@ -55,10 +62,12 @@ class WeeklyPlanController extends Controller
                 $query->locked();
             } elseif ($request->status === 'unlocked') {
                 $query->unlocked();
+            } elseif ($request->status === 'prepared') {
+                $query->where('is_prepared', true);
+            } elseif ($request->status === 'not_prepared') {
+                $query->where('is_prepared', false);
             }
         }
-
-        $plans = $query->latest('week_start_date')->paginate(15);
 
         // For filtering dropdowns
         $teachersQuery = User::whereHas('roles', fn($q) => $q->where('slug', 'teacher'));
@@ -74,8 +83,81 @@ class WeeklyPlanController extends Controller
         $teachers = $teachersQuery->get();
         $subjects = $subjectsQuery->get();
         $classes = $classesQuery->get();
+        $gradeLevels = $classes->pluck('grade_level')->filter()->unique()->sort()->values();
 
-        return view('admin.weekly-plans.index', compact('plans', 'teachers', 'subjects', 'classes'));
+        if ($viewMode === 'grid') {
+            // Grid view: scope to selected week, group by day-of-week
+            $weekPlans = (clone $query)
+                ->whereDate('week_start_date', $weekStart)
+                ->get();
+
+            return view('admin.weekly-plans.index-grid', compact(
+                'weekPlans', 'weekStart', 'weekEnd',
+                'teachers', 'subjects', 'classes', 'gradeLevels'
+            ));
+        }
+
+        // Legacy list view
+        if ($request->filled('week_start_date')) {
+            $query->where('week_start_date', $request->week_start_date);
+        }
+        $plans = $query->latest('week_start_date')->paginate(15);
+
+        return view('admin.weekly-plans.index', compact('plans', 'teachers', 'subjects', 'classes', 'gradeLevels'));
+    }
+
+    /**
+     * PDF export of the week grid.
+     */
+    public function pdf(Request $request)
+    {
+        $user = auth()->user();
+        $schoolId = $this->getSchoolId();
+        $weekStart = $request->filled('week_start')
+            ? Carbon::parse($request->week_start)->startOfWeek(Carbon::SUNDAY)
+            : Carbon::now()->startOfWeek(Carbon::SUNDAY);
+        $weekEnd = $weekStart->copy()->addDays(4);
+
+        $query = WeeklyPlan::with(['teacher', 'subject', 'classRoom.section'])
+            ->whereDate('week_start_date', $weekStart);
+
+        if ($schoolId) {
+            $query->whereHas('teacher', fn($q) => $q->where('school_id', $schoolId));
+        }
+        if ($request->filled('teacher_id')) {
+            $query->where('teacher_id', $request->teacher_id);
+        }
+        if ($request->filled('class_id')) {
+            $query->where('class_id', $request->class_id);
+        }
+        if ($request->filled('grade_level')) {
+            $query->whereHas('classRoom', fn($q) => $q->where('grade_level', $request->grade_level));
+        }
+
+        $weekPlans = $query->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.weekly-plans.pdf', [
+            'weekPlans' => $weekPlans,
+            'weekStart' => $weekStart,
+            'weekEnd' => $weekEnd,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream('weekly-plan-' . $weekStart->format('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Mark a weekly plan as prepared (toggles is_prepared + prepared_at).
+     */
+    public function markPrepared(WeeklyPlan $weekly_plan)
+    {
+        if ($weekly_plan->is_prepared) {
+            $weekly_plan->update(['is_prepared' => false, 'prepared_at' => null]);
+            $msg = 'تم إلغاء حالة التحضير';
+        } else {
+            $weekly_plan->update(['is_prepared' => true, 'prepared_at' => now()]);
+            $msg = 'تم تحديد الخطة كمُحضّرة';
+        }
+        return back()->with('success', $msg);
     }
 
     public function create()
