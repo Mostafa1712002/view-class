@@ -9,7 +9,7 @@ return [
         'add' => 'Add Subject',
         'add_manual' => 'Add Subject (manual)',
         'add_excel' => 'Import from Excel',
-        'add_template' => 'Add ViewClass templates',
+        'add_template' => 'Add Al-Awwal templates',
         'set_credit_hours' => 'Set Credit Hours',
         'subject_sections' => 'Subject Sections',
         'edit' => 'Edit',
@@ -34,7 +34,7 @@ return [
         'sources' => [
             'manual' => 'Manual',
             'excel' => 'Excel import',
-            'viewclass' => 'ViewClass template',
+            'viewclass' => 'Al-Awwal template',
         ],
         'flash' => [
             'created' => 'Subject added successfully',
@@ -161,7 +161,7 @@ return [
         'add' => 'Add Bank',
         'add_btn' => 'Add +',
         'library' => 'Bank Library',
-        'library_title' => 'Question Bank Library (ViewClass)',
+        'library_title' => 'Question Bank Library (Al-Awwal)',
         'clone' => 'Clone to my school',
         'create_title' => 'Create New Question Bank',
         'edit_title' => 'Edit Question Bank',

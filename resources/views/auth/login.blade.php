@@ -9,36 +9,72 @@
     <title>@lang('auth.login_title') — @lang('auth.app_name')</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    @if($dir === 'ltr')
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    @endif
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     @if($dir === 'rtl')
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     @endif
 
     <style>
+        :root {
+            --gold-100: #f6d27a; --gold-200: #e3b85c; --gold-300: #cfa046;
+            --gold-400: #b7842e; --gold-500: #9c6b1f;
+            --black-100: #0b0b0b; --black-200: #121212; --black-300: #1a1a1a;
+            --brand-green: #1f6f4a;
+        }
         body, html {
             font-family: 'Cairo', 'Segoe UI', sans-serif !important;
             direction: {{ $dir }};
         }
+        @if($dir === 'ltr')
+        h1, h2, h3, h4, .brand-logo h2 {
+            font-family: 'Playfair Display', Georgia, serif !important;
+            letter-spacing: .3px;
+        }
+        @endif
         .auth-wrapper {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(207,160,70,.18), transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(31,111,74,.14), transparent 60%),
+                linear-gradient(135deg, var(--black-100) 0%, var(--black-300) 100%);
             padding: 20px;
         }
         .auth-card {
             max-width: 460px;
             width: 100%;
             border-radius: 14px;
-            box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(207,160,70,0.15);
         }
         .brand-logo { margin-bottom: 18px; text-align: center; }
-        .brand-logo h2 { color: #7367f0; font-weight: 700; margin-top: 10px; margin-bottom: 2px; }
+        .brand-logo img { max-height: 90px; width: auto; }
+        .brand-logo h2 { color: var(--gold-500); font-weight: 700; margin-top: 10px; margin-bottom: 2px; }
         .brand-logo .version { color: #8c8ca1; font-size: 0.85rem; }
-        .btn-primary { background-color: #7367f0 !important; border-color: #7367f0 !important; }
-        .btn-primary:hover { background-color: #5e50ee !important; border-color: #5e50ee !important; }
-        .form-control:focus { border-color: #7367f0; box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-200), var(--gold-500)) !important;
+            border-color: var(--gold-400) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(207,160,70,.25);
+            transition: .25s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--gold-300), var(--gold-500)) !important;
+            border-color: var(--gold-500) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(207,160,70,.35);
+        }
+        .form-control:focus {
+            border-color: var(--gold-300);
+            box-shadow: 0 0 0 .15rem rgba(207,160,70,.18);
+        }
         .lang-switch {
             position: absolute;
             top: 16px;
@@ -73,21 +109,9 @@
         <div class="auth-card card">
             <div class="card-body p-4">
                 <div class="brand-logo">
-                    <svg viewBox="0 0 139 95" height="48" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="lg1" x1="100%" y1="10.5%" x2="50%" y2="89.5%">
-                                <stop stop-color="#7367f0" offset="0%"/>
-                                <stop stop-color="#9e95f5" offset="100%"/>
-                            </linearGradient>
-                        </defs>
-                        <g fill-rule="evenodd">
-                            <path d="M0,0 L39.18,0 L69.35,32.25 L101.43,0 L139.53,0 L139.53,94.57 L81.76,94.57 L69.35,72.25 L56.87,94.57 L0,94.57 Z" fill="url(#lg1)" opacity="0.2"/>
-                            <path d="M69.35,32.25 L101.43,0 L139.53,0 L139.53,94.57 L81.76,94.57 L69.35,72.25 Z" fill="#7367f0"/>
-                            <path d="M69.35,32.25 L39.18,0 L0,0 L43.67,94.57 L56.87,94.57 L69.35,72.25 Z" fill="#9e95f5" opacity="0.7"/>
-                        </g>
-                    </svg>
-                    <h2>@lang('auth.app_name')</h2>
-                    <div class="version">@lang('auth.version_label') 5.3</div>
+                    <img src="{{ asset('img/brand/al-awwal-logo.png') }}" alt="@lang('auth.app_name')">
+                    <h2 class="mt-2">@lang('auth.app_name')</h2>
+                    <div class="version text-muted">@lang('auth.tagline')</div>
                 </div>
 
                 <h4 class="mb-1 text-center">@lang('auth.welcome')</h4>

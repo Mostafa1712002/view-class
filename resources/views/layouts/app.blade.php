@@ -24,6 +24,10 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @endif
     <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
+    {{-- Al-Awwal brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
+    @if(!$isRtl)
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    @endif
 
     <!-- BEGIN VENDOR CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset($cssRoot.'/vendors.css') }}">
@@ -50,13 +54,85 @@
     <!-- END Custom CSS-->
 
     <style>
+        /* ============ Al-Awwal brand tokens (Sprint 5 — الهوية) ============ */
+        :root {
+            --gold-100: #f6d27a;
+            --gold-200: #e3b85c;
+            --gold-300: #cfa046;
+            --gold-400: #b7842e;
+            --gold-500: #9c6b1f;
+
+            --black-100: #0b0b0b;
+            --black-200: #121212;
+            --black-300: #1a1a1a;
+
+            --white-100: #ffffff;
+            --white-200: #f5f5f5;
+            --white-300: #dcdcdc;
+
+            --brand-green: #1f6f4a;
+
+            --text-primary: var(--white-100);
+            --text-secondary: #a1a1a1;
+
+            --radius-md: 10px;
+        }
+
         body, h1, h2, h3, h4, h5, h6, p, span, a, button, input, select, textarea, label, th, td {
             font-family: {{ $isRtl ? "'Cairo', sans-serif" : "'Inter', system-ui, -apple-system, sans-serif" }} !important;
         }
+        {{-- English luxury serif on headings + brand text --}}
+        @if(!$isRtl)
+        h1, h2, h3, h4, .brand-text, .auth-card .brand-logo h2 {
+            font-family: 'Playfair Display', 'Cinzel', Georgia, serif !important;
+            letter-spacing: .2px;
+        }
+        @endif
         .brand-text {
-            font-family: {{ $isRtl ? "'Cairo', sans-serif" : "'Inter', system-ui, sans-serif" }} !important;
+            font-family: {{ $isRtl ? "'Cairo', sans-serif" : "'Playfair Display', 'Inter', serif" }} !important;
             font-weight: 700;
         }
+
+        /* ============ Brand colour overrides (replace blue/purple primary) ============ */
+        .bg-info, .header-navbar.bg-info {
+            background: linear-gradient(135deg, var(--black-200) 0%, var(--black-300) 60%, var(--gold-500) 130%) !important;
+            border-bottom: 1px solid var(--gold-400);
+        }
+        .header-navbar .brand-text { color: var(--gold-200) !important; }
+
+        .btn-primary, .btn-primary:focus {
+            background: linear-gradient(135deg, var(--gold-200), var(--gold-500)) !important;
+            border-color: var(--gold-400) !important;
+            color: var(--white-100) !important;
+            box-shadow: 0 2px 8px rgba(207,160,70,.25);
+        }
+        .btn-primary:hover, .btn-primary:active {
+            background: linear-gradient(135deg, var(--gold-300), var(--gold-500)) !important;
+            border-color: var(--gold-500) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(207,160,70,.35);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold-200), var(--gold-500));
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            transition: .25s ease;
+            box-shadow: 0 2px 8px rgba(207,160,70,.25);
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(207,160,70,.3);
+            color: #fff;
+        }
+
+        /* Form focus glow in gold instead of purple/blue */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--gold-300) !important;
+            box-shadow: 0 0 0 .15rem rgba(207,160,70,.18) !important;
+        }
+        a { color: var(--gold-500); }
+        a:hover { color: var(--gold-400); }
         /* ============ Header — single row, professional layout ============ */
         .shell-navbar-row { height: 56px; padding: 0 .75rem; }
         .shell-navbar-row .navbar-wrapper.shell-row {
@@ -92,9 +168,9 @@
             font-size: .92rem;
         }
         .main-menu.menu-light .navigation > li.active > a {
-            background: linear-gradient(118deg, #1e9ff2 0%, #60bfff 100%);
-            color: #fff !important;
-            box-shadow: 0 4px 18px rgba(30,159,242,.35);
+            background: linear-gradient(118deg, var(--gold-300) 0%, var(--gold-200) 100%);
+            color: var(--white-100) !important;
+            box-shadow: 0 4px 18px rgba(207,160,70,.35);
         }
         .main-menu.menu-light .navigation > li.active > a i { color: #fff; }
         .main-menu.menu-light .navigation > li > a > i {
