@@ -118,7 +118,7 @@ class DashboardController extends Controller
             ->count();
 
         $weeklyPlansThisWeek = WeeklyPlan::whereHas('teacher', fn($q) => $q->where('school_id', $schoolId))
-            ->where('week_start', '>=', $thisWeek)
+            ->where('week_start_date', '>=', $thisWeek)
             ->count();
 
         $attendanceStats = $this->getAttendanceStats($schoolId, $thisMonth);
@@ -185,7 +185,7 @@ class DashboardController extends Controller
             ->count();
 
         $myWeeklyPlans = WeeklyPlan::where('teacher_id', $user->id)
-            ->where('week_start', '>=', $thisWeek)
+            ->where('week_start_date', '>=', $thisWeek)
             ->take(5)
             ->get();
 

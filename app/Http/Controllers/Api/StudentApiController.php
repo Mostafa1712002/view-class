@@ -162,10 +162,10 @@ class StudentApiController extends Controller
             return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
         }
 
-        $plans = WeeklyPlan::where('class_room_id', $user->class_room_id)
+        $plans = WeeklyPlan::where('class_id', $user->class_room_id)
             ->with(['subject', 'teacher'])
-            ->where('week_start', '>=', Carbon::now()->subWeeks(2))
-            ->orderBy('week_start', 'desc')
+            ->where('week_start_date', '>=', Carbon::now()->subWeeks(2))
+            ->orderBy('week_start_date', 'desc')
             ->get();
 
         return response()->json([
@@ -174,8 +174,8 @@ class StudentApiController extends Controller
                 'id' => $p->id,
                 'subject' => $p->subject?->name,
                 'teacher' => $p->teacher?->name,
-                'week_start' => $p->week_start->format('Y/m/d'),
-                'week_end' => $p->week_end->format('Y/m/d'),
+                'week_start' => $p->week_start_date->format('Y/m/d'),
+                'week_end' => $p->week_end_date->format('Y/m/d'),
                 'topics' => $p->topics,
                 'objectives' => $p->objectives,
                 'resources' => $p->resources,
