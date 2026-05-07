@@ -20,7 +20,7 @@ class AdminUserSeeder extends Seeder
                 'name_ar' => 'مدير النظام',
                 'name_en' => 'System Administrator',
                 'username' => 'admin',
-                'password' => bcrypt('Admin@12345'),
+                'password' => bcrypt('admin123'),
                 'school_id' => $school?->id,
                 'email_verified_at' => now(),
                 'is_active' => true,
