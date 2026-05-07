@@ -99,10 +99,10 @@ class DashboardController extends Controller
         $presentToday = $todayAttendance->where('status', 'present')->count();
         $absentToday = $todayAttendance->where('status', 'absent')->count();
 
-        $upcomingExams = Exam::where('school_id', $schoolId)
-            ->where('start_date', '>=', $today)
-            ->where('status', 'published')
-            ->orderBy('start_date')
+        $upcomingExams = Exam::whereHas('classRoom.section', fn($q) => $q->where('school_id', $schoolId))
+            ->where('start_time', '>=', $today)
+            ->where('is_published', true)
+            ->orderBy('start_time')
             ->take(5)
             ->get();
 
@@ -175,8 +175,8 @@ class DashboardController extends Controller
         $myClassIds = $todaySchedules->pluck('class_room_id')->unique();
 
         $upcomingExams = Exam::where('teacher_id', $user->id)
-            ->where('start_date', '>=', $today)
-            ->orderBy('start_date')
+            ->where('start_time', '>=', $today)
+            ->orderBy('start_time')
             ->take(5)
             ->get();
 

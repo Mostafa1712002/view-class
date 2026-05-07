@@ -287,7 +287,7 @@
                                 <strong>{{ $exam->title }}</strong>
                                 <br><small class="text-muted">{{ $exam->subject->name ?? '' }}</small>
                             </div>
-                            <span class="badge bg-light-primary">{{ $exam->start_date->format('m/d') }}</span>
+                            <span class="badge bg-light-primary">{{ optional($exam->start_time)->format('m/d') }}</span>
                         </div>
                         @endforeach
                     @else

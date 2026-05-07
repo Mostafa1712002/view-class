@@ -168,7 +168,7 @@ class SearchController extends Controller
 
     private function searchExams($query, $schoolId)
     {
-        return Exam::where('school_id', $schoolId)
+        return Exam::whereHas('classRoom.section', fn($q) => $q->where('school_id', $schoolId))
             ->where('title', 'like', "%{$query}%")
             ->with(['subject'])
             ->take(10)
@@ -177,7 +177,7 @@ class SearchController extends Controller
                 'id' => $e->id,
                 'title' => $e->title,
                 'subject' => $e->subject->name ?? '',
-                'date' => $e->start_date->format('Y/m/d'),
+                'date' => optional($e->start_time)->format('Y/m/d'),
                 'status' => $e->status_label,
             ]);
     }
