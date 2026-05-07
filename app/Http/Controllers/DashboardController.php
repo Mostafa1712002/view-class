@@ -155,7 +155,7 @@ class DashboardController extends Controller
             'weekly_plans_count' => $weeklyPlansThisWeek,
             'attendance_stats' => $attendanceStats,
             'grade_distribution' => $gradeDistribution,
-            'recent_notifications' => Notification::where('school_id', $schoolId)
+            'recent_notifications' => Notification::whereHas('user', fn($q) => $q->where('school_id', $schoolId))
                 ->latest()
                 ->take(5)
                 ->get(),
