@@ -124,12 +124,13 @@ class DashboardController extends Controller
         $attendanceStats = $this->getAttendanceStats($schoolId, $thisMonth);
 
         $gradeDistribution = Grade::whereHas('student', fn($q) => $q->where('school_id', $schoolId))
+            ->whereNotNull('total')
             ->selectRaw('
                 CASE
-                    WHEN percentage >= 90 THEN "ممتاز"
-                    WHEN percentage >= 80 THEN "جيد جداً"
-                    WHEN percentage >= 70 THEN "جيد"
-                    WHEN percentage >= 60 THEN "مقبول"
+                    WHEN total >= 90 THEN "ممتاز"
+                    WHEN total >= 80 THEN "جيد جداً"
+                    WHEN total >= 70 THEN "جيد"
+                    WHEN total >= 60 THEN "مقبول"
                     ELSE "ضعيف"
                 END as grade_level,
                 COUNT(*) as count
@@ -180,8 +181,8 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $pendingGrading = Grade::whereHas('exam', fn($q) => $q->where('teacher_id', $user->id))
-            ->whereNull('score')
+        $pendingGrading = Grade::where('teacher_id', $user->id)
+            ->whereNull('total')
             ->count();
 
         $myWeeklyPlans = WeeklyPlan::where('teacher_id', $user->id)
