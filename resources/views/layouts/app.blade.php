@@ -133,11 +133,11 @@
         }
         a { color: var(--gold-500); }
         a:hover { color: var(--gold-400); }
-        /* ============ Header — single row, professional layout ============ */
-        .shell-navbar-row { height: 56px; padding: 0 .75rem; }
+        /* ============ Header — single row on xl+, stacked on smaller ============ */
+        .shell-navbar-row { min-height: 56px; height: auto; padding: 0 .75rem; }
         .shell-navbar-row .navbar-wrapper.shell-row {
             display: flex; flex-wrap: nowrap; align-items: center;
-            justify-content: space-between; gap: 8px; height: 56px; width: 100%;
+            justify-content: space-between; gap: 8px; min-height: 56px; width: 100%;
         }
         .shell-nav-left, .shell-nav-right { flex: 0 0 auto; min-width: 0; }
         .shell-nav-left { max-width: 30%; }
@@ -150,6 +150,32 @@
         .shell-nav-right .avatar img { width: 32px; height: 32px; object-fit: cover; border-radius: 50%; }
         .header-navbar .brand-text { font-size: 1.1rem; font-weight: 700; color: #fff; }
         .header-navbar .brand-logo { height: 32px; }
+
+        /* ============ Mobile/tablet header adjustments ============ */
+        /* When mobile scope strip is visible (below xl), push content further down */
+        @media (max-width: 1199.98px) {
+            html body.fixed-navbar { padding-top: 7.5rem; }
+        }
+        /* Phones: tighten icon padding and hide non-critical chrome */
+        @media (max-width: 575.98px) {
+            html body.fixed-navbar { padding-top: 8rem; }
+            .shell-navbar-row { padding: 0 .35rem; }
+            .shell-nav-left { max-width: 38%; }
+            .shell-nav-right { max-width: 62%; gap: 0; }
+            .shell-nav-right .nav-link { padding: .35rem .3rem !important; }
+            .shell-nav-right .nav-link i { font-size: 1.05rem; }
+            .shell-nav-right .badge.badge-up { transform: scale(.8); }
+            .header-navbar .brand-logo { height: 28px; }
+            /* Drop low-value items on phones (search, language, role-switch live in avatar dropdown anyway) */
+            [data-shell-hide-xs] { display: none !important; }
+        }
+        /* Scope strip: stack cleanly on phones, single row from sm up */
+        #shell-scope-mobile { padding: 6px 12px; gap: 6px; }
+        #shell-scope-mobile form { width: 100%; gap: 6px !important; }
+        #shell-scope-mobile select { min-width: 0; }
+        @media (max-width: 575.98px) {
+            #shell-scope-mobile select { flex: 1 1 100% !important; max-width: 100% !important; }
+        }
 
         /* Select2 tweaks to look at home in a coloured header */
         #shell-scope-form .select2-container { margin: 0 2px; }

@@ -79,18 +79,18 @@
 
         {{-- Right cluster: utility actions + profile --}}
         <ul class="shell-nav-right nav navbar-nav flex-row align-items-center m-0">
-            <li class="nav-item d-none d-md-flex align-items-center text-white px-2" id="shell-clock" style="line-height:1.1;">
+            <li class="nav-item d-none d-md-flex align-items-center text-white px-2" id="shell-clock" style="line-height:1.1;" data-shell-hide-xs>
                 <span id="shell-clock-time" class="text-bold-600">—</span>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" data-shell-hide-xs>
                 <a class="nav-link" href="#" title="@lang('shell.search')" aria-label="@lang('shell.search')"
                    onclick="event.preventDefault(); const bar=document.getElementById('shell-search-bar'); if(bar){bar.classList.toggle('d-none'); const i=bar.querySelector('input'); if(i && !bar.classList.contains('d-none')) i.focus();}">
                     <i class="ficon la la-search"></i>
                 </a>
             </li>
 
-            <li class="nav-item dropdown">
+            <li class="nav-item dropdown" data-shell-hide-xs>
                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" title="@lang('shell.switch_language')">
                     <i class="ficon la la-globe"></i>
                     <span class="d-none d-lg-inline ms-1">{{ strtoupper($shellLocale) }}</span>
@@ -158,7 +158,7 @@
 
                 @php($shellRoles = $shellUser->roles ?? collect())
                 @if($shellRoles->count() > 0)
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown" data-shell-hide-xs>
                         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" title="@lang('shell.select_role')">
                             <i class="ficon la la-user-shield"></i>
                             <span class="d-none d-xl-inline ms-1">{{ session('current_role', $shellRoles->first()->name) }}</span>
