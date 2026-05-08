@@ -287,11 +287,83 @@
         .main-menu li[data-section="communication"] > a > i { color: #f57c00; }
         .main-menu li[data-section="system"] > a > i { color: #2e7d32; }
         .main-menu li.active[data-section] > a > i { color: #fff !important; }
+
+        /* ============ Luxury theme — opt-in via body.theme-luxury (Slice 1) ============ */
+        body.theme-luxury {
+            background:
+                radial-gradient(ellipse at 18% 85%, rgba(207,160,70,.14), transparent 55%),
+                radial-gradient(ellipse at 82% 15%, rgba(31,111,74,.10), transparent 55%),
+                linear-gradient(135deg, var(--black-100) 0%, var(--black-300) 100%) !important;
+            color: var(--white-200);
+        }
+        body.theme-luxury .app-content { background: transparent; }
+        body.theme-luxury h1, body.theme-luxury h2, body.theme-luxury h3,
+        body.theme-luxury h4, body.theme-luxury h5,
+        body.theme-luxury .content-header-title { color: var(--white-100) !important; }
+        body.theme-luxury .text-muted, body.theme-luxury small.text-muted {
+            color: var(--text-secondary) !important;
+        }
+        body.theme-luxury p, body.theme-luxury .card-text { color: var(--text-secondary); }
+        body.theme-luxury .breadcrumb { background: transparent; }
+        body.theme-luxury .breadcrumb-item, body.theme-luxury .breadcrumb-item a {
+            color: var(--text-secondary);
+        }
+        body.theme-luxury .breadcrumb-item.active { color: var(--gold-200); }
+
+        /* Glass cards — finance/luxury feel */
+        body.theme-luxury .card {
+            background: rgba(255,255,255,0.035) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(207,160,70,0.18) !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+            color: var(--white-200);
+        }
+        body.theme-luxury .card .card-body { color: var(--white-200); }
+        body.theme-luxury .card-title, body.theme-luxury .card .card-title {
+            color: var(--white-100) !important;
+        }
+        body.theme-luxury .card h2.fw-bolder, body.theme-luxury .card h2.fw-bold,
+        body.theme-luxury .luxury-stat {
+            color: var(--gold-200) !important;
+            text-shadow: 0 0 24px rgba(207,160,70,0.18);
+        }
+
+        /* Table on dark — keep legible */
+        body.theme-luxury .table { color: var(--white-200); }
+        body.theme-luxury .table thead th {
+            background: rgba(255,255,255,0.04) !important;
+            color: var(--gold-200);
+            border-bottom: 1px solid rgba(207,160,70,0.25);
+        }
+        body.theme-luxury .table tbody tr { border-color: rgba(255,255,255,0.06); }
+        body.theme-luxury .table tbody tr:hover { background: rgba(255,255,255,0.03); }
+        body.theme-luxury .table td, body.theme-luxury .table th {
+            border-color: rgba(255,255,255,0.06);
+        }
+
+        /* Avatars on the dashboards keep their tinted bg but get a subtle border */
+        body.theme-luxury .avatar.bg-light-primary,
+        body.theme-luxury .avatar.bg-light-success,
+        body.theme-luxury .avatar.bg-light-warning,
+        body.theme-luxury .avatar.bg-light-info,
+        body.theme-luxury .avatar.bg-light-danger,
+        body.theme-luxury .avatar.bg-light-secondary {
+            border: 1px solid rgba(207,160,70,0.25);
+        }
+
+        /* Welcome banner on dashboard — was hardcoded #f8fbff; force glass */
+        body.theme-luxury .card[style*="#f8fbff"],
+        body.theme-luxury .card[style*="background"] {
+            background: rgba(255,255,255,0.04) !important;
+            border-{{ $isRtl ? 'right' : 'left' }}: 4px solid var(--gold-300) !important;
+        }
+        body.theme-luxury .card[style*="#f8fbff"] h4 { color: var(--gold-200) !important; }
     </style>
 
     @stack('styles')
 </head>
-<body class="vertical-layout vertical-menu 2-columns menu-expanded fixed-navbar" data-open="click" data-menu="vertical-menu" data-col="2-columns">
+<body class="vertical-layout vertical-menu 2-columns menu-expanded fixed-navbar @yield('body_class')" data-open="click" data-menu="vertical-menu" data-col="2-columns">
 
     <!-- BEGIN: Header -->
     @include('components.navbar')

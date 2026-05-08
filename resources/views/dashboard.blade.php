@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('dashboard.page_title'))
+@section('body_class', 'theme-luxury')
 
 @section('content')
 <div class="content-header row">

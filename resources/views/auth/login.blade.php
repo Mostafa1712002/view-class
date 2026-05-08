@@ -48,16 +48,27 @@
         .auth-card {
             max-width: 460px;
             width: 100%;
-            border-radius: 14px;
-            box-shadow: 0 18px 40px rgba(0,0,0,0.45);
-            background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(207,160,70,0.15);
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+            background: rgba(20,20,28,0.55);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(207,160,70,0.22);
+            color: var(--white-200);
         }
+        .auth-card .card-body { color: var(--white-200); }
+        .auth-card h4 { color: var(--white-100); }
+        .auth-card .form-label { color: var(--white-200); font-weight: 500; }
+        .auth-card p.text-muted, .auth-card small.text-muted { color: #b9b9c2 !important; }
+        .auth-card .form-control {
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(207,160,70,0.25);
+        }
+        .auth-card .form-check-label { color: var(--white-200); }
         .brand-logo { margin-bottom: 18px; text-align: center; }
-        .brand-logo img { max-height: 90px; width: auto; }
-        .brand-logo h2 { color: var(--gold-500); font-weight: 700; margin-top: 10px; margin-bottom: 2px; }
-        .brand-logo .version { color: #8c8ca1; font-size: 0.85rem; }
+        .brand-logo img { max-height: 90px; width: auto; filter: drop-shadow(0 6px 18px rgba(207,160,70,.25)); }
+        .brand-logo h2 { color: var(--gold-200); font-weight: 700; margin-top: 10px; margin-bottom: 2px; }
+        .brand-logo .version { color: #b9b9c2; font-size: 0.85rem; }
         .btn-primary {
             background: linear-gradient(135deg, var(--gold-200), var(--gold-500)) !important;
             border-color: var(--gold-400) !important;
