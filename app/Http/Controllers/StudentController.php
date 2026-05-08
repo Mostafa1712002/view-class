@@ -58,17 +58,15 @@ class StudentController extends Controller
                     $sq->where('users.id', $student->id);
                 });
             })
-            ->where('exam_date', '>=', now())
-            ->where('status', 'published')
-            ->orderBy('exam_date')
+            ->where('start_time', '>=', now())
+            ->where('is_published', true)
+            ->orderBy('start_time')
             ->limit(5)
             ->get();
 
-        // Recent exam results
+        // Recent exam results — submitted attempts only
         $recentExamResults = $student->studentExams()
-            ->whereHas('exam', function ($q) {
-                $q->where('status', 'completed');
-            })
+            ->whereNotNull('submitted_at')
             ->with(['exam.subject'])
             ->latest()
             ->limit(5)
@@ -202,19 +200,19 @@ class StudentController extends Controller
             // Upcoming exams
             $upcomingExams = Exam::whereIn('class_id', $classIds)
                 ->where('academic_year_id', $selectedYear->id)
-                ->where('exam_date', '>=', now())
-                ->whereIn('status', ['published', 'active'])
+                ->where('start_time', '>=', now())
+                ->where('is_published', true)
                 ->with('subject')
-                ->orderBy('exam_date')
+                ->orderBy('start_time')
                 ->get();
 
-            // Completed exams with results
+            // Completed exams with results — submitted attempts
             $completedExams = $student->studentExams()
                 ->whereHas('exam', function ($q) use ($selectedYear, $classIds) {
                     $q->where('academic_year_id', $selectedYear->id)
-                        ->whereIn('class_id', $classIds)
-                        ->where('status', 'completed');
+                        ->whereIn('class_id', $classIds);
                 })
+                ->whereNotNull('submitted_at')
                 ->with(['exam.subject'])
                 ->get();
         }

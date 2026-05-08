@@ -120,10 +120,10 @@ class ParentController extends Controller
         // Upcoming exams
         $upcomingExams = $class ? $class->exams()
             ->where('academic_year_id', $academicYear?->id)
-            ->where('exam_date', '>=', now())
-            ->whereIn('status', ['published', 'active'])
+            ->where('start_time', '>=', now())
+            ->where('is_published', true)
             ->with('subject')
-            ->orderBy('exam_date')
+            ->orderBy('start_time')
             ->limit(5)
             ->get() : collect();
 
