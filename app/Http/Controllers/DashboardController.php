@@ -167,13 +167,16 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $thisWeek = Carbon::now()->startOfWeek();
 
-        $todaySchedules = Schedule::where('teacher_id', $user->id)
-            ->with(['classRoom', 'subject'])
-            ->whereHas('periods', fn($q) => $q->where('day', $today->dayOfWeek))
+        // schedules has no teacher_id; teacher lives on schedule_periods. Resolve
+        // a teacher's class schedules for today via the pivot.
+        $todaySchedules = Schedule::whereHas('periods', fn($q) => $q
+                ->where('teacher_id', $user->id)
+                ->where('day_of_week', $today->dayOfWeek))
+            ->with(['classRoom', 'periods' => fn($q) => $q->where('teacher_id', $user->id)])
             ->get();
 
         $mySubjects = $user->subjects()->get();
-        $myClassIds = $todaySchedules->pluck('class_room_id')->unique();
+        $myClassIds = $todaySchedules->pluck('class_id')->unique();
 
         $upcomingExams = Exam::where('teacher_id', $user->id)
             ->where('start_time', '>=', $today)
