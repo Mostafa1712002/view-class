@@ -172,11 +172,12 @@
             <li class="nav-item has-sub {{ request()->routeIs('admin.users.*') ? 'open' : '' }}" data-section="system">
                 <a href="#"><i class="la la-users"></i><span class="menu-title">@lang('shell.nav_users')</span></a>
                 <ul class="menu-content">
-                    <li class="{{ request()->routeIs('admin.users.students.*') ? 'active' : '' }}">
+                    <li class="{{ request()->routeIs('admin.users.students.*') && !request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}">
                         <a href="{{ Route::has('admin.users.students.index') ? route('admin.users.students.index') : '#' }}">
                             <i class="la la-user-graduate"></i><span class="menu-item">@lang('users.students')</span>
                         </a>
                     </li>
+                    {{-- === School search card 59 === --}}@if(auth()->check() && auth()->user()->isSuperAdmin())<li class="{{ request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}"><a href="{{ Route::has('admin.users.students.global-search') ? route('admin.users.students.global-search') : '#' }}"><i class="la la-search-plus"></i><span class="menu-item">@lang('users.global_search')</span></a></li>@endif
                     <li class="{{ request()->routeIs('admin.users.parents.*') ? 'active' : '' }}">
                         <a href="{{ Route::has('admin.users.parents.index') ? route('admin.users.parents.index') : '#' }}">
                             <i class="la la-user-friends"></i><span class="menu-item">@lang('users.parents')</span>

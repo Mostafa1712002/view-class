@@ -154,6 +154,8 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
 // Sprint 3 — Users Module (admin-prefixed)
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::prefix('users')->name('users.')->group(function () {
+        // === School search card 59 ===
+        Route::get('students/global-search', [\App\Modules\Users\Controllers\StudentGlobalSearchController::class, 'index'])->name('students.global-search');
         Route::get('students', [\App\Modules\Users\Controllers\StudentController::class, 'index'])->name('students.index');
         Route::get('students/create', [\App\Modules\Users\Controllers\StudentController::class, 'create'])->name('students.create');
         Route::post('students', [\App\Modules\Users\Controllers\StudentController::class, 'store'])->name('students.store');
