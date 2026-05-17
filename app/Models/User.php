@@ -236,4 +236,11 @@ class User extends Authenticatable
     {
         return $this->belongsTo(JobTitle::class);
     }
+
+    // === Teachers card 54 ===
+    public function teacherProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TeacherProfile::class);
+    }
+    // === /Teachers card 54 ===
 }
