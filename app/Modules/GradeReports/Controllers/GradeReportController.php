@@ -53,6 +53,7 @@ class GradeReportController extends Controller
     public function store(Request $request)
     {
         $data = $this->validatePayload($request);
+        $data['type'] = $request->validate(['type' => ['nullable', 'in:dynamic,static,gradesheet']])['type'] ?? 'dynamic';
         // For super-admins (no scoped school) prefer the explicitly picked class's school,
         // else the user's own school, else the first school in the system.
         $schoolId = $this->schoolId() ?? auth()->user()->school_id;
