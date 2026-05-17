@@ -7,7 +7,19 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface QuestionBankRepository
 {
-    public function paginate(?int $schoolId, ?string $search = null, int $perPage = 25): LengthAwarePaginator;
+    /**
+     * Paginate banks visible to the active school, with optional filters.
+     *
+     * @param array $filters keys: q, visibility, status, source, subject_id, grade_level, creator_id
+     */
+    public function paginate(?int $schoolId, array $filters = [], int $perPage = 25): LengthAwarePaginator;
+
+    /**
+     * KPI counters for the index header.
+     *
+     * @return array{total:int, public:int, private:int, active:int}
+     */
+    public function stats(?int $schoolId): array;
 
     public function findScoped(int $id, ?int $schoolId): ?QuestionBank;
 

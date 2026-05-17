@@ -21,9 +21,28 @@ class QuestionBankController extends Controller
     public function index(Request $request): View
     {
         $schoolId = $this->activeSchoolId();
-        $banks = $this->banks->paginate($schoolId, $request->get('q'));
+        $filters = $this->extractFilters($request);
 
-        return view('admin.question-banks.index', compact('banks'));
+        $banks = $this->banks->paginate($schoolId, $filters);
+        $stats = $this->banks->stats($schoolId);
+
+        $subjects = $this->subjectsForSchool($schoolId);
+        $creators = $this->creatorsForSchool($schoolId);
+
+        $vocab = $this->vocabulary();
+
+        return view('admin.question-banks.index', [
+            'banks' => $banks,
+            'stats' => $stats,
+            'filters' => $filters,
+            'subjects' => $subjects,
+            'creators' => $creators,
+            'visibilities' => $vocab['visibilities'],
+            'statuses' => $vocab['statuses'],
+            'sources' => $vocab['sources'],
+            'grades' => $vocab['grades'],
+            'categories' => $vocab['categories'],
+        ]);
     }
 
     public function library(): View
@@ -46,11 +65,21 @@ class QuestionBankController extends Controller
     public function create(): View
     {
         $schoolId = $this->activeSchoolId();
-        $bank = new QuestionBank();
+        $bank = new QuestionBank([
+            'visibility' => QuestionBank::VISIBILITY_PRIVATE,
+            'status' => QuestionBank::STATUS_ACTIVE,
+            'source' => QuestionBank::SOURCE_MANUAL,
+            'is_ana_qudurat_linkable' => false,
+        ]);
         $subjects = $this->subjectsForSchool($schoolId);
         $teachers = $this->teachersForSchool($schoolId);
+        $vocab = $this->vocabulary();
 
-        return view('admin.question-banks.create', compact('bank', 'subjects', 'teachers'));
+        return view('admin.question-banks.create', array_merge([
+            'bank' => $bank,
+            'subjects' => $subjects,
+            'teachers' => $teachers,
+        ], $vocab));
     }
 
     public function store(Request $request): RedirectResponse
@@ -62,8 +91,15 @@ class QuestionBankController extends Controller
         $payload = [
             'name_ar' => $data['name_ar'],
             'name_en' => $data['name_en'] ?? null,
-            'school_id' => $this->activeSchoolId(),
+            'description' => $data['description'] ?? null,
+            'school_id' => $this->resolveSchoolForPayload($data),
             'is_library' => false,
+            'visibility' => $data['visibility'],
+            'status' => $data['status'],
+            'source' => $data['source'],
+            'grade_level' => $data['grade_level'] ?? null,
+            'category_type' => $data['category_type'] ?? null,
+            'is_ana_qudurat_linkable' => (bool) ($data['is_ana_qudurat_linkable'] ?? false),
             'created_by' => auth()->id(),
         ];
 
@@ -71,7 +107,7 @@ class QuestionBankController extends Controller
 
         return redirect()
             ->route('admin.question-banks.index')
-            ->with('success', __('sprint4.question_banks.flash.created'));
+            ->with('success', __('question_banks.flash_created'));
     }
 
     public function edit(int $id): View
@@ -82,8 +118,13 @@ class QuestionBankController extends Controller
 
         $subjects = $this->subjectsForSchool($schoolId);
         $teachers = $this->teachersForSchool($schoolId);
+        $vocab = $this->vocabulary();
 
-        return view('admin.question-banks.edit', compact('bank', 'subjects', 'teachers'));
+        return view('admin.question-banks.edit', array_merge([
+            'bank' => $bank,
+            'subjects' => $subjects,
+            'teachers' => $teachers,
+        ], $vocab));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -99,11 +140,18 @@ class QuestionBankController extends Controller
         $this->banks->update($bank, [
             'name_ar' => $data['name_ar'],
             'name_en' => $data['name_en'] ?? null,
+            'description' => $data['description'] ?? null,
+            'visibility' => $data['visibility'],
+            'status' => $data['status'],
+            'source' => $data['source'],
+            'grade_level' => $data['grade_level'] ?? null,
+            'category_type' => $data['category_type'] ?? null,
+            'is_ana_qudurat_linkable' => (bool) ($data['is_ana_qudurat_linkable'] ?? false),
         ], $subjectIds, $memberRoles);
 
         return redirect()
             ->route('admin.question-banks.index')
-            ->with('success', __('sprint4.question_banks.flash.updated'));
+            ->with('success', __('question_banks.flash_updated'));
     }
 
     public function destroy(int $id): RedirectResponse
@@ -116,7 +164,20 @@ class QuestionBankController extends Controller
 
         return redirect()
             ->route('admin.question-banks.index')
-            ->with('success', __('sprint4.question_banks.flash.deleted'));
+            ->with('success', __('question_banks.flash_deleted'));
+    }
+
+    private function extractFilters(Request $request): array
+    {
+        return [
+            'q' => trim((string) $request->get('q', '')),
+            'visibility' => $request->get('visibility'),
+            'status' => $request->get('status'),
+            'source' => $request->get('source'),
+            'subject_id' => $request->get('subject_id'),
+            'grade_level' => $request->get('grade_level'),
+            'creator_id' => $request->get('creator_id'),
+        ];
     }
 
     private function validateBank(Request $request): array
@@ -124,11 +185,29 @@ class QuestionBankController extends Controller
         return $request->validate([
             'name_ar' => ['required', 'string', 'max:255'],
             'name_en' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'visibility' => ['required', 'in:public,private'],
+            'status' => ['required', 'in:active,inactive,under_review,archived'],
+            'source' => ['required', 'in:manual,library,import,ana_qudurat'],
+            'grade_level' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'category_type' => ['nullable', 'in:school,qudurat,verbal,quantitative,speed_reading'],
+            'is_ana_qudurat_linkable' => ['nullable', 'boolean'],
             'subject_ids' => ['nullable', 'array'],
             'subject_ids.*' => ['integer', 'exists:subjects,id'],
             'member_roles' => ['nullable', 'array'],
             'member_roles.*' => ['nullable', 'in:viewer,editor'],
         ]);
+    }
+
+    /**
+     * Public banks created from inside a school stay attached to that school
+     * (so the school still owns it) but become visible everywhere thanks to
+     * the visibility flag. A super-admin without an active school scope can
+     * still create a true platform-wide public bank (school_id = null).
+     */
+    private function resolveSchoolForPayload(array $data): ?int
+    {
+        return $this->activeSchoolId();
     }
 
     private function subjectsForSchool(?int $schoolId): \Illuminate\Support\Collection
@@ -146,10 +225,64 @@ class QuestionBankController extends Controller
         if ($schoolId !== null) {
             $query->where('school_id', $schoolId);
         }
-        // Anyone with a role; we filter casual users via roles existence
         $query->whereHas('roles', function ($q) {
             $q->whereIn('slug', ['teacher', 'school-admin', 'super-admin']);
         });
         return $query->orderBy('name')->limit(200)->get();
+    }
+
+    private function creatorsForSchool(?int $schoolId): \Illuminate\Support\Collection
+    {
+        $bankQuery = QuestionBank::query()
+            ->select('created_by')
+            ->where('is_library', false)
+            ->whereNotNull('created_by');
+
+        if ($schoolId !== null) {
+            $bankQuery->where(function ($q) use ($schoolId) {
+                $q->where('school_id', $schoolId)->orWhere('visibility', 'public');
+            });
+        }
+
+        $ids = $bankQuery->distinct()->pluck('created_by');
+        if ($ids->isEmpty()) {
+            return collect();
+        }
+
+        return User::query()
+            ->select('id', 'name', 'username')
+            ->whereIn('id', $ids)
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function vocabulary(): array
+    {
+        return [
+            'visibilities' => [
+                QuestionBank::VISIBILITY_PUBLIC => __('question_banks.visibility_public'),
+                QuestionBank::VISIBILITY_PRIVATE => __('question_banks.visibility_private'),
+            ],
+            'statuses' => [
+                QuestionBank::STATUS_ACTIVE => __('question_banks.status_active'),
+                QuestionBank::STATUS_INACTIVE => __('question_banks.status_inactive'),
+                QuestionBank::STATUS_UNDER_REVIEW => __('question_banks.status_under_review'),
+                QuestionBank::STATUS_ARCHIVED => __('question_banks.status_archived'),
+            ],
+            'sources' => [
+                QuestionBank::SOURCE_MANUAL => __('question_banks.source_manual'),
+                QuestionBank::SOURCE_LIBRARY => __('question_banks.source_library'),
+                QuestionBank::SOURCE_IMPORT => __('question_banks.source_import'),
+                QuestionBank::SOURCE_ANA_QUDURAT => __('question_banks.source_ana_qudurat'),
+            ],
+            'grades' => __('question_banks.grades'),
+            'categories' => [
+                QuestionBank::CATEGORY_SCHOOL => __('question_banks.category_school'),
+                QuestionBank::CATEGORY_QUDURAT => __('question_banks.category_qudurat'),
+                QuestionBank::CATEGORY_VERBAL => __('question_banks.category_verbal'),
+                QuestionBank::CATEGORY_QUANTITATIVE => __('question_banks.category_quantitative'),
+                QuestionBank::CATEGORY_SPEED_READING => __('question_banks.category_speed_reading'),
+            ],
+        ];
     }
 }

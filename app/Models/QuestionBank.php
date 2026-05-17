@@ -16,13 +16,45 @@ class QuestionBank extends Model
         'school_id',
         'name_ar',
         'name_en',
+        'description',
         'is_library',
+        'visibility',
+        'status',
+        'source',
+        'grade_level',
+        'category_type',
+        'is_ana_qudurat_linkable',
+        'external_id',
+        'link_status',
+        'last_sync_at',
         'created_by',
     ];
 
     protected $casts = [
         'is_library' => 'boolean',
+        'is_ana_qudurat_linkable' => 'boolean',
+        'grade_level' => 'integer',
+        'last_sync_at' => 'datetime',
     ];
+
+    public const VISIBILITY_PUBLIC = 'public';
+    public const VISIBILITY_PRIVATE = 'private';
+
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_INACTIVE = 'inactive';
+    public const STATUS_UNDER_REVIEW = 'under_review';
+    public const STATUS_ARCHIVED = 'archived';
+
+    public const SOURCE_MANUAL = 'manual';
+    public const SOURCE_LIBRARY = 'library';
+    public const SOURCE_IMPORT = 'import';
+    public const SOURCE_ANA_QUDURAT = 'ana_qudurat';
+
+    public const CATEGORY_SCHOOL = 'school';
+    public const CATEGORY_QUDURAT = 'qudurat';
+    public const CATEGORY_VERBAL = 'verbal';
+    public const CATEGORY_QUANTITATIVE = 'quantitative';
+    public const CATEGORY_SPEED_READING = 'speed_reading';
 
     public function school(): BelongsTo
     {
