@@ -2,6 +2,8 @@
 
 @section('title', __('schools.title'))
 
+@section('body_class', 'theme-light')
+
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
@@ -22,10 +24,10 @@
             <a href="{{ route('admin.schools.create') }}" class="btn btn-primary btn-sm">
                 <i class="la la-plus"></i> @lang('schools.add_school')
             </a>
-            <a href="#" class="btn btn-outline-secondary btn-sm" title="@lang('schools.branches')">
+            <a href="{{ route('admin.school-branches.index') }}" class="btn btn-outline-secondary btn-sm" title="@lang('schools.branches')">
                 <i class="la la-sitemap"></i> @lang('schools.branches')
             </a>
-            <a href="#" class="btn btn-outline-secondary btn-sm" title="@lang('schools.extra_services')">
+            <a href="{{ route('admin.sms-services.index') }}" class="btn btn-outline-secondary btn-sm" title="@lang('schools.extra_services')">
                 <i class="la la-puzzle-piece"></i> @lang('schools.extra_services')
             </a>
         </div>

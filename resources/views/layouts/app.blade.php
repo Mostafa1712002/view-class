@@ -505,6 +505,13 @@
                     dir: '{{ $dir }}',
                     minimumResultsForSearch: 0,  // always show search box
                 });
+                // Generic init for any form that opts in via `.select2` class.
+                $('select.select2').not('#shell-scope-form select').select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    dir: '{{ $dir }}',
+                    minimumResultsForSearch: 6,  // hide search for tiny lists
+                });
             });
         })();
     </script>

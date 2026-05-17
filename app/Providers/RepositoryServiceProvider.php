@@ -17,6 +17,14 @@ use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
 use App\Modules\QuestionBanks\Repositories\EloquentQuestionBankRepository;
 use App\Modules\GradeReports\Repositories\Contracts\GradeReportRepository;
 use App\Modules\GradeReports\Repositories\EloquentGradeReportRepository;
+use App\Modules\Libraries\Repositories\Contracts\LibraryItemRepository;
+use App\Modules\Libraries\Repositories\Contracts\LibraryRepository;
+use App\Modules\Libraries\Repositories\EloquentLibraryItemRepository;
+use App\Modules\Libraries\Repositories\EloquentLibraryRepository;
+use App\Modules\SchoolBranches\Repositories\Contracts\SchoolBranchRepository;
+use App\Modules\SchoolBranches\Repositories\EloquentSchoolBranchRepository;
+use App\Modules\SmsServices\Repositories\Contracts\SmsSettingsRepository;
+use App\Modules\SmsServices\Repositories\EloquentSmsSettingsRepository;
 use App\Modules\Subjects\Repositories\Contracts\SubjectRepository;
 use App\Modules\Subjects\Repositories\EloquentSubjectRepository;
 use App\Modules\Users\Repositories\Contracts\AdminRepository;
@@ -44,6 +52,10 @@ class RepositoryServiceProvider extends ServiceProvider
         SubjectRepository::class => EloquentSubjectRepository::class,
         QuestionBankRepository::class => EloquentQuestionBankRepository::class,
         GradeReportRepository::class => EloquentGradeReportRepository::class,
+        LibraryRepository::class => EloquentLibraryRepository::class,
+        LibraryItemRepository::class => EloquentLibraryItemRepository::class,
+        SchoolBranchRepository::class => EloquentSchoolBranchRepository::class,
+        SmsSettingsRepository::class => EloquentSmsSettingsRepository::class,
     ];
 
     public function register(): void

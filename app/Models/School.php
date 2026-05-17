@@ -19,10 +19,13 @@ class School extends Model
         'name_ar',
         'name_en',
         'branch',
+        'branch_id',
         'sort_order',
         'educational_track',
         'stage',
         'city',
+        'student_gender',
+        'timezone',
         'default_language',
         'code',
         'logo',
@@ -48,6 +51,21 @@ class School extends Model
     public function educationalCompany(): BelongsTo
     {
         return $this->belongsTo(EducationalCompany::class);
+    }
+
+    public function branchRecord(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\SchoolBranches\Models\SchoolBranch::class, 'branch_id');
+    }
+
+    public function smsSetting()
+    {
+        return $this->hasOne(\App\Modules\SmsServices\Models\SchoolSmsSetting::class);
+    }
+
+    public function smsSenders()
+    {
+        return $this->hasMany(\App\Modules\SmsServices\Models\SmsSender::class);
     }
 
     public function users(): HasMany

@@ -15,8 +15,19 @@
     </div>
 
     <div class="col-md-4 mb-3">
-        <label for="branch" class="form-label">@lang('schools.branch')</label>
-        <input type="text" class="form-control" id="branch" name="branch" value="{{ $val('branch') }}">
+        <label for="branch_id" class="form-label">@lang('schools.branch')</label>
+        <select class="form-control select2" id="branch_id" name="branch_id">
+            <option value="">—</option>
+            @foreach(($branches ?? []) as $b)
+                <option value="{{ $b->id }}" @selected($val('branch_id') == $b->id)>{{ app()->getLocale() === 'en' ? ($b->name_en ?: $b->name_ar) : ($b->name_ar ?: $b->name_en) }}</option>
+            @endforeach
+        </select>
+        @if(($branches ?? collect())->isEmpty())
+            <small class="text-muted">
+                @lang('schools.no_branches_yet')
+                <a href="{{ route('admin.school-branches.create') }}">@lang('schools.add_branch_now')</a>
+            </small>
+        @endif
     </div>
     <div class="col-md-4 mb-3">
         <label for="sort_order" class="form-label">@lang('schools.sort_order')</label>
@@ -29,17 +40,48 @@
                 <option value="{{ $t }}" @selected($val('educational_track','national') === $t)>@lang('schools.track_' . $t)</option>
             @endforeach
         </select>
+        <small class="text-muted">@lang('schools.track_predefined_hint')</small>
     </div>
 
     <div class="col-md-6 mb-3">
         <label for="stage" class="form-label">@lang('schools.stage') <span class="text-danger">*</span></label>
-        <input type="text" class="form-control @error('stage') is-invalid @enderror" id="stage" name="stage" value="{{ $val('stage') }}" required>
+        <select class="form-control select2 @error('stage') is-invalid @enderror" id="stage" name="stage" required>
+            <option value="">—</option>
+            @foreach(['primary','intermediate','secondary'] as $s)
+                <option value="{{ $s }}" @selected($val('stage') === $s)>@lang('schools.stage_' . $s)</option>
+            @endforeach
+        </select>
         @error('stage')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3">
         <label for="city" class="form-label">@lang('schools.city') <span class="text-danger">*</span></label>
-        <input type="text" class="form-control @error('city') is-invalid @enderror" id="city" name="city" value="{{ $val('city') }}" required>
+        <select class="form-control select2 @error('city') is-invalid @enderror" id="city" name="city" required>
+            <option value="">—</option>
+            @foreach(($cities ?? []) as $key => $labels)
+                <option value="{{ $key }}" @selected($val('city') === $key)>{{ app()->getLocale() === 'en' ? $labels['en'] : $labels['ar'] }}</option>
+            @endforeach
+        </select>
         @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label for="student_gender" class="form-label">@lang('schools.student_gender') <span class="text-danger">*</span></label>
+        <select class="form-control select2 @error('student_gender') is-invalid @enderror" id="student_gender" name="student_gender" required>
+            <option value="">—</option>
+            <option value="boys"  @selected($val('student_gender') === 'boys')>@lang('schools.gender_boys')</option>
+            <option value="girls" @selected($val('student_gender') === 'girls')>@lang('schools.gender_girls')</option>
+            <option value="mixed" @selected($val('student_gender','mixed') === 'mixed')>@lang('schools.gender_mixed')</option>
+        </select>
+        @error('student_gender')<div class="invalid-feedback">{{ $message }}</div>@enderror
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="timezone" class="form-label">@lang('schools.timezone') <span class="text-danger">*</span></label>
+        <select class="form-control select2 @error('timezone') is-invalid @enderror" id="timezone" name="timezone" required>
+            @foreach(($timezones ?? []) as $tz => $label)
+                <option value="{{ $tz }}" @selected($val('timezone','Asia/Riyadh') === $tz)>{{ $label }}</option>
+            @endforeach
+        </select>
+        @error('timezone')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     <div class="col-md-6 mb-3">

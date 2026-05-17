@@ -8,6 +8,14 @@ return [
     'school_details' => 'School Details',
     'branches' => 'Branches',
     'extra_services' => 'Extra Services',
+    'student_gender' => 'Student Gender',
+    'gender_boys' => 'Boys',
+    'gender_girls' => 'Girls',
+    'gender_mixed' => 'Mixed',
+    'timezone' => 'Local Timezone',
+    'track_predefined_hint' => 'Tracks are system-defined values',
+    'no_branches_yet' => 'No branches yet.',
+    'add_branch_now' => 'Add a branch now',
 
     // Form fields
     'name' => 'School Name',

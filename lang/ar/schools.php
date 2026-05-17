@@ -7,7 +7,15 @@ return [
     'edit_school' => 'تعديل المدرسة',
     'school_details' => 'بيانات المدرسة',
     'branches' => 'الفروع',
-    'extra_services' => 'خدمات إضافية',
+    'extra_services' => 'الخدمات الإضافية',
+    'student_gender' => 'نوع الطلاب',
+    'gender_boys' => 'بنين',
+    'gender_girls' => 'بنات',
+    'gender_mixed' => 'مختلط',
+    'timezone' => 'الوقت المحلي',
+    'track_predefined_hint' => 'المسارات قيم مُعرَّفة في النظام',
+    'no_branches_yet' => 'لا توجد فروع بعد.',
+    'add_branch_now' => 'أضِف فرعاً الآن',
 
     // Form fields
     'name' => 'اسم المدرسة',

@@ -33,7 +33,11 @@ class SchoolController extends Controller
     public function create()
     {
         $companies = EducationalCompany::orderBy('name_ar')->get();
-        return view('admin.schools.create', compact('companies'));
+        $branches = \App\Modules\SchoolBranches\Models\SchoolBranch::where('is_active', true)
+            ->orderBy('name_ar')->get();
+        $cities = config('saudi_cities', []);
+        $timezones = $this->timezoneOptions();
+        return view('admin.schools.create', compact('companies', 'branches', 'cities', 'timezones'));
     }
 
     public function store(Request $request)
@@ -64,7 +68,11 @@ class SchoolController extends Controller
     public function edit(School $school)
     {
         $companies = EducationalCompany::orderBy('name_ar')->get();
-        return view('admin.schools.edit', compact('school', 'companies'));
+        $branches = \App\Modules\SchoolBranches\Models\SchoolBranch::where('is_active', true)
+            ->orderBy('name_ar')->get();
+        $cities = config('saudi_cities', []);
+        $timezones = $this->timezoneOptions();
+        return view('admin.schools.edit', compact('school', 'companies', 'branches', 'cities', 'timezones'));
     }
 
     public function update(Request $request, School $school)
@@ -102,14 +110,23 @@ class SchoolController extends Controller
             $codeRule .= ',' . $schoolId;
         }
 
+        $cityKeys = array_keys(config('saudi_cities', []));
+        $cityRule = $cityKeys ? 'required|in:' . implode(',', $cityKeys) : 'required|string|max:100';
+
+        $tzKeys = array_keys($this->timezoneOptions());
+        $tzRule = 'required|in:' . implode(',', $tzKeys);
+
         return $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'branch' => 'nullable|string|max:255',
+            'branch_id' => 'nullable|exists:school_branches,id',
             'sort_order' => 'nullable|integer|min:0',
             'educational_track' => 'nullable|in:national,international,general,k12',
-            'stage' => 'required|string|max:100',
-            'city' => 'required|string|max:100',
+            'stage' => 'required|in:primary,intermediate,secondary',
+            'city' => $cityRule,
+            'student_gender' => 'required|in:boys,girls,mixed',
+            'timezone' => $tzRule,
             'default_language' => 'required|in:ar,en',
             'educational_company_id' => 'nullable|exists:educational_companies,id',
             'code' => $codeRule,
@@ -125,6 +142,39 @@ class SchoolController extends Controller
             'logo' => 'nullable|image|max:2048',
             'is_active' => 'sometimes|boolean',
         ]);
+    }
+
+    /**
+     * Curated timezone list for the schools form. Defaults are biased toward
+     * KSA (the platform's primary market) but include neighbours so multinational
+     * companies can use the same select.
+     *
+     * @return array<string,string>
+     */
+    private function timezoneOptions(): array
+    {
+        return [
+            'Asia/Riyadh'   => 'Asia/Riyadh (UTC+3)',
+            'Asia/Aden'     => 'Asia/Aden (UTC+3)',
+            'Asia/Kuwait'   => 'Asia/Kuwait (UTC+3)',
+            'Asia/Bahrain'  => 'Asia/Bahrain (UTC+3)',
+            'Asia/Qatar'    => 'Asia/Qatar (UTC+3)',
+            'Asia/Dubai'    => 'Asia/Dubai (UTC+4)',
+            'Asia/Muscat'   => 'Asia/Muscat (UTC+4)',
+            'Asia/Baghdad'  => 'Asia/Baghdad (UTC+3)',
+            'Asia/Amman'    => 'Asia/Amman (UTC+3)',
+            'Asia/Damascus' => 'Asia/Damascus (UTC+3)',
+            'Asia/Beirut'   => 'Asia/Beirut (UTC+3)',
+            'Asia/Jerusalem'=> 'Asia/Jerusalem (UTC+3)',
+            'Africa/Cairo'  => 'Africa/Cairo (UTC+2)',
+            'Africa/Khartoum'=> 'Africa/Khartoum (UTC+2)',
+            'Africa/Tripoli'=> 'Africa/Tripoli (UTC+2)',
+            'Africa/Tunis'  => 'Africa/Tunis (UTC+1)',
+            'Africa/Algiers'=> 'Africa/Algiers (UTC+1)',
+            'Africa/Casablanca'=> 'Africa/Casablanca (UTC+1)',
+            'Europe/Istanbul'=> 'Europe/Istanbul (UTC+3)',
+            'UTC'           => 'UTC',
+        ];
     }
 
     private function generateCode(string $name): string

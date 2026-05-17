@@ -2,6 +2,8 @@
 
 @section('title', __('schools.edit_school'))
 
+@section('body_class', 'theme-light')
+
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-12 mb-2">

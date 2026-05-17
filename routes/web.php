@@ -65,6 +65,28 @@ Route::middleware('auth')->group(function () {
 
 // Admin Routes (Super Admin Only)
 Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')->group(function () {
+    // School Branches (Trello card 51) — global lookup, schools point at one branch.
+    Route::get('school-branches', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'index'])->name('school-branches.index');
+    Route::get('school-branches/create', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'create'])->name('school-branches.create');
+    Route::post('school-branches', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'store'])->name('school-branches.store');
+    Route::get('school-branches/{id}/edit', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'edit'])->name('school-branches.edit');
+    Route::put('school-branches/{id}', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'update'])->name('school-branches.update');
+    Route::delete('school-branches/{id}', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'destroy'])->name('school-branches.destroy');
+
+    // SMS Services (Trello card 51 — Additional Services button)
+    Route::prefix('sms-services')->name('sms-services.')->group(function () {
+        Route::get('/', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'index'])->name('index');
+        Route::get('{school}/connection', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'editConnection'])->name('connection.edit');
+        Route::put('{school}/connection', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'updateConnection'])->name('connection.update');
+        Route::get('{school}/default-sender', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'editDefaultSender'])->name('default-sender.edit');
+        Route::put('{school}/default-sender', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'updateDefaultSender'])->name('default-sender.update');
+        Route::post('{school}/toggle', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'toggleActive'])->name('toggle');
+        Route::get('{school}/senders', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'index'])->name('senders.index');
+        Route::get('{school}/senders/create', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'create'])->name('senders.create');
+        Route::post('{school}/senders', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'store'])->name('senders.store');
+        Route::delete('{school}/senders/{sender}', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'destroy'])->name('senders.destroy');
+    });
+
     // Schools Management
     Route::resource('schools', \App\Http\Controllers\Admin\SchoolController::class);
 
@@ -237,6 +259,38 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     // School Schedule (Sprint 4 phase 4 — read-only view + PDF)
     Route::get('school-schedule', [\App\Modules\SchoolSchedule\Controllers\SchoolScheduleController::class, 'index'])->name('school-schedule.index');
     Route::get('school-schedule/pdf', [\App\Modules\SchoolSchedule\Controllers\SchoolScheduleController::class, 'pdf'])->name('school-schedule.pdf');
+
+    // Libraries module (public + private + virtual labs)
+    Route::prefix('libraries')->name('libraries.')->group(function () {
+        // Public library
+        Route::get('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'index'])->name('public.index');
+        Route::get('public/create', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'create'])->name('public.create');
+        Route::post('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'store'])->name('public.store');
+        Route::get('public/{id}/edit', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'edit'])->name('public.edit');
+        Route::put('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'update'])->name('public.update');
+        Route::delete('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'destroy'])->name('public.destroy');
+
+        // Private libraries
+        Route::get('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'index'])->name('private.index');
+        Route::get('private/create', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'create'])->name('private.create');
+        Route::post('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'store'])->name('private.store');
+        Route::get('private/{id}/edit', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'edit'])->name('private.edit');
+        Route::put('private/{id}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'update'])->name('private.update');
+        Route::delete('private/{id}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'destroy'])->name('private.destroy');
+        Route::get('private/{id}/items', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'items'])->name('private.items');
+        Route::post('private/{id}/items', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'storeItem'])->name('private.items.store');
+        Route::delete('private/{id}/items/{itemId}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'destroyItem'])->name('private.items.destroy');
+
+        // Virtual labs
+        Route::get('labs', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'index'])->name('labs.index');
+        Route::get('labs/manage', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'manage'])->name('labs.manage');
+        Route::get('labs/create', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'create'])->name('labs.create');
+        Route::post('labs', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'store'])->name('labs.store');
+        Route::get('labs/{id}', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'show'])->name('labs.show');
+        Route::get('labs/{id}/edit', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'edit'])->name('labs.edit');
+        Route::put('labs/{id}', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'update'])->name('labs.update');
+        Route::delete('labs/{id}', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'destroy'])->name('labs.destroy');
+    });
 });
 
 // Admin Exams & Grades Routes
