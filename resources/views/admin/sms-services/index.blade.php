@@ -90,7 +90,7 @@
                                                 @csrf
                                                 <button type="submit" class="dropdown-item">
                                                     <i class="la la-power-off"></i>
-                                                    @if($isActive)@lang('sms_services.disable')@else@lang('sms_services.enable')@endif
+                                                    {{ $isActive ? __('sms_services.disable') : __('sms_services.enable') }}
                                                 </button>
                                             </form>
                                         </li>
