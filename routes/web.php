@@ -262,6 +262,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('question-banks/{bankId}/questions', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'index'])->name('question-banks.questions.index');
     Route::get('question-banks/{bankId}/questions/create', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'create'])->name('question-banks.questions.create');
     Route::post('question-banks/{bankId}/questions', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'store'])->name('question-banks.questions.store');
+    Route::get('question-banks/{bankId}/questions/{questionId}/edit', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'edit'])->name('question-banks.questions.edit');
+    Route::put('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'update'])->name('question-banks.questions.update');
+    Route::get('question-banks/{bankId}/questions/{questionId}/preview', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'preview'])->name('question-banks.questions.preview');
+    Route::post('question-banks/{bankId}/questions/{questionId}/duplicate', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'duplicate'])->name('question-banks.questions.duplicate');
     Route::delete('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'destroy'])->name('question-banks.questions.destroy');
 
     // Class Periods + Time Slots + Schedule Entries (Sprint 4 phase 3)

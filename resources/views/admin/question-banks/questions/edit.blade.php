@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', __('questions.create_title'))
+@section('title', __('questions.edit_title'))
 @section('body_class', 'theme-light')
 
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-12 mb-2">
-        <h2 class="content-header-title mb-0">{{ $bank->name_ar }} — @lang('questions.create_title')</h2>
+        <h2 class="content-header-title mb-0">{{ $bank->name_ar }} — @lang('questions.edit_title')</h2>
         <div class="breadcrumb-wrapper">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('questions.breadcrumb.home')</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('admin.question-banks.index') }}">@lang('questions.breadcrumb.banks')</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('admin.question-banks.questions.index', $bank->id) }}">{{ $bank->name_ar }}</a></li>
-                <li class="breadcrumb-item active">@lang('questions.create_title')</li>
+                <li class="breadcrumb-item active">@lang('questions.edit_title')</li>
             </ol>
         </div>
     </div>
