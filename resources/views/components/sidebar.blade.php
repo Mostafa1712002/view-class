@@ -59,12 +59,12 @@
                 <a href="{{ Route::has('manage.schedules.index') ? route('manage.schedules.index') : '#' }}"><i class="la la-calendar-check"></i><span class="menu-title">@lang('shell.nav_schedule')</span></a>
             </li>
 
-            <li class="nav-item has-sub" data-section="educational">
+            <li class="nav-item has-sub {{ request()->routeIs('admin.libraries.*') ? 'active open' : '' }}" data-section="educational">
                 <a href="#"><i class="la la-bookmark"></i><span class="menu-title">@lang('shell.nav_libraries')</span></a>
                 <ul class="menu-content">
-                    <li><a href="#"><i class="la la-globe"></i><span class="menu-item">@lang('shell.nav_library_public')</span></a></li>
-                    <li><a href="#"><i class="la la-lock"></i><span class="menu-item">@lang('shell.nav_library_private')</span></a></li>
-                    <li><a href="#"><i class="la la-flask"></i><span class="menu-item">@lang('shell.nav_labs')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.libraries.public.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.libraries.public.index') ? route('admin.libraries.public.index') : '#' }}"><i class="la la-globe"></i><span class="menu-item">@lang('shell.nav_library_public')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.libraries.private.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.libraries.private.index') ? route('admin.libraries.private.index') : '#' }}"><i class="la la-lock"></i><span class="menu-item">@lang('shell.nav_library_private')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.libraries.labs.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.libraries.labs.index') ? route('admin.libraries.labs.index') : '#' }}"><i class="la la-flask"></i><span class="menu-item">@lang('shell.nav_labs')</span></a></li>
                 </ul>
             </li>
 
