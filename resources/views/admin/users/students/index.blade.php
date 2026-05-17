@@ -245,10 +245,9 @@
                             <i class="la la-file-excel"></i> @lang('users.import_excel')
                             <span class="badge-soon">@lang('users.student_coming_soon')</span>
                         </a>
-                        <a class="dropdown-item disabled" href="#">
+                        <a class="dropdown-item" href="{{ route('admin.noor.form') }}">
                             <i class="la la-cloud-download-alt"></i> @lang('users.import_noor')
-                            <span class="badge-soon">@lang('users.student_coming_soon')</span>
-                        </a>
+                        </a> {{-- === Noor card 58 === --}}
                         <a class="dropdown-item disabled" href="#">
                             <i class="la la-images"></i> @lang('users.import_photos')
                             <span class="badge-soon">@lang('users.student_coming_soon')</span>

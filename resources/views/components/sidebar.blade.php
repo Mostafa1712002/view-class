@@ -202,7 +202,7 @@
                             <i class="la la-tag"></i><span class="menu-item">@lang('users.job_titles')</span>
                         </a>
                     </li>
-                    <li><a href="#"><i class="la la-file-import"></i><span class="menu-item">@lang('shell.nav_users_import_noor')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.noor.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.noor.form') ? route('admin.noor.form') : '#' }}"><i class="la la-file-import"></i><span class="menu-item">@lang('shell.nav_users_import_noor')</span></a></li> {{-- === Noor card 58 === --}}
                 </ul>
             </li>
 

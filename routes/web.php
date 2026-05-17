@@ -205,6 +205,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
         Route::get('cards', [\App\Modules\Users\Controllers\UserCardController::class, 'index'])->name('cards.index');
         Route::post('cards/generate', [\App\Modules\Users\Controllers\UserCardController::class, 'generate'])->name('cards.generate');
+        Route::post('cards/{id}/regenerate-password', [\App\Modules\Users\Controllers\UserCardController::class, 'regenerate'])
+            ->whereNumber('id')
+            ->name('cards.regenerate');
 
         Route::post('{id}/impersonate', [\App\Modules\Users\Controllers\ImpersonateController::class, 'start'])->name('impersonate.start');
     });
@@ -501,4 +504,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/sett
     Route::get('notifications', [\App\Http\Controllers\Admin\SettingsController::class, 'notifications'])->name('notifications');
     Route::put('notifications', [\App\Http\Controllers\Admin\SettingsController::class, 'updateNotifications'])->name('notifications.update');
     Route::post('logo', [\App\Http\Controllers\Admin\SettingsController::class, 'uploadLogo'])->name('logo.upload');
+});
+
+// === Noor card 58 ===
+Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('noor', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'form'])->name('noor.form');
+    Route::post('noor', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'submit'])->name('noor.submit');
 });
