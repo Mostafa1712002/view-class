@@ -3,9 +3,11 @@
 namespace App\Modules\Users\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\ClassRoom;
 use App\Models\Role;
 use App\Models\Section;
+use App\Models\StudentProfile;
 use App\Models\User;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use App\Modules\Users\Repositories\Contracts\StudentRepository;
@@ -58,12 +60,14 @@ class StudentController extends Controller
                 'class_room_id' => $data['class_room_id'] ?? null,
                 'name' => $data['name'],
                 'name_ar' => $data['name'],
+                'name_en' => $data['name_en'] ?? null,
                 'username' => $data['username'],
                 'email' => ($data['email'] ?? null) ?: ($data['username'].'@viewclass.local'),
                 'national_id' => $data['national_id'] ?? null,
                 'gender' => $data['gender'] ?? null,
                 'date_of_birth' => $data['date_of_birth'] ?? null,
                 'phone' => $data['phone'] ?? null,
+                'address' => $data['address'] ?? null,
                 'password' => Hash::make($plain),
                 'plain_password_for_card' => encrypt($plain),
                 'is_active' => true,
@@ -84,11 +88,25 @@ class StudentController extends Controller
                 ]);
             }
 
+            $this->syncProfile($user->id, $data);
+
             return $user;
         });
 
         return redirect()->route('admin.users.students.index')
             ->with('status', __('users.student_created', ['name' => $user->name]));
+    }
+
+    public function show(int $id): View|RedirectResponse
+    {
+        $student = $this->students->findScoped($id, $this->activeSchoolId());
+        if (!$student) {
+            return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
+        }
+        $profile = StudentProfile::firstOrNew(['user_id' => $student->id]);
+        $student->load(['classRoom', 'section', 'parents']);
+
+        return view('admin.users.students.show', compact('student', 'profile'));
     }
 
     public function edit(int $id): View|RedirectResponse
@@ -101,8 +119,9 @@ class StudentController extends Controller
         $schoolId = $this->activeSchoolId();
         $sections = Section::query()->where('school_id', $schoolId)->orderBy('name')->get();
         $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
+        $profile = StudentProfile::firstOrNew(['user_id' => $student->id]);
 
-        return view('admin.users.students.edit', compact('student', 'sections', 'classes'));
+        return view('admin.users.students.edit', compact('student', 'sections', 'classes', 'profile'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -116,12 +135,14 @@ class StudentController extends Controller
         $student->fill([
             'name' => $data['name'],
             'name_ar' => $data['name'],
+            'name_en' => $data['name_en'] ?? $student->name_en,
             'username' => $data['username'],
             'email' => ($data['email'] ?? null) ?: ($data['username'].'@viewclass.local'),
             'national_id' => $data['national_id'] ?? null,
             'gender' => $data['gender'] ?? null,
             'date_of_birth' => $data['date_of_birth'] ?? null,
             'phone' => $data['phone'] ?? null,
+            'address' => $data['address'] ?? null,
             'section_id' => $data['section_id'] ?? null,
             'class_room_id' => $data['class_room_id'] ?? null,
         ]);
@@ -130,6 +151,8 @@ class StudentController extends Controller
             $student->plain_password_for_card = encrypt($data['password']);
         }
         $student->save();
+
+        $this->syncProfile($student->id, $data);
 
         return redirect()->route('admin.users.students.index')
             ->with('status', __('users.student_updated', ['name' => $student->name]));
@@ -165,26 +188,27 @@ class StudentController extends Controller
                     $u->is_active = true;
                     break;
                 case 'unlicense':
-                    $u->status = 'unlicensed';
+                    $u->status = 'inactive';
                     $u->is_active = false;
                     break;
                 case 'waiting':
-                    $u->status = 'waiting';
+                    $u->status = 'pending';
                     $u->is_active = false;
                     break;
                 case 'hide_grades':
                 case 'show_grades':
                 case 'hide_report':
                 case 'show_report':
-                    $prefs = json_decode($u->notification_preferences ?? '{}', true) ?: [];
+                    $prefs = $u->notification_preferences ?? [];
+                    if (is_string($prefs)) {
+                        $prefs = json_decode($prefs, true) ?: [];
+                    }
                     $key = match ($data['action']) {
-                        'hide_grades' => 'grades_hidden',
-                        'show_grades' => 'grades_hidden',
-                        'hide_report' => 'report_hidden',
-                        'show_report' => 'report_hidden',
+                        'hide_grades', 'show_grades' => 'grades_hidden',
+                        'hide_report', 'show_report' => 'report_hidden',
                     };
                     $prefs[$key] = str_starts_with($data['action'], 'hide_');
-                    $u->notification_preferences = json_encode($prefs);
+                    $u->notification_preferences = $prefs;
                     break;
             }
             $u->save();
@@ -194,19 +218,177 @@ class StudentController extends Controller
             ->with('status', __('users.bulk_done', ['count' => $rows->count()]));
     }
 
+    /**
+     * Parents linked to a student (read-only listing for now — wired from the row dropdown).
+     */
+    public function parents(int $id): View|RedirectResponse
+    {
+        $student = $this->students->findScoped($id, $this->activeSchoolId());
+        if (!$student) {
+            return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
+        }
+        $parents = $student->parents()->get();
+
+        return view('admin.users.students.parents', compact('student', 'parents'));
+    }
+
+    /**
+     * The student's class schedule (read-only for the admin user-management view).
+     */
+    public function schedule(int $id): View|RedirectResponse
+    {
+        $student = $this->students->findScoped($id, $this->activeSchoolId());
+        if (!$student) {
+            return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
+        }
+
+        $class = $student->classRoom;
+        $periods = collect();
+        if ($class) {
+            $schedule = $class->schedules()
+                ->where('is_active', true)
+                ->first();
+            if ($schedule) {
+                $periods = $schedule->periods()
+                    ->with(['subject', 'teacher'])
+                    ->orderBy('day_of_week')
+                    ->orderBy('period_number')
+                    ->get()
+                    ->groupBy('day_of_week');
+            }
+        }
+        $days = [
+            'sunday' => 'الأحد',
+            'monday' => 'الإثنين',
+            'tuesday' => 'الثلاثاء',
+            'wednesday' => 'الأربعاء',
+            'thursday' => 'الخميس',
+        ];
+
+        return view('admin.users.students.schedule', compact('student', 'class', 'periods', 'days'));
+    }
+
+    /**
+     * Lessons / classes the student is enrolled in (read-only listing).
+     */
+    public function lessons(int $id): View|RedirectResponse
+    {
+        $student = $this->students->findScoped($id, $this->activeSchoolId());
+        if (!$student) {
+            return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
+        }
+        $classes = $student->enrolledClasses()->with(['section', 'subjects'])->get();
+
+        return view('admin.users.students.lessons', compact('student', 'classes'));
+    }
+
+    /**
+     * Attendance history for a student (latest 60 entries).
+     */
+    public function attendance(int $id): View|RedirectResponse
+    {
+        $student = $this->students->findScoped($id, $this->activeSchoolId());
+        if (!$student) {
+            return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
+        }
+        $attendances = Attendance::query()
+            ->where('student_id', $student->id)
+            ->with(['subject', 'classRoom'])
+            ->orderByDesc('date')
+            ->paginate(30);
+
+        return view('admin.users.students.attendance', compact('student', 'attendances'));
+    }
+
+    /**
+     * Behaviour log — page shell, full CRUD deferred to future card.
+     */
+    public function behavior(int $id): View|RedirectResponse
+    {
+        $student = $this->students->findScoped($id, $this->activeSchoolId());
+        if (!$student) {
+            return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
+        }
+        return view('admin.users.students.behavior', compact('student'));
+    }
+
+    /**
+     * Medical record — page shell, full CRUD deferred to future card.
+     */
+    public function medical(int $id): View|RedirectResponse
+    {
+        $student = $this->students->findScoped($id, $this->activeSchoolId());
+        if (!$student) {
+            return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
+        }
+        return view('admin.users.students.medical', compact('student'));
+    }
+
+    private function syncProfile(int $userId, array $data): void
+    {
+        StudentProfile::updateOrCreate(
+            ['user_id' => $userId],
+            collect($data)->only([
+                'first_name', 'father_name', 'grandfather_name', 'last_name',
+                'first_name_en', 'father_name_en', 'grandfather_name_en', 'last_name_en',
+                'fingerprint_id', 'seat_number', 'passport_number', 'nationality',
+                'academic_id', 'birth_place', 'admission_year',
+                'previous_school', 'enrollment_date',
+                'father_national_id', 'mother_national_id', 'mother_full_name',
+                'home_phone', 'notes',
+            ])->toArray()
+        );
+    }
+
     private function validateStudent(Request $request, ?int $id = null): array
     {
         return $request->validate([
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'username' => 'required|string|max:64|unique:users,username'.($id ? ','.$id : ''),
             'email' => 'nullable|email|max:255|unique:users,email'.($id ? ','.$id : ''),
             'national_id' => 'nullable|string|max:32',
             'gender' => 'nullable|in:male,female',
             'date_of_birth' => 'nullable|date',
             'phone' => 'nullable|string|max:32',
+            'address' => 'nullable|string|max:1000',
             'section_id' => 'nullable|integer|exists:sections,id',
             'class_room_id' => 'nullable|integer|exists:classes,id',
             'password' => 'nullable|string|min:6|max:64',
+
+            // Profile name parts
+            'first_name' => 'nullable|string|max:255',
+            'father_name' => 'nullable|string|max:255',
+            'grandfather_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'first_name_en' => 'nullable|string|max:255',
+            'father_name_en' => 'nullable|string|max:255',
+            'grandfather_name_en' => 'nullable|string|max:255',
+            'last_name_en' => 'nullable|string|max:255',
+
+            // Identification
+            'fingerprint_id' => 'nullable|string|max:64',
+            'seat_number' => 'nullable|string|max:32',
+            'passport_number' => 'nullable|string|max:32',
+            'nationality' => 'nullable|string|max:64',
+            'academic_id' => 'nullable|string|max:64',
+            'birth_place' => 'nullable|string|max:128',
+            'admission_year' => 'nullable|integer|min:1990|max:2100',
+
+            // Schooling
+            'previous_school' => 'nullable|string|max:255',
+            'enrollment_date' => 'nullable|date',
+
+            // Family
+            'father_national_id' => 'nullable|string|max:32',
+            'mother_national_id' => 'nullable|string|max:32',
+            'mother_full_name' => 'nullable|string|max:255',
+
+            // Contact
+            'home_phone' => 'nullable|string|max:32',
+
+            // Notes
+            'notes' => 'nullable|string|max:2000',
         ]);
     }
 }
