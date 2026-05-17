@@ -7,6 +7,7 @@ use App\Models\ClassRoom;
 use App\Models\Subject;
 use App\Models\User;
 use App\Models\WeeklyPlan;
+use App\Models\WeeklyPlanNoteTemplate;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -91,9 +92,27 @@ class WeeklyPlanController extends Controller
                 ->whereDate('week_start_date', $weekStart)
                 ->get();
 
+            // Card 66 — KPI tiles for the selected week
+            $kpis = [
+                'total' => $weekPlans->count(),
+                'prepared' => $weekPlans->where('is_prepared', true)->count(),
+                'not_prepared' => $weekPlans->where('is_prepared', false)->count(),
+                'locked' => $weekPlans->where('is_locked', true)->count(),
+            ];
+
+            // Ready notes templates (small dropdown helper)
+            $noteTemplatesQuery = WeeklyPlanNoteTemplate::query();
+            if (!$user->isSuperAdmin()) {
+                $noteTemplatesQuery->where(function ($w) use ($schoolId) {
+                    $w->whereNull('school_id')->orWhere('school_id', $schoolId);
+                });
+            }
+            $noteTemplates = $noteTemplatesQuery->latest()->limit(50)->get();
+
             return view('admin.weekly-plans.index-grid', compact(
                 'weekPlans', 'weekStart', 'weekEnd',
-                'teachers', 'subjects', 'classes', 'gradeLevels'
+                'teachers', 'subjects', 'classes', 'gradeLevels',
+                'kpis', 'noteTemplates'
             ));
         }
 
