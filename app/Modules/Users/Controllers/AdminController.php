@@ -24,16 +24,90 @@ class AdminController extends Controller
 
     public function index(Request $request): View
     {
-        $admins = $this->admins->paginate(
-            $this->activeSchoolId(),
-            $request->string('q')->toString() ?: null,
-        );
-        $jobTitles = JobTitle::query()->forSchool($this->activeSchoolId())->active()->orderBy('sort_order')->get();
+        $schoolId = $this->activeSchoolId();
+        $q = $request->string('q')->toString();
+        $jobTitleId = (int) $request->input('job_title_id') ?: null;
+
+        $admins = $this->buildAdminListQuery($schoolId, $q ?: null, $jobTitleId)
+            ->with(['jobTitle', 'roles'])
+            ->orderBy('users.name')
+            ->paginate(25)
+            ->withQueryString();
+
+        $jobTitles = JobTitle::query()->forSchool($schoolId)->active()->orderBy('sort_order')->get();
+
+        // === Admins card 55 — page KPIs ===
+        $stats = $this->computeAdminStats($schoolId);
+
         return view('admin.users.admins.index', [
             'admins' => $admins,
             'jobTitles' => $jobTitles,
-            'q' => $request->string('q')->toString(),
+            'q' => $q,
+            'stats' => $stats,
         ]);
+    }
+
+    /**
+     * Shared admin list builder — duplicates the repo's logic so we can
+     * inject job_title_id filtering without touching the contract. (card 55)
+     */
+    private function buildAdminListQuery(?int $schoolId, ?string $search, ?int $jobTitleId)
+    {
+        $endUserRoles = ['student', 'parent', 'teacher'];
+
+        $q = User::query()
+            ->whereHas('roles', fn ($r) => $r->whereNotIn('slug', $endUserRoles))
+            ->whereDoesntHave('roles', fn ($r) => $r->whereIn('slug', $endUserRoles));
+
+        if ($schoolId !== null) {
+            $q->where(function ($w) use ($schoolId) {
+                $w->where('users.school_id', $schoolId)
+                  ->orWhereHas('roles', fn ($r) => $r->where('slug', 'super-admin'));
+            });
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $needle = '%'.trim($search).'%';
+            $q->where(function ($w) use ($needle) {
+                $w->where('users.name', 'like', $needle)
+                  ->orWhere('users.username', 'like', $needle)
+                  ->orWhere('users.email', 'like', $needle)
+                  ->orWhere('users.national_id', 'like', $needle);
+            });
+        }
+
+        if ($jobTitleId) {
+            $q->where('users.job_title_id', $jobTitleId);
+        }
+
+        return $q;
+    }
+
+    /**
+     * Lightweight per-school KPI counts for the admins index page.
+     * (Admins card 55)
+     */
+    private function computeAdminStats(?int $schoolId): array
+    {
+        $endUserRoles = ['student', 'parent', 'teacher'];
+
+        $base = User::query()
+            ->whereHas('roles', fn ($r) => $r->whereNotIn('slug', $endUserRoles))
+            ->whereDoesntHave('roles', fn ($r) => $r->whereIn('slug', $endUserRoles));
+
+        if ($schoolId !== null) {
+            $base->where(function ($w) use ($schoolId) {
+                $w->where('users.school_id', $schoolId)
+                  ->orWhereHas('roles', fn ($r) => $r->where('slug', 'super-admin'));
+            });
+        }
+
+        $total = (clone $base)->count();
+        $active = (clone $base)->where('users.is_active', true)->count();
+        $withJob = (clone $base)->whereNotNull('users.job_title_id')->count();
+        $super = (clone $base)->whereHas('roles', fn ($r) => $r->where('slug', 'super-admin'))->count();
+
+        return compact('total', 'active', 'withJob', 'super');
     }
 
     public function create(Request $request): View
