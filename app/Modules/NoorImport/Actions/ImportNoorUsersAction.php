@@ -108,17 +108,26 @@ final class ImportNoorUsersAction
     private function payloadFromRow(NoorRowDto $row, int $schoolId): array
     {
         $name = $row->name ?: ('مستخدم ' . $row->nationalId);
+        $username = $this->safeUsername($row);
+        // Legacy users table has NOT NULL on email/gender/language/timezone
+        // with no defaults, so fill safe placeholders rather than letting
+        // the insert blow up mid-batch.
+        $email = $row->email ?: ($username . '@noor.local');
         return array_filter([
             'name' => $name,
             'name_ar' => $name,
             'school_id' => $schoolId,
             'national_id' => $row->nationalId,
-            'username' => $this->safeUsername($row),
+            'username' => $username,
             'phone' => $row->phone,
-            'email' => $row->email,
-            'gender' => $this->normalizeGender($row->gender),
+            'email' => $email,
+            'gender' => $this->normalizeGender($row->gender) ?? 'male',
             'birth_date' => $row->birthDate,
             'specialization' => $row->specialization,
+            'language' => 'ar',
+            'language_preference' => 'ar',
+            'timezone' => 'Asia/Riyadh',
+            'status' => 'active',
             'is_active' => true,
         ], fn ($v) => $v !== null && $v !== '');
     }
