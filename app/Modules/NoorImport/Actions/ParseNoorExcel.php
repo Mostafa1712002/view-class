@@ -54,7 +54,7 @@ final class ParseNoorExcel
         $header = null;
         $rowNumber = 0;
 
-        while (($row = fgetcsv($handle, 0, ',')) !== false) {
+        while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
             $rowNumber++;
             if ($header === null) {
                 $header = array_map(fn ($v) => $this->normalizeHeader((string) $v), $row);
