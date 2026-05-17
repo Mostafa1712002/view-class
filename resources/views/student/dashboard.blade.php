@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'لوحة التحكم')
-@section('body_class', 'theme-luxury')
+@section('body_class', 'theme-light')
 
 @section('content')
 <div class="container-fluid">

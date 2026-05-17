@@ -288,77 +288,113 @@
         .main-menu li[data-section="system"] > a > i { color: #2e7d32; }
         .main-menu li.active[data-section] > a > i { color: #fff !important; }
 
-        /* ============ Luxury theme — opt-in via body.theme-luxury (Slice 1) ============ */
-        body.theme-luxury {
-            background:
-                radial-gradient(ellipse at 18% 85%, rgba(207,160,70,.14), transparent 55%),
-                radial-gradient(ellipse at 82% 15%, rgba(31,111,74,.10), transparent 55%),
-                linear-gradient(135deg, var(--black-100) 0%, var(--black-300) 100%) !important;
-            color: var(--white-200);
+        /* ============ Light theme — opt-in via body.theme-light (Slice 1 reworked) ============
+           Clean white background, soft hairline cards, gold used only as accent.
+           No backdrop-filter, no heavy gradients — keeps mobile FCP snappy. */
+        body.theme-light {
+            background: #f8fafc !important;
+            color: #0f172a;
         }
-        body.theme-luxury .app-content { background: transparent; }
-        body.theme-luxury h1, body.theme-luxury h2, body.theme-luxury h3,
-        body.theme-luxury h4, body.theme-luxury h5,
-        body.theme-luxury .content-header-title { color: var(--white-100) !important; }
-        body.theme-luxury .text-muted, body.theme-luxury small.text-muted {
-            color: var(--text-secondary) !important;
+        body.theme-light .app-content { background: transparent; }
+        body.theme-light .content-header-title,
+        body.theme-light h1, body.theme-light h2, body.theme-light h3,
+        body.theme-light h4, body.theme-light h5, body.theme-light h6 {
+            color: #0f172a;
         }
-        body.theme-luxury p, body.theme-luxury .card-text { color: var(--text-secondary); }
-        body.theme-luxury .breadcrumb { background: transparent; }
-        body.theme-luxury .breadcrumb-item, body.theme-luxury .breadcrumb-item a {
-            color: var(--text-secondary);
-        }
-        body.theme-luxury .breadcrumb-item.active { color: var(--gold-200); }
+        body.theme-light .text-muted,
+        body.theme-light small.text-muted { color: #64748b !important; }
+        body.theme-light p, body.theme-light .card-text { color: #475569; }
+        body.theme-light .breadcrumb { background: transparent; }
+        body.theme-light .breadcrumb-item,
+        body.theme-light .breadcrumb-item a { color: #64748b; }
+        body.theme-light .breadcrumb-item.active { color: var(--gold-400); font-weight: 600; }
 
-        /* Glass cards — finance/luxury feel */
-        body.theme-luxury .card {
-            background: rgba(255,255,255,0.035) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(207,160,70,0.18) !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-            color: var(--white-200);
+        /* Cards — white surface, hairline border, very soft elevation */
+        body.theme-light .card {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 14px !important;
+            box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+            color: #0f172a;
+            transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s cubic-bezier(.4,0,.2,1);
+            animation: themeLightFadeIn .32s cubic-bezier(.4,0,.2,1) both;
         }
-        body.theme-luxury .card .card-body { color: var(--white-200); }
-        body.theme-luxury .card-title, body.theme-luxury .card .card-title {
-            color: var(--white-100) !important;
+        body.theme-light .card .card-body { color: #0f172a; }
+        body.theme-light .card-header {
+            background: transparent;
+            border-bottom: 1px solid #f1f5f9;
+            padding: .9rem 1rem;
         }
-        body.theme-luxury .card h2.fw-bolder, body.theme-luxury .card h2.fw-bold,
-        body.theme-luxury .luxury-stat {
-            color: var(--gold-200) !important;
-            text-shadow: 0 0 24px rgba(207,160,70,0.18);
-        }
+        body.theme-light .card-title,
+        body.theme-light .card .card-title { color: #0f172a; font-weight: 700; }
 
-        /* Table on dark — keep legible */
-        body.theme-luxury .table { color: var(--white-200); }
-        body.theme-luxury .table thead th {
-            background: rgba(255,255,255,0.04) !important;
-            color: var(--gold-200);
-            border-bottom: 1px solid rgba(207,160,70,0.25);
-        }
-        body.theme-luxury .table tbody tr { border-color: rgba(255,255,255,0.06); }
-        body.theme-luxury .table tbody tr:hover { background: rgba(255,255,255,0.03); }
-        body.theme-luxury .table td, body.theme-luxury .table th {
-            border-color: rgba(255,255,255,0.06);
+        /* Hover lift — but only on stat tiles to keep tables/charts stable */
+        body.theme-light .card.text-center:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(15,23,42,.06), 0 12px 28px rgba(15,23,42,.05);
         }
 
-        /* Avatars on the dashboards keep their tinted bg but get a subtle border */
-        body.theme-luxury .avatar.bg-light-primary,
-        body.theme-luxury .avatar.bg-light-success,
-        body.theme-luxury .avatar.bg-light-warning,
-        body.theme-luxury .avatar.bg-light-info,
-        body.theme-luxury .avatar.bg-light-danger,
-        body.theme-luxury .avatar.bg-light-secondary {
-            border: 1px solid rgba(207,160,70,0.25);
+        /* KPI numbers — gold accent, sparingly */
+        body.theme-light .card h2.fw-bolder,
+        body.theme-light .card h2.fw-bold,
+        body.theme-light .card h3.fw-bolder,
+        body.theme-light .luxury-stat {
+            color: var(--gold-400);
+            font-weight: 800;
+            letter-spacing: -.5px;
         }
 
-        /* Welcome banner on dashboard — was hardcoded #f8fbff; force glass */
-        body.theme-luxury .card[style*="#f8fbff"],
-        body.theme-luxury .card[style*="background"] {
-            background: rgba(255,255,255,0.04) !important;
+        /* Tables — clean, lots of whitespace */
+        body.theme-light .table { color: #0f172a; }
+        body.theme-light .table thead th {
+            background: #f8fafc !important;
+            color: #475569;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+        }
+        body.theme-light .table tbody tr { border-color: #f1f5f9; }
+        body.theme-light .table tbody tr:hover { background: #f8fafc; }
+        body.theme-light .table td,
+        body.theme-light .table th { border-color: #f1f5f9; }
+
+        /* Avatars — subtle ring */
+        body.theme-light .avatar.bg-light-primary,
+        body.theme-light .avatar.bg-light-success,
+        body.theme-light .avatar.bg-light-warning,
+        body.theme-light .avatar.bg-light-info,
+        body.theme-light .avatar.bg-light-danger,
+        body.theme-light .avatar.bg-light-secondary {
+            border: 1px solid rgba(15,23,42,.06);
+        }
+
+        /* Welcome banner override — keep readable on white shell */
+        body.theme-light .card[style*="#f8fbff"] {
+            background: #ffffff !important;
             border-{{ $isRtl ? 'right' : 'left' }}: 4px solid var(--gold-300) !important;
         }
-        body.theme-luxury .card[style*="#f8fbff"] h4 { color: var(--gold-200) !important; }
+        body.theme-light .card[style*="#f8fbff"] h4 { color: #0f172a; }
+
+        /* Progress bars — soft track */
+        body.theme-light .progress { background: #f1f5f9; }
+
+        /* Buttons that aren't btn-primary still benefit from a subtle interaction */
+        body.theme-light .btn { transition: transform .15s ease, box-shadow .2s ease; }
+        body.theme-light .btn:active { transform: translateY(1px); }
+
+        /* Stagger card fade-in — first row appears immediately, later rows trail in */
+        body.theme-light .row:nth-of-type(1) .card { animation-delay: 0ms; }
+        body.theme-light .row:nth-of-type(2) .card { animation-delay: 40ms; }
+        body.theme-light .row:nth-of-type(3) .card { animation-delay: 80ms; }
+        body.theme-light .row:nth-of-type(4) .card { animation-delay: 120ms; }
+
+        @keyframes themeLightFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body.theme-light .card { animation: none !important; transition: none !important; }
+            body.theme-light .card.text-center:hover { transform: none; }
+        }
     </style>
 
     @stack('styles')
