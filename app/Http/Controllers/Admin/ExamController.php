@@ -23,7 +23,7 @@ class ExamController extends Controller
             ->withCount('questions');
 
         // Filter by teacher for non-admin users
-        if (!Auth::user()->hasRole(['super-admin', 'school-admin'])) {
+        if (!Auth::user()->hasAnyRole(['super-admin', 'school-admin'])) {
             $query->where('teacher_id', Auth::id());
         }
 
