@@ -49,9 +49,9 @@
                         <div class="d-flex justify-content-between py-1"><span class="text-muted">@lang('users.employee_id'):</span><span>{{ $teacher->employee_id ?? '—' }}</span></div>
                         <div class="d-flex justify-content-between py-1"><span class="text-muted">@lang('users.status'):</span>
                             @if($teacher->is_active)
-                                <span class="badge bg-success">@lang('users.student_status_active')</span>
+                                <span class="badge bg-success">@lang('users.teacher_status_active')</span>
                             @else
-                                <span class="badge bg-secondary">@lang('users.student_status_inactive')</span>
+                                <span class="badge bg-secondary">@lang('users.teacher_status_inactive')</span>
                             @endif
                         </div>
                     </div>

@@ -45,7 +45,7 @@
         <div class="col-md-4">
             <div class="card text-center">
                 <div class="card-body">
-                    <h6 class="text-muted">@lang('users.student_status_active')</h6>
+                    <h6 class="text-muted">@lang('users.teacher_status_active')</h6>
                     <h2 class="fw-bolder mb-0">{{ $teachersWithLoad }}</h2>
                 </div>
             </div>

@@ -72,9 +72,9 @@
                         <td>{{ $u->specialization ?? '—' }}</td>
                         <td>
                             @if($u->is_active)
-                                <span class="badge bg-success">@lang('users.student_status_active')</span>
+                                <span class="badge bg-success">@lang('users.teacher_status_active')</span>
                             @else
-                                <span class="badge bg-secondary">@lang('users.student_status_inactive')</span>
+                                <span class="badge bg-secondary">@lang('users.teacher_status_inactive')</span>
                             @endif
                         </td>
                         <td>{{ $u->last_login_at ? $u->last_login_at->diffForHumans() : '—' }}</td>
