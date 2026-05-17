@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'تعديل الجدول')
+@section('body_class', 'theme-light')
 
 @section('content')
 <div class="content-header row">

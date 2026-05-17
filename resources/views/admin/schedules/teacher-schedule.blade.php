@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'جدول المعلم')
+@section('body_class', 'theme-light')
 
 @section('content')
 <div class="content-header row">
@@ -50,9 +51,7 @@
                         <tr>
                             <th style="width: 80px;">الحصة</th>
                             @foreach($days as $dayNum => $dayName)
-                                @if($dayNum != 5)
                                 <th>{{ $dayName }}</th>
-                                @endif
                             @endforeach
                         </tr>
                     </thead>
@@ -61,20 +60,20 @@
                         <tr>
                             <td class="table-light"><strong>{{ $period }}</strong></td>
                             @foreach($days as $dayNum => $dayName)
-                                @if($dayNum != 5)
                                 <td>
-                                    @if($timetable[$dayNum][$period])
-                                        @php $p = $timetable[$dayNum][$period]; @endphp
-                                        <div class="text-primary fw-bold">{{ $p->subject->name }}</div>
-                                        <small class="text-muted">{{ $p->schedule->classRoom->name }} - {{ $p->schedule->classRoom->division }}</small>
-                                        @if($p->room)
-                                            <br><small class="badge bg-light-secondary">{{ $p->room }}</small>
-                                        @endif
-                                    @else
+                                    @php $cell = $timetable[$dayNum][$period] ?? []; @endphp
+                                    @if(empty($cell))
                                         <span class="text-muted">-</span>
+                                    @else
+                                        @foreach($cell as $p)
+                                            <div class="text-primary fw-bold">{{ optional($p->subject)->name }}</div>
+                                            <small class="text-muted">{{ optional($p->schedule->classRoom)->name }}{{ optional($p->schedule->classRoom)->division ? ' - ' . $p->schedule->classRoom->division : '' }}</small>
+                                            @if($p->room)
+                                                <br><small class="badge bg-light-secondary">{{ $p->room }}</small>
+                                            @endif
+                                        @endforeach
                                     @endif
                                 </td>
-                                @endif
                             @endforeach
                         </tr>
                         @endfor

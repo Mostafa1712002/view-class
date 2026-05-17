@@ -35,7 +35,7 @@
                     <li><a href="#"><i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_questions_bank')</span></a></li>
                     <li class="{{ request()->routeIs('admin.exams.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><i class="la la-file-alt"></i><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>
                     {{-- === Lessons card 64 === --}}<li class="{{ request()->routeIs('admin.lessons.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.lessons.index') ? route('admin.lessons.index') : '#' }}"><i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_periods')</span></a></li>
-                    <li><a href="#"><i class="la la-book-open"></i><span class="menu-item">@lang('shell.nav_books')</span></a></li>
+                    {{-- === Books card 65 === --}}<li class="{{ request()->routeIs('manage.books.*') ? 'active' : '' }}"><a href="{{ Route::has('manage.books.index') ? route('manage.books.index') : '#' }}"><i class="la la-book-open"></i><span class="menu-item">@lang('shell.nav_books')</span></a></li>
                 </ul>
             </li>
 
@@ -294,6 +294,7 @@
                 <li class="nav-item {{ request()->routeIs('student.exams') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.exams') }}"><i class="la la-file-alt"></i><span class="menu-title">@lang('shell.portal_exams')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.grades') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.grades') }}"><i class="la la-graduation-cap"></i><span class="menu-title">@lang('shell.portal_my_grades')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.attendance') }}"><i class="la la-check-square"></i><span class="menu-title">@lang('shell.portal_my_attendance')</span></a></li>
+                {{-- === Books card 65 === --}}<li class="nav-item {{ request()->routeIs('student.books.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('student.books.index') ? route('student.books.index') : '#' }}"><i class="la la-book-open"></i><span class="menu-title">@lang('shell.nav_books')</span></a></li>
             @endif
 
             @if($sidebarUser && $sidebarUser->isParent())

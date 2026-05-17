@@ -156,6 +156,14 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     Route::post('weekly-plan-notes', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'store'])->name('weekly-plan-notes.store');
     Route::put('weekly-plan-notes/{id}', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'update'])->name('weekly-plan-notes.update');
     Route::delete('weekly-plan-notes/{id}', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'destroy'])->name('weekly-plan-notes.destroy');
+
+    // === Books card 65 ===
+    Route::get('books', [\App\Modules\Books\Controllers\BookController::class, 'index'])->name('books.index');
+    Route::get('books/create', [\App\Modules\Books\Controllers\BookController::class, 'create'])->name('books.create');
+    Route::post('books', [\App\Modules\Books\Controllers\BookController::class, 'store'])->name('books.store');
+    Route::get('books/{id}/edit', [\App\Modules\Books\Controllers\BookController::class, 'edit'])->name('books.edit');
+    Route::put('books/{id}', [\App\Modules\Books\Controllers\BookController::class, 'update'])->name('books.update');
+    Route::delete('books/{id}', [\App\Modules\Books\Controllers\BookController::class, 'destroy'])->name('books.destroy');
 });
 
 // Sprint 3 — Users Module (admin-prefixed)
@@ -428,6 +436,8 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('exams', [\App\Http\Controllers\StudentController::class, 'exams'])->name('exams');
     Route::get('schedule', [\App\Http\Controllers\StudentController::class, 'schedule'])->name('schedule');
     Route::get('weekly-plans', [\App\Http\Controllers\StudentController::class, 'weeklyPlans'])->name('weekly-plans');
+    // === Books card 65 ===
+    Route::get('books', [\App\Modules\Books\Controllers\StudentBookController::class, 'index'])->name('books.index');
 });
 
 // Parent Routes

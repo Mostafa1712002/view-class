@@ -4,17 +4,26 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
+use App\Models\Attendance;
 use App\Models\ClassRoom;
 use App\Models\Schedule;
 use App\Models\SchedulePeriod;
 use App\Models\Section;
 use App\Models\Subject;
 use App\Models\User;
+use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ScheduleController extends Controller
 {
+    /** Periods per day grid */
+    private const PERIODS_PER_DAY = 7;
+
+    /** Days shown in KSA week (Sun-Thu) */
+    private const ACTIVE_DAYS = [0, 1, 2, 3, 4];
+
     protected function authorizeAccess()
     {
         $user = auth()->user();
@@ -29,46 +38,188 @@ class ScheduleController extends Controller
         return $user->isSuperAdmin() ? null : $user->school_id;
     }
 
+    /**
+     * Main schedule page — global weekly grid (defaults to per-class view).
+     * Toggle to per-teacher view via ?view=teacher.
+     * Sub-route /manage/schedules/list shows the schedule-record list.
+     */
     public function index(Request $request)
     {
         $this->authorizeAccess();
         $schoolId = $this->getSchoolId();
 
-        $query = Schedule::with(['classRoom.section', 'academicYear']);
-
-        if ($schoolId) {
-            $query->whereHas('classRoom.section', function ($q) use ($schoolId) {
-                $q->where('school_id', $schoolId);
-            });
+        $view = $request->get('view', 'class'); // class|teacher
+        if (!in_array($view, ['class', 'teacher'], true)) {
+            $view = 'class';
         }
 
+        // Filter values
+        $filters = [
+            'section_id' => $request->input('section_id'),
+            'class_id' => $request->input('class_id'),
+            'teacher_id' => $request->input('teacher_id'),
+            'subject_id' => $request->input('subject_id'),
+            'student_id' => $request->input('student_id'),
+            'academic_year_id' => $request->input('academic_year_id'),
+            'semester' => $request->input('semester'),
+        ];
+
+        // Build period query, school-scoped through schedule->classRoom->section
+        $periodQuery = SchedulePeriod::query()
+            ->with([
+                'subject',
+                'teacher',
+                'schedule.classRoom.section',
+                'schedule.academicYear',
+            ])
+            ->whereHas('schedule', function ($q) use ($schoolId, $filters) {
+                $q->where('is_active', true);
+                if ($schoolId) {
+                    $q->whereHas('classRoom.section', fn($qq) => $qq->where('school_id', $schoolId));
+                }
+                if (!empty($filters['class_id'])) {
+                    $q->where('class_id', $filters['class_id']);
+                }
+                if (!empty($filters['section_id'])) {
+                    $q->whereHas('classRoom', fn($qq) => $qq->where('section_id', $filters['section_id']));
+                }
+                if (!empty($filters['academic_year_id'])) {
+                    $q->where('academic_year_id', $filters['academic_year_id']);
+                }
+                if (!empty($filters['semester'])) {
+                    $q->where('semester', $filters['semester']);
+                }
+            });
+
+        if (!empty($filters['teacher_id'])) {
+            $periodQuery->where('teacher_id', $filters['teacher_id']);
+        }
+        if (!empty($filters['subject_id'])) {
+            $periodQuery->where('subject_id', $filters['subject_id']);
+        }
+        if (!empty($filters['student_id'])) {
+            // Student is linked to classes via class_student pivot; restrict periods
+            // to schedules whose class_id is in the student's enrolled classes.
+            $classIds = DB::table('class_student')
+                ->where('student_id', $filters['student_id'])
+                ->pluck('class_id')
+                ->all();
+            if (empty($classIds)) {
+                $periodQuery->whereRaw('1=0');
+            } else {
+                $periodQuery->whereHas('schedule', fn($q) => $q->whereIn('class_id', $classIds));
+            }
+        }
+
+        $periods = $periodQuery->get();
+
+        // Build timetable: timetable[day][period_number] = collection of periods.
+        // In per-class view, group by class; in per-teacher view, group by teacher.
+        $groupedTimetable = [];
+        if ($view === 'teacher') {
+            // group by teacher_id then by day then by period_number
+            $groups = $periods->groupBy('teacher_id');
+            foreach ($groups as $teacherId => $list) {
+                if (!$teacherId) continue;
+                $teacher = $list->first()->teacher;
+                if (!$teacher) continue;
+                $grid = $this->emptyGrid();
+                foreach ($list as $p) {
+                    $grid[$p->day_of_week][$p->period_number][] = $p;
+                }
+                $groupedTimetable[] = [
+                    'group_id' => $teacherId,
+                    'group_label' => $teacher->name,
+                    'grid' => $grid,
+                    'count' => $list->count(),
+                    'meta' => null,
+                ];
+            }
+            usort($groupedTimetable, fn($a, $b) => strcmp((string) $a['group_label'], (string) $b['group_label']));
+        } else {
+            // class view
+            $groups = $periods->groupBy(fn($p) => optional($p->schedule)->class_id);
+            foreach ($groups as $classId => $list) {
+                if (!$classId) continue;
+                $schedule = $list->first()->schedule;
+                if (!$schedule || !$schedule->classRoom) continue;
+                $grid = $this->emptyGrid();
+                foreach ($list as $p) {
+                    $grid[$p->day_of_week][$p->period_number][] = $p;
+                }
+                $groupedTimetable[] = [
+                    'group_id' => $classId,
+                    'group_label' => trim(($schedule->classRoom->name ?? '') . ' - ' . ($schedule->classRoom->division ?? '')),
+                    'sub_label' => optional($schedule->classRoom->section)->name,
+                    'schedule_id' => $schedule->id,
+                    'grid' => $grid,
+                    'count' => $list->count(),
+                    'meta' => [
+                        'semester' => $schedule->semester_label,
+                        'academic_year' => optional($schedule->academicYear)->name,
+                    ],
+                ];
+            }
+            usort($groupedTimetable, fn($a, $b) => strcmp((string) $a['group_label'], (string) $b['group_label']));
+        }
+
+        // Derived status indicators (overall, based on current filter scope)
+        $statusFlags = $this->computeStatusFlags($filters, $schoolId, $periods);
+
+        // Filter options
+        $optionData = $this->filterOptions($schoolId);
+
+        $totals = [
+            'schedules' => $periods->pluck('schedule_id')->unique()->count(),
+            'periods' => $periods->count(),
+            'teachers' => $periods->pluck('teacher_id')->unique()->count(),
+            'classes' => $periods->pluck('schedule.class_id')->unique()->count(),
+        ];
+
+        $days = $this->activeDaysLabels();
+
+        return view('admin.schedules.index', array_merge($optionData, [
+            'groupedTimetable' => $groupedTimetable,
+            'filters' => $filters,
+            'view' => $view,
+            'days' => $days,
+            'periodsCount' => self::PERIODS_PER_DAY,
+            'totals' => $totals,
+            'statusFlags' => $statusFlags,
+        ]));
+    }
+
+    /**
+     * List of underlying Schedule records (CRUD).
+     */
+    public function manageList(Request $request)
+    {
+        $this->authorizeAccess();
+        $schoolId = $this->getSchoolId();
+
+        $query = Schedule::with(['classRoom.section', 'academicYear'])
+            ->withCount('periods');
+
+        if ($schoolId) {
+            $query->whereHas('classRoom.section', fn($q) => $q->where('school_id', $schoolId));
+        }
         if ($request->filled('class_id')) {
             $query->where('class_id', $request->class_id);
         }
-
         if ($request->filled('academic_year_id')) {
             $query->where('academic_year_id', $request->academic_year_id);
         }
-
         if ($request->filled('semester')) {
             $query->where('semester', $request->semester);
         }
 
-        $schedules = $query->latest()->paginate(15);
+        $schedules = $query->latest()->paginate(20)->withQueryString();
 
-        // للفلترة
-        $classesQuery = ClassRoom::with('section');
-        $yearsQuery = AcademicYear::query();
+        $optionData = $this->filterOptions($schoolId);
 
-        if ($schoolId) {
-            $classesQuery->whereHas('section', fn($q) => $q->where('school_id', $schoolId));
-            $yearsQuery->where('school_id', $schoolId);
-        }
-
-        $classes = $classesQuery->get();
-        $academicYears = $yearsQuery->get();
-
-        return view('admin.schedules.index', compact('schedules', 'classes', 'academicYears'));
+        return view('admin.schedules.manage', array_merge($optionData, [
+            'schedules' => $schedules,
+        ]));
     }
 
     public function create()
@@ -107,7 +258,6 @@ class ScheduleController extends Controller
             'semester.in' => 'الفصل الدراسي غير صحيح',
         ]);
 
-        // التحقق من عدم وجود جدول مكرر
         $exists = Schedule::where('class_id', $validated['class_id'])
             ->where('academic_year_id', $validated['academic_year_id'])
             ->where('semester', $validated['semester'])
@@ -129,17 +279,9 @@ class ScheduleController extends Controller
 
         $schedule->load(['classRoom.section', 'academicYear', 'periods.subject', 'periods.teacher']);
 
-        // تنظيم الحصص في جدول
-        $timetable = [];
-        $days = SchedulePeriod::DAYS;
-        $periodsCount = 7; // عدد الحصص في اليوم
-
-        foreach ($days as $dayNum => $dayName) {
-            $timetable[$dayNum] = [];
-            for ($period = 1; $period <= $periodsCount; $period++) {
-                $timetable[$dayNum][$period] = $schedule->getPeriod($dayNum, $period);
-            }
-        }
+        $timetable = $this->buildClassTimetable($schedule);
+        $days = $this->activeDaysLabels();
+        $periodsCount = self::PERIODS_PER_DAY;
 
         return view('admin.schedules.show', compact('schedule', 'timetable', 'days', 'periodsCount'));
     }
@@ -151,7 +293,6 @@ class ScheduleController extends Controller
 
         $schedule->load(['classRoom.section', 'academicYear', 'periods.subject', 'periods.teacher']);
 
-        // المواد والمعلمين
         $subjectsQuery = Subject::query();
         $teachersQuery = User::whereHas('roles', fn($q) => $q->where('slug', 'teacher'));
 
@@ -163,17 +304,9 @@ class ScheduleController extends Controller
         $subjects = $subjectsQuery->get();
         $teachers = $teachersQuery->get();
 
-        // تنظيم الحصص في جدول
-        $timetable = [];
-        $days = SchedulePeriod::DAYS;
-        $periodsCount = 7;
-
-        foreach ($days as $dayNum => $dayName) {
-            $timetable[$dayNum] = [];
-            for ($period = 1; $period <= $periodsCount; $period++) {
-                $timetable[$dayNum][$period] = $schedule->getPeriod($dayNum, $period);
-            }
-        }
+        $timetable = $this->buildClassTimetable($schedule);
+        $days = $this->activeDaysLabels();
+        $periodsCount = self::PERIODS_PER_DAY;
 
         return view('admin.schedules.edit', compact('schedule', 'timetable', 'days', 'periodsCount', 'subjects', 'teachers'));
     }
@@ -182,7 +315,7 @@ class ScheduleController extends Controller
     {
         $this->authorizeAccess();
 
-        $validated = $request->validate([
+        $request->validate([
             'is_active' => 'boolean',
         ]);
 
@@ -199,7 +332,7 @@ class ScheduleController extends Controller
 
         $schedule->delete();
 
-        return redirect()->route('manage.schedules.index')
+        return redirect()->route('manage.schedules.list')
             ->with('success', 'تم حذف الجدول بنجاح');
     }
 
@@ -226,7 +359,6 @@ class ScheduleController extends Controller
 
         $validated['schedule_id'] = $schedule->id;
 
-        // البحث عن حصة موجودة أو إنشاء جديدة
         $period = SchedulePeriod::updateOrCreate(
             [
                 'schedule_id' => $schedule->id,
@@ -247,7 +379,6 @@ class ScheduleController extends Controller
         return back()->with('success', 'تم حفظ الحصة بنجاح');
     }
 
-    // حذف حصة
     public function destroyPeriod(Schedule $schedule, SchedulePeriod $period)
     {
         $this->authorizeAccess();
@@ -268,7 +399,6 @@ class ScheduleController extends Controller
         return back()->with('success', 'تم حذف الحصة بنجاح');
     }
 
-    // جدول المعلم
     public function teacherSchedule(Request $request)
     {
         $user = auth()->user();
@@ -279,7 +409,6 @@ class ScheduleController extends Controller
 
         $teacherId = $request->get('teacher_id', $user->id);
 
-        // التحقق من الصلاحية
         if (!$user->isSuperAdmin() && !$user->isSchoolAdmin() && $teacherId != $user->id) {
             abort(403);
         }
@@ -291,21 +420,11 @@ class ScheduleController extends Controller
             ->whereHas('schedule', fn($q) => $q->active())
             ->get();
 
-        // تنظيم الحصص
-        $timetable = [];
-        $days = SchedulePeriod::DAYS;
-        $periodsCount = 7;
-
-        foreach ($days as $dayNum => $dayName) {
-            $timetable[$dayNum] = [];
-            for ($period = 1; $period <= $periodsCount; $period++) {
-                $timetable[$dayNum][$period] = $periods->first(function ($p) use ($dayNum, $period) {
-                    return $p->day_of_week == $dayNum && $p->period_number == $period;
-                });
-            }
+        $timetable = $this->emptyGrid();
+        foreach ($periods as $p) {
+            $timetable[$p->day_of_week][$p->period_number][] = $p;
         }
 
-        // قائمة المعلمين للفلترة (للمدراء فقط)
         $teachers = null;
         if ($user->isSuperAdmin() || $user->isSchoolAdmin()) {
             $teachersQuery = User::whereHas('roles', fn($q) => $q->where('slug', 'teacher'));
@@ -315,6 +434,121 @@ class ScheduleController extends Controller
             $teachers = $teachersQuery->get();
         }
 
+        $days = $this->activeDaysLabels();
+        $periodsCount = self::PERIODS_PER_DAY;
+
         return view('admin.schedules.teacher-schedule', compact('teacher', 'timetable', 'days', 'periodsCount', 'teachers'));
+    }
+
+    // ---------- helpers ----------
+
+    private function emptyGrid(): array
+    {
+        $grid = [];
+        foreach (self::ACTIVE_DAYS as $d) {
+            $grid[$d] = [];
+            for ($p = 1; $p <= self::PERIODS_PER_DAY; $p++) {
+                $grid[$d][$p] = [];
+            }
+        }
+        return $grid;
+    }
+
+    private function activeDaysLabels(): array
+    {
+        $names = trans('schedule.days');
+        if (!is_array($names)) {
+            $names = SchedulePeriod::DAYS;
+        }
+        $out = [];
+        foreach (self::ACTIVE_DAYS as $d) {
+            $out[$d] = $names[$d] ?? ('Day ' . $d);
+        }
+        return $out;
+    }
+
+    /**
+     * Build a [day][period] => SchedulePeriod|null structure for a single class schedule.
+     */
+    private function buildClassTimetable(Schedule $schedule): array
+    {
+        $timetable = [];
+        foreach (self::ACTIVE_DAYS as $dayNum) {
+            $timetable[$dayNum] = [];
+            for ($period = 1; $period <= self::PERIODS_PER_DAY; $period++) {
+                $timetable[$dayNum][$period] = $schedule->getPeriod($dayNum, $period);
+            }
+        }
+        return $timetable;
+    }
+
+    private function filterOptions($schoolId): array
+    {
+        $classesQuery = ClassRoom::with('section');
+        $sectionsQuery = Section::query();
+        $teachersQuery = User::whereHas('roles', fn($q) => $q->where('slug', 'teacher'));
+        $subjectsQuery = Subject::query();
+        $studentsQuery = User::whereHas('roles', fn($q) => $q->where('slug', 'student'));
+        $yearsQuery = AcademicYear::query();
+
+        if ($schoolId) {
+            $classesQuery->whereHas('section', fn($q) => $q->where('school_id', $schoolId));
+            $sectionsQuery->where('school_id', $schoolId);
+            $teachersQuery->where('school_id', $schoolId);
+            $subjectsQuery->where('school_id', $schoolId);
+            $studentsQuery->where('school_id', $schoolId);
+            $yearsQuery->where('school_id', $schoolId);
+        }
+
+        return [
+            'classes' => $classesQuery->orderBy('name')->get(),
+            'sections' => $sectionsQuery->orderBy('name')->get(),
+            'teachers' => $teachersQuery->orderBy('name')->get(),
+            'subjects' => $subjectsQuery->orderBy('name')->get(),
+            'students' => $studentsQuery->orderBy('name')->limit(500)->get(),
+            'academicYears' => $yearsQuery->orderBy('name', 'desc')->get(),
+        ];
+    }
+
+    /**
+     * Aggregate availability of related data so the UI can show status badges.
+     */
+    private function computeStatusFlags(array $filters, $schoolId, $periods): array
+    {
+        $flags = [
+            'weekly_plan' => false,
+            'attendance' => false,
+            'lesson_prep' => false,
+        ];
+
+        // Weekly plans presence per scope
+        if (Schema::hasTable('weekly_plans')) {
+            $wp = WeeklyPlan::query();
+            if ($schoolId) {
+                $wp->whereHas('classRoom.section', fn($q) => $q->where('school_id', $schoolId));
+            }
+            if (!empty($filters['class_id'])) $wp->where('class_id', $filters['class_id']);
+            if (!empty($filters['teacher_id'])) $wp->where('teacher_id', $filters['teacher_id']);
+            if (!empty($filters['subject_id'])) $wp->where('subject_id', $filters['subject_id']);
+            $flags['weekly_plan'] = $wp->exists();
+        }
+
+        // Attendance presence per scope
+        if (Schema::hasTable('attendances')) {
+            $at = Attendance::query();
+            if ($schoolId) {
+                $at->whereHas('classRoom.section', fn($q) => $q->where('school_id', $schoolId));
+            }
+            if (!empty($filters['class_id'])) $at->where('class_id', $filters['class_id']);
+            if (!empty($filters['teacher_id'])) $at->where('teacher_id', $filters['teacher_id']);
+            if (!empty($filters['subject_id'])) $at->where('subject_id', $filters['subject_id']);
+            $flags['attendance'] = $at->exists();
+        }
+
+        // Lesson preparation table — not present in current schema; remain false.
+        // This intentionally renders the badge in neutral state until that module ships.
+        $flags['lesson_prep'] = $flags['weekly_plan']; // approximate from weekly plan presence
+
+        return $flags;
     }
 }

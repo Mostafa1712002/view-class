@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'إضافة جدول جديد')
+@section('body_class', 'theme-light')
 
 @section('content')
 <div class="content-header row">

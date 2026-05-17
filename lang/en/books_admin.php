@@ -1,0 +1,84 @@
+<?php
+
+return [
+    'page_title' => 'Books',
+    'breadcrumb' => 'Books',
+    'add_book' => 'Add Book',
+    'add_ministry_book' => 'Add Ministry Book',
+    'edit_book' => 'Edit Book',
+    'no_records' => 'No records found',
+    'all' => 'All',
+
+    'filters' => [
+        'title' => 'Search',
+        'subject' => 'Subject',
+        'grade' => 'Grade',
+        'term' => 'Term',
+        'ministry' => 'Ministry books only',
+        'status' => 'Status',
+        'apply' => 'Apply',
+        'reset' => 'Reset',
+    ],
+
+    'columns' => [
+        'title' => 'Title',
+        'grade' => 'Grade',
+        'subject' => 'Subject',
+        'term' => 'Term',
+        'source' => 'Source',
+        'status' => 'Status',
+        'created_at' => 'Created at',
+        'actions' => 'Actions',
+    ],
+
+    'fields' => [
+        'title' => 'Title',
+        'source' => 'Book source',
+        'file' => 'Upload (PDF)',
+        'external_url' => 'External URL',
+        'subject' => 'Subject',
+        'grade' => 'Grade',
+        'term' => 'Term',
+        'description' => 'Description',
+        'cover' => 'Cover image',
+        'is_ministry' => 'Ministry book',
+        'is_active' => 'Active',
+    ],
+
+    'source_file' => 'File',
+    'source_external' => 'External URL',
+    'status_active' => 'Active',
+    'status_inactive' => 'Inactive',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'ministry_yes' => 'Ministry',
+    'ministry_no' => '—',
+    'grade_label' => 'Grade :n',
+    'grade_unspecified' => 'Unspecified',
+    'choose_subject' => 'Select subject',
+    'choose_grade' => 'Select grade',
+    'choose_term' => 'Select term',
+
+    'save' => 'Save',
+    'reset_form' => 'Clear',
+    'back' => 'Back',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'view' => 'View',
+    'download' => 'Download',
+    'confirm_delete' => 'Are you sure you want to delete this book?',
+
+    'flash_created' => 'Book created successfully.',
+    'flash_updated' => 'Book updated successfully.',
+    'flash_deleted' => 'Book deleted.',
+
+    'student' => [
+        'page_title' => 'Books',
+        'empty' => 'No books available right now.',
+        'open' => 'Open',
+    ],
+
+    'pdf_help' => 'PDF only, up to 20 MB.',
+    'current_file' => 'Current file',
+    'replace_file_hint' => 'Leave empty to keep the current file.',
+];
