@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('sprint4.subjects.create_title'))
+@section('body_class','theme-light')
 
 @section('content')
 <div class="content-header row">
@@ -17,12 +18,8 @@
 </div>
 
 <div class="content-body">
-    <div class="card">
-        <div class="card-body">
-            <form action="{{ route('admin.subjects.store') }}" method="POST">
-                @include('admin.subjects._form')
-            </form>
-        </div>
-    </div>
+    <form action="{{ route('admin.subjects.store') }}" method="POST">
+        @include('admin.subjects._form')
+    </form>
 </div>
 @endsection

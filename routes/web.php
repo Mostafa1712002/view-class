@@ -187,6 +187,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'creditHours'])->name('subjects.credit-hours');
     Route::patch('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'saveCreditHours'])->name('subjects.credit-hours.save');
 
+    Route::get('subjects/templates', [\App\Modules\Subjects\Controllers\SubjectController::class, 'templatesIndex'])->name('subjects.templates.index');
+    Route::post('subjects/templates', [\App\Modules\Subjects\Controllers\SubjectController::class, 'templatesAttach'])->name('subjects.templates.attach');
+
     Route::get('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'index'])->name('subjects.index');
     Route::get('subjects/create', [\App\Modules\Subjects\Controllers\SubjectController::class, 'create'])->name('subjects.create');
     Route::post('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'store'])->name('subjects.store');

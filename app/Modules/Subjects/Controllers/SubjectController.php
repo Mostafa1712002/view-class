@@ -26,7 +26,14 @@ class SubjectController extends Controller
             ? $this->subjects->platformTemplates()->count()
             : count((array) $this->subjects->platformTemplates());
 
-        return view('admin.subjects.index', compact('subjects', 'templatesCount'));
+        $stats = [
+            'total' => Subject::query()->where('school_id', $schoolId)->count(),
+            'active' => Subject::query()->where('school_id', $schoolId)->where('is_active', true)->count(),
+            'core' => Subject::query()->where('school_id', $schoolId)->where('is_core', true)->count(),
+            'templates' => $templatesCount,
+        ];
+
+        return view('admin.subjects.index', compact('subjects', 'templatesCount', 'stats'));
     }
 
     public function create(): View
@@ -160,6 +167,87 @@ class SubjectController extends Controller
         return redirect()
             ->route('admin.subjects.lesson-tree', $subject->id)
             ->with('success', __('sprint4.subjects.flash.lesson_deleted'));
+    }
+
+    public function templatesIndex(): View
+    {
+        $schoolId = $this->activeSchoolId();
+        $templates = collect($this->subjects->platformTemplates());
+
+        // Group templates by the first grade level they target so the UI can show one section per grade.
+        $byGrade = [];
+        foreach ($templates as $template) {
+            $levels = is_array($template->grade_levels) && count($template->grade_levels) > 0
+                ? $template->grade_levels
+                : [0]; // 0 = ungraded bucket
+            foreach ($levels as $level) {
+                $byGrade[(int) $level][] = $template;
+            }
+        }
+        ksort($byGrade);
+
+        // Which template IDs are already added to this school?
+        $alreadyAdded = Subject::query()
+            ->where('school_id', $schoolId)
+            ->whereNotNull('template_subject_id')
+            ->pluck('template_subject_id')
+            ->all();
+
+        return view('admin.subjects.templates', [
+            'byGrade' => $byGrade,
+            'alreadyAdded' => $alreadyAdded,
+            'total' => $templates->count(),
+        ]);
+    }
+
+    public function templatesAttach(Request $request): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        $ids = array_map('intval', (array) $request->input('template_ids', []));
+        $ids = array_filter($ids);
+
+        if (empty($ids)) {
+            return redirect()
+                ->route('admin.subjects.templates.index')
+                ->with('error', __('sprint4.subjects.add_template_no_selection'));
+        }
+
+        // Load only true platform templates (school_id NULL).
+        $templates = Subject::query()->whereNull('school_id')->whereIn('id', $ids)->get();
+
+        // Skip templates already added to this school to keep the operation idempotent.
+        $existing = Subject::query()
+            ->where('school_id', $schoolId)
+            ->whereIn('template_subject_id', $templates->pluck('id'))
+            ->pluck('template_subject_id')
+            ->all();
+
+        $count = 0;
+        foreach ($templates as $template) {
+            if (in_array($template->id, $existing, true)) {
+                continue;
+            }
+            $this->subjects->create([
+                'school_id' => $schoolId,
+                'name' => $template->name,
+                'name_en' => $template->name_en,
+                'code' => $template->code,
+                'description' => $template->description,
+                'is_core' => (bool) $template->is_core,
+                'is_active' => true,
+                'grade_levels' => $template->grade_levels,
+                'section' => $template->section,
+                'credit_hours' => $template->credit_hours,
+                'certificate_order' => $template->certificate_order,
+                'source' => 'viewclass',
+                'template_subject_id' => $template->id,
+            ]);
+            $count++;
+        }
+
+        return redirect()
+            ->route('admin.subjects.index')
+            ->with('success', __('sprint4.subjects.add_template_success', ['count' => $count]));
     }
 
     public function creditHours(): View
