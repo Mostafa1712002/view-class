@@ -53,7 +53,16 @@ class GradeReportController extends Controller
     public function store(Request $request)
     {
         $data = $this->validatePayload($request);
+        // For super-admins (no scoped school) prefer the explicitly picked class's school,
+        // else the user's own school, else the first school in the system.
         $schoolId = $this->schoolId() ?? auth()->user()->school_id;
+        if (!$schoolId && !empty($data['class_id'])) {
+            $class = ClassRoom::find($data['class_id']);
+            $schoolId = $class?->section?->school_id;
+        }
+        if (!$schoolId) {
+            $schoolId = \App\Models\School::query()->orderBy('id')->value('id');
+        }
         $report = $this->reports->createDynamic($data, $schoolId, auth()->id());
         return redirect()->route('admin.grade-reports.edit', $report)->with('success', trans('grades_admin.created_ok'));
     }
