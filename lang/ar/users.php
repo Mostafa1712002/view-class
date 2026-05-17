@@ -150,4 +150,28 @@ return [
     'filter_grade' => 'الصف',
     'filter_job_title' => 'المسمى الوظيفي',
     'filter_search' => 'بحث',
+
+    // Admins page (card 55)
+    'admin_total' => 'إجمالي الإداريين',
+    'admin_active' => 'الإداريون النشطون',
+    'admin_with_role' => 'مسندون لمسمى وظيفي',
+    'admin_super' => 'مدراء النظام',
+    'admin_picker_title' => 'اختر مسمى وظيفي لإضافة إداري',
+    'admin_picker_subtitle' => 'حدد الوظيفة الإدارية لإضافة إداري جديد إلى المدرسة',
+    'admin_picker_blank' => 'بدون مسمى وظيفي',
+    'admin_picker_close' => 'إغلاق',
+    'admin_basic_info' => 'البيانات الأساسية',
+    'admin_assignment' => 'الإسناد والصلاحيات',
+    'admin_security' => 'بيانات الدخول',
+    'admin_search_engine' => 'محرك البحث',
+    'admin_search_hint' => 'بحث بالاسم أو رقم الهوية أو اسم المستخدم أو البريد',
+    'admin_more_actions' => 'المزيد',
+    'admin_manage_permissions' => 'إدارة الصلاحيات',
+    'admin_manage_job_titles' => 'إعدادات المسميات الوظيفية',
+    'admin_supervisees' => 'إدارة المُشرف عليهم',
+    'admin_no_filter_results' => 'لا توجد نتائج تطابق البحث',
+    'admin_status_active' => 'نشط',
+    'admin_status_inactive' => 'غير نشط',
+    'admin_unknown_role' => 'بدون دور',
+
 ];

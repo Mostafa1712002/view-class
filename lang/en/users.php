@@ -140,4 +140,28 @@ return [
     'filter_grade' => 'Grade',
     'filter_job_title' => 'Job title',
     'filter_search' => 'Search',
+
+    // Admins page (card 55)
+    'admin_total' => 'Total admins',
+    'admin_active' => 'Active admins',
+    'admin_with_role' => 'With job title',
+    'admin_super' => 'System managers',
+    'admin_picker_title' => 'Pick a job title to add admin',
+    'admin_picker_subtitle' => 'Select the administrative role for the new admin',
+    'admin_picker_blank' => 'No job title',
+    'admin_picker_close' => 'Close',
+    'admin_basic_info' => 'Basic information',
+    'admin_assignment' => 'Assignment & permissions',
+    'admin_security' => 'Login credentials',
+    'admin_search_engine' => 'Search engine',
+    'admin_search_hint' => 'Search by name, national id, username or email',
+    'admin_more_actions' => 'More',
+    'admin_manage_permissions' => 'Manage permissions',
+    'admin_manage_job_titles' => 'Job title settings',
+    'admin_supervisees' => 'Manage supervisees',
+    'admin_no_filter_results' => 'No results match the search',
+    'admin_status_active' => 'Active',
+    'admin_status_inactive' => 'Inactive',
+    'admin_unknown_role' => 'No role',
+
 ];
