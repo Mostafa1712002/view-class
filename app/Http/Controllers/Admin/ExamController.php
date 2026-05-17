@@ -8,6 +8,7 @@ use App\Models\ExamQuestion;
 use App\Models\Subject;
 use App\Models\ClassRoom;
 use App\Models\AcademicYear;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,25 +28,57 @@ class ExamController extends Controller
             $query->where('teacher_id', Auth::id());
         }
 
-        // Apply filters
-        if ($request->filled('subject_id')) {
-            $query->where('subject_id', $request->subject_id);
+        $filters = [
+            'grade_level' => $request->input('grade_level'),
+            'teacher_id'  => $request->input('teacher_id'),
+            'subject_id'  => $request->input('subject_id'),
+            'class_id'    => $request->input('class_id'),
+            'type'        => $request->input('type'),
+            'status'      => $request->input('status'),
+        ];
+
+        if (! empty($filters['grade_level'])) {
+            $gl = $filters['grade_level'];
+            $query->whereHas('classRoom', fn ($q) => $q->where('grade_level', $gl));
         }
-        if ($request->filled('class_id')) {
-            $query->where('class_id', $request->class_id);
+        if (! empty($filters['teacher_id'])) {
+            $query->where('teacher_id', $filters['teacher_id']);
         }
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
+        if (! empty($filters['subject_id'])) {
+            $query->where('subject_id', $filters['subject_id']);
         }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if (! empty($filters['class_id'])) {
+            $query->where('class_id', $filters['class_id']);
+        }
+        if (! empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
 
-        $exams = $query->latest()->paginate(15);
+        $exams = $query->latest()->paginate(15)->withQueryString();
+
+        // Stats — show the same totals regardless of filters so tiles stay stable.
+        $statsBase = Exam::query();
+        if (! Auth::user()->hasAnyRole(['super-admin', 'school-admin'])) {
+            $statsBase->where('teacher_id', Auth::id());
+        }
+        $stats = [
+            'total'     => (clone $statsBase)->count(),
+            'published' => (clone $statsBase)->where('is_published', true)->count(),
+            'active'    => (clone $statsBase)->where('status', 'active')->count(),
+            'upcoming'  => (clone $statsBase)->where('start_time', '>', now())->count(),
+        ];
+
         $subjects = Subject::orderBy('name')->get();
-        $classes = ClassRoom::orderBy('name')->get();
+        $classes  = ClassRoom::orderBy('name')->get();
+        $teachers = User::whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))
+            ->orderBy('name')->get(['id', 'name']);
 
-        return view('admin.exams.index', compact('exams', 'subjects', 'classes'));
+        return view('admin.exams.index', compact(
+            'exams', 'subjects', 'classes', 'teachers', 'filters', 'stats'
+        ));
     }
 
     /**

@@ -21,6 +21,8 @@
 </div>
 
 <div class="content-body">
+    @include('admin.exams._schedule_tabs', ['active' => 'class'])
+
     <p class="text-muted small">@lang('sprint4.school_schedule.help')</p>
 
     <form action="{{ route('admin.school-schedule.index') }}" method="GET" class="card p-3 mb-3">
