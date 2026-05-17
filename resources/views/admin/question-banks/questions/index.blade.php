@@ -126,7 +126,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="dropdown">
-                <button class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" type="button">
                     <i class="la la-plus"></i> @lang('questions.add_btn')
                 </button>
                 <ul class="dropdown-menu add-type-menu">
@@ -181,6 +181,7 @@
                             <td class="q-actions">
                                 <button type="button" class="btn btn-sm btn-outline-info preview-btn"
                                         title="@lang('questions.view_actions.preview')"
+                                        data-toggle="modal" data-target="#previewModal"
                                         data-bs-toggle="modal" data-bs-target="#previewModal"
                                         data-url="{{ route('admin.question-banks.questions.preview', [$bank->id, $q->id]) }}">
                                     <i class="la la-eye"></i>
@@ -224,13 +225,15 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">@lang('questions.preview_title')</h5>
-                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body" id="previewBody">
                 <div class="text-center py-4 text-muted"><i class="la la-spinner la-spin la-2x"></i></div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@lang('questions.preview.close')</button>
+                <button class="btn btn-outline-secondary btn-sm" data-dismiss="modal" data-bs-dismiss="modal">@lang('questions.preview.close')</button>
             </div>
         </div>
     </div>
@@ -240,40 +243,62 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var modalEl = document.getElementById('previewModal');
-    if (!modalEl) return;
-    var loading = '<div class="text-center py-4 text-muted"><i class="la la-spinner la-spin la-2x"></i></div>';
-    var failed  = '<div class="text-center text-danger">!</div>';
-    modalEl.addEventListener('show.bs.modal', function (event) {
-        var btn = event.relatedTarget;
-        var url = btn ? btn.getAttribute('data-url') : null;
-        var body = document.getElementById('previewBody');
-        // Render server-rendered, auth-gated, blade-escaped HTML fragment.
+    var body = document.getElementById('previewBody');
+    if (!modalEl || !body) return;
+
+    function showLoader() {
         body.replaceChildren();
         var loader = document.createElement('div');
         loader.className = 'text-center py-4 text-muted';
         loader.textContent = '...';
         body.appendChild(loader);
-        if (!url) return;
+    }
+
+    function showError() {
+        body.replaceChildren();
+        var err = document.createElement('div');
+        err.className = 'text-center text-danger py-4';
+        err.textContent = '!';
+        body.appendChild(err);
+    }
+
+    function loadPreview(url) {
+        showLoader();
         fetch(url, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' })
             .then(function (r) { return r.text(); })
             .then(function (html) {
+                // Server-rendered, auth-gated, blade-escaped fragment.
                 var parser = new DOMParser();
                 var doc = parser.parseFromString('<div>' + html + '</div>', 'text/html');
-                var node = doc.body.firstChild;
+                var wrapper = doc.body.firstChild;
                 body.replaceChildren();
-                if (node) {
-                    while (node.firstChild) {
-                        body.appendChild(node.firstChild);
-                    }
+                if (wrapper) {
+                    while (wrapper.firstChild) { body.appendChild(wrapper.firstChild); }
                 }
             })
-            .catch(function () {
-                body.replaceChildren();
-                var err = document.createElement('div');
-                err.className = 'text-center text-danger';
-                err.textContent = '!';
-                body.appendChild(err);
-            });
+            .catch(showError);
+    }
+
+    // Open modal — works on Bootstrap 4 (jQuery) and Bootstrap 5 (native).
+    function openModal() {
+        if (window.jQuery && jQuery(modalEl).modal) {
+            jQuery(modalEl).modal('show');
+        } else if (window.bootstrap && bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        } else {
+            modalEl.style.display = 'block';
+            modalEl.classList.add('show');
+        }
+    }
+
+    document.querySelectorAll('.preview-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var url = btn.getAttribute('data-url');
+            if (!url) return;
+            loadPreview(url);
+            openModal();
+        });
     });
 });
 </script>
