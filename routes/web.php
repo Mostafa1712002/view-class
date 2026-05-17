@@ -157,14 +157,22 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('students', [\App\Modules\Users\Controllers\StudentController::class, 'index'])->name('students.index');
         Route::get('students/create', [\App\Modules\Users\Controllers\StudentController::class, 'create'])->name('students.create');
         Route::post('students', [\App\Modules\Users\Controllers\StudentController::class, 'store'])->name('students.store');
+        Route::post('students/bulk', [\App\Modules\Users\Controllers\StudentController::class, 'bulk'])->name('students.bulk');
         Route::get('students/{id}/edit', [\App\Modules\Users\Controllers\StudentController::class, 'edit'])->name('students.edit');
+        Route::get('students/{id}/parents', [\App\Modules\Users\Controllers\StudentController::class, 'parents'])->name('students.parents');
+        Route::get('students/{id}/schedule', [\App\Modules\Users\Controllers\StudentController::class, 'schedule'])->name('students.schedule');
+        Route::get('students/{id}/lessons', [\App\Modules\Users\Controllers\StudentController::class, 'lessons'])->name('students.lessons');
+        Route::get('students/{id}/attendance', [\App\Modules\Users\Controllers\StudentController::class, 'attendance'])->name('students.attendance');
+        Route::get('students/{id}/behavior', [\App\Modules\Users\Controllers\StudentController::class, 'behavior'])->name('students.behavior');
+        Route::get('students/{id}/medical', [\App\Modules\Users\Controllers\StudentController::class, 'medical'])->name('students.medical');
+        Route::get('students/{id}', [\App\Modules\Users\Controllers\StudentController::class, 'show'])->whereNumber('id')->name('students.show');
         Route::put('students/{id}', [\App\Modules\Users\Controllers\StudentController::class, 'update'])->name('students.update');
         Route::delete('students/{id}', [\App\Modules\Users\Controllers\StudentController::class, 'destroy'])->name('students.destroy');
-        Route::post('students/bulk', [\App\Modules\Users\Controllers\StudentController::class, 'bulk'])->name('students.bulk');
 
         Route::get('parents', [\App\Modules\Users\Controllers\ParentController::class, 'index'])->name('parents.index');
         Route::get('parents/create', [\App\Modules\Users\Controllers\ParentController::class, 'create'])->name('parents.create');
         Route::post('parents', [\App\Modules\Users\Controllers\ParentController::class, 'store'])->name('parents.store');
+        Route::get('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'show'])->name('parents.show');
         Route::get('parents/{id}/edit', [\App\Modules\Users\Controllers\ParentController::class, 'edit'])->name('parents.edit');
         Route::put('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'update'])->name('parents.update');
         Route::delete('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'destroy'])->name('parents.destroy');
@@ -173,8 +181,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
         Route::get('teachers', [\App\Modules\Users\Controllers\TeacherController::class, 'index'])->name('teachers.index');
         Route::get('teachers/workloads', [\App\Modules\Users\Controllers\TeacherController::class, 'workloads'])->name('teachers.workloads');
+        Route::get('teachers/import', [\App\Modules\Users\Controllers\TeacherController::class, 'importForm'])->name('teachers.import');
         Route::get('teachers/create', [\App\Modules\Users\Controllers\TeacherController::class, 'create'])->name('teachers.create');
         Route::post('teachers', [\App\Modules\Users\Controllers\TeacherController::class, 'store'])->name('teachers.store');
+        Route::get('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'show'])->name('teachers.show');
         Route::get('teachers/{id}/edit', [\App\Modules\Users\Controllers\TeacherController::class, 'edit'])->name('teachers.edit');
         Route::put('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'update'])->name('teachers.update');
         Route::delete('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'destroy'])->name('teachers.destroy');

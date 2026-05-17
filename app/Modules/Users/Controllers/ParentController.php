@@ -116,15 +116,26 @@ class ParentController extends Controller
             ->with('status', __('users.parent_deleted'));
     }
 
-    public function students(int $id): View|RedirectResponse
+    public function show(int $id): View|RedirectResponse
     {
         $parent = $this->parents->findScoped($id, $this->activeSchoolId());
         if (!$parent) {
             return redirect()->route('admin.users.parents.index')->with('error', __('users.not_found'));
         }
-        $linked = $parent->children()->get();
-        $available = $this->students->paginate($this->activeSchoolId(), null, 50);
-        return view('admin.users.parents.students', compact('parent', 'linked', 'available'));
+        $children = $parent->children()->with('classRoom')->get();
+        return view('admin.users.parents.show', compact('parent', 'children'));
+    }
+
+    public function students(Request $request, int $id): View|RedirectResponse
+    {
+        $parent = $this->parents->findScoped($id, $this->activeSchoolId());
+        if (!$parent) {
+            return redirect()->route('admin.users.parents.index')->with('error', __('users.not_found'));
+        }
+        $linked = $parent->children()->with('classRoom')->get();
+        $q = $request->string('q')->toString() ?: null;
+        $available = $this->students->paginate($this->activeSchoolId(), $q, 30);
+        return view('admin.users.parents.students', compact('parent', 'linked', 'available', 'q'));
     }
 
     public function syncStudents(Request $request, int $id): RedirectResponse
