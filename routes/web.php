@@ -137,6 +137,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     Route::resource('academic-years', \App\Http\Controllers\Admin\AcademicYearController::class);
 
     // Schedules Management
+    Route::get('schedules/list', [\App\Http\Controllers\Admin\ScheduleController::class, 'manageList'])->name('schedules.list');
     Route::resource('schedules', \App\Http\Controllers\Admin\ScheduleController::class);
     Route::post('schedules/{schedule}/periods', [\App\Http\Controllers\Admin\ScheduleController::class, 'storePeriod'])->name('schedules.store-period');
     Route::delete('schedules/{schedule}/periods/{period}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroyPeriod'])->name('schedules.destroy-period');
@@ -149,6 +150,12 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     Route::post('weekly-plans/{weekly_plan}/mark-prepared', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'markPrepared'])->name('weekly-plans.mark-prepared');
     Route::post('weekly-plans/bulk-lock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'bulkLock'])->name('weekly-plans.bulk-lock');
     Route::get('weekly-plans/{weekly_plan}/duplicate', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'duplicate'])->name('weekly-plans.duplicate');
+
+    // Card 66 — الملاحظات الجاهزة (Weekly Plan Note Templates)
+    Route::get('weekly-plan-notes', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'index'])->name('weekly-plan-notes.index');
+    Route::post('weekly-plan-notes', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'store'])->name('weekly-plan-notes.store');
+    Route::put('weekly-plan-notes/{id}', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'update'])->name('weekly-plan-notes.update');
+    Route::delete('weekly-plan-notes/{id}', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'destroy'])->name('weekly-plan-notes.destroy');
 });
 
 // Sprint 3 — Users Module (admin-prefixed)
@@ -322,6 +329,14 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
 // Admin Exams & Grades Routes
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
+    // === Lessons card 64 ===
+    Route::get('lessons', [\App\Modules\Lessons\Controllers\LessonController::class, 'index'])->name('lessons.index');
+    Route::get('lessons/create', [\App\Modules\Lessons\Controllers\LessonController::class, 'create'])->name('lessons.create');
+    Route::post('lessons', [\App\Modules\Lessons\Controllers\LessonController::class, 'store'])->name('lessons.store');
+    Route::get('lessons/{id}/edit', [\App\Modules\Lessons\Controllers\LessonController::class, 'edit'])->name('lessons.edit');
+    Route::put('lessons/{id}', [\App\Modules\Lessons\Controllers\LessonController::class, 'update'])->name('lessons.update');
+    Route::delete('lessons/{id}', [\App\Modules\Lessons\Controllers\LessonController::class, 'destroy'])->name('lessons.destroy');
+
     // Exams Management
     Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
     Route::post('exams/{exam}/publish', [\App\Http\Controllers\Admin\ExamController::class, 'publish'])->name('exams.publish');

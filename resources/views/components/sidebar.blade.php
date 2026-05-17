@@ -34,7 +34,7 @@
                     <li class="{{ request()->routeIs('manage.subjects.*') ? 'active' : '' }}"><a href="{{ Route::has('manage.subjects.index') ? route('manage.subjects.index') : '#' }}"><i class="la la-book"></i><span class="menu-item">@lang('shell.nav_subjects')</span></a></li>
                     <li><a href="#"><i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_questions_bank')</span></a></li>
                     <li class="{{ request()->routeIs('admin.exams.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><i class="la la-file-alt"></i><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>
-                    <li><a href="#"><i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_periods')</span></a></li>
+                    {{-- === Lessons card 64 === --}}<li class="{{ request()->routeIs('admin.lessons.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.lessons.index') ? route('admin.lessons.index') : '#' }}"><i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_periods')</span></a></li>
                     <li><a href="#"><i class="la la-book-open"></i><span class="menu-item">@lang('shell.nav_books')</span></a></li>
                 </ul>
             </li>

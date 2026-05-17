@@ -7,6 +7,8 @@ use App\Modules\Auth\Repositories\Contracts\UserRepository;
 use App\Modules\Auth\Repositories\EloquentSessionRepository;
 use App\Modules\Auth\Repositories\EloquentUserRepository;
 use App\Modules\Auth\Services\JwtService;
+use App\Modules\Books\Repositories\Contracts\BookRepository;
+use App\Modules\Books\Repositories\EloquentBookRepository;
 use App\Modules\Dashboard\Repositories\Contracts\DashboardStatsRepository;
 use App\Modules\Dashboard\Repositories\EloquentDashboardStatsRepository;
 use App\Modules\Profile\Repositories\Contracts\ProfileRepository;
@@ -17,6 +19,8 @@ use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
 use App\Modules\QuestionBanks\Repositories\EloquentQuestionBankRepository;
 use App\Modules\GradeReports\Repositories\Contracts\GradeReportRepository;
 use App\Modules\GradeReports\Repositories\EloquentGradeReportRepository;
+use App\Modules\Lessons\Repositories\Contracts\LessonRepository;
+use App\Modules\Lessons\Repositories\EloquentLessonRepository;
 use App\Modules\Libraries\Repositories\Contracts\LibraryItemRepository;
 use App\Modules\Libraries\Repositories\Contracts\LibraryRepository;
 use App\Modules\Libraries\Repositories\EloquentLibraryItemRepository;
@@ -50,8 +54,10 @@ class RepositoryServiceProvider extends ServiceProvider
         TeacherRepository::class => EloquentTeacherListRepository::class,
         AdminRepository::class => EloquentAdminListRepository::class,
         SubjectRepository::class => EloquentSubjectRepository::class,
+        BookRepository::class => EloquentBookRepository::class,
         QuestionBankRepository::class => EloquentQuestionBankRepository::class,
         GradeReportRepository::class => EloquentGradeReportRepository::class,
+        LessonRepository::class => EloquentLessonRepository::class,
         LibraryRepository::class => EloquentLibraryRepository::class,
         LibraryItemRepository::class => EloquentLibraryItemRepository::class,
         SchoolBranchRepository::class => EloquentSchoolBranchRepository::class,
