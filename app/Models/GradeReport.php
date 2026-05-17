@@ -16,7 +16,10 @@ class GradeReport extends Model
         'academic_year_id',
         'academic_term_id',
         'class_id',
+        'subject_id',
         'type',
+        'is_active',
+        'is_locked',
         'title',
         'grade_input_starts_at',
         'grade_input_ends_at',
@@ -41,6 +44,8 @@ class GradeReport extends Model
         'calc_ends_at' => 'date',
         'opens_at' => 'date',
         'closes_at' => 'date',
+        'is_active' => 'boolean',
+        'is_locked' => 'boolean',
         'include_behavior' => 'boolean',
         'show_subject_bilingual' => 'boolean',
         'visible_to_student' => 'boolean',
@@ -49,6 +54,16 @@ class GradeReport extends Model
         'header_settings' => 'array',
         'footer_settings' => 'array',
     ];
+
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    public function studentValues(): HasMany
+    {
+        return $this->hasMany(StudentGradeValue::class);
+    }
 
     public function school(): BelongsTo
     {

@@ -43,14 +43,18 @@
                 <a href="{{ Route::has('manage.weekly-plans.index') ? route('manage.weekly-plans.index') : '#' }}"><i class="la la-list-alt"></i><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a>
             </li>
 
-            <li class="nav-item has-sub {{ (request()->routeIs('admin.grades.*') || request()->routeIs('admin.grade-reports.*')) ? 'active' : '' }}" data-section="educational">
+            {{-- === Grades card 67 === --}}
+            <li class="nav-item has-sub {{ (request()->routeIs('admin.grades.*') || request()->routeIs('admin.grade-reports.*') || request()->routeIs('admin.grades.entry.*')) ? 'active' : '' }}" data-section="educational">
                 <a href="#"><i class="la la-graduation-cap"></i><span class="menu-title">@lang('shell.nav_grades')</span></a>
                 <ul class="menu-content">
                     <li class="{{ request()->routeIs('admin.grade-reports.*') ? 'active' : '' }}">
                         <a href="{{ Route::has('admin.grade-reports.index') ? route('admin.grade-reports.index') : '#' }}"><i class="la la-file-alt"></i><span class="menu-item">تقارير الدرجات</span></a>
                     </li>
-                    <li class="{{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">
-                        <a href="{{ Route::has('admin.grades.index') ? route('admin.grades.index') : '#' }}"><i class="la la-edit"></i><span class="menu-item">إدخال الدرجات</span></a>
+                    <li class="{{ request()->routeIs('admin.grades.entry.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.grades.entry.index') ? route('admin.grades.entry.index') : '#' }}"><i class="la la-grid"></i><span class="menu-item">إدخال درجات (ديناميكي)</span></a>
+                    </li>
+                    <li class="{{ (request()->routeIs('admin.grades.index') || request()->routeIs('admin.grades.store') || request()->routeIs('admin.grades.publish')) ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.grades.index') ? route('admin.grades.index') : '#' }}"><i class="la la-edit"></i><span class="menu-item">إدخال الدرجات (مبسط)</span></a>
                     </li>
                 </ul>
             </li>

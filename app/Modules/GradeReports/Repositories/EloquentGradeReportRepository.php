@@ -84,6 +84,50 @@ class EloquentGradeReportRepository implements GradeReportRepository
         return $report->fresh(['columns', 'ratings']);
     }
 
+    public function replaceColumns(GradeReport $report, array $columns): GradeReport
+    {
+        return DB::transaction(function () use ($report, $columns) {
+            $keptIds = [];
+            $order = 0;
+            foreach ($columns as $row) {
+                $order++;
+                $row = array_filter($row, fn($v) => $v !== null && $v !== '');
+                $title = trim((string)($row['title'] ?? ''));
+                if ($title === '') {
+                    continue;
+                }
+                $payload = [
+                    'subject_id' => $row['subject_id'] ?? null,
+                    'title' => $title,
+                    'type' => $row['type'] ?? 'numeric',
+                    'weight' => (float) ($row['weight'] ?? 0),
+                    'max_score' => (float) ($row['max_score'] ?? 100),
+                    'pass_threshold' => isset($row['pass_threshold']) ? (float) $row['pass_threshold'] : null,
+                    'sort_order' => $order,
+                    'is_in_total' => (bool) ($row['is_in_total'] ?? true),
+                    'is_visible' => (bool) ($row['is_visible'] ?? true),
+                ];
+                if (!empty($row['id'])) {
+                    $col = $report->columns()->whereKey($row['id'])->first();
+                    if ($col) {
+                        $col->update($payload);
+                        $keptIds[] = $col->id;
+                        continue;
+                    }
+                }
+                $new = $report->columns()->create($payload);
+                $keptIds[] = $new->id;
+            }
+            // Cascade delete student values for removed columns then delete columns
+            $toDelete = $report->columns()->whereNotIn('id', $keptIds ?: [0])->pluck('id');
+            if ($toDelete->isNotEmpty()) {
+                DB::table('student_grade_values')->whereIn('grade_report_column_id', $toDelete)->delete();
+                $report->columns()->whereIn('id', $toDelete)->delete();
+            }
+            return $report->fresh(['columns']);
+        });
+    }
+
     public function delete(GradeReport $report): void
     {
         $report->delete();

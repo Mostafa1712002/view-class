@@ -2,6 +2,8 @@
 
 @section('title', $report->title)
 
+@section('body_class', 'theme-light')
+
 @section('content')
 <div class="content-header">
     <h2 class="content-header-title">{{ $report->title }}</h2>

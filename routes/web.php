@@ -451,12 +451,22 @@ Route::middleware(['auth', 'role:parent'])->prefix('parent')->name('parent.')->g
 });
 
 // Sprint 5 — Grade Reports (report-builder layer above the legacy grades data-entry)
+// === Grades card 67 ===
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/grade-reports')->name('admin.grade-reports.')->group(function () {
     Route::get('/', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'index'])->name('index');
     Route::get('create', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'create'])->name('create');
     Route::post('/', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'store'])->name('store');
-    Route::get('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'show'])->name('show');
-    Route::delete('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'destroy'])->name('destroy');
+    Route::get('{id}/edit', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'edit'])->whereNumber('id')->name('edit');
+    Route::put('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'update'])->whereNumber('id')->name('update');
+    Route::post('{id}/columns', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'updateColumns'])->whereNumber('id')->name('columns.update');
+    Route::get('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'show'])->whereNumber('id')->name('show');
+    Route::delete('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'destroy'])->whereNumber('id')->name('destroy');
+});
+
+// === Grades card 67 === — Dynamic, report-driven grade entry (lives at /admin/grades/entry)
+Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/grades')->name('admin.grades.entry.')->group(function () {
+    Route::get('entry', [\App\Modules\GradeReports\Controllers\GradeEntryController::class, 'index'])->name('index');
+    Route::post('entry', [\App\Modules\GradeReports\Controllers\GradeEntryController::class, 'store'])->name('store');
 });
 
 // Reports Routes

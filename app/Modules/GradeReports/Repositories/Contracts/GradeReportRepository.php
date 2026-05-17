@@ -15,5 +15,7 @@ interface GradeReportRepository
 
     public function update(GradeReport $report, array $payload): GradeReport;
 
+    public function replaceColumns(GradeReport $report, array $columns): GradeReport;
+
     public function delete(GradeReport $report): void;
 }
