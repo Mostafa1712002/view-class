@@ -29,6 +29,7 @@ return [
     'choose' => 'اختر',
     'loading' => 'جاري التحميل',
     'no_data' => 'لا توجد بيانات',
+    'no_results' => 'لا توجد نتائج',
     'confirm_delete' => 'هل أنت متأكد من الحذف؟',
 
     // Common table columns

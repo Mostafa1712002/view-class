@@ -28,6 +28,7 @@ return [
     'choose' => 'Choose',
     'loading' => 'Loading…',
     'no_data' => 'No data',
+    'no_results' => 'No results',
     'confirm_delete' => 'Are you sure you want to delete?',
 
     'id' => 'ID',
