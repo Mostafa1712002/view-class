@@ -32,8 +32,15 @@ class NoorImportController extends Controller
         $user = $request->user();
         $schoolId = $user->school_id;
 
-        if (! $schoolId && ! $user->isSuperAdmin()) {
-            return back()->withErrors(['file' => __('noor.errors.no_school')])->withInput();
+        // Super-admin without a school assignment imports into the first
+        // school for now; school-admin must have a school.
+        if (! $schoolId) {
+            if ($user->isSuperAdmin()) {
+                $schoolId = \App\Models\School::query()->orderBy('id')->value('id');
+            }
+            if (! $schoolId) {
+                return back()->withErrors(['file' => __('noor.errors.no_school')])->withInput();
+            }
         }
 
         $file = $request->file('file');
@@ -86,7 +93,7 @@ class NoorImportController extends Controller
             return back()->withErrors(['file' => __('noor.errors.empty_file')])->withInput();
         }
 
-        $result = $importer->execute($rows, $type, (int) ($schoolId ?? 0));
+        $result = $importer->execute($rows, $type, (int) $schoolId);
 
         DB::table('noor_imports')->where('id', $logId)->update([
             'status'         => $result->status,
