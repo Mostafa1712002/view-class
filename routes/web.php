@@ -224,6 +224,14 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'creditHours'])->name('subjects.credit-hours');
     Route::patch('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'saveCreditHours'])->name('subjects.credit-hours.save');
 
+    // === Subject tracks (شعب المواد) — card 61 ===
+    Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');
+    Route::get('subjects/tracks/create',       [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'create'])->name('subject-tracks.create');
+    Route::post('subjects/tracks',             [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'store'])->name('subject-tracks.store');
+    Route::get('subjects/tracks/{id}/edit',    [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'edit'])->name('subject-tracks.edit');
+    Route::put('subjects/tracks/{id}',         [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'update'])->name('subject-tracks.update');
+    Route::delete('subjects/tracks/{id}',      [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'destroy'])->name('subject-tracks.destroy');
+
     Route::get('subjects/templates', [\App\Modules\Subjects\Controllers\SubjectController::class, 'templatesIndex'])->name('subjects.templates.index');
     Route::post('subjects/templates', [\App\Modules\Subjects\Controllers\SubjectController::class, 'templatesAttach'])->name('subjects.templates.attach');
 

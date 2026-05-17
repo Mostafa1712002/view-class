@@ -250,22 +250,75 @@ class SubjectController extends Controller
             ->with('success', __('sprint4.subjects.add_template_success', ['count' => $count]));
     }
 
-    public function creditHours(): View
+    public function creditHours(Request $request): View
     {
         $schoolId = $this->activeSchoolId();
-        $subjects = $this->subjects->paginate($schoolId, null, 100);
-        return view('admin.subjects.credit-hours', compact('subjects'));
+
+        // Build grade-level dropdown options. ViewClass uses level 1-12 stored as
+        // JSON-stringified ints in subjects.grade_levels (e.g. ["1","2"]). Show the
+        // human label that matches Saudi naming conventions.
+        $gradeOptions = $this->gradeLevelOptions();
+
+        $selectedLevel = (int) $request->query('grade_level', 0);
+        $subjects = [];
+
+        if ($selectedLevel > 0) {
+            $subjects = $this->subjects->subjectsForGradeLevel($schoolId, $selectedLevel);
+        }
+
+        return view('admin.subjects.credit-hours', [
+            'gradeOptions'  => $gradeOptions,
+            'selectedLevel' => $selectedLevel,
+            'subjects'      => $subjects,
+        ]);
     }
 
     public function saveCreditHours(Request $request): RedirectResponse
     {
-        $hours = $request->input('credit_hours', []);
         $schoolId = $this->activeSchoolId();
-        $count = $this->subjects->bulkSetCreditHours($schoolId, is_array($hours) ? $hours : []);
+
+        $hours  = (array) $request->input('credit_hours', []);
+        $active = (array) $request->input('credit_hours_active', []);
+        $level  = (int) $request->input('grade_level', 0);
+
+        $count = $this->subjects->bulkSetCreditValues($schoolId, $hours, $active);
+
+        $params = $level > 0 ? ['grade_level' => $level] : [];
 
         return redirect()
-            ->route('admin.subjects.credit-hours')
+            ->route('admin.subjects.credit-hours', $params)
             ->with('success', __('sprint4.subjects.flash.credit_hours_saved', ['count' => $count]));
+    }
+
+    /**
+     * Grade levels 1..12 with Saudi-style labels (الأول الابتدائي … الثالث الثانوي).
+     *
+     * @return array<int,string>
+     */
+    private function gradeLevelOptions(): array
+    {
+        $ordinals = [
+            1 => 'الأول', 2 => 'الثاني', 3 => 'الثالث', 4 => 'الرابع',
+            5 => 'الخامس', 6 => 'السادس',
+        ];
+
+        $out = [];
+        // 1..6  Primary
+        for ($g = 1; $g <= 6; $g++) {
+            $out[$g] = $ordinals[$g] . ' الابتدائي';
+        }
+        // 7..9  Intermediate
+        $intermediate = [7 => 'الأول', 8 => 'الثاني', 9 => 'الثالث'];
+        foreach ($intermediate as $g => $ord) {
+            $out[$g] = $ord . ' المتوسط';
+        }
+        // 10..12 Secondary
+        $secondary = [10 => 'الأول', 11 => 'الثاني', 12 => 'الثالث'];
+        foreach ($secondary as $g => $ord) {
+            $out[$g] = $ord . ' الثانوي';
+        }
+
+        return $out;
     }
 
     private function validateSubject(Request $request, ?Subject $subject = null): array

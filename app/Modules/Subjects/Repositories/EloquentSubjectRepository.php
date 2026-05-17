@@ -84,6 +84,53 @@ class EloquentSubjectRepository implements SubjectRepository
         return Subject::query()->whereNull('school_id')->orderBy('name')->get();
     }
 
+    public function subjectsForGradeLevel(?int $schoolId, int $level): iterable
+    {
+        $query = Subject::query();
+
+        if ($schoolId !== null) {
+            $query->where('school_id', $schoolId);
+        }
+
+        // subjects.grade_levels stores levels as JSON-stringified ints e.g. ["1","2"]
+        // so we match the string form for accuracy with existing data.
+        $query->where(function ($q) use ($level) {
+            $q->whereRaw('JSON_CONTAINS(grade_levels, ?)', ['"' . $level . '"'])
+              ->orWhereRaw('JSON_CONTAINS(grade_levels, ?)', [(string) $level]);
+        });
+
+        return $query->orderBy('certificate_order')->orderBy('name')->get();
+    }
+
+    public function bulkSetCreditValues(?int $schoolId, array $hoursById, array $activeById): int
+    {
+        $count = 0;
+        $ids   = array_unique(array_map('intval', array_keys($hoursById + $activeById)));
+
+        foreach ($ids as $id) {
+            if ($id <= 0) {
+                continue;
+            }
+
+            $query = Subject::query()->whereKey($id);
+            if ($schoolId !== null) {
+                $query->where('school_id', $schoolId);
+            }
+
+            $payload = [];
+            if (array_key_exists($id, $hoursById)) {
+                $h = $hoursById[$id];
+                $payload['credit_hours'] = ($h === '' || $h === null) ? null : (int) $h;
+            }
+            // Toggle: the array only carries IDs whose switch was on. Missing => false.
+            $payload['credit_hours_active'] = ! empty($activeById[$id]);
+
+            $count += $query->update($payload);
+        }
+
+        return $count;
+    }
+
     private function withoutNulls(array $payload): array
     {
         return array_filter($payload, static fn ($v) => $v !== null);

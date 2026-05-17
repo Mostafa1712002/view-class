@@ -207,7 +207,7 @@
                 </ul>
             </li>
 
-            <li class="nav-item has-sub {{ request()->routeIs('admin.subjects.*') ? 'open' : '' }}" data-section="system">
+            <li class="nav-item has-sub {{ (request()->routeIs('admin.subjects.*') || request()->routeIs('admin.subject-tracks.*')) ? 'open' : '' }}" data-section="system">
                 <a href="#"><i class="la la-book"></i><span class="menu-title">@lang('sprint4.subjects.page_title')</span></a>
                 <ul class="menu-content">
                     <li class="{{ request()->routeIs('admin.subjects.index') || request()->routeIs('admin.subjects.create') || request()->routeIs('admin.subjects.edit') ? 'active' : '' }}">
@@ -215,6 +215,8 @@
                             <i class="la la-book-open"></i><span class="menu-item">@lang('sprint4.subjects.plural')</span>
                         </a>
                     </li>
+                    {{-- === Sections card 61 === --}}
+                    <li class="{{ request()->routeIs('admin.subject-tracks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subject-tracks.index') ? route('admin.subject-tracks.index') : '#' }}"><i class="la la-stream"></i><span class="menu-item">@lang('subject_tracks.page_title')</span></a></li>
                     <li class="{{ request()->routeIs('admin.question-banks.*') ? 'active' : '' }}">
                         <a href="{{ Route::has('admin.question-banks.index') ? route('admin.question-banks.index') : '#' }}">
                             <i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_question_bank')</span>

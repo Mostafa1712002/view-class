@@ -19,6 +19,20 @@ interface SubjectRepository
 
     public function bulkSetCreditHours(?int $schoolId, array $creditHoursById): int;
 
+    /**
+     * Subjects in the picked grade level (matches the JSON-stringified value in
+     * subjects.grade_levels e.g. ["1","2"]).
+     *
+     * @return iterable<Subject>
+     */
+    public function subjectsForGradeLevel(?int $schoolId, int $level): iterable;
+
+    /**
+     * Persist both `credit_hours` (weekly lessons) and `credit_hours_active`
+     * (actual-approved toggle) in one pass.
+     */
+    public function bulkSetCreditValues(?int $schoolId, array $hoursById, array $activeById): int;
+
     /** @return iterable<Subject>  ViewClass platform templates (school_id NULL) */
     public function platformTemplates(): iterable;
 }

@@ -23,6 +23,7 @@ class Subject extends Model
         'grade_levels',
         'section',
         'credit_hours',
+        'credit_hours_active',
         'certificate_order',
         'source',
         'template_subject_id',
@@ -32,6 +33,7 @@ class Subject extends Model
     protected $casts = [
         'is_core' => 'boolean',
         'is_active' => 'boolean',
+        'credit_hours_active' => 'boolean',
         'grade_levels' => 'array',
         'credit_hours' => 'integer',
         'certificate_order' => 'integer',
