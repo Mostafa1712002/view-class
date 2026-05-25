@@ -15,7 +15,10 @@ trait HasSchoolScope
             return null;
         }
         if ($u->isSuperAdmin()) {
-            return (int) (session('admin.scope.school_id') ?: $u->school_id) ?: null;
+            // The navbar scope selector stores the active school under
+            // session('scope.school_id'); keep the legacy key as a fallback.
+            $scoped = session('scope.school_id') ?? session('admin.scope.school_id');
+            return (int) ($scoped ?: $u->school_id) ?: null;
         }
         return $u->school_id;
     }
