@@ -2,7 +2,9 @@
 
 namespace App\Modules\NoorImport\Actions;
 
+use App\Models\ClassRoom;
 use App\Models\Role;
+use App\Models\Section;
 use App\Models\User;
 use App\Modules\NoorImport\DTOs\NoorImportResult;
 use App\Modules\NoorImport\DTOs\NoorRowDto;
@@ -26,6 +28,10 @@ use Illuminate\Support\Str;
  */
 final class ImportNoorUsersAction
 {
+    /** @var array<string,int|null> in-call cache for section/class lookups */
+    private array $sectionCache = [];
+    private array $classCache = [];
+
     /**
      * @param  array<int, NoorRowDto>  $rows
      */
@@ -244,6 +250,9 @@ final class ImportNoorUsersAction
             'gender' => $this->normalizeGender($row->gender) ?? 'male',
             'birth_date' => $row->birthDate,
             'specialization' => $row->specialization,
+            // Best-effort class assignment from the Noor grade/class columns.
+            'section_id' => $sectionId = $this->matchSection($row->grade, $schoolId),
+            'class_room_id' => $this->matchClass($row->classRoom, $sectionId),
             'language' => 'ar',
             'language_preference' => 'ar',
             'timezone' => 'Asia/Riyadh',
@@ -257,6 +266,40 @@ final class ImportNoorUsersAction
         }
 
         return array_filter($payload, fn ($v) => $v !== null && $v !== '');
+    }
+
+    /** Best-effort match of a Noor grade name to a Section in the school. */
+    private function matchSection(?string $grade, int $schoolId): ?int
+    {
+        $grade = $grade ? trim($grade) : '';
+        if ($grade === '') return null;
+        $key = $schoolId . '|' . $grade;
+        if (array_key_exists($key, $this->sectionCache)) {
+            return $this->sectionCache[$key];
+        }
+        $id = Section::where('school_id', $schoolId)
+            ->where(function ($q) use ($grade) {
+                $q->where('name', $grade)->orWhere('name', 'like', '%' . $grade . '%');
+            })
+            ->value('id');
+        return $this->sectionCache[$key] = $id ? (int) $id : null;
+    }
+
+    /** Best-effort match of a Noor class name to a ClassRoom inside the section. */
+    private function matchClass(?string $class, ?int $sectionId): ?int
+    {
+        $class = $class ? trim($class) : '';
+        if ($class === '' || ! $sectionId) return null;
+        $key = $sectionId . '|' . $class;
+        if (array_key_exists($key, $this->classCache)) {
+            return $this->classCache[$key];
+        }
+        $id = ClassRoom::where('section_id', $sectionId)
+            ->where(function ($q) use ($class) {
+                $q->where('name', $class)->orWhere('name', 'like', '%' . $class . '%');
+            })
+            ->value('id');
+        return $this->classCache[$key] = $id ? (int) $id : null;
     }
 
     private function safeUsername(string $base): string
