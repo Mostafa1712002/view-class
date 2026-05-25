@@ -209,12 +209,20 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('teachers', [\App\Modules\Users\Controllers\TeacherController::class, 'index'])->name('teachers.index');
         Route::get('teachers/workloads', [\App\Modules\Users\Controllers\TeacherController::class, 'workloads'])->name('teachers.workloads');
         Route::get('teachers/import', [\App\Modules\Users\Controllers\TeacherController::class, 'importForm'])->name('teachers.import');
+        Route::get('teachers/import/template', [\App\Modules\Users\Controllers\TeacherController::class, 'importTemplate'])->name('teachers.import.template');
+        Route::get('teachers/export', [\App\Modules\Users\Controllers\TeacherController::class, 'export'])->name('teachers.export');
+        Route::post('teachers/import', [\App\Modules\Users\Controllers\TeacherController::class, 'import'])->name('teachers.import.store');
+        Route::post('teachers/import/update', [\App\Modules\Users\Controllers\TeacherController::class, 'importUpdate'])->name('teachers.import.update');
+        Route::post('teachers/import/photos', [\App\Modules\Users\Controllers\TeacherController::class, 'importPhotos'])->name('teachers.import.photos');
         Route::get('teachers/create', [\App\Modules\Users\Controllers\TeacherController::class, 'create'])->name('teachers.create');
         Route::post('teachers', [\App\Modules\Users\Controllers\TeacherController::class, 'store'])->name('teachers.store');
-        Route::get('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'show'])->name('teachers.show');
-        Route::get('teachers/{id}/edit', [\App\Modules\Users\Controllers\TeacherController::class, 'edit'])->name('teachers.edit');
-        Route::put('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'update'])->name('teachers.update');
-        Route::delete('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'destroy'])->name('teachers.destroy');
+        Route::get('teachers/{id}/permissions', [\App\Modules\Users\Controllers\TeacherController::class, 'permissions'])->whereNumber('id')->name('teachers.permissions');
+        Route::post('teachers/{id}/permissions', [\App\Modules\Users\Controllers\TeacherController::class, 'storePermission'])->whereNumber('id')->name('teachers.permissions.store');
+        Route::delete('teachers/{id}/permissions/{assignmentId}', [\App\Modules\Users\Controllers\TeacherController::class, 'destroyPermission'])->whereNumber('id')->whereNumber('assignmentId')->name('teachers.permissions.destroy');
+        Route::get('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'show'])->whereNumber('id')->name('teachers.show');
+        Route::get('teachers/{id}/edit', [\App\Modules\Users\Controllers\TeacherController::class, 'edit'])->whereNumber('id')->name('teachers.edit');
+        Route::put('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'update'])->whereNumber('id')->name('teachers.update');
+        Route::delete('teachers/{id}', [\App\Modules\Users\Controllers\TeacherController::class, 'destroy'])->whereNumber('id')->name('teachers.destroy');
 
         Route::get('admins', [\App\Modules\Users\Controllers\AdminController::class, 'index'])->name('admins.index');
         Route::get('admins/create', [\App\Modules\Users\Controllers\AdminController::class, 'create'])->name('admins.create');
@@ -236,6 +244,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
             ->whereNumber('id')
             ->name('cards.regenerate');
 
+        Route::get('{id}/impersonate', [\App\Modules\Users\Controllers\ImpersonateController::class, 'confirm'])->whereNumber('id')->name('impersonate.confirm');
         Route::post('{id}/impersonate', [\App\Modules\Users\Controllers\ImpersonateController::class, 'start'])->name('impersonate.start');
     });
 });

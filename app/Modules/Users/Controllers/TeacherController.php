@@ -4,16 +4,22 @@ namespace App\Modules\Users\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClassRoom;
+use App\Models\JobTitle;
 use App\Models\Role;
+use App\Models\School;
+use App\Models\TeacherAssignment;
 use App\Models\TeacherProfile;
 use App\Models\User;
+use App\Modules\Users\Actions\ParseTeacherSheet;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use App\Modules\Users\Repositories\Contracts\TeacherRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TeacherController extends Controller
 {
@@ -184,9 +190,297 @@ class TeacherController extends Controller
         return view('admin.users.teachers.workloads', compact('teachers'));
     }
 
+    // ===================== Excel + photo tools =====================
+
     public function importForm(): View
     {
         return view('admin.users.teachers.import');
+    }
+
+    /** Download a CSV template (UTF-8 BOM so Excel reads Arabic correctly). */
+    public function importTemplate(): StreamedResponse
+    {
+        $headers = ['رقم الهوية', 'الاسم الأول', 'اسم الأب', 'اسم الجد', 'اسم العائلة', 'الاسم بالإنجليزي', 'الرقم الوظيفي', 'جواز السفر', 'اسم المستخدم', 'التخصص', 'المؤهل', 'البريد الإلكتروني', 'رقم الهاتف', 'رقم الجوال', 'الجنس', 'تاريخ الميلاد', 'مكان الولادة', 'تاريخ التعيين', 'العنوان', 'الجنسية'];
+        $sample = ['1020304050', 'محمد', 'أحمد', 'علي', 'الزهراني', 'Mohammed Alzahrani', 'EMP-1001', 'A1234567', 'mohammed.t', 'رياضيات', 'بكالوريوس', 'sample@example.com', '0500000000', '0500000001', 'male', '1990-01-01', 'الرياض', '2020-09-01', 'الرياض', 'سعودي'];
+
+        return $this->streamCsv('teachers-template.csv', [$headers, $sample]);
+    }
+
+    /** Export current teachers so the admin can edit and re-upload. */
+    public function export(): StreamedResponse
+    {
+        $rows = [[
+            'رقم الهوية', 'الاسم الكامل', 'الاسم بالإنجليزي', 'الرقم الوظيفي', 'جواز السفر', 'اسم المستخدم', 'التخصص', 'المؤهل', 'البريد الإلكتروني', 'رقم الهاتف', 'رقم الجوال', 'الجنس', 'تاريخ الميلاد', 'مكان الولادة', 'تاريخ التعيين', 'العنوان', 'الجنسية',
+        ]];
+
+        $this->teachers->query($this->activeSchoolId())->with('teacherProfile')->orderBy('users.id')
+            ->chunk(200, function ($chunk) use (&$rows) {
+                foreach ($chunk as $t) {
+                    $tp = $t->teacherProfile;
+                    $rows[] = [
+                        $t->national_id, $t->name, $t->name_en, $t->employee_id,
+                        $tp->passport_number ?? null, $t->username, $t->specialization, $t->qualification,
+                        $t->email, $t->phone, $tp->phone_secondary ?? null, $t->gender,
+                        optional($t->date_of_birth)->format('Y-m-d'), $tp->birth_place ?? null,
+                        optional($t->hire_date)->format('Y-m-d'), $t->address, $tp->nationality ?? null,
+                    ];
+                }
+            });
+
+        return $this->streamCsv('teachers-export-'.date('Ymd-His').'.csv', $rows);
+    }
+
+    /** Create new teacher accounts from an uploaded sheet (mirrors /teacher/editExcel add mode). */
+    public function import(Request $request, ParseTeacherSheet $parser): RedirectResponse
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt,xlsx,xls']);
+        $schoolId = $this->activeSchoolId();
+        $created = 0; $skipped = 0;
+
+        $rows = $parser->execute($request->file('file'));
+        DB::transaction(function () use ($rows, $schoolId, &$created, &$skipped) {
+            $role = Role::where('slug', 'teacher')->first();
+            foreach ($rows as $row) {
+                $username = $row['username'] ?: ($row['national_id'] ?: null);
+                $name = $row['name'] ?: $this->composeArabicName($row);
+                if (!$username || $name === '') {
+                    $skipped++;
+                    continue;
+                }
+                if (User::where('username', $username)->exists()) {
+                    $skipped++;
+                    continue;
+                }
+                $plain = $row['national_id'] ?: str()->random(8);
+                $user = User::create($this->withoutNulls([
+                    'school_id' => $schoolId,
+                    'name' => $name,
+                    'name_ar' => $name,
+                    'name_en' => $row['name_en'] ?: $this->composeEnglishName($row),
+                    'username' => $username,
+                    'email' => $row['email'] ?: ($username.'@viewclass.local'),
+                    'national_id' => $row['national_id'] ?? null,
+                    'employee_id' => $row['employee_id'] ?? null,
+                    'specialization' => $row['specialization'] ?? null,
+                    'qualification' => $row['qualification'] ?? null,
+                    'gender' => $this->normalizeGender($row['gender'] ?? null),
+                    'phone' => $row['phone'] ?? null,
+                    'address' => $row['address'] ?? null,
+                    'date_of_birth' => $row['date_of_birth'] ?? null,
+                    'hire_date' => $row['hire_date'] ?? null,
+                    'password' => Hash::make($plain),
+                    'plain_password_for_card' => encrypt($plain),
+                    'is_active' => true,
+                    'status' => 'active',
+                ]));
+                if ($role) {
+                    $user->roles()->syncWithoutDetaching($role);
+                }
+                $this->syncProfileFromRow($user, $row);
+                $created++;
+            }
+        });
+
+        return redirect()->route('admin.users.teachers.index')
+            ->with('status', __('users.imported_count', ['count' => $created])
+                .($skipped ? ' — '.__('users.skipped_count', ['count' => $skipped]) : ''));
+    }
+
+    /** Update existing teachers (matched by national_id / username) from an uploaded sheet. */
+    public function importUpdate(Request $request, ParseTeacherSheet $parser): RedirectResponse
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt,xlsx,xls']);
+        $schoolId = $this->activeSchoolId();
+        $updated = 0; $skipped = 0;
+
+        $rows = $parser->execute($request->file('file'));
+        DB::transaction(function () use ($rows, $schoolId, &$updated, &$skipped) {
+            foreach ($rows as $row) {
+                $teacher = $row['national_id']
+                    ? $this->teachers->query($schoolId)->where('national_id', $row['national_id'])->first()
+                    : ($row['username'] ? $this->teachers->query($schoolId)->where('username', $row['username'])->first() : null);
+                if (!$teacher) {
+                    $skipped++;
+                    continue;
+                }
+                $name = $row['name'] ?: $this->composeArabicName($row);
+                $teacher->fill($this->withoutNulls([
+                    'name' => $name !== '' ? $name : null,
+                    'name_ar' => $name !== '' ? $name : null,
+                    'name_en' => $row['name_en'] ?? null,
+                    'employee_id' => $row['employee_id'] ?? null,
+                    'specialization' => $row['specialization'] ?? null,
+                    'qualification' => $row['qualification'] ?? null,
+                    'gender' => $this->normalizeGender($row['gender'] ?? null),
+                    'phone' => $row['phone'] ?? null,
+                    'address' => $row['address'] ?? null,
+                    'date_of_birth' => $row['date_of_birth'] ?? null,
+                    'hire_date' => $row['hire_date'] ?? null,
+                ]));
+                $teacher->save();
+                $this->syncProfileFromRow($teacher, $row);
+                $updated++;
+            }
+        });
+
+        return redirect()->route('admin.users.teachers.index')
+            ->with('status', __('users.updated_count', ['count' => $updated])
+                .($skipped ? ' — '.__('users.skipped_count', ['count' => $skipped]) : ''));
+    }
+
+    /** Bulk import teacher photos from a ZIP (mirrors /teacher/zipFile). Files matched by national_id / username stem. */
+    public function importPhotos(Request $request): RedirectResponse
+    {
+        $request->validate(['archive' => 'required|file|mimes:zip']);
+        $schoolId = $this->activeSchoolId();
+        $matched = 0; $skipped = 0;
+
+        $zip = new \ZipArchive();
+        if ($zip->open($request->file('archive')->getRealPath()) !== true) {
+            return redirect()->route('admin.users.teachers.import')
+                ->with('error', __('users.import_no_file'));
+        }
+
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $entry = $zip->getNameIndex($i);
+            if ($entry === false || str_ends_with($entry, '/')) {
+                continue;
+            }
+            $base = basename($entry);
+            if ($base === '' || str_starts_with($base, '.') || str_starts_with($base, '__MACOSX')) {
+                continue;
+            }
+            $ext = strtolower(pathinfo($base, PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowed, true)) {
+                continue;
+            }
+            $stem = pathinfo($base, PATHINFO_FILENAME);
+            $teacher = $this->teachers->query($schoolId)->where('national_id', $stem)->first()
+                ?? $this->teachers->query($schoolId)->where('username', $stem)->first();
+            if (!$teacher) {
+                $skipped++;
+                continue;
+            }
+            $contents = $zip->getFromIndex($i);
+            if ($contents === false) {
+                $skipped++;
+                continue;
+            }
+            $storedPath = 'teachers/photos/'.$stem.'-'.uniqid().'.'.$ext;
+            Storage::disk('public')->put($storedPath, $contents);
+            TeacherProfile::updateOrCreate(['user_id' => $teacher->id], ['profile_photo' => $storedPath]);
+            $matched++;
+        }
+        $zip->close();
+
+        return redirect()->route('admin.users.teachers.index')
+            ->with('status', __('users.photos_matched_count', ['count' => $matched])
+                .($skipped ? ' — '.__('users.skipped_count', ['count' => $skipped]) : ''));
+    }
+
+    // ===================== Permissions / school assignments =====================
+
+    /** صلاحيات وأدوار المعلم: school + role + job-title assignments. */
+    public function permissions(int $id): View|RedirectResponse
+    {
+        $teacher = $this->teachers->findScoped($id, $this->activeSchoolId());
+        if (!$teacher) {
+            return redirect()->route('admin.users.teachers.index')->with('error', __('users.not_found'));
+        }
+
+        $schools = School::query()->orderBy('name')->get(['id', 'name']);
+        $roles = Role::query()->where('is_active', true)
+            ->whereIn('slug', ['school-admin', 'supervisor', 'counselor', 'teacher'])
+            ->orderBy('id')->get(['id', 'name', 'slug']);
+        $jobTitles = JobTitle::query()->forSchool($this->activeSchoolId())->active()
+            ->orderBy('sort_order')->get(['id', 'name_ar']);
+        $assignments = TeacherAssignment::query()->where('user_id', $teacher->id)
+            ->with(['school:id,name', 'role:id,name', 'jobTitle:id,name_ar'])
+            ->orderBy('school_id')->get();
+
+        return view('admin.users.teachers.permissions', compact('teacher', 'schools', 'roles', 'jobTitles', 'assignments'));
+    }
+
+    public function storePermission(Request $request, int $id): RedirectResponse
+    {
+        $teacher = $this->teachers->findScoped($id, $this->activeSchoolId());
+        if (!$teacher) {
+            return redirect()->route('admin.users.teachers.index')->with('error', __('users.not_found'));
+        }
+        $data = $request->validate([
+            'school_id' => 'required|integer|exists:schools,id',
+            'role_id' => 'required|integer|exists:roles,id',
+            'job_title_id' => 'nullable|integer|exists:job_titles,id',
+        ]);
+
+        TeacherAssignment::firstOrCreate([
+            'user_id' => $teacher->id,
+            'school_id' => $data['school_id'],
+            'role_id' => $data['role_id'],
+            'job_title_id' => $data['job_title_id'] ?? null,
+        ]);
+
+        return redirect()->route('admin.users.teachers.permissions', $teacher->id)
+            ->with('status', __('users.assignment_added'));
+    }
+
+    public function destroyPermission(int $id, int $assignmentId): RedirectResponse
+    {
+        $teacher = $this->teachers->findScoped($id, $this->activeSchoolId());
+        if (!$teacher) {
+            return redirect()->route('admin.users.teachers.index')->with('error', __('users.not_found'));
+        }
+        TeacherAssignment::query()->where('id', $assignmentId)->where('user_id', $teacher->id)->delete();
+
+        return redirect()->route('admin.users.teachers.permissions', $teacher->id)
+            ->with('status', __('users.assignment_removed'));
+    }
+
+    // ===================== Helpers =====================
+
+    /** @param array<int, array<int,mixed>> $rows */
+    private function streamCsv(string $filename, array $rows): StreamedResponse
+    {
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // UTF-8 BOM for Excel
+            foreach ($rows as $row) {
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    private function normalizeGender(?string $gender): ?string
+    {
+        if (!$gender) {
+            return null;
+        }
+        if (in_array($gender, ['male', 'female'], true)) {
+            return $gender;
+        }
+
+        return in_array($gender, ['ذكر', 'm', 'M'], true) ? 'male'
+            : (in_array($gender, ['أنثى', 'انثى', 'f', 'F'], true) ? 'female' : null);
+    }
+
+    /** Persist parsed-sheet profile fields onto the teacher's TeacherProfile. */
+    private function syncProfileFromRow(User $user, array $row): void
+    {
+        TeacherProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            $this->withoutNulls([
+                'first_name_ar' => $row['first_name_ar'] ?? null,
+                'father_name_ar' => $row['father_name_ar'] ?? null,
+                'grandfather_name_ar' => $row['grandfather_name_ar'] ?? null,
+                'family_name_ar' => $row['family_name_ar'] ?? null,
+                'passport_number' => $row['passport_number'] ?? null,
+                'birth_place' => $row['birth_place'] ?? null,
+                'nationality' => $row['nationality'] ?? null,
+                'phone_secondary' => $row['phone_secondary'] ?? null,
+            ]),
+        );
     }
 
     private function validateTeacher(Request $request, ?int $id = null): array

@@ -1,6 +1,16 @@
 @extends('layouts.app')
 @section('title', __('users.teachers'))
 @section('body_class', 'theme-light')
+@push('styles')
+<style>
+    /* Let row action dropdowns float above the table instead of being clipped. */
+    body.theme-light .table-responsive { overflow: visible; }
+    body.theme-light .dropdown-menu.is-floating {
+        position: fixed; z-index: 1080;
+        box-shadow: 0 8px 24px rgba(15,23,42,.12), 0 2px 6px rgba(15,23,42,.06);
+    }
+</style>
+@endpush
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
@@ -101,7 +111,7 @@
                                     </form>
                                     @endif
                                     <a class="dropdown-item" href="{{ route('admin.users.teachers.workloads') }}"><i class="la la-calendar"></i> @lang('users.schedule_link')</a>
-                                    <a class="dropdown-item disabled" href="#"><i class="la la-shield-alt"></i> @lang('users.permissions_link')</a>
+                                    <a class="dropdown-item" href="{{ route('admin.users.teachers.permissions', $u->id) }}"><i class="la la-shield-alt"></i> @lang('users.permissions_link')</a>
                                 </div>
                             </div>
                         </td>
@@ -116,6 +126,8 @@
     </div>
 </div>
 
+@endsection
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var checkAll = document.getElementById('js-check-all');
@@ -125,6 +137,26 @@ document.addEventListener('DOMContentLoaded', function () {
             rows.forEach(function (r) { r.checked = checkAll.checked; });
         });
     }
+
+    // Float row action dropdowns above the table using position:fixed.
+    if (window.jQuery) {
+        jQuery(document)
+            .on('shown.bs.dropdown', '.table .dropdown', function (e) {
+                var $toggle = jQuery(this).find('[data-toggle="dropdown"],[data-bs-toggle="dropdown"]').first();
+                var $menu = jQuery(this).find('.dropdown-menu').first();
+                if (!$toggle.length || !$menu.length) { return; }
+                var r = $toggle[0].getBoundingClientRect();
+                var mw = $menu.outerWidth();
+                $menu.addClass('is-floating').css({
+                    top: (r.bottom + 4) + 'px',
+                    left: Math.max(8, r.right - mw) + 'px',
+                    right: 'auto'
+                });
+            })
+            .on('hidden.bs.dropdown', '.table .dropdown', function () {
+                jQuery(this).find('.dropdown-menu').removeClass('is-floating').css({ top: '', left: '', right: '' });
+            });
+    }
 });
 </script>
-@endsection
+@endpush

@@ -11,6 +11,23 @@ use Illuminate\Support\Facades\DB;
 
 class ImpersonateController extends Controller
 {
+    /**
+     * GET confirmation page. Hitting POST-only /impersonate via a bare URL
+     * yields a 405/419; this presents a tiny CSRF-protected confirm form.
+     */
+    public function confirm(Request $request, int $id): \Illuminate\Contracts\View\View|RedirectResponse
+    {
+        $me = Auth::user();
+        abort_unless($me && $me->isSuperAdmin(), 403);
+
+        $target = User::query()->whereKey($id)->first();
+        if (!$target) {
+            return redirect()->route('dashboard')->with('error', __('users.not_found'));
+        }
+
+        return view('admin.users.impersonate-confirm', compact('target'));
+    }
+
     public function start(Request $request, int $id): RedirectResponse
     {
         $me = Auth::user();

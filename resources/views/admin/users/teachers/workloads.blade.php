@@ -64,8 +64,6 @@
                         <th>@lang('users.name')</th>
                         <th>@lang('users.national_id')</th>
                         <th class="text-center">@lang('users.workload_label')</th>
-                        <th class="text-center">@lang('users.subjects_count')</th>
-                        <th class="text-center">@lang('users.classes_count_label')</th>
                         <th class="text-end">@lang('users.controls')</th>
                     </tr>
                 </thead>
@@ -84,20 +82,6 @@
                                 <span class="text-muted">0</span>
                             @endif
                         </td>
-                        <td class="text-center">
-                            @if($t->subjects_count > 0)
-                                <span class="badge bg-info">{{ $t->subjects_count }}</span>
-                            @else
-                                <span class="text-muted">0</span>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            @if($t->classes_count > 0)
-                                <span class="badge bg-success">{{ $t->classes_count }}</span>
-                            @else
-                                <span class="text-muted">0</span>
-                            @endif
-                        </td>
                         <td class="text-end">
                             <a href="{{ route('admin.users.teachers.show', $t->id) }}" class="btn btn-sm btn-outline-info" title="@lang('users.show_details')">
                                 <i class="la la-eye"></i>
@@ -108,7 +92,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="text-center text-muted py-4">@lang('users.no_results')</td></tr>
+                    <tr><td colspan="4" class="text-center text-muted py-4">@lang('users.no_results')</td></tr>
                 @endforelse
                 </tbody>
             </table>

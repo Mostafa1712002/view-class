@@ -337,4 +337,40 @@ return [
     'teacher_basic_info' => 'البيانات الأساسية',
     'teacher_status_active' => 'نشط',
     'teacher_status_inactive' => 'غير نشط',
+
+    // Teacher Excel import / update / photos
+    'import_add_title' => 'استيراد معلمين جدد من Excel',
+    'import_add_help' => 'حمّل القالب، عبّئ بيانات المعلمين، ثم ارفع الملف لإنشاء حسابات جديدة.',
+    'import_add_btn' => 'استيراد وإنشاء الحسابات',
+    'import_update_title' => 'تحديث بيانات المعلمين من Excel',
+    'import_update_help' => 'صدّر الحاليين، عدّل البيانات، ثم ارفع الملف لتحديث الحسابات (المطابقة برقم الهوية أو اسم المستخدم).',
+    'import_update_btn' => 'تحديث البيانات',
+    'import_photos_title' => 'استيراد صور المعلمين',
+    'import_photos_help' => 'ارفع ملف ZIP يحتوي صور المعلمين، وسيتم مطابقة كل صورة بالمعلم حسب اسم الملف (رقم الهوية أو اسم المستخدم).',
+    'import_photos_btn' => 'رفع الصور',
+    'import_photos_hint' => 'مثال على اسم الصورة: 1020304050.jpg أو mohammed.t.png — الامتدادات المدعومة: jpg, jpeg, png, gif, webp.',
+    'upload_zip' => 'رفع ملف ZIP للصور',
+    'photos_matched_count' => 'تم ربط :count صورة',
+
+    // Teacher permissions / school assignments
+    'permissions_page_title' => 'صلاحيات وأدوار المعلم',
+    'assignment_add_title' => 'إضافة صلاحية جديدة للمعلم',
+    'assignment_school' => 'المدرسة',
+    'assignment_choose_school' => 'اختر المدرسة',
+    'assignment_role' => 'المجموعة / الدور',
+    'assignment_choose_role' => 'اختر الدور',
+    'assignment_job_title' => 'المسمى الوظيفي',
+    'assignment_choose_job_title' => 'الرجاء اختيار مسمى وظيفي',
+    'assignment_current_title' => 'الصلاحيات الحالية للمعلم',
+    'assignment_schools' => 'المدارس',
+    'assignment_groups' => 'المجموعات',
+    'assignment_manage' => 'الإدارة',
+    'assignment_added' => 'تمت إضافة الصلاحية بنجاح.',
+    'assignment_removed' => 'تم حذف الصلاحية.',
+    'assignment_none' => 'لا توجد صلاحيات مسندة لهذا المعلم بعد.',
+    'assignment_delete_confirm' => 'هل تريد حذف هذه الصلاحية؟',
+
+    // Impersonation confirm
+    'impersonate_confirm_question' => 'هل تريد تسجيل الدخول كهذا المستخدم؟',
+    'impersonate_confirm_yes' => 'نعم، تسجيل الدخول',
 ];
