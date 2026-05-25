@@ -590,5 +590,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/sett
 // === Noor card 58 ===
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('noor', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'form'])->name('noor.form');
-    Route::post('noor', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'submit'])->name('noor.submit');
+    Route::post('noor/preview', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'preview'])->name('noor.preview');
+    Route::post('noor/{log}/execute', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'execute'])->name('noor.execute');
+    Route::get('noor/{log}/errors', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'errorsReport'])->name('noor.errors');
 });

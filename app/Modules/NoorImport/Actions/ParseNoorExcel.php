@@ -116,12 +116,21 @@ final class ParseNoorExcel
 
     private function buildDto(int $rowNumber, array $header, array $row): NoorRowDto
     {
-        $get = function (array $keywords) use ($header, $row): ?string {
+        // $exclude lets student-only fields ignore columns that belong to the
+        // parent (e.g. "هوية ولي الأمر" must not be picked up as the student id).
+        $get = function (array $keywords, array $exclude = []) use ($header, $row): ?string {
             foreach ($header as $colIdx => $h) {
+                if ($h === '') continue;
+                foreach ($exclude as $x) {
+                    if (mb_strpos($h, $x) !== false) continue 2;
+                }
                 foreach ($keywords as $k) {
-                    if ($h !== '' && mb_strpos($h, $k) !== false) {
+                    if (mb_strpos($h, $k) !== false) {
                         $v = $row[$colIdx] ?? null;
-                        if ($v === null || trim((string) $v) === '') return null;
+                        if ($v === null || trim((string) $v) === '') {
+                            // Keep scanning other columns instead of giving up.
+                            continue 2;
+                        }
                         return trim((string) $v);
                     }
                 }
@@ -131,15 +140,23 @@ final class ParseNoorExcel
 
         return new NoorRowDto(
             rowNumber: $rowNumber,
-            nationalId: $get(['الهوية', 'هوية', 'السجل', 'national']),
+            // Student identity: prefer the explicit student/national-id headers,
+            // never the parent (ولي الأمر) one which we capture separately below.
+            nationalId: $get(['هوية الطالب', 'رقم هوية الطالب', 'الهوية', 'رقم الهوية', 'هوية', 'السجل المدني', 'السجل', 'national'], ['ولي', 'guardian', 'parent']),
             academicNumber: $get(['الرقم الأكاديمي', 'اكاديمي', 'أكاديمي', 'academic']),
-            name: $get(['الاسم', 'اسم الطالب', 'اسم المعلم', 'name']),
-            gender: $get(['الجنس', 'gender']),
+            name: $get(['اسم الطالب', 'الاسم', 'اسم المعلم', 'name'], ['ولي', 'guardian', 'parent']),
+            gender: $get(['الجنس', 'النوع', 'gender']),
             birthDate: $get(['تاريخ الميلاد', 'الميلاد', 'birth']),
-            phone: $get(['الجوال', 'جوال', 'هاتف', 'phone', 'mobile']),
+            phone: $get(['جوال الطالب', 'الجوال', 'جوال', 'هاتف', 'phone', 'mobile'], ['ولي', 'guardian', 'parent']),
             email: $get(['البريد', 'الإيميل', 'الايميل', 'email']),
-            classRoom: $get(['الصف', 'الفصل', 'class']),
+            grade: $get(['الصف', 'المرحلة', 'grade']),
+            classRoom: $get(['الفصل', 'الشعبة', 'class', 'section']),
             specialization: $get(['التخصص', 'specialization']),
+            nationality: $get(['الجنسية', 'nationality']),
+            studentStatus: $get(['حالة الطالب', 'الحالة', 'status']),
+            parentName: $get(['اسم ولي الامر', 'اسم ولي الأمر', 'ولي الامر', 'ولي الأمر', 'guardian name', 'parent name']),
+            parentNationalId: $get(['هوية ولي الامر', 'هوية ولي الأمر', 'رقم هوية ولي الامر', 'رقم هوية ولي الأمر', 'سجل ولي الامر', 'guardian id', 'parent id']),
+            parentPhone: $get(['جوال ولي الامر', 'جوال ولي الأمر', 'هاتف ولي الامر', 'هاتف ولي الأمر', 'guardian phone', 'parent phone']),
             raw: array_combine($header, array_map(fn ($v) => is_string($v) ? $v : (string) ($v ?? '')
                 , array_slice($row, 0, count($header))
             )) ?: [],

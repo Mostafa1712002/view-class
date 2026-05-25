@@ -13,5 +13,7 @@ final class NoorImportResult
         public readonly array $errors = [],
         public readonly string $status = 'completed',
         public readonly ?string $note = null,
+        public readonly int $parentCreated = 0,
+        public readonly int $parentUpdated = 0,
     ) {}
 }

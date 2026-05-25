@@ -55,6 +55,13 @@
             </div>
         </div>
 
+        @if (($result->parentCreated ?? 0) + ($result->parentUpdated ?? 0) > 0)
+            <div class="alert alert-info">
+                <i class="la la-user-friends"></i>
+                @lang('noor.result_parents', ['created' => $result->parentCreated, 'updated' => $result->parentUpdated])
+            </div>
+        @endif
+
         @if (! empty($result->errors))
             <div class="card mb-3">
                 <div class="card-header">
@@ -83,6 +90,11 @@
     @endif
 
     <div class="text-center">
+        @if ($result && ! empty($result->errors))
+            <a href="{{ route('admin.noor.errors', $log_id) }}" class="btn btn-outline-danger">
+                <i class="la la-download"></i> @lang('noor.result_download_errors')
+            </a>
+        @endif
         <a href="{{ route('admin.noor.form') }}" class="btn btn-outline-primary">
             <i class="la la-arrow-right"></i> @lang('noor.back_to_form')
         </a>
