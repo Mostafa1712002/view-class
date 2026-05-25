@@ -4,7 +4,6 @@
 @section('body_class', 'theme-light')
 
 @php
-    $isRtl = app()->getLocale() === 'ar';
     $undefinedLabel = __('sprint4.subjects.credit_hours_page.undefined');
     $gradeLabel = $selectedLevel > 0 ? ($gradeOptions[$selectedLevel] ?? null) : null;
 @endphp
@@ -87,11 +86,15 @@
     }
     .cv-slider::before {
         content: ""; position: absolute; width: 20px; height: 20px;
-        left: 3px; top: 3px; background: #fff; border-radius: 50%;
+        inset-inline-start: 3px; top: 3px; background: #fff; border-radius: 50%;
         transition: transform .2s ease; box-shadow: 0 1px 3px rgba(0,0,0,.18);
     }
+    /* Direction-agnostic: the knob always slides toward the inline-end of the track.
+       Using logical inset + a positive translate lets the browser mirror it in RTL,
+       so the white knob never slips outside the pill (was off-screen in RTL before). */
     .cv-switch input:checked + .cv-slider { background: var(--gold-400, #cfa046); }
-    .cv-switch input:checked + .cv-slider::before { transform: translateX({{ $isRtl ? '-20px' : '20px' }}); }
+    .cv-switch input:checked + .cv-slider::before { transform: translateX(20px); }
+    [dir="rtl"] .cv-switch input:checked + .cv-slider::before { transform: translateX(-20px); }
 
     .cv-empty { padding: 2.5rem 1rem; text-align: center; color: #64748b; }
     .cv-empty i { font-size: 2.4rem; color: #cbd5e1; margin-bottom: .5rem; display: block; }
