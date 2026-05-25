@@ -120,6 +120,28 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    /**
+     * All class IDs this student belongs to.
+     *
+     * Enrollment is written in two places that are not always kept in sync:
+     * the `class_student` pivot (set on student creation) and the direct
+     * `users.class_room_id` column (the only one the student-edit form
+     * updates, and what seeded/imported students carry). We union both so a
+     * student is considered enrolled if either source links them to a class.
+     *
+     * @return array<int>
+     */
+    public function enrolledClassIds(): array
+    {
+        $ids = $this->enrolledClasses()->pluck('classes.id')->all();
+
+        if ($this->class_room_id) {
+            $ids[] = (int) $this->class_room_id;
+        }
+
+        return array_values(array_unique(array_filter($ids)));
+    }
+
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class, 'student_id');

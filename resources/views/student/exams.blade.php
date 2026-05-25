@@ -35,25 +35,51 @@
                 </div>
                 <div class="card-body">
                     @forelse($upcomingExams as $exam)
+                        @php
+                            $now = now();
+                            $alreadySubmitted = isset($submittedExamIds) && $submittedExamIds->contains($exam->id);
+                            $hasStarted = ! $exam->start_time || $now->gte($exam->start_time);
+                            $canEnter = $hasStarted
+                                && $exam->status === 'active'
+                                && ! $alreadySubmitted
+                                && $exam->questions()->count() > 0;
+                        @endphp
                         <div class="border rounded p-3 mb-3">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <h6 class="mb-1">{{ $exam->title }}</h6>
                                     <small class="text-muted">{{ $exam->subject->name ?? '-' }}</small>
                                 </div>
-                                <span class="badge bg-info">{{ $exam->exam_date->format('Y-m-d') }}</span>
+                                <span class="badge bg-info">
+                                    {{ $exam->start_time ? $exam->start_time->format('Y-m-d') : '—' }}
+                                </span>
                             </div>
                             <hr class="my-2">
-                            <div class="d-flex gap-3 text-muted small">
-                                <span><i class="bi bi-clock me-1"></i>{{ $exam->duration }} دقيقة</span>
+                            <div class="d-flex gap-3 text-muted small flex-wrap">
+                                @if($exam->duration_minutes)
+                                    <span><i class="bi bi-clock me-1"></i>{{ $exam->duration_minutes }} دقيقة</span>
+                                @endif
                                 <span><i class="bi bi-award me-1"></i>{{ $exam->total_marks }} درجة</span>
                                 @if($exam->start_time)
-                                    <span><i class="bi bi-play-circle me-1"></i>{{ $exam->start_time }}</span>
+                                    <span><i class="bi bi-play-circle me-1"></i>{{ $exam->start_time->format('Y-m-d H:i') }}</span>
                                 @endif
                             </div>
                             @if($exam->description)
                                 <p class="mt-2 mb-0 small text-muted">{{ $exam->description }}</p>
                             @endif
+                            <div class="mt-3">
+                                @if($alreadySubmitted)
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>تم التسليم</span>
+                                @elseif($canEnter)
+                                    <a href="{{ route('student.exams.show', $exam) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil-square me-1"></i>دخول الاختبار
+                                    </a>
+                                @elseif(! $hasStarted)
+                                    <span class="badge bg-secondary"><i class="bi bi-hourglass-split me-1"></i>لم يبدأ بعد</span>
+                                @else
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i>غير متاح حالياً</span>
+                                @endif
+                            </div>
                         </div>
                     @empty
                         <div class="text-center py-4">
@@ -95,7 +121,7 @@
                                 <div class="progress-bar bg-{{ $percentage >= 50 ? 'success' : 'danger' }}"
                                      style="width: {{ $percentage }}%"></div>
                             </div>
-                            <small class="text-muted">{{ $result->exam->exam_date->format('Y-m-d') }}</small>
+                            <small class="text-muted">{{ optional($result->exam->start_time)->format('Y-m-d') ?? optional($result->submitted_at)->format('Y-m-d') }}</small>
                         </div>
                     @empty
                         <div class="text-center py-4">

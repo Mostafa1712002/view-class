@@ -52,17 +52,22 @@ class StudentController extends Controller
             ->where('is_published', true)
             ->avg('total');
 
-        // Upcoming exams
-        $upcomingExams = Exam::whereHas('classRoom', function ($q) use ($student) {
-                $q->whereHas('students', function ($sq) use ($student) {
-                    $sq->where('users.id', $student->id);
-                });
-            })
-            ->where('start_time', '>=', now())
-            ->where('is_published', true)
-            ->orderBy('start_time')
-            ->limit(5)
-            ->get();
+        // Upcoming / available exams for the student's class(es).
+        $classIds = $student->enrolledClassIds();
+        $upcomingExams = collect();
+        if (! empty($classIds)) {
+            $now = now();
+            $upcomingExams = Exam::whereIn('class_id', $classIds)
+                ->where('is_published', true)
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('end_time')
+                        ->orWhere('end_time', '>=', $now);
+                })
+                ->whereNotIn('status', ['cancelled'])
+                ->orderBy('start_time')
+                ->limit(5)
+                ->get();
+        }
 
         // Recent exam results — submitted attempts only
         $recentExamResults = $student->studentExams()
@@ -193,31 +198,52 @@ class StudentController extends Controller
         $upcomingExams = collect();
         $completedExams = collect();
 
+        // Class IDs already submitted by this student keyed by exam id, so the
+        // view can tell which available exams still need to be taken.
+        $submittedExamIds = collect();
+
         if ($selectedYear) {
-            // Get student's class
-            $classIds = $student->enrolledClasses()->pluck('classes.id');
+            // Resolve the student's class from both enrollment sources
+            // (class_student pivot + users.class_room_id).
+            $classIds = $student->enrolledClassIds();
 
-            // Upcoming exams
-            $upcomingExams = Exam::whereIn('class_id', $classIds)
-                ->where('academic_year_id', $selectedYear->id)
-                ->where('start_time', '>=', now())
-                ->where('is_published', true)
-                ->with('subject')
-                ->orderBy('start_time')
-                ->get();
+            if (! empty($classIds)) {
+                $now = now();
 
-            // Completed exams with results — submitted attempts
-            $completedExams = $student->studentExams()
-                ->whereHas('exam', function ($q) use ($selectedYear, $classIds) {
-                    $q->where('academic_year_id', $selectedYear->id)
-                        ->whereIn('class_id', $classIds);
-                })
-                ->whereNotNull('submitted_at')
-                ->with(['exam.subject'])
-                ->get();
+                // Available exams: published, not yet ended, in the student's
+                // class. Includes exams already in progress (start_time in the
+                // past) as long as the window has not closed — those are the
+                // ones the student should be able to enter and take right now.
+                $upcomingExams = Exam::whereIn('class_id', $classIds)
+                    ->where('academic_year_id', $selectedYear->id)
+                    ->where('is_published', true)
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('end_time')
+                            ->orWhere('end_time', '>=', $now);
+                    })
+                    ->whereNotIn('status', ['cancelled'])
+                    ->with('subject')
+                    ->orderBy('start_time')
+                    ->get();
+
+                // IDs the student already submitted (hide their "enter" action).
+                $submittedExamIds = $student->studentExams()
+                    ->whereNotNull('submitted_at')
+                    ->pluck('exam_id');
+
+                // Completed exams with results — submitted attempts.
+                $completedExams = $student->studentExams()
+                    ->whereHas('exam', function ($q) use ($selectedYear, $classIds) {
+                        $q->where('academic_year_id', $selectedYear->id)
+                            ->whereIn('class_id', $classIds);
+                    })
+                    ->whereNotNull('submitted_at')
+                    ->with(['exam.subject'])
+                    ->get();
+            }
         }
 
-        return view('student.exams', compact('student', 'academicYears', 'selectedYear', 'upcomingExams', 'completedExams'));
+        return view('student.exams', compact('student', 'academicYears', 'selectedYear', 'upcomingExams', 'completedExams', 'submittedExamIds'));
     }
 
     /**

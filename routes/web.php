@@ -434,6 +434,11 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('grades', [\App\Http\Controllers\StudentController::class, 'grades'])->name('grades');
     Route::get('attendance', [\App\Http\Controllers\StudentController::class, 'attendance'])->name('attendance');
     Route::get('exams', [\App\Http\Controllers\StudentController::class, 'exams'])->name('exams');
+    // === Exams card (ex) — student-facing take-exam flow ===
+    Route::get('exams/{exam}', [\App\Http\Controllers\StudentExamController::class, 'show'])->name('exams.show');
+    Route::post('exams/{exam}/start', [\App\Http\Controllers\StudentExamController::class, 'start'])->name('exams.start');
+    Route::post('exams/{exam}/submit', [\App\Http\Controllers\StudentExamController::class, 'submit'])->name('exams.submit');
+    Route::get('exams/{exam}/result', [\App\Http\Controllers\StudentExamController::class, 'result'])->name('exams.result');
     Route::get('schedule', [\App\Http\Controllers\StudentController::class, 'schedule'])->name('schedule');
     Route::get('weekly-plans', [\App\Http\Controllers\StudentController::class, 'weeklyPlans'])->name('weekly-plans');
     // === Books card 65 ===
