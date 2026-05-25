@@ -23,4 +23,24 @@ interface BookRepository
 
     /** Books visible to a student. */
     public function forStudent(int $schoolId, int $gradeLevel): Collection;
+
+    /** Available book pool for a school: ministry books ∪ the school's own active books. */
+    public function availableBooksForSchool(?int $schoolId): Collection;
+
+    /**
+     * Map of class_id => [book_id, ...] already linked for this school.
+     * @return array<int,int[]>
+     */
+    public function linkedBookIdsByClass(int $schoolId): array;
+
+    /** @return int[] valid class ids belonging to the school's sections. */
+    public function classIdsForSchool(int $schoolId): array;
+
+    /**
+     * Transactionally replace the school's grade↔book links.
+     * @param array<int,int[]> $selection  class_id => [book_id, ...]
+     * @param int[] $validClassIds  classes that belong to this school (scope guard)
+     * @param int[] $validBookIds   books in the available pool (scope guard)
+     */
+    public function syncSchoolGradeBooks(int $schoolId, array $selection, array $validClassIds, array $validBookIds): void;
 }

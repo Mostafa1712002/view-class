@@ -21,6 +21,9 @@
         <a href="{{ route('manage.books.create', ['ministry' => 1]) }}" class="btn btn-outline-warning btn-sm">
             <i class="la la-university"></i> @lang('books_admin.add_ministry_book')
         </a>
+        <a href="{{ route('manage.books.grades') }}" class="btn btn-outline-primary btn-sm">
+            <i class="la la-list-alt"></i> @lang('books_admin.manage_grades')
+        </a>
     </div>
 </div>
 

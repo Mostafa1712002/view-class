@@ -161,6 +161,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     Route::get('books', [\App\Modules\Books\Controllers\BookController::class, 'index'])->name('books.index');
     Route::get('books/create', [\App\Modules\Books\Controllers\BookController::class, 'create'])->name('books.create');
     Route::post('books', [\App\Modules\Books\Controllers\BookController::class, 'store'])->name('books.store');
+    // Books — bulk grade↔book management screen
+    Route::get('books/grades', [\App\Modules\Books\Controllers\BookGradeController::class, 'index'])->name('books.grades');
+    Route::post('books/grades', [\App\Modules\Books\Controllers\BookGradeController::class, 'save'])->name('books.grades.save');
     Route::get('books/{id}/edit', [\App\Modules\Books\Controllers\BookController::class, 'edit'])->name('books.edit');
     Route::put('books/{id}', [\App\Modules\Books\Controllers\BookController::class, 'update'])->name('books.update');
     Route::delete('books/{id}', [\App\Modules\Books\Controllers\BookController::class, 'destroy'])->name('books.destroy');

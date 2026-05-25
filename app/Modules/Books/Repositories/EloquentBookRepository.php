@@ -3,9 +3,12 @@
 namespace App\Modules\Books\Repositories;
 
 use App\Models\Book;
+use App\Models\ClassRoom;
+use App\Models\Section;
 use App\Modules\Books\Repositories\Contracts\BookRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class EloquentBookRepository implements BookRepository
@@ -100,5 +103,86 @@ class EloquentBookRepository implements BookRepository
             })
             ->orderByDesc('id')
             ->get();
+    }
+
+    public function availableBooksForSchool(?int $schoolId): Collection
+    {
+        return Book::query()
+            ->with('subject')
+            ->where('is_active', true)
+            ->where(function ($q) use ($schoolId) {
+                $q->where('is_ministry', true)->orWhereNull('school_id');
+                if ($schoolId !== null) {
+                    $q->orWhere('school_id', $schoolId);
+                }
+            })
+            ->orderByDesc('is_ministry')
+            ->orderBy('title')
+            ->get();
+    }
+
+    public function linkedBookIdsByClass(int $schoolId): array
+    {
+        $rows = DB::table('school_grade_books')
+            ->where('school_id', $schoolId)
+            ->get(['class_id', 'book_id']);
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(int) $row->class_id][] = (int) $row->book_id;
+        }
+
+        return $map;
+    }
+
+    public function classIdsForSchool(int $schoolId): array
+    {
+        $sectionIds = Section::query()->where('school_id', $schoolId)->pluck('id');
+
+        return ClassRoom::query()
+            ->whereIn('section_id', $sectionIds)
+            ->pluck('id')
+            ->map(static fn ($id) => (int) $id)
+            ->all();
+    }
+
+    public function syncSchoolGradeBooks(int $schoolId, array $selection, array $validClassIds, array $validBookIds): void
+    {
+        $validClassIds = array_map('intval', $validClassIds);
+        $validBookIds = array_map('intval', $validBookIds);
+
+        // Build the deduped, scope-validated rows to insert.
+        $rows = [];
+        $now = now();
+        foreach ($selection as $classId => $bookIds) {
+            $classId = (int) $classId;
+            if (!in_array($classId, $validClassIds, true)) {
+                continue; // ignore classes outside this school
+            }
+            foreach (array_unique(array_map('intval', (array) $bookIds)) as $bookId) {
+                if (!in_array($bookId, $validBookIds, true)) {
+                    continue; // ignore books outside the available pool
+                }
+                $rows[] = [
+                    'school_id' => $schoolId,
+                    'class_id' => $classId,
+                    'book_id' => $bookId,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        DB::transaction(function () use ($schoolId, $validClassIds, $rows) {
+            // Only clear links for grades that belong to this school.
+            DB::table('school_grade_books')
+                ->where('school_id', $schoolId)
+                ->whereIn('class_id', $validClassIds ?: [0])
+                ->delete();
+
+            if ($rows !== []) {
+                DB::table('school_grade_books')->insert($rows);
+            }
+        });
     }
 }
