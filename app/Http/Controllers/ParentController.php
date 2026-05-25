@@ -269,29 +269,39 @@ class ParentController extends Controller
     public function contactTeacher(): View
     {
         $parent = auth()->user();
-        $children = $parent->children()->with(['classEnrollments.classRoom'])->get();
+        $children = $parent->children()->get();
 
         foreach ($children as $child) {
-            $childClass = $child->classEnrollments()
-                ->whereHas('academicYear', fn($q) => $q->where('is_current', true))
-                ->first()?->classRoom;
+            // A student's classes come from the class_student pivot and/or the
+            // direct users.class_room_id column (kept in sync by enrolledClassIds()).
+            $classIds = $child->enrolledClassIds();
 
-            if ($childClass) {
-                $teachers = User::whereHas('scheduleTeacher.schedule', function ($query) use ($childClass) {
-                    $query->where('class_id', $childClass->id);
-                })
-                    ->with(['scheduleTeacher.subject'])
-                    ->get()
-                    ->map(function ($teacher) {
-                        $subject = $teacher->scheduleTeacher->first()?->subject;
-                        $teacher->pivot = (object) ['subject_name' => $subject?->name];
-                        return $teacher;
-                    });
-
-                $child->teachers = $teachers;
-            } else {
+            if (empty($classIds)) {
                 $child->teachers = collect();
+                continue;
             }
+
+            // Teachers are linked to a class through SchedulePeriod (teacher_id)
+            // whose parent Schedule carries the class_id.
+            $periods = \App\Models\SchedulePeriod::query()
+                ->whereHas('schedule', fn ($q) => $q->whereIn('class_id', $classIds))
+                ->whereNotNull('teacher_id')
+                ->with(['teacher', 'subject'])
+                ->get();
+
+            // One row per teacher+subject pair, de-duplicated.
+            $teachers = $periods
+                ->filter(fn ($p) => $p->teacher)
+                ->unique(fn ($p) => $p->teacher_id.'-'.$p->subject_id)
+                ->map(function ($p) {
+                    $teacher = $p->teacher;
+                    $teacher->pivot = (object) ['subject_name' => $p->subject?->name];
+
+                    return $teacher;
+                })
+                ->values();
+
+            $child->teachers = $teachers;
         }
 
         return view('parent.contact-teacher', compact('parent', 'children'));

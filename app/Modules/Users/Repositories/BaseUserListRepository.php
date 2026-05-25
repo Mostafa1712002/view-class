@@ -38,6 +38,11 @@ abstract class BaseUserListRepository implements UserListRepository
         return $this->base($schoolId)->where('users.id', $id)->first();
     }
 
+    public function query(?int $schoolId): Builder
+    {
+        return $this->base($schoolId);
+    }
+
     protected function base(?int $schoolId, ?string $search = null): Builder
     {
         $q = User::query()

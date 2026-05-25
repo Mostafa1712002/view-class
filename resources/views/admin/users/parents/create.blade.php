@@ -13,7 +13,7 @@
 </div>
 
 <div class="content-body">
-    <form action="{{ route('admin.users.parents.store') }}" method="POST">
+    <form action="{{ route('admin.users.parents.store') }}" method="POST" enctype="multipart/form-data">
         @include('admin.users.parents._form')
     </form>
 </div>

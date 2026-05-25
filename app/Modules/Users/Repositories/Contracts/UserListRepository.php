@@ -3,9 +3,16 @@
 namespace App\Modules\Users\Repositories\Contracts;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 interface UserListRepository
 {
+    /**
+     * Role + school scoped query builder for bulk operations
+     * (export, Excel update, linking).
+     */
+    public function query(?int $schoolId): Builder;
+
     /**
      * Paginate users matching the role this repo represents,
      * scoped to the given school, optionally filtered by search.

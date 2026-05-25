@@ -5,6 +5,7 @@ namespace App\Modules\Users\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Modules\Users\Actions\ParseParentSheet;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use App\Modules\Users\Repositories\Contracts\ParentRepository;
 use App\Modules\Users\Repositories\Contracts\StudentRepository;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ParentController extends Controller
 {
@@ -46,26 +48,22 @@ class ParentController extends Controller
     {
         $data = $this->validateParent($request);
         $schoolId = $this->activeSchoolId();
-        DB::transaction(function () use ($data, $schoolId) {
+        DB::transaction(function () use ($data, $request, $schoolId) {
             $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
-            $user = User::create($this->withoutNulls([
+            $user = User::create($this->withoutNulls(array_merge($this->mapProfile($data), [
                 'school_id' => $schoolId,
-                'name' => $data['name'],
-                'name_ar' => $data['name'],
                 'username' => $data['username'],
                 'email' => ($data['email'] ?? null) ?: ($data['username'].'@viewclass.local'),
-                'national_id' => $data['national_id'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'phone' => $data['phone'] ?? null,
                 'password' => Hash::make($plain),
                 'plain_password_for_card' => encrypt($plain),
                 'is_active' => true,
                 'status' => 'active',
-            ]));
-            $role = Role::where('slug', 'parent')->first();
-            if ($role) {
-                $user->roles()->syncWithoutDetaching($role);
+            ])));
+            if ($request->hasFile('profile_picture')) {
+                $user->profile_picture = $request->file('profile_picture')->store('parents/photos', 'public');
+                $user->save();
             }
+            $this->attachParentRole($user);
         });
 
         return redirect()->route('admin.users.parents.index')
@@ -88,18 +86,16 @@ class ParentController extends Controller
             return redirect()->route('admin.users.parents.index')->with('error', __('users.not_found'));
         }
         $data = $this->validateParent($request, $id);
-        $parent->fill([
-            'name' => $data['name'],
-            'name_ar' => $data['name'],
+        $parent->fill(array_merge($this->mapProfile($data), [
             'username' => $data['username'],
             'email' => ($data['email'] ?? null) ?: ($data['username'].'@viewclass.local'),
-            'national_id' => $data['national_id'] ?? null,
-            'gender' => $data['gender'] ?? null,
-            'phone' => $data['phone'] ?? null,
-        ]);
+        ]));
         if (!empty($data['password'])) {
             $parent->password = Hash::make($data['password']);
             $parent->plain_password_for_card = encrypt($data['password']);
+        }
+        if ($request->hasFile('profile_picture')) {
+            $parent->profile_picture = $request->file('profile_picture')->store('parents/photos', 'public');
         }
         $parent->save();
         return redirect()->route('admin.users.parents.index')
@@ -154,16 +150,227 @@ class ParentController extends Controller
             ->with('status', __('users.parent_students_synced'));
     }
 
+    // ===================== Excel tools =====================
+
+    public function importForm(): View
+    {
+        return view('admin.users.parents.import');
+    }
+
+    /** Download a CSV template (UTF-8 BOM so Excel reads Arabic correctly). */
+    public function importTemplate(): StreamedResponse
+    {
+        $headers = ['رقم الهوية', 'الاسم الكامل', 'اسم المستخدم', 'البريد الإلكتروني', 'رقم الهاتف', 'رقم الجوال', 'الواتساب', 'الجنس', 'تاريخ الميلاد', 'مكان الولادة', 'العنوان', 'الجنسية', 'الاسم بالإنجليزي', 'هوية الطالب'];
+        $sample = ['1010101010', 'ولي أمر تجريبي', 'parent.sample', 'sample@example.com', '0500000000', '0500000001', '0500000001', 'male', '1985-01-01', 'الرياض', 'الرياض', 'سعودي', 'Sample Parent', '9111111111'];
+
+        return $this->streamCsv('parents-template.csv', [$headers, $sample]);
+    }
+
+    /** Export current parents so the admin can edit and re-upload. */
+    public function export(): StreamedResponse
+    {
+        $rows = [[
+            'رقم الهوية', 'الاسم الكامل', 'اسم المستخدم', 'البريد الإلكتروني', 'رقم الهاتف', 'رقم الجوال', 'الواتساب', 'الجنس', 'تاريخ الميلاد', 'مكان الولادة', 'العنوان', 'الجنسية', 'الاسم بالإنجليزي',
+        ]];
+
+        $this->parents->query($this->activeSchoolId())->orderBy('users.id')->chunk(200, function ($chunk) use (&$rows) {
+            foreach ($chunk as $p) {
+                $rows[] = [
+                    $p->national_id, $p->name, $p->username, $p->email,
+                    $p->phone, $p->phone_secondary, $p->whatsapp, $p->gender,
+                    optional($p->date_of_birth)->format('Y-m-d'), $p->birth_place,
+                    $p->address, $p->nationality, $p->name_en,
+                ];
+            }
+        });
+
+        return $this->streamCsv('parents-export-'.date('Ymd-His').'.csv', $rows);
+    }
+
+    /** Create new parent accounts from an uploaded sheet. */
+    public function import(Request $request, ParseParentSheet $parser): RedirectResponse
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt,xlsx,xls']);
+        $schoolId = $this->activeSchoolId();
+        $created = 0; $skipped = 0; $errors = [];
+
+        $rows = $parser->execute($request->file('file'));
+        DB::transaction(function () use ($rows, $schoolId, &$created, &$skipped, &$errors) {
+            foreach ($rows as $row) {
+                $username = $row['username'] ?: ($row['national_id'] ?: null);
+                $name = $row['name'] ?: trim(($row['first_name'] ?? '').' '.($row['family_name'] ?? ''));
+                if (!$username || $name === '') {
+                    $skipped++; $errors[] = $row['_row'];
+                    continue;
+                }
+                if (User::where('username', $username)->exists()) {
+                    $skipped++; $errors[] = $row['_row'];
+                    continue;
+                }
+                $plain = $row['national_id'] ?: str()->random(8);
+                $user = User::create($this->withoutNulls(array_merge($this->mapProfile($row), [
+                    'name' => $name,
+                    'school_id' => $schoolId,
+                    'username' => $username,
+                    'email' => $row['email'] ?: ($username.'@viewclass.local'),
+                    'password' => Hash::make($plain),
+                    'plain_password_for_card' => encrypt($plain),
+                    'is_active' => true,
+                    'status' => 'active',
+                ])));
+                $this->attachParentRole($user);
+                $created++;
+            }
+        });
+
+        return redirect()->route('admin.users.parents.index')
+            ->with('status', __('users.imported_count', ['count' => $created])
+                .($skipped ? ' — '.__('users.skipped_count', ['count' => $skipped]) : ''));
+    }
+
+    /** Update existing parents (matched by national_id) from an uploaded sheet. */
+    public function importUpdate(Request $request, ParseParentSheet $parser): RedirectResponse
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt,xlsx,xls']);
+        $schoolId = $this->activeSchoolId();
+        $updated = 0; $skipped = 0;
+
+        $rows = $parser->execute($request->file('file'));
+        DB::transaction(function () use ($rows, $schoolId, &$updated, &$skipped) {
+            foreach ($rows as $row) {
+                $parent = $row['national_id']
+                    ? $this->parents->query($schoolId)->where('national_id', $row['national_id'])->first()
+                    : ($row['username'] ? $this->parents->query($schoolId)->where('username', $row['username'])->first() : null);
+                if (!$parent) {
+                    $skipped++;
+                    continue;
+                }
+                $parent->fill($this->withoutNulls($this->mapProfile($row)));
+                $parent->save();
+                $updated++;
+            }
+        });
+
+        return redirect()->route('admin.users.parents.index')
+            ->with('status', __('users.updated_count', ['count' => $updated])
+                .($skipped ? ' — '.__('users.skipped_count', ['count' => $skipped]) : ''));
+    }
+
+    /** Link parents to students using national-id columns in an uploaded sheet. */
+    public function linkByNumbers(Request $request, ParseParentSheet $parser): RedirectResponse
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt,xlsx,xls']);
+        $schoolId = $this->activeSchoolId();
+        $linked = 0; $skipped = 0;
+
+        $rows = $parser->execute($request->file('file'));
+        DB::transaction(function () use ($rows, $schoolId, &$linked, &$skipped) {
+            foreach ($rows as $row) {
+                $parent = $row['national_id']
+                    ? $this->parents->query($schoolId)->where('national_id', $row['national_id'])->first()
+                    : null;
+                $student = $row['student_national_id']
+                    ? $this->students->query($schoolId)->where('national_id', $row['student_national_id'])->first()
+                    : null;
+                if (!$parent || !$student) {
+                    $skipped++;
+                    continue;
+                }
+                $parent->children()->syncWithoutDetaching([
+                    $student->id => ['relationship' => 'parent', 'is_primary' => false, 'can_receive_notifications' => true],
+                ]);
+                $linked++;
+            }
+        });
+
+        return redirect()->route('admin.users.parents.index')
+            ->with('status', __('users.linked_count', ['count' => $linked])
+                .($skipped ? ' — '.__('users.skipped_count', ['count' => $skipped]) : ''));
+    }
+
+    // ===================== Helpers =====================
+
+    private function attachParentRole(User $user): void
+    {
+        $role = Role::where('slug', 'parent')->first();
+        if ($role) {
+            $user->roles()->syncWithoutDetaching($role);
+        }
+    }
+
+    /** Build the writable profile payload from validated/parsed data. */
+    private function mapProfile(array $data): array
+    {
+        $name = $data['name'] ?? null;
+        if (!$name) {
+            $name = trim(implode(' ', array_filter([
+                $data['first_name'] ?? null,
+                $data['father_name'] ?? null,
+                $data['family_name'] ?? null,
+            ]))) ?: null;
+        }
+
+        $gender = $data['gender'] ?? null;
+        if ($gender && !in_array($gender, ['male', 'female'], true)) {
+            $gender = in_array($gender, ['ذكر', 'm', 'M'], true) ? 'male'
+                : (in_array($gender, ['أنثى', 'انثى', 'f', 'F'], true) ? 'female' : null);
+        }
+
+        return [
+            'name' => $name,
+            'name_ar' => $name,
+            'name_en' => $data['name_en'] ?? null,
+            'first_name' => $data['first_name'] ?? null,
+            'father_name' => $data['father_name'] ?? null,
+            'grandfather_name' => $data['grandfather_name'] ?? null,
+            'family_name' => $data['family_name'] ?? null,
+            'national_id' => $data['national_id'] ?? null,
+            'gender' => $gender,
+            'phone' => $data['phone'] ?? null,
+            'phone_secondary' => $data['phone_secondary'] ?? null,
+            'whatsapp' => $data['whatsapp'] ?? null,
+            'address' => $data['address'] ?? null,
+            'date_of_birth' => $data['date_of_birth'] ?? null,
+            'birth_place' => $data['birth_place'] ?? null,
+            'nationality' => $data['nationality'] ?? null,
+        ];
+    }
+
     private function validateParent(Request $request, ?int $id = null): array
     {
         return $request->validate([
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'first_name' => 'nullable|string|max:128',
+            'father_name' => 'nullable|string|max:128',
+            'grandfather_name' => 'nullable|string|max:128',
+            'family_name' => 'nullable|string|max:128',
             'username' => 'required|string|max:64|unique:users,username'.($id ? ','.$id : ''),
             'email' => 'nullable|email|max:255|unique:users,email'.($id ? ','.$id : ''),
             'national_id' => 'nullable|string|max:32',
             'gender' => 'nullable|in:male,female',
             'phone' => 'nullable|string|max:32',
+            'phone_secondary' => 'nullable|string|max:32',
+            'whatsapp' => 'nullable|string|max:32',
+            'address' => 'nullable|string|max:500',
+            'date_of_birth' => 'nullable|date',
+            'birth_place' => 'nullable|string|max:128',
+            'nationality' => 'nullable|string|max:64',
+            'profile_picture' => 'nullable|image|max:4096',
             'password' => 'nullable|string|min:6|max:64',
         ]);
+    }
+
+    /** @param array<int, array<int,mixed>> $rows */
+    private function streamCsv(string $filename, array $rows): StreamedResponse
+    {
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // UTF-8 BOM for Excel
+            foreach ($rows as $row) {
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

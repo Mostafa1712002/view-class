@@ -64,9 +64,9 @@
 @endpush
 
 <div class="pf-card">
-    <div class="head"><h5><i class="la la-user"></i> @lang('users.parent_basic_info')</h5></div>
+    <div class="head"><h5><i class="la la-user"></i> @lang('users.parent_personal_info')</h5></div>
     <div class="body">
-        <div class="pf-grid">
+        <div class="pf-grid cols-3">
             <div class="pf-field">
                 <label>@lang('users.name') <span class="req">*</span></label>
                 <input type="text" name="name" class="form-control" value="{{ old('name', $parent->name ?? '') }}" required />
@@ -76,8 +76,24 @@
                 <input type="text" name="national_id" class="form-control" value="{{ old('national_id', $parent->national_id ?? '') }}" />
             </div>
             <div class="pf-field">
-                <label>@lang('users.phone')</label>
-                <input type="text" name="phone" class="form-control" value="{{ old('phone', $parent->phone ?? '') }}" />
+                <label>@lang('users.first_name')</label>
+                <input type="text" name="first_name" class="form-control" value="{{ old('first_name', $parent->first_name ?? '') }}" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.father_name')</label>
+                <input type="text" name="father_name" class="form-control" value="{{ old('father_name', $parent->father_name ?? '') }}" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.grandfather_name')</label>
+                <input type="text" name="grandfather_name" class="form-control" value="{{ old('grandfather_name', $parent->grandfather_name ?? '') }}" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.family_name')</label>
+                <input type="text" name="family_name" class="form-control" value="{{ old('family_name', $parent->family_name ?? '') }}" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.name_en')</label>
+                <input type="text" name="name_en" class="form-control" value="{{ old('name_en', $parent->name_en ?? '') }}" dir="ltr" />
             </div>
             <div class="pf-field">
                 <label>@lang('users.gender')</label>
@@ -87,6 +103,43 @@
                     <option value="male" @selected($g === 'male')>@lang('users.gender_male')</option>
                     <option value="female" @selected($g === 'female')>@lang('users.gender_female')</option>
                 </select>
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.date_of_birth')</label>
+                @php $dob = old('date_of_birth', isset($parent) && $parent->date_of_birth ? $parent->date_of_birth->format('Y-m-d') : ''); @endphp
+                <input type="date" name="date_of_birth" class="form-control" value="{{ $dob }}" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.birth_place')</label>
+                <input type="text" name="birth_place" class="form-control" value="{{ old('birth_place', $parent->birth_place ?? '') }}" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.nationality')</label>
+                <input type="text" name="nationality" class="form-control" value="{{ old('nationality', $parent->nationality ?? '') }}" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pf-card">
+    <div class="head"><h5><i class="la la-phone"></i> @lang('users.parent_contact_info')</h5></div>
+    <div class="body">
+        <div class="pf-grid cols-3">
+            <div class="pf-field">
+                <label>@lang('users.phone')</label>
+                <input type="text" name="phone" class="form-control" value="{{ old('phone', $parent->phone ?? '') }}" dir="ltr" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.mobile')</label>
+                <input type="text" name="phone_secondary" class="form-control" value="{{ old('phone_secondary', $parent->phone_secondary ?? '') }}" dir="ltr" />
+            </div>
+            <div class="pf-field">
+                <label>@lang('users.whatsapp')</label>
+                <input type="text" name="whatsapp" class="form-control" value="{{ old('whatsapp', $parent->whatsapp ?? '') }}" dir="ltr" />
+            </div>
+            <div class="pf-field" style="grid-column: 1 / -1;">
+                <label>@lang('users.address')</label>
+                <input type="text" name="address" class="form-control" value="{{ old('address', $parent->address ?? '') }}" />
             </div>
         </div>
     </div>
@@ -102,13 +155,22 @@
             </div>
             <div class="pf-field">
                 <label>@lang('users.email')</label>
-                <input type="email" name="email" class="form-control" value="{{ old('email', $parent->email ?? '') }}" />
+                <input type="email" name="email" class="form-control" value="{{ old('email', $parent->email ?? '') }}" dir="ltr" />
             </div>
             <div class="pf-field">
                 <label>@lang('users.password')
                     <span class="hint">{{ isset($parent) ? ($isRtl ? 'اتركه فارغًا لعدم التغيير' : 'leave empty to keep') : '' }}</span>
                 </label>
                 <input type="password" name="password" class="form-control" autocomplete="new-password" />
+            </div>
+            <div class="pf-field" style="grid-column: 1 / -1;">
+                <label>@lang('users.profile_picture')</label>
+                @if(isset($parent) && $parent->profile_picture)
+                    <div style="margin-bottom:.5rem;">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($parent->profile_picture) }}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;">
+                    </div>
+                @endif
+                <input type="file" name="profile_picture" class="form-control" accept="image/*" />
             </div>
         </div>
     </div>

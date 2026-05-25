@@ -190,14 +190,21 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::delete('students/{id}', [\App\Modules\Users\Controllers\StudentController::class, 'destroy'])->name('students.destroy');
 
         Route::get('parents', [\App\Modules\Users\Controllers\ParentController::class, 'index'])->name('parents.index');
+        // Excel tools — declared before parents/{id} so the wildcard does not swallow them
+        Route::get('parents/import', [\App\Modules\Users\Controllers\ParentController::class, 'importForm'])->name('parents.import');
+        Route::get('parents/import/template', [\App\Modules\Users\Controllers\ParentController::class, 'importTemplate'])->name('parents.import.template');
+        Route::post('parents/import', [\App\Modules\Users\Controllers\ParentController::class, 'import'])->name('parents.import.run');
+        Route::get('parents/export', [\App\Modules\Users\Controllers\ParentController::class, 'export'])->name('parents.export');
+        Route::post('parents/import-update', [\App\Modules\Users\Controllers\ParentController::class, 'importUpdate'])->name('parents.import.update');
+        Route::post('parents/link-by-numbers', [\App\Modules\Users\Controllers\ParentController::class, 'linkByNumbers'])->name('parents.link.numbers');
         Route::get('parents/create', [\App\Modules\Users\Controllers\ParentController::class, 'create'])->name('parents.create');
         Route::post('parents', [\App\Modules\Users\Controllers\ParentController::class, 'store'])->name('parents.store');
-        Route::get('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'show'])->name('parents.show');
-        Route::get('parents/{id}/edit', [\App\Modules\Users\Controllers\ParentController::class, 'edit'])->name('parents.edit');
-        Route::put('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'update'])->name('parents.update');
-        Route::delete('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'destroy'])->name('parents.destroy');
-        Route::get('parents/{id}/students', [\App\Modules\Users\Controllers\ParentController::class, 'students'])->name('parents.students');
-        Route::post('parents/{id}/students', [\App\Modules\Users\Controllers\ParentController::class, 'syncStudents'])->name('parents.students.sync');
+        Route::get('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'show'])->whereNumber('id')->name('parents.show');
+        Route::get('parents/{id}/edit', [\App\Modules\Users\Controllers\ParentController::class, 'edit'])->whereNumber('id')->name('parents.edit');
+        Route::put('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'update'])->whereNumber('id')->name('parents.update');
+        Route::delete('parents/{id}', [\App\Modules\Users\Controllers\ParentController::class, 'destroy'])->whereNumber('id')->name('parents.destroy');
+        Route::get('parents/{id}/students', [\App\Modules\Users\Controllers\ParentController::class, 'students'])->whereNumber('id')->name('parents.students');
+        Route::post('parents/{id}/students', [\App\Modules\Users\Controllers\ParentController::class, 'syncStudents'])->whereNumber('id')->name('parents.students.sync');
 
         Route::get('teachers', [\App\Modules\Users\Controllers\TeacherController::class, 'index'])->name('teachers.index');
         Route::get('teachers/workloads', [\App\Modules\Users\Controllers\TeacherController::class, 'workloads'])->name('teachers.workloads');

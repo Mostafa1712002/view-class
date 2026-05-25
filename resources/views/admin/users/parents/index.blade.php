@@ -276,6 +276,9 @@
     @if(session('error'))
         <div class="pp-alert err"><i class="la la-exclamation-triangle"></i><span>{{ session('error') }}</span></div>
     @endif
+    @if($errors->any())
+        <div class="pp-alert err"><i class="la la-exclamation-triangle"></i><span>{{ $errors->first() }}</span></div>
+    @endif
 
     {{-- KPI strip --}}
     <div class="pp-kpis">
@@ -323,12 +326,17 @@
                                 <i class="la la-user-plus"></i>
                                 <span>@lang('users.add_parent')</span>
                             </a>
-                            <a href="#" class="disabled" title="@lang('users.import_excel')">
+                            <a href="{{ route('admin.users.parents.import') }}">
                                 <i class="la la-file-excel"></i>
-                                <span>
-                                    @lang('users.import_excel')
-                                    <small>{{ $isRtl ? 'قريبًا' : 'Coming soon' }}</small>
-                                </span>
+                                <span>@lang('users.import_excel')</span>
+                            </a>
+                            <a href="#" class="js-excel-action" data-target="form-edit-excel">
+                                <i class="la la-file-upload"></i>
+                                <span>@lang('users.edit_excel')</span>
+                            </a>
+                            <a href="#" class="js-excel-action" data-target="form-link-numbers">
+                                <i class="la la-link"></i>
+                                <span>@lang('users.update_by_student_numbers')</span>
                             </a>
                         </div>
                     </div>
@@ -456,12 +464,39 @@
             @endif
         </div>
     </div>
+
+    {{-- Hidden Excel tool forms (triggered from the Add menu) --}}
+    <form id="form-edit-excel" action="{{ route('admin.users.parents.import.update') }}" method="POST" enctype="multipart/form-data" class="d-none">
+        @csrf
+        <input type="file" name="file" class="js-excel-file" accept=".csv,.xlsx,.xls,.txt" />
+    </form>
+    <form id="form-link-numbers" action="{{ route('admin.users.parents.link.numbers') }}" method="POST" enctype="multipart/form-data" class="d-none">
+        @csrf
+        <input type="file" name="file" class="js-excel-file" accept=".csv,.xlsx,.xls,.txt" />
+    </form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var addBtn = document.getElementById('pp-add-btn');
     var addMenu = document.getElementById('pp-add-menu');
+
+    // Excel actions that need a file: clicking the menu item opens the picker,
+    // and selecting a file auto-submits the matching hidden form.
+    document.querySelectorAll('.js-excel-action').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var form = document.getElementById(link.dataset.target);
+            if (form) form.querySelector('.js-excel-file').click();
+            if (addMenu) addMenu.classList.remove('is-open');
+        });
+    });
+    document.querySelectorAll('.js-excel-file').forEach(function (input) {
+        input.addEventListener('change', function () {
+            if (input.files && input.files.length) input.closest('form').submit();
+        });
+    });
     if (addBtn && addMenu) {
         addBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -469,19 +504,54 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.js-row-menu.is-open').forEach(function (m) { m.classList.remove('is-open'); });
         });
     }
+    // The row menu lives inside .table-responsive (overflow:auto) which clips it.
+    // Promote the open menu to position:fixed anchored under its toggle so it
+    // floats above the table and every other element.
+    function placeFixed(menu, btn) {
+        var r = btn.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.zIndex = '2000';
+        menu.style.top = (r.bottom + 4) + 'px';
+        var mw = menu.offsetWidth || 220;
+        var left = r.right - mw;            // RTL: align right edge under the toggle
+        if (left < 8) left = 8;
+        if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+        menu.style.left = left + 'px';
+        menu.style.right = 'auto';
+    }
+    function resetFixed(menu) {
+        menu.style.position = '';
+        menu.style.zIndex = '';
+        menu.style.top = '';
+        menu.style.left = '';
+        menu.style.right = '';
+    }
+    function closeAllRowMenus() {
+        document.querySelectorAll('.js-row-menu.is-open').forEach(function (m) {
+            m.classList.remove('is-open');
+            var menu = m.querySelector('.menu');
+            if (menu) resetFixed(menu);
+        });
+    }
     document.querySelectorAll('.js-row-menu-btn').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
             var wrap = btn.closest('.js-row-menu');
+            var menu = wrap.querySelector('.menu');
             var wasOpen = wrap.classList.contains('is-open');
-            document.querySelectorAll('.js-row-menu.is-open').forEach(function (m) { m.classList.remove('is-open'); });
+            closeAllRowMenus();
             if (addMenu) addMenu.classList.remove('is-open');
-            if (!wasOpen) wrap.classList.add('is-open');
+            if (!wasOpen) {
+                wrap.classList.add('is-open');
+                placeFixed(menu, btn);
+            }
         });
     });
+    window.addEventListener('resize', closeAllRowMenus);
+    window.addEventListener('scroll', closeAllRowMenus, true);
     document.addEventListener('click', function () {
         if (addMenu) addMenu.classList.remove('is-open');
-        document.querySelectorAll('.js-row-menu.is-open').forEach(function (m) { m.classList.remove('is-open'); });
+        closeAllRowMenus();
     });
 });
 </script>

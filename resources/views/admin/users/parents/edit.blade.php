@@ -14,7 +14,7 @@
 </div>
 
 <div class="content-body">
-    <form action="{{ route('admin.users.parents.update', $parent->id) }}" method="POST">
+    <form action="{{ route('admin.users.parents.update', $parent->id) }}" method="POST" enctype="multipart/form-data">
         @method('PUT')
         @include('admin.users.parents._form')
     </form>
