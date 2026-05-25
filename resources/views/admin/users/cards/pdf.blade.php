@@ -1,14 +1,26 @@
+@php
+    $isRtl = app()->getLocale() === 'ar';
+    $dir   = $isRtl ? 'rtl' : 'ltr';
+    $align = $isRtl ? 'right' : 'left';
+@endphp
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ $isRtl ? 'ar' : 'en' }}" dir="{{ $dir }}">
 <head>
     <meta charset="utf-8">
     <title>{{ __('user_cards.page_title') }} - {{ $platform }}</title>
     <style>
         @page { margin: 10mm; }
-        body { font-family: 'DejaVu Sans', sans-serif; margin: 0; color:#0f172a; font-size: 11px; }
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            margin: 0;
+            color: #0f172a;
+            font-size: 11px;
+            direction: {{ $dir }};
+            text-align: {{ $align }};
+        }
 
         .pdf-header {
-            text-align:center;
+            text-align: center;
             border-bottom: 2px solid #c9a04b;
             padding: 4mm 0 3mm; margin-bottom: 6mm;
         }
@@ -52,18 +64,29 @@
         .meta-line strong { color:#0f172a; }
 
         .creds { margin-top: 3mm; }
-        .creds .row { margin: 1.5mm 0; font-size: 10.5px; }
-        .creds .label { color:#64748b; display:inline-block; min-width: 26mm; }
+        .creds .row {
+            margin: 1.5mm 0;
+            font-size: 10.5px;
+        }
+        .creds .label {
+            color: #64748b;
+        }
         .creds .value {
-            color:#0f172a;
+            color: #0f172a;
             font-weight: bold;
             font-family: 'DejaVu Sans Mono', 'DejaVu Sans', monospace;
-            background:#f8fafc;
+            background: #f8fafc;
             border: 1px dashed #cbd5e1;
             padding: 0.5mm 2mm;
             border-radius: 1.5mm;
         }
-        .url-line { font-size: 9px; color:#475569; margin-top: 2.5mm; border-top: 1px dotted #cbd5e1; padding-top: 1.5mm; }
+        .url-line {
+            font-size: 9px;
+            color: #475569;
+            margin-top: 2.5mm;
+            border-top: 1px dotted #cbd5e1;
+            padding-top: 1.5mm;
+        }
         .url-line .v { color:#0f172a; font-weight:bold; }
 
         .no-pwd { color:#991b1b; font-style: italic; }
