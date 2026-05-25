@@ -25,10 +25,15 @@ class WeeklyPlanController extends Controller
         $schoolId = $this->getSchoolId();
         $viewMode = $request->get('view', 'grid'); // 'grid' (Sprint 5 default) or 'list' (legacy)
 
-        // Resolve target week (Sun-Thu). Default = current week.
-        $weekStart = $request->filled('week_start')
-            ? Carbon::parse($request->week_start)->startOfWeek(Carbon::SUNDAY)
-            : Carbon::now()->startOfWeek(Carbon::SUNDAY);
+        // Resolve target week (Sun-Thu). A specific date filter pins the week to
+        // the week that contains that date; otherwise week_start / current week.
+        if ($request->filled('date')) {
+            $weekStart = Carbon::parse($request->date)->startOfWeek(Carbon::SUNDAY);
+        } elseif ($request->filled('week_start')) {
+            $weekStart = Carbon::parse($request->week_start)->startOfWeek(Carbon::SUNDAY);
+        } else {
+            $weekStart = Carbon::now()->startOfWeek(Carbon::SUNDAY);
+        }
         $weekEnd = $weekStart->copy()->addDays(4); // Thursday (school week)
 
         $query = WeeklyPlan::with(['teacher', 'subject', 'classRoom.section', 'lockedByUser']);
@@ -56,6 +61,18 @@ class WeeklyPlanController extends Controller
 
         if ($request->filled('grade_level')) {
             $query->whereHas('classRoom', fn($q) => $q->where('grade_level', $request->grade_level));
+        }
+
+        // Free-text search across plan content + teacher/subject names (auto-search).
+        if ($request->filled('q')) {
+            $term = trim($request->q);
+            $query->where(function ($w) use ($term) {
+                foreach (['lesson_title', 'topics', 'objectives', 'homework', 'exams', 'notes'] as $col) {
+                    $w->orWhere($col, 'like', "%{$term}%");
+                }
+                $w->orWhereHas('teacher', fn($t) => $t->where('name', 'like', "%{$term}%"))
+                  ->orWhereHas('subject', fn($s) => $s->where('name', 'like', "%{$term}%"));
+            });
         }
 
         if ($request->filled('status')) {
@@ -130,11 +147,84 @@ class WeeklyPlanController extends Controller
      */
     public function pdf(Request $request)
     {
-        $user = auth()->user();
+        [$weekPlans, $weekStart, $weekEnd] = $this->buildExportQuery($request);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.weekly-plans.pdf', [
+            'weekPlans' => $weekPlans,
+            'weekStart' => $weekStart,
+            'weekEnd' => $weekEnd,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream('weekly-plan-' . $weekStart->format('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Excel (.xlsx) export of the filtered week using PhpSpreadsheet.
+     */
+    public function excel(Request $request)
+    {
+        [$weekPlans, $weekStart, $weekEnd] = $this->buildExportQuery($request);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setRightToLeft(true);
+        $sheet->setTitle('الخطة الأسبوعية');
+
+        $headers = [
+            'الحالة', 'المعلم', 'المادة', 'الفصل', 'الدرس',
+            'الأهداف', 'الواجبات والمهام', 'الاختبارات', 'الملاحظات',
+        ];
+        $sheet->fromArray($headers, null, 'A1');
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('F8E8C1');
+
+        $row = 2;
+        foreach ($weekPlans as $plan) {
+            $sheet->fromArray([
+                $plan->is_locked ? 'مقفلة' : ($plan->is_prepared ? 'تم التحضير' : 'لم يتم التحضير'),
+                $plan->teacher?->name ?? '',
+                $plan->subject?->name ?? '',
+                $plan->classRoom?->name ?? '',
+                $plan->lesson_title ?? $plan->topics ?? '',
+                $plan->objectives ?? '',
+                $plan->homework ?? '',
+                $plan->exams ?? '',
+                $plan->notes ?? '',
+            ], null, 'A' . $row);
+            $row++;
+        }
+
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'weekly-plan-' . $weekStart->format('Y-m-d') . '.xlsx';
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /**
+     * Shared filtered query for PDF + Excel exports.
+     * Returns [Collection $weekPlans, Carbon $weekStart, Carbon $weekEnd].
+     */
+    protected function buildExportQuery(Request $request): array
+    {
         $schoolId = $this->getSchoolId();
-        $weekStart = $request->filled('week_start')
-            ? Carbon::parse($request->week_start)->startOfWeek(Carbon::SUNDAY)
-            : Carbon::now()->startOfWeek(Carbon::SUNDAY);
+
+        if ($request->filled('date')) {
+            $weekStart = Carbon::parse($request->date)->startOfWeek(Carbon::SUNDAY);
+        } elseif ($request->filled('week_start')) {
+            $weekStart = Carbon::parse($request->week_start)->startOfWeek(Carbon::SUNDAY);
+        } else {
+            $weekStart = Carbon::now()->startOfWeek(Carbon::SUNDAY);
+        }
         $weekEnd = $weekStart->copy()->addDays(4);
 
         $query = WeeklyPlan::with(['teacher', 'subject', 'classRoom.section'])
@@ -146,22 +236,27 @@ class WeeklyPlanController extends Controller
         if ($request->filled('teacher_id')) {
             $query->where('teacher_id', $request->teacher_id);
         }
+        if ($request->filled('subject_id')) {
+            $query->where('subject_id', $request->subject_id);
+        }
         if ($request->filled('class_id')) {
             $query->where('class_id', $request->class_id);
         }
         if ($request->filled('grade_level')) {
             $query->whereHas('classRoom', fn($q) => $q->where('grade_level', $request->grade_level));
         }
+        if ($request->filled('q')) {
+            $term = trim($request->q);
+            $query->where(function ($w) use ($term) {
+                foreach (['lesson_title', 'topics', 'objectives', 'homework', 'exams', 'notes'] as $col) {
+                    $w->orWhere($col, 'like', "%{$term}%");
+                }
+                $w->orWhereHas('teacher', fn($t) => $t->where('name', 'like', "%{$term}%"))
+                  ->orWhereHas('subject', fn($s) => $s->where('name', 'like', "%{$term}%"));
+            });
+        }
 
-        $weekPlans = $query->get();
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.weekly-plans.pdf', [
-            'weekPlans' => $weekPlans,
-            'weekStart' => $weekStart,
-            'weekEnd' => $weekEnd,
-        ])->setPaper('a4', 'landscape');
-
-        return $pdf->stream('weekly-plan-' . $weekStart->format('Y-m-d') . '.pdf');
+        return [$query->get(), $weekStart, $weekEnd];
     }
 
     /**
@@ -222,9 +317,11 @@ class WeeklyPlanController extends Controller
             'week_start_date' => 'required|date',
             'objectives' => 'nullable|string',
             'topics' => 'nullable|string',
+            'lesson_title' => 'nullable|string|max:255',
             'activities' => 'nullable|string',
             'resources' => 'nullable|string',
             'assessment' => 'nullable|string',
+            'exams' => 'nullable|string',
             'homework' => 'nullable|string',
             'notes' => 'nullable|string',
         ], [
@@ -316,9 +413,11 @@ class WeeklyPlanController extends Controller
             'class_id' => 'required|exists:classes,id',
             'objectives' => 'nullable|string',
             'topics' => 'nullable|string',
+            'lesson_title' => 'nullable|string|max:255',
             'activities' => 'nullable|string',
             'resources' => 'nullable|string',
             'assessment' => 'nullable|string',
+            'exams' => 'nullable|string',
             'homework' => 'nullable|string',
             'notes' => 'nullable|string',
         ], [

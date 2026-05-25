@@ -97,6 +97,16 @@
     <div class="card">
         <div class="card-header"><h4 class="card-title">محتوى الخطة</h4></div>
         <div class="card-body">
+            @if($weeklyPlan->lesson_title)
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <div class="border rounded p-1">
+                        <h6 class="text-primary">عنوان الدرس</h6>
+                        <p class="mb-0">{{ $weeklyPlan->lesson_title }}</p>
+                    </div>
+                </div>
+            </div>
+            @endif
             <div class="row">
                 <div class="col-md-6 mb-2">
                     <div class="border rounded p-1">
@@ -134,8 +144,16 @@
                 </div>
                 <div class="col-md-6 mb-2">
                     <div class="border rounded p-1">
-                        <h6 class="text-primary">الواجبات</h6>
+                        <h6 class="text-primary">الواجبات والمهام</h6>
                         <p class="mb-0">{!! nl2br(e($weeklyPlan->homework)) ?: '<span class="text-muted">-</span>' !!}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <div class="border rounded p-1">
+                        <h6 class="text-primary">الاختبارات</h6>
+                        <p class="mb-0">{!! nl2br(e($weeklyPlan->exams)) ?: '<span class="text-muted">-</span>' !!}</p>
                     </div>
                 </div>
             </div>

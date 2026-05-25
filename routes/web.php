@@ -144,6 +144,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
 
     // Weekly Plans Management
     Route::get('weekly-plans/pdf', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'pdf'])->name('weekly-plans.pdf');
+    Route::get('weekly-plans/excel', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'excel'])->name('weekly-plans.excel');
     Route::resource('weekly-plans', \App\Http\Controllers\Admin\WeeklyPlanController::class);
     Route::post('weekly-plans/{weekly_plan}/lock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'lock'])->name('weekly-plans.lock');
     Route::post('weekly-plans/{weekly_plan}/unlock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'unlock'])->name('weekly-plans.unlock');

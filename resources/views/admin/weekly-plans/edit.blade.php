@@ -63,6 +63,12 @@
                 <h5>محتوى الخطة</h5>
 
                 <div class="row">
+                    <div class="col-12 mb-1">
+                        <label class="form-label">عنوان الدرس</label>
+                        <input type="text" name="lesson_title" class="form-control" value="{{ old('lesson_title', $weeklyPlan->lesson_title) }}">
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6 mb-1">
                         <label class="form-label">أهداف الأسبوع</label>
                         <textarea name="objectives" class="form-control" rows="4">{{ old('objectives', $weeklyPlan->objectives) }}</textarea>
@@ -88,7 +94,13 @@
                         <textarea name="assessment" class="form-control" rows="4">{{ old('assessment', $weeklyPlan->assessment) }}</textarea>
                     </div>
                     <div class="col-md-6 mb-1">
-                        <label class="form-label">الواجبات</label>
+                        <label class="form-label">الاختبارات</label>
+                        <textarea name="exams" class="form-control" rows="4">{{ old('exams', $weeklyPlan->exams) }}</textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mb-1">
+                        <label class="form-label">الواجبات والمهام</label>
                         <textarea name="homework" class="form-control" rows="4">{{ old('homework', $weeklyPlan->homework) }}</textarea>
                     </div>
                 </div>

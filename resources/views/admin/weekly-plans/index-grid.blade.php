@@ -191,6 +191,31 @@
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         overflow: hidden; max-width: 180px; line-height: 1.4;
     }
+
+    /* Auto-search toggle in filter title */
+    .wp-auto-toggle {
+        margin-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: auto;
+        display: inline-flex; align-items: center; gap: .35rem;
+        font-size: .8rem; font-weight: 500; color: #64748b; cursor: pointer; margin-bottom: 0;
+    }
+    .wp-auto-toggle input { accent-color: #cfa046; }
+    .ml-auto { margin-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: auto; }
+
+    /* Column customization dropdown */
+    .wp-cols-dropdown { position: relative; display: inline-block; }
+    .wp-cols-menu {
+        display: none; position: absolute; top: calc(100% + 4px);
+        {{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: 0; z-index: 50;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(15,23,42,.12); padding: .5rem; min-width: 200px;
+    }
+    .wp-cols-menu.open { display: block; }
+    .wp-cols-menu label {
+        display: flex; align-items: center; gap: .5rem; padding: .35rem .5rem;
+        border-radius: 8px; font-size: .85rem; color: #334155; cursor: pointer; margin: 0;
+    }
+    .wp-cols-menu label:hover { background: #f8fafc; }
+    .wp-cols-menu input { accent-color: #cfa046; }
 </style>
 @endpush
 
@@ -242,18 +267,27 @@
     </div>
 
     {{-- Filters --}}
+    @php
+        $hasAdvanced = request()->filled('teacher_id') || request()->filled('subject_id')
+            || request()->filled('status') || request()->filled('q') || request()->filled('date');
+    @endphp
     <div class="wp-card">
         <div class="se-title">
             <i class="la la-search"></i>
             @lang('weekly_plan.filters_title')
+            <label class="wp-auto-toggle ml-auto">
+                <input type="checkbox" id="wpAutoSearch" checked>
+                <span>@lang('weekly_plan.auto_search_label')</span>
+            </label>
         </div>
-        <form method="GET" action="{{ route('manage.weekly-plans.index') }}" class="wp-form">
+        <form method="GET" action="{{ route('manage.weekly-plans.index') }}" class="wp-form" id="wpFilterForm">
             <input type="hidden" name="view" value="grid">
             <input type="hidden" name="week_start" value="{{ $weekStart->toDateString() }}">
+            {{-- Primary (always visible) --}}
             <div class="row g-2">
                 <div class="col-md-3 col-sm-6">
                     <label class="form-label">@lang('weekly_plan.filter_grade')</label>
-                    <select name="grade_level" class="form-control form-select">
+                    <select name="grade_level" class="form-control form-select wp-auto">
                         <option value="">@lang('weekly_plan.filter_all')</option>
                         @foreach($gradeLevels as $g)
                             <option value="{{ $g }}" @selected(request('grade_level') == $g)>{{ $g }}</option>
@@ -262,7 +296,7 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <label class="form-label">@lang('weekly_plan.filter_class')</label>
-                    <select name="class_id" class="form-control form-select">
+                    <select name="class_id" class="form-control form-select wp-auto">
                         <option value="">@lang('weekly_plan.filter_all')</option>
                         @foreach($classes as $c)
                             <option value="{{ $c->id }}" @selected(request('class_id') == $c->id)>{{ $c->name }}</option>
@@ -270,8 +304,24 @@
                     </select>
                 </div>
                 <div class="col-md-3 col-sm-6">
+                    <label class="form-label">@lang('weekly_plan.filter_search')</label>
+                    <input type="text" name="q" value="{{ request('q') }}" class="form-control wp-auto-text"
+                           placeholder="@lang('weekly_plan.filter_search_placeholder')">
+                </div>
+                <div class="col-md-3 col-sm-6 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn-gold">
+                        <i class="la la-search"></i> @lang('weekly_plan.btn_search')
+                    </button>
+                    <button type="button" class="btn-ghost" id="wpAdvancedToggle">
+                        <i class="la la-sliders-h"></i> @lang('weekly_plan.btn_advanced')
+                    </button>
+                </div>
+            </div>
+            {{-- Advanced (collapsible) --}}
+            <div class="row g-2 mt-1 wp-advanced" id="wpAdvanced" style="{{ $hasAdvanced ? '' : 'display:none;' }}">
+                <div class="col-md-3 col-sm-6">
                     <label class="form-label">@lang('weekly_plan.filter_teacher')</label>
-                    <select name="teacher_id" class="form-control form-select">
+                    <select name="teacher_id" class="form-control form-select wp-auto">
                         <option value="">@lang('weekly_plan.filter_all')</option>
                         @foreach($teachers as $t)
                             <option value="{{ $t->id }}" @selected(request('teacher_id') == $t->id)>{{ $t->name }}</option>
@@ -280,7 +330,7 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <label class="form-label">@lang('weekly_plan.filter_subject')</label>
-                    <select name="subject_id" class="form-control form-select">
+                    <select name="subject_id" class="form-control form-select wp-auto">
                         <option value="">@lang('weekly_plan.filter_all')</option>
                         @foreach($subjects as $s)
                             <option value="{{ $s->id }}" @selected(request('subject_id') == $s->id)>{{ $s->name }}</option>
@@ -289,16 +339,17 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <label class="form-label">@lang('weekly_plan.filter_status')</label>
-                    <select name="status" class="form-control form-select">
+                    <select name="status" class="form-control form-select wp-auto">
                         <option value="">@lang('weekly_plan.filter_all')</option>
                         <option value="prepared" @selected(request('status') === 'prepared')>@lang('weekly_plan.filter_status_prepared')</option>
                         <option value="not_prepared" @selected(request('status') === 'not_prepared')>@lang('weekly_plan.filter_status_not_prepared')</option>
                     </select>
                 </div>
-                <div class="col-md-9 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn-gold">
-                        <i class="la la-search"></i> @lang('weekly_plan.btn_search')
-                    </button>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label">@lang('weekly_plan.filter_date')</label>
+                    <input type="date" name="date" value="{{ request('date') }}" class="form-control wp-auto">
+                </div>
+                <div class="col-12 d-flex align-items-end gap-2">
                     <a href="{{ route('manage.weekly-plans.index', ['view' => 'grid', 'week_start' => $weekStart->toDateString()]) }}" class="btn-ghost">
                         <i class="la la-times"></i> @lang('weekly_plan.btn_reset')
                     </a>
@@ -330,9 +381,15 @@
             <a href="{{ route('manage.weekly-plans.pdf', request()->query()) }}" target="_blank" class="btn-ghost btn-danger-outline">
                 <i class="la la-file-pdf"></i> @lang('weekly_plan.btn_pdf')
             </a>
-            <button type="button" class="btn-ghost btn-success-outline" disabled title="@lang('weekly_plan.btn_excel_soon')">
+            <a href="{{ route('manage.weekly-plans.excel', request()->query()) }}" class="btn-ghost btn-success-outline">
                 <i class="la la-file-excel"></i> @lang('weekly_plan.btn_excel')
-            </button>
+            </a>
+            <div class="wp-cols-dropdown">
+                <button type="button" class="btn-ghost" id="wpColsToggle">
+                    <i class="la la-columns"></i> @lang('weekly_plan.btn_columns')
+                </button>
+                <div class="wp-cols-menu" id="wpColsMenu"></div>
+            </div>
             <a href="{{ route('manage.weekly-plan-notes.index') }}" class="btn-ghost">
                 <i class="la la-sticky-note"></i> @lang('weekly_plan.btn_ready_notes')
             </a>
@@ -363,24 +420,25 @@
     @else
         <div class="wp-surface">
             <div class="table-responsive">
-                <table class="wp-table">
+                <table class="wp-table" id="wpTable">
                     <thead>
                         <tr>
-                            <th>@lang('weekly_plan.th_status')</th>
-                            <th>@lang('weekly_plan.th_teacher')</th>
-                            <th>@lang('weekly_plan.th_subject')</th>
-                            <th>@lang('weekly_plan.th_lesson')</th>
-                            <th>@lang('weekly_plan.th_objectives')</th>
-                            <th>@lang('weekly_plan.th_homework')</th>
-                            <th>@lang('weekly_plan.th_attachments')</th>
-                            <th>@lang('weekly_plan.th_notes')</th>
-                            <th class="text-center">@lang('weekly_plan.th_actions')</th>
+                            <th data-col="status">@lang('weekly_plan.th_status')</th>
+                            <th data-col="teacher">@lang('weekly_plan.th_teacher')</th>
+                            <th data-col="subject">@lang('weekly_plan.th_subject')</th>
+                            <th data-col="lesson">@lang('weekly_plan.th_lesson')</th>
+                            <th data-col="objectives">@lang('weekly_plan.th_objectives')</th>
+                            <th data-col="homework">@lang('weekly_plan.th_homework')</th>
+                            <th data-col="exams">@lang('weekly_plan.th_exams')</th>
+                            <th data-col="attachments">@lang('weekly_plan.th_attachments')</th>
+                            <th data-col="notes">@lang('weekly_plan.th_notes')</th>
+                            <th class="text-center" data-col="actions" data-col-locked="1">@lang('weekly_plan.th_actions')</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($plansByClass as $className => $plans)
                             <tr class="wp-group-row">
-                                <td colspan="9">
+                                <td colspan="10">
                                     <i class="la la-users"></i>
                                     @lang('weekly_plan.th_class'): <strong>{{ $className }}</strong>
                                     <span class="text-muted small">({{ $plans->count() }})</span>
@@ -389,7 +447,7 @@
                             @foreach($plans as $plan)
                                 @php $attachments = is_array($plan->attachments ?? null) ? $plan->attachments : []; @endphp
                                 <tr>
-                                    <td>
+                                    <td data-col="status">
                                         @if($plan->is_locked)
                                             <span class="wp-badge wp-badge-locked"><i class="la la-lock"></i> @lang('weekly_plan.status_locked')</span>
                                         @elseif($plan->is_prepared)
@@ -398,20 +456,21 @@
                                             <span class="wp-badge wp-badge-not-prepared"><i class="la la-clock"></i> @lang('weekly_plan.status_not_prepared')</span>
                                         @endif
                                     </td>
-                                    <td>{{ $plan->teacher?->name ?? '—' }}</td>
-                                    <td>{{ $plan->subject?->name ?? '—' }}</td>
-                                    <td class="col-narrow"><div class="wp-clip">{{ $plan->topics ?: '—' }}</div></td>
-                                    <td class="col-narrow"><div class="wp-clip">{{ $plan->objectives ?: '—' }}</div></td>
-                                    <td class="col-narrow"><div class="wp-clip">{{ $plan->homework ?: '—' }}</div></td>
-                                    <td class="text-center">
+                                    <td data-col="teacher">{{ $plan->teacher?->name ?? '—' }}</td>
+                                    <td data-col="subject">{{ $plan->subject?->name ?? '—' }}</td>
+                                    <td class="col-narrow" data-col="lesson"><div class="wp-clip">{{ $plan->lesson_title ?: ($plan->topics ?: '—') }}</div></td>
+                                    <td class="col-narrow" data-col="objectives"><div class="wp-clip">{{ $plan->objectives ?: '—' }}</div></td>
+                                    <td class="col-narrow" data-col="homework"><div class="wp-clip">{{ $plan->homework ?: '—' }}</div></td>
+                                    <td class="col-narrow" data-col="exams"><div class="wp-clip">{{ $plan->exams ?: '—' }}</div></td>
+                                    <td class="text-center" data-col="attachments">
                                         @if(count($attachments) > 0)
                                             <span class="wp-badge wp-badge-prepared"><i class="la la-paperclip"></i> {{ count($attachments) }}</span>
                                         @else
                                             <span class="text-muted small">—</span>
                                         @endif
                                     </td>
-                                    <td class="col-narrow"><div class="wp-clip">{{ $plan->notes ?: '—' }}</div></td>
-                                    <td class="text-center">
+                                    <td class="col-narrow" data-col="notes"><div class="wp-clip">{{ $plan->notes ?: '—' }}</div></td>
+                                    <td class="text-center" data-col="actions">
                                         <div class="wp-actions">
                                             <form action="{{ route('manage.weekly-plans.mark-prepared', $plan) }}" method="POST" class="d-inline">
                                                 @csrf
@@ -433,3 +492,106 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    var form = document.getElementById('wpFilterForm');
+
+    // ---- Advanced search toggle ----
+    var advToggle = document.getElementById('wpAdvancedToggle');
+    var adv = document.getElementById('wpAdvanced');
+    if (advToggle && adv) {
+        advToggle.addEventListener('click', function () {
+            adv.style.display = (adv.style.display === 'none' || adv.style.display === '') ? 'flex' : 'none';
+        });
+    }
+
+    // ---- Auto-search (submit on change, debounce text) ----
+    var autoChk = document.getElementById('wpAutoSearch');
+    var AUTO_KEY = 'wp_auto_search';
+    if (autoChk) {
+        var saved = localStorage.getItem(AUTO_KEY);
+        if (saved !== null) { autoChk.checked = (saved === '1'); }
+        autoChk.addEventListener('change', function () {
+            localStorage.setItem(AUTO_KEY, autoChk.checked ? '1' : '0');
+        });
+    }
+    function autoOn() { return !autoChk || autoChk.checked; }
+
+    if (form) {
+        form.querySelectorAll('.wp-auto').forEach(function (el) {
+            el.addEventListener('change', function () { if (autoOn()) form.submit(); });
+        });
+        var debounce;
+        form.querySelectorAll('.wp-auto-text').forEach(function (el) {
+            el.addEventListener('input', function () {
+                if (!autoOn()) return;
+                clearTimeout(debounce);
+                debounce = setTimeout(function () { form.submit(); }, 500);
+            });
+        });
+    }
+
+    // ---- Column customization (localStorage-persisted) ----
+    var table = document.getElementById('wpTable');
+    var colsToggle = document.getElementById('wpColsToggle');
+    var colsMenu = document.getElementById('wpColsMenu');
+    var COLS_KEY = 'wp_hidden_cols';
+
+    if (table && colsToggle && colsMenu) {
+        var labels = {
+            status: @json(__('weekly_plan.th_status')),
+            teacher: @json(__('weekly_plan.th_teacher')),
+            subject: @json(__('weekly_plan.th_subject')),
+            lesson: @json(__('weekly_plan.th_lesson')),
+            objectives: @json(__('weekly_plan.th_objectives')),
+            homework: @json(__('weekly_plan.th_homework')),
+            exams: @json(__('weekly_plan.th_exams')),
+            attachments: @json(__('weekly_plan.th_attachments')),
+            notes: @json(__('weekly_plan.th_notes'))
+        };
+        var hidden = JSON.parse(localStorage.getItem(COLS_KEY) || '[]');
+
+        function applyCols() {
+            Object.keys(labels).forEach(function (col) {
+                var show = hidden.indexOf(col) === -1;
+                table.querySelectorAll('[data-col="' + col + '"]').forEach(function (cell) {
+                    cell.style.display = show ? '' : 'none';
+                });
+            });
+        }
+        function buildMenu() {
+            while (colsMenu.firstChild) { colsMenu.removeChild(colsMenu.firstChild); }
+            Object.keys(labels).forEach(function (col) {
+                var lab = document.createElement('label');
+                var cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = hidden.indexOf(col) === -1;
+                cb.addEventListener('change', function () {
+                    if (cb.checked) { hidden = hidden.filter(function (c) { return c !== col; }); }
+                    else if (hidden.indexOf(col) === -1) { hidden.push(col); }
+                    localStorage.setItem(COLS_KEY, JSON.stringify(hidden));
+                    applyCols();
+                });
+                lab.appendChild(cb);
+                lab.appendChild(document.createTextNode(labels[col]));
+                colsMenu.appendChild(lab);
+            });
+        }
+        buildMenu();
+        applyCols();
+
+        colsToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            colsMenu.classList.toggle('open');
+        });
+        document.addEventListener('click', function (e) {
+            if (!colsMenu.contains(e.target) && e.target !== colsToggle) {
+                colsMenu.classList.remove('open');
+            }
+        });
+    }
+})();
+</script>
+@endpush

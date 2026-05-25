@@ -36,8 +36,10 @@
                     <th>المعلم</th>
                     <th>المادة</th>
                     <th>الفصل</th>
+                    <th>الدرس</th>
                     <th>الأهداف</th>
                     <th>الواجبات والمهام</th>
+                    <th>الاختبارات</th>
                     <th>الملاحظات</th>
                 </tr>
             </thead>
@@ -50,8 +52,10 @@
                         <td>{{ $plan->teacher?->name }}</td>
                         <td>{{ $plan->subject?->name }}</td>
                         <td>{{ $plan->classRoom?->name }}</td>
+                        <td>{{ $plan->lesson_title ?: $plan->topics }}</td>
                         <td>{{ $plan->objectives }}</td>
                         <td>{{ $plan->homework }}</td>
+                        <td>{{ $plan->exams }}</td>
                         <td>{{ $plan->notes }}</td>
                     </tr>
                 @endforeach

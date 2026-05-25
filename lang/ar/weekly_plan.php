@@ -29,8 +29,13 @@ return [
     'filter_all' => '— الكل —',
     'filter_status_prepared' => 'تم التحضير',
     'filter_status_not_prepared' => 'لم يتم التحضير',
+    'filter_date' => 'التاريخ',
+    'filter_search' => 'بحث في المحتوى',
+    'filter_search_placeholder' => 'الدرس، الأهداف، الواجبات، المعلم...',
     'btn_search' => 'بحث',
     'btn_reset' => 'مسح الفلاتر',
+    'btn_advanced' => 'بحث متقدم',
+    'auto_search_label' => 'بحث تلقائي',
 
     // Week navigator
     'week_prev' => 'الأسبوع السابق',

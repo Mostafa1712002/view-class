@@ -25,4 +25,4 @@
 
 ## Phase 5: lang + deploy + live verify
 - [x] lang/ar/users.php keys
-- [ ] deploy + Playwright live verify all URLs
+- [x] deploy + Playwright live verify all URLs (b3a7065)
