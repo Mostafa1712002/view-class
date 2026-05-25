@@ -3,6 +3,7 @@
 namespace App\Modules\Lessons\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\School;
 use App\Models\TimeSlot;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
@@ -17,9 +18,19 @@ class LessonTimeSlotController extends Controller
 {
     use HasSchoolScope;
 
+    /**
+     * Time slots have a NOT NULL school_id. When a super-admin browses with
+     * the "all schools" scope, activeSchoolId() is null — fall back to the
+     * first school so the page never 500s (mirrors the grade-reports resolver).
+     */
+    protected function resolveSchoolId(): ?int
+    {
+        return $this->activeSchoolId() ?? School::query()->orderBy('id')->value('id');
+    }
+
     public function index(): View
     {
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->resolveSchoolId();
         $slots = TimeSlot::query()->where('school_id', $schoolId)->orderBy('period_no')->get();
 
         return view('admin.lessons.time-slots', compact('slots'));
@@ -27,7 +38,7 @@ class LessonTimeSlotController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->resolveSchoolId();
 
         $data = $request->validate([
             'period_no' => ['required', 'integer', 'min:1', 'max:20'],
@@ -50,7 +61,7 @@ class LessonTimeSlotController extends Controller
 
     public function destroy(int $id): RedirectResponse
     {
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->resolveSchoolId();
         $slot = TimeSlot::query()->where('school_id', $schoolId)->whereKey($id)->firstOrFail();
         $slot->delete();
 
