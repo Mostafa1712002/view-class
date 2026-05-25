@@ -28,11 +28,13 @@
                 <span>@lang('shell.section_educational')</span>
             </li>
 
-            <li class="nav-item has-sub" data-section="educational">
+            {{-- === Card: ادارة المواد — single consolidated submenu (dedup: removed the duplicate under system settings) === --}}
+            <li class="nav-item has-sub {{ (request()->routeIs('admin.subjects.*') || request()->routeIs('admin.subject-tracks.*') || request()->routeIs('admin.question-banks.*') || request()->routeIs('admin.exams.*') || request()->routeIs('admin.lessons.*') || request()->routeIs('manage.books.*')) ? 'active open' : '' }}" data-section="educational">
                 <a href="#"><i class="la la-book"></i><span class="menu-title">@lang('shell.nav_exams_management')</span></a>
                 <ul class="menu-content">
-                    <li class="{{ request()->routeIs('manage.subjects.*') ? 'active' : '' }}"><a href="{{ Route::has('manage.subjects.index') ? route('manage.subjects.index') : '#' }}"><i class="la la-book"></i><span class="menu-item">@lang('shell.nav_subjects')</span></a></li>
-                    <li><a href="#"><i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_questions_bank')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.subjects.index') || request()->routeIs('admin.subjects.create') || request()->routeIs('admin.subjects.edit') ? 'active' : '' }}"><a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}"><i class="la la-book"></i><span class="menu-item">@lang('shell.nav_subjects')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.subject-tracks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subject-tracks.index') ? route('admin.subject-tracks.index') : '#' }}"><i class="la la-stream"></i><span class="menu-item">@lang('subject_tracks.page_title')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.question-banks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.question-banks.index') ? route('admin.question-banks.index') : '#' }}"><i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_questions_bank')</span></a></li>
                     <li class="{{ request()->routeIs('admin.exams.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><i class="la la-file-alt"></i><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>
                     {{-- === Lessons card 64 === --}}<li class="{{ request()->routeIs('admin.lessons.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.lessons.index') ? route('admin.lessons.index') : '#' }}"><i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_periods')</span></a></li>
                     {{-- === Books card 65 === --}}<li class="{{ request()->routeIs('manage.books.*') ? 'active' : '' }}"><a href="{{ Route::has('manage.books.index') ? route('manage.books.index') : '#' }}"><i class="la la-book-open"></i><span class="menu-item">@lang('shell.nav_books')</span></a></li>
@@ -211,28 +213,7 @@
                 </ul>
             </li>
 
-            <li class="nav-item has-sub {{ (request()->routeIs('admin.subjects.*') || request()->routeIs('admin.subject-tracks.*')) ? 'open' : '' }}" data-section="system">
-                <a href="#"><i class="la la-book"></i><span class="menu-title">@lang('sprint4.subjects.page_title')</span></a>
-                <ul class="menu-content">
-                    <li class="{{ request()->routeIs('admin.subjects.index') || request()->routeIs('admin.subjects.create') || request()->routeIs('admin.subjects.edit') ? 'active' : '' }}">
-                        <a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}">
-                            <i class="la la-book-open"></i><span class="menu-item">@lang('sprint4.subjects.plural')</span>
-                        </a>
-                    </li>
-                    {{-- === Sections card 61 === --}}
-                    <li class="{{ request()->routeIs('admin.subject-tracks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subject-tracks.index') ? route('admin.subject-tracks.index') : '#' }}"><i class="la la-stream"></i><span class="menu-item">@lang('subject_tracks.page_title')</span></a></li>
-                    <li class="{{ request()->routeIs('admin.question-banks.*') ? 'active' : '' }}">
-                        <a href="{{ Route::has('admin.question-banks.index') ? route('admin.question-banks.index') : '#' }}">
-                            <i class="la la-question-circle"></i><span class="menu-item">@lang('shell.nav_question_bank')</span>
-                        </a>
-                    </li>
-                    <li class="{{ request()->routeIs('admin.class-periods.*') ? 'active' : '' }}">
-                        <a href="{{ Route::has('admin.class-periods.index') ? route('admin.class-periods.index') : '#' }}">
-                            <i class="la la-clock"></i><span class="menu-item">@lang('shell.nav_class_periods')</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
+            {{-- === Card: ادارة المواد — duplicate "إدارة المواد" submenu removed from here; consolidated into the educational section above === --}}
 
             <li class="nav-item {{ request()->routeIs('admin.school-schedule.*') ? 'active' : '' }}" data-section="system">
                 <a href="{{ Route::has('admin.school-schedule.index') ? route('admin.school-schedule.index') : '#' }}">
