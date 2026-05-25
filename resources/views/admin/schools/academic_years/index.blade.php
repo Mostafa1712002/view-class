@@ -118,7 +118,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#weeks-{{ $term->id }}"><i class="la la-calendar-week"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-toggle="collapse" data-target="#weeks-{{ $term->id }}"><i class="la la-calendar-week"></i></button>
                                         <form action="{{ route('admin.schools.academic-years.terms.destroy', [$school, $year, $term]) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                             @csrf
                                             @method('DELETE')

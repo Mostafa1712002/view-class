@@ -80,7 +80,7 @@
                             </td>
                             <td>
                                 <div class="dropdown">
-                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                         <i class="la la-cog"></i>
                                     </button>
                                     <ul class="dropdown-menu">
