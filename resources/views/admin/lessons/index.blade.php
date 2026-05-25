@@ -87,6 +87,16 @@
     }
     .btn-gold:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(207,160,70,.22); }
 
+    .ls-tools { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
+    .btn-tool {
+        background: #fff; border: 1px solid #e2e8f0; color: #475569;
+        font-weight: 600; padding: .55rem .95rem; border-radius: 10px;
+        display: inline-flex; align-items: center; gap: .4rem; font-size: .88rem;
+        transition: all .15s ease;
+    }
+    .btn-tool:hover { background: #fffbeb; border-color: var(--gold-300); color: #92400e; }
+    .btn-tool i { color: var(--gold-400); }
+
     /* Surface + table */
     .ls-surface { background: #fff; border: 1px solid #e5e7eb; border-top: 0; border-radius: 0 0 14px 14px; overflow: hidden; }
     .ls-table { margin: 0; }
@@ -206,8 +216,11 @@
     <div class="left">
         <span class="count-pill">{{ number_format($lessons->total()) }} @lang('lessons_admin.kpi.total')</span>
     </div>
-    <div>
+    <div class="ls-tools">
         <a href="{{ route('admin.lessons.create') }}" class="btn-gold"><i class="la la-plus"></i>@lang('lessons_admin.actions.add')</a>
+        <a href="{{ route('admin.lessons.time-slots.index') }}" class="btn-tool"><i class="la la-clock"></i>@lang('lessons_admin.timeslots.title')</a>
+        <a href="{{ route('admin.lessons.advanced') }}" class="btn-tool"><i class="la la-th"></i>@lang('lessons_admin.advanced.title')</a>
+        <a href="{{ route('admin.school-schedule.pdf') }}" class="btn-tool" target="_blank"><i class="la la-file-pdf"></i>@lang('lessons_admin.toolbar.export')</a>
     </div>
 </div>
 
@@ -232,6 +245,8 @@
                         <th>@lang('lessons_admin.table.period')</th>
                         <th>@lang('lessons_admin.table.time')</th>
                         <th>@lang('lessons_admin.table.room')</th>
+                        <th>@lang('lessons_admin.table.substitute')</th>
+                        <th>@lang('lessons_admin.table.students')</th>
                         <th style="text-align:{{ $isRtl ? 'left' : 'right' }}">@lang('lessons_admin.table.actions')</th>
                     </tr>
                 </thead>
@@ -252,8 +267,17 @@
                             @endif
                         </td>
                         <td>{{ $lesson->room ?? '—' }}</td>
+                        <td>
+                            @if($lesson->substitute_teacher_id)
+                                <span class="ls-pill" style="background:#fef9c3;color:#854d0e">{{ optional($lesson->substituteTeacher)->name ?? '—' }}</span>
+                            @else
+                                <span style="color:#94a3b8">—</span>
+                            @endif
+                        </td>
+                        <td><span class="ls-pill muted">{{ $lesson->students_count ?? 0 }}</span></td>
                         <td style="text-align:{{ $isRtl ? 'left' : 'right' }}">
                             <div class="ls-actions">
+                                <a href="{{ route('admin.lessons.students.index', $lesson->id) }}" class="ls-action-btn" title="@lang('lessons_admin.students.title')" style="background:#eef2ff;border:1px solid #e0e7ff;color:#4338ca"><i class="la la-users"></i></a>
                                 <a href="{{ route('admin.lessons.edit', $lesson->id) }}" class="ls-action-btn edit" title="@lang('lessons_admin.actions.edit')"><i class="la la-edit"></i></a>
                                 <form action="{{ route('admin.lessons.destroy', $lesson->id) }}" method="POST" style="display:inline" onsubmit="return confirm('{{ __('lessons_admin.confirm_delete') }}');">
                                     @csrf

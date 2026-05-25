@@ -15,6 +15,7 @@ final class LessonDto
         public readonly ?string $startTime = null,
         public readonly ?string $endTime = null,
         public readonly ?string $room = null,
+        public readonly ?int $substituteTeacherId = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -30,6 +31,7 @@ final class LessonDto
             startTime: $data['start_time'] ?? null,
             endTime: $data['end_time'] ?? null,
             room: $data['room'] ?? null,
+            substituteTeacherId: !empty($data['substitute_teacher_id']) ? (int) $data['substitute_teacher_id'] : null,
         );
     }
 }

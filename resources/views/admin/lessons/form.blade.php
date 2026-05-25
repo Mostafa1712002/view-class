@@ -15,6 +15,7 @@
         'semester' => old('semester', $isEdit ? optional($lesson->schedule)->semester : 'first'),
         'subject_id' => old('subject_id', $isEdit ? $lesson->subject_id : null),
         'teacher_id' => old('teacher_id', $isEdit ? $lesson->teacher_id : null),
+        'substitute_teacher_id' => old('substitute_teacher_id', $isEdit ? $lesson->substitute_teacher_id : null),
         'day_of_week' => old('day_of_week', $isEdit ? $lesson->day_of_week : null),
         'period_number' => old('period_number', $isEdit ? $lesson->period_number : null),
         'start_time' => old('start_time', $isEdit && $lesson->start_time ? $lesson->start_time->format('H:i') : null),
@@ -143,6 +144,17 @@
                     @endforeach
                 </select>
                 @error('teacher_id') <div class="err">{{ $message }}</div> @enderror
+            </div>
+
+            <div class="ls-field">
+                <label>@lang('lessons_admin.form.substitute_teacher')</label>
+                <select name="substitute_teacher_id" class="form-control {{ $errors->has('substitute_teacher_id') ? 'is-invalid' : '' }}">
+                    <option value="">@lang('lessons_admin.substitute.none')</option>
+                    @foreach($teachers as $t)
+                        <option value="{{ $t->id }}" @selected((string) $cur['substitute_teacher_id'] === (string) $t->id)>{{ $t->name }}</option>
+                    @endforeach
+                </select>
+                @error('substitute_teacher_id') <div class="err">{{ $message }}</div> @enderror
             </div>
 
             <div class="ls-field">

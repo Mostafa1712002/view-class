@@ -5,6 +5,7 @@ namespace App\Modules\Lessons\Actions;
 use App\Models\Schedule;
 use App\Models\SchedulePeriod;
 use App\Modules\Lessons\DTOs\LessonDto;
+use App\Modules\Lessons\Services\LessonConflictGuard;
 use Illuminate\Database\QueryException;
 use RuntimeException;
 
@@ -15,6 +16,8 @@ use RuntimeException;
  */
 final class CreateLessonAction
 {
+    public function __construct(private LessonConflictGuard $guard) {}
+
     public function execute(LessonDto $dto): SchedulePeriod
     {
         $schedule = Schedule::firstOrCreate(
@@ -28,11 +31,19 @@ final class CreateLessonAction
             ]
         );
 
+        $this->guard->assertNoConflict(
+            $schedule->id,
+            $dto->teacherId,
+            $dto->dayOfWeek,
+            $dto->periodNumber,
+        );
+
         try {
             return SchedulePeriod::create([
                 'schedule_id' => $schedule->id,
                 'subject_id' => $dto->subjectId,
                 'teacher_id' => $dto->teacherId,
+                'substitute_teacher_id' => $dto->substituteTeacherId,
                 'day_of_week' => $dto->dayOfWeek,
                 'period_number' => $dto->periodNumber,
                 'start_time' => $dto->startTime,

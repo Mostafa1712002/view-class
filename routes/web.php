@@ -307,20 +307,12 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('question-banks/{bankId}/questions/{questionId}/duplicate', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'duplicate'])->name('question-banks.questions.duplicate');
     Route::delete('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'destroy'])->name('question-banks.questions.destroy');
 
-    // Class Periods + Time Slots + Schedule Entries (Sprint 4 phase 3)
-    Route::get('class-periods/time-slots', [\App\Modules\ClassPeriods\Controllers\TimeSlotController::class, 'index'])->name('class-periods.time-slots.index');
-    Route::post('class-periods/time-slots', [\App\Modules\ClassPeriods\Controllers\TimeSlotController::class, 'store'])->name('class-periods.time-slots.store');
-    Route::delete('class-periods/time-slots/{id}', [\App\Modules\ClassPeriods\Controllers\TimeSlotController::class, 'destroy'])->name('class-periods.time-slots.destroy');
-
-    Route::get('class-periods/advanced', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'advanced'])->name('class-periods.advanced');
-
-    Route::get('class-periods', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'index'])->name('class-periods.index');
-    Route::get('class-periods/create', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'create'])->name('class-periods.create');
-    Route::post('class-periods', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'store'])->name('class-periods.store');
-    Route::delete('class-periods/{id}', [\App\Modules\ClassPeriods\Controllers\ClassPeriodController::class, 'destroy'])->name('class-periods.destroy');
-
-    Route::post('class-periods/schedule-entries', [\App\Modules\ClassPeriods\Controllers\ScheduleEntryController::class, 'store'])->name('class-periods.schedule-entries.store');
-    Route::delete('class-periods/schedule-entries/{id}', [\App\Modules\ClassPeriods\Controllers\ScheduleEntryController::class, 'destroy'])->name('class-periods.schedule-entries.destroy');
+    // Retired duplicate "إدارة المواد / class-periods" tab — consolidated into الحصص (/admin/lessons).
+    // Keep the old URLs alive as redirects so bookmarks/links don't 404.
+    Route::get('class-periods/time-slots', fn () => redirect()->route('admin.lessons.time-slots.index'))->name('class-periods.time-slots.index');
+    Route::get('class-periods/advanced', fn () => redirect()->route('admin.lessons.advanced'))->name('class-periods.advanced');
+    Route::get('class-periods/create', fn () => redirect()->route('admin.lessons.create'));
+    Route::get('class-periods', fn () => redirect()->route('admin.lessons.index'))->name('class-periods.index');
 
     // School Schedule (Sprint 4 phase 4 — read-only view + PDF)
     Route::get('school-schedule', [\App\Modules\SchoolSchedule\Controllers\SchoolScheduleController::class, 'index'])->name('school-schedule.index');
@@ -361,10 +353,23 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
 // Admin Exams & Grades Routes
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
-    // === Lessons card 64 ===
+    // === Lessons (الحصص) — card 64 + "تعديلات الحصص" ===
     Route::get('lessons', [\App\Modules\Lessons\Controllers\LessonController::class, 'index'])->name('lessons.index');
     Route::get('lessons/create', [\App\Modules\Lessons\Controllers\LessonController::class, 'create'])->name('lessons.create');
     Route::post('lessons', [\App\Modules\Lessons\Controllers\LessonController::class, 'store'])->name('lessons.store');
+
+    // Time slots (إدارة الفترات الزمنية) — migrated from the retired ClassPeriods module
+    Route::get('lessons/time-slots', [\App\Modules\Lessons\Controllers\LessonTimeSlotController::class, 'index'])->name('lessons.time-slots.index');
+    Route::post('lessons/time-slots', [\App\Modules\Lessons\Controllers\LessonTimeSlotController::class, 'store'])->name('lessons.time-slots.store');
+    Route::delete('lessons/time-slots/{id}', [\App\Modules\Lessons\Controllers\LessonTimeSlotController::class, 'destroy'])->name('lessons.time-slots.destroy');
+
+    // Advanced board (الجدول المتقدم)
+    Route::get('lessons/advanced', [\App\Modules\Lessons\Controllers\LessonScheduleBoardController::class, 'index'])->name('lessons.advanced');
+
+    // Students inside a lesson (إدارة الطلاب داخل الحصة)
+    Route::get('lessons/{id}/students', [\App\Modules\Lessons\Controllers\LessonStudentController::class, 'index'])->name('lessons.students.index');
+    Route::put('lessons/{id}/students', [\App\Modules\Lessons\Controllers\LessonStudentController::class, 'update'])->name('lessons.students.update');
+
     Route::get('lessons/{id}/edit', [\App\Modules\Lessons\Controllers\LessonController::class, 'edit'])->name('lessons.edit');
     Route::put('lessons/{id}', [\App\Modules\Lessons\Controllers\LessonController::class, 'update'])->name('lessons.update');
     Route::delete('lessons/{id}', [\App\Modules\Lessons\Controllers\LessonController::class, 'destroy'])->name('lessons.destroy');

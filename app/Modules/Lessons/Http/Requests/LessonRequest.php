@@ -20,6 +20,7 @@ class LessonRequest extends FormRequest
             'semester' => ['required', 'in:first,second'],
             'subject_id' => ['required', 'integer', 'exists:subjects,id'],
             'teacher_id' => ['required', 'integer', 'exists:users,id'],
+            'substitute_teacher_id' => ['nullable', 'integer', 'different:teacher_id', 'exists:users,id'],
             'day_of_week' => ['required', 'integer', 'between:0,6'],
             'period_number' => ['required', 'integer', 'between:1,12'],
             'start_time' => ['nullable', 'date_format:H:i'],

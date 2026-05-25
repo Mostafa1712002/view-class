@@ -47,9 +47,47 @@ return [
         'period' => 'Period',
         'time' => 'Time',
         'room' => 'Room',
+        'substitute' => 'Substitute',
+        'students' => 'Students',
         'actions' => 'Actions',
         'empty_title' => 'No lessons yet',
         'empty_hint' => 'Click "Add lesson" to create the first entry in the timetable.',
+    ],
+
+    'toolbar' => [
+        'export' => 'Export timetable',
+    ],
+
+    'substitute' => [
+        'none' => 'No substitute teacher',
+        'badge' => 'Sub',
+    ],
+
+    'timeslots' => [
+        'title' => 'Time slots',
+        'add' => 'Add time slot',
+        'period_no' => 'Period no.',
+        'starts_at' => 'Start time',
+        'ends_at' => 'End time',
+        'is_break' => 'Break',
+        'empty' => 'No time slots defined yet.',
+        'confirm_delete' => 'Delete this time slot?',
+    ],
+
+    'advanced' => [
+        'title' => 'Advanced board',
+        'show' => 'Show board',
+        'day_period' => 'Day / Period',
+        'legend' => 'Lessons are laid out across weekdays and periods. Use the filters above to view a specific class, teacher or subject.',
+    ],
+
+    'students' => [
+        'title' => 'Lesson students',
+        'head' => 'Students of the lesson’s class',
+        'name' => 'Name',
+        'academic_no' => 'Academic no.',
+        'empty' => 'No students enrolled in this lesson’s class.',
+        'hint' => 'Select the students linked to this lesson. You can target support/enrichment lessons to a subset of the class.',
     ],
 
     'form' => [
@@ -64,6 +102,7 @@ return [
         'semester_second' => 'Second semester',
         'subject' => 'Subject',
         'teacher' => 'Teacher',
+        'substitute_teacher' => 'Substitute teacher (optional)',
         'day' => 'Day',
         'period_number' => 'Period number',
         'start_time' => 'Start time',

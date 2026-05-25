@@ -16,7 +16,9 @@ class EloquentLessonRepository implements LessonRepository
                 'schedule.academicYear',
                 'subject',
                 'teacher',
-            ]);
+                'substituteTeacher',
+            ])
+            ->withCount('students');
 
         if ($schoolId !== null) {
             $query->whereHas('schedule.classRoom.section', function ($q) use ($schoolId) {
@@ -72,7 +74,9 @@ class EloquentLessonRepository implements LessonRepository
                 'schedule.academicYear',
                 'subject',
                 'teacher',
+                'substituteTeacher',
             ])
+            ->withCount('students')
             ->where('id', $id);
 
         if ($schoolId !== null) {
