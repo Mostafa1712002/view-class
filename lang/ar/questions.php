@@ -33,8 +33,12 @@ return [
 
     'status' => [
         'draft' => 'مسودة',
-        'published' => 'منشور',
+        'pending_review' => 'بانتظار المراجعة',
+        'approved' => 'معتمد',
+        'rejected' => 'مرفوض',
         'archived' => 'مؤرشف',
+        // legacy fallback (pre-card data may still reference it)
+        'published' => 'معتمد',
     ],
 
     'columns' => [

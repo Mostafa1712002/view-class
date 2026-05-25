@@ -23,9 +23,9 @@ interface QuestionBankRepository
 
     public function findScoped(int $id, ?int $schoolId): ?QuestionBank;
 
-    public function create(array $payload, array $subjectIds, array $memberRoles): QuestionBank;
+    public function create(array $payload, array $subjectIds, array $memberRoles, array $schoolIds = []): QuestionBank;
 
-    public function update(QuestionBank $bank, array $payload, ?array $subjectIds, ?array $memberRoles): QuestionBank;
+    public function update(QuestionBank $bank, array $payload, ?array $subjectIds, ?array $memberRoles, ?array $schoolIds = null): QuestionBank;
 
     public function delete(QuestionBank $bank): void;
 

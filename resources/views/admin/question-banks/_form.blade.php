@@ -55,6 +55,35 @@
     </div>
 </div>
 
+@php
+    $sharedSchoolIds = old('school_ids', $bank->exists ? ($bank->sharedSchools?->pluck('id')->all() ?? []) : []);
+    $isPublic = old('visibility', $bank->visibility ?? 'private') === 'public';
+@endphp
+<div class="qb-form-section" id="qb-share-section" style="{{ $isPublic ? '' : 'display:none;' }}">
+    <h3 class="qb-form-section__title">@lang('question_banks.form.section_sharing')</h3>
+    <div class="row">
+        <div class="col-12 mb-2">
+            <small class="text-muted">@lang('question_banks.form.sharing_hint')</small>
+        </div>
+        @if($shareSchools->isEmpty())
+            <div class="col-12"><p class="text-muted small mb-0">—</p></div>
+        @else
+            <div class="col-12">
+                <div class="qb-subject-grid">
+                    @foreach($shareSchools as $school)
+                        <label class="qb-subject-chip">
+                            <input type="checkbox" name="school_ids[]" value="{{ $school->id }}"
+                                   {{ in_array($school->id, $sharedSchoolIds) ? 'checked' : '' }}>
+                            <span>{{ $school->name_ar ?? $school->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                <small class="text-muted d-block mt-2">@lang('question_banks.form.sharing_empty_means_all')</small>
+            </div>
+        @endif
+    </div>
+</div>
+
 <div class="qb-form-section">
     <h3 class="qb-form-section__title">@lang('question_banks.form.section_education')</h3>
     <div class="row">
@@ -146,8 +175,36 @@
                 <span>@lang('question_banks.form.is_ana_qudurat_linkable')</span>
             </label>
         </div>
+        <div class="col-12 mb-3">
+            <label class="qb-toggle">
+                <input type="hidden" name="exportable" value="0">
+                <input type="checkbox" name="exportable" value="1"
+                       {{ old('exportable', $bank->exists ? $bank->exportable : true) ? 'checked' : '' }}>
+                <span>@lang('question_banks.form.exportable')</span>
+            </label>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">@lang('question_banks.form.external_platform')</label>
+            <input type="text" name="external_platform" value="{{ old('external_platform', $bank->external_platform) }}"
+                   class="form-control @error('external_platform') is-invalid @enderror"
+                   placeholder="@lang('question_banks.form.external_platform_hint')">
+            @error('external_platform')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        var visSel = document.querySelector('select[name="visibility"]');
+        var shareSection = document.getElementById('qb-share-section');
+        if (!visSel || !shareSection) return;
+        function sync() {
+            shareSection.style.display = visSel.value === 'public' ? '' : 'none';
+        }
+        visSel.addEventListener('change', sync);
+        sync();
+    })();
+</script>
 
 <div class="qb-form-actions">
     <a href="{{ route('admin.question-banks.index') }}" class="btn-reset">

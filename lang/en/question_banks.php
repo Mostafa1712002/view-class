@@ -42,6 +42,7 @@ return [
     'visibility_public_hint' => 'Available platform-wide or across multiple schools',
     'visibility_private_hint' => 'Scoped to a single school',
     'school_platform' => 'Platform-wide',
+    'school_shared' => 'Shared with :count schools',
 
     'status_active' => 'Active',
     'status_inactive' => 'Inactive',
@@ -78,9 +79,15 @@ return [
 
     'form' => [
         'section_basic' => 'Basic data',
+        'section_sharing' => 'Share bank with schools',
         'section_education' => 'Educational link',
         'section_permissions' => 'Permissions',
         'section_future' => 'Future link configuration',
+        'sharing_hint' => 'Choose the schools that can see this general bank',
+        'sharing_empty_means_all' => 'If no school is selected, the bank is available to all schools on the platform.',
+        'exportable' => 'Exportable',
+        'external_platform' => 'External platform name',
+        'external_platform_hint' => 'e.g. Ana w al-Qudurat',
         'name_ar' => 'Bank name (Arabic)',
         'name_en' => 'Bank name (English)',
         'description' => 'Short description',

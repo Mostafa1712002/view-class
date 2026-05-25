@@ -24,17 +24,24 @@ class QuestionBank extends Model
         'grade_level',
         'category_type',
         'is_ana_qudurat_linkable',
+        'exportable',
         'external_id',
+        'external_platform',
         'link_status',
+        'sync_status',
         'last_sync_at',
+        'metadata',
         'created_by',
+        'imported_by',
     ];
 
     protected $casts = [
         'is_library' => 'boolean',
         'is_ana_qudurat_linkable' => 'boolean',
+        'exportable' => 'boolean',
         'grade_level' => 'integer',
         'last_sync_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     public const VISIBILITY_PUBLIC = 'public';
@@ -59,6 +66,15 @@ class QuestionBank extends Model
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
+    }
+
+    /**
+     * Schools a general (public) bank is explicitly shared with.
+     * Empty for a public bank = platform-wide (visible to every school).
+     */
+    public function sharedSchools(): BelongsToMany
+    {
+        return $this->belongsToMany(School::class, 'question_bank_schools');
     }
 
     public function creator(): BelongsTo

@@ -18,7 +18,7 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
                 'school:id,name,name_en',
                 'creator:id,name,username',
             ])
-            ->withCount('questions');
+            ->withCount(['questions', 'sharedSchools']);
 
         $search = $filters['q'] ?? null;
         if ($search !== null && $search !== '') {
@@ -71,7 +71,7 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
     public function findScoped(int $id, ?int $schoolId): ?QuestionBank
     {
         $query = QuestionBank::query()
-            ->with(['subjects', 'members', 'school:id,name,name_en', 'creator:id,name,username'])
+            ->with(['subjects', 'members', 'sharedSchools:id,name,name_en', 'school:id,name,name_en', 'creator:id,name,username'])
             ->whereKey($id);
 
         if ($schoolId !== null) {
@@ -85,9 +85,9 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
         return $query->first();
     }
 
-    public function create(array $payload, array $subjectIds, array $memberRoles): QuestionBank
+    public function create(array $payload, array $subjectIds, array $memberRoles, array $schoolIds = []): QuestionBank
     {
-        return DB::transaction(function () use ($payload, $subjectIds, $memberRoles) {
+        return DB::transaction(function () use ($payload, $subjectIds, $memberRoles, $schoolIds) {
             $bank = QuestionBank::create($this->withoutNulls($payload));
 
             if (! empty($subjectIds)) {
@@ -98,13 +98,15 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
                 $bank->members()->sync($this->normalizeMemberRoles($memberRoles));
             }
 
-            return $bank->load(['subjects', 'members']);
+            $bank->sharedSchools()->sync($this->normalizeSchoolIds($bank, $schoolIds));
+
+            return $bank->load(['subjects', 'members', 'sharedSchools']);
         });
     }
 
-    public function update(QuestionBank $bank, array $payload, ?array $subjectIds, ?array $memberRoles): QuestionBank
+    public function update(QuestionBank $bank, array $payload, ?array $subjectIds, ?array $memberRoles, ?array $schoolIds = null): QuestionBank
     {
-        return DB::transaction(function () use ($bank, $payload, $subjectIds, $memberRoles) {
+        return DB::transaction(function () use ($bank, $payload, $subjectIds, $memberRoles, $schoolIds) {
             $bank->fill($this->withoutNulls($payload));
             $bank->save();
 
@@ -116,7 +118,11 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
                 $bank->members()->sync($this->normalizeMemberRoles($memberRoles));
             }
 
-            return $bank->refresh()->load(['subjects', 'members']);
+            if ($schoolIds !== null) {
+                $bank->sharedSchools()->sync($this->normalizeSchoolIds($bank, $schoolIds));
+            }
+
+            return $bank->refresh()->load(['subjects', 'members', 'sharedSchools']);
         });
     }
 
@@ -179,9 +185,18 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
 
         if ($schoolId !== null) {
             $query->where(function ($q) use ($schoolId) {
-                // Visible to this school: own private banks + platform-wide public banks
+                // 1) The school's own banks (private or public it created).
                 $q->where('school_id', $schoolId)
-                  ->orWhere('visibility', QuestionBank::VISIBILITY_PUBLIC);
+                  // 2) Public banks shared platform-wide (no explicit school targeting).
+                  ->orWhere(function ($pub) {
+                      $pub->where('visibility', QuestionBank::VISIBILITY_PUBLIC)
+                          ->whereDoesntHave('sharedSchools');
+                  })
+                  // 3) Public banks explicitly shared with this school.
+                  ->orWhere(function ($pub) use ($schoolId) {
+                      $pub->where('visibility', QuestionBank::VISIBILITY_PUBLIC)
+                          ->whereHas('sharedSchools', fn ($s) => $s->where('schools.id', $schoolId));
+                  });
             });
         }
 
@@ -201,6 +216,24 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
             $sync[(int) $userId] = ['role' => in_array($role, ['viewer', 'editor'], true) ? $role : 'viewer'];
         }
         return $sync;
+    }
+
+    /**
+     * Shared-school targeting only makes sense for public (general) banks.
+     * For a private bank we always clear the pivot so it stays school-scoped.
+     */
+    private function normalizeSchoolIds(QuestionBank $bank, array $schoolIds): array
+    {
+        if ($bank->visibility !== QuestionBank::VISIBILITY_PUBLIC) {
+            return [];
+        }
+
+        return collect($schoolIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function withoutNulls(array $payload): array

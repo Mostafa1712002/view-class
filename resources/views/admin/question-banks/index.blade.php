@@ -377,7 +377,9 @@
                             </span>
                         </td>
                         <td data-label="@lang('question_banks.col_school')">
-                            @if($visibility === 'public' && ! $bank->school_id)
+                            @if($visibility === 'public' && ($bank->shared_schools_count ?? 0) > 0)
+                                <span class="qb-secondary">{{ __('question_banks.school_shared', ['count' => $bank->shared_schools_count]) }}</span>
+                            @elseif($visibility === 'public')
                                 <span class="qb-secondary">@lang('question_banks.school_platform')</span>
                             @elseif($bank->school)
                                 <span class="qb-secondary">{{ $bank->school->name }}</span>

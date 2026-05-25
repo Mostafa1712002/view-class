@@ -25,7 +25,14 @@ class BankQuestion extends Model
         3 => 'hard',
     ];
 
-    public const STATUSES = ['draft', 'published', 'archived'];
+    // Card §8 — question review workflow states.
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PENDING_REVIEW = 'pending_review';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_ARCHIVED = 'archived';
+
+    public const STATUSES = ['draft', 'pending_review', 'approved', 'rejected', 'archived'];
 
     protected $fillable = [
         'question_bank_id',

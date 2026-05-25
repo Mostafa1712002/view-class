@@ -48,6 +48,7 @@ return [
     'visibility_public_hint' => 'متاح للمنصة بالكامل أو لأكثر من مدرسة',
     'visibility_private_hint' => 'مرتبط بمدرسة واحدة فقط',
     'school_platform' => 'عام على المنصة',
+    'school_shared' => 'مشترك مع :count مدرسة',
 
     // Status
     'status_active' => 'مفعّل',
@@ -89,9 +90,15 @@ return [
     // Form sections
     'form' => [
         'section_basic' => 'البيانات الأساسية',
+        'section_sharing' => 'مشاركة البنك مع المدارس',
         'section_education' => 'الربط التعليمي',
         'section_permissions' => 'الصلاحيات',
         'section_future' => 'إعدادات الربط المستقبلي',
+        'sharing_hint' => 'حدّد المدارس التي يمكنها رؤية هذا البنك العام',
+        'sharing_empty_means_all' => 'إذا لم تحدد أي مدرسة، يصبح البنك متاحًا لكل المدارس على المنصة.',
+        'exportable' => 'قابل للتصدير',
+        'external_platform' => 'اسم المنصة الخارجية',
+        'external_platform_hint' => 'مثال: أنا والقدرات',
         'name_ar' => 'اسم البنك (عربي)',
         'name_en' => 'اسم البنك (إنجليزي)',
         'description' => 'وصف مختصر للبنك',

@@ -67,7 +67,7 @@ class BankQuestionController extends Controller
             'type' => $type,
             'difficulty' => 1,
             'points' => 1,
-            'status' => 'published',
+            'status' => 'approved',
         ]);
 
         $lessons = $this->lessonsForBank($bank);
@@ -94,7 +94,7 @@ class BankQuestionController extends Controller
             'difficulty' => $data['difficulty'] ?? 1,
             'points' => $data['points'] ?? 1,
             'attachment_path' => $attachmentPath,
-            'status' => $data['status'] ?? 'published',
+            'status' => $data['status'] ?? 'approved',
             'created_by' => auth()->id(),
         ]);
 
@@ -139,7 +139,7 @@ class BankQuestionController extends Controller
             'difficulty' => $data['difficulty'] ?? 1,
             'points' => $data['points'] ?? 1,
             'attachment_path' => $attachmentPath,
-            'status' => $data['status'] ?? 'published',
+            'status' => $data['status'] ?? 'approved',
         ]);
 
         return redirect()
@@ -205,7 +205,7 @@ class BankQuestionController extends Controller
             'body_en' => ['nullable', 'string'],
             'difficulty' => ['nullable', 'integer', 'min:1', 'max:3'],
             'points' => ['nullable', 'numeric', 'min:0', 'max:9999'],
-            'status' => ['nullable', 'in:draft,published,archived'],
+            'status' => ['nullable', 'in:draft,pending_review,approved,rejected,archived'],
             'lesson_id' => ['nullable', 'integer', 'exists:subject_lessons,id'],
             'attachment' => ['nullable', 'file', 'max:10240'],
             'remove_attachment' => ['nullable', 'boolean'],

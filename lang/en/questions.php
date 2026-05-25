@@ -33,8 +33,12 @@ return [
 
     'status' => [
         'draft' => 'Draft',
-        'published' => 'Published',
+        'pending_review' => 'Pending review',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
         'archived' => 'Archived',
+        // legacy fallback
+        'published' => 'Approved',
     ],
 
     'columns' => [

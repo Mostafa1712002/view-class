@@ -73,12 +73,14 @@ class QuestionBankController extends Controller
         ]);
         $subjects = $this->subjectsForSchool($schoolId);
         $teachers = $this->teachersForSchool($schoolId);
+        $shareSchools = $this->schoolsForSharing();
         $vocab = $this->vocabulary();
 
         return view('admin.question-banks.create', array_merge([
             'bank' => $bank,
             'subjects' => $subjects,
             'teachers' => $teachers,
+            'shareSchools' => $shareSchools,
         ], $vocab));
     }
 
@@ -87,6 +89,7 @@ class QuestionBankController extends Controller
         $data = $this->validateBank($request);
         $subjectIds = $request->input('subject_ids', []);
         $memberRoles = $request->input('member_roles', []);
+        $schoolIds = $data['visibility'] === 'public' ? ($data['school_ids'] ?? []) : [];
 
         $payload = [
             'name_ar' => $data['name_ar'],
@@ -100,10 +103,12 @@ class QuestionBankController extends Controller
             'grade_level' => $data['grade_level'] ?? null,
             'category_type' => $data['category_type'] ?? null,
             'is_ana_qudurat_linkable' => (bool) ($data['is_ana_qudurat_linkable'] ?? false),
+            'exportable' => (bool) ($data['exportable'] ?? true),
+            'external_platform' => $data['external_platform'] ?? null,
             'created_by' => auth()->id(),
         ];
 
-        $this->banks->create($payload, $subjectIds, $memberRoles);
+        $this->banks->create($payload, $subjectIds, $memberRoles, $schoolIds);
 
         return redirect()
             ->route('admin.question-banks.index')
@@ -118,12 +123,14 @@ class QuestionBankController extends Controller
 
         $subjects = $this->subjectsForSchool($schoolId);
         $teachers = $this->teachersForSchool($schoolId);
+        $shareSchools = $this->schoolsForSharing();
         $vocab = $this->vocabulary();
 
         return view('admin.question-banks.edit', array_merge([
             'bank' => $bank,
             'subjects' => $subjects,
             'teachers' => $teachers,
+            'shareSchools' => $shareSchools,
         ], $vocab));
     }
 
@@ -136,6 +143,7 @@ class QuestionBankController extends Controller
         $data = $this->validateBank($request);
         $subjectIds = $request->input('subject_ids', []);
         $memberRoles = $request->input('member_roles', []);
+        $schoolIds = $data['visibility'] === 'public' ? ($data['school_ids'] ?? []) : [];
 
         $this->banks->update($bank, [
             'name_ar' => $data['name_ar'],
@@ -147,7 +155,9 @@ class QuestionBankController extends Controller
             'grade_level' => $data['grade_level'] ?? null,
             'category_type' => $data['category_type'] ?? null,
             'is_ana_qudurat_linkable' => (bool) ($data['is_ana_qudurat_linkable'] ?? false),
-        ], $subjectIds, $memberRoles);
+            'exportable' => (bool) ($data['exportable'] ?? true),
+            'external_platform' => $data['external_platform'] ?? null,
+        ], $subjectIds, $memberRoles, $schoolIds);
 
         return redirect()
             ->route('admin.question-banks.index')
@@ -192,10 +202,14 @@ class QuestionBankController extends Controller
             'grade_level' => ['nullable', 'integer', 'min:1', 'max:12'],
             'category_type' => ['nullable', 'in:school,qudurat,verbal,quantitative,speed_reading'],
             'is_ana_qudurat_linkable' => ['nullable', 'boolean'],
+            'exportable' => ['nullable', 'boolean'],
+            'external_platform' => ['nullable', 'string', 'max:100'],
             'subject_ids' => ['nullable', 'array'],
             'subject_ids.*' => ['integer', 'exists:subjects,id'],
             'member_roles' => ['nullable', 'array'],
             'member_roles.*' => ['nullable', 'in:viewer,editor'],
+            'school_ids' => ['nullable', 'array'],
+            'school_ids.*' => ['integer', 'exists:schools,id'],
         ]);
     }
 
@@ -229,6 +243,32 @@ class QuestionBankController extends Controller
             $q->whereIn('slug', ['teacher', 'school-admin', 'super-admin']);
         });
         return $query->orderBy('name')->limit(200)->get();
+    }
+
+    /**
+     * Schools selectable as sharing targets for a general (public) bank.
+     * Super-admins see every school; a school-scoped admin sees the schools in
+     * the same educational company (so a group of schools can share one bank).
+     */
+    private function schoolsForSharing(): \Illuminate\Support\Collection
+    {
+        $query = \App\Models\School::query()
+            ->select('id', 'name', 'name_ar', 'name_en')
+            ->where('is_active', true);
+
+        $user = auth()->user();
+        if ($user && ! $user->isSuperAdmin()) {
+            $companyId = \App\Models\School::query()
+                ->whereKey($user->school_id)
+                ->value('educational_company_id');
+            if ($companyId !== null) {
+                $query->where('educational_company_id', $companyId);
+            } elseif ($user->school_id) {
+                $query->whereKey($user->school_id);
+            }
+        }
+
+        return $query->orderBy('name')->get();
     }
 
     private function creatorsForSchool(?int $schoolId): \Illuminate\Support\Collection
