@@ -234,6 +234,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('admins/create', [\App\Modules\Users\Controllers\AdminController::class, 'create'])->name('admins.create');
         Route::post('admins', [\App\Modules\Users\Controllers\AdminController::class, 'store'])->name('admins.store');
         Route::get('admins/{id}/edit', [\App\Modules\Users\Controllers\AdminController::class, 'edit'])->name('admins.edit');
+        Route::get('admins/{id}', [\App\Modules\Users\Controllers\AdminController::class, 'show'])->name('admins.show')->whereNumber('id');
         Route::put('admins/{id}', [\App\Modules\Users\Controllers\AdminController::class, 'update'])->name('admins.update');
         Route::delete('admins/{id}', [\App\Modules\Users\Controllers\AdminController::class, 'destroy'])->name('admins.destroy');
         Route::get('admins/{id}/supervisees', [\App\Modules\Users\Controllers\AdminController::class, 'supervisees'])->name('admins.supervisees');

@@ -20,7 +20,7 @@
         </div>
     @endif
     <div class="ad-form-wrap">
-        <form action="{{ route('admin.users.admins.update', $admin->id) }}" method="POST" autocomplete="off">
+        <form action="{{ route('admin.users.admins.update', $admin->id) }}" method="POST" autocomplete="off" enctype="multipart/form-data">
             @method('PUT')
             @include('admin.users.admins._form')
         </form>

@@ -36,9 +36,11 @@
     </div>
     <div class="row">
         <div class="form-group col-md-6 mb-3">
-            <label class="ad-form-label">@lang('users.name') <span class="req">*</span></label>
+            <label class="ad-form-label">@lang('users.name')
+                <span class="hint">@lang('users.admin_full_name_hint')</span>
+            </label>
             <input type="text" name="name" class="form-control"
-                   value="{{ old('name', $admin->name ?? '') }}" required />
+                   value="{{ old('name', $admin->name ?? '') }}" />
         </div>
         <div class="form-group col-md-6 mb-3">
             <label class="ad-form-label">@lang('users.national_id')</label>
@@ -46,6 +48,69 @@
                    value="{{ old('national_id', $admin->national_id ?? '') }}"
                    placeholder="10**********" />
         </div>
+        <div class="form-group col-md-3 mb-3">
+            <label class="ad-form-label">@lang('users.admin_first_name')</label>
+            <input type="text" name="first_name" class="form-control"
+                   value="{{ old('first_name', $admin->first_name ?? '') }}" />
+        </div>
+        <div class="form-group col-md-3 mb-3">
+            <label class="ad-form-label">@lang('users.admin_father_name')</label>
+            <input type="text" name="father_name" class="form-control"
+                   value="{{ old('father_name', $admin->father_name ?? '') }}" />
+        </div>
+        <div class="form-group col-md-3 mb-3">
+            <label class="ad-form-label">@lang('users.admin_grandfather_name')</label>
+            <input type="text" name="grandfather_name" class="form-control"
+                   value="{{ old('grandfather_name', $admin->grandfather_name ?? '') }}" />
+        </div>
+        <div class="form-group col-md-3 mb-3">
+            <label class="ad-form-label">@lang('users.admin_family_name')</label>
+            <input type="text" name="family_name" class="form-control"
+                   value="{{ old('family_name', $admin->family_name ?? '') }}" />
+        </div>
+        <div class="form-group col-md-6 mb-3">
+            <label class="ad-form-label">@lang('users.admin_name_en')</label>
+            <input type="text" name="name_en" class="form-control"
+                   value="{{ old('name_en', $admin->name_en ?? '') }}" />
+        </div>
+        <div class="form-group col-md-3 mb-3">
+            <label class="ad-form-label">@lang('users.gender')</label>
+            @php $g = old('gender', $admin->gender ?? ''); @endphp
+            <select name="gender" class="form-control">
+                <option value="">—</option>
+                <option value="male" @selected($g === 'male')>@lang('users.gender_male')</option>
+                <option value="female" @selected($g === 'female')>@lang('users.gender_female')</option>
+            </select>
+        </div>
+        <div class="form-group col-md-3 mb-3">
+            <label class="ad-form-label">@lang('users.date_of_birth')</label>
+            @php $dob = old('date_of_birth', isset($admin) && $admin->date_of_birth ? $admin->date_of_birth->format('Y-m-d') : ''); @endphp
+            <input type="date" name="date_of_birth" class="form-control" value="{{ $dob }}" />
+        </div>
+        <div class="form-group col-md-6 mb-3">
+            <label class="ad-form-label">@lang('users.birth_place')</label>
+            <input type="text" name="birth_place" class="form-control"
+                   value="{{ old('birth_place', $admin->birth_place ?? '') }}" />
+        </div>
+        <div class="form-group col-md-6 mb-3">
+            <label class="ad-form-label">@lang('users.nationality')</label>
+            @php $nat = old('nationality', $admin->nationality ?? ''); @endphp
+            <select name="nationality" class="form-control">
+                <option value="">@lang('users.select_nationality')</option>
+                @foreach(config('countries_ar') as $country)
+                    <option value="{{ $country }}" @selected($nat === $country)>{{ $country }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+</div>
+
+{{-- Section: Contact --}}
+<div class="ad-form-section">
+    <div class="ad-section-title">
+        <i class="la la-phone"></i> @lang('users.admin_contact_info')
+    </div>
+    <div class="row">
         <div class="form-group col-md-6 mb-3">
             <label class="ad-form-label">@lang('users.email')</label>
             <input type="email" name="email" class="form-control"
@@ -58,13 +123,41 @@
                    placeholder="05XXXXXXXX" />
         </div>
         <div class="form-group col-md-6 mb-3">
-            <label class="ad-form-label">@lang('users.gender')</label>
-            @php $g = old('gender', $admin->gender ?? ''); @endphp
-            <select name="gender" class="form-control">
-                <option value="">—</option>
-                <option value="male" @selected($g === 'male')>@lang('users.gender_male')</option>
-                <option value="female" @selected($g === 'female')>@lang('users.gender_female')</option>
-            </select>
+            <label class="ad-form-label">@lang('users.admin_phone_secondary')</label>
+            <input type="text" name="phone_secondary" class="form-control"
+                   value="{{ old('phone_secondary', $admin->phone_secondary ?? '') }}" />
+        </div>
+        <div class="form-group col-md-6 mb-3">
+            <label class="ad-form-label">@lang('users.admin_whatsapp')</label>
+            <input type="text" name="whatsapp" class="form-control"
+                   value="{{ old('whatsapp', $admin->whatsapp ?? '') }}" />
+        </div>
+        <div class="form-group col-md-12 mb-3">
+            <label class="ad-form-label">@lang('users.address')</label>
+            <textarea name="address" class="form-control" rows="2">{{ old('address', $admin->address ?? '') }}</textarea>
+        </div>
+    </div>
+</div>
+
+{{-- Section: Profile photo --}}
+<div class="ad-form-section">
+    <div class="ad-section-title">
+        <i class="la la-image"></i> @lang('users.admin_photo_info')
+    </div>
+    <div class="row align-items-center">
+        <div class="col-md-2 mb-3">
+            @php $photo = $admin->profile_picture ?? $admin->avatar ?? null; @endphp
+            <div class="ad-avatar-preview">
+                @if($photo)
+                    <img src="{{ asset('storage/'.$photo) }}" alt="" />
+                @else
+                    <i class="la la-user"></i>
+                @endif
+            </div>
+        </div>
+        <div class="col-md-10 mb-3">
+            <label class="ad-form-label">@lang('users.admin_profile_picture')</label>
+            <input type="file" name="profile_picture" class="form-control" accept="image/*" />
         </div>
     </div>
 </div>
@@ -195,6 +288,14 @@
         display: flex; gap: .55rem; align-items: center;
         padding-top: .25rem;
     }
+    .ad-avatar-preview {
+        width: 84px; height: 84px; border-radius: 12px;
+        background: #f8fafc; border: 1px solid #e5e7eb;
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden; color: #cbd5e1; font-size: 2rem;
+    }
+    .ad-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .ad-form-section textarea.form-control { resize: vertical; }
 </style>
 @endpush
 @endonce

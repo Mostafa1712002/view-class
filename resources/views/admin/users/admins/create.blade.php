@@ -15,7 +15,7 @@
 
 <div class="content-body">
     <div class="ad-form-wrap">
-        <form action="{{ route('admin.users.admins.store') }}" method="POST" autocomplete="off">
+        <form action="{{ route('admin.users.admins.store') }}" method="POST" autocomplete="off" enctype="multipart/form-data">
             @include('admin.users.admins._form')
         </form>
     </div>

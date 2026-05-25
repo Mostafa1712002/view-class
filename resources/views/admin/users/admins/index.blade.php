@@ -182,6 +182,13 @@
     }
     .ad-action-btn.more:hover { background: #f8fafc; color: #0f172a; }
 
+    /* Let row action dropdowns float above the table instead of being clipped. */
+    body.theme-light .ad-table-wrap, body.theme-light .table-responsive { overflow: visible; }
+    body.theme-light .dropdown-menu.is-floating {
+        position: fixed; z-index: 1080;
+        box-shadow: 0 8px 24px rgba(15,23,42,.12), 0 2px 6px rgba(15,23,42,.06);
+    }
+
     /* Dropdown menu polish */
     .ad-actions .dropdown-menu {
         border: 1px solid #e5e7eb; border-radius: 12px; padding: .35rem;
@@ -479,6 +486,9 @@
                                         <i class="la la-ellipsis-h"></i>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-{{ $isRtl ? 'start' : 'end' }}">
+                                        <a class="dropdown-item" href="{{ route('admin.users.admins.show', $u->id) }}">
+                                            <i class="la la-eye"></i> @lang('users.admin_view')
+                                        </a>
                                         <a class="dropdown-item" href="{{ route('admin.users.admins.edit', $u->id) }}">
                                             <i class="la la-edit"></i> @lang('users.edit')
                                         </a>
@@ -546,4 +556,29 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+// Float row action dropdowns above the table using position:fixed (avoid clipping).
+document.addEventListener('DOMContentLoaded', function () {
+    if (!window.jQuery) { return; }
+    jQuery(document)
+        .on('shown.bs.dropdown', '.ad-table .dropdown', function () {
+            var $toggle = jQuery(this).find('[data-toggle="dropdown"],[data-bs-toggle="dropdown"]').first();
+            var $menu = jQuery(this).find('.dropdown-menu').first();
+            if (!$toggle.length || !$menu.length) { return; }
+            var r = $toggle[0].getBoundingClientRect();
+            var mw = $menu.outerWidth();
+            $menu.addClass('is-floating').css({
+                top: (r.bottom + 4) + 'px',
+                left: Math.max(8, r.right - mw) + 'px',
+                right: 'auto'
+            });
+        })
+        .on('hidden.bs.dropdown', '.ad-table .dropdown', function () {
+            jQuery(this).find('.dropdown-menu').removeClass('is-floating').css({ top: '', left: '', right: '' });
+        });
+});
+</script>
+@endpush
 @endsection
