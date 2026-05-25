@@ -198,6 +198,72 @@
         </div>
     </div>
 
+    {{-- === Anti-cheat (ac) === Exit-attempts log --}}
+    @php
+        $allExitAttempts = $exam->studentExams->flatMap->exitAttempts;
+        $typeLabels = \App\Models\ExamExitAttempt::TYPES;
+    @endphp
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-shield-exclamation me-1"></i>سجل محاولات الخروج / الغش</h5>
+            <span class="badge bg-danger">{{ $allExitAttempts->count() }} محاولة</span>
+        </div>
+        <div class="card-body">
+            @if($allExitAttempts->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم الطالب</th>
+                                <th>الاختبار</th>
+                                <th>وقت المحاولة</th>
+                                <th>نوع المحاولة</th>
+                                <th>عدد المحاولات</th>
+                                <th>إنهاء تلقائي؟</th>
+                                <th>الجهاز</th>
+                                <th>المتصفح</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $row = 0; @endphp
+                            @foreach($exam->studentExams as $studentExam)
+                                @foreach($studentExam->exitAttempts as $attempt)
+                                    <tr>
+                                        <td>{{ ++$row }}</td>
+                                        <td>{{ $studentExam->student->name ?? '-' }}</td>
+                                        <td>{{ $exam->title }}</td>
+                                        <td>{{ $attempt->occurred_at?->format('Y/m/d H:i:s') ?? '-' }}</td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">
+                                                {{ $typeLabels[$attempt->attempt_type] ?? $attempt->attempt_type }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $attempt->attempt_count }}</td>
+                                        <td>
+                                            @if($attempt->auto_ended)
+                                                <span class="badge bg-danger">نعم</span>
+                                            @else
+                                                <span class="badge bg-secondary">لا</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $attempt->device ?? '-' }}</td>
+                                        <td>{{ $attempt->browser ?? '-' }}</td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="text-center py-4">
+                    <i class="bi bi-shield-check display-4 text-success"></i>
+                    <p class="mt-3 mb-0 text-muted">لا توجد محاولات خروج مسجلة لهذا الاختبار.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+
     {{-- Grade Distribution Chart --}}
     @if($exam->studentExams->where('status', 'graded')->count() > 0)
         <div class="card mt-4">

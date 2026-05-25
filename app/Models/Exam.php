@@ -90,6 +90,11 @@ class Exam extends Model
         return $this->hasMany(StudentExam::class);
     }
 
+    public function exitAttempts(): HasMany
+    {
+        return $this->hasMany(ExamExitAttempt::class);
+    }
+
     public function getTypeLabelAttribute(): string
     {
         return self::TYPES[$this->type] ?? $this->type;

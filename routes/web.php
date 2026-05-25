@@ -441,6 +441,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('exams/{exam}', [\App\Http\Controllers\StudentExamController::class, 'show'])->name('exams.show');
     Route::post('exams/{exam}/start', [\App\Http\Controllers\StudentExamController::class, 'start'])->name('exams.start');
     Route::post('exams/{exam}/submit', [\App\Http\Controllers\StudentExamController::class, 'submit'])->name('exams.submit');
+    // === Anti-cheat (ac) — exit-attempt beacon + single-session heartbeat ===
+    Route::post('exams/{exam}/exit-attempt', [\App\Http\Controllers\StudentExamController::class, 'logExit'])->name('exams.exit-attempt');
+    Route::post('exams/{exam}/heartbeat', [\App\Http\Controllers\StudentExamController::class, 'heartbeat'])->name('exams.heartbeat');
     Route::get('exams/{exam}/result', [\App\Http\Controllers\StudentExamController::class, 'result'])->name('exams.result');
     Route::get('schedule', [\App\Http\Controllers\StudentController::class, 'schedule'])->name('schedule');
     Route::get('weekly-plans', [\App\Http\Controllers\StudentController::class, 'weeklyPlans'])->name('weekly-plans');

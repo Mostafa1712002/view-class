@@ -262,7 +262,9 @@ class ExamController extends Controller
     public function results(Exam $exam)
     {
         $exam->load(['questions', 'studentExams' => function ($query) {
-            $query->with(['student', 'answers.question'])->orderBy('score', 'desc');
+            $query->with(['student', 'answers.question', 'exitAttempts' => function ($q) {
+                $q->orderBy('occurred_at');
+            }])->orderBy('score', 'desc');
         }]);
 
         return view('admin.exams.results', compact('exam'));

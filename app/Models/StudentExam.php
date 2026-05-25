@@ -16,6 +16,9 @@ class StudentExam extends Model
         'score',
         'percentage',
         'status',
+        'session_token',
+        'exit_attempts_count',
+        'auto_ended',
         'attempt_number',
         'teacher_feedback',
     ];
@@ -26,6 +29,8 @@ class StudentExam extends Model
         'score' => 'decimal:2',
         'percentage' => 'decimal:2',
         'attempt_number' => 'integer',
+        'exit_attempts_count' => 'integer',
+        'auto_ended' => 'boolean',
     ];
 
     public const STATUSES = [
@@ -48,6 +53,11 @@ class StudentExam extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(StudentAnswer::class);
+    }
+
+    public function exitAttempts(): HasMany
+    {
+        return $this->hasMany(ExamExitAttempt::class);
     }
 
     public function getStatusLabelAttribute(): string

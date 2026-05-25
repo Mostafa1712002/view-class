@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Models\ExamExitAttempt;
 use App\Models\StudentAnswer;
 use App\Models\StudentExam;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -53,7 +56,17 @@ class StudentExamController extends Controller
             ->latest()
             ->first();
 
-        return view('student.exam-take', compact('exam', 'attempt', 'student'));
+        // === Anti-cheat (ac) ===
+        // Rotate the single-session token every time the take page is rendered
+        // for an active attempt. The newest opener wins; any older tab / device
+        // still polling with the previous token is locked out by heartbeat().
+        $sessionToken = null;
+        if ($attempt) {
+            $sessionToken = (string) Str::uuid();
+            $attempt->forceFill(['session_token' => $sessionToken])->save();
+        }
+
+        return view('student.exam-take', compact('exam', 'attempt', 'student', 'sessionToken'));
     }
 
     /**
@@ -159,6 +172,154 @@ class StudentExamController extends Controller
 
         return redirect()->route('student.exams.result', $exam)
             ->with('status', 'تم تسليم الاختبار بنجاح.');
+    }
+
+    /**
+     * Number of distinct exit attempts after which the exam auto-ends.
+     */
+    public const AUTO_END_THRESHOLD = 3;
+
+    /**
+     * === Anti-cheat (ac) ===
+     * Record an exit / focus-loss event sent from the take page (via a
+     * keepalive beacon). When the running count crosses the threshold the
+     * attempt is auto-submitted. Returns whether the exam was auto-ended.
+     */
+    public function logExit(Request $request, Exam $exam): JsonResponse
+    {
+        $student = auth()->user();
+
+        if (! in_array($exam->class_id, $student->enrolledClassIds(), true)) {
+            return response()->json(['logged' => false], 403);
+        }
+
+        $attempt = $exam->studentExams()
+            ->where('student_id', $student->id)
+            ->whereNull('submitted_at')
+            ->latest()
+            ->first();
+
+        // No active attempt → nothing to log (already submitted / never started).
+        if (! $attempt) {
+            return response()->json(['logged' => false, 'auto_ended' => false]);
+        }
+
+        $type = (string) $request->input('type', 'window_blur');
+        if (! array_key_exists($type, ExamExitAttempt::TYPES)) {
+            $type = 'window_blur';
+        }
+
+        $ua = (string) $request->userAgent();
+        [$device, $browser] = $this->parseUserAgent($ua);
+
+        $autoEnded = false;
+
+        DB::transaction(function () use ($attempt, $exam, $student, $type, $ua, $device, $browser, $request, &$autoEnded) {
+            $attempt->increment('exit_attempts_count');
+            $count = $attempt->exit_attempts_count;
+
+            $autoEnded = $count >= self::AUTO_END_THRESHOLD && $attempt->submitted_at === null;
+
+            ExamExitAttempt::create([
+                'student_exam_id' => $attempt->id,
+                'exam_id' => $exam->id,
+                'student_id' => $student->id,
+                'attempt_type' => $type,
+                'attempt_count' => $count,
+                'auto_ended' => $autoEnded,
+                'device' => $device,
+                'browser' => $browser,
+                'ip_address' => $request->ip(),
+                'user_agent' => $ua,
+                'occurred_at' => now(),
+            ]);
+
+            if ($autoEnded) {
+                $this->autoEndAttempt($exam, $attempt);
+            }
+        });
+
+        return response()->json([
+            'logged' => true,
+            'count' => $attempt->exit_attempts_count,
+            'threshold' => self::AUTO_END_THRESHOLD,
+            'auto_ended' => $autoEnded,
+        ]);
+    }
+
+    /**
+     * === Anti-cheat (ac) ===
+     * Single-session heartbeat: the take page polls this with the token it was
+     * issued. A mismatch means a newer tab / device took over the attempt, so
+     * this client must lock itself out.
+     */
+    public function heartbeat(Request $request, Exam $exam): JsonResponse
+    {
+        $student = auth()->user();
+
+        $attempt = $exam->studentExams()
+            ->where('student_id', $student->id)
+            ->whereNull('submitted_at')
+            ->latest()
+            ->first();
+
+        if (! $attempt) {
+            // Attempt was submitted (possibly auto-ended) elsewhere.
+            return response()->json(['valid' => false, 'reason' => 'submitted']);
+        }
+
+        $token = (string) $request->input('token', '');
+        $valid = $token !== '' && hash_equals((string) $attempt->session_token, $token);
+
+        return response()->json([
+            'valid' => $valid,
+            'reason' => $valid ? null : 'superseded',
+        ]);
+    }
+
+    /**
+     * Auto-submit an attempt that crossed the exit threshold. Grades whatever
+     * answers were saved (objective questions auto-grade, the rest stay manual)
+     * and flags the row as auto-ended.
+     */
+    private function autoEndAttempt(Exam $exam, StudentExam $attempt): void
+    {
+        $exam->loadMissing('questions');
+
+        $attempt->submit();
+        $attempt->forceFill(['auto_ended' => true])->save();
+
+        $needsManual = $exam->questions->contains(fn ($q) => ! $q->isAutoGradable());
+        if (! $needsManual) {
+            $attempt->markAsGraded();
+        } else {
+            $attempt->calculateScore();
+        }
+    }
+
+    /**
+     * Best-effort device + browser extraction from a user-agent string.
+     *
+     * @return array{0:string,1:string}
+     */
+    private function parseUserAgent(string $ua): array
+    {
+        $device = match (true) {
+            (bool) preg_match('/iPad|Tablet/i', $ua) => 'Tablet',
+            (bool) preg_match('/Mobile|Android|iPhone/i', $ua) => 'Mobile',
+            default => 'Desktop',
+        };
+
+        $browser = match (true) {
+            (bool) preg_match('/Edg\//i', $ua) => 'Edge',
+            (bool) preg_match('/OPR\/|Opera/i', $ua) => 'Opera',
+            (bool) preg_match('/Chrome\//i', $ua) => 'Chrome',
+            (bool) preg_match('/Firefox\//i', $ua) => 'Firefox',
+            (bool) preg_match('/Safari\//i', $ua) => 'Safari',
+            default => 'غير معروف',
+        };
+
+        return [$device, $browser];
     }
 
     /**
