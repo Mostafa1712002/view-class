@@ -3,7 +3,10 @@
 @section('body_class','theme-light')
 @section('title', __('libraries.labs.manage_title'))
 
+@include('admin.libraries._styles')
+
 @section('content')
+<div class="lib-scope">
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
         <h2 class="content-header-title mb-0">@lang('libraries.labs.manage_title')</h2>
@@ -36,7 +39,7 @@
                             <td><strong>{{ $lab->title }}</strong></td>
                             <td>{{ $lab->category?->name_ar ?? '—' }}</td>
                             <td>@if($lab->external_url)<a href="{{ $lab->external_url }}" target="_blank">{{ \Illuminate\Support\Str::limit($lab->external_url, 40) }}</a>@else —@endif</td>
-                            <td>{!! $lab->is_active ? '<span class="badge bg-success">✓</span>' : '<span class="badge bg-warning">—</span>' !!}</td>
+                            <td>{!! $lab->is_active ? '<span class="badge badge-success">✓</span>' : '<span class="badge badge-warning">—</span>' !!}</td>
                             <td>
                                 <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.libraries.labs.edit', $lab->id) }}"><i class="la la-pen"></i></a>
                                 <form action="{{ route('admin.libraries.labs.destroy', $lab->id) }}" method="POST" class="d-inline" onsubmit="return confirm('@lang('libraries.confirm_delete')')">
@@ -53,5 +56,6 @@
         </div>
         <div class="card-footer">{{ $labs->links() }}</div>
     </div>
+</div>
 </div>
 @endsection

@@ -3,7 +3,10 @@
 @section('body_class','theme-light')
 @section('title', __('libraries.private.title'))
 
+@include('admin.libraries._styles')
+
 @section('content')
+<div class="lib-scope">
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
         <h2 class="content-header-title mb-0">@lang('libraries.private.title')</h2>
@@ -34,7 +37,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <form method="GET" action="{{ route('admin.libraries.private.index') }}" class="d-flex">
-                <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm me-1" placeholder="@lang('libraries.public.search_placeholder')" />
+                <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm mr-1" placeholder="@lang('libraries.public.search_placeholder')" />
                 <button class="btn btn-outline-primary btn-sm" type="submit"><i class="la la-search"></i></button>
             </form>
             <div class="text-muted small">{{ $libraries->total() }}</div>
@@ -56,13 +59,13 @@
                             <td><strong>{{ $library->title }}</strong>
                                 @if($library->description)<small class="d-block text-muted">{{ \Illuminate\Support\Str::limit($library->description, 80) }}</small>@endif
                             </td>
-                            <td><span class="badge bg-info">{{ $library->items_count ?? 0 }}</span></td>
-                            <td><span class="badge bg-secondary">{{ $library->audiences_count ?? 0 }}</span></td>
+                            <td><span class="badge badge-light border">{{ $library->items_count ?? 0 }}</span></td>
+                            <td><span class="badge badge-light border">{{ $library->audiences_count ?? 0 }}</span></td>
                             <td>
                                 @if($library->is_active)
-                                    <span class="badge bg-success">@lang('libraries.private.columns.is_active')</span>
+                                    <span class="badge badge-success">@lang('libraries.private.columns.is_active')</span>
                                 @else
-                                    <span class="badge bg-warning">—</span>
+                                    <span class="badge badge-warning">—</span>
                                 @endif
                             </td>
                             <td>
@@ -82,5 +85,6 @@
         </div>
         <div class="card-footer">{{ $libraries->links() }}</div>
     </div>
+</div>
 </div>
 @endsection

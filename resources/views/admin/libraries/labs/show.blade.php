@@ -3,7 +3,10 @@
 @section('body_class','theme-light')
 @section('title', $lab->title)
 
+@include('admin.libraries._styles')
+
 @section('content')
+<div class="lib-scope">
 <div class="content-header row">
     <div class="content-header-left col-md-12 col-12 mb-2">
         <h2 class="content-header-title mb-0">{{ $lab->title }}</h2>
@@ -29,5 +32,6 @@
             @endif
         </div>
     </div>
+</div>
 </div>
 @endsection

@@ -3,7 +3,10 @@
 @section('body_class','theme-light')
 @section('title', __('libraries.labs.title'))
 
+@include('admin.libraries._styles')
+
 @section('content')
+<div class="lib-scope">
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
         <h2 class="content-header-title mb-0">@lang('libraries.labs.title')</h2>
@@ -29,24 +32,24 @@
 
     <div class="alert alert-info"><i class="la la-info-circle"></i> @lang('libraries.labs.coming_soon')</div>
 
-    <div class="row g-3">
+    <div class="row">
         {{-- categories sidebar --}}
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-header"><h6 class="mb-0">@lang('libraries.labs.categories')</h6></div>
-                <ul class="list-group list-group-flush">
+        <div class="col-md-3 col-12 mb-3">
+            <div class="card lib-cat-card">
+                <div class="card-header"><i class="la la-folder"></i> @lang('libraries.labs.categories')</div>
+                <ul class="list-group list-group-flush lib-cat-list mb-0">
                     <li class="list-group-item {{ ! $activeCategory ? 'active' : '' }}">
-                        <a href="{{ route('admin.libraries.labs.index') }}" class="text-decoration-none {{ ! $activeCategory ? 'text-white' : '' }}">@lang('libraries.labs.all_categories')</a>
+                        <a href="{{ route('admin.libraries.labs.index') }}"><strong>@lang('libraries.labs.all_categories')</strong></a>
                     </li>
                     @foreach($categories as $cat)
                         <li class="list-group-item {{ $activeCategory && $activeCategory->id === $cat->id ? 'active' : '' }}">
-                            <a href="{{ route('admin.libraries.labs.index', ['category' => $cat->slug]) }}" class="text-decoration-none {{ $activeCategory && $activeCategory->id === $cat->id ? 'text-white' : '' }}">
+                            <a href="{{ route('admin.libraries.labs.index', ['category' => $cat->slug]) }}">
                                 <strong>{{ app()->getLocale() === 'ar' ? $cat->name_ar : ($cat->name_en ?? $cat->name_ar) }}</strong>
                             </a>
                             @if($cat->children->count())
-                                <ul class="list-unstyled ms-3 mt-1 small">
+                                <ul class="list-unstyled mt-1">
                                     @foreach($cat->children as $child)
-                                        <li><a href="{{ route('admin.libraries.labs.index', ['category' => $child->slug]) }}" class="text-decoration-none text-muted">— {{ app()->getLocale() === 'ar' ? $child->name_ar : ($child->name_en ?? $child->name_ar) }}</a></li>
+                                        <li class="lib-subcat"><a href="{{ route('admin.libraries.labs.index', ['category' => $child->slug]) }}">— {{ app()->getLocale() === 'ar' ? $child->name_ar : ($child->name_en ?? $child->name_ar) }}</a></li>
                                     @endforeach
                                 </ul>
                             @endif
@@ -57,24 +60,26 @@
         </div>
 
         {{-- labs grid --}}
-        <div class="col-md-9">
+        <div class="col-md-9 col-12">
             @if($labs->count() === 0)
-                <div class="card"><div class="card-body text-center text-muted py-5">@lang('libraries.labs.no_results')</div></div>
+                <div class="card"><div class="lib-empty"><i class="la la-flask"></i>@lang('libraries.labs.no_results')</div></div>
             @else
-                <div class="row g-3">
+                <div class="row">
                     @foreach($labs as $lab)
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 shadow-sm">
-                                @if($lab->thumbnail_path)
-                                    <img src="{{ asset('storage/' . $lab->thumbnail_path) }}" class="card-img-top" style="height:140px;object-fit:cover" />
-                                @else
-                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:140px"><i class="la la-flask" style="font-size:3rem;color:#999"></i></div>
-                                @endif
-                                <div class="card-body">
-                                    <h6 class="card-title mb-1">{{ $lab->title }}</h6>
-                                    @if($lab->description)<p class="card-text small text-muted">{{ \Illuminate\Support\Str::limit($lab->description, 80) }}</p>@endif
+                        <div class="col-md-6 col-lg-4 col-12 mb-4">
+                            <div class="lib-card h-100 d-flex flex-column">
+                                <div class="lib-card-media">
+                                    @if($lab->thumbnail_path)
+                                        <img src="{{ asset('storage/' . $lab->thumbnail_path) }}" alt="{{ $lab->title }}" />
+                                    @else
+                                        <i class="la la-flask lib-icon"></i>
+                                    @endif
                                 </div>
-                                <div class="card-footer bg-white">
+                                <div class="lib-card-body flex-grow-1">
+                                    <div class="lib-card-title">{{ $lab->title }}</div>
+                                    @if($lab->description)<p class="lib-card-desc">{{ \Illuminate\Support\Str::limit($lab->description, 80) }}</p>@endif
+                                </div>
+                                <div class="lib-card-footer">
                                     @if($lab->external_url)
                                         <a href="{{ $lab->external_url }}" target="_blank" class="btn btn-primary btn-sm w-100"><i class="la la-external-link-alt"></i> @lang('libraries.labs.open')</a>
                                     @else
@@ -89,5 +94,6 @@
             @endif
         </div>
     </div>
+</div>
 </div>
 @endsection

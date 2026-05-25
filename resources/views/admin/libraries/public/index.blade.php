@@ -3,7 +3,10 @@
 @section('body_class','theme-light')
 @section('title', __('libraries.public.title'))
 
+@include('admin.libraries._styles')
+
 @section('content')
+<div class="lib-scope">
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
         <h2 class="content-header-title mb-0">@lang('libraries.public.title')</h2>
@@ -33,45 +36,50 @@
     </ul>
 
     {{-- Search filters --}}
-    <div class="card mb-3">
+    <div class="card lib-filter-card mb-4">
         <div class="card-header">
             <h5 class="mb-0"><i class="la la-search"></i> @lang('libraries.public.filter_title')</h5>
         </div>
         <div class="card-body">
             <form method="GET" action="{{ route('admin.libraries.public.index') }}">
-                <div class="row g-2">
-                    <div class="col-md-3"><label class="form-label small">@lang('libraries.public.filters.title')</label>
-                        <input type="text" name="title" value="{{ $filters['title'] ?? '' }}" class="form-control form-control-sm" />
+                <div class="row">
+                    <div class="col-md-3 col-12 lib-field">
+                        <label class="form-label">@lang('libraries.public.filters.title')</label>
+                        <input type="text" name="title" value="{{ $filters['title'] ?? '' }}" class="form-control" />
                     </div>
-                    <div class="col-md-2"><label class="form-label small">@lang('libraries.public.filters.content_type')</label>
-                        <select name="content_type" class="form-select form-select-sm">
+                    <div class="col-md-2 col-6 lib-field">
+                        <label class="form-label">@lang('libraries.public.filters.content_type')</label>
+                        <select name="content_type" class="form-select">
                             <option value="">@lang('libraries.public.filters.all')</option>
                             @foreach($types as $t)
                                 <option value="{{ $t }}" @selected(($filters['content_type'] ?? '')===$t)>@lang('libraries.types.'.$t)</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2"><label class="form-label small">@lang('libraries.public.filters.subject')</label>
-                        <select name="subject_id" class="form-select form-select-sm">
+                    <div class="col-md-2 col-6 lib-field">
+                        <label class="form-label">@lang('libraries.public.filters.subject')</label>
+                        <select name="subject_id" class="form-select">
                             <option value="">@lang('libraries.public.filters.all')</option>
                             @foreach($subjects as $s)
                                 <option value="{{ $s->id }}" @selected((string)($filters['subject_id'] ?? '')===(string)$s->id)>{{ $s->name }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2"><label class="form-label small">@lang('libraries.public.filters.teacher')</label>
-                        <select name="teacher_id" class="form-select form-select-sm">
+                    <div class="col-md-2 col-6 lib-field">
+                        <label class="form-label">@lang('libraries.public.filters.teacher')</label>
+                        <select name="teacher_id" class="form-select">
                             <option value="">@lang('libraries.public.filters.all')</option>
                             @foreach($teachers as $t)
                                 <option value="{{ $t->id }}" @selected((string)($filters['teacher_id'] ?? '')===(string)$t->id)>{{ $t->name }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2"><label class="form-label small">@lang('libraries.public.filters.tag')</label>
-                        <input type="text" name="tag" value="{{ $filters['tag'] ?? '' }}" class="form-control form-control-sm" />
+                    <div class="col-md-2 col-6 lib-field">
+                        <label class="form-label">@lang('libraries.public.filters.tag')</label>
+                        <input type="text" name="tag" value="{{ $filters['tag'] ?? '' }}" class="form-control" />
                     </div>
-                    <div class="col-md-1 d-flex align-items-end">
-                        <button class="btn btn-primary btn-sm w-100" type="submit"><i class="la la-filter"></i></button>
+                    <div class="col-md-1 col-12 d-flex align-items-end lib-field">
+                        <button class="btn btn-primary w-100" type="submit"><i class="la la-filter"></i></button>
                     </div>
                 </div>
             </form>
@@ -80,40 +88,45 @@
 
     {{-- Items grid --}}
     @if($items->count() === 0)
-        <div class="card"><div class="card-body text-center text-muted py-5">@lang('libraries.public.no_results')</div></div>
+        <div class="card"><div class="lib-empty"><i class="la la-book-open"></i>@lang('libraries.public.no_results')</div></div>
     @else
-        <div class="row g-3">
+        <div class="row">
             @foreach($items as $item)
-                <div class="col-md-4 col-lg-3">
-                    <div class="card h-100 shadow-sm">
-                        @if($item->thumbnail_path)
-                            <img src="{{ asset('storage/' . $item->thumbnail_path) }}" alt="" class="card-img-top" style="height:140px;object-fit:cover" />
-                        @else
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:140px">
-                                <i class="la la-{{ $item->content_type === 'video' ? 'play-circle' : ($item->content_type === 'pdf' ? 'file-pdf' : ($item->content_type === 'image' ? 'image' : ($item->content_type === 'presentation' ? 'desktop' : ($item->content_type === 'link' ? 'link' : 'file')))) }}" style="font-size:3rem;color:#999"></i>
-                            </div>
-                        @endif
-                        <div class="card-body">
-                            <h6 class="card-title mb-1">{{ $item->title }}</h6>
-                            <small class="text-muted d-block mb-2">
-                                <span class="badge bg-info">@lang('libraries.types.'.$item->content_type)</span>
-                                <span>· {{ $item->created_at?->format('Y-m-d') }}</span>
-                            </small>
-                            @if($item->description)
-                                <p class="card-text small text-muted" style="max-height:3em;overflow:hidden">{{ \Illuminate\Support\Str::limit($item->description, 80) }}</p>
+                @php
+                    $icon = $item->content_type === 'video' ? 'play-circle'
+                        : ($item->content_type === 'pdf' ? 'file-pdf'
+                        : ($item->content_type === 'image' ? 'image'
+                        : ($item->content_type === 'presentation' ? 'desktop'
+                        : ($item->content_type === 'link' ? 'link' : 'file-alt'))));
+                @endphp
+                <div class="col-md-4 col-lg-3 col-6 mb-4">
+                    <div class="lib-card h-100 d-flex flex-column">
+                        <div class="lib-card-media">
+                            <span class="lib-type-chip">@lang('libraries.types.'.$item->content_type)</span>
+                            @if($item->thumbnail_path)
+                                <img src="{{ asset('storage/' . $item->thumbnail_path) }}" alt="{{ $item->title }}" />
+                            @else
+                                <i class="la la-{{ $icon }} lib-icon"></i>
                             @endif
                         </div>
-                        <div class="card-footer d-flex gap-1 bg-white">
+                        <div class="lib-card-body flex-grow-1">
+                            <div class="lib-card-title">{{ $item->title }}</div>
+                            <div class="lib-card-meta"><i class="la la-calendar"></i> {{ $item->created_at?->format('Y-m-d') }}</div>
+                            @if($item->description)
+                                <p class="lib-card-desc">{{ \Illuminate\Support\Str::limit($item->description, 80) }}</p>
+                            @endif
+                        </div>
+                        <div class="lib-card-footer">
                             @if($item->file_path)
-                                <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="la la-download"></i></a>
+                                <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="@lang('libraries.actions.download')"><i class="la la-download"></i></a>
                             @endif
                             @if($item->external_url)
-                                <a href="{{ $item->external_url }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="la la-external-link-alt"></i></a>
+                                <a href="{{ $item->external_url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="@lang('libraries.actions.open')"><i class="la la-external-link-alt"></i></a>
                             @endif
-                            <a href="{{ route('admin.libraries.public.edit', $item->id) }}" class="btn btn-sm btn-outline-secondary ms-auto"><i class="la la-pen"></i></a>
+                            <a href="{{ route('admin.libraries.public.edit', $item->id) }}" class="btn btn-sm btn-outline-secondary ms-auto" title="@lang('libraries.actions.edit')"><i class="la la-pen"></i></a>
                             <form action="{{ route('admin.libraries.public.destroy', $item->id) }}" method="POST" onsubmit="return confirm('@lang('libraries.confirm_delete')')">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="la la-trash"></i></button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('libraries.actions.delete')"><i class="la la-trash"></i></button>
                             </form>
                         </div>
                     </div>
@@ -122,5 +135,6 @@
         </div>
         <div class="mt-3">{{ $items->links() }}</div>
     @endif
+</div>
 </div>
 @endsection

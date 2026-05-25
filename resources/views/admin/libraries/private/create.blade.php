@@ -3,7 +3,10 @@
 @section('body_class','theme-light')
 @section('title', __('libraries.private.add_library'))
 
+@include('admin.libraries._styles')
+
 @section('content')
+<div class="lib-scope">
 <div class="content-header row">
     <div class="content-header-left col-md-12 col-12 mb-2">
         <h2 class="content-header-title mb-0">@lang('libraries.private.add_library')</h2>
@@ -23,5 +26,6 @@
             @include('admin.libraries.private._form')
         </form>
     </div></div>
+</div>
 </div>
 @endsection

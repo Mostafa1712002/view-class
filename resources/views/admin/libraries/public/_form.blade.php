@@ -1,10 +1,10 @@
 @csrf
-<div class="row g-3">
-    <div class="col-md-8">
+<div class="row">
+    <div class="col-md-8 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.title') <span class="text-danger">*</span></label>
         <input type="text" name="title" value="{{ old('title', $item->title) }}" class="form-control" required maxlength="255" />
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.content_type') <span class="text-danger">*</span></label>
         <select name="content_type" class="form-select" required>
             @foreach($types as $t)
@@ -12,11 +12,11 @@
             @endforeach
         </select>
     </div>
-    <div class="col-12">
+    <div class="col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.description')</label>
         <textarea name="description" rows="3" class="form-control">{{ old('description', $item->description) }}</textarea>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.subject')</label>
         <select name="subject_id" class="form-select">
             <option value="">—</option>
@@ -25,7 +25,7 @@
             @endforeach
         </select>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.teacher')</label>
         <select name="teacher_id" class="form-select">
             <option value="">—</option>
@@ -34,26 +34,26 @@
             @endforeach
         </select>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.tags')</label>
         <input type="text" name="tags" value="{{ old('tags', $item->tags) }}" class="form-control" placeholder="مثل: رياضيات, الصف الأول" />
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-6 lib-field">
         <label class="form-label">@lang('libraries.fields.sort_order')</label>
         <input type="number" name="sort_order" value="{{ old('sort_order', $item->sort_order ?? 0) }}" class="form-control" min="0" />
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.external_url')</label>
         <input type="url" name="external_url" value="{{ old('external_url', $item->external_url) }}" class="form-control" placeholder="https://..." />
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.file')</label>
         <input type="file" name="file" class="form-control" />
         @if(! empty($item->file_path))
             <small class="d-block mt-1"><a href="{{ asset('storage/' . $item->file_path) }}" target="_blank">@lang('libraries.actions.download')</a></small>
         @endif
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 col-12 lib-field">
         <label class="form-label">@lang('libraries.fields.thumbnail')</label>
         <input type="file" name="thumbnail" accept="image/*" class="form-control" />
         @if(! empty($item->thumbnail_path))
@@ -61,7 +61,7 @@
         @endif
     </div>
 </div>
-<div class="mt-3 d-flex gap-2">
+<div class="mt-3 d-flex gap-2 flex-wrap">
     <button type="submit" class="btn btn-primary"><i class="la la-save"></i> @lang('libraries.actions.save')</button>
     <a href="{{ route('admin.libraries.public.index') }}" class="btn btn-outline-secondary">@lang('libraries.actions.cancel')</a>
 </div>
