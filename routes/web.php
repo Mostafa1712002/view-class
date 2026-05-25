@@ -269,6 +269,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('subjects/templates', [\App\Modules\Subjects\Controllers\SubjectController::class, 'templatesIndex'])->name('subjects.templates.index');
     Route::post('subjects/templates', [\App\Modules\Subjects\Controllers\SubjectController::class, 'templatesAttach'])->name('subjects.templates.attach');
 
+    // === Bulk import from Excel/CSV (platform template) ===
+    Route::get('subjects/import/template', [\App\Modules\Subjects\Controllers\SubjectController::class, 'importTemplate'])->name('subjects.import.template');
+    Route::post('subjects/import', [\App\Modules\Subjects\Controllers\SubjectController::class, 'importStore'])->name('subjects.import.store');
+
     Route::get('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'index'])->name('subjects.index');
     Route::get('subjects/create', [\App\Modules\Subjects\Controllers\SubjectController::class, 'create'])->name('subjects.create');
     Route::post('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'store'])->name('subjects.store');
