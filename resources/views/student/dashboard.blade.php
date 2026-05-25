@@ -70,8 +70,10 @@
                                 <small class="text-muted">{{ $exam->subject->name ?? '-' }}</small>
                             </div>
                             <div class="text-end">
-                                <span class="badge bg-info">{{ $exam->exam_date->format('Y-m-d') }}</span>
-                                <small class="d-block text-muted">{{ $exam->duration }} دقيقة</small>
+                                <span class="badge bg-info">{{ optional($exam->start_time)->format('Y-m-d') ?? '—' }}</span>
+                                @if($exam->duration_minutes)
+                                    <small class="d-block text-muted">{{ $exam->duration_minutes }} دقيقة</small>
+                                @endif
                             </div>
                         </div>
                     @empty
