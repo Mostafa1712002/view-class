@@ -22,9 +22,13 @@
     .badge-diff-1 { background:#dcfce7; color:#166534; }
     .badge-diff-2 { background:#fef3c7; color:#92400e; }
     .badge-diff-3 { background:#fee2e2; color:#991b1b; }
-    .badge-status-draft     { background:#e2e8f0; color:#475569; }
-    .badge-status-published { background:#dbeafe; color:#1e40af; }
-    .badge-status-archived  { background:#fde68a; color:#78350f; }
+    .badge-status-draft          { background:#e2e8f0; color:#475569; }
+    .badge-status-pending_review { background:#fef3c7; color:#92400e; }
+    .badge-status-approved       { background:#dcfce7; color:#166534; }
+    .badge-status-rejected       { background:#fee2e2; color:#991b1b; }
+    .badge-status-archived       { background:#fde68a; color:#78350f; }
+    /* legacy fallback */
+    .badge-status-published      { background:#dcfce7; color:#166534; }
     .add-type-menu .dropdown-item { padding: 10px 16px; font-size: 14px; }
     .q-actions .btn { padding: 4px 8px; }
     .q-bank-title-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
@@ -110,7 +114,7 @@
                     <label class="form-label">@lang('questions.filters.status')</label>
                     <select name="status" class="form-select form-select-sm">
                         <option value="">@lang('questions.filters.all')</option>
-                        @foreach(['draft','published','archived'] as $s)
+                        @foreach(\App\Models\BankQuestion::STATUSES as $s)
                             <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>@lang('questions.status.'.$s)</option>
                         @endforeach
                     </select>

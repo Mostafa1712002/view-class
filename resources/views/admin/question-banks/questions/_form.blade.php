@@ -96,8 +96,8 @@
         <div class="col-md-2 col-6">
             <label class="form-label">@lang('questions.form.status')</label>
             <select name="status" class="form-select">
-                @foreach(['draft','published','archived'] as $s)
-                    <option value="{{ $s }}" {{ old('status', $question->status ?? 'published') === $s ? 'selected' : '' }}>
+                @foreach(\App\Models\BankQuestion::STATUSES as $s)
+                    <option value="{{ $s }}" {{ old('status', $question->status ?? 'approved') === $s ? 'selected' : '' }}>
                         @lang('questions.status.'.$s)
                     </option>
                 @endforeach
