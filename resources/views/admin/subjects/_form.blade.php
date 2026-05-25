@@ -1,13 +1,13 @@
 @csrf
 
 @php
-    // LineAwesome icon set offered for subjects (matches the card's icon list).
+    // LineAwesome 1.x (theme version) — only classes that exist in this build.
     $iconChoices = [
-        'la-bell', 'la-book', 'la-globe', 'la-palette', 'la-search',
-        'la-drafting-compass', 'la-sticky-note', 'la-bus', 'la-calculator',
-        'la-microscope', 'la-desktop', 'la-ruler-combined', 'la-atom',
-        'la-flask', 'la-quran', 'la-kaaba', 'la-pen', 'la-apple-alt',
-        'la-language', 'la-music', 'la-running', 'la-laptop-code',
+        'la-bell', 'la-book', 'la-globe', 'la-paint-brush', 'la-search',
+        'la-map', 'la-sticky-note', 'la-bus', 'la-calculator',
+        'la-flask', 'la-desktop', 'la-television', 'la-cube',
+        'la-graduation-cap', 'la-bookmark', 'la-pencil', 'la-apple',
+        'la-language', 'la-music', 'la-futbol-o', 'la-laptop', 'la-leaf',
     ];
     $selectedIcon = old('icon', $subject->icon);
 @endphp
