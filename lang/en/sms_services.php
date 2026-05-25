@@ -62,4 +62,27 @@ return [
     'no_senders' => 'No sender names yet.',
 
     'note_no_gateway' => 'Note: no live SMS gateway is wired up. The UI stores credentials; real sending will activate once a provider is configured.',
+
+    // Test connection
+    'test_connection' => 'Test Connection',
+    'test_connection_hint' => 'Checks that API credentials are present. No live provider is wired yet, so this is a local check.',
+    'test_missing_credentials' => 'Please enter and save the API Key and API Secret before testing the connection.',
+    'test_stub_ok' => 'Connection credentials (:provider) are complete. A real check will run once a provider is wired.',
+
+    // Authorization template download
+    'download_template' => 'Download Authorization Template',
+
+    // Message log
+    'view_log' => 'Message Log',
+    'messages_title' => 'Message Log — :school',
+    'balance_used' => 'Used',
+    'balance_remaining' => 'Remaining',
+    'balance_total' => 'Total',
+    'msg_recipient' => 'Recipient',
+    'msg_body' => 'Message',
+    'msg_sent_at' => 'Sent At',
+    'msg_status_queued' => 'Queued',
+    'msg_status_sent' => 'Sent',
+    'msg_status_failed' => 'Failed',
+    'no_messages' => 'No messages in the log yet.',
 ];

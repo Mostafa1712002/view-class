@@ -78,9 +78,14 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
         Route::get('/', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'index'])->name('index');
         Route::get('{school}/connection', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'editConnection'])->name('connection.edit');
         Route::put('{school}/connection', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'updateConnection'])->name('connection.update');
+        Route::post('{school}/connection/test', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'testConnection'])->name('connection.test');
+        Route::get('{school}/messages', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'messages'])->name('messages.index');
         Route::get('{school}/default-sender', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'editDefaultSender'])->name('default-sender.edit');
         Route::put('{school}/default-sender', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'updateDefaultSender'])->name('default-sender.update');
         Route::post('{school}/toggle', [\App\Modules\SmsServices\Controllers\SmsServicesController::class, 'toggleActive'])->name('toggle');
+        Route::get('senders/template/{provider}', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'downloadTemplate'])
+            ->whereIn('provider', ['stc', 'mobily', 'zain'])
+            ->name('senders.template');
         Route::get('{school}/senders', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'index'])->name('senders.index');
         Route::get('{school}/senders/create', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'create'])->name('senders.create');
         Route::post('{school}/senders', [\App\Modules\SmsServices\Controllers\SmsSenderRequestController::class, 'store'])->name('senders.store');

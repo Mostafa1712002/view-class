@@ -84,6 +84,7 @@
                                         <li><a class="dropdown-item" href="{{ route('admin.sms-services.default-sender.edit', $school) }}"><i class="la la-user-tag"></i> @lang('sms_services.edit_default_sender')</a></li>
                                         <li><a class="dropdown-item" href="{{ route('admin.sms-services.senders.index', $school) }}"><i class="la la-list"></i> @lang('sms_services.view_senders')</a></li>
                                         <li><a class="dropdown-item" href="{{ route('admin.sms-services.senders.create', $school) }}"><i class="la la-plus"></i> @lang('sms_services.request_sender_name')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.sms-services.messages.index', $school) }}"><i class="la la-history"></i> @lang('sms_services.view_log')</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form action="{{ route('admin.sms-services.toggle', $school) }}" method="POST">

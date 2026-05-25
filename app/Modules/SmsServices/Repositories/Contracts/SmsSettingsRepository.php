@@ -25,4 +25,6 @@ interface SmsSettingsRepository
     public function createSender(School $school, array $data): SmsSender;
 
     public function deleteSender(SmsSender $sender): bool;
+
+    public function paginateMessagesForSchool(School $school, int $perPage = 25): LengthAwarePaginator;
 }

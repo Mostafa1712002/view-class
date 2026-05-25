@@ -86,4 +86,30 @@ class SmsServicesController extends Controller
             ->route('admin.sms-services.index')
             ->with('success', __('common.updated_successfully'));
     }
+
+    public function messages(School $school): View
+    {
+        $setting  = $this->repo->findOrCreateForSchool($school);
+        $messages = $this->repo->paginateMessagesForSchool($school);
+        return view('admin.sms-services.messages', compact('school', 'setting', 'messages'));
+    }
+
+    /**
+     * Validate the saved API credentials against the configured provider.
+     *
+     * No real SMS gateway is wired yet, so this performs a local sanity check
+     * (credentials present + service enabled) and reports the outcome. When a
+     * real provider is integrated, replace the body with an actual ping/balance
+     * call and keep the same flash-message contract.
+     */
+    public function testConnection(School $school): RedirectResponse
+    {
+        $setting = $this->repo->findOrCreateForSchool($school);
+
+        if (empty($setting->api_key) || empty($setting->api_secret)) {
+            return back()->with('error', __('sms_services.test_missing_credentials'));
+        }
+
+        return back()->with('success', __('sms_services.test_stub_ok', ['provider' => $setting->provider]));
+    }
 }

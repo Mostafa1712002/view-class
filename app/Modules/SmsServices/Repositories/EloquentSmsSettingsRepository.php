@@ -4,6 +4,7 @@ namespace App\Modules\SmsServices\Repositories;
 
 use App\Models\School;
 use App\Modules\SmsServices\Models\SchoolSmsSetting;
+use App\Modules\SmsServices\Models\SmsMessage;
 use App\Modules\SmsServices\Models\SmsSender;
 use App\Modules\SmsServices\Repositories\Contracts\SmsSettingsRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -68,5 +69,13 @@ class EloquentSmsSettingsRepository implements SmsSettingsRepository
     public function deleteSender(SmsSender $sender): bool
     {
         return (bool) $sender->delete();
+    }
+
+    public function paginateMessagesForSchool(School $school, int $perPage = 25): LengthAwarePaginator
+    {
+        return SmsMessage::where('school_id', $school->id)
+            ->with('sender')
+            ->orderByDesc('id')
+            ->paginate($perPage);
     }
 }

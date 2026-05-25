@@ -60,6 +60,9 @@
                             <label class="form-label">@lang('sms_services.attachment_provider')</label>
                             <input type="text" class="form-control" value="{{ $label }}" readonly>
                             <input type="hidden" name="providers[]" value="{{ $key }}">
+                            <a href="{{ route('admin.sms-services.senders.template', $key) }}" class="btn btn-link btn-sm px-0 mt-1" target="_blank">
+                                <i class="la la-download"></i> @lang('sms_services.download_template')
+                            </a>
                         </div>
                         <div class="col-md-9">
                             <label class="form-label">@lang('sms_services.attachment_file')</label>

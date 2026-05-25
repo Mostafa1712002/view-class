@@ -72,6 +72,13 @@
                 <button type="submit" class="btn btn-primary"><i class="la la-save"></i> @lang('sms_services.save_settings')</button>
                 <a href="{{ route('admin.sms-services.index') }}" class="btn btn-secondary"><i class="la la-times"></i> @lang('common.cancel')</a>
             </form>
+
+            <hr>
+            <form action="{{ route('admin.sms-services.connection.test', $school) }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-outline-info"><i class="la la-plug"></i> @lang('sms_services.test_connection')</button>
+                <small class="text-muted d-block mt-1">@lang('sms_services.test_connection_hint')</small>
+            </form>
         </div>
     </div>
 </div>

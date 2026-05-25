@@ -77,4 +77,21 @@ class SmsSenderRequestController extends Controller
         $this->repo->deleteSender($sender);
         return back()->with('success', __('common.deleted_successfully'));
     }
+
+    /**
+     * Generate a blank carrier authorization template (STC / Mobily / Zain).
+     *
+     * Built on the fly with dompdf so no binary assets need committing; the
+     * school prints it, signs/stamps it, and re-uploads it as an attachment.
+     */
+    public function downloadTemplate(string $provider)
+    {
+        $labels = ['stc' => 'STC', 'mobily' => 'Mobily', 'zain' => 'Zain'];
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.sms-services.template', [
+            'provider' => $provider,
+            'providerLabel' => $labels[$provider] ?? strtoupper($provider),
+        ]);
+
+        return $pdf->download("sms-authorization-{$provider}.pdf");
+    }
 }
