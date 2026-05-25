@@ -3,7 +3,7 @@
     <div class="alert-body">
         {{ session('success') }}
     </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <button type="button" class="btn-close" data-dismiss="alert" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif
 
@@ -12,7 +12,7 @@
     <div class="alert-body">
         {{ session('error') }}
     </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <button type="button" class="btn-close" data-dismiss="alert" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif
 
@@ -25,6 +25,6 @@
             @endforeach
         </ul>
     </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <button type="button" class="btn-close" data-dismiss="alert" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif

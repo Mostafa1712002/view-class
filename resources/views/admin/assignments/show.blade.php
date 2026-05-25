@@ -160,7 +160,7 @@
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gradeModal{{ $student->id }}">
+                                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-bs-toggle="modal" data-target="#gradeModal{{ $student->id }}" data-bs-target="#gradeModal{{ $student->id }}">
                                                 <i class="la la-edit"></i>
                                             </button>
 
@@ -172,7 +172,7 @@
                                                             @csrf
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title">تقييم {{ $student->name }}</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                <button type="button" class="btn-close" data-dismiss="modal" data-bs-dismiss="modal"></button>
                                                             </div>
                                                             <div class="modal-body text-start">
                                                                 <div class="mb-3">
@@ -185,7 +185,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('common.cancel')</button>
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">@lang('common.cancel')</button>
                                                                 <button type="submit" class="btn btn-primary">حفظ التقييم</button>
                                                             </div>
                                                         </form>

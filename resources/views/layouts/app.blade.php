@@ -395,6 +395,235 @@
             body.theme-light .card { animation: none !important; transition: none !important; }
             body.theme-light .card.text-center:hover { transform: none; }
         }
+
+        /* =====================================================================
+           Bootstrap 5 → Bootstrap 4 compatibility shim
+           The admin theme ships Bootstrap 4.0 + jQuery 3.2.1. Many views were
+           authored with BS5 utility classes that BS4 doesn't define, so they
+           silently render unstyled. This block back-fills the BS5 utilities
+           we actually use so existing markup behaves correctly. JS data-attrs
+           are handled separately (each view also carries data-toggle/-target/
+           -dismiss alongside the data-bs-* form).
+           ===================================================================== */
+
+        /* form-select → style like BS4 .custom-select / .form-control */
+        .form-select {
+            display: block;
+            width: 100%;
+            height: calc(1.5em + .75rem + 2px);
+            padding: .375rem 1.75rem .375rem .75rem;
+            font-size: .9rem;
+            line-height: 1.5;
+            color: #495057;
+            vertical-align: middle;
+            background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right .75rem center/12px 12px;
+            border: 1px solid #ced4da;
+            border-radius: .375rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        html[dir="rtl"] .form-select {
+            padding: .375rem .75rem .375rem 1.75rem;
+            background-position: left .75rem center;
+        }
+        .form-select:focus {
+            border-color: var(--gold-300);
+            outline: 0;
+            box-shadow: 0 0 0 .15rem rgba(207,160,70,.18);
+        }
+        .form-select-sm { height: calc(1.5em + .5rem + 2px); padding-top: .25rem; padding-bottom: .25rem; font-size: .8rem; }
+        .form-select-lg { height: calc(1.5em + 1rem + 2px); padding-top: .5rem; padding-bottom: .5rem; font-size: 1.05rem; }
+
+        /* btn-close → BS5 close button (BS4 used .close). Render the X glyph. */
+        .btn-close {
+            box-sizing: content-box;
+            width: 1em; height: 1em;
+            padding: .25em;
+            color: #000;
+            background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+            border: 0; border-radius: .375rem;
+            opacity: .5; cursor: pointer;
+        }
+        .btn-close:hover { opacity: .85; }
+
+        /* gap-* — flex/grid gap (supported by browsers; BS4 just lacks the class) */
+        .gap-0 { gap: 0 !important; }
+        .gap-1 { gap: .25rem !important; }
+        .gap-2 { gap: .5rem !important; }
+        .gap-3 { gap: 1rem !important; }
+        .gap-4 { gap: 1.5rem !important; }
+        .gap-5 { gap: 3rem !important; }
+
+        /* row gutters g-* (BS5) → emulate with padding on columns + negative row margin */
+        .row.g-1 { margin: -.25rem; } .row.g-1 > [class*="col"] { padding: .25rem; }
+        .row.g-2 { margin: -.5rem; }  .row.g-2 > [class*="col"] { padding: .5rem; }
+        .row.g-3 { margin: -.75rem; } .row.g-3 > [class*="col"] { padding: .75rem; }
+        .row.g-4 { margin: -1rem; }   .row.g-4 > [class*="col"] { padding: 1rem; }
+
+        /* Logical-direction margins/paddings (BS5 ms/me/ps/pe). Use inline
+           logical props so they flip correctly under RTL automatically. */
+        .ms-0 { margin-inline-start: 0 !important; } .me-0 { margin-inline-end: 0 !important; }
+        .ms-1 { margin-inline-start: .25rem !important; } .me-1 { margin-inline-end: .25rem !important; }
+        .ms-2 { margin-inline-start: .5rem !important; }  .me-2 { margin-inline-end: .5rem !important; }
+        .ms-3 { margin-inline-start: 1rem !important; }   .me-3 { margin-inline-end: 1rem !important; }
+        .ms-4 { margin-inline-start: 1.5rem !important; } .me-4 { margin-inline-end: 1.5rem !important; }
+        .ms-5 { margin-inline-start: 3rem !important; }   .me-5 { margin-inline-end: 3rem !important; }
+        .ms-auto { margin-inline-start: auto !important; } .me-auto { margin-inline-end: auto !important; }
+        .ps-0 { padding-inline-start: 0 !important; } .pe-0 { padding-inline-end: 0 !important; }
+        .ps-1 { padding-inline-start: .25rem !important; } .pe-1 { padding-inline-end: .25rem !important; }
+        .ps-2 { padding-inline-start: .5rem !important; }  .pe-2 { padding-inline-end: .5rem !important; }
+        .ps-3 { padding-inline-start: 1rem !important; }   .pe-3 { padding-inline-end: 1rem !important; }
+        .ps-4 { padding-inline-start: 1.5rem !important; } .pe-4 { padding-inline-end: 1.5rem !important; }
+        .ps-5 { padding-inline-start: 3rem !important; }   .pe-5 { padding-inline-end: 3rem !important; }
+        /* larger me-* seen in views */
+        .me-6 { margin-inline-end: 4rem !important; } .me-7 { margin-inline-end: 5rem !important; }
+        .me-8 { margin-inline-end: 6rem !important; } .me-9 { margin-inline-end: 7rem !important; }
+
+        /* font weights (BS5) */
+        .fw-bold { font-weight: 700 !important; }
+        .fw-bolder { font-weight: 800 !important; }
+        .fw-semibold { font-weight: 600 !important; }
+        .fw-medium { font-weight: 500 !important; }
+        .fw-normal { font-weight: 400 !important; }
+        .fw-light { font-weight: 300 !important; }
+
+        /* font sizes (BS5 .fs-*) */
+        .fs-1 { font-size: 2.5rem !important; }
+        .fs-2 { font-size: 2rem !important; }
+        .fs-3 { font-size: 1.75rem !important; }
+        .fs-4 { font-size: 1.5rem !important; }
+        .fs-5 { font-size: 1.25rem !important; }
+        .fs-6 { font-size: 1rem !important; }
+
+        /* d-grid (BS5) */
+        .d-grid { display: grid !important; }
+
+        /* rounded-pill (BS5; BS4 had .rounded-pill from 4.2 only) */
+        .rounded-pill { border-radius: 50rem !important; }
+
+        /* Background utilities used for badges/labels (BS4 .badge-* exists but
+           BS5 markup uses .bg-*; ensure white text + brand gold for primary) */
+        .badge.bg-primary, .bg-primary { background-color: var(--gold-400) !important; color: #fff; }
+        .badge.bg-secondary, .bg-secondary { background-color: #6c757d !important; color: #fff; }
+        .badge.bg-success, .bg-success { background-color: #28a745 !important; color: #fff; }
+        .badge.bg-danger, .bg-danger { background-color: #dc3545 !important; color: #fff; }
+        .badge.bg-warning, .bg-warning { background-color: #ffc107 !important; color: #212529; }
+        .badge.bg-info, .bg-info { background-color: #17a2b8 !important; color: #fff; }
+        .badge.bg-dark, .bg-dark { background-color: #343a40 !important; color: #fff; }
+        .badge.bg-light, .bg-light { background-color: #f1f5f9 !important; color: #475569; }
+        /* text-bg-* (BS5) */
+        .text-bg-primary { background-color: var(--gold-400) !important; color: #fff !important; }
+        .text-bg-success { background-color: #28a745 !important; color: #fff !important; }
+        .text-bg-danger  { background-color: #dc3545 !important; color: #fff !important; }
+        .text-bg-warning { background-color: #ffc107 !important; color: #212529 !important; }
+        .text-bg-info    { background-color: #17a2b8 !important; color: #fff !important; }
+        .text-bg-secondary { background-color: #6c757d !important; color: #fff !important; }
+        /* note: header navbar's own .bg-info gradient (defined above) keeps priority via its compound selector */
+
+        /* =====================================================================
+           Unified content-header — one professional treatment for every page's
+           `class="content-header row"` (card requirement #2). Title + breadcrumb
+           on the start side, action buttons on the end side, gold accent bar.
+           ===================================================================== */
+        .app-content .content-header.row {
+            margin: 0 0 1.25rem;
+            padding: 1rem 1.25rem;
+            background: #ffffff;
+            border: 1px solid #e9edf3;
+            border-radius: 14px;
+            box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 6px 18px rgba(15,23,42,.04);
+            position: relative;
+            overflow: hidden;
+            align-items: center;
+            animation: themeLightFadeIn .3s cubic-bezier(.4,0,.2,1) both;
+        }
+        /* gold accent bar on the leading edge */
+        .app-content .content-header.row::before {
+            content: "";
+            position: absolute;
+            inset-block: 0;
+            inset-inline-start: 0;
+            width: 5px;
+            background: linear-gradient(180deg, var(--gold-200), var(--gold-500));
+        }
+        .app-content .content-header.row .content-header-title {
+            font-weight: 800;
+            font-size: 1.4rem;
+            margin: 0;
+            color: #0f172a;
+            letter-spacing: -.3px;
+        }
+        .app-content .content-header.row .breadcrumb {
+            background: transparent;
+            padding: .3rem 0 0;
+            margin: 0;
+            font-size: .82rem;
+        }
+        .app-content .content-header.row .breadcrumb-item a { color: #94a3b8; }
+        .app-content .content-header.row .breadcrumb-item a:hover { color: var(--gold-400); }
+        .app-content .content-header.row .breadcrumb-item.active { color: var(--gold-500); font-weight: 600; }
+        .app-content .content-header.row .content-header-right .d-flex,
+        .app-content .content-header.row .content-header-right > div {
+            gap: .5rem;
+        }
+        .app-content .content-header.row .content-header-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        @media (max-width: 767.98px) {
+            .app-content .content-header.row { padding: .85rem 1rem; }
+            .app-content .content-header.row .content-header-title { font-size: 1.2rem; }
+            .app-content .content-header.row .content-header-right { justify-content: flex-start; margin-top: .6rem; }
+            .app-content .content-header.row .content-header-right .d-flex { flex-wrap: wrap; }
+        }
+        /* Suppress the layout's empty fallback header (pages render their own) */
+        .app-content .content-header.row.shell-empty-header { display: none; }
+
+        /* =====================================================================
+           Shared shell consistency (card requirement #1 + #3)
+           Tables never overflow the viewport on small screens; consistent
+           filter bars / cards / buttons inherit the light theme above.
+           ===================================================================== */
+        /* Any table inside a card scrolls horizontally instead of breaking layout */
+        .card .table-responsive,
+        .card > .card-body > .table:not(.table-responsive) { width: 100%; }
+        .card .table { width: 100%; }
+        @media (max-width: 991.98px) {
+            .card .card-body > .table,
+            .card .card-body > table.table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        /* Consistent filter/search bars: any .card-body holding a search input */
+        body.theme-light .form-control,
+        body.theme-light .form-select {
+            border-color: #e2e8f0;
+        }
+        /* Consistent secondary/outline buttons in light theme */
+        body.theme-light .btn-outline-secondary {
+            border-color: #e2e8f0;
+            color: #475569;
+        }
+        body.theme-light .btn-outline-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--gold-300);
+            color: var(--gold-500);
+        }
+        /* Soft button variant used across list pages */
+        body.theme-light .btn-soft {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+        }
+        body.theme-light .btn-soft:hover {
+            background: #f1f5f9;
+            border-color: var(--gold-300);
+            color: var(--gold-500);
+        }
     </style>
 
     @stack('styles')
@@ -426,7 +655,11 @@
                     </div>
                 </form>
             @endif
-            <!-- Breadcrumb -->
+            {{-- Fallback breadcrumb header. Pages render their own
+                 `content-header row`, so this only shows when a page opts in
+                 via @section('page-title'); otherwise it's hidden to avoid an
+                 empty band. --}}
+            @hasSection('page-title')
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
                     <h3 class="content-header-title">@yield('page-title')</h3>
@@ -437,6 +670,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Alerts -->
             @if(session('success'))
