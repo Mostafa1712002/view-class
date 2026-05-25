@@ -17,7 +17,10 @@ Trello: 6a0b038b77eb166320155a5d
 ## Deferred (note in QA comment, follow-up card)
 - import_photos, refresh_status, graduates, delete_graduates, advanced_list, counts, unlinked_to_parents
 
+## Extra fix found during QA
+- [x] HasSchoolScope: read session('scope.school_id') (navbar key) so super-admins see sections/classes
+
 ## Progress
 | Phase | Tasks | Done | Status |
 |-------|-------|------|--------|
-| All | 10 | 0 | In progress |
+| All | 11 | 11 | Done — deployed + live verified |
