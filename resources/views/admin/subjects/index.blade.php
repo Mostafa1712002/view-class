@@ -174,13 +174,12 @@
                                 <span class="desc">إضافة مادة جديدة يدوياً بكامل البيانات</span>
                             </span>
                         </a>
-                        <a class="dropdown-item" href="#" data-toggle="modal" data-bs-toggle="modal" data-target="#excelInfoModal" data-bs-target="#excelInfoModal">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-bs-toggle="modal" data-target="#excelImportModal" data-bs-target="#excelImportModal">
                             <i class="la la-file-excel"></i>
                             <span>
                                 @lang('sprint4.subjects.add_excel')
                                 <span class="desc">رفع ملف Excel بقالب المنصة</span>
                             </span>
-                            <span class="badge-soon">@lang('sprint4.subjects.excel_coming_soon')</span>
                         </a>
                         <a class="dropdown-item" href="{{ route('admin.subjects.templates.index') }}">
                             <i class="la la-cloud-download-alt"></i>
@@ -224,7 +223,10 @@
                         <tr>
                             <td><input type="checkbox" class="js-row" value="{{ $subject->id }}" /></td>
                             <td>
-                                <span class="subject-name">{{ $subject->name }}</span>
+                                <span class="subject-name">
+                                    @if($subject->icon)<i class="la {{ $subject->icon }}" style="color: var(--gold-400); margin-inline-end: .35rem;"></i>@endif
+                                    {{ $subject->name }}
+                                </span>
                                 @if($subject->name_en)<span class="subject-en">{{ $subject->name_en }}</span>@endif
                                 @if($subject->code)<span class="grade-chip mt-1 d-inline-block">{{ $subject->code }}</span>@endif
                             </td>
@@ -291,21 +293,31 @@
     </div>
 </div>
 
-{{-- Excel-import info modal — feature is on the roadmap; this modal explains it cleanly. --}}
-<div class="modal fade" id="excelInfoModal" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- Excel-import modal — upload a file built from the platform template. --}}
+<div class="modal fade" id="excelImportModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content" style="border-radius: 16px; border: 1px solid #e5e7eb;">
-            <div class="modal-header" style="border-bottom: 1px solid #f1f5f9;">
-                <h5 class="modal-title"><i class="la la-file-excel" style="color: #047857;"></i> @lang('sprint4.subjects.add_excel')</h5>
-                <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"><span>&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <p>سيتاح قريباً رفع ملف Excel يحتوي على عدد كبير من المواد دفعة واحدة وفق قالب معتمد من المنصة.</p>
-                <p class="text-muted small mb-0">حالياً يمكنك إضافة المواد يدوياً من زر "إضافة مادة (يدوياً)" أو من قوالب المنصة الجاهزة.</p>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid #f1f5f9;">
-                <button type="button" class="btn btn-soft" data-dismiss="modal" data-bs-dismiss="modal">حسناً</button>
-            </div>
+            <form action="{{ route('admin.subjects.import.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header" style="border-bottom: 1px solid #f1f5f9;">
+                    <h5 class="modal-title"><i class="la la-file-excel" style="color: #047857;"></i> @lang('sprint4.subjects.import.title')</h5>
+                    <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">@lang('sprint4.subjects.import.help')</p>
+                    <a href="{{ route('admin.subjects.import.template') }}" class="btn btn-soft mb-3">
+                        <i class="la la-download"></i> @lang('sprint4.subjects.import.download_template')
+                    </a>
+                    <div class="form-group mb-0">
+                        <label class="form-label fw-semibold">@lang('sprint4.subjects.import.choose_file')</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv,.txt" required>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #f1f5f9;">
+                    <button type="button" class="btn btn-soft" data-dismiss="modal" data-bs-dismiss="modal">@lang('sprint4.subjects.import.cancel')</button>
+                    <button type="submit" class="btn add-subject-btn"><i class="la la-upload"></i> @lang('sprint4.subjects.import.upload')</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

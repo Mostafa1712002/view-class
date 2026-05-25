@@ -16,6 +16,9 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'name_en',
+        'short_name_ar',
+        'short_name_en',
+        'language',
         'code',
         'school_id',
         'description',
@@ -24,6 +27,9 @@ class Subject extends Model
         'section',
         'credit_hours',
         'credit_hours_active',
+        'total_hours',
+        'credit_value',
+        'icon',
         'certificate_order',
         'source',
         'template_subject_id',
@@ -36,6 +42,8 @@ class Subject extends Model
         'credit_hours_active' => 'boolean',
         'grade_levels' => 'array',
         'credit_hours' => 'integer',
+        'total_hours' => 'integer',
+        'credit_value' => 'integer',
         'certificate_order' => 'integer',
     ];
 

@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Subject;
 use App\Models\SubjectLesson;
 use App\Models\SubjectUnit;
+use App\Modules\Subjects\Actions\ImportSubjectsFromExcelAction;
 use App\Modules\Subjects\Repositories\Contracts\SubjectRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 
 class SubjectController extends Controller
@@ -26,10 +28,15 @@ class SubjectController extends Controller
             ? $this->subjects->platformTemplates()->count()
             : count((array) $this->subjects->platformTemplates());
 
+        // Mirror the same scope used by paginate(): when no school is resolved
+        // (super-admin with no active school) count across all schools so the
+        // KPI tiles stay consistent with the table below.
+        $scoped = fn () => Subject::query()->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId));
+
         $stats = [
-            'total' => Subject::query()->where('school_id', $schoolId)->count(),
-            'active' => Subject::query()->where('school_id', $schoolId)->where('is_active', true)->count(),
-            'core' => Subject::query()->where('school_id', $schoolId)->where('is_core', true)->count(),
+            'total' => $scoped()->count(),
+            'active' => $scoped()->where('is_active', true)->count(),
+            'core' => $scoped()->where('is_core', true)->count(),
             'templates' => $templatesCount,
         ];
 
@@ -250,6 +257,75 @@ class SubjectController extends Controller
             ->with('success', __('sprint4.subjects.add_template_success', ['count' => $count]));
     }
 
+    /**
+     * Stream the platform Excel template (one header row) the admin fills in
+     * before bulk-importing subjects.
+     */
+    public function importTemplate(): StreamedResponse
+    {
+        $headers = [
+            'الاسم بالعربي',
+            'الاسم بالإنجليزي',
+            'الاسم المختصر بالعربي',
+            'الاسم المختصر بالإنجليزي',
+            'لغة المادة',
+            'الكود',
+            'الشعبة',
+            'الصف الدراسي',
+            'الترتيب في الشهادة',
+            'عدد الساعات',
+            'عدد الحصص في الأسبوع',
+            'القيمة المعتمدة',
+        ];
+
+        // A sample row to make the expected format obvious.
+        $sample = ['الرياضيات', 'Mathematics', 'رياضيات', 'Math', 'عربي', 'MATH101', 'عام', '7', '1', '4', '5', '5'];
+
+        $filename = 'subjects_import_template.csv';
+
+        return response()->streamDownload(function () use ($headers, $sample) {
+            $out = fopen('php://output', 'w');
+            // UTF-8 BOM so Excel opens the Arabic headers correctly.
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, $headers);
+            fputcsv($out, $sample);
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    public function importStore(Request $request, ImportSubjectsFromExcelAction $action): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv,txt', 'max:5120'],
+        ]);
+
+        $schoolId = $this->activeSchoolId();
+
+        try {
+            $result = $action->execute($request->file('file'), $schoolId);
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.subjects.index')
+                ->with('error', $e->getMessage());
+        }
+
+        $message = __('sprint4.subjects.import.summary', [
+            'created' => $result->created,
+            'skipped' => $result->skipped,
+            'failed' => $result->failed,
+        ]);
+
+        $redirect = redirect()->route('admin.subjects.index');
+
+        if ($result->created > 0) {
+            return $redirect->with('success', $message);
+        }
+
+        return $redirect->with('error', $message);
+    }
+
     public function creditHours(Request $request): View
     {
         $schoolId = $this->activeSchoolId();
@@ -326,14 +402,20 @@ class SubjectController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'name_en' => ['nullable', 'string', 'max:255'],
+            'short_name_ar' => ['nullable', 'string', 'max:120'],
+            'short_name_en' => ['nullable', 'string', 'max:120'],
+            'language' => ['nullable', 'string', 'in:ar,en'],
             'code' => ['nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
             'section' => ['nullable', 'string', 'max:120'],
+            'icon' => ['nullable', 'string', 'max:60'],
             'is_core' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'grade_levels' => ['nullable', 'array'],
             'grade_levels.*' => ['integer', 'min:1', 'max:12'],
-            'credit_hours' => ['nullable', 'integer', 'min:0', 'max:20'],
+            'credit_hours' => ['nullable', 'integer', 'min:0', 'max:50'],
+            'total_hours' => ['nullable', 'integer', 'min:0', 'max:50'],
+            'credit_value' => ['nullable', 'integer', 'min:0', 'max:50'],
             'certificate_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
         ]);
     }
