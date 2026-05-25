@@ -241,9 +241,8 @@
                         <a class="dropdown-item" href="{{ route('admin.users.students.create') }}">
                             <i class="la la-user-plus"></i> @lang('users.add_student')
                         </a>
-                        <a class="dropdown-item disabled" href="#">
+                        <a class="dropdown-item" href="{{ route('admin.noor.form', ['type' => 'students']) }}">
                             <i class="la la-file-excel"></i> @lang('users.import_excel')
-                            <span class="badge-soon">@lang('users.student_coming_soon')</span>
                         </a>
                         <a class="dropdown-item" href="{{ route('admin.noor.form') }}">
                             <i class="la la-cloud-download-alt"></i> @lang('users.import_noor')
@@ -269,7 +268,7 @@
                         <a class="dropdown-item disabled" href="#"><i class="la la-list"></i> @lang('users.advanced_list') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
                         <a class="dropdown-item disabled" href="#"><i class="la la-chart-bar"></i> @lang('users.counts') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
                         <a class="dropdown-item disabled" href="#"><i class="la la-unlink"></i> @lang('users.unlinked_to_parents') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
-                        <a class="dropdown-item disabled" href="#"><i class="la la-search"></i> @lang('users.global_search') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.global-search') }}"><i class="la la-search"></i> @lang('users.global_search')</a>
                     </div>
                 </div>
 
@@ -474,6 +473,48 @@ document.addEventListener('DOMContentLoaded', function () {
             rowChecks().forEach(function (r) { r.checked = checkAll.checked; });
         });
     }
+    // Row 3-dot dropdown clips inside .table-responsive (overflow:auto).
+    // Promote the open menu to position:fixed anchored to its toggle so it
+    // floats above the table and every other element.
+    function placeFixed(menu, toggle) {
+        var r = toggle.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.zIndex = '2000';
+        menu.style.top = (r.bottom + 4) + 'px';
+        // RTL: align the menu's right edge under the toggle, keep on-screen.
+        var mw = menu.offsetWidth || 230;
+        var left = r.right - mw;
+        if (left < 8) left = 8;
+        if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+        menu.style.left = left + 'px';
+        menu.style.right = 'auto';
+        menu.style.transform = 'none';
+        menu.style.margin = '0';
+    }
+    function resetFixed(menu) {
+        menu.style.position = '';
+        menu.style.zIndex = '';
+        menu.style.top = '';
+        menu.style.left = '';
+        menu.style.right = '';
+        menu.style.transform = '';
+        menu.style.margin = '';
+    }
+    document.querySelectorAll('.students-table .row-actions .dropdown').forEach(function (dd) {
+        var toggle = dd.querySelector('[data-bs-toggle="dropdown"], [data-toggle="dropdown"]');
+        var menu = dd.querySelector('.dropdown-menu');
+        if (!toggle || !menu) return;
+        dd.addEventListener('shown.bs.dropdown', function () { placeFixed(menu, toggle); });
+        dd.addEventListener('hidden.bs.dropdown', function () { resetFixed(menu); });
+        // Fallback for jQuery-driven Bootstrap dropdowns (no bs.dropdown events).
+        toggle.addEventListener('click', function () {
+            setTimeout(function () {
+                if (menu.classList.contains('show')) placeFixed(menu, toggle);
+                else resetFixed(menu);
+            }, 0);
+        });
+    });
+
     document.querySelectorAll('.js-bulk').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var ids = [];

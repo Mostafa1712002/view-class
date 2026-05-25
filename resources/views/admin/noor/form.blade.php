@@ -44,7 +44,7 @@
                             <select name="type" id="type" class="form-control" required>
                                 <option value="">@lang('noor.import_type_choose')</option>
                                 @foreach ($types as $value => $label)
-                                    <option value="{{ $value }}" @selected(old('type') === $value)>{{ $label }}</option>
+                                    <option value="{{ $value }}" @selected(old('type', request('type')) === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>

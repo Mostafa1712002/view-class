@@ -33,7 +33,6 @@
                     ['name' => 'father_name_en', 'label' => __('users.student_father_name_en'), 'col' => 'col-md-3'],
                     ['name' => 'grandfather_name_en', 'label' => __('users.student_grandfather_name_en'), 'col' => 'col-md-3'],
                     ['name' => 'last_name_en', 'label' => __('users.student_last_name_en'), 'col' => 'col-md-3'],
-                    ['name' => 'name_en', 'label' => __('users.name').' (EN)', 'col' => 'col-md-6'],
                 ],
             ],
             [
@@ -43,7 +42,8 @@
                     ['name' => 'fingerprint_id', 'label' => __('users.student_fingerprint'), 'col' => 'col-md-3'],
                     ['name' => 'seat_number', 'label' => __('users.student_seat_number'), 'col' => 'col-md-3'],
                     ['name' => 'passport_number', 'label' => __('users.student_passport'), 'col' => 'col-md-3'],
-                    ['name' => 'nationality', 'label' => __('users.student_nationality'), 'col' => 'col-md-3'],
+                    ['name' => 'nationality', 'label' => __('users.student_nationality'), 'type' => 'select', 'col' => 'col-md-3',
+                        'options' => ['' => __('users.select_nationality')] + array_combine(config('countries_ar'), config('countries_ar'))],
                     ['name' => 'academic_id', 'label' => __('users.student_academic_id'), 'col' => 'col-md-3'],
                     ['name' => 'gender', 'label' => __('users.gender'), 'type' => 'select', 'col' => 'col-md-3',
                         'options' => ['' => '—', 'male' => __('users.gender_male'), 'female' => __('users.gender_female')]],
@@ -56,8 +56,10 @@
                 'icon' => 'la la-graduation-cap', 'title' => __('users.student_school_info'),
                 'fields' => [
                     ['name' => 'section_id', 'label' => __('users.grade_level'), 'type' => 'select', 'col' => 'col-md-3',
+                        'attrs' => 'id="student-section-select"',
                         'options' => ['' => __('users.select_section')] + ($sections->pluck('name', 'id')->toArray())],
                     ['name' => 'class_room_id', 'label' => __('users.class'), 'type' => 'select', 'col' => 'col-md-3',
+                        'attrs' => 'id="student-class-select"',
                         'options' => ['' => __('users.select_class')] + ($classes->pluck('name', 'id')->toArray())],
                     ['name' => 'previous_school', 'label' => __('users.student_previous_school'), 'col' => 'col-md-3'],
                     ['name' => 'enrollment_date', 'label' => __('users.student_enrollment_date'), 'type' => 'date', 'col' => 'col-md-3'],
@@ -101,9 +103,14 @@
                                 {{ $f['label'] }}@if($required) <span class="text-danger">*</span>@endif
                             </label>
                             @if($type === 'select')
-                                <select name="{{ $f['name'] }}" class="form-control" {{ $required ? 'required' : '' }}>
+                                <select name="{{ $f['name'] }}" class="form-control" {{ $required ? 'required' : '' }} {!! $f['attrs'] ?? '' !!}>
                                     @foreach($f['options'] as $optVal => $optLabel)
-                                        <option value="{{ $optVal }}" @selected((string)$value === (string)$optVal)>{{ $optLabel }}</option>
+                                        @if($f['name'] === 'class_room_id' && $optVal !== '')
+                                            @php $optSection = optional($classes->firstWhere('id', $optVal))->section_id; @endphp
+                                            <option value="{{ $optVal }}" data-section="{{ $optSection }}" @selected((string)$value === (string)$optVal)>{{ $optLabel }}</option>
+                                        @else
+                                            <option value="{{ $optVal }}" @selected((string)$value === (string)$optVal)>{{ $optLabel }}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             @elseif($type === 'textarea')
@@ -164,3 +171,40 @@
         </div>
     @endif
 </div>
+
+<script>
+(function () {
+    var sectionSel = document.getElementById('student-section-select');
+    var classSel = document.getElementById('student-class-select');
+    if (!sectionSel || !classSel) return;
+
+    var allOptions = Array.prototype.slice.call(classSel.options).map(function (o) {
+        return { value: o.value, label: o.textContent, section: o.getAttribute('data-section') || '' };
+    });
+    var placeholder = allOptions.length && allOptions[0].value === '' ? allOptions[0] : null;
+
+    function rebuild() {
+        var sid = sectionSel.value;
+        var current = classSel.value;
+        while (classSel.firstChild) { classSel.removeChild(classSel.firstChild); }
+        if (placeholder) {
+            classSel.appendChild(new Option(placeholder.label, ''));
+        }
+        var keepCurrent = false;
+        allOptions.forEach(function (o) {
+            if (o.value === '') return;
+            if (!sid || o.section === sid) {
+                var opt = new Option(o.label, o.value);
+                opt.setAttribute('data-section', o.section);
+                if (o.value === current) { opt.selected = true; keepCurrent = true; }
+                classSel.appendChild(opt);
+            }
+        });
+        if (!keepCurrent && placeholder) { classSel.value = ''; }
+    }
+
+    sectionSel.addEventListener('change', rebuild);
+    // On load, narrow the class list to the pre-selected section (edit page).
+    rebuild();
+})();
+</script>
