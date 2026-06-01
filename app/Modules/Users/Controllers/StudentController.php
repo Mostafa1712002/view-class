@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\Section;
 use App\Models\StudentProfile;
 use App\Models\User;
+use App\Modules\Subjects\Repositories\Contracts\SubjectRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use App\Modules\Users\Repositories\Contracts\StudentRepository;
 use Illuminate\Http\RedirectResponse;
@@ -21,8 +22,10 @@ class StudentController extends Controller
 {
     use HasSchoolScope;
 
-    public function __construct(private readonly StudentRepository $students)
-    {
+    public function __construct(
+        private readonly StudentRepository $students,
+        private readonly SubjectRepository $subjects,
+    ) {
     }
 
     public function index(Request $request): View
@@ -277,7 +280,16 @@ class StudentController extends Controller
         if (!$student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
-        $classes = $student->enrolledClasses()->with(['section', 'subjects'])->get();
+        $classes = $student->enrolledClasses()->with('section')->get();
+
+        // Subjects are linked to a grade level (not directly to a class), so
+        // resolve each class's subjects via its grade level. Fall back to the
+        // student's own school when no active scope is set (e.g. super-admin).
+        $schoolId = $this->activeSchoolId() ?? $student->school_id ?? optional($student->section)->school_id;
+        foreach ($classes as $class) {
+            $subjects = collect($this->subjects->subjectsForGradeLevel($schoolId, (int) $class->grade_level));
+            $class->setRelation('subjects', $subjects);
+        }
 
         return view('admin.users.students.lessons', compact('student', 'classes'));
     }
