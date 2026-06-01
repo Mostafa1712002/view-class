@@ -28,12 +28,18 @@
 
 ---
 
-## Phase 2: Module audit (remaining, broad spec) — NOT in first deploy
-Most of the 32-page spec already exists. Genuine gaps to confirm with QA/user
-before building (do NOT silently mark card done):
-- [ ] Year rollover multi-type migration (ترحيل الفصول/الطلاب/الفترات/الحصص) — only `promote` exists
-- [ ] Lesson-distribution table (جدول توزيع الدروس) coverage
-- [ ] Search/filter/column-customize/export across school tables
+## Phase 2: Year-rollover migration + audit
+Most of the 32-page spec already existed. Built the main missing piece
+(year-rollover migration); two items deliberately deferred per user decision.
+- [x] Year rollover — **classes** migration (copy source→dest year, additive+dedupe)
+- [x] Year rollover — **students** grade promotion (source class→dest class, additive+dedupe, source kept as history)
+- [x] Time slots: N/A — school-global, used across all years automatically (noted on page)
+- [~] Lessons rollover — **deferred to card #91** (lessons module rebuild) per user decision 2026-06-01
+- [ ] Search/filter/column-customize/export across school tables — minor polish, follow-up
+
+**Outcome:** ✅ Migration page + service (AcademicYearMigrationService); deployed
+(40106aa); verified live (classes copy into a throwaway year, then cleaned up)
+and locally (idempotency, student promotion + history kept).
 
 ---
 
@@ -42,5 +48,5 @@ before building (do NOT silently mark card done):
 | Phase | Tasks | Completed | Status |
 |-------|-------|-----------|--------|
 | 1. Concrete bugs | 3 | 3 | ✅ Done + verified live |
-| 2. Audit | 3 | 0 | Deferred (needs user/QA) |
-| **Total** | **6** | **3** | **50%** |
+| 2. Migration + audit | 5 | 3 | ✅ Core done (lessons→#91, search/export follow-up) |
+| **Total** | **8** | **6** | **75%** |
