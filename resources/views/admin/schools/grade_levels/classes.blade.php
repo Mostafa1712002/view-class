@@ -91,7 +91,9 @@
                                 <td>{{ $class->students_count }}</td>
                                 <td>{{ optional($class->leadTeacher)->name_ar ?? optional($class->leadTeacher)->name ?? '-' }}</td>
                                 <td>
-                                    <a href="{{ route('admin.schools.grade-levels.classes.students', [$school, $section, $class]) }}" class="btn btn-sm btn-outline-info"><i class="la la-users"></i></a>
+                                    <a href="{{ route('admin.schools.grade-levels.classes.show', [$school, $section, $class]) }}" class="btn btn-sm btn-outline-secondary" title="@lang('common.view')"><i class="la la-eye"></i></a>
+                                    <a href="{{ route('admin.schools.grade-levels.classes.edit', [$school, $section, $class]) }}" class="btn btn-sm btn-outline-primary" title="@lang('common.edit')"><i class="la la-edit"></i></a>
+                                    <a href="{{ route('admin.schools.grade-levels.classes.students', [$school, $section, $class]) }}" class="btn btn-sm btn-outline-info" title="@lang('schools.students')"><i class="la la-users"></i></a>
                                     <form action="{{ route('admin.schools.grade-levels.classes.destroy', [$school, $section, $class]) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                         @csrf
                                         @method('DELETE')

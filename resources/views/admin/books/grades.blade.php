@@ -65,6 +65,9 @@
         @else
             <form method="POST" action="{{ route('manage.books.grades.save') }}" id="grade-books-form">
                 @csrf
+                @if(request()->filled('school'))
+                    <input type="hidden" name="school" value="{{ (int) request('school') }}">
+                @endif
 
                 <div class="accordion" id="stagesAccordion">
                     @foreach($stages as $sIdx => $stage)

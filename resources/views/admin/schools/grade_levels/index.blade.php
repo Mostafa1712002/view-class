@@ -79,6 +79,9 @@
                                     <a href="{{ route('admin.schools.grade-levels.classes', [$school, $section]) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="la la-th-large"></i> @lang('schools.view_classes')
                                     </a>
+                                    <a href="{{ route('manage.books.grades', ['school' => $school->id]) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="la la-book"></i> @lang('schools.books')
+                                    </a>
                                 </td>
                             </tr>
                         @empty

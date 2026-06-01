@@ -26,9 +26,9 @@ class BookGradeController extends Controller
         private SyncSchoolGradeBooksAction $sync,
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->resolveBookSchoolId($request);
 
         if ($schoolId === null) {
             return view('admin.books.grades', [
@@ -58,7 +58,8 @@ class BookGradeController extends Controller
 
     public function save(Request $request): RedirectResponse
     {
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->resolveBookSchoolId($request);
+        $backParams = $request->integer('school') ? ['school' => $schoolId] : [];
 
         if ($schoolId === null) {
             return redirect()
@@ -81,12 +82,31 @@ class BookGradeController extends Controller
             report($e);
 
             return redirect()
-                ->route('manage.books.grades')
+                ->route('manage.books.grades', $backParams)
                 ->with('error', __('books_admin.grades.flash_error'));
         }
 
         return redirect()
-            ->route('manage.books.grades')
+            ->route('manage.books.grades', $backParams)
             ->with('success', __('books_admin.grades.flash_saved'));
+    }
+
+    /**
+     * Resolve the school for the books-per-grade screen. Honors an optional
+     * `?school=<id>` override (used by the per-school grade-levels page) when
+     * the user is a super-admin or owns that school; otherwise falls back to
+     * the active navbar scope.
+     */
+    private function resolveBookSchoolId(Request $request): ?int
+    {
+        $requested = $request->integer('school') ?: null;
+        if ($requested !== null) {
+            $u = auth()->user();
+            if ($u && ($u->isSuperAdmin() || (int) $u->school_id === $requested)) {
+                return $requested;
+            }
+        }
+
+        return $this->activeSchoolId();
     }
 }

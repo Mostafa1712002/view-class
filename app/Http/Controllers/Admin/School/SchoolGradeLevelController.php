@@ -86,6 +86,64 @@ class SchoolGradeLevelController extends Controller
         return back()->with('success', __('common.deleted_successfully'));
     }
 
+    public function showClass(School $school, Section $section, ClassRoom $class)
+    {
+        abort_unless(
+            $section->school_id === $school->id && $class->section_id === $section->id,
+            404
+        );
+
+        $class->loadCount('students');
+        $class->load(['leadTeacher', 'academicYear']);
+
+        return view('admin.schools.grade_levels.class_show', compact('school', 'section', 'class'));
+    }
+
+    public function editClass(School $school, Section $section, ClassRoom $class)
+    {
+        abort_unless(
+            $section->school_id === $school->id && $class->section_id === $section->id,
+            404
+        );
+
+        $academicYears = $school->academicYears()->orderByDesc('start_date')->get();
+        $teachers = User::where('school_id', $school->id)
+            ->whereHas('roles', fn($r) => $r->where('slug', 'teacher'))
+            ->get();
+
+        return view('admin.schools.grade_levels.class_edit', compact('school', 'section', 'class', 'academicYears', 'teachers'));
+    }
+
+    public function updateClass(Request $request, School $school, Section $section, ClassRoom $class)
+    {
+        abort_unless(
+            $section->school_id === $school->id && $class->section_id === $section->id,
+            404
+        );
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'grade_level' => 'required|integer|min:1|max:12',
+            'lead_teacher_id' => 'nullable|exists:users,id',
+            'capacity' => 'required|integer|min:1|max:200',
+            'academic_year_id' => 'required|exists:academic_years,id',
+        ]);
+
+        // Capacity cannot drop below the number of students already enrolled.
+        $enrolled = $class->students()->count();
+        if ($validated['capacity'] < $enrolled) {
+            return back()
+                ->withInput()
+                ->with('error', __('schools.capacity_below_students', ['count' => $enrolled]));
+        }
+
+        $class->update($validated);
+
+        return redirect()
+            ->route('admin.schools.grade-levels.classes', [$school, $section])
+            ->with('success', __('common.updated_successfully'));
+    }
+
     public function showStudents(School $school, Section $section, ClassRoom $class)
     {
         abort_unless(

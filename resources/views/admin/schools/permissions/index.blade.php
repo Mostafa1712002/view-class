@@ -61,7 +61,7 @@
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush" id="group-list">
                         @forelse($groups as $g)
-                            <button type="button" class="list-group-item list-group-item-action group-pick @if($loop->first) active @endif" data-group="{{ $g }}">{{ $g }}</button>
+                            <button type="button" class="list-group-item list-group-item-action group-pick @if($loop->first) active @endif" data-group="{{ $g }}">{{ __('schools.permission_groups.'.$g) }}</button>
                         @empty
                             <div class="list-group-item text-muted">@lang('common.no_data')</div>
                         @endforelse
