@@ -260,7 +260,7 @@
                                     <div class="dropdown-menu dropdown-menu-end">
                                         <a class="dropdown-item" href="{{ route('admin.subjects.edit', $subject->id) }}"><i class="la la-pen"></i> @lang('sprint4.subjects.edit')</a>
                                         <a class="dropdown-item" href="{{ route('admin.subjects.lesson-tree', $subject->id) }}"><i class="la la-stream"></i> @lang('sprint4.subjects.lesson_tree') ({{ $subject->units_count }})</a>
-                                        <a class="dropdown-item disabled" href="#"><i class="la la-list"></i> @lang('sprint4.subjects.standards')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.subjects.domains', $subject->id) }}"><i class="la la-list"></i> @lang('sprint4.subjects.standards')</a>
                                         <div class="dropdown-divider"></div>
                                         <form action="{{ route('admin.subjects.destroy', $subject->id) }}" method="POST" onsubmit="return confirm('@lang('sprint4.subjects.delete') ?')">
                                             @csrf @method('DELETE')

@@ -299,6 +299,12 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('subjects/{id}/units/{unitId}/lessons', [\App\Modules\Subjects\Controllers\SubjectController::class, 'storeLesson'])->name('subjects.lessons.store');
     Route::delete('subjects/{id}/units/{unitId}/lessons/{lessonId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyLesson'])->name('subjects.lessons.destroy');
 
+    // Subject domains (المجالات) — card 90
+    Route::get('subjects/{id}/domains', [\App\Modules\Subjects\Controllers\SubjectController::class, 'domains'])->name('subjects.domains');
+    Route::post('subjects/{id}/domains', [\App\Modules\Subjects\Controllers\SubjectController::class, 'storeDomain'])->name('subjects.domains.store');
+    Route::put('subjects/{id}/domains/{domainId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'updateDomain'])->name('subjects.domains.update');
+    Route::delete('subjects/{id}/domains/{domainId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyDomain'])->name('subjects.domains.destroy');
+
     // Question Banks (Sprint 4 phase 2)
     Route::get('question-banks/library', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'library'])->name('question-banks.library');
     Route::post('question-banks/library/{id}/clone', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'clone'])->name('question-banks.library.clone');

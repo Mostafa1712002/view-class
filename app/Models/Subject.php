@@ -88,6 +88,11 @@ class Subject extends Model
         return $this->hasMany(SubjectUnit::class)->orderBy('sort_order');
     }
 
+    public function domains(): HasMany
+    {
+        return $this->hasMany(Domain::class)->orderBy('sort_order');
+    }
+
     public function template(): BelongsTo
     {
         return $this->belongsTo(Subject::class, 'template_subject_id');

@@ -11,8 +11,8 @@ use App\Modules\Subjects\Repositories\Contracts\SubjectRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SubjectController extends Controller
 {
@@ -45,7 +45,8 @@ class SubjectController extends Controller
 
     public function create(): View
     {
-        $subject = new Subject();
+        $subject = new Subject;
+
         return view('admin.subjects.create', compact('subject'));
     }
 
@@ -174,6 +175,65 @@ class SubjectController extends Controller
         return redirect()
             ->route('admin.subjects.lesson-tree', $subject->id)
             ->with('success', __('sprint4.subjects.flash.lesson_deleted'));
+    }
+
+    public function domains(int $id): View
+    {
+        $schoolId = $this->activeSchoolId();
+        $subject = $this->subjects->findScoped($id, $schoolId);
+        abort_if(! $subject, 404);
+
+        $domains = $subject->domains()->get();
+
+        return view('admin.subjects.domains', compact('subject', 'domains'));
+    }
+
+    public function storeDomain(Request $request, int $id): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        $subject = $this->subjects->findScoped($id, $schoolId);
+        abort_if(! $subject, 404);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $data['sort_order'] = (int) ($subject->domains()->max('sort_order') + 1);
+        $subject->domains()->create($data);
+
+        return redirect()
+            ->route('admin.subjects.domains', $subject->id)
+            ->with('success', __('domains.flash.added'));
+    }
+
+    public function updateDomain(Request $request, int $id, int $domainId): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        $subject = $this->subjects->findScoped($id, $schoolId);
+        abort_if(! $subject, 404);
+
+        $domain = $subject->domains()->whereKey($domainId)->firstOrFail();
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $domain->update($data);
+
+        return redirect()
+            ->route('admin.subjects.domains', $subject->id)
+            ->with('success', __('domains.flash.updated'));
+    }
+
+    public function destroyDomain(int $id, int $domainId): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        $subject = $this->subjects->findScoped($id, $schoolId);
+        abort_if(! $subject, 404);
+
+        $domain = $subject->domains()->whereKey($domainId)->firstOrFail();
+        $domain->delete();
+
+        return redirect()
+            ->route('admin.subjects.domains', $subject->id)
+            ->with('success', __('domains.flash.deleted'));
     }
 
     public function templatesIndex(): View
@@ -343,9 +403,9 @@ class SubjectController extends Controller
         }
 
         return view('admin.subjects.credit-hours', [
-            'gradeOptions'  => $gradeOptions,
+            'gradeOptions' => $gradeOptions,
             'selectedLevel' => $selectedLevel,
-            'subjects'      => $subjects,
+            'subjects' => $subjects,
         ]);
     }
 
@@ -353,9 +413,9 @@ class SubjectController extends Controller
     {
         $schoolId = $this->activeSchoolId();
 
-        $hours  = (array) $request->input('credit_hours', []);
+        $hours = (array) $request->input('credit_hours', []);
         $active = (array) $request->input('credit_hours_active', []);
-        $level  = (int) $request->input('grade_level', 0);
+        $level = (int) $request->input('grade_level', 0);
 
         $count = $this->subjects->bulkSetCreditValues($schoolId, $hours, $active);
 
@@ -381,17 +441,17 @@ class SubjectController extends Controller
         $out = [];
         // 1..6  Primary
         for ($g = 1; $g <= 6; $g++) {
-            $out[$g] = $ordinals[$g] . ' الابتدائي';
+            $out[$g] = $ordinals[$g].' الابتدائي';
         }
         // 7..9  Intermediate
         $intermediate = [7 => 'الأول', 8 => 'الثاني', 9 => 'الثالث'];
         foreach ($intermediate as $g => $ord) {
-            $out[$g] = $ord . ' المتوسط';
+            $out[$g] = $ord.' المتوسط';
         }
         // 10..12 Secondary
         $secondary = [10 => 'الأول', 11 => 'الثاني', 12 => 'الثالث'];
         foreach ($secondary as $g => $ord) {
-            $out[$g] = $ord . ' الثانوي';
+            $out[$g] = $ord.' الثانوي';
         }
 
         return $out;
