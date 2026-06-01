@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin\School;
 use App\Http\Controllers\Controller;
 use App\Models\AcademicTerm;
 use App\Models\AcademicYear;
+use App\Models\ClassRoom;
 use App\Models\School;
 use App\Models\StudyWeek;
+use App\Services\AcademicYearMigrationService;
 use Illuminate\Http\Request;
 
 class SchoolAcademicYearController extends Controller
@@ -111,7 +113,61 @@ class SchoolAcademicYearController extends Controller
     {
         abort_unless($year->school_id === $school->id, 404);
 
-        // Stub — actual rollover (students/sections/schedules) is sprint 3 scope.
-        return back()->with('success', __('schools.promote_stub_note'));
+        // The old one-click promote is replaced by the explicit migration page
+        // (choose what to migrate + source/destination). Keep the route working.
+        return redirect()->route('admin.schools.academic-years.migrate', $school);
+    }
+
+    /**
+     * Year-rollover migration page: pick a type (classes / students) and the
+     * source + destination. Time-slots are school-global (carry over
+     * automatically); lessons rollover is handled by the lessons module.
+     */
+    public function migrate(School $school)
+    {
+        $years = $school->academicYears()->orderByDesc('start_date')->get();
+        $sections = $school->sections()->orderBy('level')->orderBy('name')->get();
+        $classes = ClassRoom::whereHas('section', fn ($q) => $q->where('school_id', $school->id))
+            ->withCount('students')
+            ->get(['id', 'name', 'section_id', 'academic_year_id']);
+
+        return view('admin.schools.academic_years.migrate', compact('school', 'years', 'sections', 'classes'));
+    }
+
+    public function migrateClasses(Request $request, School $school, AcademicYearMigrationService $service)
+    {
+        $validated = $request->validate([
+            'source_year_id' => 'required|integer',
+            'destination_year_id' => 'required|integer|different:source_year_id',
+        ]);
+
+        $source = $school->academicYears()->findOrFail($validated['source_year_id']);
+        $destination = $school->academicYears()->findOrFail($validated['destination_year_id']);
+
+        $result = $service->migrateClasses($school, $source, $destination);
+
+        return redirect()
+            ->route('admin.schools.academic-years.migrate', $school)
+            ->with('success', __('schools.migrate_classes_result', $result));
+    }
+
+    public function migrateStudents(Request $request, School $school, AcademicYearMigrationService $service)
+    {
+        $validated = $request->validate([
+            'source_class_id' => 'required|integer',
+            'destination_class_id' => 'required|integer|different:source_class_id',
+        ]);
+
+        $scoped = fn ($id) => ClassRoom::whereHas('section', fn ($q) => $q->where('school_id', $school->id))
+            ->findOrFail($id);
+
+        $source = $scoped($validated['source_class_id']);
+        $destination = $scoped($validated['destination_class_id']);
+
+        $result = $service->promoteStudents($source, $destination);
+
+        return redirect()
+            ->route('admin.schools.academic-years.migrate', $school)
+            ->with('success', __('schools.migrate_students_result', $result));
     }
 }

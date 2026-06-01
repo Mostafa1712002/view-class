@@ -101,6 +101,9 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
         Route::put('settings', [\App\Http\Controllers\Admin\School\SchoolSettingsController::class, 'update'])->name('settings.update');
 
         Route::get('academic-years', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'index'])->name('academic-years.index');
+        Route::get('academic-years/migrate', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'migrate'])->name('academic-years.migrate');
+        Route::post('academic-years/migrate/classes', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'migrateClasses'])->name('academic-years.migrate.classes');
+        Route::post('academic-years/migrate/students', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'migrateStudents'])->name('academic-years.migrate.students');
         Route::post('academic-years', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'storeYear'])->name('academic-years.store');
         Route::post('academic-years/{year}/promote', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'promote'])->name('academic-years.promote');
         Route::post('academic-years/{year}/terms', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'storeTerm'])->name('academic-years.terms.store');

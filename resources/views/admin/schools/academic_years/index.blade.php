@@ -31,10 +31,9 @@
                         <h5 class="mb-0">{{ $current->name }}</h5>
                         <small>{{ optional($current->start_date)->format('Y-m-d') }} → {{ optional($current->end_date)->format('Y-m-d') }}</small>
                     </div>
-                    <form action="{{ route('admin.schools.academic-years.promote', [$school, $current]) }}" method="POST" onsubmit="return confirm(@json(__('schools.confirm_promote')))">
-                        @csrf
-                        <button class="btn btn-warning"><i class="la la-share"></i> @lang('schools.promote_to_new_year')</button>
-                    </form>
+                    <a href="{{ route('admin.schools.academic-years.migrate', $school) }}" class="btn btn-warning">
+                        <i class="la la-share"></i> @lang('schools.promote_to_new_year')
+                    </a>
                 </div>
             </div>
         </div>
