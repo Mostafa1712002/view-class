@@ -190,6 +190,12 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('students/create', [\App\Modules\Users\Controllers\StudentController::class, 'create'])->name('students.create');
         Route::post('students', [\App\Modules\Users\Controllers\StudentController::class, 'store'])->name('students.store');
         Route::post('students/bulk', [\App\Modules\Users\Controllers\StudentController::class, 'bulk'])->name('students.bulk');
+        // === Excel student import card #108 (declared before students/{id} wildcard) ===
+        Route::get('students/import', [\App\Modules\StudentImport\Controllers\StudentImportController::class, 'form'])->name('students.import.form');
+        Route::get('students/import/template', [\App\Modules\StudentImport\Controllers\StudentImportController::class, 'template'])->name('students.import.template');
+        Route::post('students/import/preview', [\App\Modules\StudentImport\Controllers\StudentImportController::class, 'preview'])->name('students.import.preview');
+        Route::post('students/import/{log}/run', [\App\Modules\StudentImport\Controllers\StudentImportController::class, 'execute'])->whereNumber('log')->name('students.import.execute');
+        Route::get('students/import/{log}/errors', [\App\Modules\StudentImport\Controllers\StudentImportController::class, 'errorsReport'])->whereNumber('log')->name('students.import.errors');
         Route::get('students/{id}/edit', [\App\Modules\Users\Controllers\StudentController::class, 'edit'])->name('students.edit');
         Route::get('students/{id}/parents', [\App\Modules\Users\Controllers\StudentController::class, 'parents'])->name('students.parents');
         Route::get('students/{id}/schedule', [\App\Modules\Users\Controllers\StudentController::class, 'schedule'])->name('students.schedule');

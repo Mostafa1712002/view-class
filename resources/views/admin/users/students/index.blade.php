@@ -241,7 +241,7 @@
                         <a class="dropdown-item" href="{{ route('admin.users.students.create') }}">
                             <i class="la la-user-plus"></i> @lang('users.add_student')
                         </a>
-                        <a class="dropdown-item" href="{{ route('admin.noor.form', ['type' => 'students']) }}">
+                        <a class="dropdown-item" href="{{ route('admin.users.students.import.form') }}">
                             <i class="la la-file-excel"></i> @lang('users.import_excel')
                         </a>
                         <a class="dropdown-item" href="{{ route('admin.noor.form') }}">
