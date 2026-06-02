@@ -22,7 +22,7 @@ class PublicLibraryController extends Controller
     public function index(Request $request): View
     {
         $schoolId = $this->activeSchoolId();
-        $filters = $request->only(['title', 'content_type', 'subject_id', 'teacher_id', 'tag']);
+        $filters = $request->only(['title', 'content_type', 'subject_id', 'teacher_id', 'tag', 'sort']);
         $items = $this->items->paginatePublic($schoolId, $filters);
 
         $subjects = Subject::query()
@@ -49,7 +49,8 @@ class PublicLibraryController extends Controller
 
     public function create(): View
     {
-        $item = new LibraryItem();
+        $item = new LibraryItem;
+
         return view('admin.libraries.public.create', $this->formData($item));
     }
 
@@ -72,6 +73,7 @@ class PublicLibraryController extends Controller
     {
         $item = $this->items->findScoped($id, $this->activeSchoolId());
         abort_if(! $item, 404);
+
         return view('admin.libraries.public.edit', $this->formData($item));
     }
 
@@ -105,7 +107,7 @@ class PublicLibraryController extends Controller
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'content_type' => ['required', 'in:' . implode(',', LibraryItem::TYPES)],
+            'content_type' => ['required', 'in:'.implode(',', LibraryItem::TYPES)],
             'external_url' => ['nullable', 'url', 'max:1024'],
             'subject_id' => ['nullable', 'integer', 'exists:subjects,id'],
             'teacher_id' => ['nullable', 'integer', 'exists:users,id'],
@@ -133,6 +135,7 @@ class PublicLibraryController extends Controller
             }
         }
         unset($data['file'], $data['thumbnail']);
+
         return $data;
     }
 

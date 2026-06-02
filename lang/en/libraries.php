@@ -16,6 +16,9 @@ return [
             'tag' => 'Tag',
             'all' => 'All',
             'apply' => 'Filter',
+            'sort' => 'Sort',
+            'sort_newest' => 'Newest',
+            'sort_oldest' => 'Oldest',
         ],
         'columns' => [
             'title' => 'Title',

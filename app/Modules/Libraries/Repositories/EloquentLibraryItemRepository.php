@@ -21,7 +21,7 @@ class EloquentLibraryItemRepository implements LibraryItemRepository
         });
 
         if (! empty($filters['title'])) {
-            $q->where('title', 'like', '%' . $filters['title'] . '%');
+            $q->where('title', 'like', '%'.$filters['title'].'%');
         }
         if (! empty($filters['content_type'])) {
             $q->where('content_type', $filters['content_type']);
@@ -33,10 +33,16 @@ class EloquentLibraryItemRepository implements LibraryItemRepository
             $q->where('teacher_id', (int) $filters['teacher_id']);
         }
         if (! empty($filters['tag'])) {
-            $q->where('tags', 'like', '%' . $filters['tag'] . '%');
+            $q->where('tags', 'like', '%'.$filters['tag'].'%');
         }
 
-        return $q->orderByDesc('id')->paginate($perPage)->withQueryString();
+        if (($filters['sort'] ?? '') === 'oldest') {
+            $q->orderBy('id'); // oldest first
+        } else {
+            $q->orderByDesc('id'); // newest first (default)
+        }
+
+        return $q->paginate($perPage)->withQueryString();
     }
 
     public function paginateForLibrary(int $libraryId, ?int $schoolId, ?string $search = null, int $perPage = 25): LengthAwarePaginator
@@ -48,8 +54,9 @@ class EloquentLibraryItemRepository implements LibraryItemRepository
             });
         }
         if ($search) {
-            $q->where('title', 'like', '%' . $search . '%');
+            $q->where('title', 'like', '%'.$search.'%');
         }
+
         return $q->orderBy('sort_order')->orderByDesc('id')->paginate($perPage)->withQueryString();
     }
 
@@ -61,6 +68,7 @@ class EloquentLibraryItemRepository implements LibraryItemRepository
                 $w->whereNull('school_id')->orWhere('school_id', $schoolId);
             });
         }
+
         return $q->first();
     }
 
@@ -72,6 +80,7 @@ class EloquentLibraryItemRepository implements LibraryItemRepository
     public function update(LibraryItem $item, array $payload): LibraryItem
     {
         $item->update($payload);
+
         return $item->fresh();
     }
 

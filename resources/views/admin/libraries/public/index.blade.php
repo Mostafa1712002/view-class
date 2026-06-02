@@ -78,6 +78,13 @@
                         <label class="form-label">@lang('libraries.public.filters.tag')</label>
                         <input type="text" name="tag" value="{{ $filters['tag'] ?? '' }}" class="form-control" />
                     </div>
+                    <div class="col-md-2 col-6 lib-field">
+                        <label class="form-label">@lang('libraries.public.filters.sort')</label>
+                        <select name="sort" class="form-select">
+                            <option value="newest" @selected(($filters['sort'] ?? 'newest')==='newest')>@lang('libraries.public.filters.sort_newest')</option>
+                            <option value="oldest" @selected(($filters['sort'] ?? '')==='oldest')>@lang('libraries.public.filters.sort_oldest')</option>
+                        </select>
+                    </div>
                     <div class="col-md-1 col-12 d-flex align-items-end lib-field">
                         <button class="btn btn-primary w-100" type="submit"><i class="la la-filter"></i></button>
                     </div>

@@ -16,6 +16,9 @@ return [
             'tag' => 'الوسم',
             'all' => 'الكل',
             'apply' => 'تصفية البحث',
+            'sort' => 'الترتيب',
+            'sort_newest' => 'الأحدث',
+            'sort_oldest' => 'الأقدم',
         ],
         'columns' => [
             'title' => 'العنوان',
