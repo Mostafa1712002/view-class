@@ -409,6 +409,16 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     // Advanced board (الجدول المتقدم)
     Route::get('lessons/advanced', [\App\Modules\Lessons\Controllers\LessonScheduleBoardController::class, 'index'])->name('lessons.advanced');
 
+    // === خدمات أخرى — card #91 ===
+    Route::get('lessons/conflicts', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'conflicts'])->name('lessons.conflicts');
+    Route::post('lessons/reassign-students', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'reassignStudents'])->name('lessons.reassign-students');
+    Route::delete('lessons/schedule', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'destroySchedule'])->name('lessons.schedule.destroy');
+    Route::delete('lessons/time-slots-all', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'destroyTimeSlots'])->name('lessons.time-slots.destroy-all');
+    Route::get('lessons/export/course-students', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'exportCourseStudents'])->name('lessons.export.course-students');
+    Route::get('lessons/import', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'importForm'])->name('lessons.import.form');
+    Route::get('lessons/import/template', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'importTemplate'])->name('lessons.import.template');
+    Route::post('lessons/import', [\App\Modules\Lessons\Controllers\LessonServicesController::class, 'import'])->name('lessons.import.run');
+
     // Students inside a lesson (إدارة الطلاب داخل الحصة)
     Route::get('lessons/{id}/students', [\App\Modules\Lessons\Controllers\LessonStudentController::class, 'index'])->name('lessons.students.index');
     Route::put('lessons/{id}/students', [\App\Modules\Lessons\Controllers\LessonStudentController::class, 'update'])->name('lessons.students.update');

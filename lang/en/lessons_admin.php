@@ -58,6 +58,47 @@ return [
         'export' => 'Export timetable',
     ],
 
+    'services' => [
+        'menu' => 'More services',
+        'export_course_students' => 'Export course students',
+        'conflicts' => 'View conflicts',
+        'reassign' => 'Reassign lessons to students',
+        'import' => 'Import timetable from file',
+        'delete_schedule' => 'Delete schedule data',
+        'delete_timeslots' => 'Delete all time slots',
+        'confirm_reassign' => 'Each lesson\'s students will be reassigned from its class roster. Continue?',
+        'confirm_delete_schedule' => 'All schedule lessons for this school will be permanently deleted. Are you sure?',
+        'confirm_delete_timeslots' => 'All time slots for this school will be deleted. Are you sure?',
+        'reassigned' => 'Students reassigned for :count lessons',
+        'schedule_deleted' => ':count lessons deleted from the schedule',
+        'timeslots_deleted' => ':count time slots deleted',
+        'imported' => 'Imported :created lessons, skipped :skipped rows',
+        'no_school' => 'Please select a school first.',
+        'empty_file' => 'The file contains no data.',
+        'row_class_missing' => 'Grade/class not found (row :row)',
+        'row_day_missing' => 'Invalid day (row :row)',
+        'row_error' => 'Error on row :row: :msg',
+        'import_title' => 'Import timetable',
+        'import_intro' => 'Upload a CSV timetable. Download the template to see the expected columns (teacher, subject, grade, class, day, period_no, start_time, end_time, room).',
+        'download_template' => 'Download template',
+        'columns_title' => 'Required columns',
+        'upload' => 'Upload & import',
+    ],
+
+    'export' => [
+        'student_id' => 'Student ID',
+        'student_name' => 'Student name',
+    ],
+
+    'conflicts_page' => [
+        'title' => 'Schedule conflicts',
+        'none' => 'No schedule conflicts. 👌',
+        'type_teacher' => 'Teacher conflict (same teacher, same day & period)',
+        'type_class' => 'Class conflict (same class, same day & period)',
+        'day' => 'Day',
+        'period' => 'Period',
+    ],
+
     'substitute' => [
         'none' => 'No substitute teacher',
         'badge' => 'Sub',

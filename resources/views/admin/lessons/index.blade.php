@@ -221,8 +221,31 @@
         <a href="{{ route('admin.lessons.time-slots.index') }}" class="btn-tool"><i class="la la-clock"></i>@lang('lessons_admin.timeslots.title')</a>
         <a href="{{ route('admin.lessons.advanced') }}" class="btn-tool"><i class="la la-th"></i>@lang('lessons_admin.advanced.title')</a>
         <a href="{{ route('admin.school-schedule.pdf') }}" class="btn-tool" target="_blank"><i class="la la-file-pdf"></i>@lang('lessons_admin.toolbar.export')</a>
+        <div class="dropdown d-inline-block">
+            <button type="button" class="btn-tool dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown"><i class="la la-cogs"></i>@lang('lessons_admin.services.menu')</button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <a class="dropdown-item" href="{{ route('admin.lessons.export.course-students') }}"><i class="la la-file-csv"></i> @lang('lessons_admin.services.export_course_students')</a>
+                <a class="dropdown-item" href="{{ route('admin.lessons.conflicts') }}"><i class="la la-exclamation-triangle"></i> @lang('lessons_admin.services.conflicts')</a>
+                <form action="{{ route('admin.lessons.reassign-students') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('lessons_admin.services.confirm_reassign')')">
+                    @csrf
+                    <button class="dropdown-item" type="submit"><i class="la la-user-friends"></i> @lang('lessons_admin.services.reassign')</button>
+                </form>
+                <a class="dropdown-item" href="{{ route('admin.lessons.import.form') }}"><i class="la la-file-import"></i> @lang('lessons_admin.services.import')</a>
+                <div class="dropdown-divider"></div>
+                <form action="{{ route('admin.lessons.schedule.destroy') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('lessons_admin.services.confirm_delete_schedule')')">
+                    @csrf @method('DELETE')
+                    <button class="dropdown-item text-danger" type="submit"><i class="la la-trash"></i> @lang('lessons_admin.services.delete_schedule')</button>
+                </form>
+                <form action="{{ route('admin.lessons.time-slots.destroy-all') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('lessons_admin.services.confirm_delete_timeslots')')">
+                    @csrf @method('DELETE')
+                    <button class="dropdown-item text-danger" type="submit"><i class="la la-trash"></i> @lang('lessons_admin.services.delete_timeslots')</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+@if(session('status'))<div class="alert alert-success">{{ session('status') }}</div>@endif
+@if(session('import_errors'))<div class="alert alert-warning"><ul class="mb-0 pr-3">@foreach(session('import_errors') as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
 <div class="ls-surface">
     @if($lessons->count() === 0)
