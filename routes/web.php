@@ -503,8 +503,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('exams/{exam}/result', [\App\Http\Controllers\StudentExamController::class, 'result'])->name('exams.result');
     Route::get('schedule', [\App\Http\Controllers\StudentController::class, 'schedule'])->name('schedule');
     Route::get('weekly-plans', [\App\Http\Controllers\StudentController::class, 'weeklyPlans'])->name('weekly-plans');
-    // === Books card 65 ===
+    // === Books card 65 + digital reader card 103 ===
     Route::get('books', [\App\Modules\Books\Controllers\StudentBookController::class, 'index'])->name('books.index');
+    Route::get('books/{id}/read', [\App\Modules\Books\Controllers\StudentBookController::class, 'read'])->whereNumber('id')->name('books.read');
 });
 
 // Parent Routes

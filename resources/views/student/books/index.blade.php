@@ -46,8 +46,8 @@
                         </div>
                         <div class="card-footer text-center">
                             @if($book->read_url)
-                                <a href="{{ $book->read_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary w-100">
-                                    <i class="la la-eye"></i> @lang('books_admin.student.open')
+                                <a href="{{ route('student.books.read', $book->id) }}" class="btn btn-sm btn-primary w-100">
+                                    <i class="la la-book-reader"></i> @lang('books_admin.student.open')
                                 </a>
                             @endif
                         </div>

@@ -75,7 +75,12 @@ return [
     'student' => [
         'page_title' => 'Books',
         'empty' => 'No books available right now.',
-        'open' => 'Open',
+        'open' => 'Read',
+        'read' => 'Read book',
+        'download' => 'Download',
+        'back_to_books' => 'Back to books',
+        'no_file' => 'No file available for this book.',
+        'open_new_tab' => 'Open in new tab',
     ],
 
     'pdf_help' => 'PDF only, up to 20 MB.',
