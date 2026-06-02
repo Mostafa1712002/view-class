@@ -190,6 +190,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('students/create', [\App\Modules\Users\Controllers\StudentController::class, 'create'])->name('students.create');
         Route::post('students', [\App\Modules\Users\Controllers\StudentController::class, 'store'])->name('students.store');
         Route::post('students/bulk', [\App\Modules\Users\Controllers\StudentController::class, 'bulk'])->name('students.bulk');
+        Route::post('students/graduates/delete', [\App\Modules\Users\Controllers\StudentController::class, 'deleteGraduates'])->name('students.graduates.delete');
         // === Excel student import card #108 (declared before students/{id} wildcard) ===
         Route::get('students/import', [\App\Modules\StudentImport\Controllers\StudentImportController::class, 'form'])->name('students.import.form');
         Route::get('students/import/template', [\App\Modules\StudentImport\Controllers\StudentImportController::class, 'template'])->name('students.import.template');

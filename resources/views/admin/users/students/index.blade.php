@@ -263,11 +263,14 @@
                         <i class="la la-th-list me-1"></i> @lang('users.other_options')
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item disabled" href="#"><i class="la la-graduation-cap"></i> @lang('users.graduates') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
-                        <a class="dropdown-item disabled" href="#"><i class="la la-trash"></i> @lang('users.delete_graduates') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
-                        <a class="dropdown-item disabled" href="#"><i class="la la-list"></i> @lang('users.advanced_list') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
-                        <a class="dropdown-item disabled" href="#"><i class="la la-chart-bar"></i> @lang('users.counts') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
-                        <a class="dropdown-item disabled" href="#"><i class="la la-unlink"></i> @lang('users.unlinked_to_parents') <span class="badge-soon">@lang('users.student_coming_soon')</span></a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['filter' => 'graduates']) }}"><i class="la la-graduation-cap"></i> @lang('users.graduates')</a>
+                        <form action="{{ route('admin.users.students.graduates.delete') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('users.confirm_delete_graduates')');">
+                            @csrf
+                            <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('users.delete_graduates')</button>
+                        </form>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['advanced' => 1]) }}"><i class="la la-list"></i> @lang('users.advanced_list')</a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['view' => 'counts']) }}"><i class="la la-chart-bar"></i> @lang('users.counts')</a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['filter' => 'no_parents']) }}"><i class="la la-unlink"></i> @lang('users.unlinked_to_parents')</a>
                         <a class="dropdown-item" href="{{ route('admin.users.students.global-search') }}"><i class="la la-search"></i> @lang('users.global_search')</a>
                     </div>
                 </div>
@@ -291,6 +294,103 @@
                 <input type="search" name="q" value="{{ $q }}" placeholder="@lang('users.student_search_hint')" />
             </form>
         </div>
+
+        @if(($filter ?? '') === 'graduates' || ($filter ?? '') === 'no_parents')
+            <div class="px-3 pt-3">
+                <span class="badge badge-info" style="font-size:.85rem;padding:.5rem .8rem;">
+                    <i class="la la-filter"></i>
+                    {{ $filter === 'graduates' ? __('users.filter_active_graduates') : __('users.filter_active_no_parents') }}
+                </span>
+                <a href="{{ route('admin.users.students.index') }}" class="btn btn-sm btn-link text-danger">
+                    <i class="la la-times"></i> @lang('users.clear_filter')
+                </a>
+            </div>
+        @endif
+
+        @if($advanced ?? false)
+            <div class="px-3 pt-3">
+                <form action="{{ route('admin.users.students.index') }}" method="GET" class="card border p-3 mb-0">
+                    <div class="form-row align-items-end">
+                        <div class="col-md-3 col-6 mb-2">
+                            <label class="small mb-1">@lang('users.grade_level')</label>
+                            <select name="section_id" class="form-control form-control-sm">
+                                <option value="">@lang('users.all_grades')</option>
+                                @foreach($sections as $s)
+                                    <option value="{{ $s->id }}" @selected(($sectionId ?? null) == $s->id)>{{ $s->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-6 mb-2">
+                            <label class="small mb-1">@lang('users.class')</label>
+                            <select name="class_room_id" class="form-control form-control-sm">
+                                <option value="">@lang('users.all_classes')</option>
+                                @foreach($classes as $c)
+                                    <option value="{{ $c->id }}" @selected(($classId ?? null) == $c->id)>{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-6 mb-2">
+                            <label class="small mb-1">@lang('users.gender')</label>
+                            <select name="gender" class="form-control form-control-sm">
+                                <option value="">@lang('users.all_genders')</option>
+                                <option value="male" @selected(($gender ?? '') === 'male')>@lang('users.gender_male')</option>
+                                <option value="female" @selected(($gender ?? '') === 'female')>@lang('users.gender_female')</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-6 mb-2">
+                            <label class="small mb-1">@lang('users.filter_status')</label>
+                            <select name="status" class="form-control form-control-sm">
+                                <option value="">@lang('users.filter_status_all')</option>
+                                <option value="active" @selected(($status ?? '') === 'active')>@lang('users.student_status_active')</option>
+                                <option value="inactive" @selected(($status ?? '') === 'inactive')>@lang('users.student_status_inactive')</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-12 mb-2">
+                            <input type="hidden" name="advanced" value="1">
+                            <button type="submit" class="btn btn-sm btn-primary"><i class="la la-filter"></i> @lang('users.filter_apply')</button>
+                            <a href="{{ route('admin.users.students.index', ['advanced' => 1]) }}" class="btn btn-sm btn-soft">@lang('users.filter_reset')</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        @endif
+
+        @if(($view ?? '') === 'counts' && $counts)
+            <div class="px-3 pt-3">
+                <div class="row">
+                    @foreach([
+                        ['count_total', $counts['total'], '#1d4ed8'],
+                        ['count_active', $counts['active'], '#16a34a'],
+                        ['count_inactive', $counts['inactive'], '#dc2626'],
+                        ['count_no_parents', $counts['no_parents'], '#b45309'],
+                        ['count_graduates', $counts['graduates'], '#7c3aed'],
+                    ] as $stat)
+                        <div class="col-md-2 col-6 mb-2">
+                            <div class="card text-center mb-0">
+                                <div class="card-body p-2">
+                                    <div class="text-muted small">@lang('users.'.$stat[0])</div>
+                                    <h3 class="fw-bold mb-0" style="color:{{ $stat[2] }};">{{ $stat[1] }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                @if($counts['per_section']->count())
+                    <div class="card border mb-0">
+                        <div class="card-header py-2"><strong>@lang('users.count_per_section')</strong></div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm mb-0">
+                                <tbody>
+                                    @foreach($counts['per_section'] as $name => $n)
+                                        <tr><td>{{ $name }}</td><td class="text-end">{{ $n }}</td></tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
 
         <div class="table-responsive d-none d-sm-block">
             <table class="table table-hover students-table align-middle mb-0">
@@ -473,47 +573,9 @@ document.addEventListener('DOMContentLoaded', function () {
             rowChecks().forEach(function (r) { r.checked = checkAll.checked; });
         });
     }
-    // Row 3-dot dropdown clips inside .table-responsive (overflow:auto).
-    // Promote the open menu to position:fixed anchored to its toggle so it
-    // floats above the table and every other element.
-    function placeFixed(menu, toggle) {
-        var r = toggle.getBoundingClientRect();
-        menu.style.position = 'fixed';
-        menu.style.zIndex = '2000';
-        menu.style.top = (r.bottom + 4) + 'px';
-        // RTL: align the menu's right edge under the toggle, keep on-screen.
-        var mw = menu.offsetWidth || 230;
-        var left = r.right - mw;
-        if (left < 8) left = 8;
-        if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
-        menu.style.left = left + 'px';
-        menu.style.right = 'auto';
-        menu.style.transform = 'none';
-        menu.style.margin = '0';
-    }
-    function resetFixed(menu) {
-        menu.style.position = '';
-        menu.style.zIndex = '';
-        menu.style.top = '';
-        menu.style.left = '';
-        menu.style.right = '';
-        menu.style.transform = '';
-        menu.style.margin = '';
-    }
-    document.querySelectorAll('.students-table .row-actions .dropdown').forEach(function (dd) {
-        var toggle = dd.querySelector('[data-bs-toggle="dropdown"], [data-toggle="dropdown"]');
-        var menu = dd.querySelector('.dropdown-menu');
-        if (!toggle || !menu) return;
-        dd.addEventListener('shown.bs.dropdown', function () { placeFixed(menu, toggle); });
-        dd.addEventListener('hidden.bs.dropdown', function () { resetFixed(menu); });
-        // Fallback for jQuery-driven Bootstrap dropdowns (no bs.dropdown events).
-        toggle.addEventListener('click', function () {
-            setTimeout(function () {
-                if (menu.classList.contains('show')) placeFixed(menu, toggle);
-                else resetFixed(menu);
-            }, 0);
-        });
-    });
+    // Row 3-dot dropdown clipping is handled globally in layouts/app.blade.php
+    // (relocates the open menu to <body> so it escapes .table-responsive and any
+    // transformed .card ancestor). No per-view handling needed here.
 
     document.querySelectorAll('.js-bulk').forEach(function (btn) {
         btn.addEventListener('click', function () {

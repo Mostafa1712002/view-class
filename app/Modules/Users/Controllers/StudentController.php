@@ -25,20 +25,119 @@ class StudentController extends Controller
     public function __construct(
         private readonly StudentRepository $students,
         private readonly SubjectRepository $subjects,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
         $schoolId = $this->activeSchoolId();
-        $students = $this->students->paginate($schoolId, $request->string('q')->toString() ?: null);
+        $q = $request->string('q')->toString();
+        $filter = $request->string('filter')->toString();        // graduates | no_parents
+        $view = $request->string('view')->toString();            // counts
+        $advanced = (bool) $request->boolean('advanced');
+        $sectionId = $request->integer('section_id') ?: null;
+        $classId = $request->integer('class_room_id') ?: null;
+        $gender = $request->string('gender')->toString();
+        $status = $request->string('status')->toString();        // active | inactive
+
+        $builder = $this->applyFilters(
+            $this->students->query($schoolId)->with(['classRoom', 'section']),
+            compact('q', 'filter', 'sectionId', 'classId', 'gender', 'status')
+        );
+
+        $counts = null;
+        if ($view === 'counts') {
+            $counts = $this->studentCounts($schoolId);
+        }
+
+        $students = $builder->orderBy('users.name')->paginate(25)->withQueryString();
         $sections = Section::query()->where('school_id', $schoolId)->orderBy('name')->get();
+        $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
 
         return view('admin.users.students.index', [
             'students' => $students,
             'sections' => $sections,
-            'q' => $request->string('q')->toString(),
+            'classes' => $classes,
+            'q' => $q,
+            'filter' => $filter,
+            'view' => $view,
+            'advanced' => $advanced || $sectionId || $classId || $gender || $status,
+            'counts' => $counts,
+            'sectionId' => $sectionId,
+            'classId' => $classId,
+            'gender' => $gender,
+            'status' => $status,
         ]);
+    }
+
+    /** Apply the list search + filters shared by the index and bulk-graduate actions. */
+    private function applyFilters(\Illuminate\Database\Eloquent\Builder $builder, array $f): \Illuminate\Database\Eloquent\Builder
+    {
+        if (! empty($f['q'])) {
+            $needle = '%'.trim($f['q']).'%';
+            $builder->where(function ($w) use ($needle) {
+                $w->where('users.name', 'like', $needle)
+                    ->orWhere('users.email', 'like', $needle)
+                    ->orWhere('users.username', 'like', $needle)
+                    ->orWhere('users.national_id', 'like', $needle);
+            });
+        }
+        if (($f['filter'] ?? '') === 'graduates') {
+            $builder->whereHas('section', fn ($s) => $s->where('name', 'like', '%خريج%'));
+        }
+        if (($f['filter'] ?? '') === 'no_parents') {
+            $builder->whereDoesntHave('parents');
+        }
+        if (! empty($f['sectionId'])) {
+            $builder->where('users.section_id', $f['sectionId']);
+        }
+        if (! empty($f['classId'])) {
+            $builder->where('users.class_room_id', $f['classId']);
+        }
+        if (! empty($f['gender'])) {
+            $builder->where('users.gender', $f['gender']);
+        }
+        if (($f['status'] ?? '') === 'active') {
+            $builder->where('users.is_active', true);
+        } elseif (($f['status'] ?? '') === 'inactive') {
+            $builder->where('users.is_active', false);
+        }
+
+        return $builder;
+    }
+
+    /** Summary counts for the "أعداد الطلاب" view. */
+    private function studentCounts(?int $schoolId): array
+    {
+        $base = fn () => $this->students->query($schoolId);
+
+        $perSection = $base()->with('section')->get()
+            ->groupBy(fn ($u) => optional($u->section)->name ?: __('users.no_grade'))
+            ->map->count()->sortDesc();
+
+        return [
+            'total' => $base()->count(),
+            'active' => $base()->where('users.is_active', true)->count(),
+            'inactive' => $base()->where('users.is_active', false)->count(),
+            'no_parents' => $base()->whereDoesntHave('parents')->count(),
+            'graduates' => $base()->whereHas('section', fn ($s) => $s->where('name', 'like', '%خريج%'))->count(),
+            'per_section' => $perSection,
+        ];
+    }
+
+    /** "حذف الخريجين" — soft-delete all graduate students in the active school. */
+    public function deleteGraduates(): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        $graduates = $this->students->query($schoolId)
+            ->whereHas('section', fn ($s) => $s->where('name', 'like', '%خريج%'))
+            ->get();
+
+        foreach ($graduates as $g) {
+            $g->delete();
+        }
+
+        return redirect()->route('admin.users.students.index')
+            ->with('status', __('users.graduates_deleted', ['count' => $graduates->count()]));
     }
 
     public function create(): View
@@ -82,7 +181,7 @@ class StudentController extends Controller
                 $user->roles()->syncWithoutDetaching($role);
             }
 
-            if (!empty($data['class_room_id'])) {
+            if (! empty($data['class_room_id'])) {
                 DB::table('class_student')->insertOrIgnore([
                     'class_id' => $data['class_room_id'],
                     'student_id' => $user->id,
@@ -103,7 +202,7 @@ class StudentController extends Controller
     public function show(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
         $profile = StudentProfile::firstOrNew(['user_id' => $student->id]);
@@ -115,7 +214,7 @@ class StudentController extends Controller
     public function edit(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
 
@@ -130,7 +229,7 @@ class StudentController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
         $data = $this->validateStudent($request, $id);
@@ -149,7 +248,7 @@ class StudentController extends Controller
             'section_id' => $data['section_id'] ?? null,
             'class_room_id' => $data['class_room_id'] ?? null,
         ]);
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $student->password = Hash::make($data['password']);
             $student->plain_password_for_card = encrypt($data['password']);
         }
@@ -167,6 +266,7 @@ class StudentController extends Controller
         if ($student) {
             $student->delete();
         }
+
         return redirect()->route('admin.users.students.index')
             ->with('status', __('users.student_deleted'));
     }
@@ -227,7 +327,7 @@ class StudentController extends Controller
     public function parents(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
         $parents = $student->parents()->get();
@@ -241,7 +341,7 @@ class StudentController extends Controller
     public function schedule(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
 
@@ -277,7 +377,7 @@ class StudentController extends Controller
     public function lessons(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
         $classes = $student->enrolledClasses()->with('section')->get();
@@ -300,7 +400,7 @@ class StudentController extends Controller
     public function attendance(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
         $attendances = Attendance::query()
@@ -318,9 +418,10 @@ class StudentController extends Controller
     public function behavior(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
+
         return view('admin.users.students.behavior', compact('student'));
     }
 
@@ -330,9 +431,10 @@ class StudentController extends Controller
     public function medical(int $id): View|RedirectResponse
     {
         $student = $this->students->findScoped($id, $this->activeSchoolId());
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
+
         return view('admin.users.students.medical', compact('student'));
     }
 

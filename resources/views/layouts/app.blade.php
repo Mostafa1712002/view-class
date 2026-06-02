@@ -798,6 +798,85 @@
         setInterval(refreshNotificationCount, 60000);
     </script>
 
+    {{-- Global fix: action/▾ dropdown menus inside scrollable tables get clipped
+         by .table-responsive (overflow:auto) and trapped by transformed .card
+         ancestors. Relocate the open menu to <body> with fixed positioning so it
+         floats above the table and every element, on every page. --}}
+    <style>
+        .tw-floating-menu { position: fixed !important; z-index: 3000 !important; display: block !important; margin: 0 !important; }
+    </style>
+    <script>
+    (function () {
+        function inScroller(el) { return !!(el && el.closest && el.closest('.table-responsive')); }
+        function place(menu, toggle) {
+            var r = toggle.getBoundingClientRect();
+            if (!menu.__twOrigParent) { menu.__twOrigParent = menu.parentNode; menu.__twOrigNext = menu.nextSibling; }
+            if (menu.parentNode !== document.body) document.body.appendChild(menu);
+            menu.classList.add('tw-floating-menu');
+            menu.__twToggle = toggle;
+            var mw = menu.offsetWidth || 230;
+            var mh = menu.offsetHeight || 0;
+            var rtl = (getComputedStyle(document.body).direction === 'rtl');
+            var left = rtl ? (r.right - mw) : r.left;
+            if (left < 8) left = 8;
+            if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+            var top = r.bottom + 4;
+            if (top + mh > window.innerHeight - 8 && (r.top - mh - 4) > 8) top = r.top - mh - 4; // flip up
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
+            menu.style.right = 'auto';
+            menu.style.bottom = 'auto';
+            menu.style.transform = 'none';
+        }
+        function restore(menu) {
+            menu.classList.remove('tw-floating-menu');
+            ['left', 'top', 'right', 'bottom', 'transform'].forEach(function (p) { menu.style[p] = ''; });
+            if (menu.__twOrigParent) {
+                if (menu.__twOrigNext && menu.__twOrigNext.parentNode === menu.__twOrigParent) {
+                    menu.__twOrigParent.insertBefore(menu, menu.__twOrigNext);
+                } else {
+                    menu.__twOrigParent.appendChild(menu);
+                }
+            }
+            menu.__twOrigParent = null; menu.__twOrigNext = null; menu.__twToggle = null;
+        }
+        function syncAll() {
+            document.querySelectorAll('.tw-floating-menu').forEach(function (m) {
+                if (!m.classList.contains('show')) restore(m);
+            });
+        }
+        if (window.jQuery) {
+            window.jQuery(document)
+                .on('shown.bs.dropdown', function (e) {
+                    var dd = e.target;
+                    var toggle = dd.querySelector('[data-toggle="dropdown"],[data-bs-toggle="dropdown"]');
+                    var menu = dd.querySelector('.dropdown-menu');
+                    if (toggle && menu && inScroller(toggle)) place(menu, toggle);
+                })
+                .on('hidden.bs.dropdown', function () { setTimeout(syncAll, 0); });
+        }
+        // Click fallback (covers BS5 / non-jQuery dropdowns).
+        document.addEventListener('click', function (e) {
+            var toggle = e.target.closest && e.target.closest('[data-toggle="dropdown"],[data-bs-toggle="dropdown"]');
+            setTimeout(function () {
+                if (toggle && inScroller(toggle)) {
+                    var menu = toggle.parentNode.querySelector('.dropdown-menu')
+                        || document.querySelector('.tw-floating-menu');
+                    if (menu && menu.classList.contains('show')) place(menu, toggle);
+                }
+                syncAll();
+            }, 0);
+        }, true);
+        function reposition() {
+            document.querySelectorAll('.tw-floating-menu').forEach(function (m) {
+                if (m.__twToggle && m.classList.contains('show')) place(m, m.__twToggle);
+            });
+        }
+        window.addEventListener('scroll', reposition, true);
+        window.addEventListener('resize', reposition);
+    })();
+    </script>
+
     @stack('scripts')
 </body>
 </html>
