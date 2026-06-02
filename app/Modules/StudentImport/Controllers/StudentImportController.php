@@ -11,6 +11,7 @@ use App\Modules\StudentImport\Actions\ParseStudentExcel;
 use App\Modules\StudentImport\Http\Requests\StudentImportRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -101,9 +102,20 @@ class StudentImportController extends Controller
         $classified = $classifier->execute($rows, (int) $schoolId);
         $counts = $this->countStatuses($classified);
 
+        // Never persist the raw Password cell in cleartext. Encrypt it inside the
+        // stored preview; execute() decrypts it back. The in-memory $classified
+        // (passed to the view, which never renders the password) stays as-is.
+        $forStorage = array_map(function ($r) {
+            if (! empty($r['password'])) {
+                $r['password'] = Crypt::encryptString((string) $r['password']);
+            }
+
+            return $r;
+        }, $classified);
+
         DB::table('student_imports')->where('id', $logId)->update([
             'total_rows' => count($classified),
-            'preview_data' => json_encode($classified, JSON_UNESCAPED_UNICODE),
+            'preview_data' => json_encode($forStorage, JSON_UNESCAPED_UNICODE),
             'updated_at' => now(),
         ]);
 
@@ -130,6 +142,14 @@ class StudentImportController extends Controller
         $previewRows = json_decode($row->preview_data, true) ?: [];
         $result = $importer->executeFromPreview($previewRows, (int) $row->school_id);
 
+        // Drop the (encrypted) password from the stored preview now that the
+        // import has run — it is no longer needed and must not linger at rest.
+        $purged = array_map(function ($r) {
+            unset($r['password']);
+
+            return $r;
+        }, $previewRows);
+
         DB::table('student_imports')->where('id', $log)->update([
             'status' => $result->status,
             'total_rows' => $result->total,
@@ -137,6 +157,7 @@ class StudentImportController extends Controller
             'updated_count' => $result->updated,
             'failed_count' => $result->failed,
             'parent_created_count' => $result->parentCreated,
+            'preview_data' => json_encode($purged, JSON_UNESCAPED_UNICODE),
             'errors' => $result->errors ? json_encode($result->errors, JSON_UNESCAPED_UNICODE) : null,
             'updated_at' => now(),
         ]);
@@ -177,12 +198,21 @@ class StudentImportController extends Controller
         return response()->streamDownload(function () use ($bad) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, [__('student_import.result.row'), __('student_import.preview.col_name'), __('student_import.preview.col_id'), __('student_import.result.reason')]);
+            $safe = fn ($v) => $this->csvSafe($v);
+            fputcsv($out, array_map($safe, [__('student_import.result.row'), __('student_import.preview.col_name'), __('student_import.preview.col_id'), __('student_import.result.reason')]));
             foreach ($bad as $b) {
-                fputcsv($out, [$b['row'], $b['name'], $b['id'], $b['reason']]);
+                fputcsv($out, array_map($safe, [$b['row'], $b['name'], $b['id'], $b['reason']]));
             }
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /** Neutralise CSV/Excel formula injection from user-supplied cell values. */
+    private function csvSafe($value): string
+    {
+        $s = (string) $value;
+
+        return preg_match('/^[=+\-@\t\r]/', $s) ? "'".$s : $s;
     }
 
     private function resolveSchoolId(Request $request, $user): ?int

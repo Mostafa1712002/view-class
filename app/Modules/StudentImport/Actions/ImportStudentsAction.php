@@ -52,6 +52,16 @@ final class ImportStudentsAction
                 continue;
             }
 
+            // The password is stored encrypted in preview_data — decrypt it back.
+            // Tolerate a plaintext value (older previews / direct calls).
+            if (! empty($pr['password'])) {
+                try {
+                    $pr['password'] = \Illuminate\Support\Facades\Crypt::decryptString((string) $pr['password']);
+                } catch (\Throwable) {
+                    // leave as-is
+                }
+            }
+
             $row = StudentImportRowDto::fromArray($pr);
             $sectionId = $pr['resolvedSectionId'] ?? null;
             $classId = $pr['resolvedClassId'] ?? null;
