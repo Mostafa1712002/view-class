@@ -32,5 +32,11 @@
 |-------|-------|-----------|--------|
 | 1. Backend | 8 | 8 | Done |
 | 2. UI | 5 | 5 | Done |
-| 3. Verify | 7 | 4 | In Progress |
-| **Total** | **20** | **17** | **85%** |
+| 3. Verify | 7 | 7 | Done |
+| **Total** | **20** | **20** | **100%** |
+
+## Security hardening (post-review)
+- [x] Encrypt Password cell at rest in preview_data (decrypt on execute)
+- [x] Strip password from preview_data after completion
+- [x] CSV formula-injection sanitization on error export
+- [x] Verified live: password works, no cleartext stored
