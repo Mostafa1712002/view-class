@@ -271,12 +271,25 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
 Route::middleware(['auth'])->group(function () {
     Route::post('admin/users/impersonate/stop', [\App\Modules\Users\Controllers\ImpersonateController::class, 'stop'])->name('admin.users.impersonate.stop');
+
+    // === My education policies (any signed-in user) — card #105 ===
+    Route::get('my/policies', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'index'])->name('policies.my.index');
+    Route::get('my/policies/{id}', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'show'])->whereNumber('id')->name('policies.my.show');
 });
 
 // Sprint 4 — Subjects Module
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'creditHours'])->name('subjects.credit-hours');
     Route::patch('subjects/credit-hours', [\App\Modules\Subjects\Controllers\SubjectController::class, 'saveCreditHours'])->name('subjects.credit-hours.save');
+
+    // === Education policies (سياسات التعليم) — cards #104 + #105 ===
+    Route::get('policies', [\App\Modules\Policies\Controllers\PolicyController::class, 'index'])->name('policies.index');
+    Route::get('policies/create', [\App\Modules\Policies\Controllers\PolicyController::class, 'create'])->name('policies.create');
+    Route::post('policies', [\App\Modules\Policies\Controllers\PolicyController::class, 'store'])->name('policies.store');
+    Route::get('policies/{id}/edit', [\App\Modules\Policies\Controllers\PolicyController::class, 'edit'])->whereNumber('id')->name('policies.edit');
+    Route::put('policies/{id}', [\App\Modules\Policies\Controllers\PolicyController::class, 'update'])->whereNumber('id')->name('policies.update');
+    Route::delete('policies/{id}', [\App\Modules\Policies\Controllers\PolicyController::class, 'destroy'])->whereNumber('id')->name('policies.destroy');
+    Route::get('policies/{id}/acknowledgements', [\App\Modules\Policies\Controllers\PolicyController::class, 'acknowledgements'])->whereNumber('id')->name('policies.acknowledgements');
 
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');

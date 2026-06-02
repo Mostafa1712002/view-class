@@ -174,6 +174,10 @@
             <li class="nav-item {{ request()->routeIs('admin.schools.*') ? 'active' : '' }}" data-section="system">
                 <a href="{{ Route::has('admin.schools.index') ? route('admin.schools.index') : '#' }}"><i class="la la-building"></i><span class="menu-title">@lang('shell.nav_schools')</span></a>
             </li>
+            {{-- === Education policies cards #104/#105 === --}}
+            <li class="nav-item {{ request()->routeIs('admin.policies.*') ? 'active' : '' }}" data-section="system">
+                <a href="{{ Route::has('admin.policies.index') ? route('admin.policies.index') : '#' }}"><i class="la la-gavel"></i><span class="menu-title">@lang('shell.nav_policies')</span></a>
+            </li>
 
             <li class="nav-item has-sub {{ request()->routeIs('admin.users.*') ? 'open' : '' }}" data-section="system">
                 <a href="#"><i class="la la-users"></i><span class="menu-title">@lang('shell.nav_users')</span></a>
@@ -252,6 +256,11 @@
             <li class="nav-item" data-section="system"><a href="#"><i class="la la-life-ring"></i><span class="menu-title">@lang('shell.nav_support')</span></a></li>
             <li class="nav-item" data-section="system"><a href="#"><i class="la la-user-plus"></i><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
             @endif
+
+            {{-- My education policies — visible to every signed-in user (card #105) --}}
+            <li class="nav-item {{ request()->routeIs('policies.my.*') ? 'active' : '' }}">
+                <a href="{{ Route::has('policies.my.index') ? route('policies.my.index') : '#' }}"><i class="la la-gavel"></i><span class="menu-title">@lang('shell.nav_policies')</span></a>
+            </li>
 
             @if($sidebarUser && $sidebarUser->isTeacher())
                 <li class="navigation-header sec-educational"><span>@lang('shell.portal_my_schedule')</span></li>
