@@ -36,7 +36,11 @@ class EloquentLibraryItemRepository implements LibraryItemRepository
             $q->where('tags', 'like', '%'.$filters['tag'].'%');
         }
 
-        if (($filters['sort'] ?? '') === 'oldest') {
+        $q->withAvg('ratings as ratings_avg', 'rating')->withCount('ratings');
+
+        if (($filters['sort'] ?? '') === 'top_rated') {
+            $q->orderByDesc('ratings_avg')->orderByDesc('id');
+        } elseif (($filters['sort'] ?? '') === 'oldest') {
             $q->orderBy('id'); // oldest first
         } else {
             $q->orderByDesc('id'); // newest first (default)

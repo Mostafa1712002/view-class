@@ -57,7 +57,8 @@ class PublicLibraryController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateItem($request);
-        $data['is_public'] = true;
+        $data['is_public'] = $request->boolean('is_public', true);
+        $data['allow_comments'] = $request->boolean('allow_comments', true);
         $data['library_id'] = null;
         $data['school_id'] = $this->activeSchoolId();
         $data['created_by'] = auth()->id();
@@ -83,12 +84,92 @@ class PublicLibraryController extends Controller
         abort_if(! $item, 404);
 
         $data = $this->validateItem($request);
+        $data['is_public'] = $request->boolean('is_public', true);
+        $data['allow_comments'] = $request->boolean('allow_comments', true);
         $data = $this->handleUploads($request, $data, $item);
 
         $this->items->update($item, $data);
 
         return redirect()->route('admin.libraries.public.index')
             ->with('success', __('libraries.flash.item_updated'));
+    }
+
+    /** Item detail page with ratings + comments (card #97). */
+    public function show(int $id): View
+    {
+        $item = $this->items->findScoped($id, $this->activeSchoolId());
+        abort_if(! $item, 404);
+
+        $item->load(['subject', 'teacher', 'comments.user']);
+        $userRating = \App\Models\LibraryItemRating::where('library_item_id', $item->id)
+            ->where('user_id', auth()->id())
+            ->value('rating');
+
+        return view('admin.libraries.public.show', [
+            'item' => $item,
+            'avg' => $item->averageRating(),
+            'count' => $item->ratingsCount(),
+            'userRating' => $userRating,
+        ]);
+    }
+
+    /** Rate an item 1-5; one rating per user, editable (card #97). */
+    public function rate(Request $request, int $id): RedirectResponse
+    {
+        $item = $this->items->findScoped($id, $this->activeSchoolId());
+        abort_if(! $item, 404);
+
+        $data = $request->validate([
+            'rating' => ['required', 'integer', 'between:1,5'],
+        ]);
+
+        \App\Models\LibraryItemRating::updateOrCreate(
+            ['library_item_id' => $item->id, 'user_id' => auth()->id()],
+            ['rating' => $data['rating']],
+        );
+
+        return back()->with('success', __('libraries.flash.rated'));
+    }
+
+    /** Post a comment (only when the item allows comments) (card #97). */
+    public function storeComment(Request $request, int $id): RedirectResponse
+    {
+        $item = $this->items->findScoped($id, $this->activeSchoolId());
+        abort_if(! $item, 404);
+        abort_unless($item->allow_comments, 403);
+
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:1000'],
+        ]);
+
+        \App\Models\LibraryItemComment::create([
+            'library_item_id' => $item->id,
+            'user_id' => auth()->id(),
+            'body' => $data['body'],
+        ]);
+
+        return back()->with('success', __('libraries.flash.commented'));
+    }
+
+    /** Delete a comment — its owner or any staff admin (card #97). */
+    public function destroyComment(int $id, int $commentId): RedirectResponse
+    {
+        $item = $this->items->findScoped($id, $this->activeSchoolId());
+        abort_if(! $item, 404);
+
+        $comment = \App\Models\LibraryItemComment::where('library_item_id', $item->id)
+            ->whereKey($commentId)
+            ->firstOrFail();
+
+        $user = auth()->user();
+        abort_unless(
+            $comment->user_id === $user->id || $user->isSuperAdmin() || $user->isSchoolAdmin(),
+            403,
+        );
+
+        $comment->delete();
+
+        return back()->with('success', __('libraries.flash.comment_deleted'));
     }
 
     public function destroy(int $id): RedirectResponse

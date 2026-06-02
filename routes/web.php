@@ -349,9 +349,14 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'index'])->name('public.index');
         Route::get('public/create', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'create'])->name('public.create');
         Route::post('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'store'])->name('public.store');
-        Route::get('public/{id}/edit', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'edit'])->name('public.edit');
-        Route::put('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'update'])->name('public.update');
-        Route::delete('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'destroy'])->name('public.destroy');
+        Route::get('public/{id}/edit', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'edit'])->whereNumber('id')->name('public.edit');
+        Route::put('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'update'])->whereNumber('id')->name('public.update');
+        Route::delete('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'destroy'])->whereNumber('id')->name('public.destroy');
+        // Ratings + comments (card #97)
+        Route::get('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'show'])->whereNumber('id')->name('public.show');
+        Route::post('public/{id}/rate', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'rate'])->whereNumber('id')->name('public.rate');
+        Route::post('public/{id}/comments', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'storeComment'])->whereNumber('id')->name('public.comments.store');
+        Route::delete('public/{id}/comments/{commentId}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'destroyComment'])->whereNumber('id')->whereNumber('commentId')->name('public.comments.destroy');
 
         // Private libraries
         Route::get('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'index'])->name('private.index');

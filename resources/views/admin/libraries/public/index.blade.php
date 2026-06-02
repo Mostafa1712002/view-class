@@ -83,6 +83,7 @@
                         <select name="sort" class="form-select">
                             <option value="newest" @selected(($filters['sort'] ?? 'newest')==='newest')>@lang('libraries.public.filters.sort_newest')</option>
                             <option value="oldest" @selected(($filters['sort'] ?? '')==='oldest')>@lang('libraries.public.filters.sort_oldest')</option>
+                            <option value="top_rated" @selected(($filters['sort'] ?? '')==='top_rated')>@lang('libraries.public.filters.sort_top_rated')</option>
                         </select>
                     </div>
                     <div class="col-md-1 col-12 d-flex align-items-end lib-field">
@@ -119,6 +120,11 @@
                         <div class="lib-card-body flex-grow-1">
                             <div class="lib-card-title">{{ $item->title }}</div>
                             <div class="lib-card-meta"><i class="la la-calendar"></i> {{ $item->created_at?->format('Y-m-d') }}</div>
+                            <div class="lib-card-meta">
+                                <span style="color:#f59e0b;">★</span>
+                                {{ number_format((float) ($item->ratings_avg ?? 0), 1) }}
+                                <span class="text-muted">({{ $item->ratings_count ?? 0 }})</span>
+                            </div>
                             @if($item->description)
                                 <p class="lib-card-desc">{{ \Illuminate\Support\Str::limit($item->description, 80) }}</p>
                             @endif
@@ -130,7 +136,8 @@
                             @if($item->external_url)
                                 <a href="{{ $item->external_url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="@lang('libraries.actions.open')"><i class="la la-external-link-alt"></i></a>
                             @endif
-                            <a href="{{ route('admin.libraries.public.edit', $item->id) }}" class="btn btn-sm btn-outline-secondary ms-auto" title="@lang('libraries.actions.edit')"><i class="la la-pen"></i></a>
+                            <a href="{{ route('admin.libraries.public.show', $item->id) }}" class="btn btn-sm btn-outline-info ms-auto" title="@lang('libraries.show.details')"><i class="la la-star"></i></a>
+                            <a href="{{ route('admin.libraries.public.edit', $item->id) }}" class="btn btn-sm btn-outline-secondary" title="@lang('libraries.actions.edit')"><i class="la la-pen"></i></a>
                             <form action="{{ route('admin.libraries.public.destroy', $item->id) }}" method="POST" onsubmit="return confirm('@lang('libraries.confirm_delete')')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('libraries.actions.delete')"><i class="la la-trash"></i></button>

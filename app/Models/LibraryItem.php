@@ -27,11 +27,13 @@ class LibraryItem extends Model
         'tags',
         'sort_order',
         'is_public',
+        'allow_comments',
         'created_by',
     ];
 
     protected $casts = [
         'is_public' => 'boolean',
+        'allow_comments' => 'boolean',
         'sort_order' => 'integer',
     ];
 
@@ -50,5 +52,26 @@ class LibraryItem extends Model
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    public function ratings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LibraryItemRating::class, 'library_item_id');
+    }
+
+    public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LibraryItemComment::class, 'library_item_id')->latest();
+    }
+
+    /** Average rating (0 when none), rounded to 1 decimal. */
+    public function averageRating(): float
+    {
+        return round((float) $this->ratings()->avg('rating'), 1);
+    }
+
+    public function ratingsCount(): int
+    {
+        return $this->ratings()->count();
     }
 }

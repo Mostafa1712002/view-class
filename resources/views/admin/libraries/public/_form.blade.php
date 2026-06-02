@@ -60,6 +60,18 @@
             <img src="{{ asset('storage/' . $item->thumbnail_path) }}" alt="" class="mt-2" style="max-height:60px" />
         @endif
     </div>
+    <div class="col-md-6 col-12 lib-field d-flex align-items-center" style="gap:1.5rem;">
+        <div class="form-check">
+            <input type="hidden" name="is_public" value="0" />
+            <input type="checkbox" name="is_public" value="1" id="lib-publish" class="form-check-input" @checked(old('is_public', $item->is_public ?? true)) />
+            <label class="form-check-label" for="lib-publish">@lang('libraries.form.publish')</label>
+        </div>
+        <div class="form-check">
+            <input type="hidden" name="allow_comments" value="0" />
+            <input type="checkbox" name="allow_comments" value="1" id="lib-allow-comments" class="form-check-input" @checked(old('allow_comments', $item->allow_comments ?? true)) />
+            <label class="form-check-label" for="lib-allow-comments">@lang('libraries.form.allow_comments')</label>
+        </div>
+    </div>
 </div>
 <div class="mt-3 d-flex gap-2 flex-wrap">
     <button type="submit" class="btn btn-primary"><i class="la la-save"></i> @lang('libraries.actions.save')</button>
