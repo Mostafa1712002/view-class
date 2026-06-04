@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class StudentController extends Controller
@@ -319,6 +320,82 @@ class StudentController extends Controller
 
         return redirect()->route('admin.users.students.index')
             ->with('status', __('users.bulk_done', ['count' => $rows->count()]));
+    }
+
+    /** Bulk student-photo import — upload form (card #125). */
+    public function photosForm(): View
+    {
+        return view('admin.users.students.photos');
+    }
+
+    /**
+     * Import student photos in bulk (card #125). Each image's file name (without
+     * extension) is matched to a student's national id / academic id / username
+     * within the active school, and saved as that student's avatar.
+     */
+    public function importPhotos(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'photos' => ['required', 'array'],
+            'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+        $schoolId = $this->activeSchoolId();
+
+        $matched = [];
+        $unmatched = [];
+        foreach ($request->file('photos') as $file) {
+            $key = trim(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+            if ($key === '') {
+                $unmatched[] = $file->getClientOriginalName();
+
+                continue;
+            }
+
+            $student = User::query()
+                ->when($schoolId, fn ($q) => $q->where('users.school_id', $schoolId))
+                ->where(function ($q) use ($key) {
+                    $q->where('national_id', $key)->orWhere('username', $key);
+                })
+                ->first();
+
+            if (! $student) {
+                $sid = DB::table('student_profiles')->where('academic_id', $key)->value('user_id');
+                if ($sid) {
+                    $student = User::query()->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->find($sid);
+                }
+            }
+
+            if ($student) {
+                if ($student->avatar) {
+                    Storage::disk('public')->delete($student->avatar);
+                }
+                $student->avatar = $file->store('avatars', 'public');
+                $student->save();
+                $matched[] = $student->name.' ('.$key.')';
+            } else {
+                $unmatched[] = $file->getClientOriginalName();
+            }
+        }
+
+        return redirect()->route('admin.users.students.photos')
+            ->with('photo_result', ['matched' => $matched, 'unmatched' => $unmatched]);
+    }
+
+    /** Bulk student-status update page (card #125) — applies via the existing bulk() action. */
+    public function statusForm(Request $request): View
+    {
+        $schoolId = $this->activeSchoolId();
+        $q = trim((string) $request->get('q', ''));
+
+        $students = User::query()
+            ->whereHas('roles', fn ($r) => $r->where('slug', 'student'))
+            ->when($schoolId, fn ($w) => $w->where('users.school_id', $schoolId))
+            ->when($q !== '', fn ($w) => $w->where('users.name', 'like', '%'.$q.'%'))
+            ->orderBy('users.name')
+            ->limit(1000)
+            ->get(['users.id', 'users.name', 'users.status', 'users.is_active']);
+
+        return view('admin.users.students.status', compact('students', 'q'));
     }
 
     /**
