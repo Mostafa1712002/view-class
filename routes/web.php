@@ -325,6 +325,18 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'store'])->name('behavior.records.store');
     Route::delete('behavior/records/{id}', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'destroy'])->whereNumber('id')->name('behavior.records.destroy');
 
+    // === E-canteen: canteens management (المقصف الإلكتروني) — card #116 / Task 20 ===
+    Route::get('canteens', [\App\Modules\Canteen\Controllers\CanteenController::class, 'index'])->name('canteens.index');
+    Route::get('canteens/create', [\App\Modules\Canteen\Controllers\CanteenController::class, 'create'])->name('canteens.create');
+    Route::post('canteens', [\App\Modules\Canteen\Controllers\CanteenController::class, 'store'])->name('canteens.store');
+    Route::get('canteens/{id}/edit', [\App\Modules\Canteen\Controllers\CanteenController::class, 'edit'])->whereNumber('id')->name('canteens.edit');
+    Route::put('canteens/{id}', [\App\Modules\Canteen\Controllers\CanteenController::class, 'update'])->whereNumber('id')->name('canteens.update');
+    Route::delete('canteens/{id}', [\App\Modules\Canteen\Controllers\CanteenController::class, 'destroy'])->whereNumber('id')->name('canteens.destroy');
+    Route::get('canteens/{id}/manager', [\App\Modules\Canteen\Controllers\CanteenController::class, 'managerForm'])->whereNumber('id')->name('canteens.manager');
+    Route::put('canteens/{id}/manager', [\App\Modules\Canteen\Controllers\CanteenController::class, 'assignManager'])->whereNumber('id')->name('canteens.manager.assign');
+    Route::post('canteens/{id}/activate', [\App\Modules\Canteen\Controllers\CanteenController::class, 'activate'])->whereNumber('id')->name('canteens.activate');
+    Route::post('canteens/{id}/deactivate', [\App\Modules\Canteen\Controllers\CanteenController::class, 'deactivate'])->whereNumber('id')->name('canteens.deactivate');
+
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');
     Route::get('subjects/tracks/create',       [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'create'])->name('subject-tracks.create');

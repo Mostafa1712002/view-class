@@ -229,7 +229,7 @@
                 <a href="{{ Route::has('manage.academic-years.index') ? route('manage.academic-years.index') : '#' }}"><i class="la la-calendar"></i><span class="menu-title">@lang('shell.nav_academic_years')</span></a>
             </li>
 
-            <li class="nav-item" data-section="system"><a href="#"><i class="la la-utensils"></i><span class="menu-title">@lang('shell.nav_cafeteria')</span></a></li>
+            <li class="nav-item {{ request()->routeIs('admin.canteens.*') ? 'active' : '' }}" data-section="system"><a href="{{ route('admin.canteens.index') }}"><i class="la la-utensils"></i><span class="menu-title">@lang('shell.nav_cafeteria')</span></a></li>
 
             <li class="nav-item has-sub" data-section="system">
                 <a href="#"><i class="la la-briefcase-medical"></i><span class="menu-title">@lang('shell.nav_clinic')</span></a>
