@@ -87,6 +87,23 @@ jQuery(function ($) {
     var $classSel = $('#lib-classes');
     var $studentSel = $('#lib-students');
     var $teacherSel = $('#lib-teachers');
+
+    // Re-init these selects with the search box always visible (card #128); the global
+    // init hides search for short lists (minimumResultsForSearch: 6).
+    if ($.fn.select2) {
+        $classSel.add($studentSel).add($teacherSel).each(function () {
+            var $s = $(this);
+            if ($s.hasClass('select2-hidden-accessible')) $s.select2('destroy');
+            $s.select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                dir: document.documentElement.getAttribute('dir') || 'rtl',
+                minimumResultsForSearch: 0,
+                placeholder: $s.data('placeholder') || '',
+            });
+        });
+    }
+
     var T = {
         loading: @json(__('libraries.private.fields.loading')),
         noStudents: @json(__('libraries.private.fields.no_students')),
