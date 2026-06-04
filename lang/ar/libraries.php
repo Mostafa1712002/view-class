@@ -50,6 +50,11 @@ return [
             'classes' => 'فصول',
             'students' => 'طلاب',
             'teachers' => 'معلمون',
+            'choose_class_first' => 'اختر الفصل أولاً',
+            'loading' => 'جارٍ التحميل…',
+            'no_students' => 'لا يوجد طلاب في هذا الفصل',
+            'no_teachers' => 'لا يوجد معلمون مرتبطون بهذا الفصل',
+            'select_all' => 'تحديد الكل',
         ],
         'tabs' => [
             'details' => 'البيانات',

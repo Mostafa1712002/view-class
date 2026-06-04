@@ -374,6 +374,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         // Private libraries
         Route::get('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'index'])->name('private.index');
         Route::get('private/create', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'create'])->name('private.create');
+        Route::get('private/class-members', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'classMembers'])->name('private.class-members');
         Route::post('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'store'])->name('private.store');
         Route::get('private/{id}/edit', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'edit'])->name('private.edit');
         Route::put('private/{id}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'update'])->name('private.update');
