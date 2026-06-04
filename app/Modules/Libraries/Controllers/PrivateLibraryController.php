@@ -230,16 +230,25 @@ class PrivateLibraryController extends Controller
             return response()->json(['students' => [], 'teachers' => []]);
         }
 
-        $students = User::query()
-            ->whereHas('roles', fn ($q) => $q->where('slug', 'student'))
-            ->whereIn('id', function ($q) use ($scopedClassIds) {
-                $q->select('student_id')->from('class_student')->whereIn('class_id', $scopedClassIds);
-            })
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        // Students of a class = its enrolment, via the class_student pivot OR the
+        // users.class_room_id column. We do NOT additionally require a 'student' role
+        // row: many enrolled students have no role_user entry, and requiring one made
+        // only a single student appear (card #121). Enrolment is the source of truth.
+        $studentIds = DB::table('class_student')->whereIn('class_id', $scopedClassIds)->pluck('student_id')
+            ->merge(DB::table('users')->whereIn('class_room_id', $scopedClassIds)->pluck('id'))
+            ->filter()->map(fn ($v) => (int) $v)->unique()->values();
+
+        $students = $studentIds->isEmpty() ? collect()
+            : User::query()
+                ->whereIn('users.id', $studentIds)
+                ->when($schoolId, fn ($w) => $w->where('users.school_id', $schoolId))
+                ->leftJoin('student_profiles', 'student_profiles.user_id', '=', 'users.id')
+                ->orderBy('users.name')
+                ->get(['users.id', 'users.name', 'student_profiles.academic_id']);
 
         // Teachers linked to a class = its lead teacher + teachers of its periods +
-        // teachers in its schedule periods (including substitutes).
+        // teachers in its schedule periods (including substitutes). As with students,
+        // we trust the class linkage rather than requiring a 'teacher' role row.
         $teacherIds = ClassRoom::query()->whereIn('id', $scopedClassIds)->pluck('lead_teacher_id');
         $teacherIds = $teacherIds
             ->merge(DB::table('class_periods')->whereIn('class_id', $scopedClassIds)->pluck('teacher_id'))
@@ -257,12 +266,15 @@ class PrivateLibraryController extends Controller
         $teachers = $teacherIds->isEmpty() ? collect()
             : User::query()
                 ->whereIn('id', $teacherIds)
-                ->whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))
+                ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
                 ->orderBy('name')
                 ->get(['id', 'name']);
 
         return response()->json([
-            'students' => $students->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])->values(),
+            'students' => $students->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->academic_id ? $u->name.' — '.$u->academic_id : $u->name,
+            ])->values(),
             'teachers' => $teachers->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])->values(),
         ]);
     }
