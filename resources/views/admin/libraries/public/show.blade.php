@@ -99,6 +99,31 @@
         </div>
     </div>
 
+    {{-- Like / dislike / understood reactions (card #118) --}}
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap align-items-center" style="gap:.5rem;">
+            <span class="text-muted mr-2">@lang('libraries.show.reactions'):</span>
+            <form method="POST" action="{{ route('admin.libraries.public.react', $item->id) }}" class="d-inline">
+                @csrf <input type="hidden" name="type" value="like">
+                <button type="submit" class="btn btn-sm {{ $myReaction === 'like' ? 'btn-success' : 'btn-outline-success' }}">
+                    <i class="la la-thumbs-up"></i> @lang('libraries.show.like') <span class="badge badge-light">{{ $likeCount }}</span>
+                </button>
+            </form>
+            <form method="POST" action="{{ route('admin.libraries.public.react', $item->id) }}" class="d-inline">
+                @csrf <input type="hidden" name="type" value="dislike">
+                <button type="submit" class="btn btn-sm {{ $myReaction === 'dislike' ? 'btn-danger' : 'btn-outline-danger' }}">
+                    <i class="la la-thumbs-down"></i> @lang('libraries.show.dislike') <span class="badge badge-light">{{ $dislikeCount }}</span>
+                </button>
+            </form>
+            <form method="POST" action="{{ route('admin.libraries.public.react', $item->id) }}" class="d-inline">
+                @csrf <input type="hidden" name="type" value="understood">
+                <button type="submit" class="btn btn-sm {{ $iUnderstood ? 'btn-primary' : 'btn-outline-primary' }}">
+                    <i class="la la-check-circle"></i> @lang('libraries.show.understood') <span class="badge badge-light">{{ $understoodCount }}</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div class="row">
         {{-- Details + rating --}}
         <div class="col-lg-5 mb-3">

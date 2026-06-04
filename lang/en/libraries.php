@@ -123,6 +123,7 @@ return [
         'lab_updated' => 'Lab updated',
         'lab_deleted' => 'Lab deleted',
         'rated' => 'Your rating was saved',
+        'reacted' => 'Your reaction was saved',
         'commented' => 'Your comment was added',
         'comment_deleted' => 'Comment deleted',
     ],
@@ -156,6 +157,10 @@ return [
         'comments_off' => 'Disabled',
         'unsupported' => 'This content type cannot be previewed inline. Use the open or download button.',
         'no_content' => 'No content is attached to this item.',
+        'reactions' => 'Reactions',
+        'like' => 'Like',
+        'dislike' => 'Dislike',
+        'understood' => 'Understood',
     ],
     'form' => [
         'publish' => 'Published (visible to students)',

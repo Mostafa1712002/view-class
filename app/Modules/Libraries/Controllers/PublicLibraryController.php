@@ -105,12 +105,66 @@ class PublicLibraryController extends Controller
             ->where('user_id', auth()->id())
             ->value('rating');
 
+        // Like / dislike / understood reactions (card #118).
+        $reactionCounts = \App\Models\LibraryItemReaction::where('library_item_id', $item->id)
+            ->selectRaw('type, COUNT(*) as c')->groupBy('type')->pluck('c', 'type');
+        $myReactions = \App\Models\LibraryItemReaction::where('library_item_id', $item->id)
+            ->where('user_id', auth()->id())->pluck('type')->all();
+
         return view('admin.libraries.public.show', [
             'item' => $item,
             'avg' => $item->averageRating(),
             'count' => $item->ratingsCount(),
             'userRating' => $userRating,
+            'likeCount' => (int) ($reactionCounts['like'] ?? 0),
+            'dislikeCount' => (int) ($reactionCounts['dislike'] ?? 0),
+            'understoodCount' => (int) ($reactionCounts['understood'] ?? 0),
+            'myReaction' => in_array('like', $myReactions, true) ? 'like' : (in_array('dislike', $myReactions, true) ? 'dislike' : null),
+            'iUnderstood' => in_array('understood', $myReactions, true),
         ]);
+    }
+
+    /**
+     * Toggle a like/dislike/understood reaction (card #118).
+     * Like and dislike are mutually exclusive (switching moves the reaction);
+     * clicking the active one again removes it. "Understood" is an independent toggle.
+     */
+    public function react(Request $request, int $id): RedirectResponse
+    {
+        $item = $this->items->findScoped($id, $this->activeSchoolId());
+        abort_if(! $item, 404);
+
+        $data = $request->validate([
+            'type' => ['required', \Illuminate\Validation\Rule::in(\App\Models\LibraryItemReaction::TYPES)],
+        ]);
+        $type = $data['type'];
+        $userId = auth()->id();
+
+        if ($type === 'understood') {
+            $existing = \App\Models\LibraryItemReaction::where('library_item_id', $item->id)
+                ->where('user_id', $userId)->where('type', 'understood')->first();
+            $existing ? $existing->delete() : \App\Models\LibraryItemReaction::create([
+                'library_item_id' => $item->id, 'user_id' => $userId, 'type' => 'understood',
+            ]);
+
+            return back()->with('success', __('libraries.flash.reacted'));
+        }
+
+        // like / dislike — mutually exclusive
+        $current = \App\Models\LibraryItemReaction::where('library_item_id', $item->id)
+            ->where('user_id', $userId)->whereIn('type', ['like', 'dislike'])->first();
+
+        if ($current && $current->type === $type) {
+            $current->delete();                 // clicking the active reaction again removes it
+        } elseif ($current) {
+            $current->update(['type' => $type]); // switch like <-> dislike
+        } else {
+            \App\Models\LibraryItemReaction::create([
+                'library_item_id' => $item->id, 'user_id' => $userId, 'type' => $type,
+            ]);
+        }
+
+        return back()->with('success', __('libraries.flash.reacted'));
     }
 
     /** Rate an item 1-5; one rating per user, editable (card #97). */

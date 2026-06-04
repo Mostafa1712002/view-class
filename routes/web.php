@@ -450,6 +450,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         // Ratings + comments (card #97)
         Route::get('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'show'])->whereNumber('id')->name('public.show');
         Route::post('public/{id}/rate', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'rate'])->whereNumber('id')->name('public.rate');
+        Route::post('public/{id}/react', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'react'])->whereNumber('id')->name('public.react');
         Route::post('public/{id}/comments', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'storeComment'])->whereNumber('id')->name('public.comments.store');
         Route::delete('public/{id}/comments/{commentId}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'destroyComment'])->whereNumber('id')->whereNumber('commentId')->name('public.comments.destroy');
 
