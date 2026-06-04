@@ -201,5 +201,31 @@
         color: #a99e85;
     }
     .lib-scope .lib-empty i { font-size: 3rem; color: #d9cbab; display: block; margin-bottom: .6rem; }
+
+    /* --- On-brand form controls (gold focus is global) -------- */
+    .lib-scope textarea.form-control { min-height: 96px; }
+    .lib-scope .form-check-input { cursor: pointer; accent-color: var(--gold-300); }
+
+    /* --- File inputs: themed selector button (theme ships BS4) - */
+    .lib-scope input[type="file"].form-control {
+        display: flex;
+        align-items: center;
+        padding: 0;
+        overflow: hidden;
+        color: #8a8170;
+        cursor: pointer;
+    }
+    .lib-scope input[type="file"].form-control::file-selector-button {
+        align-self: stretch;
+        border: 0;
+        margin-inline-end: .9rem;
+        padding-inline: 1.15rem;
+        background: linear-gradient(135deg, var(--gold-200), var(--gold-400));
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter .2s;
+    }
+    .lib-scope input[type="file"].form-control::file-selector-button:hover { filter: brightness(1.07); }
 </style>
 @endpush
