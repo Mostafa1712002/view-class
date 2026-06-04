@@ -1,7 +1,11 @@
 @extends('layouts.app')
 @section('title', $item->title)
 @section('body_class', 'theme-light')
+
+@include('admin.libraries._styles')
+
 @section('content')
+<div class="lib-scope">
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
         <h2 class="content-header-title mb-0">{{ $item->title }}</h2>
@@ -80,7 +84,7 @@
                 </div>
             @elseif($type === 'link' && $safeUrl)
                 <div class="text-center p-5">
-                    <i class="la la-link" style="font-size:2.5rem;color:#6366f1;"></i>
+                    <i class="la la-link" style="font-size:2.5rem;color:var(--gold-300);"></i>
                     <p class="mt-2 mb-3 text-break"><a href="{{ $safeUrl }}" target="_blank" rel="noopener">{{ $safeUrl }}</a></p>
                     <a href="{{ $safeUrl }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="la la-external-link-alt"></i> @lang('libraries.show.open')</a>
                 </div>
@@ -192,5 +196,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection
