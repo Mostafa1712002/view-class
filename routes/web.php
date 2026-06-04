@@ -359,6 +359,13 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::put('canteen-balances/{student}', [\App\Modules\Canteen\Controllers\CanteenBalanceController::class, 'update'])->whereNumber('student')->name('canteen-balances.update');
     Route::get('canteen-balances/{student}/history', [\App\Modules\Canteen\Controllers\CanteenBalanceController::class, 'history'])->whereNumber('student')->name('canteen-balances.history');
 
+    // === E-canteen: orders lifecycle — card #116 / Task 20 part 4 ===
+    Route::get('canteen-orders', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'index'])->name('canteen-orders.index');
+    Route::get('canteen-orders/create', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'create'])->name('canteen-orders.create');
+    Route::post('canteen-orders', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'store'])->name('canteen-orders.store');
+    Route::get('canteen-orders/{id}', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'show'])->whereNumber('id')->name('canteen-orders.show');
+    Route::put('canteen-orders/{id}/status', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'updateStatus'])->whereNumber('id')->name('canteen-orders.status');
+
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');
     Route::get('subjects/tracks/create',       [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'create'])->name('subject-tracks.create');
