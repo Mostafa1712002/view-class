@@ -18,6 +18,7 @@ class Policy extends Model
         'title',
         'description',
         'target_roles',
+        'is_active',
         'file_path',
         'external_url',
         'created_by',
@@ -25,10 +26,11 @@ class Policy extends Model
 
     protected $casts = [
         'target_roles' => 'array',
+        'is_active' => 'boolean',
     ];
 
     /** Roles a policy can target. */
-    public const ROLES = ['student', 'teacher', 'parent', 'school-admin'];
+    public const ROLES = ['student', 'teacher', 'parent', 'school-admin', 'super-admin'];
 
     public function creator(): BelongsTo
     {

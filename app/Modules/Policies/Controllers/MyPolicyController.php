@@ -10,12 +10,16 @@ use Illuminate\View\View;
 class MyPolicyController extends Controller
 {
     /** Policies targeted at the current user's role(s), in their school. */
-    public function index(): View
+    public function index(\Illuminate\Http\Request $request): View
     {
         $user = auth()->user();
         $roles = $user->roles->pluck('slug')->all();
+        $q = trim((string) $request->get('q', ''));
+        $status = $request->get('status'); // null | read | unread
 
         $policies = Policy::query()
+            ->with('creator')
+            ->where('is_active', true)
             ->where(function ($w) use ($user) {
                 $w->whereNull('school_id');
                 if ($user->school_id) {
@@ -27,16 +31,28 @@ class MyPolicyController extends Controller
                     $w->orWhereJsonContains('target_roles', $slug);
                 }
             })
+            ->when($q !== '', fn ($w) => $w->where('title', 'like', '%'.$q.'%'))
             ->orderByDesc('id')
             ->get();
 
-        $readIds = PolicyAcknowledgement::where('user_id', $user->id)
-            ->whereNotNull('read_at')
-            ->pluck('policy_id')->all();
+        $readIds = array_fill_keys(
+            PolicyAcknowledgement::where('user_id', $user->id)
+                ->whereNotNull('read_at')
+                ->pluck('policy_id')->all(),
+            true
+        );
+
+        if ($status === 'read') {
+            $policies = $policies->filter(fn ($p) => isset($readIds[$p->id]))->values();
+        } elseif ($status === 'unread') {
+            $policies = $policies->filter(fn ($p) => ! isset($readIds[$p->id]))->values();
+        }
 
         return view('user.policies.index', [
             'policies' => $policies,
-            'readIds' => array_fill_keys($readIds, true),
+            'readIds' => $readIds,
+            'q' => $q,
+            'status' => $status,
         ]);
     }
 
@@ -47,6 +63,7 @@ class MyPolicyController extends Controller
         $roles = $user->roles->pluck('slug')->all();
 
         $policy = Policy::query()
+            ->where('is_active', true)
             ->where(function ($w) use ($user) {
                 $w->whereNull('school_id');
                 if ($user->school_id) {

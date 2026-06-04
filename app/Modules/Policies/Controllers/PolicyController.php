@@ -51,6 +51,7 @@ class PolicyController extends Controller
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'target_roles' => $data['target_roles'],
+            'is_active' => (bool) ($data['is_active'] ?? false),
             'external_url' => $data['external_url'] ?? null,
             'created_by' => auth()->id(),
         ]);
@@ -81,6 +82,7 @@ class PolicyController extends Controller
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'target_roles' => $data['target_roles'],
+            'is_active' => (bool) ($data['is_active'] ?? false),
             'external_url' => $data['external_url'] ?? null,
         ]);
         if ($request->hasFile('file')) {
@@ -133,6 +135,7 @@ class PolicyController extends Controller
             'description' => ['nullable', 'string'],
             'target_roles' => ['required', 'array', 'min:1'],
             'target_roles.*' => ['in:'.implode(',', Policy::ROLES)],
+            'is_active' => ['nullable', 'boolean'],
             'external_url' => ['nullable', 'url', 'max:1024'],
             'file' => ['nullable', 'file', 'max:20480'],
         ]);

@@ -5,6 +5,16 @@ return [
     'add' => 'Add Policy',
     'edit' => 'Edit Policy',
     'search' => 'Search by policy title',
+    'search_btn' => 'Search',
+    'status_active' => 'Active',
+    'status_inactive' => 'Inactive',
+    'filter' => [
+        'all' => 'All',
+    ],
+    'type' => [
+        'file' => 'File',
+        'link' => 'Link',
+    ],
     'my_title' => 'Education Policies',
     'my_intro' => 'Organisational policies and instructions for you. Click a policy to read it.',
 
@@ -27,6 +37,7 @@ return [
         'title' => 'Policy name',
         'description' => 'Policy description',
         'target_roles' => 'Target roles',
+        'is_active' => 'Active (visible to users)',
         'file' => 'Upload file',
         'external_url' => 'External URL',
     ],
@@ -36,6 +47,7 @@ return [
         'teacher' => 'Teachers',
         'parent' => 'Parents',
         'school-admin' => 'Admins',
+        'super-admin' => 'System admin',
     ],
 
     'actions' => [

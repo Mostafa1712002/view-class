@@ -36,6 +36,7 @@
                             <th>@lang('policies.cols.read')</th>
                             <th>@lang('policies.cols.created_at')</th>
                             <th>@lang('policies.cols.creator')</th>
+                            <th>@lang('policies.cols.status')</th>
                             <th class="text-end">@lang('policies.cols.actions')</th>
                         </tr>
                     </thead>
@@ -52,6 +53,13 @@
                                 <td><span class="text-success">{{ $p->read_count }}</span> / {{ $p->beneficiaries_count }}</td>
                                 <td><small>{{ $p->created_at?->format('Y-m-d') }}</small></td>
                                 <td><small>{{ optional($p->creator)->name ?? '—' }}</small></td>
+                                <td>
+                                    @if($p->is_active)
+                                        <span class="badge badge-success">@lang('policies.status_active')</span>
+                                    @else
+                                        <span class="badge badge-secondary">@lang('policies.status_inactive')</span>
+                                    @endif
+                                </td>
                                 <td class="text-end">
                                     <div class="dropdown d-inline">
                                         <button class="btn btn-sm btn-soft" data-toggle="dropdown" data-bs-toggle="dropdown"><i class="la la-ellipsis-v"></i></button>
@@ -67,7 +75,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="text-center text-muted py-4">@lang('policies.empty')</td></tr>
+                            <tr><td colspan="8" class="text-center text-muted py-4">@lang('policies.empty')</td></tr>
                         @endforelse
                     </tbody>
                 </table>

@@ -27,6 +27,15 @@
     </div>
 </div>
 
+<div class="form-group mb-3">
+    <div class="form-check">
+        <input type="hidden" name="is_active" value="0">
+        <input type="checkbox" name="is_active" value="1" id="policy-is-active" class="form-check-input"
+            @checked(old('is_active', $policy->is_active ?? true))>
+        <label class="form-check-label" for="policy-is-active">@lang('policies.fields.is_active')</label>
+    </div>
+</div>
+
 <div class="row">
     <div class="form-group mb-3 col-md-6">
         <label class="form-label">@lang('policies.fields.external_url')</label>
