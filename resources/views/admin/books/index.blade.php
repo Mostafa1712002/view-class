@@ -14,7 +14,7 @@
             </ol>
         </div>
     </div>
-    <div class="content-header-right col-md-5 col-12 text-md-end">
+    <div class="content-header-right col-md-5 col-12 text-md-right">
         <a href="{{ route('manage.books.create') }}" class="btn btn-primary btn-sm">
             <i class="la la-plus"></i> @lang('books_admin.add_book')
         </a>
@@ -39,14 +39,14 @@
         </div>
         <div class="card-body">
             <form method="GET" action="{{ route('manage.books.index') }}">
-                <div class="row g-2">
+                <div class="form-row">
                     <div class="col-md-3">
                         <label class="form-label small">@lang('books_admin.filters.title')</label>
                         <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control form-control-sm" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small">@lang('books_admin.filters.subject')</label>
-                        <select name="subject_id" class="form-select form-select-sm">
+                        <select name="subject_id" class="custom-select custom-select-sm">
                             <option value="">@lang('books_admin.all')</option>
                             @foreach($subjects as $s)
                                 <option value="{{ $s->id }}" @selected((string)($filters['subject_id'] ?? '')===(string)$s->id)>{{ $s->name }}</option>
@@ -55,7 +55,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small">@lang('books_admin.filters.grade')</label>
-                        <select name="grade_level" class="form-select form-select-sm">
+                        <select name="grade_level" class="custom-select custom-select-sm">
                             <option value="">@lang('books_admin.all')</option>
                             @foreach($grades as $val => $label)
                                 <option value="{{ $val }}" @selected((string)($filters['grade_level'] ?? '')===(string)$val)>{{ $label }}</option>
@@ -64,7 +64,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small">@lang('books_admin.filters.term')</label>
-                        <select name="academic_term_id" class="form-select form-select-sm">
+                        <select name="academic_term_id" class="custom-select custom-select-sm">
                             <option value="">@lang('books_admin.all')</option>
                             @foreach($terms as $t)
                                 <option value="{{ $t->id }}" @selected((string)($filters['academic_term_id'] ?? '')===(string)$t->id)>{{ $t->name }}</option>
@@ -73,7 +73,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small">@lang('books_admin.filters.ministry')</label>
-                        <select name="is_ministry" class="form-select form-select-sm">
+                        <select name="is_ministry" class="custom-select custom-select-sm">
                             <option value="">@lang('books_admin.all')</option>
                             <option value="1" @selected((string)($filters['is_ministry'] ?? '')==='1')>@lang('books_admin.yes')</option>
                             <option value="0" @selected((string)($filters['is_ministry'] ?? '')==='0')>@lang('books_admin.no')</option>
@@ -100,7 +100,7 @@
                         <th>@lang('books_admin.columns.source')</th>
                         <th>@lang('books_admin.columns.status')</th>
                         <th>@lang('books_admin.columns.created_at')</th>
-                        <th class="text-end">@lang('books_admin.columns.actions')</th>
+                        <th class="text-right">@lang('books_admin.columns.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,7 +109,7 @@
                             <td>
                                 {{ $book->title }}
                                 @if($book->is_ministry)
-                                    <span class="badge bg-warning text-dark ms-1">@lang('books_admin.ministry_yes')</span>
+                                    <span class="badge badge-warning ml-1">@lang('books_admin.ministry_yes')</span>
                                 @endif
                             </td>
                             <td>{{ optional($book->subject)->name ?? '—' }}</td>
@@ -124,13 +124,13 @@
                             </td>
                             <td>
                                 @if($book->is_active)
-                                    <span class="badge bg-success">@lang('books_admin.status_active')</span>
+                                    <span class="badge badge-success">@lang('books_admin.status_active')</span>
                                 @else
-                                    <span class="badge bg-secondary">@lang('books_admin.status_inactive')</span>
+                                    <span class="badge badge-secondary">@lang('books_admin.status_inactive')</span>
                                 @endif
                             </td>
                             <td><small>{{ optional($book->created_at)->format('Y-m-d') }}</small></td>
-                            <td class="text-end">
+                            <td class="text-right">
                                 @if($book->read_url)
                                     <a href="{{ $book->read_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info" title="@lang('books_admin.view')">
                                         <i class="la la-eye"></i>
