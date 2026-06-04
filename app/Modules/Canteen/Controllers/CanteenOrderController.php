@@ -71,18 +71,27 @@ class CanteenOrderController extends Controller
 
         $data = $request->validate([
             'canteen_id' => ['required', Rule::exists('canteens', 'id')->where(fn ($q) => $schoolId ? $q->where('school_id', $schoolId) : $q)],
-            'student_id' => ['required', Rule::exists('users', 'id')],
+            // Scope the student to the active school — never let an order target another tenant's student.
+            'student_id' => ['required', Rule::exists('users', 'id')->where(fn ($q) => $schoolId ? $q->where('school_id', $schoolId) : $q)],
             'items' => ['required', 'array'],
             'items.*' => ['nullable', 'integer', 'min:0', 'max:1000'],
             'note' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $canteen = Canteen::findOrFail($data['canteen_id']);
+        $canteen = Canteen::query()
+            ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+            ->findOrFail($data['canteen_id']);
         if (! $canteen->is_active) {
             return back()->withInput()->with('error', __('canteen.orders.flash.canteen_inactive'));
         }
 
-        $student = User::whereKey($data['student_id'])->whereHas('roles', fn ($r) => $r->where('slug', 'student'))->firstOrFail();
+        $student = User::whereKey($data['student_id'])
+            ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+            ->whereHas('roles', fn ($r) => $r->where('slug', 'student'))
+            ->firstOrFail();
+
+        // A canteen only serves students of its own school.
+        abort_unless((int) $canteen->school_id === (int) $student->school_id, 422);
 
         // Build the line items from qty>0 entries, validating each product.
         $blocked = CanteenBlockedProduct::where('student_id', $student->id)->pluck('canteen_product_id')->all();
