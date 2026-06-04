@@ -11,8 +11,10 @@ use App\Models\User;
 use App\Modules\Libraries\Repositories\Contracts\LibraryItemRepository;
 use App\Modules\Libraries\Repositories\Contracts\LibraryRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -183,24 +185,85 @@ class PrivateLibraryController extends Controller
             ->limit(500)
             ->get(['id', 'name']);
 
-        $students = User::query()
-            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
-            ->whereHas('roles', fn ($q) => $q->where('name', 'student'))
-            ->orderBy('name')
-            ->limit(500)
-            ->get(['id', 'name']);
-
-        $teachers = User::query()
-            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
-            ->whereHas('roles', fn ($q) => $q->where('name', 'teacher'))
-            ->orderBy('name')
-            ->limit(500)
-            ->get(['id', 'name']);
-
         $currentAudiences = $library->exists
             ? LibraryAudience::where('library_id', $library->id)->get()->groupBy('audience_type')
             : collect();
 
-        return compact('library', 'classes', 'students', 'teachers', 'currentAudiences');
+        // Students/teachers are loaded dynamically per selected class (card #119), so we only
+        // need to pre-render the ones already attached to this library (edit screen).
+        $selectedStudentIds = collect($currentAudiences['user'] ?? [])->pluck('audience_id')->all();
+        $selectedTeacherIds = collect($currentAudiences['teacher'] ?? [])->pluck('audience_id')->all();
+
+        $selectedStudents = empty($selectedStudentIds) ? collect()
+            : User::query()->whereIn('id', $selectedStudentIds)->orderBy('name')->get(['id', 'name']);
+        $selectedTeachers = empty($selectedTeacherIds) ? collect()
+            : User::query()->whereIn('id', $selectedTeacherIds)->orderBy('name')->get(['id', 'name']);
+
+        return compact('library', 'classes', 'currentAudiences', 'selectedStudents', 'selectedTeachers');
+    }
+
+    /**
+     * AJAX endpoint (card #119): return the students and teachers linked to the
+     * selected class(es) so the private-library audience selects cascade from the
+     * chosen class instead of listing every user in the school.
+     */
+    public function classMembers(Request $request): JsonResponse
+    {
+        $classIds = collect((array) $request->input('class_ids', []))
+            ->filter(fn ($v) => is_numeric($v))
+            ->map(fn ($v) => (int) $v)
+            ->values();
+
+        if ($classIds->isEmpty()) {
+            return response()->json(['students' => [], 'teachers' => []]);
+        }
+
+        $schoolId = $this->activeSchoolId();
+
+        // Keep only classes the current scope is allowed to see.
+        $scopedClassIds = ClassRoom::query()
+            ->whereIn('id', $classIds)
+            ->when($schoolId, fn ($q) => $q->whereHas('section', fn ($s) => $s->where('school_id', $schoolId)))
+            ->pluck('id');
+
+        if ($scopedClassIds->isEmpty()) {
+            return response()->json(['students' => [], 'teachers' => []]);
+        }
+
+        $students = User::query()
+            ->whereHas('roles', fn ($q) => $q->where('slug', 'student'))
+            ->whereIn('id', function ($q) use ($scopedClassIds) {
+                $q->select('student_id')->from('class_student')->whereIn('class_id', $scopedClassIds);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        // Teachers linked to a class = its lead teacher + teachers of its periods +
+        // teachers in its schedule periods (including substitutes).
+        $teacherIds = ClassRoom::query()->whereIn('id', $scopedClassIds)->pluck('lead_teacher_id');
+        $teacherIds = $teacherIds
+            ->merge(DB::table('class_periods')->whereIn('class_id', $scopedClassIds)->pluck('teacher_id'))
+            ->merge(DB::table('class_periods')->whereIn('class_id', $scopedClassIds)->pluck('substitute_teacher_id'));
+
+        $scheduleIds = DB::table('schedules')->whereIn('class_id', $scopedClassIds)->pluck('id');
+        if ($scheduleIds->isNotEmpty()) {
+            $teacherIds = $teacherIds
+                ->merge(DB::table('schedule_periods')->whereIn('schedule_id', $scheduleIds)->pluck('teacher_id'))
+                ->merge(DB::table('schedule_periods')->whereIn('schedule_id', $scheduleIds)->pluck('substitute_teacher_id'));
+        }
+
+        $teacherIds = $teacherIds->filter()->map(fn ($v) => (int) $v)->unique()->values();
+
+        $teachers = $teacherIds->isEmpty() ? collect()
+            : User::query()
+                ->whereIn('id', $teacherIds)
+                ->whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))
+                ->orderBy('name')
+                ->get(['id', 'name']);
+
+        return response()->json([
+            'students' => $students->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])->values(),
+            'teachers' => $teachers->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])->values(),
+        ]);
     }
 }

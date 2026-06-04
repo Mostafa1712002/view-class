@@ -50,6 +50,11 @@ return [
             'classes' => 'Classes',
             'students' => 'Students',
             'teachers' => 'Teachers',
+            'choose_class_first' => 'Choose a class first',
+            'loading' => 'Loading…',
+            'no_students' => 'No students in this class',
+            'no_teachers' => 'No teachers linked to this class',
+            'select_all' => 'Select all',
         ],
         'tabs' => [
             'details' => 'Details',
