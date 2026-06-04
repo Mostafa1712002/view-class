@@ -248,8 +248,8 @@
                 <a href="#"><i class="la la-balance-scale"></i><span class="menu-title">@lang('shell.nav_behavior')</span></a>
                 <ul class="menu-content">
                     <li class="{{ request()->routeIs('admin.behavior.groups.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.groups.index') }}"><i class="la la-users"></i><span class="menu-item">@lang('shell.nav_behavior_groups')</span></a></li>
-                    <li><a href="#"><i class="la la-gavel"></i><span class="menu-item">@lang('shell.nav_behaviors')</span></a></li>
-                    <li><a href="#"><i class="la la-cogs"></i><span class="menu-item">@lang('shell.nav_behavior_actions')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.behavior.behaviors.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.behaviors.index') }}"><i class="la la-gavel"></i><span class="menu-item">@lang('shell.nav_behaviors')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.behavior.actions.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.actions.index') }}"><i class="la la-cogs"></i><span class="menu-item">@lang('shell.nav_behavior_actions')</span></a></li>
                 </ul>
             </li>
 

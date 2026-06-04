@@ -300,6 +300,24 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('behavior/groups/{id}/toggle', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'toggle'])->whereNumber('id')->name('behavior.groups.toggle');
     Route::delete('behavior/groups/{id}', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'destroy'])->whereNumber('id')->name('behavior.groups.destroy');
 
+    // === Behaviour: behaviours (السلوكيات) — card #115 / Task 19 ===
+    Route::get('behavior/behaviors', [\App\Modules\Behavior\Controllers\BehaviorController::class, 'index'])->name('behavior.behaviors.index');
+    Route::get('behavior/behaviors/create', [\App\Modules\Behavior\Controllers\BehaviorController::class, 'create'])->name('behavior.behaviors.create');
+    Route::post('behavior/behaviors', [\App\Modules\Behavior\Controllers\BehaviorController::class, 'store'])->name('behavior.behaviors.store');
+    Route::get('behavior/behaviors/{id}/edit', [\App\Modules\Behavior\Controllers\BehaviorController::class, 'edit'])->whereNumber('id')->name('behavior.behaviors.edit');
+    Route::put('behavior/behaviors/{id}', [\App\Modules\Behavior\Controllers\BehaviorController::class, 'update'])->whereNumber('id')->name('behavior.behaviors.update');
+    Route::post('behavior/behaviors/{id}/toggle', [\App\Modules\Behavior\Controllers\BehaviorController::class, 'toggle'])->whereNumber('id')->name('behavior.behaviors.toggle');
+    Route::delete('behavior/behaviors/{id}', [\App\Modules\Behavior\Controllers\BehaviorController::class, 'destroy'])->whereNumber('id')->name('behavior.behaviors.destroy');
+
+    // === Behaviour: actions (الإجراءات) — card #115 / Task 19 ===
+    Route::get('behavior/actions', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'index'])->name('behavior.actions.index');
+    Route::get('behavior/actions/create', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'create'])->name('behavior.actions.create');
+    Route::post('behavior/actions', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'store'])->name('behavior.actions.store');
+    Route::get('behavior/actions/{id}/edit', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'edit'])->whereNumber('id')->name('behavior.actions.edit');
+    Route::put('behavior/actions/{id}', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'update'])->whereNumber('id')->name('behavior.actions.update');
+    Route::post('behavior/actions/{id}/toggle', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'toggle'])->whereNumber('id')->name('behavior.actions.toggle');
+    Route::delete('behavior/actions/{id}', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'destroy'])->whereNumber('id')->name('behavior.actions.destroy');
+
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');
     Route::get('subjects/tracks/create',       [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'create'])->name('subject-tracks.create');
