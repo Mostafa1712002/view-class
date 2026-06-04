@@ -56,6 +56,52 @@ return [
         'need_product' => 'add at least one active product',
     ],
 
+    'categories' => [
+        'title' => 'Categories',
+        'add' => 'Add category',
+        'empty' => 'No categories yet.',
+        'fields' => [
+            'name' => 'Category name',
+            'sort_order' => 'Display order',
+        ],
+        'flash' => [
+            'created' => 'Category added',
+            'updated' => 'Category updated',
+            'deleted' => 'Category deleted',
+            'has_products' => 'A category with products cannot be deleted. Remove or disable its products first.',
+        ],
+    ],
+
+    'products' => [
+        'title' => 'Products',
+        'add' => 'Add product',
+        'edit' => 'Edit product',
+        'empty' => 'No products yet.',
+        'choose_category' => 'Choose a category',
+        'no_categories' => 'Add at least one active category before adding products.',
+        'cols' => [
+            'image' => 'Image',
+            'name' => 'Product',
+            'category' => 'Category',
+            'price' => 'Price',
+            'calories' => 'Calories',
+        ],
+        'fields' => [
+            'category' => 'Category',
+            'name' => 'Product name',
+            'price' => 'Price',
+            'calories' => 'Calories',
+            'image' => 'Product image',
+            'sort_order' => 'Display order',
+            'is_active' => 'Active',
+        ],
+        'flash' => [
+            'created' => 'Product added',
+            'updated' => 'Product updated',
+            'deleted' => 'Product deleted',
+        ],
+    ],
+
     'flash' => [
         'created' => 'Canteen created (inactive). Finish setup, then activate it.',
         'updated' => 'Canteen updated',

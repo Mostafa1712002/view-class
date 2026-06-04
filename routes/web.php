@@ -337,6 +337,22 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('canteens/{id}/activate', [\App\Modules\Canteen\Controllers\CanteenController::class, 'activate'])->whereNumber('id')->name('canteens.activate');
     Route::post('canteens/{id}/deactivate', [\App\Modules\Canteen\Controllers\CanteenController::class, 'deactivate'])->whereNumber('id')->name('canteens.deactivate');
 
+    // === E-canteen: categories — card #116 / Task 20 part 2 ===
+    Route::get('canteens/{canteen}/categories', [\App\Modules\Canteen\Controllers\CanteenCategoryController::class, 'index'])->whereNumber('canteen')->name('canteens.categories.index');
+    Route::post('canteens/{canteen}/categories', [\App\Modules\Canteen\Controllers\CanteenCategoryController::class, 'store'])->whereNumber('canteen')->name('canteens.categories.store');
+    Route::put('canteens/{canteen}/categories/{id}', [\App\Modules\Canteen\Controllers\CanteenCategoryController::class, 'update'])->whereNumber('canteen')->whereNumber('id')->name('canteens.categories.update');
+    Route::post('canteens/{canteen}/categories/{id}/toggle', [\App\Modules\Canteen\Controllers\CanteenCategoryController::class, 'toggle'])->whereNumber('canteen')->whereNumber('id')->name('canteens.categories.toggle');
+    Route::delete('canteens/{canteen}/categories/{id}', [\App\Modules\Canteen\Controllers\CanteenCategoryController::class, 'destroy'])->whereNumber('canteen')->whereNumber('id')->name('canteens.categories.destroy');
+
+    // === E-canteen: products — card #116 / Task 20 part 2 ===
+    Route::get('canteens/{canteen}/products', [\App\Modules\Canteen\Controllers\CanteenProductController::class, 'index'])->whereNumber('canteen')->name('canteens.products.index');
+    Route::get('canteens/{canteen}/products/create', [\App\Modules\Canteen\Controllers\CanteenProductController::class, 'create'])->whereNumber('canteen')->name('canteens.products.create');
+    Route::post('canteens/{canteen}/products', [\App\Modules\Canteen\Controllers\CanteenProductController::class, 'store'])->whereNumber('canteen')->name('canteens.products.store');
+    Route::get('canteens/{canteen}/products/{id}/edit', [\App\Modules\Canteen\Controllers\CanteenProductController::class, 'edit'])->whereNumber('canteen')->whereNumber('id')->name('canteens.products.edit');
+    Route::put('canteens/{canteen}/products/{id}', [\App\Modules\Canteen\Controllers\CanteenProductController::class, 'update'])->whereNumber('canteen')->whereNumber('id')->name('canteens.products.update');
+    Route::post('canteens/{canteen}/products/{id}/toggle', [\App\Modules\Canteen\Controllers\CanteenProductController::class, 'toggle'])->whereNumber('canteen')->whereNumber('id')->name('canteens.products.toggle');
+    Route::delete('canteens/{canteen}/products/{id}', [\App\Modules\Canteen\Controllers\CanteenProductController::class, 'destroy'])->whereNumber('canteen')->whereNumber('id')->name('canteens.products.destroy');
+
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');
     Route::get('subjects/tracks/create',       [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'create'])->name('subject-tracks.create');

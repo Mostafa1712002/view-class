@@ -57,6 +57,8 @@
                         <td class="text-right">
                             <a href="{{ route('admin.canteens.edit', $c->id) }}" class="btn btn-sm btn-outline-primary" title="@lang('canteen.actions.edit')"><i class="la la-edit"></i></a>
                             <a href="{{ route('admin.canteens.manager', $c->id) }}" class="btn btn-sm btn-outline-info" title="@lang('canteen.actions.assign_manager')"><i class="la la-user-tie"></i></a>
+                            <a href="{{ route('admin.canteens.categories.index', $c->id) }}" class="btn btn-sm btn-outline-secondary" title="@lang('canteen.categories.title')"><i class="la la-tags"></i></a>
+                            <a href="{{ route('admin.canteens.products.index', $c->id) }}" class="btn btn-sm btn-outline-secondary" title="@lang('canteen.products.title')"><i class="la la-box"></i></a>
                             @if($c->is_active)
                                 <form method="POST" action="{{ route('admin.canteens.deactivate', $c->id) }}" class="d-inline">@csrf
                                     <button type="submit" class="btn btn-sm btn-outline-warning" title="@lang('canteen.actions.deactivate')"><i class="la la-pause-circle"></i></button>

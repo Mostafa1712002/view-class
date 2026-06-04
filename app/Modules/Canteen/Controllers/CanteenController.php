@@ -153,9 +153,21 @@ class CanteenController extends Controller
     public function assignManager(Request $request, int $id): RedirectResponse
     {
         $canteen = $this->findScoped($id);
+
+        // The manager must be a school-admin of THIS canteen's school (not any arbitrary user id).
         $data = $request->validate([
-            'manager_id' => ['nullable', Rule::exists('users', 'id')],
+            'manager_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where(fn ($q) => $q->where('school_id', $canteen->school_id)),
+            ],
         ]);
+
+        if (! empty($data['manager_id'])) {
+            $isAdmin = User::whereKey($data['manager_id'])
+                ->whereHas('roles', fn ($r) => $r->where('slug', 'school-admin'))
+                ->exists();
+            abort_unless($isAdmin, 422);
+        }
 
         $canteen->update(['manager_id' => $data['manager_id'] ?: null]);
 
