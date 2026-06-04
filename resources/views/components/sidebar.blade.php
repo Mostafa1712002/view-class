@@ -250,6 +250,7 @@
                     <li class="{{ request()->routeIs('admin.behavior.groups.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.groups.index') }}"><i class="la la-users"></i><span class="menu-item">@lang('shell.nav_behavior_groups')</span></a></li>
                     <li class="{{ request()->routeIs('admin.behavior.behaviors.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.behaviors.index') }}"><i class="la la-gavel"></i><span class="menu-item">@lang('shell.nav_behaviors')</span></a></li>
                     <li class="{{ request()->routeIs('admin.behavior.actions.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.actions.index') }}"><i class="la la-cogs"></i><span class="menu-item">@lang('shell.nav_behavior_actions')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.behavior.records.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.records.index') }}"><i class="la la-clipboard-list"></i><span class="menu-item">@lang('behavior.records.title')</span></a></li>
                 </ul>
             </li>
 

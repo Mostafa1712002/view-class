@@ -318,6 +318,13 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('behavior/actions/{id}/toggle', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'toggle'])->whereNumber('id')->name('behavior.actions.toggle');
     Route::delete('behavior/actions/{id}', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'destroy'])->whereNumber('id')->name('behavior.actions.destroy');
 
+    // === Behaviour: records / apply behaviour (تسجيل السلوك) — card #115 / Task 19 ===
+    Route::get('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'index'])->name('behavior.records.index');
+    Route::get('behavior/records/create', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'create'])->name('behavior.records.create');
+    Route::get('behavior/records/actions', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'actions'])->name('behavior.records.actions');
+    Route::post('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'store'])->name('behavior.records.store');
+    Route::delete('behavior/records/{id}', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'destroy'])->whereNumber('id')->name('behavior.records.destroy');
+
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');
     Route::get('subjects/tracks/create',       [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'create'])->name('subject-tracks.create');

@@ -1,0 +1,226 @@
+<?php
+
+namespace App\Modules\Behavior\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Behavior;
+use App\Models\BehaviorAction;
+use App\Models\BehaviorGroup;
+use App\Models\BehaviorRecord;
+use App\Models\Notification;
+use App\Models\User;
+use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+class BehaviorRecordController extends Controller
+{
+    use HasSchoolScope;
+
+    private function tab(Request $request): string
+    {
+        $tab = (string) $request->get('tab', 'student');
+
+        return in_array($tab, BehaviorGroup::SCOPES, true) ? $tab : 'student';
+    }
+
+    private function usersFor(string $tab)
+    {
+        $schoolId = $this->activeSchoolId();
+        $role = $tab === 'teacher' ? 'teacher' : 'student';
+
+        return User::query()
+            ->whereHas('roles', fn ($r) => $r->where('slug', $role))
+            ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+            ->orderBy('name')
+            ->limit(1000)
+            ->get(['id', 'name']);
+    }
+
+    private function behaviorsFor(string $tab)
+    {
+        $schoolId = $this->activeSchoolId();
+
+        return Behavior::query()
+            ->where('is_active', true)
+            ->whereHas('group', fn ($g) => $g->where('scope', $tab))
+            ->when($schoolId, fn ($w) => $w->where(fn ($x) => $x->where('school_id', $schoolId)->orWhereNull('school_id')))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    public function index(Request $request): View
+    {
+        $tab = $this->tab($request);
+        $schoolId = $this->activeSchoolId();
+        $q = trim((string) $request->get('q', ''));
+
+        $records = BehaviorRecord::query()
+            ->with(['subject', 'behavior', 'action', 'recorder'])
+            ->where('scope', $tab)
+            ->when($schoolId, fn ($w) => $w->where(fn ($x) => $x->where('school_id', $schoolId)->orWhereNull('school_id')))
+            ->when($q !== '', fn ($w) => $w->whereHas('subject', fn ($s) => $s->where('name', 'like', '%'.$q.'%')))
+            ->orderByDesc('id')
+            ->limit(500)
+            ->get();
+
+        return view('admin.behavior.records.index', compact('records', 'tab', 'q'));
+    }
+
+    public function create(Request $request): View
+    {
+        $tab = $this->tab($request);
+
+        return view('admin.behavior.records.create', [
+            'tab' => $tab,
+            'users' => $this->usersFor($tab),
+            'behaviors' => $this->behaviorsFor($tab),
+        ]);
+    }
+
+    /** AJAX: active actions for a behaviour (card #115 apply flow). */
+    public function actions(Request $request): JsonResponse
+    {
+        $behaviorId = (int) $request->get('behavior_id');
+        if (! $behaviorId) {
+            return response()->json(['actions' => []]);
+        }
+
+        $schoolId = $this->activeSchoolId();
+
+        // Ensure the behaviour is in scope before exposing its actions.
+        $behavior = Behavior::query()
+            ->where('is_active', true)
+            ->when($schoolId, fn ($w) => $w->where(fn ($x) => $x->where('school_id', $schoolId)->orWhereNull('school_id')))
+            ->find($behaviorId);
+
+        if (! $behavior) {
+            return response()->json(['actions' => []]);
+        }
+
+        $actions = BehaviorAction::query()
+            ->where('behavior_id', $behaviorId)
+            ->where('is_active', true)
+            ->orderByDesc('id')
+            ->get(['id', 'description', 'points', 'point_type', 'notify_parent', 'needs_followup']);
+
+        return response()->json([
+            'actions' => $actions->map(fn ($a) => [
+                'id' => $a->id,
+                'description' => $a->description,
+                'signed_points' => $a->signedPoints(),
+                'notify_parent' => (bool) $a->notify_parent,
+                'needs_followup' => (bool) $a->needs_followup,
+            ])->values(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $tab = $this->tab($request);
+        $schoolId = $this->activeSchoolId();
+        $role = $tab === 'teacher' ? 'teacher' : 'student';
+
+        $data = $request->validate([
+            'subject_user_id' => [
+                'required',
+                Rule::exists('users', 'id')->where(function ($q) use ($schoolId) {
+                    if ($schoolId) {
+                        $q->where('school_id', $schoolId);
+                    }
+                }),
+            ],
+            'behavior_id' => [
+                'required',
+                Rule::exists('behaviors', 'id')->where(function ($q) use ($schoolId) {
+                    $q->where('is_active', true)->whereNull('deleted_at');
+                    if ($schoolId) {
+                        $q->where(fn ($x) => $x->where('school_id', $schoolId)->orWhereNull('school_id'));
+                    }
+                }),
+            ],
+            'behavior_action_id' => ['nullable', Rule::exists('behavior_actions', 'id')->where(fn ($q) => $q->where('is_active', true)->whereNull('deleted_at'))],
+            'points' => ['nullable', 'integer', 'between:-100000,100000'],
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        // The subject must actually hold the role for this tab, and behave within scope.
+        $subject = User::query()->whereKey($data['subject_user_id'])
+            ->whereHas('roles', fn ($r) => $r->where('slug', $role))->firstOrFail();
+
+        $behavior = Behavior::query()->with('group')->findOrFail($data['behavior_id']);
+        abort_unless(optional($behavior->group)->scope === $tab, 422);
+
+        $action = null;
+        if (! empty($data['behavior_action_id'])) {
+            $action = BehaviorAction::query()->where('behavior_id', $behavior->id)->find($data['behavior_action_id']);
+            abort_unless($action, 422); // action must belong to the chosen behaviour
+        }
+
+        // Points: explicit override wins, else the action's signed value, else 0.
+        $points = array_key_exists('points', $data) && $data['points'] !== null
+            ? (int) $data['points']
+            : ($action ? $action->signedPoints() : 0);
+
+        $notifyParent = $tab === 'student' && $action && $action->notify_parent;
+
+        $record = BehaviorRecord::create([
+            'school_id' => $schoolId,
+            'scope' => $tab,
+            'subject_user_id' => $subject->id,
+            'behavior_id' => $behavior->id,
+            'behavior_action_id' => $action?->id,
+            'points' => $points,
+            'note' => $data['note'] ?? null,
+            'needs_followup' => $action?->needs_followup ?? false,
+            'notified_parent' => false,
+            'recorded_by' => auth()->id(),
+        ]);
+
+        if ($notifyParent) {
+            $this->notifyParents($subject, $behavior, $record);
+            $record->update(['notified_parent' => true]);
+        }
+
+        return redirect()->route('admin.behavior.records.index', ['tab' => $tab])
+            ->with('status', __('behavior.flash.record_created'));
+    }
+
+    /** Notify the student's parents (only those allowed to receive notifications). */
+    private function notifyParents(User $student, Behavior $behavior, BehaviorRecord $record): void
+    {
+        $parentIds = DB::table('parent_student')
+            ->where('student_id', $student->id)
+            ->where('can_receive_notifications', true)
+            ->pluck('parent_id');
+
+        foreach ($parentIds as $pid) {
+            Notification::create([
+                'user_id' => $pid,
+                'type' => 'system',
+                'title' => __('behavior.notify.title'),
+                'body' => __('behavior.notify.body', ['student' => $student->name, 'behavior' => $behavior->name]),
+                'icon' => 'la la-balance-scale',
+                'color' => $record->points < 0 ? 'danger' : 'success',
+                'data' => ['behavior_record_id' => $record->id],
+            ]);
+        }
+    }
+
+    public function destroy(int $id): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        $record = BehaviorRecord::query()
+            ->when($schoolId, fn ($w) => $w->where(fn ($x) => $x->where('school_id', $schoolId)->orWhereNull('school_id')))
+            ->whereKey($id)->firstOrFail();
+        $scope = $record->scope;
+        $record->delete();
+
+        return redirect()->route('admin.behavior.records.index', ['tab' => $scope])
+            ->with('status', __('behavior.flash.record_deleted'));
+    }
+}
