@@ -75,10 +75,24 @@ class BehaviorRecordController extends Controller
     {
         $tab = $this->tab($request);
 
+        // When opened from a specific student's page (?student=ID), lock the select to
+        // that student instead of listing everyone (card #127).
+        $lockedUser = null;
+        if ($request->filled('student')) {
+            $schoolId = $this->activeSchoolId();
+            $role = $tab === 'teacher' ? 'teacher' : 'student';
+            $lockedUser = User::query()
+                ->whereKey((int) $request->get('student'))
+                ->whereHas('roles', fn ($r) => $r->where('slug', $role))
+                ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+                ->first(['id', 'name']);
+        }
+
         return view('admin.behavior.records.create', [
             'tab' => $tab,
-            'users' => $this->usersFor($tab),
+            'users' => $lockedUser ? collect([$lockedUser]) : $this->usersFor($tab),
             'behaviors' => $this->behaviorsFor($tab),
+            'lockedUser' => $lockedUser,
         ]);
     }
 

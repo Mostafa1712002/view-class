@@ -26,12 +26,15 @@
         <div class="row">
             <div class="form-group mb-3 col-md-6">
                 <label class="form-label">@lang('behavior.records.fields.subject_'.$tab) <span class="text-danger">*</span></label>
-                <select name="subject_user_id" class="custom-select" required>
-                    <option value="">@lang('behavior.records.choose_'.$tab)</option>
+                @php $lockedId = ($lockedUser ?? null)?->id; @endphp
+                <select name="subject_user_id" class="custom-select" required @if($lockedUser) disabled @endif>
+                    @unless($lockedUser)<option value="">@lang('behavior.records.choose_'.$tab)</option>@endunless
                     @foreach($users as $u)
-                        <option value="{{ $u->id }}" @selected((string)old('subject_user_id')===(string)$u->id)>{{ $u->name }}</option>
+                        <option value="{{ $u->id }}" @selected($lockedId ? $lockedId===$u->id : (string)old('subject_user_id')===(string)$u->id)>{{ $u->name }}</option>
                     @endforeach
                 </select>
+                {{-- Disabled selects don't submit, so carry the locked id in a hidden field. --}}
+                @if($lockedUser)<input type="hidden" name="subject_user_id" value="{{ $lockedUser->id }}">@endif
                 @if($users->isEmpty())<small class="text-muted d-block mt-1">@lang('behavior.records.no_users')</small>@endif
             </div>
             <div class="form-group mb-3 col-md-6">

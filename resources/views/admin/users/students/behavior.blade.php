@@ -32,7 +32,7 @@
                 <strong style="font-size:1.4rem; color:{{ ($pointsTotal ?? 0) < 0 ? '#dc3545' : '#28a745' }};">{{ $pointsTotal ?? 0 }}</strong>
             </div>
         </div>
-        <a href="{{ route('admin.behavior.records.create', ['tab' => 'student']) }}" class="btn btn-primary btn-sm">
+        <a href="{{ route('admin.behavior.records.create', ['tab' => 'student', 'student' => $student->id]) }}" class="btn btn-primary btn-sm">
             <i class="la la-plus"></i> @lang('behavior.records.add')
         </a>
     </div>
