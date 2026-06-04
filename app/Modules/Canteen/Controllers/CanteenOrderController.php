@@ -8,6 +8,7 @@ use App\Models\CanteenBalance;
 use App\Models\CanteenBlockedProduct;
 use App\Models\CanteenOrder;
 use App\Models\CanteenProduct;
+use App\Models\Notification;
 use App\Models\User;
 use App\Modules\Canteen\Services\CanteenBalanceService;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
@@ -133,8 +134,9 @@ class CanteenOrderController extends Controller
             }
         }
 
+        $order = null;
         try {
-            DB::transaction(function () use ($canteen, $student, $schoolId, $lines, $total, $data) {
+            DB::transaction(function () use (&$order, $canteen, $student, $schoolId, $lines, $total, $data) {
                 $order = CanteenOrder::create([
                     'school_id' => $schoolId,
                     'canteen_id' => $canteen->id,
@@ -162,7 +164,33 @@ class CanteenOrderController extends Controller
             return back()->withInput()->with('error', __('canteen.orders.flash.insufficient'));
         }
 
+        // Notify the student's parents that an order was placed on the child's account.
+        if ($order) {
+            $this->notifyParents($student, $order);
+        }
+
         return redirect()->route('admin.canteen-orders.index')->with('status', __('canteen.orders.flash.created'));
+    }
+
+    /** Notify the student's parents (those who allow it) about a canteen order. */
+    private function notifyParents(User $student, CanteenOrder $order): void
+    {
+        $parentIds = DB::table('parent_student')
+            ->where('student_id', $student->id)
+            ->where('can_receive_notifications', true)
+            ->pluck('parent_id');
+
+        foreach ($parentIds as $pid) {
+            Notification::create([
+                'user_id' => $pid,
+                'type' => 'system',
+                'title' => __('canteen.orders.notify.title'),
+                'body' => __('canteen.orders.notify.body', ['student' => $student->name, 'total' => number_format((float) $order->total, 2)]),
+                'icon' => 'la la-utensils',
+                'color' => 'info',
+                'data' => ['canteen_order_id' => $order->id],
+            ]);
+        }
     }
 
     public function show(int $id): View

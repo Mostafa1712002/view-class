@@ -160,6 +160,10 @@ return [
         'confirm_cancel' => 'The order will be cancelled and the balance refunded if it was charged. Continue?',
         'charge_note' => 'Canteen order #:id',
         'refund_note' => 'Refund for cancelled order #:id',
+        'notify' => [
+            'title' => 'Canteen order',
+            'body' => 'A canteen order of :total was placed for :student.',
+        ],
         'cols' => [
             'canteen' => 'Canteen',
             'student' => 'Student',
