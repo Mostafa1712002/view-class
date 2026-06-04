@@ -15,66 +15,57 @@
     </div>
 </div>
 <div class="content-body">
-    @if(session('status'))<div class="alert alert-success">{{ session('status') }}</div>@endif
+    @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
     @if($errors->any())<div class="alert alert-danger"><ul class="mb-0 pr-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 
-    <div class="card mb-3"><div class="card-body">
-        <form method="GET" action="{{ route('admin.users.students.status') }}" class="form-row align-items-end">
-            <div class="form-group col-md-5 mb-0"><input type="text" name="q" value="{{ $q ?? '' }}" class="form-control form-control-sm" placeholder="@lang('users.search_name')"></div>
-            <div class="form-group col-md-2 mb-0"><button type="submit" class="btn btn-primary btn-sm"><i class="la la-search"></i> @lang('users.search')</button></div>
-        </form>
-    </div></div>
-
-    <form method="POST" action="{{ route('admin.users.students.bulk') }}">
-        @csrf
-        <div class="card">
-            <div class="card-body d-flex flex-wrap align-items-end" style="gap:.75rem;">
-                <div class="form-group mb-0">
-                    <label class="form-label small mb-1">@lang('users.status_new')</label>
-                    <select name="action" class="custom-select custom-select-sm" required>
-                        <option value="license">@lang('users.status_active')</option>
-                        <option value="unlicense">@lang('users.status_inactive')</option>
-                        <option value="waiting">@lang('users.status_pending')</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm"><i class="la la-save"></i> @lang('users.status_apply')</button>
-                <small class="text-muted">@lang('users.status_apply_hint')</small>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width:42px"><input type="checkbox" id="chk-all"></th>
-                            <th>@lang('users.name')</th>
-                            <th>@lang('users.status_current')</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($students as $s)
-                            <tr>
-                                <td><input type="checkbox" name="ids[]" value="{{ $s->id }}" class="chk-row"></td>
-                                <td>{{ $s->name }}</td>
-                                <td>
-                                    @if($s->is_active)<span class="badge badge-success">@lang('users.status_active')</span>
-                                    @elseif(($s->status ?? '') === 'pending')<span class="badge badge-warning">@lang('users.status_pending')</span>
-                                    @else<span class="badge badge-secondary">@lang('users.status_inactive')</span>@endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="3" class="text-center py-4 text-muted">@lang('users.no_students_found')</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+    @php $result = session('update_result'); @endphp
+    @if($result)
+        <div class="alert {{ $result['skipped'] ? 'alert-warning' : 'alert-success' }}">
+            @lang('users.update_updated_count', ['n' => $result['updated']])
+            @if($result['skipped']) — @lang('users.update_skipped_count', ['n' => $result['skipped']]) @endif
         </div>
-    </form>
-</div>
+        <div class="card mb-3">
+            <div class="table-responsive"><table class="table table-sm mb-0">
+                <thead><tr><th>@lang('users.update_row')</th><th>@lang('users.update_key')</th><th>@lang('users.photos_status')</th><th>@lang('users.photos_reason')</th></tr></thead>
+                <tbody>
+                    @foreach($result['rows'] as $r)
+                        <tr>
+                            <td>{{ $r['row'] }}</td>
+                            <td>{{ $r['key'] }}</td>
+                            <td>@if($r['ok'])<span class="badge badge-success">@lang('users.photos_ok')</span>@else<span class="badge badge-danger">@lang('users.photos_failed')</span>@endif</td>
+                            <td>{{ $r['reason'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table></div>
+        </div>
+    @endif
 
-@push('scripts')
-<script>
-jQuery(function ($) {
-    $('#chk-all').on('change', function () { $('.chk-row').prop('checked', this.checked); });
-});
-</script>
-@endpush
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="la la-file-excel"></i> @lang('users.update_card_title')</h4>
+            <a href="{{ route('admin.users.students.import.template') }}" class="btn btn-light btn-sm">
+                <i class="la la-download"></i> @lang('users.update_download_template')
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <ul class="mb-0 pr-3">
+                    <li>@lang('users.update_rule_match')</li>
+                    <li>@lang('users.update_rule_nocreate')</li>
+                    <li>@lang('users.update_rule_nopassword')</li>
+                </ul>
+            </div>
+            <form method="POST" action="{{ route('admin.users.students.status.update') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="form-group mb-3">
+                    <label class="form-label">@lang('users.update_field')</label>
+                    <input type="file" name="file" class="form-control" accept=".csv,.txt,.xlsx,.xls" required>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="la la-save"></i> @lang('users.update_run_btn')</button>
+                <a href="{{ route('admin.users.students.index') }}" class="btn btn-outline-secondary">@lang('users.cancel')</a>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

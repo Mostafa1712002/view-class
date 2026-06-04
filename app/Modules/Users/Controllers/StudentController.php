@@ -322,80 +322,185 @@ class StudentController extends Controller
             ->with('status', __('users.bulk_done', ['count' => $rows->count()]));
     }
 
-    /** Bulk student-photo import — upload form (card #125). */
+    /** Bulk student-photo import — upload form (cards #125 + #130). */
     public function photosForm(): View
     {
         return view('admin.users.students.photos');
     }
 
     /**
-     * Import student photos in bulk (card #125). Each image's file name (without
-     * extension) is matched to a student's national id / academic id / username
-     * within the active school, and saved as that student's avatar.
+     * Import student photos in bulk from a ZIP (card #130, per the analysis).
+     * Each image's file name (without extension) is the student's national id;
+     * matched students (in the active school) get the image as their avatar.
+     * Returns a per-file report (updated / rejected with reason).
      */
     public function importPhotos(Request $request): RedirectResponse
     {
-        $request->validate([
-            'photos' => ['required', 'array'],
-            'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-        ]);
+        $request->validate(['archive' => ['required', 'file', 'mimes:zip']]);
         $schoolId = $this->activeSchoolId();
 
-        $matched = [];
-        $unmatched = [];
-        foreach ($request->file('photos') as $file) {
-            $key = trim(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
-            if ($key === '') {
-                $unmatched[] = $file->getClientOriginalName();
+        $zip = new \ZipArchive();
+        if ($zip->open($request->file('archive')->getRealPath()) !== true) {
+            return redirect()->route('admin.users.students.photos')->with('error', __('users.photos_bad_zip'));
+        }
+
+        $allowed = ['jpg', 'jpeg', 'png'];
+        $rows = [];
+        $updated = 0;
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $entry = $zip->getNameIndex($i);
+            if ($entry === false || str_ends_with($entry, '/')) {
+                continue; // skip directories
+            }
+            $base = basename($entry);
+            if ($base === '' || str_starts_with($base, '.') || str_starts_with($entry, '__MACOSX')) {
+                continue; // skip hidden / mac metadata
+            }
+
+            $ext = strtolower(pathinfo($base, PATHINFO_EXTENSION));
+            if (! in_array($ext, $allowed, true)) {
+                $rows[] = ['file' => $base, 'ok' => false, 'reason' => __('users.photos_reason_ext')];
 
                 continue;
             }
 
-            $student = User::query()
-                ->when($schoolId, fn ($q) => $q->where('users.school_id', $schoolId))
-                ->where(function ($q) use ($key) {
-                    $q->where('national_id', $key)->orWhere('username', $key);
-                })
+            $key = trim(pathinfo($base, PATHINFO_FILENAME));
+            $student = $key === '' ? null : User::query()
+                ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+                ->where(fn ($q) => $q->where('national_id', $key)->orWhere('username', $key))
                 ->first();
 
             if (! $student) {
-                $sid = DB::table('student_profiles')->where('academic_id', $key)->value('user_id');
-                if ($sid) {
-                    $student = User::query()->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->find($sid);
-                }
+                $rows[] = ['file' => $base, 'ok' => false, 'reason' => __('users.photos_reason_no_student')];
+
+                continue;
             }
 
-            if ($student) {
-                if ($student->avatar) {
-                    Storage::disk('public')->delete($student->avatar);
-                }
-                $student->avatar = $file->store('avatars', 'public');
-                $student->save();
-                $matched[] = $student->name.' ('.$key.')';
-            } else {
-                $unmatched[] = $file->getClientOriginalName();
+            $contents = $zip->getFromIndex($i);
+            if ($contents === false || $contents === '') {
+                $rows[] = ['file' => $base, 'ok' => false, 'reason' => __('users.photos_reason_unreadable')];
+
+                continue;
             }
+
+            if ($student->avatar) {
+                Storage::disk('public')->delete($student->avatar);
+            }
+            $path = 'avatars/'.$key.'-'.uniqid().'.'.$ext;
+            Storage::disk('public')->put($path, $contents);
+            $student->avatar = $path;
+            $student->save();
+            $rows[] = ['file' => $base, 'ok' => true, 'reason' => $student->name];
+            $updated++;
         }
+        $total = $zip->numFiles;
+        $zip->close();
 
         return redirect()->route('admin.users.students.photos')
-            ->with('photo_result', ['matched' => $matched, 'unmatched' => $unmatched]);
+            ->with('photo_result', ['rows' => $rows, 'updated' => $updated, 'rejected' => count(array_filter($rows, fn ($r) => ! $r['ok']))]);
     }
 
-    /** Bulk student-status update page (card #125) — applies via the existing bulk() action. */
+    /** "Update student data from Excel" — upload page (card #130). */
     public function statusForm(Request $request): View
     {
+        return view('admin.users.students.status');
+    }
+
+    /**
+     * Update EXISTING students from an Excel/CSV file (card #130). Rows are matched
+     * to existing students by national id (then username) within the active school
+     * and updated in place — new students are never created and passwords are never
+     * changed. Returns a per-row report.
+     */
+    public function updateFromExcel(Request $request, \App\Modules\StudentImport\Actions\ParseStudentExcel $parser): RedirectResponse
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls']]);
         $schoolId = $this->activeSchoolId();
-        $q = trim((string) $request->get('q', ''));
 
-        $students = User::query()
-            ->whereHas('roles', fn ($r) => $r->where('slug', 'student'))
-            ->when($schoolId, fn ($w) => $w->where('users.school_id', $schoolId))
-            ->when($q !== '', fn ($w) => $w->where('users.name', 'like', '%'.$q.'%'))
-            ->orderBy('users.name')
-            ->limit(1000)
-            ->get(['users.id', 'users.name', 'users.status', 'users.is_active']);
+        try {
+            $dtos = $parser->execute($request->file('file'));
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.users.students.status')->with('error', $e->getMessage());
+        }
 
-        return view('admin.users.students.status', compact('students', 'q'));
+        $rows = [];
+        $updated = 0;
+        foreach ($dtos as $dto) {
+            $key = $dto->nationalId ?: $dto->username;
+            $student = $key === null ? null : User::query()
+                ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+                ->where(fn ($q) => $q->where('national_id', $dto->nationalId)->orWhere('username', $dto->username))
+                ->whereHas('roles', fn ($r) => $r->where('slug', 'student'))
+                ->first();
+
+            if (! $student) {
+                $rows[] = ['row' => $dto->rowNumber, 'key' => (string) $key, 'ok' => false, 'reason' => __('users.update_reason_no_student')];
+
+                continue;
+            }
+
+            // Compose the name only if name parts were supplied; never touch the password.
+            $name = $dto->fullName();
+            $student->fill($this->withoutNulls([
+                'name' => $name !== '' ? $name : null,
+                'name_ar' => $name !== '' ? $name : null,
+                'phone' => $dto->mobile,
+                'email' => $dto->email,
+                'gender' => $this->normalizeGenderValue($dto->gender),
+                'date_of_birth' => $dto->birthDate,
+                'nationality' => $dto->nationality,
+            ]));
+            $student->save();
+
+            // Update light profile fields if present.
+            $profileData = $this->withoutNulls([
+                'academic_id' => $dto->academicId,
+                'birth_place' => $dto->birthPlace,
+            ]);
+            if ($profileData !== []) {
+                StudentProfile::updateOrCreate(['user_id' => $student->id], $profileData);
+            }
+
+            // Re-link the class if a matching class name exists in the school.
+            if ($dto->classRoom) {
+                $classId = ClassRoom::query()
+                    ->where('name', $dto->classRoom)
+                    ->when($schoolId, fn ($w) => $w->whereHas('section', fn ($s) => $s->where('school_id', $schoolId)))
+                    ->value('id');
+                if ($classId) {
+                    $student->class_room_id = $classId;
+                    $student->save();
+                    DB::table('class_student')->insertOrIgnore([
+                        'class_id' => $classId, 'student_id' => $student->id, 'created_at' => now(), 'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            $rows[] = ['row' => $dto->rowNumber, 'key' => (string) $key, 'ok' => true, 'reason' => $student->name];
+            $updated++;
+        }
+
+        return redirect()->route('admin.users.students.status')
+            ->with('update_result', ['rows' => $rows, 'updated' => $updated, 'skipped' => count(array_filter($rows, fn ($r) => ! $r['ok']))]);
+    }
+
+    /** Drop null/blank values so an update only writes the columns actually supplied. */
+    private function withoutNulls(array $data): array
+    {
+        return array_filter($data, fn ($v) => $v !== null && $v !== '');
+    }
+
+    /** Normalize a free-text gender value to male/female (or null). */
+    private function normalizeGenderValue(?string $g): ?string
+    {
+        $g = trim((string) $g);
+        if ($g === '') {
+            return null;
+        }
+        $g = mb_strtolower($g);
+
+        return in_array($g, ['male', 'm', 'ذكر', 'ولد'], true) ? 'male'
+            : (in_array($g, ['female', 'f', 'أنثى', 'انثى', 'بنت'], true) ? 'female' : null);
     }
 
     /**
