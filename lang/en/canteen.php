@@ -194,6 +194,33 @@ return [
         ],
     ],
 
+    'parent' => [
+        'title' => 'My children\'s canteen',
+        'intro' => 'Track your children\'s balance, set a daily limit, block specific products, and review orders.',
+        'balance' => 'Current balance',
+        'daily_limit' => 'Daily limit',
+        'daily_limit_hint' => 'Leave empty to remove the daily limit.',
+        'no_limit' => 'No limit',
+        'save_limit' => 'Save limit',
+        'manage_blocks' => 'Block products',
+        'blocks_hint' => 'Blocked products cannot be ordered by the student.',
+        'block' => 'Block',
+        'unblock' => 'Unblock',
+        'blocked' => 'Blocked',
+        'allowed' => 'Allowed',
+        'block_status' => 'Status',
+        'orders' => 'Past orders',
+        'items' => 'Items',
+        'no_children' => 'No children are linked to your account.',
+        'no_products' => 'No products available.',
+        'no_orders' => 'No orders.',
+        'flash' => [
+            'limit_updated' => 'Daily limit updated',
+            'blocked' => 'Product blocked',
+            'unblocked' => 'Product unblocked',
+        ],
+    ],
+
     'flash' => [
         'created' => 'Canteen created (inactive). Finish setup, then activate it.',
         'updated' => 'Canteen updated',

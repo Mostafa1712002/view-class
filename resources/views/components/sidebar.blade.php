@@ -263,6 +263,13 @@
                 <a href="{{ Route::has('policies.my.index') ? route('policies.my.index') : '#' }}"><i class="la la-gavel"></i><span class="menu-title">@lang('shell.nav_policies')</span></a>
             </li>
 
+            {{-- Parent canteen controls — visible to parents (card #116) --}}
+            @if($sidebarUser && $sidebarUser->hasRole('parent'))
+            <li class="nav-item {{ request()->routeIs('my.canteen.*') ? 'active' : '' }}">
+                <a href="{{ Route::has('my.canteen.index') ? route('my.canteen.index') : '#' }}"><i class="la la-utensils"></i><span class="menu-title">@lang('canteen.parent.title')</span></a>
+            </li>
+            @endif
+
             @if($sidebarUser && $sidebarUser->isTeacher())
                 <li class="navigation-header sec-educational"><span>@lang('shell.portal_my_schedule')</span></li>
                 <li class="nav-item {{ request()->routeIs('teacher.schedule') ? 'active' : '' }}" data-section="educational">

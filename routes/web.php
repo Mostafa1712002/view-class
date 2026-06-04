@@ -275,6 +275,13 @@ Route::middleware(['auth'])->group(function () {
     // === My education policies (any signed-in user) — card #105 ===
     Route::get('my/policies', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'index'])->name('policies.my.index');
     Route::get('my/policies/{id}', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'show'])->whereNumber('id')->name('policies.my.show');
+
+    // === Parent canteen controls (ولي الأمر) — card #116 / Task 20 part 4b ===
+    Route::get('my/canteen', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'index'])->name('my.canteen.index');
+    Route::put('my/canteen/{student}/limit', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'updateLimit'])->whereNumber('student')->name('my.canteen.limit');
+    Route::get('my/canteen/{student}/products', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'products'])->whereNumber('student')->name('my.canteen.products');
+    Route::post('my/canteen/{student}/products/{product}/toggle', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'toggleBlock'])->whereNumber('student')->whereNumber('product')->name('my.canteen.products.toggle');
+    Route::get('my/canteen/{student}/orders', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'orders'])->whereNumber('student')->name('my.canteen.orders');
 });
 
 // Sprint 4 — Subjects Module
