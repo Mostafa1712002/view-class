@@ -11,6 +11,7 @@
         </ol>
     </div>
     <div class="content-header-right col-md-5 col-12 text-md-right">
+        <a href="{{ route('admin.canteen-balances.index') }}" class="btn btn-outline-primary btn-sm"><i class="la la-wallet"></i> @lang('canteen.balances.title')</a>
         <a href="{{ route('admin.canteens.create') }}" class="btn btn-primary btn-sm"><i class="la la-plus"></i> @lang('canteen.add')</a>
     </div>
 </div>

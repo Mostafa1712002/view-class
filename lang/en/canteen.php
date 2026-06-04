@@ -102,6 +102,45 @@ return [
         ],
     ],
 
+    'balances' => [
+        'title' => 'Balances',
+        'edit' => 'Edit balance',
+        'history' => 'Transaction log',
+        'search' => 'Search by student name',
+        'empty' => 'No students.',
+        'no_history' => 'No transactions on this balance.',
+        'current' => 'Current balance',
+        'save' => 'Save transaction',
+        'cols' => [
+            'student' => 'Student',
+            'grade' => 'Grade',
+            'class' => 'Class',
+            'balance' => 'Current balance',
+            'daily_limit' => 'Daily limit',
+            'last_tx' => 'Last transaction',
+            'type' => 'Type',
+            'amount' => 'Amount',
+            'balance_after' => 'Balance after',
+            'source' => 'Source',
+            'note' => 'Note',
+            'by' => 'By',
+        ],
+        'fields' => [
+            'type' => 'Operation type',
+            'amount' => 'Amount',
+            'note' => 'Note',
+        ],
+        'types' => [
+            'add' => 'Add balance',
+            'deduct' => 'Deduct balance',
+            'set' => 'Set new balance',
+        ],
+        'flash' => [
+            'updated' => 'Transaction saved and balance updated',
+            'insufficient' => 'This operation would make the balance negative. Check the amount.',
+        ],
+    ],
+
     'flash' => [
         'created' => 'Canteen created (inactive). Finish setup, then activate it.',
         'updated' => 'Canteen updated',
