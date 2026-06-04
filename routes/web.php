@@ -291,6 +291,15 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::delete('policies/{id}', [\App\Modules\Policies\Controllers\PolicyController::class, 'destroy'])->whereNumber('id')->name('policies.destroy');
     Route::get('policies/{id}/acknowledgements', [\App\Modules\Policies\Controllers\PolicyController::class, 'acknowledgements'])->whereNumber('id')->name('policies.acknowledgements');
 
+    // === Behaviour: behaviour groups (السلوك) — card #114 / Task 18 ===
+    Route::get('behavior/groups', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'index'])->name('behavior.groups.index');
+    Route::get('behavior/groups/create', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'create'])->name('behavior.groups.create');
+    Route::post('behavior/groups', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'store'])->name('behavior.groups.store');
+    Route::get('behavior/groups/{id}/edit', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'edit'])->whereNumber('id')->name('behavior.groups.edit');
+    Route::put('behavior/groups/{id}', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'update'])->whereNumber('id')->name('behavior.groups.update');
+    Route::post('behavior/groups/{id}/toggle', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'toggle'])->whereNumber('id')->name('behavior.groups.toggle');
+    Route::delete('behavior/groups/{id}', [\App\Modules\Behavior\Controllers\BehaviorGroupController::class, 'destroy'])->whereNumber('id')->name('behavior.groups.destroy');
+
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');
     Route::get('subjects/tracks/create',       [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'create'])->name('subject-tracks.create');
