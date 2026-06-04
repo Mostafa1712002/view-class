@@ -422,7 +422,18 @@ class StudentController extends Controller
             return redirect()->route('admin.users.students.index')->with('error', __('users.not_found'));
         }
 
-        return view('admin.users.students.behavior', compact('student'));
+        // Behaviour records logged for this student (card #123) + running points total.
+        $records = \App\Models\BehaviorRecord::query()
+            ->with(['behavior', 'action', 'recorder'])
+            ->where('scope', 'student')
+            ->where('subject_user_id', $student->id)
+            ->orderByDesc('id')
+            ->limit(500)
+            ->get();
+        $pointsTotal = (int) \App\Models\BehaviorRecord::where('scope', 'student')
+            ->where('subject_user_id', $student->id)->sum('points');
+
+        return view('admin.users.students.behavior', compact('student', 'records', 'pointsTotal'));
     }
 
     /**

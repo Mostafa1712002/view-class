@@ -143,6 +143,7 @@ return [
         'no_users' => 'No users in this tab.',
         'no_behaviors' => 'No active behaviours in this tab.',
         'points_hint' => 'Auto-filled from the action; you can adjust it if allowed.',
+        'points_total' => 'Total points',
         'will_notify' => 'The parent will be notified on save.',
         'fields' => [
             'subject_student' => 'Student',
