@@ -200,6 +200,13 @@ class BehaviorRecordController extends Controller
             $record->update(['notified_parent' => true]);
         }
 
+        // If recording started from a student's page, return there (card #131).
+        $fromStudent = (int) $request->input('from_student_id');
+        if ($tab === 'student' && $fromStudent && $fromStudent === (int) $subject->id) {
+            return redirect()->route('admin.users.students.behavior', $subject->id)
+                ->with('status', __('behavior.flash.record_created'));
+        }
+
         return redirect()->route('admin.behavior.records.index', ['tab' => $tab])
             ->with('status', __('behavior.flash.record_created'));
     }

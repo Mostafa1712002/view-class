@@ -35,6 +35,8 @@
                 </select>
                 {{-- Disabled selects don't submit, so carry the locked id in a hidden field. --}}
                 @if($lockedUser)<input type="hidden" name="subject_user_id" value="{{ $lockedUser->id }}">@endif
+                {{-- When opened from the student's page, return there after saving (card #131). --}}
+                @if($lockedUser && $tab === 'student')<input type="hidden" name="from_student_id" value="{{ $lockedUser->id }}">@endif
                 @if($users->isEmpty())<small class="text-muted d-block mt-1">@lang('behavior.records.no_users')</small>@endif
             </div>
             <div class="form-group mb-3 col-md-6">
