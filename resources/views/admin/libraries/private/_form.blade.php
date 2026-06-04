@@ -34,7 +34,7 @@
      data-selected-teachers="{{ json_encode(array_values($existingTeachers)) }}">
     <div class="col-md-4 col-12 lib-field">
         <label class="form-label">@lang('libraries.private.fields.classes')</label>
-        <select name="audiences[class][ids][]" id="lib-classes" class="form-select" multiple size="6">
+        <select name="audiences[class][ids][]" id="lib-classes" class="form-control select2" multiple data-placeholder="@lang('libraries.private.fields.classes')">
             @foreach($classes as $c)
                 <option value="{{ $c->id }}" @selected(in_array($c->id, $existingClasses))>{{ $c->name }}</option>
             @endforeach
@@ -46,7 +46,7 @@
             <span>@lang('libraries.private.fields.students')</span>
             <button type="button" class="btn btn-link btn-sm p-0 lib-select-all" data-target="lib-students">@lang('libraries.private.fields.select_all')</button>
         </label>
-        <select name="audiences[user][ids][]" id="lib-students" class="form-select" multiple size="6" disabled
+        <select name="audiences[user][ids][]" id="lib-students" class="form-control select2" multiple disabled
                 data-placeholder="@lang('libraries.private.fields.choose_class_first')">
             @foreach($selectedStudents as $s)
                 <option value="{{ $s->id }}" selected>{{ $s->name }}</option>
@@ -60,7 +60,7 @@
             <span>@lang('libraries.private.fields.teachers')</span>
             <button type="button" class="btn btn-link btn-sm p-0 lib-select-all" data-target="lib-teachers">@lang('libraries.private.fields.select_all')</button>
         </label>
-        <select name="audiences[teacher][ids][]" id="lib-teachers" class="form-select" multiple size="6" disabled
+        <select name="audiences[teacher][ids][]" id="lib-teachers" class="form-control select2" multiple disabled
                 data-placeholder="@lang('libraries.private.fields.choose_class_first')">
             @foreach($selectedTeachers as $t)
                 <option value="{{ $t->id }}" selected>{{ $t->name }}</option>
@@ -78,13 +78,15 @@
 
 @push('scripts')
 <script>
-(function () {
+// Select2-aware cascade (cards #119 + #124): the audience selects are Select2 dropdowns,
+// so we bind via jQuery and refresh Select2 after rebuilding options.
+jQuery(function ($) {
     var root = document.getElementById('lib-audiences');
     if (!root) return;
     var url = root.dataset.membersUrl;
-    var classSel = document.getElementById('lib-classes');
-    var studentSel = document.getElementById('lib-students');
-    var teacherSel = document.getElementById('lib-teachers');
+    var $classSel = $('#lib-classes');
+    var $studentSel = $('#lib-students');
+    var $teacherSel = $('#lib-teachers');
     var T = {
         loading: @json(__('libraries.private.fields.loading')),
         noStudents: @json(__('libraries.private.fields.no_students')),
@@ -92,67 +94,57 @@
         chooseFirst: @json(__('libraries.private.fields.choose_class_first')),
     };
 
-    function hint(sel, text) {
-        var h = root.querySelector('.lib-hint[data-for="' + sel.id + '"]');
+    function refresh($sel) { if ($sel.hasClass('select2-hidden-accessible')) $sel.trigger('change.select2'); }
+    function hint($sel, text) {
+        var h = root.querySelector('.lib-hint[data-for="' + $sel.attr('id') + '"]');
         if (h) h.textContent = text || '';
     }
+    function currentSelection($sel) { return ($sel.val() || []).map(String); }
 
-    // Preserve the user's current selection + the server-rendered (already attached) ids.
-    function currentSelection(sel) {
-        return Array.from(sel.options).filter(function (o) { return o.selected; }).map(function (o) { return o.value; });
-    }
-
-    function rebuild(sel, items, keepIds, emptyText) {
+    function rebuild($sel, items, keepIds, emptyText) {
         var keep = new Set((keepIds || []).map(String));
-        sel.innerHTML = '';
+        $sel.empty();
         items.forEach(function (it) {
-            var o = document.createElement('option');
-            o.value = it.id;
-            o.textContent = it.name;
-            if (keep.has(String(it.id))) o.selected = true;
-            sel.appendChild(o);
+            var o = new Option(it.name, it.id, false, keep.has(String(it.id)));
+            $sel.append(o);
         });
-        sel.disabled = items.length === 0;
-        hint(sel, items.length === 0 ? emptyText : '');
-    }
-
-    function selectedClassIds() {
-        return Array.from(classSel.selectedOptions).map(function (o) { return o.value; });
+        $sel.prop('disabled', items.length === 0);
+        hint($sel, items.length === 0 ? emptyText : '');
+        refresh($sel);
     }
 
     function load() {
-        var ids = selectedClassIds();
+        var ids = ($classSel.val() || []);
         if (ids.length === 0) {
-            studentSel.innerHTML = ''; studentSel.disabled = true; hint(studentSel, T.chooseFirst);
-            teacherSel.innerHTML = ''; teacherSel.disabled = true; hint(teacherSel, T.chooseFirst);
+            $studentSel.empty().prop('disabled', true); hint($studentSel, T.chooseFirst); refresh($studentSel);
+            $teacherSel.empty().prop('disabled', true); hint($teacherSel, T.chooseFirst); refresh($teacherSel);
             return;
         }
-        var keepStudents = currentSelection(studentSel);
-        var keepTeachers = currentSelection(teacherSel);
-        hint(studentSel, T.loading); hint(teacherSel, T.loading);
+        var keepStudents = currentSelection($studentSel);
+        var keepTeachers = currentSelection($teacherSel);
+        hint($studentSel, T.loading); hint($teacherSel, T.loading);
 
         var qs = ids.map(function (id) { return 'class_ids[]=' + encodeURIComponent(id); }).join('&');
         fetch(url + '?' + qs, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                rebuild(studentSel, data.students || [], keepStudents, T.noStudents);
-                rebuild(teacherSel, data.teachers || [], keepTeachers, T.noTeachers);
+                rebuild($studentSel, data.students || [], keepStudents, T.noStudents);
+                rebuild($teacherSel, data.teachers || [], keepTeachers, T.noTeachers);
             })
-            .catch(function () { hint(studentSel, ''); hint(teacherSel, ''); });
+            .catch(function () { hint($studentSel, ''); hint($teacherSel, ''); });
     }
 
-    classSel.addEventListener('change', load);
+    $classSel.on('change', load);
 
-    root.querySelectorAll('.lib-select-all').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var sel = document.getElementById(btn.dataset.target);
-            if (!sel || sel.disabled) return;
-            Array.from(sel.options).forEach(function (o) { o.selected = true; });
-        });
+    $('.lib-select-all').on('click', function () {
+        var $sel = $('#' + $(this).data('target'));
+        if (!$sel.length || $sel.prop('disabled')) return;
+        $sel.find('option').prop('selected', true);
+        refresh($sel);
     });
 
     // On edit: if classes are already selected, load their members and keep existing picks.
-    if (selectedClassIds().length > 0) load();
-})();
+    if (($classSel.val() || []).length > 0) load();
+});
 </script>
 @endpush
