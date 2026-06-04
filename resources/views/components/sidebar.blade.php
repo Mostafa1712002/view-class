@@ -258,9 +258,10 @@
             <li class="nav-item" data-section="system"><a href="#"><i class="la la-user-plus"></i><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
             @endif
 
-            {{-- My education policies — visible to every signed-in user (card #105) --}}
+            {{-- My education policies — visible to every signed-in user (card #105); distinct
+                 label from the admin management page to avoid the duplicate-name confusion (card #122) --}}
             <li class="nav-item {{ request()->routeIs('policies.my.*') ? 'active' : '' }}">
-                <a href="{{ Route::has('policies.my.index') ? route('policies.my.index') : '#' }}"><i class="la la-gavel"></i><span class="menu-title">@lang('shell.nav_policies')</span></a>
+                <a href="{{ Route::has('policies.my.index') ? route('policies.my.index') : '#' }}"><i class="la la-gavel"></i><span class="menu-title">@lang('shell.nav_my_policies')</span></a>
             </li>
 
             {{-- Parent canteen controls — visible to parents (card #116) --}}

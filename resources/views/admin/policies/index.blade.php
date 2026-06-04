@@ -34,6 +34,8 @@
                             <th>@lang('policies.cols.roles')</th>
                             <th>@lang('policies.cols.beneficiaries')</th>
                             <th>@lang('policies.cols.read')</th>
+                            <th>@lang('policies.cols.unread')</th>
+                            <th>@lang('policies.cols.attachment')</th>
                             <th>@lang('policies.cols.created_at')</th>
                             <th>@lang('policies.cols.creator')</th>
                             <th>@lang('policies.cols.status')</th>
@@ -51,6 +53,16 @@
                                 </td>
                                 <td>{{ $p->beneficiaries_count }}</td>
                                 <td><span class="text-success">{{ $p->read_count }}</span> / {{ $p->beneficiaries_count }}</td>
+                                <td><span class="text-danger">{{ max(0, (int) $p->beneficiaries_count - (int) $p->read_count) }}</span></td>
+                                <td>
+                                    @if($p->file_path)
+                                        <span class="badge badge-light"><i class="la la-file"></i> @lang('policies.type.file')</span>
+                                    @elseif($p->external_url)
+                                        <span class="badge badge-light"><i class="la la-link"></i> @lang('policies.type.link')</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td><small>{{ $p->created_at?->format('Y-m-d') }}</small></td>
                                 <td><small>{{ optional($p->creator)->name ?? '—' }}</small></td>
                                 <td>
@@ -75,7 +87,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="8" class="text-center text-muted py-4">@lang('policies.empty')</td></tr>
+                            <tr><td colspan="10" class="text-center text-muted py-4">@lang('policies.empty')</td></tr>
                         @endforelse
                     </tbody>
                 </table>

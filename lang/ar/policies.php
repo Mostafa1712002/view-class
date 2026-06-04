@@ -23,6 +23,8 @@ return [
         'description' => 'الوصف',
         'beneficiaries' => 'المستفيدون',
         'read' => 'اطّلعوا',
+        'unread' => 'لم يطّلعوا',
+        'attachment' => 'نوع الإرفاق',
         'roles' => 'الفئات المستهدفة',
         'created_at' => 'تاريخ الإضافة',
         'creator' => 'المُنشئ',

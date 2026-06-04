@@ -32,6 +32,7 @@ return [
     'nav_counseling' => 'الإرشاد الطلابي',
     'nav_special_ed' => 'التربية الخاصة',
     'nav_policies' => 'سياسات التعليم',
+    'nav_my_policies' => 'سياساتي التعليمية',
     'nav_reports' => 'التقارير',
     'nav_reports_admin' => 'التقارير الإدارية',
     'nav_reports_stats' => 'التقارير الإحصائية',

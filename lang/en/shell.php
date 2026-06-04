@@ -32,6 +32,7 @@ return [
     'nav_counseling' => 'Student Counseling',
     'nav_special_ed' => 'Special Education',
     'nav_policies' => 'Education Policies',
+    'nav_my_policies' => 'My Policies',
     'nav_reports' => 'Reports',
     'nav_reports_admin' => 'Administrative Reports',
     'nav_reports_stats' => 'Statistical Reports',

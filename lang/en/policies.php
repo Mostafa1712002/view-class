@@ -23,6 +23,8 @@ return [
         'description' => 'Description',
         'beneficiaries' => 'Beneficiaries',
         'read' => 'Read',
+        'unread' => 'Not read',
+        'attachment' => 'Attachment',
         'roles' => 'Target roles',
         'created_at' => 'Added',
         'creator' => 'Creator',
