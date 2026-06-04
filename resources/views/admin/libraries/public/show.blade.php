@@ -38,6 +38,8 @@
             $vimeoId = $m[1];
         }
         $isPdf = $type === 'pdf' || \Illuminate\Support\Str::endsWith(strtolower($fileUrl ?? ''), '.pdf');
+        // Only ever emit http(s) URLs into href/src/data — blocks javascript:/data: XSS from stored external_url.
+        $safeUrl = ($url && preg_match('~^https?://~i', $url)) ? $url : null;
         $hasContent = $fileUrl || $url;
     @endphp
 
@@ -63,31 +65,31 @@
                 <video controls preload="metadata" style="width:100%;max-height:80vh;border-radius:.5rem;background:#000;">
                     <source src="{{ $fileUrl }}">
                 </video>
-            @elseif($isPdf && ($fileUrl || $url))
-                @php $pdfSrc = $fileUrl ?: $url; @endphp
+            @elseif($isPdf && ($fileUrl || $safeUrl))
+                @php $pdfSrc = $fileUrl ?: $safeUrl; @endphp
                 <object data="{{ $pdfSrc }}#toolbar=1&view=FitH" type="application/pdf" style="width:100%;height:80vh;border:0;border-radius:.5rem;">
                     <iframe src="{{ $pdfSrc }}" style="width:100%;height:80vh;border:0;"></iframe>
                 </object>
-            @elseif($type === 'image' && ($fileUrl || $url))
+            @elseif($type === 'image' && ($fileUrl || $safeUrl))
                 <div class="text-center p-2">
-                    <img src="{{ $fileUrl ?: $url }}" alt="{{ $item->title }}" style="max-width:100%;max-height:80vh;border-radius:.5rem;">
+                    <img src="{{ $fileUrl ?: $safeUrl }}" alt="{{ $item->title }}" style="max-width:100%;max-height:80vh;border-radius:.5rem;">
                 </div>
-            @elseif($type === 'presentation' && $url)
+            @elseif($type === 'presentation' && $safeUrl)
                 <div style="position:relative;width:100%;padding-top:60%;">
-                    <iframe src="{{ $url }}" title="{{ $item->title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:.5rem;" allowfullscreen></iframe>
+                    <iframe src="{{ $safeUrl }}" title="{{ $item->title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:.5rem;" allowfullscreen></iframe>
                 </div>
-            @elseif($type === 'link' && $url)
+            @elseif($type === 'link' && $safeUrl)
                 <div class="text-center p-5">
                     <i class="la la-link" style="font-size:2.5rem;color:#6366f1;"></i>
-                    <p class="mt-2 mb-3 text-break"><a href="{{ $url }}" target="_blank" rel="noopener">{{ $url }}</a></p>
-                    <a href="{{ $url }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="la la-external-link-alt"></i> @lang('libraries.show.open')</a>
+                    <p class="mt-2 mb-3 text-break"><a href="{{ $safeUrl }}" target="_blank" rel="noopener">{{ $safeUrl }}</a></p>
+                    <a href="{{ $safeUrl }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="la la-external-link-alt"></i> @lang('libraries.show.open')</a>
                 </div>
             @else
                 <div class="text-center text-muted p-5">
                     <i class="la la-file" style="font-size:2.5rem;"></i>
                     <p class="mb-3 mt-2">@lang('libraries.show.unsupported')</p>
                     @if($fileUrl)<a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm"><i class="la la-download"></i> @lang('libraries.show.download')</a>@endif
-                    @if($url)<a href="{{ $url }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm"><i class="la la-external-link-alt"></i> @lang('libraries.show.open')</a>@endif
+                    @if($safeUrl)<a href="{{ $safeUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm"><i class="la la-external-link-alt"></i> @lang('libraries.show.open')</a>@endif
                 </div>
             @endif
         </div>
@@ -127,8 +129,8 @@
                     @if($item->file_path)
                         <a href="{{ asset('storage/'.$item->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="la la-download"></i> @lang('libraries.show.download')</a>
                     @endif
-                    @if($item->external_url)
-                        <a href="{{ $item->external_url }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="la la-external-link-alt"></i> @lang('libraries.show.open')</a>
+                    @if($safeUrl)
+                        <a href="{{ $safeUrl }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary"><i class="la la-external-link-alt"></i> @lang('libraries.show.open')</a>
                     @endif
 
                     <hr>
