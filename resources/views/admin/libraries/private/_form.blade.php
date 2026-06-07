@@ -149,12 +149,21 @@ jQuery(function ($) {
         var h = root.querySelector('.lib-hint[data-for="' + $sel.attr('id') + '"]');
         if (h) h.textContent = text || '';
     }
-    // The hint inside the box (placeholder) and the hint line below must never duplicate (card #128):
-    // disabled state -> placeholder shows "choose class first", the line stays empty;
-    // enabled state  -> placeholder shows "search & select", the line is only for loading/empty results.
-    function setPlaceholder($sel, text) {
-        $sel.attr('data-placeholder', text);
-        $sel.next('.select2-container').find('.select2-search__field').attr('placeholder', text);
+    // Re-init select2 so its STORED placeholder is correct. Setting the search-field
+    // placeholder by hand doesn't stick — select2 re-renders it from its options on every
+    // change. The hint inside the box (placeholder) and the hint line below must never
+    // duplicate (card #128): disabled -> placeholder "choose class first", line empty;
+    // enabled -> placeholder "search & select", line only for loading/empty results.
+    function applySelect2($sel, placeholder) {
+        if (!$.fn.select2) return;
+        if ($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+        $sel.select2({
+            theme: 'bootstrap4',
+            width: '100%',
+            dir: document.documentElement.getAttribute('dir') || 'rtl',
+            minimumResultsForSearch: 0,
+            placeholder: placeholder || '',
+        });
     }
     function updateCount($sel) {
         var n = ($sel.val() || []).length;
@@ -168,8 +177,7 @@ jQuery(function ($) {
     function disableEmpty($sel) {
         $sel.empty().prop('disabled', true);
         hint($sel, '');
-        refresh($sel);                       // select2 re-render resets the search placeholder…
-        setPlaceholder($sel, T.chooseFirst); // …so set it AFTER the refresh so it sticks.
+        applySelect2($sel, T.chooseFirst);
         updateCount($sel);
     }
 
@@ -183,8 +191,7 @@ jQuery(function ($) {
         var empty = items.length === 0;
         $sel.prop('disabled', empty);
         hint($sel, empty ? emptyText : '');
-        refresh($sel);                                       // re-render first…
-        setPlaceholder($sel, empty ? T.chooseFirst : readyText); // …then set the placeholder so it isn't overwritten.
+        applySelect2($sel, empty ? T.chooseFirst : readyText);
         updateCount($sel);
     }
 
