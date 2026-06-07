@@ -167,9 +167,10 @@ jQuery(function ($) {
 
     function disableEmpty($sel) {
         $sel.empty().prop('disabled', true);
-        setPlaceholder($sel, T.chooseFirst);
         hint($sel, '');
-        refresh($sel); updateCount($sel);
+        refresh($sel);                       // select2 re-render resets the search placeholder…
+        setPlaceholder($sel, T.chooseFirst); // …so set it AFTER the refresh so it sticks.
+        updateCount($sel);
     }
 
     function rebuild($sel, items, keepIds, emptyText, readyText) {
@@ -181,9 +182,10 @@ jQuery(function ($) {
         });
         var empty = items.length === 0;
         $sel.prop('disabled', empty);
-        setPlaceholder($sel, empty ? T.chooseFirst : readyText);
         hint($sel, empty ? emptyText : '');
-        refresh($sel); updateCount($sel);
+        refresh($sel);                                       // re-render first…
+        setPlaceholder($sel, empty ? T.chooseFirst : readyText); // …then set the placeholder so it isn't overwritten.
+        updateCount($sel);
     }
 
     function load() {
