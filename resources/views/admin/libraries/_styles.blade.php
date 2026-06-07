@@ -206,6 +206,108 @@
     .lib-scope textarea.form-control { min-height: 96px; }
     .lib-scope .form-check-input { cursor: pointer; accent-color: var(--gold-300); }
 
+    /* --- Audience pickers (classes / students / teachers) ----- */
+    .lib-scope .lib-audiences-row { margin-top: .25rem; }
+    .lib-scope .lib-aud-col {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ece6d8;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #fffdf8 0%, #fffefb 100%);
+        padding: .85rem .9rem .7rem;
+        box-shadow: 0 2px 8px rgba(30,25,10,.04);
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .lib-scope .lib-aud-col.has-selection {
+        border-color: var(--gold-200);
+        box-shadow: 0 6px 16px rgba(207,160,70,.14);
+    }
+    .lib-scope .lib-aud-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: .55rem;
+        min-height: 28px;
+    }
+    .lib-scope .lib-aud-title {
+        font-weight: 700;
+        font-size: .9rem;
+        color: #4a4233;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+    }
+    .lib-scope .lib-aud-title i { color: var(--gold-400); font-size: 1.05rem; }
+    .lib-scope .lib-aud-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        font-size: .78rem;
+        font-weight: 700;
+        color: #b9a888;
+        background: #faf6ec;
+        border: 1px solid #efe6cf;
+        border-radius: 999px;
+        padding: .1rem .55rem;
+        transition: color .2s, background .2s, border-color .2s;
+    }
+    .lib-scope .lib-aud-col.has-selection .lib-aud-badge {
+        color: #fff;
+        background: linear-gradient(135deg, var(--gold-200), var(--gold-400));
+        border-color: transparent;
+    }
+    .lib-scope .lib-aud-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+        margin-top: .5rem;
+        min-height: 22px;
+    }
+    .lib-scope .lib-aud-tools { display: inline-flex; gap: .65rem; }
+    .lib-scope .lib-aud-link {
+        border: 0;
+        background: none;
+        padding: 0;
+        font-size: .78rem;
+        font-weight: 600;
+        color: var(--gold-500);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: .2rem;
+        transition: color .15s;
+    }
+    .lib-scope .lib-aud-link:hover { color: var(--gold-400); text-decoration: underline; }
+    .lib-scope .lib-aud-link:disabled, .lib-scope .lib-aud-col .select2-container--disabled ~ * .lib-aud-link { color: #c9c1ad; cursor: default; }
+    .lib-scope .lib-aud-foot .lib-hint { font-size: .76rem; }
+
+    /* Select2 inside the audience panels: consistent height + on-brand borders */
+    .lib-scope .lib-aud-col .select2-container--bootstrap4 .select2-selection {
+        min-height: 44px;
+        border-radius: 9px;
+        border-color: #d9d9e3;
+    }
+    .lib-scope .lib-aud-col .select2-container--bootstrap4.select2-container--focus .select2-selection,
+    .lib-scope .lib-aud-col .select2-container--bootstrap4.select2-container--open .select2-selection {
+        border-color: var(--gold-300);
+        box-shadow: 0 0 0 .15rem rgba(207,160,70,.18);
+    }
+    .lib-scope .lib-aud-col .select2-container--disabled .select2-selection {
+        background: #f6f4ef;
+        border-style: dashed;
+    }
+    .lib-scope .lib-aud-col .select2-selection--multiple .select2-selection__choice {
+        background: linear-gradient(135deg, var(--gold-200), var(--gold-400));
+        border: 0;
+        color: #fff;
+        border-radius: 7px;
+        font-size: .8rem;
+        padding: .1rem .5rem;
+    }
+    .lib-scope .lib-aud-col .select2-selection--multiple .select2-selection__choice__remove { color: #fff; opacity: .85; margin-inline-end: .3rem; }
+
     /* --- File inputs: themed selector button (theme ships BS4) - */
     .lib-scope input[type="file"].form-control {
         display: flex;

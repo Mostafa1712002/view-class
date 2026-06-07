@@ -55,6 +55,11 @@ return [
             'no_students' => 'لا يوجد طلاب في هذا الفصل',
             'no_teachers' => 'لا يوجد معلمون مرتبطون بهذا الفصل',
             'select_all' => 'تحديد الكل',
+            'clear_all' => 'مسح',
+            'pick_classes' => 'ابحث واختر الفصول',
+            'pick_students' => 'ابحث واختر الطلاب',
+            'pick_teachers' => 'ابحث واختر المعلمين',
+            'selected_count' => 'المحدد',
         ],
         'tabs' => [
             'details' => 'البيانات',

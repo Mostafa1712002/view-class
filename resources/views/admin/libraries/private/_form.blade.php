@@ -28,45 +28,78 @@
     $existingTeachers = collect($currentAudiences['teacher'] ?? [])->pluck('audience_id')->all();
 @endphp
 
-<div class="row" id="lib-audiences"
+<div class="row lib-audiences-row" id="lib-audiences"
      data-members-url="{{ route('admin.libraries.private.class-members') }}"
      data-selected-students="{{ json_encode(array_values($existingStudents)) }}"
      data-selected-teachers="{{ json_encode(array_values($existingTeachers)) }}">
-    <div class="col-md-4 col-12 lib-field">
-        <label class="form-label">@lang('libraries.private.fields.classes')</label>
-        <select name="audiences[class][ids][]" id="lib-classes" class="form-control select2" multiple data-placeholder="@lang('libraries.private.fields.classes')">
-            @foreach($classes as $c)
-                <option value="{{ $c->id }}" @selected(in_array($c->id, $existingClasses))>{{ $c->name }}</option>
-            @endforeach
-        </select>
+
+    {{-- Classes --}}
+    <div class="col-lg-4 col-md-6 col-12 lib-field">
+        <div class="lib-aud-col">
+            <div class="lib-aud-head">
+                <span class="lib-aud-title"><i class="la la-layer-group"></i> @lang('libraries.private.fields.classes')</span>
+                <span class="lib-aud-badge" title="@lang('libraries.private.fields.selected_count')"><i class="la la-check-circle"></i> <span class="lib-aud-count" data-for="lib-classes">0</span></span>
+            </div>
+            <select name="audiences[class][ids][]" id="lib-classes" class="form-control select2" multiple data-placeholder="@lang('libraries.private.fields.pick_classes')">
+                @foreach($classes as $c)
+                    <option value="{{ $c->id }}" @selected(in_array($c->id, $existingClasses))>{{ $c->name }}</option>
+                @endforeach
+            </select>
+            <div class="lib-aud-foot">
+                <span class="lib-aud-tools"></span>
+                <small class="text-muted lib-hint" data-for="lib-classes"></small>
+            </div>
+        </div>
         <input type="hidden" name="audiences[class][type]" value="class" />
     </div>
-    <div class="col-md-4 col-12 lib-field">
-        <label class="form-label d-flex justify-content-between align-items-center">
-            <span>@lang('libraries.private.fields.students')</span>
-            <button type="button" class="btn btn-link btn-sm p-0 lib-select-all" data-target="lib-students">@lang('libraries.private.fields.select_all')</button>
-        </label>
-        <select name="audiences[user][ids][]" id="lib-students" class="form-control select2" multiple disabled
-                data-placeholder="@lang('libraries.private.fields.choose_class_first')">
-            @foreach($selectedStudents as $s)
-                <option value="{{ $s->id }}" selected>{{ $s->name }}</option>
-            @endforeach
-        </select>
-        <small class="text-muted lib-hint" data-for="lib-students">@lang('libraries.private.fields.choose_class_first')</small>
+
+    {{-- Students --}}
+    <div class="col-lg-4 col-md-6 col-12 lib-field">
+        <div class="lib-aud-col">
+            <div class="lib-aud-head">
+                <span class="lib-aud-title"><i class="la la-user-graduate"></i> @lang('libraries.private.fields.students')</span>
+                <span class="lib-aud-badge" title="@lang('libraries.private.fields.selected_count')"><i class="la la-check-circle"></i> <span class="lib-aud-count" data-for="lib-students">0</span></span>
+            </div>
+            <select name="audiences[user][ids][]" id="lib-students" class="form-control select2" multiple disabled
+                    data-placeholder="@lang('libraries.private.fields.choose_class_first')"
+                    data-placeholder-ready="@lang('libraries.private.fields.pick_students')">
+                @foreach($selectedStudents as $s)
+                    <option value="{{ $s->id }}" selected>{{ $s->name }}</option>
+                @endforeach
+            </select>
+            <div class="lib-aud-foot">
+                <span class="lib-aud-tools">
+                    <button type="button" class="lib-aud-link lib-select-all" data-target="lib-students"><i class="la la-check-double"></i> @lang('libraries.private.fields.select_all')</button>
+                    <button type="button" class="lib-aud-link lib-clear-all" data-target="lib-students"><i class="la la-eraser"></i> @lang('libraries.private.fields.clear_all')</button>
+                </span>
+                <small class="text-muted lib-hint" data-for="lib-students"></small>
+            </div>
+        </div>
         <input type="hidden" name="audiences[user][type]" value="user" />
     </div>
-    <div class="col-md-4 col-12 lib-field">
-        <label class="form-label d-flex justify-content-between align-items-center">
-            <span>@lang('libraries.private.fields.teachers')</span>
-            <button type="button" class="btn btn-link btn-sm p-0 lib-select-all" data-target="lib-teachers">@lang('libraries.private.fields.select_all')</button>
-        </label>
-        <select name="audiences[teacher][ids][]" id="lib-teachers" class="form-control select2" multiple disabled
-                data-placeholder="@lang('libraries.private.fields.choose_class_first')">
-            @foreach($selectedTeachers as $t)
-                <option value="{{ $t->id }}" selected>{{ $t->name }}</option>
-            @endforeach
-        </select>
-        <small class="text-muted lib-hint" data-for="lib-teachers">@lang('libraries.private.fields.choose_class_first')</small>
+
+    {{-- Teachers --}}
+    <div class="col-lg-4 col-md-6 col-12 lib-field">
+        <div class="lib-aud-col">
+            <div class="lib-aud-head">
+                <span class="lib-aud-title"><i class="la la-chalkboard-teacher"></i> @lang('libraries.private.fields.teachers')</span>
+                <span class="lib-aud-badge" title="@lang('libraries.private.fields.selected_count')"><i class="la la-check-circle"></i> <span class="lib-aud-count" data-for="lib-teachers">0</span></span>
+            </div>
+            <select name="audiences[teacher][ids][]" id="lib-teachers" class="form-control select2" multiple disabled
+                    data-placeholder="@lang('libraries.private.fields.choose_class_first')"
+                    data-placeholder-ready="@lang('libraries.private.fields.pick_teachers')">
+                @foreach($selectedTeachers as $t)
+                    <option value="{{ $t->id }}" selected>{{ $t->name }}</option>
+                @endforeach
+            </select>
+            <div class="lib-aud-foot">
+                <span class="lib-aud-tools">
+                    <button type="button" class="lib-aud-link lib-select-all" data-target="lib-teachers"><i class="la la-check-double"></i> @lang('libraries.private.fields.select_all')</button>
+                    <button type="button" class="lib-aud-link lib-clear-all" data-target="lib-teachers"><i class="la la-eraser"></i> @lang('libraries.private.fields.clear_all')</button>
+                </span>
+                <small class="text-muted lib-hint" data-for="lib-teachers"></small>
+            </div>
+        </div>
         <input type="hidden" name="audiences[teacher][type]" value="teacher" />
     </div>
 </div>
@@ -116,27 +149,46 @@ jQuery(function ($) {
         var h = root.querySelector('.lib-hint[data-for="' + $sel.attr('id') + '"]');
         if (h) h.textContent = text || '';
     }
+    // The hint inside the box (placeholder) and the hint line below must never duplicate (card #128):
+    // disabled state -> placeholder shows "choose class first", the line stays empty;
+    // enabled state  -> placeholder shows "search & select", the line is only for loading/empty results.
+    function setPlaceholder($sel, text) {
+        $sel.attr('data-placeholder', text);
+        $sel.next('.select2-container').find('.select2-search__field').attr('placeholder', text);
+    }
+    function updateCount($sel) {
+        var n = ($sel.val() || []).length;
+        var el = root.querySelector('.lib-aud-count[data-for="' + $sel.attr('id') + '"]');
+        if (el) el.textContent = n;
+        var col = $sel.closest('.lib-aud-col');
+        if (col.length) col.toggleClass('has-selection', n > 0);
+    }
     function currentSelection($sel) { return ($sel.val() || []).map(String); }
 
-    function rebuild($sel, items, keepIds, emptyText) {
+    function disableEmpty($sel) {
+        $sel.empty().prop('disabled', true);
+        setPlaceholder($sel, T.chooseFirst);
+        hint($sel, '');
+        refresh($sel); updateCount($sel);
+    }
+
+    function rebuild($sel, items, keepIds, emptyText, readyText) {
         var keep = new Set((keepIds || []).map(String));
         $sel.empty();
         items.forEach(function (it) {
             var o = new Option(it.name, it.id, false, keep.has(String(it.id)));
             $sel.append(o);
         });
-        $sel.prop('disabled', items.length === 0);
-        hint($sel, items.length === 0 ? emptyText : '');
-        refresh($sel);
+        var empty = items.length === 0;
+        $sel.prop('disabled', empty);
+        setPlaceholder($sel, empty ? T.chooseFirst : readyText);
+        hint($sel, empty ? emptyText : '');
+        refresh($sel); updateCount($sel);
     }
 
     function load() {
         var ids = ($classSel.val() || []);
-        if (ids.length === 0) {
-            $studentSel.empty().prop('disabled', true); hint($studentSel, T.chooseFirst); refresh($studentSel);
-            $teacherSel.empty().prop('disabled', true); hint($teacherSel, T.chooseFirst); refresh($teacherSel);
-            return;
-        }
+        if (ids.length === 0) { disableEmpty($studentSel); disableEmpty($teacherSel); return; }
         var keepStudents = currentSelection($studentSel);
         var keepTeachers = currentSelection($teacherSel);
         hint($studentSel, T.loading); hint($teacherSel, T.loading);
@@ -145,20 +197,31 @@ jQuery(function ($) {
         fetch(url + '?' + qs, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                rebuild($studentSel, data.students || [], keepStudents, T.noStudents);
-                rebuild($teacherSel, data.teachers || [], keepTeachers, T.noTeachers);
+                rebuild($studentSel, data.students || [], keepStudents, T.noStudents, $studentSel.data('placeholder-ready'));
+                rebuild($teacherSel, data.teachers || [], keepTeachers, T.noTeachers, $teacherSel.data('placeholder-ready'));
             })
             .catch(function () { hint($studentSel, ''); hint($teacherSel, ''); });
     }
 
-    $classSel.on('change', load);
+    $classSel.on('change', function () { updateCount($classSel); load(); });
+    $studentSel.on('change', function () { updateCount($studentSel); });
+    $teacherSel.on('change', function () { updateCount($teacherSel); });
 
     $('.lib-select-all').on('click', function () {
         var $sel = $('#' + $(this).data('target'));
         if (!$sel.length || $sel.prop('disabled')) return;
         $sel.find('option').prop('selected', true);
-        refresh($sel);
+        refresh($sel); updateCount($sel);
     });
+    $('.lib-clear-all').on('click', function () {
+        var $sel = $('#' + $(this).data('target'));
+        if (!$sel.length || $sel.prop('disabled')) return;
+        $sel.find('option').prop('selected', false);
+        refresh($sel); updateCount($sel);
+    });
+
+    // Initial counts (covers pre-selected audiences on edit).
+    updateCount($classSel); updateCount($studentSel); updateCount($teacherSel);
 
     // On edit: if classes are already selected, load their members and keep existing picks.
     if (($classSel.val() || []).length > 0) load();

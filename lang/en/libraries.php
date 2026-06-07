@@ -55,6 +55,11 @@ return [
             'no_students' => 'No students in this class',
             'no_teachers' => 'No teachers linked to this class',
             'select_all' => 'Select all',
+            'clear_all' => 'Clear',
+            'pick_classes' => 'Search and select classes',
+            'pick_students' => 'Search and select students',
+            'pick_teachers' => 'Search and select teachers',
+            'selected_count' => 'Selected',
         ],
         'tabs' => [
             'details' => 'Details',
