@@ -8,7 +8,6 @@ use App\Models\School;
 use App\Models\Section;
 use App\Models\User;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -101,14 +100,47 @@ class UserCardController extends Controller
 
         $cards = $users->map(fn (User $u) => $this->cardFor($u))->values();
 
-        $pdf = Pdf::loadView('admin.users.cards.pdf', [
+        $html = view('admin.users.cards.pdf', [
             'cards'    => $cards,
             'platform' => $platform,
             'url'      => $url,
             'tab'      => $tab,
-        ])->setPaper('a4', 'portrait');
+        ])->render();
 
-        return $pdf->stream('user-cards-'.$tab.'-'.now()->format('Ymd-His').'.pdf');
+        // mPDF (not dompdf) so Arabic names/labels are shaped & rendered RTL correctly —
+        // dompdf has no Arabic glyph joining or bidi, which garbled the cards (card #162).
+        $isRtl = app()->getLocale() === 'ar';
+        $tmp   = storage_path('app/mpdf');
+        if (!is_dir($tmp)) {
+            @mkdir($tmp, 0775, true);
+        }
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'             => 'utf-8',
+            'format'           => 'A4',
+            'orientation'      => 'P',
+            'default_font'     => 'dejavusans',
+            'autoScriptToLang' => true,
+            'autoLangToFont'   => true,
+            'tempDir'          => $tmp,
+            'margin_top'       => 10,
+            'margin_bottom'    => 10,
+            'margin_left'      => 10,
+            'margin_right'     => 10,
+        ]);
+        $mpdf->SetDirectionality($isRtl ? 'rtl' : 'ltr');
+        $mpdf->WriteHTML($html);
+
+        $filename = 'user-cards-'.$tab.'-'.now()->format('Ymd-His').'.pdf';
+
+        return response(
+            $mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN),
+            200,
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="'.$filename.'"',
+            ]
+        );
     }
 
     public function regenerate(Request $request, int $id): RedirectResponse

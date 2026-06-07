@@ -5,15 +5,10 @@
 
 @php
     $isRtl = app()->getLocale() === 'ar';
-    $float = $isRtl ? 'right' : 'left';
 @endphp
 
 @push('styles')
 <style>
-    .uc-header { margin-bottom: 1.25rem; }
-    .uc-header h2 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: .15rem; letter-spacing: -.2px; }
-    .uc-header .breadcrumb { padding: 0; margin: 0; background: transparent; font-size: .85rem; }
-    .uc-header .breadcrumb-item + .breadcrumb-item::before { color: #cbd5e1; }
     .uc-lead { color:#475569; font-size:.92rem; max-width: 60ch; margin-bottom: 1rem; }
 
     .uc-tabs { display:flex; gap:.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
@@ -109,15 +104,16 @@
 @endpush
 
 @section('content')
-<div class="content-header uc-header">
-    <h2 class="float-{{ $float }} mb-0">@lang('user_cards.page_title')</h2>
-    <div style="clear:both"></div>
-    <div class="breadcrumb-wrapper mt-1">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('user_cards.breadcrumb_home')</a></li>
-            <li class="breadcrumb-item">@lang('user_cards.breadcrumb_users')</li>
-            <li class="breadcrumb-item active">@lang('user_cards.breadcrumb_cards')</li>
-        </ol>
+<div class="content-header row">
+    <div class="content-header-left col-md-12 col-12 mb-2">
+        <h2 class="content-header-title mb-0">@lang('user_cards.page_title')</h2>
+        <div class="breadcrumb-wrapper mt-1">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('user_cards.breadcrumb_home')</a></li>
+                <li class="breadcrumb-item">@lang('user_cards.breadcrumb_users')</li>
+                <li class="breadcrumb-item active">@lang('user_cards.breadcrumb_cards')</li>
+            </ol>
+        </div>
     </div>
 </div>
 
