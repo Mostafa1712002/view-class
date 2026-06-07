@@ -157,6 +157,9 @@ jQuery(function ($) {
     function applySelect2($sel, placeholder) {
         if (!$.fn.select2) return;
         if ($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+        // Keep data-placeholder in sync — select2 reads the placeholder from jQuery's .data()
+        // cache, which .attr() does NOT update, so set both or the old value sticks.
+        $sel.attr('data-placeholder', placeholder || '').data('placeholder', placeholder || '');
         $sel.select2({
             theme: 'bootstrap4',
             width: '100%',
