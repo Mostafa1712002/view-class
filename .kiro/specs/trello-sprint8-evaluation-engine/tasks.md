@@ -21,8 +21,8 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 ## Phase 1: Form authoring (Tasks 1–5) — IN PROGRESS (building locally; not on live until sign-off)
 - [x] 1.1 Task 1 — forms list (KPIs, filters type/domain/status/search, table+enum labels, sidebar wired) — `c327a6e`, local-verified
       (remaining for 1.1 later: export, per-row control menu, archive/delete rules — add with Task 8 actions)
-- [ ] 1.2 Task 2 — create/edit form (fields, type, domain, levels behaviour, settings toggles, validation)
-- [ ] 1.3 Task 3 — type logic (Rubric/RatingScale/Checklist input + level rules)
+- [x] 1.2 Task 2 — create/edit form (fields, type/domain, levels behaviour, 16 settings toggles, validation) — `ab2e619`, local-verified
+- [x] 1.3 Task 3 — type logic (checklist hides levels; rubric N/M level percentages auto-computed) — `ab2e619`, verified (33.33/66.67/100%)
 - [ ] 1.4 Task 4 — items management (weights sum=100%, required/evidence flags, ordering, disable-not-delete)
 - [ ] 1.5 Task 5 — indicators management (level-bound for rubric; per-type behaviour)
 **Outcome:** an admin can fully author a form (still unpublished).
