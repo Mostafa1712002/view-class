@@ -23,8 +23,8 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
       (remaining for 1.1 later: export, per-row control menu, archive/delete rules — add with Task 8 actions)
 - [x] 1.2 Task 2 — create/edit form (fields, type/domain, levels behaviour, 16 settings toggles, validation) — `ab2e619`, local-verified
 - [x] 1.3 Task 3 — type logic (checklist hides levels; rubric N/M level percentages auto-computed) — `ab2e619`, verified (33.33/66.67/100%)
-- [ ] 1.4 Task 4 — items management (weights sum=100%, required/evidence flags, ordering, disable-not-delete)
-- [ ] 1.5 Task 5 — indicators management (level-bound for rubric; per-type behaviour)
+- [x] 1.4 Task 4 — items management (weight total/remaining + over-100 block, required-zero-weight block, evidence/visibility flags, up/down ordering, disable+delete with disable-not-delete for used items, published-form lock) — local-verified
+- [x] 1.5 Task 5 — indicators management (rubric level binding from form levels; no level for rating/checklist; required/note/evidence flags, ordering, disable+delete with used-guard) — local-verified
 **Outcome:** an admin can fully author a form (still unpublished).
 
 ## Phase 2: Targets, evaluators, publish (Tasks 6–8)

@@ -137,6 +137,7 @@
                                         <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false"><i class="la la-ellipsis-h"></i></button>
                                         <div class="dropdown-menu dropdown-menu-end">
                                             <a class="dropdown-item" href="{{ route('admin.evaluations.edit', $form->id) }}"><i class="la la-pen"></i> @lang('evaluation.form.actions.edit_basic')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.items.index', $form->id) }}"><i class="la la-list-ol"></i> @lang('evaluation_items.items.page_title')</a>
                                             <div class="dropdown-divider"></div>
                                             <form action="{{ route('admin.evaluations.destroy', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.form.delete_confirm')')">
                                                 @csrf @method('DELETE')

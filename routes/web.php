@@ -542,6 +542,22 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::put('evaluations/{id}', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'update'])->name('evaluations.update');
     Route::delete('evaluations/{id}', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'destroy'])->name('evaluations.destroy');
 
+    // Evaluation Items (Sprint 8 Task 4 — عناصر النموذج)
+    Route::get('evaluations/{form}/items', [\App\Modules\Evaluation\Controllers\EvaluationItemController::class, 'index'])->name('evaluations.items.index');
+    Route::post('evaluations/{form}/items', [\App\Modules\Evaluation\Controllers\EvaluationItemController::class, 'store'])->name('evaluations.items.store');
+    Route::put('evaluations/{form}/items/{item}', [\App\Modules\Evaluation\Controllers\EvaluationItemController::class, 'update'])->name('evaluations.items.update');
+    Route::post('evaluations/{form}/items/{item}/toggle', [\App\Modules\Evaluation\Controllers\EvaluationItemController::class, 'toggle'])->name('evaluations.items.toggle');
+    Route::delete('evaluations/{form}/items/{item}', [\App\Modules\Evaluation\Controllers\EvaluationItemController::class, 'destroy'])->name('evaluations.items.destroy');
+    Route::post('evaluations/{form}/items/reorder', [\App\Modules\Evaluation\Controllers\EvaluationItemController::class, 'reorder'])->name('evaluations.items.reorder');
+
+    // Evaluation Indicators (Sprint 8 Task 5 — مؤشرات العنصر)
+    Route::get('evaluations/{form}/items/{item}/indicators', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'index'])->name('evaluations.indicators.index');
+    Route::post('evaluations/{form}/items/{item}/indicators', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'store'])->name('evaluations.indicators.store');
+    Route::put('evaluations/{form}/items/{item}/indicators/{indicator}', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'update'])->name('evaluations.indicators.update');
+    Route::post('evaluations/{form}/items/{item}/indicators/{indicator}/toggle', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'toggle'])->name('evaluations.indicators.toggle');
+    Route::delete('evaluations/{form}/items/{item}/indicators/{indicator}', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'destroy'])->name('evaluations.indicators.destroy');
+    Route::post('evaluations/{form}/items/{item}/indicators/reorder', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'reorder'])->name('evaluations.indicators.reorder');
+
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
     Route::post('grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');
