@@ -82,6 +82,6 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 
 ## Separate quick-fix track (NOT this engine)
 Top of `sprint prompt` — independent bug cards to drain via the normal loop:
-- [ ] المكتبة الخاصة — private-library audience selects + search (same area as #124/#128; reproduce live first — possible bounce)
-- [ ] بطاقات المستخدمين — `/admin/users/cards` text/RTL on generate; swap `uc-header`→`row` on students tab
-- [ ] الاختبارات — `/admin/exams` design + "exam hasn't started" bug + exam-schedule tab
+- [x] المكتبة الخاصة (#128) — redesigned audience section (panels, count badges, select-all/clear, single hint, placeholder swap; fixed jQuery .data() cache bug blocking placeholder). Live-verified, handed to QA 2026-06-07.
+- [x] بطاقات المستخدمين (#162) — cards PDF switched dompdf→mPDF (Arabic shaping + RTL); header → content-header row. Live-verified (real-data PDF), handed to QA 2026-06-07.
+- [x] الاختبارات (#163) — (1) loaded Bootstrap-Icons globally (action icons were empty boxes app-wide); (2) fixed "exam not started" by running app in Asia/Riyadh (was UTC, +3h skew); (3) exam-schedule tab already existed. Live-verified, handed to QA 2026-06-07.
