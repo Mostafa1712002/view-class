@@ -24,6 +24,9 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @endif
     <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
+    {{-- Bootstrap Icons: many Sprint pages (exams, grades, attendance, messages, student/parent) use `bi bi-*`
+         which the theme never loaded, so their action icons rendered as empty boxes (card #163). --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     {{-- Al-Awwal brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
     @if(!$isRtl)
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
