@@ -6,16 +6,17 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 
 ---
 
-## Phase 0: Foundation (no Trello card — enabling work)
-- [ ] 0.1 Module scaffold `app/Modules/Evaluation/` (dirs per design §4)
-- [ ] 0.2 Migrations for all 14 tables (design §2)
-- [ ] 0.3 Models + relations in `app/Models/` (EvaluationForm, EvaluationLevel, EvaluationItem, EvaluationIndicator, EvaluationFormSnapshot, EvaluationTarget, EvaluationAssignment, EvaluationAssignmentTarget, Evaluation, EvaluationResponse, EvaluationEvidence, EvaluationComment, ClassVisit)
-- [ ] 0.4 Enums (FormType, FormStatus, UsageDomain, EvaluationStatus, VisitStatus)
+## Phase 0: Foundation (no Trello card — enabling work) — IN PROGRESS
+- [~] 0.1 Module scaffold `app/Modules/Evaluation/` (Enums/ created; remaining dirs added as files land)
+- [x] 0.2 Migrations for all 13 tables (design §2) — committed `482eb0c`, migrates clean locally
+- [x] 0.3 Models + relations in `app/Models/` (13 models) — committed `d2264b6`, boot-verified
+- [x] 0.4 Enums (FormType, FormStatus, UsageDomain, EvaluationStatus, VisitStatus) + ar/en lang — `d2264b6`
 - [ ] 0.5 Repository contracts + Eloquent (school-scoped) + bind in RepositoryServiceProvider
 - [ ] 0.6 Services skeleton: EvaluationNotifier, AuditTrail, FormCompletenessChecker
 - [ ] 0.7 Sidebar: wire العمليات التعليمية ← نماذج التقييم, التقييمات, الزيارات الصفية (replace dead `#`)
 - [ ] 0.8 Permission slugs seeded into school_role_permissions; Policies registered
 **Outcome:** schema + scaffolding migrated locally; nothing user-facing yet.
+**Review gate:** pause for user review when 0.1–0.8 complete, before Phase 1. NOT yet deployed to live.
 
 ## Phase 1: Form authoring (Tasks 1–5)
 - [ ] 1.1 Task 1 — forms list (filters, columns, export, statuses, control menu, delete/archive rules)
