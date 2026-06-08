@@ -115,5 +115,6 @@ EducationalCompany (الشركة/المجمع) → School → ClassRoom (الص�
 ## 11. Key risks / decisions to confirm
 1. **Scope size** — ~14 tables, ~12 controllers, ~20 actions, 3 scorers, ~15 views, permissions+notifications+audit. Genuinely multi-week. Proposed: build & review in the 7 phases below; deploy + QA each phase rather than big-bang.
 2. **Job performance (Task 15)** — no performance module exists. Recommend building linkage settings + a results view only this sprint; flag the aggregating module as a follow-up.
-3. **Reference data vs enums** — start with PHP Enums for types/statuses/domains (fast, type-safe) while keeping the data shapes (settings/weights/parties) fully data-driven, as the acceptance card demands. Full DB-managed type registry can be a later refactor.
+3. **Reference data vs enums** — DECISION (2026-06-08): keep PHP Enums this sprint (user-approved); revisit a DB-managed type registry in a later sprint only if admins need to add types without a deploy.
+   Original note: — start with PHP Enums for types/statuses/domains (fast, type-safe) while keeping the data shapes (settings/weights/parties) fully data-driven, as the acceptance card demands. Full DB-managed type registry can be a later refactor.
 4. **Export/print** — confirm desired formats (the cards say تصدير/طباعة; existing pages export via the shared helper — match that).

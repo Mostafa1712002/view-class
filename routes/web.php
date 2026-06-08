@@ -534,6 +534,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('exams/{exam}/questions/reorder', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'reorder'])->name('exams.questions.reorder');
     Route::post('exams/{exam}/questions/{question}/duplicate', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'duplicate'])->name('exams.questions.duplicate');
 
+    // Evaluation Forms (Sprint 8 — نماذج التقييم)
+    Route::get('evaluations', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'index'])->name('evaluations.index');
+
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
     Route::post('grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');

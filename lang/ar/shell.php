@@ -64,6 +64,7 @@ return [
     'nav_certificates' => 'الشهادات',
     'nav_edu_sites' => 'مواقع تعليمية',
     'nav_surveys' => 'الاستبيانات',
+    'nav_eval_forms' => 'نماذج التقييم',
     'nav_evaluations' => 'التقييمات',
     'nav_visits' => 'الزيارات',
     'nav_appointments' => 'المواعيد',

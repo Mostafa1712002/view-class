@@ -64,6 +64,7 @@ return [
     'nav_certificates' => 'Certificates',
     'nav_edu_sites' => 'Educational sites',
     'nav_surveys' => 'Surveys',
+    'nav_eval_forms' => 'Evaluation Forms',
     'nav_evaluations' => 'Evaluations',
     'nav_visits' => 'Visits',
     'nav_appointments' => 'Appointments',

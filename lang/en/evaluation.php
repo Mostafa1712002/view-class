@@ -69,4 +69,35 @@ return [
         'no_evaluators'             => 'No evaluators assigned',
         'close_before_start'        => 'Close date is earlier than start date',
     ],
+    'forms' => [
+        'page_title' => 'Evaluation Forms',
+        'add'        => 'Add form',
+        'add_soon'   => 'Add form (coming soon)',
+        'kpis' => [
+            'total'     => 'Total forms',
+            'published' => 'Published',
+            'draft'     => 'Draft',
+            'closed'    => 'Closed',
+        ],
+        'filters' => [
+            'search' => 'Search by name',
+            'show'   => 'Show',
+            'reset'  => 'Reset',
+        ],
+        'columns' => [
+            'name'       => 'Form name',
+            'type'       => 'Type',
+            'domain'     => 'Usage domain',
+            'status'     => 'Status',
+            'items'      => 'Items',
+            'indicators' => 'Indicators',
+            'evaluators' => 'Evaluators',
+            'targets'    => 'Targets',
+            'created'    => 'Created',
+        ],
+        'empty' => [
+            'title'    => 'No evaluation forms yet',
+            'subtitle' => 'Start by creating your first evaluation form.',
+        ],
+    ],
 ];
