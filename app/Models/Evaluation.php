@@ -15,7 +15,7 @@ class Evaluation extends Model
     protected $fillable = [
         'form_id', 'snapshot_id', 'evaluator_id', 'subject_type', 'subject_id', 'school_id',
         'class_visit_id', 'status', 'total_score', 'max_score', 'percentage', 'grade_label',
-        'items_completed', 'indicators_completed', 'evidence_count', 'general_notes',
+        'score_breakdown', 'items_completed', 'indicators_completed', 'evidence_count', 'general_notes',
         'submitted_at', 'approved_by', 'approved_at', 'rejection_reason',
     ];
 
@@ -24,6 +24,7 @@ class Evaluation extends Model
         'total_score'          => 'decimal:2',
         'max_score'            => 'decimal:2',
         'percentage'           => 'decimal:2',
+        'score_breakdown'      => 'array',
         'items_completed'      => 'integer',
         'indicators_completed' => 'integer',
         'evidence_count'       => 'integer',

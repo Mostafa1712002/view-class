@@ -576,6 +576,22 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('evaluations/{id}/close', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'close'])->name('evaluations.close');
     Route::post('evaluations/{id}/archive', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'archive'])->name('evaluations.archive');
 
+    // My Evaluations landing (Sprint 8 Task 9 — التقييمات: required of me / my results)
+    Route::get('my-evaluations', [\App\Modules\Evaluation\Controllers\MyEvaluationsController::class, 'index'])->name('my-evaluations.index');
+
+    // Subject picker (Sprint 8 Task 10 — المستهدفون المكلّف بهم)
+    Route::get('evaluations/{form}/subjects', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'subjects'])->name('evaluations.subjects');
+
+    // Execution screen (Sprint 8 Task 11 — تنفيذ التقييم)
+    Route::get('evaluations/{form}/subjects/{subject}/start', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'start'])->name('evaluations.execute.start');
+    Route::get('evaluations/execute/{evaluation}', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'show'])->name('evaluations.execute.show');
+    Route::post('evaluations/execute/{evaluation}/draft', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'draft'])->name('evaluations.execute.draft');
+    Route::post('evaluations/execute/{evaluation}/submit', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'submit'])->name('evaluations.execute.submit');
+
+    // Evidence (Sprint 8 Task 12 — الشواهد)
+    Route::post('evaluations/execute/{evaluation}/evidence', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'store'])->name('evaluations.execute.evidence.store');
+    Route::delete('evaluations/execute/{evaluation}/evidence/{evidence}', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'destroy'])->name('evaluations.execute.evidence.destroy');
+
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
     Route::post('grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');

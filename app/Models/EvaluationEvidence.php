@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EvaluationEvidence extends Model
 {
+    protected $table = 'evaluation_evidences';
+
     protected $fillable = [
         'evaluation_id', 'item_id', 'indicator_id', 'type', 'file_id', 'url',
         'original_name', 'mime', 'size', 'description', 'internal_notes',

@@ -34,12 +34,12 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 **Outcome:** a form can be published; evaluators notified; structure frozen.
 
 ## Phase 3: Execution + scoring + evidence (Tasks 9–13)
-- [ ] 3.1 Task 9 — my evaluations (required / mine tabs, completion stats)
-- [ ] 3.2 Task 10 — subject picker (filters, status per subject)
-- [ ] 3.3 Task 11 — execution screen (type-aware, draft, submit gates)
-- [ ] 3.4 Task 12 — evidence per item/indicator (files+links, mandatory-evidence gate, log)
-- [ ] 3.5 Task 13 — scoring strategies + persisted breakdown + multi-evaluator average
-**Outcome:** an evaluator can complete and submit a scored evaluation.
+- [x] 3.1 Task 9 — my evaluations (required / mine tabs, completion stats) — local-verified (required tab shows form/2 targets/0→1 done/50% after submit; results tab respects allow_subject_view_results)
+- [x] 3.2 Task 10 — subject picker (filters, status per subject) — local-verified (subjects 47/48 scoped to evaluator's assignment; school/subject/status filters; per-subject status not_started/draft/completed → start/continue/view)
+- [x] 3.3 Task 11 — execution screen (type-aware, draft, submit gates) — local-verified (rubric levels per item, draft saves partial, submit blocked on unanswered required item + missing required evidence, snapshot-bound)
+- [x] 3.4 Task 12 — evidence per item/indicator (files+links, mandatory-evidence gate, log) — local-verified (file bound to item_id=4 via File model, uploaded_by recorded; guards: others-delete/post-approval-delete/locked-upload all blocked; override bypasses)
+- [x] 3.5 Task 13 — scoring strategies + persisted breakdown — DONE earlier; integrated this phase (submit calls ScoringStrategyFactory against snapshot payload → 60×3/3 + 40×2/3 = 86.67%, grade جيد جداً, breakdown persisted to evaluations.score_breakdown). Multi-evaluator averaging deferred to result-read (Task 15/reports).
+**Outcome:** an evaluator can complete and submit a scored evaluation. ✅ local-verified end-to-end (eval #1: snapshot_id=3, school_id=1, status draft→completed, responses in rubric contract shape, score 86.67% matches engine, result-available notification to subject, audit logged).
 
 ## Phase 4: Approval + job-performance linkage (Tasks 14–15)
 - [ ] 4.1 Task 14 — approval cycle (approve/reject+reason/request-review, lock, reopen by perm)

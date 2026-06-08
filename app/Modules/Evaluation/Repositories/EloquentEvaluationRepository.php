@@ -26,7 +26,10 @@ class EloquentEvaluationRepository implements EvaluationRepository
     {
         return $this->scoped($schoolId)
             ->where('subject_id', $subjectId)
-            ->with(['form:id,title,type', 'evaluator:id,name'])
+            // NB: load the full form (not a column subset) so $form->setting()
+            // can read the `settings` json — otherwise allow_subject_view_results
+            // is never seen and the subject's results stay hidden.
+            ->with(['form', 'evaluator:id,name'])
             ->latest('id')
             ->get();
     }

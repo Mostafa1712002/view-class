@@ -101,7 +101,7 @@
 
             <li class="nav-item" data-section="educational"><a href="#"><i class="la la-poll"></i><span class="menu-title">@lang('shell.nav_surveys')</span></a></li>
             <li class="nav-item {{ request()->routeIs('admin.evaluations.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('admin.evaluations.index') ? route('admin.evaluations.index') : '#' }}"><i class="la la-clipboard-list"></i><span class="menu-title">@lang('shell.nav_eval_forms')</span></a></li>
-            <li class="nav-item" data-section="educational"><a href="#"><i class="la la-star"></i><span class="menu-title">@lang('shell.nav_evaluations')</span></a></li>
+            <li class="nav-item {{ request()->routeIs('admin.my-evaluations.*') || request()->routeIs('admin.evaluations.subjects') || request()->routeIs('admin.evaluations.execute.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('admin.my-evaluations.index') ? route('admin.my-evaluations.index') : '#' }}"><i class="la la-star"></i><span class="menu-title">@lang('shell.nav_evaluations')</span></a></li>
             <li class="nav-item" data-section="educational"><a href="#"><i class="la la-map-marker"></i><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
 
             <li class="nav-item has-sub" data-section="educational">
