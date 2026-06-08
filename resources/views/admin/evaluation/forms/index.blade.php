@@ -36,9 +36,9 @@
         </div>
     </div>
     <div class="content-header-right col-md-4 col-12 text-end">
-        <button type="button" class="btn ev-add-btn" disabled title="@lang('evaluation.forms.add_soon')">
+        <a href="{{ route('admin.evaluations.create') }}" class="btn ev-add-btn">
             <i class="la la-plus"></i> @lang('evaluation.forms.add')
-        </button>
+        </a>
     </div>
 </div>
 
@@ -117,6 +117,7 @@
                             <th>@lang('evaluation.forms.columns.evaluators')</th>
                             <th>@lang('evaluation.forms.columns.targets')</th>
                             <th>@lang('evaluation.forms.columns.created')</th>
+                            <th class="text-end" style="width:90px;">@lang('evaluation.forms.columns.actions')</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -131,6 +132,19 @@
                                 <td>{{ $form->assignments_count }}</td>
                                 <td>{{ $form->targets_count }}</td>
                                 <td><span class="text-muted small">{{ $form->created_at?->format('Y-m-d') }}</span></td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false"><i class="la la-ellipsis-h"></i></button>
+                                        <div class="dropdown-menu dropdown-menu-end">
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.edit', $form->id) }}"><i class="la la-pen"></i> @lang('evaluation.form.actions.edit_basic')</a>
+                                            <div class="dropdown-divider"></div>
+                                            <form action="{{ route('admin.evaluations.destroy', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.form.delete_confirm')')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('evaluation.form.actions.delete')</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

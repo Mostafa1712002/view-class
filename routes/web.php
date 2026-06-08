@@ -536,6 +536,11 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
     // Evaluation Forms (Sprint 8 — نماذج التقييم)
     Route::get('evaluations', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'index'])->name('evaluations.index');
+    Route::get('evaluations/create', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'create'])->name('evaluations.create');
+    Route::post('evaluations', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'store'])->name('evaluations.store');
+    Route::get('evaluations/{id}/edit', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'edit'])->name('evaluations.edit');
+    Route::put('evaluations/{id}', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'update'])->name('evaluations.update');
+    Route::delete('evaluations/{id}', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'destroy'])->name('evaluations.destroy');
 
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
