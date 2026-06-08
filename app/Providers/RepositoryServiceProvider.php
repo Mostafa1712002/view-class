@@ -39,6 +39,12 @@ use App\Modules\Users\Repositories\EloquentAdminListRepository;
 use App\Modules\Users\Repositories\EloquentParentListRepository;
 use App\Modules\Users\Repositories\EloquentStudentListRepository;
 use App\Modules\Users\Repositories\EloquentTeacherListRepository;
+use App\Modules\Evaluation\Repositories\Contracts\EvaluationFormRepository;
+use App\Modules\Evaluation\Repositories\Contracts\EvaluationRepository;
+use App\Modules\Evaluation\Repositories\Contracts\ClassVisitRepository;
+use App\Modules\Evaluation\Repositories\EloquentEvaluationFormRepository;
+use App\Modules\Evaluation\Repositories\EloquentEvaluationRepository;
+use App\Modules\Evaluation\Repositories\EloquentClassVisitRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -62,6 +68,9 @@ class RepositoryServiceProvider extends ServiceProvider
         LibraryItemRepository::class => EloquentLibraryItemRepository::class,
         SchoolBranchRepository::class => EloquentSchoolBranchRepository::class,
         SmsSettingsRepository::class => EloquentSmsSettingsRepository::class,
+        EvaluationFormRepository::class => EloquentEvaluationFormRepository::class,
+        EvaluationRepository::class => EloquentEvaluationRepository::class,
+        ClassVisitRepository::class => EloquentClassVisitRepository::class,
     ];
 
     public function register(): void
