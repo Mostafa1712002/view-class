@@ -51,7 +51,9 @@ class EloquentClassVisitRepository implements ClassVisitRepository
     {
         return ClassVisit::query()
             ->where('teacher_id', $teacherId)
-            ->where('period_id', $periodId)
+            // null period must match IS NULL, not "= NULL" (which never matches)
+            ->when($periodId === null, fn (Builder $q) => $q->whereNull('period_id'))
+            ->when($periodId !== null, fn (Builder $q) => $q->where('period_id', $periodId))
             ->whereDate('visit_date', $visitDate)
             ->when($ignoreId, fn (Builder $q) => $q->whereKeyNot($ignoreId))
             ->exists();
