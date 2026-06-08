@@ -18,8 +18,9 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 **Outcome:** data layer + services complete & verified locally. Nothing user-facing; NOT deployed to live.
 **REVIEW GATE (here):** awaiting user review of the foundation before building Phase 1 screens. All committed to `main`.
 
-## Phase 1: Form authoring (Tasks 1–5)
-- [ ] 1.1 Task 1 — forms list (filters, columns, export, statuses, control menu, delete/archive rules)
+## Phase 1: Form authoring (Tasks 1–5) — IN PROGRESS (building locally; not on live until sign-off)
+- [x] 1.1 Task 1 — forms list (KPIs, filters type/domain/status/search, table+enum labels, sidebar wired) — `c327a6e`, local-verified
+      (remaining for 1.1 later: export, per-row control menu, archive/delete rules — add with Task 8 actions)
 - [ ] 1.2 Task 2 — create/edit form (fields, type, domain, levels behaviour, settings toggles, validation)
 - [ ] 1.3 Task 3 — type logic (Rubric/RatingScale/Checklist input + level rules)
 - [ ] 1.4 Task 4 — items management (weights sum=100%, required/evidence flags, ordering, disable-not-delete)
