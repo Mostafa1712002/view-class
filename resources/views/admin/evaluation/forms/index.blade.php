@@ -138,6 +138,24 @@
                                         <div class="dropdown-menu dropdown-menu-end">
                                             <a class="dropdown-item" href="{{ route('admin.evaluations.edit', $form->id) }}"><i class="la la-pen"></i> @lang('evaluation.form.actions.edit_basic')</a>
                                             <a class="dropdown-item" href="{{ route('admin.evaluations.items.index', $form->id) }}"><i class="la la-list-ol"></i> @lang('evaluation_items.items.page_title')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.targets.index', $form->id) }}"><i class="la la-users"></i> @lang('evaluation.form.actions_menu.targets')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.evaluators.index', $form->id) }}"><i class="la la-user-check"></i> @lang('evaluation.form.actions_menu.evaluators')</a>
+                                            <div class="dropdown-divider"></div>
+                                            @if (in_array($form->status?->value, ['draft','ready'], true))
+                                                <a class="dropdown-item text-success" href="{{ route('admin.evaluations.publish.confirm', $form->id) }}"><i class="la la-bullhorn"></i> @lang('evaluation.form.actions_menu.publish')</a>
+                                            @endif
+                                            @if ($form->status?->value === 'published')
+                                                <form action="{{ route('admin.evaluations.close', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.publish.close_confirm')')">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item"><i class="la la-lock"></i> @lang('evaluation.form.actions_menu.close')</button>
+                                                </form>
+                                            @endif
+                                            @if (in_array($form->status?->value, ['draft','ready','published','closed'], true))
+                                                <form action="{{ route('admin.evaluations.archive', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.publish.archive_confirm')')">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item"><i class="la la-archive"></i> @lang('evaluation.form.actions_menu.archive')</button>
+                                                </form>
+                                            @endif
                                             <div class="dropdown-divider"></div>
                                             <form action="{{ route('admin.evaluations.destroy', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.form.delete_confirm')')">
                                                 @csrf @method('DELETE')

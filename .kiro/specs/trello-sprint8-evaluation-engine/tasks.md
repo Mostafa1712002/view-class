@@ -27,10 +27,10 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 - [x] 1.5 Task 5 — indicators management (rubric level binding from form levels; no level for rating/checklist; required/note/evidence flags, ordering, disable+delete with used-guard) — local-verified
 **Outcome:** an admin can fully author a form (still unpublished).
 
-## Phase 2: Targets, evaluators, publish (Tasks 6–8)
-- [ ] 2.1 Task 6 — targets (org filters, bulk select, pre-save summary, no duplicates)
-- [ ] 2.2 Task 7 — evaluators (evaluator↔targets scope, no self-eval, assignment log)
-- [ ] 2.3 Task 8 — publish (completeness gate, confirm modal, **freeze snapshot**, lock, notify)
+## Phase 2: Targets, evaluators, publish (Tasks 6–8) — local-verified
+- [x] 2.1 Task 6 — targets (org filters, bulk select, pre-save summary, no duplicates) — local-verified (targets #5,#6 persisted, summary modal shows selected/new/dups/inactive/schools/subjects, audit `evaluation.target.add`)
+- [x] 2.2 Task 7 — evaluators (evaluator↔targets scope, no self-eval, assignment log) — local-verified (assignment #2 → targets 5,6; audit `evaluation.evaluator.assign`)
+- [x] 2.3 Task 8 — publish (completeness gate, confirm modal, **freeze snapshot**, lock, notify) — local-verified (snapshot v1 frozen w/ 2 items+3 levels, status→published, notification `evaluation_published` to evaluator, post-publish item store blocked, gate lists 6 problems on empty form)
 **Outcome:** a form can be published; evaluators notified; structure frozen.
 
 ## Phase 3: Execution + scoring + evidence (Tasks 9–13)

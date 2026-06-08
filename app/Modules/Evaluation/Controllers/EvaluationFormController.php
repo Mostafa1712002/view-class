@@ -4,6 +4,7 @@ namespace App\Modules\Evaluation\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\EvaluationForm;
+use App\Modules\Evaluation\Actions\PublishEvaluationForm;
 use App\Modules\Evaluation\Actions\SaveEvaluationForm;
 use App\Modules\Evaluation\Enums\FormStatus;
 use App\Modules\Evaluation\Enums\FormType;
@@ -11,10 +12,12 @@ use App\Modules\Evaluation\Enums\UsageDomain;
 use App\Modules\Evaluation\Http\Requests\EvaluationFormRequest;
 use App\Modules\Evaluation\Repositories\Contracts\EvaluationFormRepository;
 use App\Modules\Evaluation\Services\AuditTrail;
+use App\Modules\Evaluation\Services\FormCompletenessChecker;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EvaluationFormController extends Controller
@@ -25,6 +28,8 @@ class EvaluationFormController extends Controller
         private readonly EvaluationFormRepository $forms,
         private readonly SaveEvaluationForm $saveForm,
         private readonly AuditTrail $audit,
+        private readonly FormCompletenessChecker $checker,
+        private readonly PublishEvaluationForm $publisher,
     ) {
     }
 
@@ -105,6 +110,81 @@ class EvaluationFormController extends Controller
         $this->forms->delete($form);
 
         return redirect()->route('admin.evaluations.index')->with('status', __('evaluation.form.deleted'));
+    }
+
+    /** Task 8 — confirmation screen before publishing (completeness + summary). */
+    public function publishConfirm(int $id): View|RedirectResponse
+    {
+        $form = $this->forms->findScoped($id, $this->activeSchoolId());
+        if (!$form) {
+            return redirect()->route('admin.evaluations.index')->with('error', __('evaluation.form.not_found'));
+        }
+
+        $problems = $this->checker->problems($form);
+
+        return view('admin.evaluation.publish.confirm', [
+            'form'     => $form,
+            'problems' => $problems,
+            'summary'  => [
+                'items'      => $form->items()->where('status', 'active')->count(),
+                'indicators' => $form->indicators()->where('status', 'active')->count(),
+                'targets'    => $form->targets()->count(),
+                'evaluators' => $form->assignments()->count(),
+                'close_date' => $form->close_date,
+                'notify'     => (bool) $form->setting('notify_on_publish', true),
+            ],
+        ]);
+    }
+
+    /** Task 8 — freeze a snapshot, lock structure, notify evaluators. */
+    public function publish(int $id): RedirectResponse
+    {
+        $form = $this->forms->findScoped($id, $this->activeSchoolId());
+        if (!$form) {
+            return redirect()->route('admin.evaluations.index')->with('error', __('evaluation.form.not_found'));
+        }
+
+        try {
+            $snapshot = $this->publisher->publish($form, (int) auth()->id());
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return redirect()
+            ->route('admin.evaluations.index')
+            ->with('status', __('evaluation.publish.flash.published', ['version' => $snapshot->version]));
+    }
+
+    public function close(int $id): RedirectResponse
+    {
+        $form = $this->forms->findScoped($id, $this->activeSchoolId());
+        if (!$form) {
+            return redirect()->route('admin.evaluations.index')->with('error', __('evaluation.form.not_found'));
+        }
+
+        try {
+            $this->publisher->close($form, (int) auth()->id());
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return back()->with('status', __('evaluation.publish.flash.closed'));
+    }
+
+    public function archive(int $id): RedirectResponse
+    {
+        $form = $this->forms->findScoped($id, $this->activeSchoolId());
+        if (!$form) {
+            return redirect()->route('admin.evaluations.index')->with('error', __('evaluation.form.not_found'));
+        }
+
+        try {
+            $this->publisher->archive($form, (int) auth()->id());
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return back()->with('status', __('evaluation.publish.flash.archived'));
     }
 
     /** Shared data for create/edit views. */

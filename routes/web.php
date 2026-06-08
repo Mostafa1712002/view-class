@@ -558,6 +558,24 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::delete('evaluations/{form}/items/{item}/indicators/{indicator}', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'destroy'])->name('evaluations.indicators.destroy');
     Route::post('evaluations/{form}/items/{item}/indicators/reorder', [\App\Modules\Evaluation\Controllers\EvaluationIndicatorController::class, 'reorder'])->name('evaluations.indicators.reorder');
 
+    // Evaluation Targets (Sprint 8 Task 6 — تحديد المستهدفين)
+    Route::get('evaluations/{form}/targets', [\App\Modules\Evaluation\Controllers\EvaluationTargetController::class, 'index'])->name('evaluations.targets.index');
+    Route::post('evaluations/{form}/targets', [\App\Modules\Evaluation\Controllers\EvaluationTargetController::class, 'store'])->name('evaluations.targets.store');
+    Route::post('evaluations/{form}/targets/summary', [\App\Modules\Evaluation\Controllers\EvaluationTargetController::class, 'summary'])->name('evaluations.targets.summary');
+    Route::delete('evaluations/{form}/targets/{target}', [\App\Modules\Evaluation\Controllers\EvaluationTargetController::class, 'destroy'])->name('evaluations.targets.destroy');
+
+    // Evaluation Evaluators (Sprint 8 Task 7 — تحديد المقيّمين)
+    Route::get('evaluations/{form}/evaluators', [\App\Modules\Evaluation\Controllers\EvaluationAssignmentController::class, 'index'])->name('evaluations.evaluators.index');
+    Route::post('evaluations/{form}/evaluators', [\App\Modules\Evaluation\Controllers\EvaluationAssignmentController::class, 'store'])->name('evaluations.evaluators.store');
+    Route::put('evaluations/{form}/evaluators/{assignment}', [\App\Modules\Evaluation\Controllers\EvaluationAssignmentController::class, 'update'])->name('evaluations.evaluators.update');
+    Route::delete('evaluations/{form}/evaluators/{assignment}', [\App\Modules\Evaluation\Controllers\EvaluationAssignmentController::class, 'destroy'])->name('evaluations.evaluators.destroy');
+
+    // Evaluation Publish / Close / Archive (Sprint 8 Task 8 — النشر)
+    Route::get('evaluations/{id}/publish', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'publishConfirm'])->name('evaluations.publish.confirm');
+    Route::post('evaluations/{id}/publish', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'publish'])->name('evaluations.publish');
+    Route::post('evaluations/{id}/close', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'close'])->name('evaluations.close');
+    Route::post('evaluations/{id}/archive', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'archive'])->name('evaluations.archive');
+
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
     Route::post('grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');
