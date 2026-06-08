@@ -6,17 +6,17 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 
 ---
 
-## Phase 0: Foundation (no Trello card — enabling work) — IN PROGRESS
-- [~] 0.1 Module scaffold `app/Modules/Evaluation/` (Enums/ created; remaining dirs added as files land)
+## Phase 0: Foundation (no Trello card — enabling work) — ✅ CORE COMPLETE (review gate)
+- [x] 0.1 Module scaffold `app/Modules/Evaluation/` (Enums, Repositories[/Contracts], Services)
 - [x] 0.2 Migrations for all 13 tables (design §2) — committed `482eb0c`, migrates clean locally
 - [x] 0.3 Models + relations in `app/Models/` (13 models) — committed `d2264b6`, boot-verified
 - [x] 0.4 Enums (FormType, FormStatus, UsageDomain, EvaluationStatus, VisitStatus) + ar/en lang — `d2264b6`
-- [ ] 0.5 Repository contracts + Eloquent (school-scoped) + bind in RepositoryServiceProvider
-- [ ] 0.6 Services skeleton: EvaluationNotifier, AuditTrail, FormCompletenessChecker
-- [ ] 0.7 Sidebar: wire العمليات التعليمية ← نماذج التقييم, التقييمات, الزيارات الصفية (replace dead `#`)
-- [ ] 0.8 Permission slugs seeded into school_role_permissions; Policies registered
-**Outcome:** schema + scaffolding migrated locally; nothing user-facing yet.
-**Review gate:** pause for user review when 0.1–0.8 complete, before Phase 1. NOT yet deployed to live.
+- [x] 0.5 Repository contracts + Eloquent (school-scoped) + bound in RepositoryServiceProvider — `f12c7ae`, container-verified
+- [x] 0.6 Services: EvaluationNotifier (13 triggers), AuditTrail (wraps ActivityLog), FormCompletenessChecker (publish gate) — `f12c7ae`
+- [→] 0.7 Sidebar wiring → **moved to Phase 1** (needs the routes/controllers to link to; would be dead `#` now)
+- [→] 0.8 Permission slugs + Policies → **moved to Phase 1** (policies protect controllers built in P1)
+**Outcome:** data layer + services complete & verified locally. Nothing user-facing; NOT deployed to live.
+**REVIEW GATE (here):** awaiting user review of the foundation before building Phase 1 screens. All committed to `main`.
 
 ## Phase 1: Form authoring (Tasks 1–5)
 - [ ] 1.1 Task 1 — forms list (filters, columns, export, statuses, control menu, delete/archive rules)
