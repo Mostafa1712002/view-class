@@ -1,3 +1,82 @@
+{{-- Inline (not @push) on purpose: this component renders in the layout body, after the
+     head's @stack('styles') already emitted, so a pushed block would arrive too late. --}}
+<style>
+/* ── Notification bell + dropdown (gold/light, RTL-aware) ───────────────── */
+.vc-notif-bell { position: relative; }
+.vc-notif-bell.has-unread .la-bell { color: var(--gold-500, #c9a04b); }
+.vc-notif-count {
+    position: absolute; top: 2px; inset-inline-end: 2px;
+    min-width: 17px; height: 17px; padding: 0 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; line-height: 1; color: #fff;
+    background: linear-gradient(135deg, #f87171, #dc2626);
+    border: 2px solid #fff; border-radius: 999px;
+    box-shadow: 0 2px 5px rgba(220,38,38,.4);
+}
+.vc-notif-dd {
+    width: 360px; max-width: 92vw; padding: 0; overflow: hidden;
+    border: 1px solid #efe6cf; border-radius: 16px;
+    box-shadow: 0 18px 48px rgba(30,25,10,.18);
+}
+.vc-notif-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .5rem; padding: .8rem 1rem;
+    background: linear-gradient(135deg, #fdfaf2, #f7efdc);
+    border-bottom: 1px solid #efe6cf;
+}
+.vc-notif-head-title { font-weight: 700; color: var(--gold-500, #b5832a); font-size: .95rem; display: inline-flex; align-items: center; gap: .4rem; }
+.vc-notif-chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; padding: 0 6px; margin-inline-start: .15rem;
+    font-size: .72rem; font-weight: 700; color: #fff; border-radius: 999px;
+    background: linear-gradient(135deg, var(--gold-200, #e3c170), var(--gold-500, #c9a04b));
+}
+.vc-notif-markall {
+    border: 0; background: transparent; padding: 0; cursor: pointer;
+    font-size: .76rem; font-weight: 600; color: var(--gold-500, #b5832a);
+    display: inline-flex; align-items: center; gap: .25rem;
+}
+.vc-notif-markall:hover { color: var(--gold-400, #cfa046); text-decoration: underline; }
+.vc-notif-list { max-height: 360px; overflow-y: auto; background: #fff; }
+.vc-notif-item {
+    display: flex; align-items: flex-start; gap: .7rem;
+    padding: .7rem 1rem; text-decoration: none;
+    border-bottom: 1px solid #f4f1ea; transition: background .15s;
+}
+.vc-notif-item:last-child { border-bottom: 0; }
+.vc-notif-item:hover { background: #faf7f0; }
+.vc-notif-item.unread { background: #fffdf5; }
+.vc-notif-ico {
+    flex: 0 0 auto; width: 38px; height: 38px; border-radius: 11px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.05rem;
+}
+.vc-notif-ico.c-primary { background:#eef2ff; color:#4338ca; }
+.vc-notif-ico.c-success { background:#ecfdf5; color:#047857; }
+.vc-notif-ico.c-warning { background:#fef3c7; color:#92400e; }
+.vc-notif-ico.c-danger  { background:#fee2e2; color:#b91c1c; }
+.vc-notif-ico.c-info    { background:#e0f2fe; color:#0369a1; }
+.vc-notif-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.vc-notif-title { font-size: .85rem; font-weight: 700; color: #2b2b2b; line-height: 1.35; }
+.vc-notif-text { font-size: .78rem; color: #7a756c; line-height: 1.4; }
+.vc-notif-time { font-size: .7rem; color: #b0a892; display: inline-flex; align-items: center; gap: .25rem; margin-top: 1px; }
+.vc-notif-dot { flex: 0 0 auto; width: 8px; height: 8px; margin-top: 6px; border-radius: 999px; background: var(--gold-400, #cfa046); }
+.vc-notif-empty { text-align: center; padding: 2.4rem 1rem; }
+.vc-notif-empty-ico {
+    width: 56px; height: 56px; border-radius: 50%; margin: 0 auto .7rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #fdf6e6, #f6e9c8); color: var(--gold-400, #cfa046); font-size: 1.5rem;
+}
+.vc-notif-empty-title { font-weight: 700; color: #5d5443; margin: 0; font-size: .9rem; }
+.vc-notif-empty-sub { color: #a99e85; font-size: .78rem; margin: .15rem 0 0; }
+.vc-notif-foot {
+    display: flex; align-items: center; justify-content: center; gap: .35rem;
+    padding: .7rem; background: #fcfaf4; border-top: 1px solid #efe6cf;
+    font-size: .82rem; font-weight: 600; color: var(--gold-500, #b5832a); text-decoration: none;
+}
+.vc-notif-foot:hover { background: #f7efdc; color: var(--gold-400, #cfa046); }
+</style>
+
 @php
     $shellUser = auth()->user();
     $shellSchool = $shellUser?->school;
@@ -113,47 +192,49 @@
                     </a>
                 </li>
 
-                <li class="dropdown dropdown-notification nav-item">
-                    <a class="nav-link nav-link-label" href="#" data-toggle="dropdown" title="@lang('shell.notifications_heading')">
+                <li class="dropdown dropdown-notification nav-item vc-notif">
+                    <a class="nav-link nav-link-label vc-notif-bell {{ $unreadCount > 0 ? 'has-unread' : '' }}" href="#" data-toggle="dropdown" title="@lang('shell.notifications_heading')">
                         <i class="ficon la la-bell"></i>
                         @if($unreadCount > 0)
-                            <span class="badge badge-pill badge-danger badge-up badge-glow">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                            <span class="vc-notif-count">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
                         @endif
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
-                        <li class="dropdown-menu-header">
-                            <h6 class="dropdown-header m-0">
-                                <span class="grey darken-2">@lang('shell.notifications_heading')</span>
-                            </h6>
+                    <div class="dropdown-menu dropdown-menu-{{ $shellIsRtl ? 'left' : 'right' }} vc-notif-dd">
+                        <div class="vc-notif-head">
+                            <span class="vc-notif-head-title">
+                                <i class="la la-bell"></i> @lang('shell.notifications_heading')
+                                @if($unreadCount > 0)<span class="vc-notif-chip">{{ $unreadCount }}</span>@endif
+                            </span>
                             @if($unreadCount > 0)
-                                <span class="notification-tag badge badge-danger float-{{ $shellIsRtl ? 'right' : 'left' }} m-0">{{ $unreadCount }} @lang('shell.notifications_new')</span>
+                                <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="m-0 p-0">
+                                    @csrf
+                                    <button type="submit" class="vc-notif-markall"><i class="la la-check-double"></i> @lang('shell.notifications_mark_all')</button>
+                                </form>
                             @endif
-                        </li>
-                        <li class="scrollable-container media-list w-100" style="max-height:300px; overflow-y:auto;">
+                        </div>
+                        <div class="vc-notif-list">
                             @forelse($unreadNotifications as $notification)
-                                <a href="{{ $notification->action_url ?? route('notifications.index') }}" onclick="markNotificationRead('{{ $notification->id }}')">
-                                    <div class="media">
-                                        <div class="media-left align-self-center">
-                                            <i class="{{ $notification->getIcon() }} icon-bg-circle bg-{{ $notification->color }}"></i>
-                                        </div>
-                                        <div class="media-body">
-                                            <h6 class="media-heading">{{ $notification->title }}</h6>
-                                            <p class="notification-text font-small-3 text-muted">{{ Str::limit($notification->body, 50) }}</p>
-                                            <small><time class="media-meta text-muted">{{ $notification->created_at->diffForHumans() }}</time></small>
-                                        </div>
-                                    </div>
+                                @php($ic = $notification->getIcon())
+                                @php($icClass = \Illuminate\Support\Str::startsWith($ic,'bi-') ? 'bi '.$ic : (\Illuminate\Support\Str::startsWith($ic,'la-') ? 'la '.$ic : $ic))
+                                <a class="vc-notif-item unread" href="{{ $notification->action_url ?? route('notifications.index') }}" onclick="markNotificationRead('{{ $notification->id }}')">
+                                    <span class="vc-notif-ico c-{{ $notification->color ?? 'info' }}"><i class="{{ $icClass }}"></i></span>
+                                    <span class="vc-notif-body">
+                                        <span class="vc-notif-title">{{ $notification->title }}</span>
+                                        <span class="vc-notif-text">{{ Str::limit($notification->body, 70) }}</span>
+                                        <span class="vc-notif-time"><i class="la la-clock"></i> {{ $notification->created_at->diffForHumans() }}</span>
+                                    </span>
+                                    <span class="vc-notif-dot" aria-hidden="true"></span>
                                 </a>
                             @empty
-                                <div class="text-center p-3">
-                                    <i class="la la-bell-slash text-muted"></i>
-                                    <p class="text-muted mb-0">@lang('shell.notifications_empty')</p>
+                                <div class="vc-notif-empty">
+                                    <span class="vc-notif-empty-ico"><i class="la la-bell"></i></span>
+                                    <p class="vc-notif-empty-title">@lang('shell.notifications_empty')</p>
+                                    <p class="vc-notif-empty-sub">@lang('shell.notifications_empty_sub')</p>
                                 </div>
                             @endforelse
-                        </li>
-                        <li class="dropdown-menu-footer">
-                            <a class="dropdown-item text-muted text-center" href="{{ route('notifications.index') }}">@lang('shell.notifications_view_all')</a>
-                        </li>
-                    </ul>
+                        </div>
+                        <a class="vc-notif-foot" href="{{ route('notifications.index') }}">@lang('shell.notifications_view_all') <i class="la la-angle-{{ $shellIsRtl ? 'left' : 'right' }}"></i></a>
+                    </div>
                 </li>
 
                 @php($shellRoles = $shellUser->roles ?? collect())

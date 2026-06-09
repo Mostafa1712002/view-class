@@ -3,88 +3,72 @@
 @section('title', 'الإشعارات')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-0">الإشعارات</h1>
-            @if($unreadCount > 0)
-                <small class="text-muted">{{ $unreadCount }} إشعار غير مقروء</small>
-            @endif
-        </div>
-        <div class="btn-group">
-            <button type="button" class="btn btn-outline-primary" id="markAllRead" {{ $unreadCount == 0 ? 'disabled' : '' }}>
-                <i class="bi bi-check-all me-1"></i>
-                تحديد الكل كمقروء
-            </button>
-            <button type="button" class="btn btn-outline-danger" id="clearRead">
-                <i class="bi bi-trash me-1"></i>
-                حذف المقروءة
-            </button>
+<div class="content-header row">
+    <div class="content-header-left col-md-7 col-12 mb-2">
+        <h2 class="content-header-title mb-0">@lang('shell.notifications_heading')</h2>
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
+                <li class="breadcrumb-item active">@lang('shell.notifications_heading')</li>
+            </ol>
         </div>
     </div>
-
-    <div class="card">
-        <div class="card-body p-0">
-            @if($notifications->count() > 0)
-                <div class="list-group list-group-flush">
-                    @foreach($notifications as $notification)
-                        <div class="list-group-item list-group-item-action {{ $notification->isRead() ? '' : 'bg-light' }}"
-                             data-notification-id="{{ $notification->id }}">
-                            <div class="d-flex w-100 align-items-start">
-                                <div class="me-3">
-                                    <span class="rounded-circle bg-{{ $notification->color }} text-white d-inline-flex align-items-center justify-content-center"
-                                          style="width: 45px; height: 45px;">
-                                        <i class="{{ $notification->getIcon() }} fs-5"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex w-100 justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="mb-1 {{ $notification->isRead() ? '' : 'fw-bold' }}">
-                                                {{ $notification->title }}
-                                            </h6>
-                                            <p class="mb-1 text-muted">{{ $notification->body }}</p>
-                                            <small class="text-muted">
-                                                <i class="bi bi-clock me-1"></i>
-                                                {{ $notification->created_at->diffForHumans() }}
-                                            </small>
-                                        </div>
-                                        <div class="btn-group">
-                                            @if($notification->action_url)
-                                                <a href="{{ $notification->action_url }}" class="btn btn-sm btn-outline-primary">
-                                                    {{ $notification->action_text ?? 'عرض' }}
-                                                </a>
-                                            @endif
-                                            @if(!$notification->isRead())
-                                                <button type="button" class="btn btn-sm btn-outline-secondary mark-read"
-                                                        data-id="{{ $notification->id }}" title="تحديد كمقروء">
-                                                    <i class="bi bi-check"></i>
-                                                </button>
-                                            @endif
-                                            <button type="button" class="btn btn-sm btn-outline-danger delete-notification"
-                                                    data-id="{{ $notification->id }}" title="حذف">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <div class="p-3">
-                    {{ $notifications->links() }}
-                </div>
-            @else
-                <div class="text-center py-5">
-                    <i class="bi bi-bell-slash display-1 text-muted"></i>
-                    <p class="mt-3 text-muted">لا توجد إشعارات</p>
-                </div>
-            @endif
-        </div>
+    <div class="content-header-right col-md-5 col-12 text-end mb-2 vc-notif-pageactions">
+        <button type="button" class="btn btn-sm" id="markAllRead" {{ $unreadCount == 0 ? 'disabled' : '' }}>
+            <i class="la la-check-double"></i> @lang('shell.notifications_mark_all')
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-danger" id="clearRead">
+            <i class="la la-trash"></i> @lang('shell.notifications_clear_read')
+        </button>
     </div>
 </div>
+
+<div class="content-body">
+    <div class="card vc-notif-page">
+        @if($notifications->count() > 0)
+            <div class="vc-notif-list" style="max-height:none;">
+                @foreach($notifications as $notification)
+                    @php($ic = $notification->getIcon())
+                    @php($icClass = \Illuminate\Support\Str::startsWith($ic,'bi-') ? 'bi '.$ic : (\Illuminate\Support\Str::startsWith($ic,'la-') ? 'la '.$ic : $ic))
+                    <div class="vc-notif-item {{ $notification->isRead() ? '' : 'unread' }}" data-notification-id="{{ $notification->id }}">
+                        <span class="vc-notif-ico c-{{ $notification->color ?? 'info' }}"><i class="{{ $icClass }}"></i></span>
+                        <span class="vc-notif-body">
+                            <span class="vc-notif-title">{{ $notification->title }}</span>
+                            <span class="vc-notif-text">{{ $notification->body }}</span>
+                            <span class="vc-notif-time"><i class="la la-clock"></i> {{ $notification->created_at->diffForHumans() }}</span>
+                        </span>
+                        <span class="vc-notif-actions">
+                            @if($notification->action_url)
+                                <a href="{{ $notification->action_url }}" class="btn btn-sm btn-outline-secondary"><i class="la la-eye"></i> {{ $notification->action_text ?? __('shell.notifications_open') }}</a>
+                            @endif
+                            @if(!$notification->isRead())
+                                <button type="button" class="btn btn-sm btn-outline-secondary mark-read" data-id="{{ $notification->id }}" title="@lang('shell.notifications_mark_one')"><i class="la la-check"></i></button>
+                            @endif
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-notification" data-id="{{ $notification->id }}" title="@lang('libraries.actions.delete')"><i class="la la-trash"></i></button>
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+            <div class="p-3">{{ $notifications->links() }}</div>
+        @else
+            <div class="vc-notif-empty" style="padding:3.5rem 1rem;">
+                <span class="vc-notif-empty-ico"><i class="la la-bell"></i></span>
+                <p class="vc-notif-empty-title">@lang('shell.notifications_empty')</p>
+                <p class="vc-notif-empty-sub">@lang('shell.notifications_empty_sub')</p>
+            </div>
+        @endif
+    </div>
+</div>
+
+@push('styles')
+<style>
+.vc-notif-page .vc-notif-item { align-items: center; }
+.vc-notif-page .vc-notif-actions { display: inline-flex; gap: .35rem; flex: 0 0 auto; }
+.vc-notif-page .vc-notif-actions .btn { border-radius: 8px; }
+.vc-notif-pageactions .btn#markAllRead { background: linear-gradient(135deg, var(--gold-200), var(--gold-500)); color:#fff; border:none; }
+.vc-notif-pageactions .btn#markAllRead[disabled] { opacity:.5; }
+</style>
+@endpush
 
 @push('scripts')
 <script>
