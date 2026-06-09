@@ -138,6 +138,32 @@
         border: 1px solid #fed7aa; display: inline-flex; align-items: center; gap: .3rem;
     }
 
+    /* Parent identity strip */
+    .pl-parent-strip {
+        background: linear-gradient(135deg, #fffbeb 0%, #fff 60%);
+        border: 1px solid #fde68a; border-radius: 14px;
+        padding: .9rem 1.1rem; margin-bottom: 1.25rem;
+        display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+        box-shadow: 0 1px 2px rgba(207,160,70,.06), 0 4px 12px rgba(207,160,70,.04);
+    }
+    .pl-parent-strip .ps-avatar {
+        width: 44px; height: 44px; border-radius: 50%;
+        background: linear-gradient(135deg, #fde68a, #fcd34d);
+        color: #92400e; font-weight: 700; font-size: 1rem;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; border: 1px solid #fde68a;
+    }
+    .pl-parent-strip .ps-name { font-weight: 700; color: #0f172a; font-size: 1rem; }
+    .pl-parent-strip .ps-username { color: #64748b; font-size: .82rem; }
+    .pl-parent-strip .ps-back {
+        margin-inline-start: auto;
+        background: #fff; border: 1px solid #e2e8f0; color: #475569;
+        border-radius: 9px; padding: .38rem .8rem; font-size: .84rem; font-weight: 500;
+        display: inline-flex; align-items: center; gap: .4rem; text-decoration: none;
+        transition: all .15s ease;
+    }
+    .pl-parent-strip .ps-back:hover { border-color: var(--gold-300); color: var(--gold-500); background: #fffbeb; }
+
     @media (max-width: 575.98px) {
         .pl-search-row { max-width: 100%; }
         .pl-actions-bar { flex-direction: column-reverse; align-items: stretch; }
@@ -161,6 +187,22 @@
     @if(session('status'))
         <div class="pl-alert"><i class="la la-check-circle"></i><span>{{ session('status') }}</span></div>
     @endif
+
+    @php
+        $psInitials = collect(preg_split('/\s+/u', trim($parent->name)))
+            ->filter()->take(2)->map(fn($p) => mb_substr($p, 0, 1))->implode('');
+    @endphp
+    <div class="pl-parent-strip">
+        <div class="ps-avatar">{{ $psInitials ?: '؟' }}</div>
+        <div>
+            <div class="ps-name">{{ $parent->name }}</div>
+            <div class="ps-username">{{ $parent->username }}</div>
+        </div>
+        <a href="{{ route('admin.users.parents.show', $parent->id) }}" class="ps-back">
+            <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i>
+            @lang('users.parent_back')
+        </a>
+    </div>
 
     <div class="pl-summary">
         <i class="la la-info-circle"></i>

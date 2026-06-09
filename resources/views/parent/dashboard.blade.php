@@ -18,7 +18,12 @@
         flex-shrink: 0; overflow: hidden;
     }
     .pd-hero .logo img { max-width: 80%; max-height: 80%; object-fit: contain; }
+    .pd-hero .logo .logo-fallback {
+        font-size: 1.4rem; font-weight: 900; color: var(--gold-500);
+        font-family: 'Georgia', serif; line-height: 1;
+    }
     .pd-hero h1 { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -.3px; }
+    .pd-hero .platform-name { font-size: .72rem; font-weight: 700; color: var(--gold-500); text-transform: uppercase; letter-spacing: .8px; margin-bottom: .1rem; }
     .pd-hero .sub { color: #92400e; font-size: .9rem; }
     .pd-hero .yr { margin-inline-start: auto; }
     .pd-hero .yr .pill {
@@ -80,10 +85,13 @@
 <div class="container-fluid">
     <div class="pd-hero">
         <div class="logo">
-            <img src="{{ asset('img/brand/al-awwal-logo.png') }}" alt="@lang('auth.app_name')" onerror="this.style.display='none'">
+            <img src="{{ asset('img/brand/al-awwal-logo.png') }}" alt="@lang('auth.app_name')"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+            <span class="logo-fallback" style="display:none">ف</span>
         </div>
         <div>
-            <h1>مرحباً {{ $parent->name }}</h1>
+            <div class="platform-name">@lang('auth.app_name')</div>
+            <h1>مرحباً، {{ $parent->name }}</h1>
             <div class="sub">بوابة ولي الأمر — متابعة أبنائك التعليمية</div>
         </div>
         @if($academicYear)
@@ -141,6 +149,7 @@
                         </div>
                         <div class="pd-foot">
                             <a href="{{ route('parent.child.grades', $childData['student']) }}"><i class="la la-award"></i> الدرجات</a>
+                            <a href="{{ route('parent.child.exams', $childData['student']) }}"><i class="la la-file-alt"></i> الاختبارات</a>
                             <a href="{{ route('parent.child.attendance', $childData['student']) }}"><i class="la la-calendar-check"></i> الحضور</a>
                             <a href="{{ route('parent.child.schedule', $childData['student']) }}"><i class="la la-calendar"></i> الجدول</a>
                         </div>

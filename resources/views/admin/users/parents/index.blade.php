@@ -178,7 +178,8 @@
     .pp-icon-btn.is-primary { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
     .pp-icon-btn.is-primary:hover { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
 
-    /* Row dropdown */
+    /* Row dropdown — uses overflow:visible trick on table-responsive to escape clipping */
+    .table-responsive.menu-open { overflow: visible !important; }
     .pp-row-menu { position: relative; }
     .pp-row-menu .menu {
         position: absolute; top: calc(100% + .35rem);
@@ -186,7 +187,7 @@
         min-width: 220px; background: #fff;
         border: 1px solid #e5e7eb; border-radius: 12px;
         box-shadow: 0 8px 24px rgba(15,23,42,.08), 0 2px 6px rgba(15,23,42,.05);
-        padding: .35rem; z-index: 30; display: none;
+        padding: .35rem; z-index: 1050; display: none;
     }
     .pp-row-menu.is-open .menu { display: block; }
     .pp-row-menu .menu a, .pp-row-menu .menu button {
@@ -505,45 +506,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     // The row menu lives inside .table-responsive (overflow:auto) which clips it.
-    // Promote the open menu to position:fixed anchored under its toggle so it
-    // floats above the table and every other element.
-    function placeFixed(menu, btn) {
-        var r = btn.getBoundingClientRect();
-        menu.style.position = 'fixed';
-        menu.style.zIndex = '2000';
-        menu.style.top = (r.bottom + 4) + 'px';
-        var mw = menu.offsetWidth || 220;
-        var left = r.right - mw;            // RTL: align right edge under the toggle
-        if (left < 8) left = 8;
-        if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
-        menu.style.left = left + 'px';
-        menu.style.right = 'auto';
-    }
-    function resetFixed(menu) {
-        menu.style.position = '';
-        menu.style.zIndex = '';
-        menu.style.top = '';
-        menu.style.left = '';
-        menu.style.right = '';
-    }
+    // Fix: temporarily set overflow:visible on .table-responsive while a menu is open.
+    // The menu itself uses position:absolute with a high z-index (defined in CSS).
     function closeAllRowMenus() {
         document.querySelectorAll('.js-row-menu.is-open').forEach(function (m) {
             m.classList.remove('is-open');
-            var menu = m.querySelector('.menu');
-            if (menu) resetFixed(menu);
+        });
+        // Restore overflow on all table-responsive wrappers
+        document.querySelectorAll('.table-responsive.menu-open').forEach(function (w) {
+            w.classList.remove('menu-open');
         });
     }
+
     document.querySelectorAll('.js-row-menu-btn').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
             var wrap = btn.closest('.js-row-menu');
-            var menu = wrap.querySelector('.menu');
             var wasOpen = wrap.classList.contains('is-open');
             closeAllRowMenus();
             if (addMenu) addMenu.classList.remove('is-open');
             if (!wasOpen) {
                 wrap.classList.add('is-open');
-                placeFixed(menu, btn);
+                // Allow the absolute dropdown to escape the overflow:auto clip
+                var tableWrap = btn.closest('.table-responsive');
+                if (tableWrap) tableWrap.classList.add('menu-open');
             }
         });
     });

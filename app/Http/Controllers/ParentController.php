@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
 use App\Models\Attendance;
+use App\Models\Exam;
 use App\Models\Grade;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -174,6 +175,56 @@ class ParentController extends Controller
         }
 
         return view('parent.child-grades', compact('parent', 'child', 'academicYears', 'selectedYear', 'grades'));
+    }
+
+    /**
+     * View child's exams (upcoming + completed results)
+     */
+    public function childExams(User $child, Request $request): View
+    {
+        $parent = auth()->user();
+
+        if (!$parent->children()->where('users.id', $child->id)->exists()) {
+            abort(403);
+        }
+
+        $academicYear = $request->academic_year_id
+            ? AcademicYear::find($request->academic_year_id)
+            : AcademicYear::where('is_current', true)->first();
+
+        $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
+
+        $classIds = $child->enrolledClassIds();
+
+        $upcomingExams = collect();
+        $completedExams = collect();
+
+        if ($academicYear && !empty($classIds)) {
+            $upcomingExams = Exam::whereIn('class_id', $classIds)
+                ->where('academic_year_id', $academicYear->id)
+                ->where('is_published', true)
+                ->where('start_time', '>=', now())
+                ->with('subject')
+                ->orderBy('start_time')
+                ->get();
+
+            $completedExams = Exam::whereIn('class_id', $classIds)
+                ->where('academic_year_id', $academicYear->id)
+                ->where('is_published', true)
+                ->where('start_time', '<', now())
+                ->with('subject')
+                ->orderByDesc('start_time')
+                ->get();
+        }
+
+        return view('parent.child-exams', compact(
+            'parent',
+            'child',
+            'academicYear',
+            'academicYears',
+            'upcomingExams',
+            'completedExams'
+        ));
     }
 
     /**
