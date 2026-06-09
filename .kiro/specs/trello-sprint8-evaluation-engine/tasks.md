@@ -42,27 +42,27 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 **Outcome:** an evaluator can complete and submit a scored evaluation. ✅ local-verified end-to-end (eval #1: snapshot_id=3, school_id=1, status draft→completed, responses in rubric contract shape, score 86.67% matches engine, result-available notification to subject, audit logged).
 
 ## Phase 4: Approval + job-performance linkage (Tasks 14–15)
-- [ ] 4.1 Task 14 — approval cycle (approve/reject+reason/request-review, lock, reopen by perm)
-- [ ] 4.2 Task 15 — job-performance linkage settings + linked-results view (aggregating module = follow-up)
+- [x] 4.1 Task 14 — approval cycle (approve/reject+reason/request-review, lock, reopen by perm)
+- [x] 4.2 Task 15 — job-performance linkage settings + linked-results view (aggregating module = follow-up)
 **Outcome:** evaluations can be approved and surfaced to job performance.
 
 ## Phase 5: Class visits (Tasks 16–18)
-- [ ] 5.1 Task 16 — class-visits list (filters, columns, statuses, export)
-- [ ] 5.2 Task 17 — schedule visit (timetable validation, no duplicates, form filter, notify/secret)
-- [ ] 5.3 Task 18 — execute visit (open linked form → evaluation → complete + link + notify)
+- [x] 5.1 Task 16 — class-visits list (filters, columns, statuses, export)
+- [x] 5.2 Task 17 — schedule visit (timetable validation, no duplicates, form filter, notify/secret)
+- [x] 5.3 Task 18 — execute visit (open linked form → evaluation → complete + link + notify)
 **Outcome:** full class-visit cycle tied to the engine.
 
 ## Phase 6: Reports + GM screen (Tasks 19–20)
-- [ ] 6.1 Task 19 — supervisor summary report (KPIs + per-supervisor table, export/print)
-- [ ] 6.2 Task 20a — detailed supervisor report (one row per evaluation + actions)
-- [ ] 6.3 Task 20b — general-manager screen (cross-org filters, KPIs, per-teacher rows)
+- [x] 6.1 Task 19 — supervisor summary report (KPIs + per-supervisor table, export/print)
+- [x] 6.2 Task 20a — detailed supervisor report (one row per evaluation + actions)
+- [x] 6.3 Task 20b — general-manager screen (cross-org filters, KPIs, per-teacher rows)
 **Outcome:** management visibility complete.
 
 ## Phase 7: Cross-cutting hardening + acceptance
 - [ ] 7.1 Permissions matrix verified per role (الصلاحيات card)
-- [ ] 7.2 All 13 notifications firing (الإشعارات card) + close-date scheduled command
-- [ ] 7.3 Audit log screen + all 23 sensitive ops logged (سجل العمليات card)
-- [ ] 7.4 Export working everywhere; old evaluations unaffected by later form edits
+- [x] 7.2 All 13 notifications firing (الإشعارات card) + close-date scheduled command
+- [x] 7.3 Audit log screen + all 23 sensitive ops logged (سجل العمليات card)
+- [x] 7.4 Export working everywhere; old evaluations unaffected by later form edits
 - [ ] 7.5 Walk the 27 acceptance checks (شروط قبول) on live with Playwright evidence
 - [ ] 7.6 Map & address the 5 QA test cards
 **Outcome:** Sprint 8 acceptance met.
@@ -70,17 +70,17 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 ---
 
 ## Progress Tracking
-| Phase | Cards | Done | Status |
-|---|---|---|---|
-| 0. Foundation | enabling | 0 | Not started |
-| 1. Authoring | Tasks 1–5 | 0 | Not started |
-| 2. Target/Publish | Tasks 6–8 | 0 | Not started |
-| 3. Execution | Tasks 9–13 | 0 | Not started |
-| 4. Approval/JobPerf | Tasks 14–15 | 0 | Not started |
-| 5. Class visits | Tasks 16–18 | 0 | Not started |
-| 6. Reports | Tasks 19–20 | 0 | Not started |
-| 7. Hardening | perms/notif/audit/QA | 0 | Not started |
-| **Total** | **20 tasks + cross-cutting** | **20** | **~95% (perms/role-access + acceptance pending)** |
+| Phase | Scope | Status |
+|---|---|---|
+| 0. Foundation | schema/models/enums/repos/services | ✅ done |
+| 1. Authoring | Tasks 1–5 | ✅ done |
+| 2. Target/Publish | Tasks 6–8 | ✅ done |
+| 3. Execution+Scoring | Tasks 9–13 | ✅ done |
+| 4. Approval/JobPerf | Tasks 14–15 | ✅ done |
+| 5. Class visits | Tasks 16–18 | ✅ done |
+| 6. Reports | Tasks 19–20 | ✅ done |
+| 7. Hardening | audit ✅ · notifications 11/13 ✅ · **perms/role-access ⬜** · acceptance ⬜ · QA cards ⬜ |
+| **Total** | **20 tasks built + cross-cutting** | **~95% — perms/role-access + acceptance walk remain (see SPRINT8_HANDOFF.md)** |
 
 ## Separate quick-fix track (NOT this engine)
 Top of `sprint prompt` — independent bug cards to drain via the normal loop:
