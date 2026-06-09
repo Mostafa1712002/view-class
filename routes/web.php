@@ -618,6 +618,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('eval-reports/supervisors/detailed', [\App\Modules\Evaluation\Controllers\SupervisorReportController::class, 'detailed'])->name('eval-reports.supervisors-detailed');
     Route::get('eval-reports/general-manager', [\App\Modules\Evaluation\Controllers\GeneralManagerController::class, 'index'])->name('eval-reports.general-manager');
 
+    // Evaluation audit log (Sprint 8 P7 — سجل العمليات)
+    Route::get('evaluations/audit', [\App\Modules\Evaluation\Controllers\EvaluationAuditController::class, 'index'])->name('eval-audit.index');
+
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
     Route::post('grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');

@@ -111,6 +111,9 @@
                     <li class="{{ request()->routeIs('admin.eval-reports.supervisors-detailed') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.supervisors-detailed') ? route('admin.eval-reports.supervisors-detailed') : '#' }}"><i class="la la-list"></i><span class="menu-item">@lang('shell.nav_eval_rep_detailed')</span></a></li>
                     <li class="{{ request()->routeIs('admin.eval-reports.general-manager') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.general-manager') ? route('admin.eval-reports.general-manager') : '#' }}"><i class="la la-user-shield"></i><span class="menu-item">@lang('shell.nav_eval_rep_gm')</span></a></li>
                     <li class="{{ request()->routeIs('admin.job-performance.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.job-performance.index') ? route('admin.job-performance.index') : '#' }}"><i class="la la-briefcase"></i><span class="menu-item">@lang('shell.nav_job_performance')</span></a></li>
+                    @if (Route::has('admin.eval-audit.index'))
+                    <li class="{{ request()->routeIs('admin.eval-audit.*') ? 'active' : '' }}"><a href="{{ route('admin.eval-audit.index') }}"><i class="la la-history"></i><span class="menu-item">@lang('shell.nav_eval_audit')</span></a></li>
+                    @endif
                 </ul>
             </li>
 

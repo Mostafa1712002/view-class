@@ -73,6 +73,7 @@ return [
     'nav_eval_rep_detailed' => 'تقرير المشرفين المفصل',
     'nav_eval_rep_gm' => 'شاشة المدير العام',
     'nav_job_performance' => 'تقييم الأداء الوظيفي',
+    'nav_eval_audit' => 'سجل العمليات',
     'nav_appointments' => 'المواعيد',
     'nav_appointments_settings' => 'إعدادات المواعيد',
     'nav_my_appointments' => 'مواعيدي',

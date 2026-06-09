@@ -73,6 +73,7 @@ return [
     'nav_eval_rep_detailed' => 'Detailed Supervisors Report',
     'nav_eval_rep_gm' => 'General Manager Screen',
     'nav_job_performance' => 'Job Performance',
+    'nav_eval_audit' => 'Audit Log',
     'nav_appointments' => 'Appointments',
     'nav_appointments_settings' => 'Appointment settings',
     'nav_my_appointments' => 'My appointments',

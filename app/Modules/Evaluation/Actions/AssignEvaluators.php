@@ -6,6 +6,7 @@ use App\Models\EvaluationAssignment;
 use App\Models\EvaluationForm;
 use App\Models\User;
 use App\Modules\Evaluation\Services\AuditTrail;
+use App\Modules\Evaluation\Services\EvaluationNotifier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,8 +22,10 @@ use Illuminate\Validation\ValidationException;
  */
 class AssignEvaluators
 {
-    public function __construct(private readonly AuditTrail $audit)
-    {
+    public function __construct(
+        private readonly AuditTrail $audit,
+        private readonly EvaluationNotifier $notifier,
+    ) {
     }
 
     /**
@@ -77,6 +80,10 @@ class AssignEvaluators
                     null,
                     $assignment->toArray()
                 );
+
+                // Notify the newly-assigned evaluator (trigger: evaluator-assigned).
+                // Only on first assignment — scope updates below do not re-notify.
+                $this->notifier->evaluatorAssigned($form, [$evaluatorId]);
             } else {
                 $this->audit->record(
                     'evaluator.update',

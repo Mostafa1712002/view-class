@@ -57,6 +57,8 @@ return [
         'rejected_body'   => 'Your evaluation was rejected, please review',
         'result_title'    => 'Your evaluation result is available',
         'result_body'     => 'Your evaluation result is now available to view',
+        'close_date_title' => 'Evaluation close date approaching',
+        'close_date_body'  => 'The evaluation form ":form" closes on :date and you still have incomplete evaluations',
     ],
     'checks' => [
         'no_title'                  => 'The form has no title',

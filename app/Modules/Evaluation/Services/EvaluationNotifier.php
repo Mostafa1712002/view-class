@@ -111,4 +111,25 @@ class EvaluationNotifier
             ['evaluation_id' => $evaluation->id]
         );
     }
+
+    /**
+     * Close-date-approaching reminder for evaluators who still have incomplete
+     * subjects on a published form within its closing window. The form_id is on
+     * the payload so the scheduled command can guard against same-day duplicates.
+     */
+    public function closeDateApproaching(EvaluationForm $form, array $evaluatorIds): void
+    {
+        $this->notify(
+            $evaluatorIds,
+            'evaluation_close_date',
+            __('evaluation.notify.close_date_title'),
+            __('evaluation.notify.close_date_body', [
+                'form' => $form->title,
+                'date' => (string) $form->close_date?->format('Y-m-d H:i'),
+            ]),
+            ['form_id' => $form->id],
+            'warning',
+            'bi-clock-history'
+        );
+    }
 }
