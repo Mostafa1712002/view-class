@@ -29,6 +29,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     {{-- SweetAlert2: app-wide confirm dialogs + success/error toasts (see the global upgrader before </body>). --}}
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        /* keep top toasts below the fixed navbar so they're actually visible */
+        .swal2-container.swal2-top { top: 4.7rem; }
+        .swal2-toast { box-shadow: 0 10px 30px rgba(30, 25, 10, .18) !important; border: 1px solid #efe6cf; }
+        .swal2-popup.swal2-toast .swal2-title { font-size: .95rem; }
+    </style>
     {{-- Al-Awwal brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
     @if(!$isRtl)
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -774,7 +780,7 @@
         var T = { yes: @json(__('common.confirm_yes')), no: @json(__('common.confirm_no')), sure: @json(__('common.confirm_sure')) };
 
         window.vcToast = function (title, icon) {
-            Swal.fire({ toast: true, position: RTL ? 'top-start' : 'top-end', icon: icon || 'success',
+            Swal.fire({ toast: true, position: 'top', icon: icon || 'success',
                 title: title, showConfirmButton: false, timer: 3500, timerProgressBar: true });
         };
         window.vcConfirm = function (opts) {
