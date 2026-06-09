@@ -201,11 +201,12 @@
     .wp-auto-toggle input { accent-color: #cfa046; }
     .ml-auto { margin-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: auto; }
 
-    /* Column customization dropdown */
+    /* Column customization dropdown
+       Using position:fixed so it escapes any overflow:hidden ancestor (e.g. .app-content).
+       JS repositions it on open via getBoundingClientRect(). */
     .wp-cols-dropdown { position: relative; display: inline-block; }
     .wp-cols-menu {
-        display: none; position: absolute; top: calc(100% + 4px);
-        {{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: 0; z-index: 50;
+        display: none; position: fixed; z-index: 9999;
         background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
         box-shadow: 0 8px 24px rgba(15,23,42,.12); padding: .5rem; min-width: 200px;
     }
@@ -534,12 +535,15 @@
     }
 
     // ---- Column customization (localStorage-persisted) ----
+    // Toggle and menu are wired regardless of whether the table is present
+    // (empty-week shows no table, but the button must still open the menu so
+    // the user can pre-configure columns before adding plans).
     var table = document.getElementById('wpTable');
     var colsToggle = document.getElementById('wpColsToggle');
     var colsMenu = document.getElementById('wpColsMenu');
     var COLS_KEY = 'wp_hidden_cols';
 
-    if (table && colsToggle && colsMenu) {
+    if (colsToggle && colsMenu) {
         var labels = {
             status: @json(__('weekly_plan.th_status')),
             teacher: @json(__('weekly_plan.th_teacher')),
@@ -554,6 +558,7 @@
         var hidden = JSON.parse(localStorage.getItem(COLS_KEY) || '[]');
 
         function applyCols() {
+            if (!table) { return; }   // no table on empty-week — safe no-op
             Object.keys(labels).forEach(function (col) {
                 var show = hidden.indexOf(col) === -1;
                 table.querySelectorAll('[data-col="' + col + '"]').forEach(function (cell) {
@@ -582,15 +587,34 @@
         buildMenu();
         applyCols();
 
+        function positionMenu() {
+            var rect = colsToggle.getBoundingClientRect();
+            var isRtl = document.documentElement.dir === 'rtl';
+            colsMenu.style.top = (rect.bottom + 4) + 'px';
+            if (isRtl) {
+                colsMenu.style.right = (window.innerWidth - rect.right) + 'px';
+                colsMenu.style.left = 'auto';
+            } else {
+                colsMenu.style.left = rect.left + 'px';
+                colsMenu.style.right = 'auto';
+            }
+        }
         colsToggle.addEventListener('click', function (e) {
             e.stopPropagation();
-            colsMenu.classList.toggle('open');
+            var wasOpen = colsMenu.classList.contains('open');
+            colsMenu.classList.remove('open');
+            if (!wasOpen) {
+                positionMenu();
+                colsMenu.classList.add('open');
+            }
         });
         document.addEventListener('click', function (e) {
             if (!colsMenu.contains(e.target) && e.target !== colsToggle) {
                 colsMenu.classList.remove('open');
             }
         });
+        window.addEventListener('scroll', function () { colsMenu.classList.remove('open'); }, true);
+        window.addEventListener('resize', function () { colsMenu.classList.remove('open'); });
     }
 })();
 </script>

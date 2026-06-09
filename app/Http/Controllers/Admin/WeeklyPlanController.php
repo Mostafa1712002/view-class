@@ -144,18 +144,50 @@ class WeeklyPlanController extends Controller
 
     /**
      * PDF export of the week grid.
+     * Uses mPDF (not dompdf) for proper Arabic glyph shaping + RTL bidi — same
+     * pattern as UserCardController::generate() which solved the same issue (#162).
      */
     public function pdf(Request $request)
     {
         [$weekPlans, $weekStart, $weekEnd] = $this->buildExportQuery($request);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.weekly-plans.pdf', [
+        $html = view('admin.weekly-plans.pdf', [
             'weekPlans' => $weekPlans,
             'weekStart' => $weekStart,
-            'weekEnd' => $weekEnd,
-        ])->setPaper('a4', 'landscape');
+            'weekEnd'   => $weekEnd,
+        ])->render();
 
-        return $pdf->stream('weekly-plan-' . $weekStart->format('Y-m-d') . '.pdf');
+        $tmp = storage_path('app/mpdf');
+        if (!is_dir($tmp)) {
+            @mkdir($tmp, 0775, true);
+        }
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'             => 'utf-8',
+            'format'           => 'A4',
+            'orientation'      => 'L',           // landscape — 9 columns need the width
+            'default_font'     => 'dejavusans',
+            'autoScriptToLang' => true,
+            'autoLangToFont'   => true,
+            'tempDir'          => $tmp,
+            'margin_top'       => 12,
+            'margin_bottom'    => 12,
+            'margin_left'      => 10,
+            'margin_right'     => 10,
+        ]);
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->WriteHTML($html);
+
+        $filename = 'weekly-plan-' . $weekStart->format('Y-m-d') . '.pdf';
+
+        return response(
+            $mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN),
+            200,
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]
+        );
     }
 
     /**
