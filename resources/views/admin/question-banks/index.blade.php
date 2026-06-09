@@ -264,13 +264,20 @@
 @endpush
 
 @section('content')
-<div class="content-header qb-header">
-    <h2>@lang('question_banks.page_title')</h2>
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('question_banks.breadcrumb_home')</a></li>
-        <li class="breadcrumb-item">@lang('question_banks.breadcrumb_subjects')</li>
-        <li class="breadcrumb-item active">@lang('question_banks.page_title')</li>
-    </ol>
+<div class="content-header row qb-header">
+    <div class="content-header-left col-md-9 col-12 mb-2">
+        <h2 class="content-header-title mb-0">@lang('question_banks.page_title')</h2>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('question_banks.breadcrumb_home')</a></li>
+            <li class="breadcrumb-item">@lang('question_banks.breadcrumb_subjects')</li>
+            <li class="breadcrumb-item active">@lang('question_banks.page_title')</li>
+        </ol>
+    </div>
+    <div class="content-header-right col-md-3 col-12 text-md-right d-flex align-items-start justify-content-md-end pt-1">
+        <a class="btn-gold" href="{{ route('admin.question-banks.create') }}">
+            <i class="la la-plus"></i> @lang('question_banks.add')
+        </a>
+    </div>
 </div>
 
 <div class="content-body">
