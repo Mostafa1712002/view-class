@@ -74,6 +74,7 @@ return [
     'pdf_role_admin'    => 'Admin',
     'pdf_login_at'      => 'Sign in at',
     'pdf_no_password'   => '— unavailable —',
+    'pdf_credentials'   => 'Login Credentials',
 
     'notice_title'    => 'How do these cards work?',
     'notice_body'     => 'Passwords chosen at user-creation time are stored encrypted just for this page. For older accounts (or users who changed their password later), use the “Regenerate” button per row to mint a fresh one and reveal it once.',

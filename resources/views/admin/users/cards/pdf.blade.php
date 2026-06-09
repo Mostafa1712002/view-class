@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <title>{{ __('user_cards.page_title') }} - {{ $platform }}</title>
     <style>
-        @page { margin: 10mm; }
+        @page { margin: 12mm 10mm; }
         body {
             font-family: 'DejaVu Sans', sans-serif;
             margin: 0;
@@ -19,134 +19,248 @@
             text-align: {{ $align }};
         }
 
+        /* ── Page header ─────────────────────────────────────────── */
         .pdf-header {
             text-align: center;
-            border-bottom: 2px solid #c9a04b;
-            padding: 4mm 0 3mm; margin-bottom: 6mm;
+            margin-bottom: 7mm;
+            padding-bottom: 4mm;
+            border-bottom: 2.5px solid #c9a04b;
         }
-        .pdf-header .platform { font-size: 16px; font-weight: bold; color:#0f172a; }
-        .pdf-header .platform .accent { color:#c9a04b; }
-        .pdf-header .sub { color:#475569; font-size:10px; margin-top:2px; }
+        .pdf-header .platform-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        .pdf-header .accent { color: #c9a04b; }
+        .pdf-header .datestamp {
+            color: #64748b;
+            font-size: 10px;
+            margin-top: 2mm;
+        }
 
-        table.grid { width:100%; border-collapse: separate; border-spacing: 4mm 4mm; }
-        table.grid td.cell {
+        /* ── Card grid ───────────────────────────────────────────── */
+        table.grid {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4mm 5mm;
+        }
+        table.grid tr { page-break-inside: avoid; }
+
+        table.grid td.card-cell {
             width: 50%;
             border: 1.5px solid #c9a04b;
-            border-radius: 4mm;
-            padding: 5mm;
-            background: #fff;
+            border-radius: 3mm;
+            padding: 0;
+            background: #ffffff;
             vertical-align: top;
-            height: 50mm;
         }
-        table.grid td.empty { border: none; background: transparent; }
+        table.grid td.empty-cell { border: none; background: transparent; width: 50%; }
 
-        .card-top {
-            border-bottom: 1px dashed #c9a04b;
-            padding-bottom: 2mm;
-            margin-bottom: 3mm;
+        /* ── Card header band (gold tint) ────────────────────────── */
+        .band {
+            background: #fdf0cc;
+            border-bottom: 1.5px solid #c9a04b;
+            padding: 3.5mm 4.5mm 3mm;
         }
-        .card-platform { font-size: 9px; color:#a37a23; font-weight:bold; letter-spacing:.5px; }
-        .card-name { font-size: 13px; font-weight: bold; color:#0f172a; margin-top:1mm; }
-        .card-role {
-            display: inline-block;
-            padding: 0.6mm 2mm;
-            border-radius: 2mm;
-            font-size: 8.5px;
+        .band-eyebrow {
+            font-size: 9px;
+            color: #8a6200;
             font-weight: bold;
-            margin-top: 1.5mm;
+            margin-bottom: 1.5mm;
         }
-        .role-student { background:#eff6ff; color:#1d4ed8; }
-        .role-parent  { background:#fef3c7; color:#92400e; }
-        .role-teacher { background:#ecfeff; color:#0e7490; }
-        .role-admin   { background:#f3e8ff; color:#7e22ce; }
-
-        .meta-line { font-size: 10px; color:#475569; margin-top:1.5mm; }
-        .meta-line strong { color:#0f172a; }
-
-        .creds { margin-top: 3mm; }
-        .creds .row {
-            margin: 1.5mm 0;
-            font-size: 10.5px;
+        .band-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #0f172a;
+            line-height: 1.3;
+            margin-bottom: 2.5mm;
         }
-        .creds .label {
+
+        /* Role chip — fixed width table for reliable mPDF pill rendering */
+        table.chip-wrap {
+            border-collapse: collapse;
+            width: 26mm;
+            text-align: center;
+        }
+        table.chip-wrap td {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1.2mm 4mm;
+            border-radius: 2mm;
+            white-space: nowrap;
+        }
+        .chip-student td { background: #bfdbfe; border: 1px solid #3b82f6; color: #1e3a8a; }
+        .chip-parent  td { background: #fde68a; border: 1px solid #ca8a04; color: #78350f; }
+        .chip-teacher td { background: #a7f3d0; border: 1px solid #10b981; color: #064e3b; }
+        .chip-admin   td { background: #ddd6fe; border: 1px solid #7c3aed; color: #4c1d95; }
+
+        /* ── Card body ───────────────────────────────────────────── */
+        .body { padding: 3mm 4.5mm 2mm; }
+
+        /* Meta table — two-column: label | value */
+        table.meta {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1mm;
+        }
+        table.meta td {
+            font-size: 10px;
+            padding: 0.8mm 0;
+            vertical-align: top;
+        }
+        table.meta td.lbl {
+            color: #94a3b8;
+            width: 20mm;
+            white-space: nowrap;
+        }
+        table.meta td.val {
+            color: #1e293b;
+            font-weight: bold;
+        }
+
+        /* ── Credentials block ───────────────────────────────────── */
+        .creds-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #a37a23;
+            border-bottom: 1px solid #e8d5a3;
+            padding-bottom: 1mm;
+            margin-top: 3mm;
+            margin-bottom: 2.5mm;
+        }
+        table.creds {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.creds td {
+            padding: 1mm 0;
+            vertical-align: middle;
+        }
+        table.creds td.cred-lbl {
+            font-size: 10px;
+            color: #64748b;
+            width: 22mm;
+            white-space: nowrap;
+        }
+        .cred-box {
+            display: inline-block;
+            font-family: 'DejaVu Sans Mono', 'DejaVu Sans', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            color: #0f172a;
+            background: #f1f5f9;
+            border: 1px solid #94a3b8;
+            border-radius: 1.5mm;
+            padding: 0.8mm 2.5mm;
+        }
+        .no-pwd {
+            font-size: 10px;
+            color: #b91c1c;
+            font-style: italic;
+        }
+
+        /* ── URL footer ──────────────────────────────────────────── */
+        .url-strip {
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            padding: 2mm 4.5mm;
+            margin-top: 3mm;
+        }
+        .url-strip .ul {
+            font-size: 10px;
             color: #64748b;
         }
-        .creds .value {
-            color: #0f172a;
+        .url-strip .uv {
+            font-size: 10px;
             font-weight: bold;
-            font-family: 'DejaVu Sans Mono', 'DejaVu Sans', monospace;
-            background: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            padding: 0.5mm 2mm;
-            border-radius: 1.5mm;
+            color: #0f172a;
         }
-        .url-line {
-            font-size: 9px;
-            color: #475569;
-            margin-top: 2.5mm;
-            border-top: 1px dotted #cbd5e1;
-            padding-top: 1.5mm;
-        }
-        .url-line .v { color:#0f172a; font-weight:bold; }
-
-        .no-pwd { color:#991b1b; font-style: italic; }
     </style>
 </head>
 <body>
+    {{-- Page header --}}
     <div class="pdf-header">
-        <div class="platform">
+        <div class="platform-title">
             {{ $platform }}
-            <span class="accent">•</span>
-            <span style="font-weight:normal;color:#64748b;">{{ __('user_cards.page_title') }}</span>
+            <span class="accent"> ◆ </span>
+            <span style="font-weight:normal;color:#475569;">{{ __('user_cards.page_title') }}</span>
         </div>
-        <div class="sub">{{ now()->format('Y-m-d H:i') }}</div>
+        <div class="datestamp">{{ now()->format('Y-m-d H:i') }}</div>
     </div>
 
+    {{-- 2-column card grid --}}
     <table class="grid">
         @foreach($cards->chunk(2) as $row)
             <tr>
                 @foreach($row as $c)
-                    <td class="cell">
-                        <div class="card-top">
-                            <div class="card-platform">{{ $platform }}</div>
-                            <div class="card-name">{{ $c['name'] }}</div>
-                            <span class="card-role role-{{ $c['kind'] }}">{{ __('user_cards.pdf_role_'.$c['kind']) }}</span>
-                            @if($c['kind'] === 'student' && ($c['grade'] || $c['class']))
-                                <div class="meta-line">
-                                    @if($c['grade'])<strong>{{ __('user_cards.pdf_grade') }}:</strong> {{ $c['grade'] }}@endif
-                                    @if($c['class']) — <strong>{{ __('user_cards.pdf_class') }}:</strong> {{ $c['class'] }}@endif
-                                </div>
-                            @endif
-                            @if($c['kind'] === 'admin' && $c['job_title'])
-                                <div class="meta-line"><strong>{{ __('user_cards.pdf_job') }}:</strong> {{ $c['job_title'] }}</div>
-                            @endif
-                            @if(!empty($c['school']))
-                                <div class="meta-line"><strong>{{ __('user_cards.pdf_school') }}:</strong> {{ $c['school'] }}</div>
-                            @endif
+                    <td class="card-cell">
+                        {{-- Gold band: eyebrow + name + role chip --}}
+                        <div class="band">
+                            <div class="band-eyebrow">{{ $platform }}</div>
+                            <div class="band-name">{{ $c['name'] }}</div>
+                            <table class="chip-wrap chip-{{ $c['kind'] }}"><tr><td>{{ __('user_cards.pdf_role_'.$c['kind']) }}</td></tr></table>
                         </div>
 
-                        <div class="creds">
-                            <div class="row">
-                                <span class="label">{{ __('user_cards.pdf_username') }}:</span>
-                                <span class="value">{{ $c['username'] ?? '—' }}</span>
-                            </div>
-                            <div class="row">
-                                <span class="label">{{ __('user_cards.pdf_password') }}:</span>
-                                @if($c['password'])
-                                    <span class="value">{{ $c['password'] }}</span>
-                                @else
-                                    <span class="no-pwd">{{ __('user_cards.pdf_no_password') }}</span>
-                                @endif
-                            </div>
+                        {{-- Body: meta + credentials --}}
+                        <div class="body">
+                            {{-- Meta table (only rows that have data) --}}
+                            @php
+                                $hasMeta = !empty($c['school'])
+                                    || ($c['kind'] === 'student' && ($c['grade'] || $c['class']))
+                                    || ($c['kind'] === 'admin' && !empty($c['job_title']));
+                            @endphp
+                            @if($hasMeta)
+                                <table class="meta">
+                                    @if(!empty($c['school']))
+                                        <tr>
+                                            <td class="lbl">{{ __('user_cards.pdf_school') }}</td>
+                                            <td class="val">{{ $c['school'] }}</td>
+                                        </tr>
+                                    @endif
+                                    @if($c['kind'] === 'student' && $c['grade'])
+                                        <tr>
+                                            <td class="lbl">{{ __('user_cards.pdf_grade') }}</td>
+                                            <td class="val">{{ $c['grade'] }}@if($c['class']) &nbsp;/&nbsp; {{ __('user_cards.pdf_class') }}: {{ $c['class'] }}@endif</td>
+                                        </tr>
+                                    @endif
+                                    @if($c['kind'] === 'admin' && !empty($c['job_title']))
+                                        <tr>
+                                            <td class="lbl">{{ __('user_cards.pdf_job') }}</td>
+                                            <td class="val">{{ $c['job_title'] }}</td>
+                                        </tr>
+                                    @endif
+                                </table>
+                            @endif
+
+                            {{-- Credentials --}}
+                            <div class="creds-title">{{ __('user_cards.pdf_credentials') }}</div>
+                            <table class="creds">
+                                <tr>
+                                    <td class="cred-lbl">{{ __('user_cards.pdf_username') }}</td>
+                                    <td><span class="cred-box">{{ $c['username'] ?? '—' }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="cred-lbl">{{ __('user_cards.pdf_password') }}</td>
+                                    <td>
+                                        @if($c['password'])
+                                            <span class="cred-box">{{ $c['password'] }}</span>
+                                        @else
+                                            <span class="no-pwd">{{ __('user_cards.pdf_no_password') }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
 
-                        <div class="url-line">
-                            {{ __('user_cards.pdf_login_at') }}: <span class="v">{{ $url }}</span>
+                        {{-- Login URL strip --}}
+                        <div class="url-strip">
+                            <span class="ul">{{ __('user_cards.pdf_login_at') }}:</span>
+                            <span class="uv"> {{ $url }}</span>
                         </div>
                     </td>
                 @endforeach
                 @if($row->count() < 2)
-                    <td class="cell empty"></td>
+                    <td class="empty-cell"></td>
                 @endif
             </tr>
         @endforeach

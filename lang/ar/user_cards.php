@@ -82,6 +82,7 @@ return [
     'pdf_role_admin'    => 'إداري',
     'pdf_login_at'      => 'سجِّل دخولك على',
     'pdf_no_password'   => '— غير متاحة —',
+    'pdf_credentials'   => 'بيانات الدخول',
 
     // Notice
     'notice_title'    => 'كيف تعمل البطاقات؟',
