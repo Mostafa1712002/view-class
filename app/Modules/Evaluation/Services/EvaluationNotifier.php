@@ -13,20 +13,30 @@ use App\Models\Notification;
  */
 class EvaluationNotifier
 {
-    /** Low-level fan-out. */
-    public function notify(array $userIds, string $type, string $title, string $body, array $data = [], string $color = 'info', string $icon = 'bi-clipboard-check'): void
+    /** Low-level fan-out. $actionUrl makes the notification deep-link to the relevant page. */
+    public function notify(array $userIds, string $type, string $title, string $body, array $data = [], string $color = 'info', string $icon = 'bi-clipboard-check', ?string $actionUrl = null, ?string $actionText = null): void
     {
         foreach (array_unique(array_filter($userIds)) as $userId) {
             Notification::create([
-                'user_id' => $userId,
-                'type'    => $type,
-                'title'   => $title,
-                'body'    => $body,
-                'icon'    => $icon,
-                'color'   => $color,
-                'data'    => $data,
+                'user_id'     => $userId,
+                'type'        => $type,
+                'title'       => $title,
+                'body'        => $body,
+                'icon'        => $icon,
+                'color'       => $color,
+                'action_url'  => $actionUrl,
+                'action_text' => $actionText,
+                'data'        => $data,
             ]);
         }
+    }
+
+    /** Build a route URL only if the route exists (keeps the notifier safe across route changes). */
+    private function url(string $name, mixed $param = null): ?string
+    {
+        return \Illuminate\Support\Facades\Route::has($name)
+            ? ($param !== null ? route($name, $param) : route($name))
+            : null;
     }
 
     public function formPublished(EvaluationForm $form, array $evaluatorIds): void
@@ -37,7 +47,9 @@ class EvaluationNotifier
             __('evaluation.notify.published_title'),
             __('evaluation.notify.published_body', ['form' => $form->title]),
             ['form_id' => $form->id],
-            'success'
+            'success',
+            'bi-clipboard-check',
+            $this->url('admin.my-evaluations.index')
         );
     }
 
@@ -48,7 +60,10 @@ class EvaluationNotifier
             'evaluation_assigned',
             __('evaluation.notify.assigned_title'),
             __('evaluation.notify.assigned_body', ['form' => $form->title]),
-            ['form_id' => $form->id]
+            ['form_id' => $form->id],
+            'info',
+            'bi-clipboard-check',
+            $this->url('admin.my-evaluations.index')
         );
     }
 
@@ -73,7 +88,10 @@ class EvaluationNotifier
             'evaluation_submitted',
             __('evaluation.notify.submitted_title'),
             __('evaluation.notify.submitted_body'),
-            ['evaluation_id' => $evaluation->id]
+            ['evaluation_id' => $evaluation->id],
+            'info',
+            'bi-clipboard-check',
+            $this->url('admin.evaluations.approvals.show', $evaluation->id)
         );
     }
 
@@ -85,7 +103,9 @@ class EvaluationNotifier
             __('evaluation.notify.approved_title'),
             __('evaluation.notify.approved_body'),
             ['evaluation_id' => $evaluation->id],
-            'success'
+            'success',
+            'bi-clipboard-check',
+            $this->url('admin.evaluations.execute.show', $evaluation->id)
         );
     }
 
@@ -97,7 +117,9 @@ class EvaluationNotifier
             __('evaluation.notify.rejected_title'),
             __('evaluation.notify.rejected_body'),
             ['evaluation_id' => $evaluation->id],
-            'danger'
+            'danger',
+            'bi-clipboard-check',
+            $this->url('admin.evaluations.execute.show', $evaluation->id)
         );
     }
 
@@ -108,7 +130,10 @@ class EvaluationNotifier
             'evaluation_result',
             __('evaluation.notify.result_title'),
             __('evaluation.notify.result_body'),
-            ['evaluation_id' => $evaluation->id]
+            ['evaluation_id' => $evaluation->id],
+            'info',
+            'bi-clipboard-check',
+            $this->url('admin.evaluations.execute.show', $evaluation->id)
         );
     }
 
@@ -129,7 +154,8 @@ class EvaluationNotifier
             ]),
             ['form_id' => $form->id],
             'warning',
-            'bi-clock-history'
+            'bi-clock-history',
+            $this->url('admin.my-evaluations.index')
         );
     }
 
@@ -171,7 +197,8 @@ class EvaluationNotifier
             __('evaluation.notify.commented_body'),
             ['evaluation_id' => $evaluation->id],
             'info',
-            'bi-chat-left-text'
+            'bi-chat-left-text',
+            $this->url('admin.evaluations.execute.show', $evaluation->id)
         );
     }
 }
