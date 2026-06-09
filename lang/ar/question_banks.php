@@ -125,9 +125,35 @@ return [
     'action_more' => 'إجراءات أخرى',
     'action_copy' => 'نسخ البنك',
     'action_archive' => 'أرشفة البنك',
+    'action_approve' => 'اعتماد البنك',
+    'action_promote' => 'ترقية إلى عام',
+    'action_copy_to_school' => 'نسخ إلى مدرستي',
 
     // Confirmations
     'confirm_delete' => 'هل أنت متأكد من حذف هذا البنك؟',
+    'confirm_approve' => 'هل تريد اعتماد هذا البنك وجعله نشطًا؟',
+    'confirm_promote' => 'هل تريد ترقية هذا البنك إلى بنك عام متاح لجميع مدارس الشركة؟',
+    'confirm_copy_to_school' => 'هل تريد نسخ الأسئلة المعتمدة من هذا البنك العام إلى مدرستك؟',
+
+    // Tab labels
+    'tab_all' => 'الكل',
+    'tab_general' => 'عام (شركة)',
+    'tab_private' => 'خاص (مدرسة)',
+    'tab_under_review' => 'قيد المراجعة',
+
+    // Column labels
+    'col_category' => 'التصنيف',
+    'col_linkable' => 'قابل للربط',
+
+    // Scope display
+    'scope_company' => 'شركة — عام',
+    'scope_school' => 'مدرسة — خاص',
+
+    // Approval notice
+    'notice_general_approved_only' => 'تظهر للمدارس الأسئلة المعتمدة فقط من البنوك العامة.',
+
+    // Errors / gates
+    'error_general_forbidden' => 'لا يمكنك إنشاء أو تعديل بنوك عامة. هذه العملية مخصصة لمدير المدرسة أو المدير العام فقط.',
 
     // Empty states
     'empty_title' => 'لا توجد بنوك أسئلة بعد',
@@ -138,6 +164,9 @@ return [
     'flash_created' => 'تم إنشاء بنك الأسئلة بنجاح',
     'flash_updated' => 'تم تحديث بنك الأسئلة بنجاح',
     'flash_deleted' => 'تم حذف بنك الأسئلة',
+    'flash_approved' => 'تم اعتماد البنك بنجاح وأصبح نشطًا',
+    'flash_promoted' => 'تم ترقية البنك إلى بنك عام بنجاح',
+    'flash_copied' => 'تم نسخ الأسئلة المعتمدة إلى بنك جديد في مدرستك',
 
     // Titles
     'create_title' => 'إنشاء بنك أسئلة جديد',

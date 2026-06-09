@@ -75,10 +75,26 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
             ->whereKey($id);
 
         if ($schoolId !== null) {
-            $query->where(function ($q) use ($schoolId) {
+            $companyId = $this->companyIdForSchool($schoolId);
+            $query->where(function ($q) use ($schoolId, $companyId) {
+                // Own bank
                 $q->where('school_id', $schoolId)
+                  // Template library
                   ->orWhere('is_library', true)
-                  ->orWhere('visibility', QuestionBank::VISIBILITY_PUBLIC);
+                  // General bank of same company — all schools in company (no pivot restriction)
+                  ->orWhere(function ($pub) use ($companyId) {
+                      $pub->where('visibility', QuestionBank::VISIBILITY_PUBLIC)
+                          ->whereDoesntHave('sharedSchools')
+                          ->when($companyId !== null, function ($cq) use ($companyId) {
+                              $cq->whereHas('school', fn ($s) => $s->where('educational_company_id', $companyId))
+                                 ->orWhereNull('school_id'); // super-admin created with no school
+                          });
+                  })
+                  // General bank explicitly shared with this school
+                  ->orWhere(function ($pub) use ($schoolId) {
+                      $pub->where('visibility', QuestionBank::VISIBILITY_PUBLIC)
+                          ->whereHas('sharedSchools', fn ($s) => $s->where('schools.id', $schoolId));
+                  });
             });
         }
 
@@ -176,23 +192,90 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
         });
     }
 
+    public function approve(QuestionBank $bank): QuestionBank
+    {
+        $bank->status = QuestionBank::STATUS_ACTIVE;
+        $bank->save();
+        return $bank;
+    }
+
+    public function promote(QuestionBank $bank, array $schoolIds = []): QuestionBank
+    {
+        return DB::transaction(function () use ($bank, $schoolIds) {
+            $bank->visibility = QuestionBank::VISIBILITY_PUBLIC;
+            $bank->status = QuestionBank::STATUS_ACTIVE;
+            $bank->save();
+
+            // Set sharing pivot; empty = company-wide
+            $bank->sharedSchools()->sync($this->normalizeSchoolIds($bank, $schoolIds));
+
+            return $bank->refresh()->load(['subjects', 'sharedSchools']);
+        });
+    }
+
+    public function copyToSchool(QuestionBank $generalBank, int $targetSchoolId, int $createdBy): QuestionBank
+    {
+        return DB::transaction(function () use ($generalBank, $targetSchoolId, $createdBy) {
+            $copy = QuestionBank::create([
+                'school_id'              => $targetSchoolId,
+                'name_ar'                => $generalBank->name_ar . ' — نسخة',
+                'name_en'                => $generalBank->name_en ? $generalBank->name_en . ' — copy' : null,
+                'description'            => $generalBank->description,
+                'is_library'             => false,
+                'visibility'             => QuestionBank::VISIBILITY_PRIVATE,
+                'status'                 => QuestionBank::STATUS_ACTIVE,
+                'source'                 => QuestionBank::SOURCE_MANUAL,
+                'grade_level'            => $generalBank->grade_level,
+                'category_type'          => $generalBank->category_type,
+                'is_ana_qudurat_linkable' => $generalBank->is_ana_qudurat_linkable ?? false,
+                'created_by'             => $createdBy,
+            ]);
+
+            $copy->subjects()->sync($generalBank->subjects->pluck('id')->all());
+
+            // Only copy approved questions
+            foreach ($generalBank->questions()->where('status', 'approved')->get() as $q) {
+                $copy->questions()->create([
+                    'type'        => $q->type,
+                    'body_ar'     => $q->body_ar,
+                    'body_en'     => $q->body_en,
+                    'answer_data' => $q->answer_data,
+                    'difficulty'  => $q->difficulty,
+                    'points'      => $q->points,
+                    'status'      => 'approved',
+                    'created_by'  => $createdBy,
+                ]);
+            }
+
+            return $copy->load(['subjects']);
+        });
+    }
+
     /**
-     * Base query for the index: respects school scope, excludes templates.
+     * Base query for the index: respects school scope and company boundary, excludes templates.
      */
     private function baseQuery(?int $schoolId): Builder
     {
         $query = QuestionBank::query()->where('is_library', false);
 
         if ($schoolId !== null) {
-            $query->where(function ($q) use ($schoolId) {
+            $companyId = $this->companyIdForSchool($schoolId);
+
+            $query->where(function ($q) use ($schoolId, $companyId) {
                 // 1) The school's own banks (private or public it created).
                 $q->where('school_id', $schoolId)
-                  // 2) Public banks shared platform-wide (no explicit school targeting).
-                  ->orWhere(function ($pub) {
+                  // 2) General (public) banks of the same company, available to all company schools (no explicit pivot).
+                  ->orWhere(function ($pub) use ($companyId) {
                       $pub->where('visibility', QuestionBank::VISIBILITY_PUBLIC)
-                          ->whereDoesntHave('sharedSchools');
+                          ->whereDoesntHave('sharedSchools')
+                          ->when($companyId !== null, function ($cq) use ($companyId) {
+                              $cq->where(function ($inner) use ($companyId) {
+                                  $inner->whereHas('school', fn ($s) => $s->where('educational_company_id', $companyId))
+                                        ->orWhereNull('school_id');
+                              });
+                          });
                   })
-                  // 3) Public banks explicitly shared with this school.
+                  // 3) General banks explicitly shared with this school.
                   ->orWhere(function ($pub) use ($schoolId) {
                       $pub->where('visibility', QuestionBank::VISIBILITY_PUBLIC)
                           ->whereHas('sharedSchools', fn ($s) => $s->where('schools.id', $schoolId));
@@ -201,6 +284,20 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
         }
 
         return $query;
+    }
+
+    /**
+     * Look up the educational_company_id for a given school (cached per request cycle).
+     */
+    private function companyIdForSchool(int $schoolId): ?int
+    {
+        static $cache = [];
+        if (! array_key_exists($schoolId, $cache)) {
+            $cache[$schoolId] = \App\Models\School::query()
+                ->whereKey($schoolId)
+                ->value('educational_company_id');
+        }
+        return $cache[$schoolId];
     }
 
     /**

@@ -21,17 +21,28 @@
                       class="form-control @error('description') is-invalid @enderror">{{ old('description', $bank->description) }}</textarea>
             @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
+        @php
+            $canManageGeneral = auth()->user()?->isSuperAdmin() || auth()->user()?->isSchoolAdmin();
+        @endphp
         <div class="col-md-4 mb-3">
             <label class="form-label">@lang('question_banks.form.visibility') <span class="text-danger">*</span></label>
             <select name="visibility" class="form-control @error('visibility') is-invalid @enderror" required>
                 @foreach($visibilities as $k => $label)
-                    <option value="{{ $k }}" @selected(old('visibility', $bank->visibility ?? 'private') === $k)>{{ $label }}</option>
+                    @if($k === 'public' && ! $canManageGeneral)
+                        {{-- Non-admin: show but disable public option --}}
+                        <option value="{{ $k }}" disabled>{{ $label }}</option>
+                    @else
+                        <option value="{{ $k }}" @selected(old('visibility', $bank->visibility ?? 'private') === $k)>{{ $label }}</option>
+                    @endif
                 @endforeach
             </select>
             @error('visibility')<div class="invalid-feedback">{{ $message }}</div>@enderror
             <small class="text-muted d-block mt-1">
                 <strong>@lang('question_banks.visibility_public'):</strong> @lang('question_banks.visibility_public_hint')<br>
                 <strong>@lang('question_banks.visibility_private'):</strong> @lang('question_banks.visibility_private_hint')
+                @if($canManageGeneral)
+                    <br><em class="text-warning"><i class="la la-info-circle"></i> @lang('question_banks.notice_general_approved_only')</em>
+                @endif
             </small>
         </div>
         <div class="col-md-4 mb-3">

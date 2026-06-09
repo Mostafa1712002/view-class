@@ -432,6 +432,11 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('question-banks/{bankId}/questions/{questionId}/duplicate', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'duplicate'])->name('question-banks.questions.duplicate');
     Route::delete('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'destroy'])->name('question-banks.questions.destroy');
 
+    // Question Bank — curation actions (T3/T5)
+    Route::post('question-banks/{id}/approve', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'approve'])->name('question-banks.approve');
+    Route::post('question-banks/{id}/promote', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'promote'])->name('question-banks.promote');
+    Route::post('question-banks/{id}/copy-to-my-school', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'copyToMySchool'])->name('question-banks.copy-to-my-school');
+
     // Retired duplicate "إدارة المواد / class-periods" tab — consolidated into الحصص (/admin/lessons).
     // Keep the old URLs alive as redirects so bookmarks/links don't 404.
     Route::get('class-periods/time-slots', fn () => redirect()->route('admin.lessons.time-slots.index'))->name('class-periods.time-slots.index');

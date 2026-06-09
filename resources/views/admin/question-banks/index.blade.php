@@ -11,6 +11,12 @@
     $activeCount = $stats['active'] ?? 0;
 
     $hasAnyFilter = collect($filters)->filter(fn($v) => $v !== null && $v !== '')->isNotEmpty();
+
+    $canManageGeneral = auth()->user()?->isSuperAdmin() || auth()->user()?->isSchoolAdmin();
+    $isSuperAdmin = auth()->user()?->isSuperAdmin();
+
+    // Active tab
+    $activeTab = request('tab', 'all');
 @endphp
 
 @push('styles')
@@ -176,6 +182,46 @@
     }
     .qb-alert i { color: #10b981; font-size: 1.1rem; }
 
+    /* Tab bar */
+    .qb-tabs { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .qb-tab {
+        padding: .45rem .9rem; border-radius: 10px; font-size: .82rem; font-weight: 600;
+        border: 1px solid #e2e8f0; background: #fff; color: #475569;
+        text-decoration: none; transition: all .15s ease; display: inline-flex; align-items: center; gap: .35rem;
+    }
+    .qb-tab:hover { background: #f8fafc; color: #0f172a; text-decoration: none; }
+    .qb-tab.active { background: linear-gradient(135deg, var(--gold-300), var(--gold-500)); color: #fff; border-color: var(--gold-400); }
+    .qb-tab .badge { background: rgba(255,255,255,.25); padding: .1rem .4rem; border-radius: 999px; font-size: .68rem; }
+    .qb-tab:not(.active) .badge { background: #f1f5f9; color: #475569; }
+
+    /* Scope badge */
+    .qb-scope-general { display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:999px;font-size:.72rem;font-weight:600;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe; }
+    .qb-scope-private  { display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:999px;font-size:.72rem;font-weight:600;background:#fffbeb;color:#92400e;border:1px solid #fde68a; }
+    .qb-scope-general i, .qb-scope-private i { font-size: .75rem; }
+
+    /* Dropdown menu */
+    .qb-dropdown { position: relative; display: inline-block; }
+    .qb-dropdown-menu {
+        position: absolute; top: 100%; z-index: 1000; min-width: 180px;
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(15,23,42,.1); padding: .35rem 0;
+        display: none;
+    }
+    .qb-dropdown-menu.show { display: block; }
+    .qb-dropdown-menu-end { inset-inline-end: 0; inset-inline-start: auto; }
+    .qb-dropdown-item {
+        display: flex; align-items: center; gap: .55rem; padding: .5rem .85rem;
+        font-size: .84rem; color: #334155; text-decoration: none; cursor: pointer;
+        border: none; background: none; width: 100%; text-align: start;
+        transition: background .12s ease;
+    }
+    .qb-dropdown-item:hover { background: #f8fafc; color: #0f172a; text-decoration: none; }
+    .qb-dropdown-item i { width: 16px; text-align: center; color: var(--gold-400); }
+    .qb-dropdown-item.danger { color: #b91c1c; }
+    .qb-dropdown-item.danger i { color: #ef4444; }
+    .qb-dropdown-item.danger:hover { background: #fee2e2; }
+    .qb-dropdown-divider { height: 1px; background: #f1f5f9; margin: .25rem 0; }
+
     .qb-footer { padding: .85rem 1rem; background: #fff; border-top: 1px solid #f1f5f9;
         display: flex; justify-content: space-between; align-items: center; }
     .qb-footer .pagination { margin: 0; }
@@ -264,8 +310,32 @@
         </div>
     </div>
 
+    {{-- Tab bar: general / private / under-review / all --}}
+    <div class="qb-tabs">
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'all'])) }}"
+           class="qb-tab {{ $activeTab==='all' ? 'active' : '' }}">
+            <i class="la la-list"></i> @lang('question_banks.tab_all')
+            <span class="badge">{{ $total }}</span>
+        </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'general'])) }}"
+           class="qb-tab {{ $activeTab==='general' ? 'active' : '' }}">
+            <i class="la la-globe"></i> @lang('question_banks.tab_general')
+            <span class="badge">{{ $publicCount }}</span>
+        </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'private'])) }}"
+           class="qb-tab {{ $activeTab==='private' ? 'active' : '' }}">
+            <i class="la la-lock"></i> @lang('question_banks.tab_private')
+            <span class="badge">{{ $privateCount }}</span>
+        </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'under_review'])) }}"
+           class="qb-tab {{ $activeTab==='under_review' ? 'active' : '' }}">
+            <i class="la la-clock-o"></i> @lang('question_banks.tab_under_review')
+        </a>
+    </div>
+
     {{-- Filters --}}
     <form action="{{ route('admin.question-banks.index') }}" method="GET" class="qb-filter-card">
+    <input type="hidden" name="tab" value="{{ $activeTab }}">
         <div class="se-title">
             <i class="la la-filter"></i>
             <span>@lang('question_banks.search_engine')</span>
@@ -348,11 +418,11 @@
                         <th>@lang('question_banks.col_visibility')</th>
                         <th>@lang('question_banks.col_school')</th>
                         <th>@lang('question_banks.col_subject')</th>
-                        <th>@lang('question_banks.col_grade')</th>
+                        <th>@lang('question_banks.col_category')</th>
                         <th>@lang('question_banks.col_creator')</th>
                         <th>@lang('question_banks.col_questions_count')</th>
                         <th>@lang('question_banks.col_status')</th>
-                        <th>@lang('question_banks.col_source')</th>
+                        <th>@lang('question_banks.col_linkable')</th>
                         <th>@lang('question_banks.col_created_at')</th>
                         <th class="text-{{ $isRtl ? 'start' : 'end' }}">@lang('question_banks.col_actions')</th>
                     </tr>
@@ -363,6 +433,8 @@
                         $visibility = $bank->visibility ?? 'private';
                         $status = $bank->status ?? 'active';
                         $source = $bank->source ?? 'manual';
+                        $isGeneral = $visibility === 'public';
+                        $canEdit = $isGeneral ? $canManageGeneral : true;
                     @endphp
                     <tr>
                         <td data-label="@lang('question_banks.col_name')">
@@ -372,14 +444,20 @@
                             @endif
                         </td>
                         <td data-label="@lang('question_banks.col_visibility')">
-                            <span class="qb-pill vis-{{ $visibility }}">
-                                <span class="dot"></span>{{ $visibilities[$visibility] ?? $visibility }}
-                            </span>
+                            @if($isGeneral)
+                                <span class="qb-scope-general">
+                                    <i class="la la-globe"></i> @lang('question_banks.scope_company')
+                                </span>
+                            @else
+                                <span class="qb-scope-private">
+                                    <i class="la la-lock"></i> @lang('question_banks.scope_school')
+                                </span>
+                            @endif
                         </td>
                         <td data-label="@lang('question_banks.col_school')">
-                            @if($visibility === 'public' && ($bank->shared_schools_count ?? 0) > 0)
+                            @if($isGeneral && ($bank->shared_schools_count ?? 0) > 0)
                                 <span class="qb-secondary">{{ __('question_banks.school_shared', ['count' => $bank->shared_schools_count]) }}</span>
-                            @elseif($visibility === 'public')
+                            @elseif($isGeneral)
                                 <span class="qb-secondary">@lang('question_banks.school_platform')</span>
                             @elseif($bank->school)
                                 <span class="qb-secondary">{{ $bank->school->name }}</span>
@@ -399,8 +477,10 @@
                                 @endif
                             @endif
                         </td>
-                        <td data-label="@lang('question_banks.col_grade')">
-                            <span class="qb-secondary">{{ $bank->grade_level ? ($grades[$bank->grade_level] ?? '#'.$bank->grade_level) : '—' }}</span>
+                        <td data-label="@lang('question_banks.col_category')">
+                            <span class="qb-secondary">
+                                {{ $bank->category_type ? ($categories[$bank->category_type] ?? $bank->category_type) : '—' }}
+                            </span>
                         </td>
                         <td data-label="@lang('question_banks.col_creator')">
                             <span class="qb-secondary">{{ $bank->creator->name ?? $bank->creator->username ?? '—' }}</span>
@@ -413,8 +493,12 @@
                                 <span class="dot"></span>{{ $statuses[$status] ?? $status }}
                             </span>
                         </td>
-                        <td data-label="@lang('question_banks.col_source')">
-                            <span class="qb-pill source">{{ $sources[$source] ?? $source }}</span>
+                        <td data-label="@lang('question_banks.col_linkable')">
+                            @if($bank->is_ana_qudurat_linkable)
+                                <span class="qb-pill status-active"><i class="la la-link"></i></span>
+                            @else
+                                <span class="qb-secondary">—</span>
+                            @endif
                         </td>
                         <td data-label="@lang('question_banks.col_created_at')">
                             <span class="qb-secondary">{{ optional($bank->created_at)->format('Y-m-d') }}</span>
@@ -426,19 +510,63 @@
                                    title="@lang('question_banks.action_view_questions')">
                                     <i class="la la-eye"></i>
                                 </a>
+                                @if($canEdit)
                                 <a href="{{ route('admin.question-banks.edit', $bank->id) }}"
                                    class="qb-action-btn edit"
                                    title="@lang('question_banks.action_edit')">
                                     <i class="la la-edit"></i>
                                 </a>
-                                <form action="{{ route('admin.question-banks.destroy', $bank->id) }}" method="POST"
-                                      onsubmit="return confirm('@lang('question_banks.confirm_delete')');">
-                                    @csrf @method('DELETE')
-                                    <button class="qb-action-btn del" type="submit"
-                                            title="@lang('question_banks.action_delete')">
-                                        <i class="la la-trash"></i>
+                                @endif
+                                {{-- Dropdown for extra actions --}}
+                                <div class="qb-dropdown">
+                                    <button class="qb-action-btn more" type="button"
+                                            onclick="toggleQbDropdown(this)"
+                                            title="@lang('question_banks.action_more')">
+                                        <i class="la la-ellipsis-v"></i>
                                     </button>
-                                </form>
+                                    <div class="qb-dropdown-menu qb-dropdown-menu-end">
+                                        {{-- Approve: show when under_review and user can manage general --}}
+                                        @if($status === 'under_review' && $canManageGeneral)
+                                            <form action="{{ route('admin.question-banks.approve', $bank->id) }}" method="POST"
+                                                  onsubmit="return confirm('@lang('question_banks.confirm_approve')')">
+                                                @csrf
+                                                <button type="submit" class="qb-dropdown-item">
+                                                    <i class="la la-check-circle"></i> @lang('question_banks.action_approve')
+                                                </button>
+                                            </form>
+                                        @endif
+                                        {{-- Promote: private → general, super-admin only --}}
+                                        @if(! $isGeneral && $isSuperAdmin)
+                                            <form action="{{ route('admin.question-banks.promote', $bank->id) }}" method="POST"
+                                                  onsubmit="return confirm('@lang('question_banks.confirm_promote')')">
+                                                @csrf
+                                                <button type="submit" class="qb-dropdown-item">
+                                                    <i class="la la-arrow-up"></i> @lang('question_banks.action_promote')
+                                                </button>
+                                            </form>
+                                        @endif
+                                        {{-- Copy to my school: general bank, school users --}}
+                                        @if($isGeneral && $status === 'active')
+                                            <form action="{{ route('admin.question-banks.copy-to-my-school', $bank->id) }}" method="POST"
+                                                  onsubmit="return confirm('@lang('question_banks.confirm_copy_to_school')')">
+                                                @csrf
+                                                <button type="submit" class="qb-dropdown-item">
+                                                    <i class="la la-copy"></i> @lang('question_banks.action_copy_to_school')
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($canEdit)
+                                            <div class="qb-dropdown-divider"></div>
+                                            <form action="{{ route('admin.question-banks.destroy', $bank->id) }}" method="POST"
+                                                  onsubmit="return confirm('@lang('question_banks.confirm_delete')');">
+                                                @csrf @method('DELETE')
+                                                <button class="qb-dropdown-item danger" type="submit">
+                                                    <i class="la la-trash"></i> @lang('question_banks.action_delete')
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -478,4 +606,20 @@
         @endif
     </div>
 </div>
+@push('scripts')
+<script>
+function toggleQbDropdown(btn) {
+    var menu = btn.nextElementSibling;
+    var isOpen = menu.classList.contains('show');
+    // Close all open dropdowns first
+    document.querySelectorAll('.qb-dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    if (!isOpen) menu.classList.add('show');
+}
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.qb-dropdown')) {
+        document.querySelectorAll('.qb-dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+});
+</script>
+@endpush
 @endsection

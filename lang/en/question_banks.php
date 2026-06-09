@@ -113,8 +113,29 @@ return [
     'action_more' => 'More actions',
     'action_copy' => 'Copy bank',
     'action_archive' => 'Archive',
+    'action_approve' => 'Approve bank',
+    'action_promote' => 'Promote to general',
+    'action_copy_to_school' => 'Copy to my school',
 
     'confirm_delete' => 'Are you sure you want to delete this bank?',
+    'confirm_approve' => 'Approve this bank and make it active?',
+    'confirm_promote' => 'Promote this bank to a general (company-wide) bank?',
+    'confirm_copy_to_school' => 'Copy all approved questions from this general bank into your school?',
+
+    'tab_all' => 'All',
+    'tab_general' => 'General (company)',
+    'tab_private' => 'Private (school)',
+    'tab_under_review' => 'Under review',
+
+    'col_category' => 'Category',
+    'col_linkable' => 'Linkable',
+
+    'scope_company' => 'Company — general',
+    'scope_school' => 'School — private',
+
+    'notice_general_approved_only' => 'Schools see only approved questions from general banks.',
+
+    'error_general_forbidden' => 'Only school-admin or super-admin can create or edit general banks.',
 
     'empty_title' => 'No question banks yet',
     'empty_sub' => 'Start by creating your first bank using the "Add bank" button.',
@@ -123,6 +144,9 @@ return [
     'flash_created' => 'Question bank created successfully',
     'flash_updated' => 'Question bank updated successfully',
     'flash_deleted' => 'Question bank deleted',
+    'flash_approved' => 'Bank approved — now active',
+    'flash_promoted' => 'Bank promoted to general successfully',
+    'flash_copied' => 'Approved questions copied to a new private bank in your school',
 
     'create_title' => 'Create question bank',
     'edit_title' => 'Edit question bank',

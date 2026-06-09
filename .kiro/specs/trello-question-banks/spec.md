@@ -24,13 +24,15 @@ So this is **mostly UI/flow + scoping rules**, NOT a schema rebuild. Minimal/no 
 Repository (`QuestionBankRepository`) enforces scope: a school sees its own private banks + general banks of its company (via visibility=public + company match / pivot). Super-admin sees all.
 
 ## Tasks (Sonnet build)
-- [ ] T1 Repository: scoped queries for general(company)+private(school); approved-only exposure to schools.
-- [ ] T2 Index UI: general/private tabs/filter + columns (scope, status, count, category, linkable) + content-header row.
-- [ ] T3 Create/edit: general (company, super-admin) vs private (school); status/approve action; ana-qudurat fields.
-- [ ] T4 Sharing UI: manage `question_bank_schools` for a general bank.
-- [ ] T5 Convert/copy actions (promote private→general; copy general→private) by permission + audit.
-- [ ] T6 content-header row on question-banks pages; list other non-standard pages for follow-up.
-- [ ] Verify locally (Playwright + DB), commit, deploy, hand to QA.
+- [x] T1 Repository: scoped queries for general(company)+private(school); approved-only exposure to schools.
+- [x] T2 Index UI: general/private tabs/filter + columns (scope, status, count, category, linkable) + content-header row.
+- [x] T3 Create/edit: general (company, super-admin) vs private (school); status/approve action; ana-qudurat fields.
+- [x] T4 Sharing UI: manage `question_bank_schools` for a general bank.
+- [x] T5 Convert/copy actions (promote private→general; copy general→private) by permission + audit.
+- [x] T6 content-header row on question-banks pages; list other non-standard pages for follow-up.
+- [x] Verify locally (Playwright + DB), commit, deploy, hand to QA.
+
+## Completed 2026-06-09
 
 ## Open question for build
 Does `bank_questions` have a per-question approval/status column, or is approval at the bank level (`status`)? Build agent verifies and uses whichever exists (prefer bank-level if no question-level flag).

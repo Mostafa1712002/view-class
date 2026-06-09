@@ -32,16 +32,16 @@ class QuestionBankController extends Controller
         $vocab = $this->vocabulary();
 
         return view('admin.question-banks.index', [
-            'banks' => $banks,
-            'stats' => $stats,
-            'filters' => $filters,
-            'subjects' => $subjects,
-            'creators' => $creators,
+            'banks'        => $banks,
+            'stats'        => $stats,
+            'filters'      => $filters,
+            'subjects'     => $subjects,
+            'creators'     => $creators,
             'visibilities' => $vocab['visibilities'],
-            'statuses' => $vocab['statuses'],
-            'sources' => $vocab['sources'],
-            'grades' => $vocab['grades'],
-            'categories' => $vocab['categories'],
+            'statuses'     => $vocab['statuses'],
+            'sources'      => $vocab['sources'],
+            'grades'       => $vocab['grades'],
+            'categories'   => $vocab['categories'],
         ]);
     }
 
@@ -87,6 +87,12 @@ class QuestionBankController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateBank($request);
+
+        // Only super-admin or school-admin can create general (public) banks.
+        if ($data['visibility'] === 'public' && ! $this->canManageGeneralBanks()) {
+            abort(403, __('question_banks.error_general_forbidden'));
+        }
+
         $subjectIds = $request->input('subject_ids', []);
         $memberRoles = $request->input('member_roles', []);
         $schoolIds = $data['visibility'] === 'public' ? ($data['school_ids'] ?? []) : [];
@@ -141,9 +147,16 @@ class QuestionBankController extends Controller
         abort_if(! $bank, 404);
 
         $data = $this->validateBank($request);
+
+        // Only super-admin or school-admin can update/change a general bank.
+        $becomingPublic = $data['visibility'] === 'public';
+        if ($becomingPublic && ! $this->canManageGeneralBanks()) {
+            abort(403, __('question_banks.error_general_forbidden'));
+        }
+
         $subjectIds = $request->input('subject_ids', []);
         $memberRoles = $request->input('member_roles', []);
-        $schoolIds = $data['visibility'] === 'public' ? ($data['school_ids'] ?? []) : [];
+        $schoolIds = $becomingPublic ? ($data['school_ids'] ?? []) : [];
 
         $this->banks->update($bank, [
             'name_ar' => $data['name_ar'],
@@ -164,6 +177,65 @@ class QuestionBankController extends Controller
             ->with('success', __('question_banks.flash_updated'));
     }
 
+    /**
+     * Quick-approve: move a bank from under_review → active.
+     */
+    public function approve(int $id): RedirectResponse
+    {
+        abort_unless($this->canManageGeneralBanks(), 403, __('question_banks.error_general_forbidden'));
+
+        $schoolId = $this->activeSchoolId();
+        $bank = $this->banks->findScoped($id, $schoolId);
+        abort_if(! $bank, 404);
+
+        $this->banks->approve($bank);
+
+        return redirect()
+            ->route('admin.question-banks.index')
+            ->with('success', __('question_banks.flash_approved'));
+    }
+
+    /**
+     * Promote a private bank to general (public / company-wide).
+     * Super-admin only.
+     */
+    public function promote(Request $request, int $id): RedirectResponse
+    {
+        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+
+        $schoolId = $this->activeSchoolId();
+        $bank = $this->banks->findScoped($id, $schoolId);
+        abort_if(! $bank, 404);
+        abort_if($bank->visibility === QuestionBank::VISIBILITY_PUBLIC, 422);
+
+        $schoolIds = $request->input('school_ids', []);
+        $this->banks->promote($bank, $schoolIds);
+
+        return redirect()
+            ->route('admin.question-banks.index')
+            ->with('success', __('question_banks.flash_promoted'));
+    }
+
+    /**
+     * Copy all approved questions from a general bank into a new private bank
+     * for the authenticated user's school.
+     */
+    public function copyToMySchool(Request $request, int $id): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        abort_if(! $schoolId, 403);
+
+        $bank = $this->banks->findScoped($id, $schoolId);
+        abort_if(! $bank, 404);
+        abort_if($bank->visibility !== QuestionBank::VISIBILITY_PUBLIC, 422);
+
+        $copy = $this->banks->copyToSchool($bank, $schoolId, auth()->id());
+
+        return redirect()
+            ->route('admin.question-banks.edit', $copy->id)
+            ->with('success', __('question_banks.flash_copied'));
+    }
+
     public function destroy(int $id): RedirectResponse
     {
         $schoolId = $this->activeSchoolId();
@@ -179,11 +251,20 @@ class QuestionBankController extends Controller
 
     private function extractFilters(Request $request): array
     {
+        $tab = $request->get('tab', 'all');
+        // Map tab shortcuts to visibility/status filters (don't override explicit filter values)
+        $visibilityFromTab = match ($tab) {
+            'general' => 'public',
+            'private' => 'private',
+            default   => $request->get('visibility'),
+        };
+        $statusFromTab = ($tab === 'under_review') ? 'under_review' : $request->get('status');
+
         return [
-            'q' => trim((string) $request->get('q', '')),
-            'visibility' => $request->get('visibility'),
-            'status' => $request->get('status'),
-            'source' => $request->get('source'),
+            'q'          => trim((string) $request->get('q', '')),
+            'visibility' => $visibilityFromTab,
+            'status'     => $statusFromTab,
+            'source'     => $request->get('source'),
             'subject_id' => $request->get('subject_id'),
             'grade_level' => $request->get('grade_level'),
             'creator_id' => $request->get('creator_id'),
@@ -269,6 +350,15 @@ class QuestionBankController extends Controller
         }
 
         return $query->orderBy('name')->get();
+    }
+
+    /**
+     * Super-admin or school-admin can create/edit/approve general (public) banks.
+     */
+    private function canManageGeneralBanks(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || $user->isSchoolAdmin());
     }
 
     private function creatorsForSchool(?int $schoolId): \Illuminate\Support\Collection

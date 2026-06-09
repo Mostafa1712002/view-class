@@ -32,4 +32,21 @@ interface QuestionBankRepository
     public function library(): LengthAwarePaginator;
 
     public function clone(QuestionBank $template, ?int $schoolId, ?int $createdBy): QuestionBank;
+
+    /**
+     * Approve a bank (under_review → active). Returns the updated bank.
+     */
+    public function approve(QuestionBank $bank): QuestionBank;
+
+    /**
+     * Promote a private bank to general (public). Super-admin only gate enforced in controller.
+     * Returns the updated bank.
+     */
+    public function promote(QuestionBank $bank, array $schoolIds = []): QuestionBank;
+
+    /**
+     * Copy all approved questions from a general bank into a new private bank
+     * owned by $targetSchoolId. Returns the new bank.
+     */
+    public function copyToSchool(QuestionBank $generalBank, int $targetSchoolId, int $createdBy): QuestionBank;
 }
