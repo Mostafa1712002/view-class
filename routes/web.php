@@ -592,6 +592,32 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('evaluations/execute/{evaluation}/evidence', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'store'])->name('evaluations.execute.evidence.store');
     Route::delete('evaluations/execute/{evaluation}/evidence/{evidence}', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'destroy'])->name('evaluations.execute.evidence.destroy');
 
+    // Approval cycle (Sprint 8 Task 14 — اعتماد ومراجعة التقييم)
+    Route::get('evaluations/approvals', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'index'])->name('evaluations.approvals.index');
+    Route::get('evaluations/approvals/{evaluation}', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'show'])->name('evaluations.approvals.show');
+    Route::post('evaluations/approvals/{evaluation}/approve', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'approve'])->name('evaluations.approvals.approve');
+    Route::post('evaluations/approvals/{evaluation}/reject', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'reject'])->name('evaluations.approvals.reject');
+    Route::post('evaluations/approvals/{evaluation}/review', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'requestReview'])->name('evaluations.approvals.review');
+    Route::post('evaluations/approvals/{evaluation}/reopen', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'reopen'])->name('evaluations.approvals.reopen');
+
+    // Job-performance linkage results (Sprint 8 Task 15 — الربط بتقييم الأداء الوظيفي)
+    Route::get('job-performance', [\App\Modules\Evaluation\Controllers\JobPerformanceController::class, 'index'])->name('job-performance.index');
+    Route::get('job-performance/{teacher}', [\App\Modules\Evaluation\Controllers\JobPerformanceController::class, 'show'])->name('job-performance.show');
+
+    // Class visits (Sprint 8 Tasks 16-18 — الزيارات الصفية)
+    Route::get('class-visits', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'index'])->name('class-visits.index');
+    Route::get('class-visits/create', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'create'])->name('class-visits.create');
+    Route::post('class-visits', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'store'])->name('class-visits.store');
+    Route::get('class-visits/{id}/edit', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'edit'])->name('class-visits.edit');
+    Route::put('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'update'])->name('class-visits.update');
+    Route::delete('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'destroy'])->name('class-visits.destroy');
+    Route::get('class-visits/{id}/execute', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'execute'])->name('class-visits.execute');
+
+    // Evaluation reports (Sprint 8 Tasks 19-20 — تقارير المشرفين + شاشة المدير العام)
+    Route::get('eval-reports/supervisors', [\App\Modules\Evaluation\Controllers\SupervisorReportController::class, 'index'])->name('eval-reports.supervisors');
+    Route::get('eval-reports/supervisors/detailed', [\App\Modules\Evaluation\Controllers\SupervisorReportController::class, 'detailed'])->name('eval-reports.supervisors-detailed');
+    Route::get('eval-reports/general-manager', [\App\Modules\Evaluation\Controllers\GeneralManagerController::class, 'index'])->name('eval-reports.general-manager');
+
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
     Route::post('grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');

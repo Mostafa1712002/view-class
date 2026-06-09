@@ -102,7 +102,17 @@
             <li class="nav-item" data-section="educational"><a href="#"><i class="la la-poll"></i><span class="menu-title">@lang('shell.nav_surveys')</span></a></li>
             <li class="nav-item {{ request()->routeIs('admin.evaluations.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('admin.evaluations.index') ? route('admin.evaluations.index') : '#' }}"><i class="la la-clipboard-list"></i><span class="menu-title">@lang('shell.nav_eval_forms')</span></a></li>
             <li class="nav-item {{ request()->routeIs('admin.my-evaluations.*') || request()->routeIs('admin.evaluations.subjects') || request()->routeIs('admin.evaluations.execute.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('admin.my-evaluations.index') ? route('admin.my-evaluations.index') : '#' }}"><i class="la la-star"></i><span class="menu-title">@lang('shell.nav_evaluations')</span></a></li>
-            <li class="nav-item" data-section="educational"><a href="#"><i class="la la-map-marker"></i><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
+            <li class="nav-item {{ request()->routeIs('admin.class-visits.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('admin.class-visits.index') ? route('admin.class-visits.index') : '#' }}"><i class="la la-map-marker"></i><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
+            <li class="nav-item {{ request()->routeIs('admin.evaluations.approvals.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('admin.evaluations.approvals.index') ? route('admin.evaluations.approvals.index') : '#' }}"><i class="la la-check-double"></i><span class="menu-title">@lang('shell.nav_eval_approvals')</span></a></li>
+            <li class="nav-item has-sub {{ request()->routeIs('admin.eval-reports.*') || request()->routeIs('admin.job-performance.*') ? 'active open' : '' }}" data-section="educational">
+                <a href="#"><i class="la la-chart-bar"></i><span class="menu-title">@lang('shell.nav_eval_reports')</span></a>
+                <ul class="menu-content">
+                    <li class="{{ request()->routeIs('admin.eval-reports.supervisors') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.supervisors') ? route('admin.eval-reports.supervisors') : '#' }}"><i class="la la-user-tie"></i><span class="menu-item">@lang('shell.nav_eval_rep_supervisors')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.eval-reports.supervisors-detailed') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.supervisors-detailed') ? route('admin.eval-reports.supervisors-detailed') : '#' }}"><i class="la la-list"></i><span class="menu-item">@lang('shell.nav_eval_rep_detailed')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.eval-reports.general-manager') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.general-manager') ? route('admin.eval-reports.general-manager') : '#' }}"><i class="la la-user-shield"></i><span class="menu-item">@lang('shell.nav_eval_rep_gm')</span></a></li>
+                    <li class="{{ request()->routeIs('admin.job-performance.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.job-performance.index') ? route('admin.job-performance.index') : '#' }}"><i class="la la-briefcase"></i><span class="menu-item">@lang('shell.nav_job_performance')</span></a></li>
+                </ul>
+            </li>
 
             <li class="nav-item has-sub" data-section="educational">
                 <a href="#"><i class="la la-user-times"></i><span class="menu-title">@lang('shell.nav_attendance_management')</span></a>
