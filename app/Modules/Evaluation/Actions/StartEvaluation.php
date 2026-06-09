@@ -73,7 +73,7 @@ class StartEvaluation
         ]);
 
         $this->audit->record(
-            'evaluation.start',
+            'start',
             "بدء تقييم على النموذج «{$form->title}» (مقيّم #{$evaluatorId} ← مستهدف #{$subjectId})",
             $evaluation,
             null,

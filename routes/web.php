@@ -648,6 +648,8 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ad
     // Evidence (Task 12)
     Route::post('evaluations/execute/{evaluation}/evidence', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'store'])->name('evaluations.execute.evidence.store');
     Route::delete('evaluations/execute/{evaluation}/evidence/{evidence}', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'destroy'])->name('evaluations.execute.evidence.destroy');
+    // Subject comment on result (Sprint 8 Item 1)
+    Route::post('evaluations/execute/{evaluation}/comment', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'comment'])->name('evaluations.comment');
 });
 
 // Teacher Routes

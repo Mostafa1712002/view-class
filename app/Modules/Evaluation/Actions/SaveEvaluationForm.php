@@ -37,6 +37,7 @@ class SaveEvaluationForm
                 'is_class_visit_only'      => (bool) ($settings['class_visit_only'] ?? false),
                 'links_to_job_performance' => (bool) ($settings['links_to_job_performance'] ?? false),
                 'settings'                 => $settings,
+                'job_perf_settings'        => $this->buildJobPerfSettings($form, $settings),
             ];
 
             if ($isNew) {
@@ -55,6 +56,37 @@ class SaveEvaluationForm
 
             return $form->refresh();
         });
+    }
+
+    /**
+     * Build or merge the job_perf_settings JSON payload from the form's settings sub-keys.
+     * Preserves any existing keys (e.g. linked_item_id, specific_party) not managed by
+     * the basic UI, so additional configuration survives a save round-trip.
+     */
+    private function buildJobPerfSettings(?EvaluationForm $form, array $settings): array
+    {
+        $existing = $form?->job_perf_settings ?? [];
+
+        $aggregation = $settings['job_perf_aggregation'] ?? null;
+        $countOn     = $settings['job_perf_count_on'] ?? null;
+        $weight      = $settings['job_perf_weight'] ?? null;
+
+        $updates = [];
+
+        if ($aggregation !== null) {
+            $updates['aggregation'] = in_array($aggregation, ['average', 'last'], true) ? $aggregation : 'average';
+        }
+
+        if ($countOn !== null) {
+            $updates['count_on'] = in_array($countOn, ['submit', 'approve'], true) ? $countOn : 'submit';
+        }
+
+        if ($weight !== null && $weight !== '') {
+            $updates['weight'] = max(0, (float) $weight);
+        }
+
+        // Merge: new UI values override existing; unknown keys are preserved.
+        return array_merge($existing, $updates);
     }
 
     private function levelCountFor(string $type, array $data): int

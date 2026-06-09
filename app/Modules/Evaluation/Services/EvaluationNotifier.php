@@ -132,4 +132,46 @@ class EvaluationNotifier
             'bi-clock-history'
         );
     }
+
+    /**
+     * Notify a teacher that their class visit is scheduled for tomorrow.
+     * The class_visit_id is on the payload so the scheduled command can guard
+     * against same-day duplicates (idempotent per visit × day).
+     */
+    public function visitReminder(ClassVisit $visit): void
+    {
+        $this->notify(
+            [$visit->teacher_id],
+            'class_visit_reminder',
+            __('evaluation.notify.visit_reminder_title'),
+            __('evaluation.notify.visit_reminder_body', [
+                'date' => (string) $visit->visit_date?->format('Y-m-d'),
+            ]),
+            ['class_visit_id' => $visit->id],
+            'warning',
+            'bi-calendar-check'
+        );
+    }
+
+    /**
+     * Notify evaluator (and approver if present) that the evaluation's subject
+     * has posted a comment on their result. The evaluation_id is on the payload.
+     */
+    public function subjectCommented(Evaluation $evaluation): void
+    {
+        $recipients = array_filter(array_unique([
+            (int) $evaluation->evaluator_id,
+            $evaluation->approved_by ? (int) $evaluation->approved_by : null,
+        ]));
+
+        $this->notify(
+            array_values($recipients),
+            'evaluation_commented',
+            __('evaluation.notify.commented_title'),
+            __('evaluation.notify.commented_body'),
+            ['evaluation_id' => $evaluation->id],
+            'info',
+            'bi-chat-left-text'
+        );
+    }
 }

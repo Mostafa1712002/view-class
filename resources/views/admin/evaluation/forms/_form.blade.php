@@ -85,6 +85,33 @@
     @endforeach
 </div>
 
+{{-- Job-performance settings (shown only when links_to_job_performance is checked) --}}
+<div id="job-perf-settings" class="card p-3 mb-3" style="background:#fffdf8;border:1px solid #ece6d8;border-radius:12px;display:none;">
+    <h6 class="mb-3" style="color:var(--gold-500);"><i class="la la-briefcase"></i> @lang('evaluation.form.fields.job_perf_settings_title')</h6>
+    <div class="row">
+        <div class="col-md-4 col-12 mb-3">
+            <label class="form-label">@lang('evaluation.form.fields.job_perf_aggregation')</label>
+            <select name="settings[job_perf_aggregation]" class="form-control">
+                <option value="average" {{ old('settings.job_perf_aggregation', $f?->job_perf_settings['aggregation'] ?? 'average') === 'average' ? 'selected' : '' }}>@lang('evaluation.form.fields.job_perf_aggregation_average')</option>
+                <option value="last"    {{ old('settings.job_perf_aggregation', $f?->job_perf_settings['aggregation'] ?? 'average') === 'last'    ? 'selected' : '' }}>@lang('evaluation.form.fields.job_perf_aggregation_last')</option>
+            </select>
+        </div>
+        <div class="col-md-4 col-12 mb-3">
+            <label class="form-label">@lang('evaluation.form.fields.job_perf_count_on')</label>
+            <select name="settings[job_perf_count_on]" class="form-control">
+                <option value="submit"  {{ old('settings.job_perf_count_on', $f?->job_perf_settings['count_on'] ?? 'submit') === 'submit'  ? 'selected' : '' }}>@lang('evaluation.form.fields.job_perf_count_on_submit')</option>
+                <option value="approve" {{ old('settings.job_perf_count_on', $f?->job_perf_settings['count_on'] ?? 'submit') === 'approve' ? 'selected' : '' }}>@lang('evaluation.form.fields.job_perf_count_on_approve')</option>
+            </select>
+        </div>
+        <div class="col-md-4 col-12 mb-3">
+            <label class="form-label">@lang('evaluation.form.fields.job_perf_weight')</label>
+            <input type="number" name="settings[job_perf_weight]" class="form-control"
+                   value="{{ old('settings.job_perf_weight', $f?->job_perf_settings['weight'] ?? '') }}"
+                   min="0" max="100" step="0.01" placeholder="1–100">
+        </div>
+    </div>
+</div>
+
 <div class="col-12 mb-3 mt-2">
     <label class="form-label">@lang('evaluation.form.fields.internal_notes')</label>
     <textarea name="internal_notes" rows="2" class="form-control">{{ $val('internal_notes') }}</textarea>
@@ -128,6 +155,13 @@ jQuery(function ($) {
     $type.on('change', applyType);
     $count.on('input change', function () { if (!isChecklist()) renderLevels(); });
     applyType();
+
+    // Job-performance settings panel toggle.
+    var $jpCheck  = $('#set-links_to_job_performance');
+    var $jpPanel  = $('#job-perf-settings');
+    function applyJobPerf() { $jpPanel.toggle($jpCheck.is(':checked')); }
+    $jpCheck.on('change', applyJobPerf);
+    applyJobPerf();
 });
 </script>
 @endpush

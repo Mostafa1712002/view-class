@@ -4,6 +4,7 @@ namespace App\Modules\Evaluation\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Evaluation;
+use App\Models\EvaluationComment;
 use App\Models\EvaluationForm;
 use App\Models\School;
 use App\Models\Subject;
@@ -13,6 +14,8 @@ use App\Modules\Evaluation\Actions\StartEvaluation;
 use App\Modules\Evaluation\Actions\SubmitEvaluation;
 use App\Modules\Evaluation\Repositories\Contracts\EvaluationFormRepository;
 use App\Modules\Evaluation\Repositories\Contracts\EvaluationRepository;
+use App\Modules\Evaluation\Services\AuditTrail;
+use App\Modules\Evaluation\Services\EvaluationNotifier;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,6 +36,8 @@ class EvaluationExecutionController extends Controller
         private readonly StartEvaluation $starter,
         private readonly SaveEvaluationDraft $drafter,
         private readonly SubmitEvaluation $submitter,
+        private readonly EvaluationNotifier $notifier,
+        private readonly AuditTrail $audit,
     ) {
     }
 
@@ -152,18 +157,24 @@ class EvaluationExecutionController extends Controller
             return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
         }
 
-        $eval->load(['responses', 'evidences', 'form', 'snapshot', 'subject:id,name']);
+        $eval->load(['responses', 'evidences', 'form', 'snapshot', 'subject:id,name', 'comments.user']);
         $payload = $eval->snapshot?->payload ?? [];
 
+        $canComment = $isSubjectViewer
+            && (bool) ($eval->form?->setting('allow_subject_comment', false))
+            && in_array($eval->status?->value, ['completed', 'approved', 'locked'], true);
+
         return view('admin.evaluation.execute.show', [
-            'evaluation' => $eval,
-            'form'       => $eval->form,
-            'payload'    => $payload,
-            'type'       => $eval->form?->type?->value ?? ($payload['form']['type'] ?? null),
-            'responses'  => $this->indexResponses($eval),
-            'evidences'  => $this->indexEvidences($eval),
-            'locked'     => ($eval->status?->isLocked() ?? false) || !$isEvaluator,
-            'editable'   => $isEvaluator && in_array($eval->status?->value, ['draft'], true),
+            'evaluation'      => $eval,
+            'form'            => $eval->form,
+            'payload'         => $payload,
+            'type'            => $eval->form?->type?->value ?? ($payload['form']['type'] ?? null),
+            'responses'       => $this->indexResponses($eval),
+            'evidences'       => $this->indexEvidences($eval),
+            'locked'          => ($eval->status?->isLocked() ?? false) || !$isEvaluator,
+            'editable'        => $isEvaluator && in_array($eval->status?->value, ['draft'], true),
+            'isSubjectViewer' => $isSubjectViewer,
+            'canComment'      => $canComment,
         ]);
     }
 
@@ -199,6 +210,52 @@ class EvaluationExecutionController extends Controller
 
         return redirect()->route('admin.evaluations.execute.show', $eval->id)
             ->with('status', __('evaluation.execute.flash.submitted'));
+    }
+
+    /* --------------------------------------------------------------- Item 1: subject comment */
+
+    /**
+     * Allow the evaluation's subject to post a comment on their result.
+     * Guards: must be the subject, form must allow it, evaluation must be completed/approved.
+     */
+    public function comment(Request $request, int $evaluation): RedirectResponse
+    {
+        $eval = Evaluation::query()->whereKey($evaluation)->with('form')->first();
+        if (!$eval) {
+            return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.form.not_found'));
+        }
+
+        $userId = (int) auth()->id();
+
+        // Only the evaluation's own subject may comment.
+        if ($eval->subject_type !== 'user' || (int) $eval->subject_id !== $userId) {
+            return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
+        }
+
+        // Form must have both allow_subject_view_results AND allow_subject_comment.
+        if (!(bool) ($eval->form?->setting('allow_subject_view_results', false))
+            || !(bool) ($eval->form?->setting('allow_subject_comment', false))) {
+            abort(403);
+        }
+
+        // Evaluation must be in a viewable / completed state.
+        if (!in_array($eval->status?->value, ['completed', 'approved', 'locked'], true)) {
+            abort(403);
+        }
+
+        $request->validate(['body' => ['required', 'string', 'max:2000']]);
+
+        EvaluationComment::create([
+            'evaluation_id' => $eval->id,
+            'user_id'       => $userId,
+            'body'          => $request->input('body'),
+        ]);
+
+        $this->notifier->subjectCommented($eval);
+        $this->audit->record('comment', "تعليق من المُقيَّم على تقييم #{$eval->id}", $eval);
+
+        return redirect()->route('admin.evaluations.execute.show', $eval->id)
+            ->with('status', __('evaluation.execute.flash.comment_saved'));
     }
 
     /* --------------------------------------------------------------- helpers */

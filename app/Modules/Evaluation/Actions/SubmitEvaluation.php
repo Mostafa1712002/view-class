@@ -92,7 +92,7 @@ class SubmitEvaluation
             }
 
             $this->audit->record(
-                'evaluation.submit',
+                'submit',
                 "تسليم تقييم #{$evaluation->id} — النتيجة {$result->percentage}% ({$result->gradeLabel})",
                 $evaluation,
                 null,

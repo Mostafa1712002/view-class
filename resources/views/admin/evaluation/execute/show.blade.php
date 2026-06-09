@@ -79,6 +79,46 @@
                 @endif
             </div>
         </div>
+
+        {{-- Subject comments on result --}}
+        @if (!empty($evaluation->comments) && $evaluation->comments->isNotEmpty())
+            <div class="card mb-3">
+                <div class="card-header" style="background:#fffdf8;border-bottom:1px solid #f0e6d2;">
+                    <strong><i class="la la-comments"></i> @lang('evaluation.execute.comments.title')</strong>
+                </div>
+                <div class="card-body p-0">
+                    @foreach ($evaluation->comments->sortBy('created_at') as $c)
+                        <div class="px-3 py-2 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="small">{{ $c->user?->name }}</strong>
+                                <small class="text-muted">{{ $c->created_at?->diffForHumans() }}</small>
+                            </div>
+                            <p class="mb-0 small">{{ $c->body }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        @if (!empty($canComment))
+            <div class="card mb-3">
+                <div class="card-header" style="background:#fffdf8;border-bottom:1px solid #f0e6d2;">
+                    <strong><i class="la la-comment-alt"></i> @lang('evaluation.execute.comments.add')</strong>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('admin.evaluations.comment', $evaluation->id) }}">
+                        @csrf
+                        <div class="mb-2">
+                            <textarea name="body" class="form-control" rows="3" placeholder="@lang('evaluation.execute.comments.placeholder')" required maxlength="2000"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            <i class="la la-paper-plane"></i> @lang('evaluation.execute.comments.submit')
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @endif
+
         {{-- Read-only answers summary --}}
         @foreach ($items as $item)
             <div class="ex-item">

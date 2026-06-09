@@ -47,7 +47,7 @@ class SaveEvaluationDraft
             $evaluation->save();
 
             $this->audit->record(
-                'evaluation.draft',
+                'draft',
                 "حفظ مسودة تقييم #{$evaluation->id}",
                 $evaluation
             );
