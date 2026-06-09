@@ -25,5 +25,12 @@ So lock, publish/close dates, columns, ratings, student/parent/teacher visibilit
 - [ ] T6 content-header row + on-brand polish on grade-reports/grades pages.
 - [ ] Verify locally, commit, deploy, hand to QA.
 
+## 🔴 SECURITY — MUST FIX BEFORE DEPLOY (automated review flagged in GradeReportPrintController.php)
+The build agent's new `app/Modules/GradeReports/Controllers/GradeReportPrintController.php` has 3 issues to fix at integration (orchestrator deploys, so fix before live):
+1. **[HIGH] IDOR on class_id** — `ClassRoom::find($classId)` not school-scoped. Scope to current school (e.g. `whereHas('section', fn($q)=>$q->where('school_id',$this->schoolId()))`) + `abort_unless($class,404)`; prefer deriving classId from `$report->class_id` (already scoped) unless an override is required.
+2. **[HIGH] IDOR on student_id** — `User::find($selectedStudentId)` not scoped. Restrict to current school AND to the report's class (`where('school_id',$this->schoolId())->whereHas('classes', class_id=$classId)`) + `abort_unless($student,404)`.
+3. **[MEDIUM] visibility/publish gate not enforced** — `$isPublished` is computed but not enforced. Add server-side `abort_unless($isPublished,403)` (for non-admin viewers) + `abort_if($viewerIsStudent && !$report->visible_to_student,403)` / parent equivalent before loading grade values.
+Verify after fix: cross-tenant class/student IDs return 404; unpublished/hidden report 403 for student/parent; admin still works.
+
 ## Open question for user (priority)
 The card lists 9 report types but is vague. Confirm the priority subset for THIS pass (recommend: grade-monitoring + transcript كشف + notification إشعار + the dynamic that exists), leaving السلوك/حجب/final-variants for a follow-up — so this ships in a reasonable scope instead of stalling on all 9.

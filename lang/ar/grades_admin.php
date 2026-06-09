@@ -30,11 +30,12 @@ return [
     'created_at' => 'تاريخ الإنشاء',
 
     // Types
-    'type_dynamic' => 'ديناميكي',
-    'type_static' => 'ثابت',
-    'type_gradesheet' => 'كشف الدرجات',
-    'type_transcript' => 'كشف الدرجات الرسمي',
-    'type_certificate' => 'إشعار / شهادة',
+    'type_dynamic'      => 'ديناميكي',
+    'type_static'       => 'ثابت',
+    'type_gradesheet'   => 'كشف الدرجات',
+    'type_transcript'   => 'كشف الدرجات الرسمي',
+    'type_notification' => 'إشعار الدرجات',
+    'type_certificate'  => 'إشعار / شهادة',
 
     // Filters
     'filter_all' => 'الكل',
@@ -100,8 +101,66 @@ return [
     'report_locked' => 'هذا التقرير مغلق — لا يمكن تعديل الدرجات.',
 
     // Messages
-    'created_ok' => 'تم إنشاء التقرير بنجاح.',
-    'updated_ok' => 'تم تحديث التقرير بنجاح.',
-    'deleted_ok' => 'تم حذف التقرير.',
+    'created_ok'      => 'تم إنشاء التقرير بنجاح.',
+    'updated_ok'      => 'تم تحديث التقرير بنجاح.',
+    'deleted_ok'      => 'تم حذف التقرير.',
     'columns_updated_ok' => 'تم تحديث المكونات بنجاح.',
+    'locked_ok'       => 'تم قفل التقرير — لن يتمكن أحد من تعديل الدرجات.',
+    'unlocked_ok'     => 'تم فتح التقرير — يمكن الآن تعديل الدرجات.',
+
+    // Monitor page
+    'monitor_title'          => 'رصد اكتمال الدرجات',
+    'monitor_intro'          => 'عرض مدى اكتمال الدرجات لكل تقرير — عدد الطلاب المسجلين مقارنةً بما تم إدخاله فعلاً.',
+    'monitor_btn'            => 'تقرير رصد الدرجات',
+    'monitor_export'         => 'تصدير CSV',
+    'monitor_filter_status'  => 'تصفية حسب الحالة',
+    'monitor_all'            => 'الكل',
+    'monitor_complete'       => 'مكتمل',
+    'monitor_missing'        => 'ناقص',
+    'monitor_empty'          => 'لا توجد درجات',
+    'monitor_report'         => 'التقرير',
+    'monitor_class'          => 'الصف',
+    'monitor_subject'        => 'المادة',
+    'monitor_teacher'        => 'المعلم',
+    'monitor_enrolled'       => 'الطلاب',
+    'monitor_entered'        => 'مُدخَل',
+    'monitor_missing_col'    => 'ناقص',
+    'monitor_status'         => 'الحالة',
+    'monitor_completion'     => 'الاكتمال',
+    'monitor_no_rows'        => 'لا توجد بيانات للفلاتر المحددة.',
+    'monitor_stat_total'     => 'إجمالي التقارير',
+    'monitor_stat_complete'  => 'مكتملة',
+    'monitor_stat_missing'   => 'ناقصة',
+    'monitor_stat_empty'     => 'بدون درجات',
+    'monitor_progress'       => 'نسبة الاكتمال',
+    'monitor_entry_link'     => 'إدخال الدرجات',
+
+    // Transcript page
+    'transcript_title'    => 'كشف الدرجات',
+    'transcript_intro'    => 'عرض درجات جميع الطلاب في هذا التقرير.',
+    'transcript_no_class' => 'اختر الصف لعرض الكشف.',
+    'transcript_total'    => 'المجموع',
+    'transcript_pct'      => 'النسبة',
+
+    // Notification page
+    'notification_title'         => 'إشعار الدرجات',
+    'notification_intro'         => 'عرض إشعار درجات طالب محدد.',
+    'notification_pick_student'  => 'اختر الطالب',
+    'notification_not_published' => 'هذا التقرير لم ينشر بعد — تواريخ الفتح/الإغلاق لم تحقق شرط النشر.',
+    'notification_no_student'    => 'اختر الطالب لعرض الإشعار.',
+    'notification_hidden_student' => 'هذا التقرير غير مرئي للطلاب (ضبط الإعدادات).',
+    'notification_hidden_parent'  => 'هذا التقرير غير مرئي لأولياء الأمور.',
+    'notification_grade_details' => 'تفاصيل الدرجات',
+    'notification_print'         => 'طباعة',
+
+    // Control menu
+    'control_settings'    => 'الإعدادات',
+    'control_columns'     => 'الأعمدة',
+    'control_monitor'     => 'رصد الدرجات',
+    'control_entry'       => 'إدخال الدرجات',
+    'control_transcript'  => 'كشف الدرجات',
+    'control_notification'=> 'إشعار الدرجات',
+    'control_lock'        => 'قفل التقرير',
+    'control_unlock'      => 'فتح التقرير',
+    'control_delete'      => 'حذف',
 ];

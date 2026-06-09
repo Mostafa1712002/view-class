@@ -53,7 +53,7 @@ class GradeReportController extends Controller
     public function store(Request $request)
     {
         $data = $this->validatePayload($request);
-        $data['type'] = $request->validate(['type' => ['nullable', 'in:dynamic,static,gradesheet']])['type'] ?? 'dynamic';
+        $data['type'] = $request->validate(['type' => ['nullable', 'in:dynamic,static,gradesheet,transcript,notification']])['type'] ?? 'dynamic';
         // For super-admins (no scoped school) prefer the explicitly picked class's school,
         // else the user's own school, else the first school in the system.
         $schoolId = $this->schoolId() ?? auth()->user()->school_id;
@@ -92,7 +92,7 @@ class GradeReportController extends Controller
 
         $data = $this->validatePayload($request);
         // type is editable for an existing report
-        $data['type'] = $request->validate(['type' => ['nullable', 'in:dynamic,static,gradesheet']])['type'] ?? $report->type;
+        $data['type'] = $request->validate(['type' => ['nullable', 'in:dynamic,static,gradesheet,transcript,notification']])['type'] ?? $report->type;
         $data['is_active'] = (bool) $request->boolean('is_active', true);
         $data['is_locked'] = (bool) $request->boolean('is_locked', false);
 
@@ -113,6 +113,15 @@ class GradeReportController extends Controller
 
         $this->reports->replaceColumns($report, $request->input('columns', []));
         return redirect()->route('admin.grade-reports.edit', $report)->with('success', trans('grades_admin.columns_updated_ok'));
+    }
+
+    public function toggleLock(int $id)
+    {
+        $report = $this->reports->findScoped($id, $this->schoolId());
+        abort_unless($report, 404);
+        $report->update(['is_locked' => !$report->is_locked]);
+        $msg = $report->is_locked ? trans('grades_admin.locked_ok') : trans('grades_admin.unlocked_ok');
+        return back()->with('success', $msg);
     }
 
     public function destroy(int $id)

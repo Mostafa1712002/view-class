@@ -739,9 +739,16 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/grad
     Route::get('/', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'index'])->name('index');
     Route::get('create', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'create'])->name('create');
     Route::post('/', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'store'])->name('store');
+    // Grade-monitoring report (standalone analytical page)
+    Route::get('monitor', [\App\Modules\GradeReports\Controllers\GradeMonitorController::class, 'index'])->name('monitor');
+    Route::get('monitor/export', [\App\Modules\GradeReports\Controllers\GradeMonitorController::class, 'export'])->name('monitor.export');
     Route::get('{id}/edit', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'edit'])->whereNumber('id')->name('edit');
     Route::put('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'update'])->whereNumber('id')->name('update');
     Route::post('{id}/columns', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'updateColumns'])->whereNumber('id')->name('columns.update');
+    // Per-report lock toggle, publish/close, transcript, notification
+    Route::post('{id}/toggle-lock', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'toggleLock'])->whereNumber('id')->name('toggle-lock');
+    Route::get('{id}/transcript', [\App\Modules\GradeReports\Controllers\GradeReportPrintController::class, 'transcript'])->whereNumber('id')->name('transcript');
+    Route::get('{id}/notification', [\App\Modules\GradeReports\Controllers\GradeReportPrintController::class, 'notification'])->whereNumber('id')->name('notification');
     Route::get('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'show'])->whereNumber('id')->name('show');
     Route::delete('{id}', [\App\Modules\GradeReports\Controllers\GradeReportController::class, 'destroy'])->whereNumber('id')->name('destroy');
 });

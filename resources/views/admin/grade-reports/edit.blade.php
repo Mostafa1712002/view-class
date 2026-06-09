@@ -6,13 +6,32 @@
 
 @section('content')
 @php($isRtl = app()->getLocale() === 'ar')
-<div class="content-header">
-    <h2 class="content-header-title">{{ trans('grades_admin.edit_report') }} — {{ $report->title }}</h2>
-    <div class="breadcrumb-wrapper">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.grade-reports.index') }}">{{ trans('grades_admin.reports_title') }}</a></li>
-            <li class="breadcrumb-item active">{{ $report->title }}</li>
-        </ol>
+<div class="content-header row">
+    <div class="content-header-left col-md-9 col-12 mb-2">
+        <h2 class="content-header-title float-{{ $isRtl ? 'right' : 'left' }} mb-0">
+            {{ trans('grades_admin.edit_report') }} — {{ $report->title }}
+        </h2>
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('grades_admin.home')</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.grade-reports.index') }}">{{ trans('grades_admin.reports_title') }}</a></li>
+                <li class="breadcrumb-item active">{{ $report->title }}</li>
+            </ol>
+        </div>
+    </div>
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2">
+        <a href="{{ route('admin.grade-reports.transcript', $report->id) }}" class="btn btn-outline-info btn-sm" title="{{ trans('grades_admin.control_transcript') }}">
+            <i class="la la-table"></i>
+        </a>
+        <a href="{{ route('admin.grade-reports.notification', $report->id) }}" class="btn btn-outline-warning btn-sm" title="{{ trans('grades_admin.control_notification') }}">
+            <i class="la la-file-invoice"></i>
+        </a>
+        <a href="{{ route('admin.grade-reports.monitor') }}" class="btn btn-outline-secondary btn-sm" title="{{ trans('grades_admin.control_monitor') }}">
+            <i class="la la-chart-bar"></i>
+        </a>
+        <a href="{{ route('admin.grade-reports.index') }}" class="btn btn-outline-secondary">
+            <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> {{ trans('grades_admin.back') }}
+        </a>
     </div>
 </div>
 

@@ -19,7 +19,7 @@
             <div class="col-md-4 mb-3">
                 <label class="form-label">{{ trans('grades_admin.report_type') }}</label>
                 <select name="type" class="form-control">
-                    @foreach(['dynamic','static','gradesheet'] as $t)
+                    @foreach(['dynamic','static','gradesheet','transcript','notification'] as $t)
                         <option value="{{ $t }}" @selected(old('type', $report?->type ?? 'dynamic') === $t)>
                             {{ trans('grades_admin.type_'.$t) }}
                         </option>
