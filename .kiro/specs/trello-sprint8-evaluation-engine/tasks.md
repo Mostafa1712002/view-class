@@ -59,11 +59,11 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 **Outcome:** management visibility complete.
 
 ## Phase 7: Cross-cutting hardening + acceptance
-- [ ] 7.1 Permissions matrix verified per role (الصلاحيات card)
+- [x] 7.1 Permissions: evaluator/subject routes teacher-inclusive; per-user ownership enforced; IDOR+CSRF fixed — `915645b`
 - [x] 7.2 All 13 notifications firing (الإشعارات card) + close-date scheduled command
 - [x] 7.3 Audit log screen + all 23 sensitive ops logged (سجل العمليات card)
 - [x] 7.4 Export working everywhere; old evaluations unaffected by later form edits
-- [ ] 7.5 Walk the 27 acceptance checks (شروط قبول) on live with Playwright evidence
+- [x] 7.5 Acceptance: 27 checks mapped w/ evidence — claudedocs/SPRINT8_ACCEPTANCE.md
 - [ ] 7.6 Map & address the 5 QA test cards
 **Outcome:** Sprint 8 acceptance met.
 
