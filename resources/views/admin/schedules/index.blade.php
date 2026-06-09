@@ -12,6 +12,15 @@
         padding: .25rem .65rem; border-radius: 999px;
         font-size: .75rem; line-height: 1.2;
         background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+        text-decoration: none; transition: filter .15s ease, box-shadow .15s ease;
+        cursor: pointer;
+    }
+    .schedule-status-pills a.pill:hover,
+    .schedule-status-pills a.pill:focus {
+        text-decoration: none;
+        filter: brightness(.94);
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        outline: none;
     }
     .schedule-status-pills .pill.on { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
     .schedule-status-pills .pill.off { background: #fff7ed; color: #92400e; border-color: #fed7aa; }
@@ -68,10 +77,109 @@
     .summary-tile .label { font-size: .75rem; color: #64748b; }
     .summary-tile .value { font-size: 1.35rem; font-weight: 700; color: #0f172a; }
 
+    /* ============================================================
+       Print stylesheet — show ONLY the .week-grid(s) at full
+       page width. Everything else (sidebar, navbar, filters,
+       summary tiles, action buttons) is hidden.
+       ============================================================ */
     @media print {
-        .no-print, .breadcrumb, .content-header-right, .card-header form, .pagination { display: none !important; }
-        .schedule-group { break-inside: avoid; }
+        /* ---- Page setup ---- */
+        @page { size: A4 landscape; margin: 1.2cm 1cm; }
+
+        /* ---- Hide the entire chrome ---- */
+        .main-menu,
+        .header-navbar,
+        footer.footer,
+        .content-header,
+        .no-print,
+        .breadcrumb-wrapper,
+        .schedule-toolbar,
+        .schedule-status-pills,
+        .summary-tiles,
+        .view-toggle,
+        .card.no-print,
+        .card-header,
+        .card-body .row,
+        .alert,
+        [data-feather] { display: none !important; }
+
+        /* ---- Reset layout so grid fills the page ---- */
+        body,
+        html { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+
+        .app-content.content,
+        .content-wrapper,
+        .content-body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+
+        /* ---- Print header (hidden on screen, shown in print) ---- */
+        .print-header { display: block !important; margin-bottom: .6cm; }
+        .print-header h2 { font-size: 14pt; font-weight: 700; margin: 0 0 2pt; }
+        .print-header .print-meta { font-size: 9pt; color: #475569; }
+
+        /* ---- Schedule groups ---- */
+        .schedule-group {
+            break-inside: avoid;
+            border: 1px solid #ccc !important;
+            border-radius: 0 !important;
+            margin-bottom: .5cm !important;
+            overflow: visible !important;
+        }
+
+        /* Keep the group header (shows teacher/class + academic year) */
+        .schedule-group-header {
+            background: #f0f4f8 !important;
+            padding: 4pt 6pt !important;
+            print-color-adjust: exact !important;
+            -webkit-print-color-adjust: exact !important;
+        }
+
+        /* Hide action links inside group header (view-grid / edit-periods) */
+        .schedule-group-meta a.meta-chip { display: none !important; }
+
+        /* ---- Make grid expand to full page width ---- */
+        .table-responsive { overflow: visible !important; width: 100% !important; }
+
+        .week-grid {
+            width: 100% !important;
+            border: 1px solid #ccc !important;
+            border-radius: 0 !important;
+            border-collapse: collapse !important;
+            print-color-adjust: exact !important;
+            -webkit-print-color-adjust: exact !important;
+        }
+
+        .week-grid th,
+        .week-grid td {
+            border: 1px solid #d1d5db !important;
+            padding: 3pt 4pt !important;
+            break-inside: avoid !important;
+            print-color-adjust: exact !important;
+            -webkit-print-color-adjust: exact !important;
+        }
+
+        .week-grid th {
+            background: #f8fafc !important;
+            print-color-adjust: exact !important;
+            -webkit-print-color-adjust: exact !important;
+        }
+
+        .week-grid tr { break-inside: avoid !important; }
+
+        /* Period cards — keep colour for readability */
+        .period-card {
+            break-inside: avoid !important;
+            print-color-adjust: exact !important;
+            -webkit-print-color-adjust: exact !important;
+            background: #eff6ff !important;
+            border: 1px solid #dbeafe !important;
+            margin-bottom: 2pt !important;
+            padding: 2pt 4pt !important;
+            border-radius: 4pt !important;
+        }
     }
+
+    /* Print header is invisible on screen */
+    .print-header { display: none; }
 
     @media (max-width: 575.98px) {
         .week-grid { font-size: .72rem; }
@@ -219,22 +327,44 @@
                 </div>
             </form>
 
+            @php
+                // Build query params to forward the current filter scope to linked modules.
+                $statusLinkParams = array_filter([
+                    'teacher_id'       => $filters['teacher_id'] ?? null,
+                    'class_id'         => $filters['class_id'] ?? null,
+                    'subject_id'       => $filters['subject_id'] ?? null,
+                    'academic_year_id' => $filters['academic_year_id'] ?? null,
+                    'semester'         => $filters['semester'] ?? null,
+                ]);
+            @endphp
             <div class="schedule-status-pills">
-                <span class="pill {{ ($statusFlags['weekly_plan'] ?? false) ? 'on' : 'off' }}">
+                {{-- Weekly Plan status — links to weekly-plans index with current scope --}}
+                <a href="{{ route('manage.weekly-plans.index', $statusLinkParams) }}"
+                   class="pill {{ ($statusFlags['weekly_plan'] ?? false) ? 'on' : 'off' }}"
+                   title="@lang('schedule.weekly_plan_status')">
                     <i data-feather="book-open" style="width:14px;height:14px;"></i>
                     @lang('schedule.weekly_plan_status'):
                     {{ ($statusFlags['weekly_plan'] ?? false) ? __('schedule.linked') : __('schedule.not_linked') }}
-                </span>
-                <span class="pill {{ ($statusFlags['lesson_prep'] ?? false) ? 'on' : 'off' }}">
+                </a>
+                {{-- Lesson Prep status — links to lessons index with current scope.
+                     NOTE: lesson_prep is currently approximated from weekly_plan presence
+                     (no separate lesson-prep table exists). The badge shows the same value
+                     as weekly_plan until a dedicated lesson-prep module ships. --}}
+                <a href="{{ route('admin.lessons.index', $statusLinkParams) }}"
+                   class="pill {{ ($statusFlags['lesson_prep'] ?? false) ? 'on' : 'off' }}"
+                   title="@lang('schedule.lesson_prep_status')">
                     <i data-feather="edit-3" style="width:14px;height:14px;"></i>
                     @lang('schedule.lesson_prep_status'):
                     {{ ($statusFlags['lesson_prep'] ?? false) ? __('schedule.linked') : __('schedule.not_linked') }}
-                </span>
-                <span class="pill {{ ($statusFlags['attendance'] ?? false) ? 'on' : 'off' }}">
+                </a>
+                {{-- Attendance status — links to attendance index with current scope --}}
+                <a href="{{ route('admin.attendance.index', $statusLinkParams) }}"
+                   class="pill {{ ($statusFlags['attendance'] ?? false) ? 'on' : 'off' }}"
+                   title="@lang('schedule.attendance_status')">
                     <i data-feather="user-check" style="width:14px;height:14px;"></i>
                     @lang('schedule.attendance_status'):
                     {{ ($statusFlags['attendance'] ?? false) ? __('schedule.linked') : __('schedule.not_linked') }}
-                </span>
+                </a>
             </div>
         </div>
     </div>
@@ -255,6 +385,38 @@
         <div class="summary-tile">
             <div class="label">@lang('schedule.class')</div>
             <div class="value">{{ $totals['classes'] }}</div>
+        </div>
+    </div>
+
+    {{-- Print-only context header (hidden on screen via CSS) --}}
+    <div class="print-header">
+        @php
+            $printSchool = auth()->user()?->school?->name ?? config('app.name');
+            $printDate   = now()->translatedFormat('l، d F Y');
+            $printParts  = [];
+            if (!empty($filters['teacher_id'])) {
+                $t = $teachers->firstWhere('id', $filters['teacher_id']);
+                if ($t) $printParts[] = __('schedule.teacher') . ': ' . $t->name;
+            }
+            if (!empty($filters['class_id'])) {
+                $c = $classes->firstWhere('id', $filters['class_id']);
+                if ($c) $printParts[] = __('schedule.class') . ': ' . $c->name . ($c->division ? ' - ' . $c->division : '');
+            }
+            if (!empty($filters['subject_id'])) {
+                $s = $subjects->firstWhere('id', $filters['subject_id']);
+                if ($s) $printParts[] = __('schedule.subject') . ': ' . $s->name;
+            }
+            if (!empty($filters['semester'])) {
+                $semLabel = $filters['semester'] === 'first' ? 'الفصل الأول' : 'الفصل الثاني';
+                $printParts[] = $semLabel;
+            }
+        @endphp
+        <h2>{{ $printSchool }} — {{ __('schedule.page_title') }}</h2>
+        <div class="print-meta">
+            {{ $printDate }}
+            @if($printParts)
+                &nbsp;·&nbsp; {{ implode(' &nbsp;·&nbsp; ', $printParts) }}
+            @endif
         </div>
     </div>
 
