@@ -92,6 +92,9 @@ class ClassVisitController extends Controller
     {
         $data = $this->validateData($request);
 
+        if ($field = $this->foreignKeyScopeError($data, $this->activeSchoolId())) {
+            return back()->withErrors([$field => __('class_visits.errors.out_of_scope')])->withInput();
+        }
         $eligible = $this->eligibleFormIds($this->activeSchoolId());
         if (!in_array((int) $data['form_id'], $eligible, true)) {
             return back()->withErrors(['form_id' => __('class_visits.errors.form_not_eligible')])->withInput();
@@ -132,6 +135,9 @@ class ClassVisitController extends Controller
 
         $data = $this->validateData($request);
 
+        if ($field = $this->foreignKeyScopeError($data, $this->activeSchoolId())) {
+            return back()->withErrors([$field => __('class_visits.errors.out_of_scope')])->withInput();
+        }
         $eligible = $this->eligibleFormIds($this->activeSchoolId());
         if (!in_array((int) $data['form_id'], $eligible, true)) {
             return back()->withErrors(['form_id' => __('class_visits.errors.form_not_eligible')])->withInput();
@@ -218,6 +224,32 @@ class ClassVisitController extends Controller
     }
 
     /** Timetable guard: if a period is chosen it must belong to the teacher. */
+    /**
+     * Cross-tenant guard: every foreign key supplied must belong to the active school
+     * (non-super-admin). teacher_id is load-bearing — it's the evaluated subject.
+     * Returns the offending field name, or null when all in scope.
+     */
+    private function foreignKeyScopeError(array $data, ?int $schoolId): ?string
+    {
+        if ($schoolId === null) {
+            return null; // super-admin / no active school — global scope
+        }
+        if (!User::whereKey((int) $data['teacher_id'])->where('school_id', $schoolId)->exists()) {
+            return 'teacher_id';
+        }
+        if (!empty($data['section_id'])
+            && !Section::whereKey((int) $data['section_id'])->where('school_id', $schoolId)->exists()) {
+            return 'section_id';
+        }
+        if (!empty($data['subject_id'])
+            && !Subject::whereKey((int) $data['subject_id'])
+                ->where(fn ($q) => $q->where('school_id', $schoolId)->orWhereNull('school_id'))->exists()) {
+            return 'subject_id';
+        }
+
+        return null;
+    }
+
     private function periodBelongsToTeacher(array $data): bool
     {
         $periodId = isset($data['period_id']) && $data['period_id'] !== '' ? (int) $data['period_id'] : null;

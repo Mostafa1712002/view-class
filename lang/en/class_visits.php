@@ -112,6 +112,7 @@ return [
         'duplicate_slot'     => 'A visit is already scheduled for the same teacher in this period and date.',
         'form_not_eligible'  => 'The selected form is not eligible for class visits (must be published and class-visit-only).',
         'period_not_teacher' => 'The selected period does not belong to the chosen teacher\'s timetable.',
+        'out_of_scope'       => 'The selected item does not belong to your school.',
         'completed_locked'   => 'A completed visit cannot be edited.',
         'delete_blocked'     => 'A completed visit cannot be deleted.',
         'cannot_execute_cancelled' => 'A cancelled visit cannot be executed.',

@@ -206,7 +206,10 @@
                                         <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false"><i class="la la-ellipsis-h"></i></button>
                                         <div class="dropdown-menu dropdown-menu-end">
                                             @if ($eff->value !== 'completed' && $eff->value !== 'cancelled')
-                                                <a class="dropdown-item text-success" href="{{ route('admin.class-visits.execute', $visit->id) }}"><i class="la la-play"></i> @lang('class_visits.actions.execute')</a>
+                                                <form action="{{ route('admin.class-visits.execute', $visit->id) }}" method="POST" class="m-0">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item text-success"><i class="la la-play"></i> @lang('class_visits.actions.execute')</button>
+                                                </form>
                                             @endif
                                             @if ($visit->evaluation_id)
                                                 <a class="dropdown-item" href="{{ route('admin.evaluations.execute.show', $visit->evaluation_id) }}"><i class="la la-eye"></i> @lang('class_visits.actions.view_eval')</a>

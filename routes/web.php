@@ -576,21 +576,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('evaluations/{id}/close', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'close'])->name('evaluations.close');
     Route::post('evaluations/{id}/archive', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'archive'])->name('evaluations.archive');
 
-    // My Evaluations landing (Sprint 8 Task 9 — التقييمات: required of me / my results)
-    Route::get('my-evaluations', [\App\Modules\Evaluation\Controllers\MyEvaluationsController::class, 'index'])->name('my-evaluations.index');
-
-    // Subject picker (Sprint 8 Task 10 — المستهدفون المكلّف بهم)
-    Route::get('evaluations/{form}/subjects', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'subjects'])->name('evaluations.subjects');
-
-    // Execution screen (Sprint 8 Task 11 — تنفيذ التقييم)
-    Route::get('evaluations/{form}/subjects/{subject}/start', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'start'])->name('evaluations.execute.start');
-    Route::get('evaluations/execute/{evaluation}', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'show'])->name('evaluations.execute.show');
-    Route::post('evaluations/execute/{evaluation}/draft', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'draft'])->name('evaluations.execute.draft');
-    Route::post('evaluations/execute/{evaluation}/submit', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'submit'])->name('evaluations.execute.submit');
-
-    // Evidence (Sprint 8 Task 12 — الشواهد)
-    Route::post('evaluations/execute/{evaluation}/evidence', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'store'])->name('evaluations.execute.evidence.store');
-    Route::delete('evaluations/execute/{evaluation}/evidence/{evidence}', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'destroy'])->name('evaluations.execute.evidence.destroy');
+    // NOTE: the evaluator/subject-facing routes (Tasks 9-12: my-evaluations, subject picker,
+    // execution, evidence) live in a SEPARATE teacher-inclusive admin group below, so teachers
+    // can act as evaluators/subjects. Those controllers enforce per-user ownership
+    // (evaluator_id / subject_id == auth id), so broadening the role is safe.
 
     // Approval cycle (Sprint 8 Task 14 — اعتماد ومراجعة التقييم)
     Route::get('evaluations/approvals', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'index'])->name('evaluations.approvals.index');
@@ -611,7 +600,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('class-visits/{id}/edit', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'edit'])->name('class-visits.edit');
     Route::put('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'update'])->name('class-visits.update');
     Route::delete('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'destroy'])->name('class-visits.destroy');
-    Route::get('class-visits/{id}/execute', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'execute'])->name('class-visits.execute');
+    Route::post('class-visits/{id}/execute', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'execute'])->name('class-visits.execute');
 
     // Evaluation reports (Sprint 8 Tasks 19-20 — تقارير المشرفين + شاشة المدير العام)
     Route::get('eval-reports/supervisors', [\App\Modules\Evaluation\Controllers\SupervisorReportController::class, 'index'])->name('eval-reports.supervisors');
@@ -640,6 +629,25 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('attendance/student-report', [\App\Http\Controllers\Admin\AttendanceController::class, 'studentReport'])->name('attendance.student-report');
     Route::get('attendance/class-report', [\App\Http\Controllers\Admin\AttendanceController::class, 'classReport'])->name('attendance.class-report');
     Route::get('attendance/calendar', [\App\Http\Controllers\Admin\AttendanceController::class, 'calendar'])->name('attendance.calendar');
+});
+
+// Evaluation — evaluator/subject-facing routes (Sprint 8 Tasks 9-12). Teacher-inclusive so a
+// teacher can execute evaluations assigned to them and view their own results. Same prefix/name
+// (admin.) as the authoring group — only the role is broadened. Controllers enforce per-user
+// ownership (evaluator_id / subject_id == auth id), so this exposes only the user's own data.
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin')->name('admin.')->group(function () {
+    // My Evaluations landing (Task 9 — التقييمات: required of me / my results)
+    Route::get('my-evaluations', [\App\Modules\Evaluation\Controllers\MyEvaluationsController::class, 'index'])->name('my-evaluations.index');
+    // Subject picker (Task 10)
+    Route::get('evaluations/{form}/subjects', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'subjects'])->name('evaluations.subjects');
+    // Execution screen (Task 11)
+    Route::get('evaluations/{form}/subjects/{subject}/start', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'start'])->name('evaluations.execute.start');
+    Route::get('evaluations/execute/{evaluation}', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'show'])->name('evaluations.execute.show');
+    Route::post('evaluations/execute/{evaluation}/draft', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'draft'])->name('evaluations.execute.draft');
+    Route::post('evaluations/execute/{evaluation}/submit', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'submit'])->name('evaluations.execute.submit');
+    // Evidence (Task 12)
+    Route::post('evaluations/execute/{evaluation}/evidence', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'store'])->name('evaluations.execute.evidence.store');
+    Route::delete('evaluations/execute/{evaluation}/evidence/{evidence}', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'destroy'])->name('evaluations.execute.evidence.destroy');
 });
 
 // Teacher Routes
