@@ -3,8 +3,14 @@
 **Last worked:** 2026-06-08 · **Branch:** `main` · **HEAD:** `cde877c`
 **Spec:** `.kiro/specs/trello-sprint8-evaluation-engine/{requirements,design,tasks}.md`
 
+## 🚀 UPDATE 2026-06-09 (later) — DEPLOYED TO LIVE + permissions + security fixed, HEAD `915645b`
+- **Deployed to live** (`viewclass.newaves-systems.com`): all 14 migrations ran, caches cleared, 57 routes. Verified on live: forms create→persist→delete end-to-end works; my-evaluations/approvals/class-visits/reports/GM pages render.
+- **Permissions (P7.1) DONE:** evaluator/subject routes (my-evaluations, subject picker, execution, evidence) extracted into a **teacher-inclusive** admin group (same route names); controllers already enforce per-user ownership (evaluator_id/subject_id == auth id). Teacher-portal sidebar link added.
+- **Security review fixes:** (1) class-visit FK inputs (teacher_id/section_id/subject_id) scoped to active school → cross-tenant IDOR closed; (2) class-visits `execute` GET→POST + CSRF form.
+- **Now-remaining:** acceptance walk (27 checks) on live · 2 notification triggers (teacher-commented needs a comment endpoint; teacher-visit-reminder needs a scheduler) · minor nits (audit double-prefix, item toggle weight re-check, job_perf_settings write UI, visibility-flag filtering). Job-perf settings sub-keys still not written by the form editor.
+
 ## ✅✅ UPDATE 2026-06-09 — full engine built (P0–P7), HEAD `fda77d3`
-All 20 tasks + cross-cutting are **built, locally verified, committed to `main`** (still NOT deployed — review gate stands). 57 engine routes, 14 migrations tracked, scheduler registered, boots clean.
+All 20 tasks + cross-cutting are **built, locally verified, committed to `main`**. 57 engine routes, 14 migrations tracked, scheduler registered, boots clean.
 - P4 approval cycle + job-performance results — `a750e85`
 - P5 class visits (schedule/dup-guard/secret/execute→evaluation) — `a750e85`
 - P6 supervisor/detailed/GM reports + CSV + multi-evaluator averaging — `a750e85` (GM verified: avg 80.84 / high 86.67 / low 78.89)
