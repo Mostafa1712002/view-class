@@ -31,6 +31,9 @@ return [
     'no_data' => 'لا توجد بيانات',
     'no_results' => 'لا توجد نتائج',
     'confirm_delete' => 'هل أنت متأكد من الحذف؟',
+    'confirm_yes' => 'نعم',
+    'confirm_no' => 'إلغاء',
+    'confirm_sure' => 'هل أنت متأكد؟',
 
     // Common table columns
     'id' => 'الرقم',

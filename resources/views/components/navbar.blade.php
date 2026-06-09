@@ -13,10 +13,16 @@
     border: 2px solid #fff; border-radius: 999px;
     box-shadow: 0 2px 5px rgba(220,38,38,.4);
 }
+.vc-notif { position: relative; }
 .vc-notif-dd {
     width: 360px; max-width: 92vw; padding: 0; overflow: hidden;
     border: 1px solid #efe6cf; border-radius: 16px;
     box-shadow: 0 18px 48px rgba(30,25,10,.18);
+    /* Position under the bell, anchored on the physical left so it extends toward the
+       screen centre (RTL: the bell sits on the left of the navbar, so this moves the
+       box rightward instead of jamming the edge). data-display="static" keeps Popper out. */
+    position: absolute; top: 100%; margin-top: .5rem;
+    right: auto; left: 0; transform: translateX(34px);
 }
 .vc-notif-head {
     display: flex; align-items: center; justify-content: space-between;
@@ -193,7 +199,7 @@
                 </li>
 
                 <li class="dropdown dropdown-notification nav-item vc-notif">
-                    <a class="nav-link nav-link-label vc-notif-bell {{ $unreadCount > 0 ? 'has-unread' : '' }}" href="#" data-toggle="dropdown" title="@lang('shell.notifications_heading')">
+                    <a class="nav-link nav-link-label vc-notif-bell {{ $unreadCount > 0 ? 'has-unread' : '' }}" href="#" data-toggle="dropdown" data-display="static" title="@lang('shell.notifications_heading')">
                         <i class="ficon la la-bell"></i>
                         @if($unreadCount > 0)
                             <span class="vc-notif-count">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>

@@ -27,6 +27,8 @@
     {{-- Bootstrap Icons: many Sprint pages (exams, grades, attendance, messages, student/parent) use `bi bi-*`
          which the theme never loaded, so their action icons rendered as empty boxes (card #163). --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    {{-- SweetAlert2: app-wide confirm dialogs + success/error toasts (see the global upgrader before </body>). --}}
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     {{-- Al-Awwal brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
     @if(!$isRtl)
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -757,6 +759,65 @@
     <script src="{{ asset('app-assets/js/core/app-menu.js') }}"></script>
     <script src="{{ asset('app-assets/js/core/app.js') }}"></script>
     <!-- END MODERN JS-->
+
+    {{-- ── App-wide SweetAlert2: confirm dialogs + success/error toasts ───────────────
+         Auto-upgrades existing markup with NO per-view changes:
+         • flash banners (.alert-success / .alert-danger, single short message) → toast
+         • inline confirm() on forms/links (onsubmit/onclick) → SweetAlert confirm
+         Plus window.vcConfirm()/vcToast() helpers for new code. --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+    (function () {
+        if (!window.Swal) return;
+        var RTL = (document.documentElement.getAttribute('dir') || 'rtl') === 'rtl';
+        var GOLD = '#c9a04b';
+        var T = { yes: @json(__('common.confirm_yes')), no: @json(__('common.confirm_no')), sure: @json(__('common.confirm_sure')) };
+
+        window.vcToast = function (title, icon) {
+            Swal.fire({ toast: true, position: RTL ? 'top-start' : 'top-end', icon: icon || 'success',
+                title: title, showConfirmButton: false, timer: 3500, timerProgressBar: true });
+        };
+        window.vcConfirm = function (opts) {
+            return Swal.fire(Object.assign({ icon: 'warning', showCancelButton: true, reverseButtons: true,
+                confirmButtonText: T.yes, cancelButtonText: T.no, confirmButtonColor: GOLD }, opts || {}));
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1) flash banners → toast (skip validation lists / long blocks)
+            document.querySelectorAll('.alert-success, .alert-danger').forEach(function (el) {
+                if (el.closest('.swal2-container')) return;
+                if (el.querySelector('ul, li, form, .close, button')) return;
+                var text = (el.textContent || '').trim();
+                if (!text || text.length > 220) return;
+                window.vcToast(text, el.classList.contains('alert-danger') ? 'error' : 'success');
+                el.remove();
+            });
+
+            // 2) inline confirm() → SweetAlert
+            function upgrade(el, attr) {
+                var code = el.getAttribute(attr);
+                if (!code || code.indexOf('confirm(') < 0) return;
+                var m = code.match(/confirm\(\s*['"]([\s\S]*?)['"]/);
+                var msg = m ? m[1] : T.sure;
+                el.removeAttribute(attr);
+                var isForm = (attr === 'onsubmit');
+                el.addEventListener(isForm ? 'submit' : 'click', function (e) {
+                    if (el.dataset.vcOk === '1') { el.dataset.vcOk = ''; return; }
+                    e.preventDefault(); e.stopPropagation();
+                    window.vcConfirm({ title: msg }).then(function (r) {
+                        if (!r.isConfirmed) return;
+                        if (isForm) { el.submit(); }      // bypasses listeners → no loop
+                        else { el.dataset.vcOk = '1'; el.click(); }
+                    });
+                }, true);
+            }
+            document.querySelectorAll('[onsubmit]').forEach(function (el) { upgrade(el, 'onsubmit'); });
+            document.querySelectorAll('[onclick]').forEach(function (el) {
+                if ((el.getAttribute('onclick') || '').indexOf('confirm(') >= 0) upgrade(el, 'onclick');
+            });
+        });
+    })();
+    </script>
 
     <script>
         $.ajaxSetup({

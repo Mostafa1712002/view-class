@@ -30,6 +30,9 @@ return [
     'no_data' => 'No data',
     'no_results' => 'No results',
     'confirm_delete' => 'Are you sure you want to delete?',
+    'confirm_yes' => 'Yes',
+    'confirm_no' => 'Cancel',
+    'confirm_sure' => 'Are you sure?',
 
     'id' => 'ID',
     'name' => 'Name',
