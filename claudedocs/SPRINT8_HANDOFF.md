@@ -3,6 +3,24 @@
 **Last worked:** 2026-06-08 · **Branch:** `main` · **HEAD:** `cde877c`
 **Spec:** `.kiro/specs/trello-sprint8-evaluation-engine/{requirements,design,tasks}.md`
 
+## ✅✅ UPDATE 2026-06-09 — full engine built (P0–P7), HEAD `fda77d3`
+All 20 tasks + cross-cutting are **built, locally verified, committed to `main`** (still NOT deployed — review gate stands). 57 engine routes, 14 migrations tracked, scheduler registered, boots clean.
+- P4 approval cycle + job-performance results — `a750e85`
+- P5 class visits (schedule/dup-guard/secret/execute→evaluation) — `a750e85`
+- P6 supervisor/detailed/GM reports + CSV + multi-evaluator averaging — `a750e85` (GM verified: avg 80.84 / high 86.67 / low 78.89)
+- P7 audit-log screen + close-date scheduler (`evaluation:notify-close-date`, daily 07:00) + notifications (11/13 wired) — `fda77d3`
+
+### ⚠️ Remaining gaps (NOT done — pick up here)
+1. **Permissions / role-access (the one real blocker).** All evaluator/subject/approval pages live in the `super-admin,school-admin` admin route group → teachers (subjects) and supervisors (approvers/evaluators) cannot reach `my-evaluations`, execution, approvals, class-visits. NOT rushed — it needs a deliberate split: authoring routes (admin only) vs evaluator routes (broaden to teacher/supervisor) vs subject result view. Decide role slugs first (`roles` table — is there a مشرف/supervisor slug?) then split the route groups + seed `school_role_permissions` + add Policies. Do this before live.
+2. **2 notification triggers:** `teacher-commented` (needs a subject-comment write endpoint — `EvaluationComment` model exists but no controller/route) and `teacher-visit-reminder` (needs its own scheduled command).
+3. **Acceptance walk:** verify the 27 شروط قبول checks on live + map the 5 QA test cards.
+4. **Minor nits (non-blocking):** double-prefix in 3 audit actions (`evaluation.evaluation.submit/draft/start` — strip the literal prefix in Submit/SaveDraft/Start actions); item toggle/reorder skip the 100%-weight re-check (publish gate backstops); `job_perf_settings` JSON sub-keys (`aggregation/count_on/weight/specific_party/linked_item_id`) are READ by the job-perf view but the form-edit screen doesn't WRITE them yet; visibility flags not filtered in result view.
+
+### Deploy when approved
+`git pull` on `viewclass.newaves-systems.com` → `sudo -u www-data php artisan migrate --force` (applies the 14 eval migrations) → `view:cache`/`config:clear` → `chown -R www-data:www-data storage bootstrap/cache`. Then verify on live. Timezone already Asia/Riyadh. NEVER artisan as root.
+
+---
+
 ## TL;DR
 Building the Sprint 8 evaluation engine (Trello cards: `sprint 8` + Task 1–20 + permissions/notifications/audit/acceptance). Foundation + authoring + targeting/publish + execution/scoring are **done and committed to `main`**, verified locally. **NOTHING is deployed to live** — there is a deliberate review gate; the user must sign off before the engine ships. Remaining: approval, job-perf linkage, class visits, reports, and cross-cutting (permissions/notifications/audit/acceptance).
 

@@ -80,7 +80,7 @@ Build in 7 reviewable phases. Each phase: implement locally → verify locally (
 | 5. Class visits | Tasks 16–18 | 0 | Not started |
 | 6. Reports | Tasks 19–20 | 0 | Not started |
 | 7. Hardening | perms/notif/audit/QA | 0 | Not started |
-| **Total** | **20 + 4 cross-cutting + 5 QA** | **0** | **0%** |
+| **Total** | **20 tasks + cross-cutting** | **20** | **~95% (perms/role-access + acceptance pending)** |
 
 ## Separate quick-fix track (NOT this engine)
 Top of `sprint prompt` — independent bug cards to drain via the normal loop:
