@@ -14,12 +14,13 @@ Additive-first: Phases A–D do not touch the live scoring/execution path; Phase
 **Outcome:** ✅ authors can fully configure items per #201; existing forms unaffected. Verified end-to-end locally (item saved with all new fields); live migration ran, columns confirmed.
 **Note:** responsible_role is free-text for now; a proper role-catalog dropdown is deferred to Phase E when the shared-eval role list is finalized.
 
-## Phase B — Evidence approval (#204)
-- [ ] Migration: evidence.status (default 'approved'), reviewed_by/at, review_note
-- [ ] Evidence model + approval Action (approve/reject/needs_edit) + permission gate
-- [ ] Execute/approvals UI: evidence status chips + approve/reject buttons
-- [ ] Scoring gate: item with evidence_needs_approval contributes 0 until evidence approved; recompute on approval
-**Outcome:** evidence lifecycle + gating per #204.
+## Phase B — Evidence approval (#204)  ✅ DONE (deployed 2026-06-12, commit 111dddf, → testing)
+- [x] Migration: evidence.status (default 'approved'), source, reviewed_by/at, review_note
+- [x] EvidenceStatus/EvidenceSource enums + model fillable/casts/reviewer()
+- [x] ReviewEvidence action (approve/reject/needs_edit; reject needs reason) + audit + re-score parent (safe states only) + routes/controller (role-gated; granular perms → Phase D)
+- [x] Execute UI: evidence status chips + source + reject reason + approve/reject/request-edit buttons (SweetAlert) + gated-item badge
+- [x] EvidenceGate: centralized post-scoring gate (pure scorers untouched); status default 'approved' → no-op for all existing data; tinker-proven zero→restore
+**Outcome:** ✅ evidence lifecycle + scoring gate per #204. Verified: tinker gate proof + live migration (5 cols) + approvals screen loads (no regression).
 
 ## Phase C — Educational-outcome config (#205)
 - [ ] Settings keys eval.outcome_method + eval.outcome_source (+ scope level) + admin UI
@@ -55,7 +56,7 @@ Additive-first: Phases A–D do not touch the live scoring/execution path; Phase
 | Phase | Card(s) | Status |
 |-------|---------|--------|
 | A. Item config | #201 | ✅ Done → testing |
-| B. Evidence approval | #204 | Not started |
+| B. Evidence approval | #204 | ✅ Done → testing |
 | C. Outcome config | #205 | Not started |
 | D. Permissions+audit | #208/#210, #209 | Not started |
 | E. Shared eval+state | #202, #203 | Not started |
