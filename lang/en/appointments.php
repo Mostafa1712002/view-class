@@ -234,6 +234,7 @@ return [
 
     // Flash messages — booking
     'booking_flash_created'       => 'Appointment request submitted successfully.',
+    'booking_invalid_target' => 'The selected person is not available for the chosen role.',
     'booking_flash_cancelled'     => 'Appointment cancelled.',
     'booking_flash_cancel_denied' => 'This appointment cannot be cancelled.',
     'booking_flash_confirmed'     => 'Appointment confirmed.',

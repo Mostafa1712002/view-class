@@ -234,6 +234,7 @@ return [
 
     // Flash messages — booking
     'booking_flash_created'       => 'تم إرسال طلب الموعد بنجاح.',
+    'booking_invalid_target' => 'الشخص المختار غير متاح ضمن الجهة المحددة.',
     'booking_flash_cancelled'     => 'تم إلغاء الموعد.',
     'booking_flash_cancel_denied' => 'لا يمكن إلغاء هذا الموعد.',
     'booking_flash_confirmed'     => 'تم تأكيد الموعد.',

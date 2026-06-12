@@ -116,13 +116,15 @@ class AppointmentBookingManagementController extends Controller
 
         abort_if(! $booking, 404);
 
-        // School scope check
-        if ($schoolId && $booking->school_id !== $schoolId) {
-            abort(403);
+        // School scope: only a super-admin may act without an active school (global).
+        // Everyone else MUST have an active school that matches the booking's school —
+        // a null scope is never an open door.
+        if (! ($user && $user->isSuperAdmin())) {
+            abort_if($schoolId === null || (int) $booking->school_id !== (int) $schoolId, 403);
         }
 
-        // Ownership check: admin can see all; teacher only their own
-        if (! $isAdmin && $booking->target_user_id !== $user->id) {
+        // Ownership check: admin can see all; teacher only bookings directed to them.
+        if (! $isAdmin && (int) $booking->target_user_id !== (int) $user->id) {
             abort(403);
         }
 
