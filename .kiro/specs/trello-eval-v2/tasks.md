@@ -22,11 +22,13 @@ Additive-first: Phases A–D do not touch the live scoring/execution path; Phase
 - [x] EvidenceGate: centralized post-scoring gate (pure scorers untouched); status default 'approved' → no-op for all existing data; tinker-proven zero→restore
 **Outcome:** ✅ evidence lifecycle + scoring gate per #204. Verified: tinker gate proof + live migration (5 cols) + approvals screen loads (no regression).
 
-## Phase C — Educational-outcome config (#205)
-- [ ] Settings keys eval.outcome_method + eval.outcome_source (+ scope level) + admin UI
-- [ ] EducationalOutcomeResolver (company→complex→school precedence; methods: all-students-abs-zero | attendees-only)
-- [ ] Outcome item calc_method=auto_platform/external + recompute action
-**Outcome:** configurable outcome calc per #205.
+## Phase C — Educational-outcome config (#205)  ✅ DONE (deployed 2026-06-12, commit bb59f8d, → testing)
+- [x] Setting eval.outcome_method (school + global default) + EducationalOutcomeResolver (school→global→default all_registered)
+- [x] evaluation_outcomes table + model (computed fields NOT mass-assignable) + OutcomeMethod/Source/ApprovalStatus enums
+- [x] EducationalOutcomeCalculator (all_registered=absent0/all ; attendees_only=present/present) + Compute & Recompute actions (recompute logs old→new) + audit
+- [x] School-scoped admin UI (index/create/show/settings/recompute, SweetAlert + method-change warning); {outcome} binding IDOR-guarded
+- [ ] DEFERRED: external-platform live import (الأول/أنا والقدرات), attendance auto-pull, file import, bind into live item scoring (→ Phase F)
+**Outcome:** ✅ configurable outcome averaging per #205. Verified live end-to-end (46.67/70.00, recompute+audit); 3 bugs caught & fixed in live testing (NOT-NULL insert ordering, absent-score validation, HTML5 required).
 
 ## Phase D — Permissions + audit (#208/#210, #209)
 - [ ] Permission catalog (constants) for the granular list; map to roles; gate Actions/controllers (fallback to role gates)
@@ -57,7 +59,7 @@ Additive-first: Phases A–D do not touch the live scoring/execution path; Phase
 |-------|---------|--------|
 | A. Item config | #201 | ✅ Done → testing |
 | B. Evidence approval | #204 | ✅ Done → testing |
-| C. Outcome config | #205 | Not started |
+| C. Outcome config | #205 | ✅ Done → testing |
 | D. Permissions+audit | #208/#210, #209 | Not started |
 | E. Shared eval+state | #202, #203 | Not started |
 | F. Screens+Noor | #206, #207, #211/#212 | Not started |
