@@ -64,7 +64,7 @@ Additive-first: Phases A–D do not touch the live scoring/execution path; Phase
 | B. Evidence approval | #204 | ✅ Done → testing |
 | C. Outcome config | #205 | ✅ Done → testing |
 | D. Permissions+audit | #208/#210, #209 | ✅ Done → testing |
-| E. Shared eval+state | #202, #203 | Not started |
+| E. Shared eval+state | #202, #203 | ✅ Done → testing |
 | F. Screens+Noor | #206, #207, #211/#212 | Not started |
 | G. % labelling | #200 | Not started |
 | **Total** | **13 cards** | **0%** |
