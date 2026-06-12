@@ -49,6 +49,8 @@ use App\Modules\Appointments\Repositories\Contracts\AppointmentScheduleRepositor
 use App\Modules\Appointments\Repositories\EloquentAppointmentScheduleRepository;
 use App\Modules\Support\Repositories\Contracts\SupportTicketRepository;
 use App\Modules\Support\Repositories\EloquentSupportTicketRepository;
+use App\Modules\SchoolCalendar\Repositories\Contracts\SchoolEventRepository;
+use App\Modules\SchoolCalendar\Repositories\EloquentSchoolEventRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -77,6 +79,7 @@ class RepositoryServiceProvider extends ServiceProvider
         ClassVisitRepository::class => EloquentClassVisitRepository::class,
         AppointmentScheduleRepository::class => EloquentAppointmentScheduleRepository::class,
         SupportTicketRepository::class        => EloquentSupportTicketRepository::class,
+        SchoolEventRepository::class          => EloquentSchoolEventRepository::class,
     ];
 
     public function register(): void

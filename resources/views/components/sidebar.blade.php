@@ -291,6 +291,18 @@
             <li class="nav-item" data-section="system"><a href="#"><i class="la la-user-plus"></i><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
             @endif
 
+            {{-- === School Calendar card #196 / #174 / #179 / #186 === --}}
+            @php
+                $scCalIsStaff   = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin() || $sidebarUser->isTeacher());
+                $scCalRoute     = $scCalIsStaff
+                    ? (Route::has('manage.school-calendar.index') ? route('manage.school-calendar.index') : '#')
+                    : (Route::has('my.calendar.index') ? route('my.calendar.index') : '#');
+                $scCalActive    = request()->routeIs('manage.school-calendar.*') || request()->routeIs('my.calendar.*');
+            @endphp
+            <li class="nav-item {{ $scCalActive ? 'active' : '' }}" data-section="educational">
+                <a href="{{ $scCalRoute }}"><i class="la la-calendar-alt"></i><span class="menu-title">@lang('shell.nav_calendar')</span></a>
+            </li>
+
             {{-- My education policies — visible to every signed-in user (card #105); distinct
                  label from the admin management page to avoid the duplicate-name confusion (card #122) --}}
             <li class="nav-item {{ request()->routeIs('policies.my.*') ? 'active' : '' }}">

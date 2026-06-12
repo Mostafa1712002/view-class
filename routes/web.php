@@ -925,3 +925,27 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/supp
     Route::post('/{ticket}/assign', [\App\Modules\Support\Controllers\AdminSupportController::class, 'assign'])->name('assign');
     Route::post('/{ticket}/status', [\App\Modules\Support\Controllers\AdminSupportController::class, 'updateStatus'])->name('updateStatus');
 });
+
+// === School Calendar card #196 / #174 / #179 / #186 ===
+// Staff CRUD (super-admin, school-admin, teacher)
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])
+    ->prefix('manage/school-calendar')
+    ->name('manage.school-calendar.')
+    ->group(function () {
+        Route::get('events.json', [\App\Modules\SchoolCalendar\Controllers\ManageSchoolCalendarController::class, 'eventsJson'])->name('events.json');
+        Route::get('/', [\App\Modules\SchoolCalendar\Controllers\ManageSchoolCalendarController::class, 'index'])->name('index');
+        Route::get('create', [\App\Modules\SchoolCalendar\Controllers\ManageSchoolCalendarController::class, 'create'])->name('create');
+        Route::post('/', [\App\Modules\SchoolCalendar\Controllers\ManageSchoolCalendarController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [\App\Modules\SchoolCalendar\Controllers\ManageSchoolCalendarController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Modules\SchoolCalendar\Controllers\ManageSchoolCalendarController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Modules\SchoolCalendar\Controllers\ManageSchoolCalendarController::class, 'destroy'])->name('destroy');
+    });
+
+// All-roles read-only calendar view
+Route::middleware(['auth'])
+    ->prefix('my/calendar')
+    ->name('my.calendar.')
+    ->group(function () {
+        Route::get('events.json', [\App\Modules\SchoolCalendar\Controllers\MyCalendarController::class, 'eventsJson'])->name('events.json');
+        Route::get('/', [\App\Modules\SchoolCalendar\Controllers\MyCalendarController::class, 'index'])->name('index');
+    });

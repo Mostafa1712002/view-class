@@ -1,0 +1,162 @@
+@extends('layouts.app')
+
+@section('title', __('school_calendar.title'))
+@section('body_class', 'theme-light')
+
+@php $isRtl = app()->getLocale() === 'ar'; @endphp
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('app-assets/vendors/css/calendars/fullcalendar.min.css') }}">
+<style>
+    #school-calendar { max-width: 100%; background: #fff; padding: 1rem; border-radius: .5rem; }
+    .fc-event { cursor: pointer; }
+    .fc-event-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 5px; }
+</style>
+@endpush
+
+@section('content')
+<div class="content-header row">
+    <div class="content-header-left col-md-9 col-12 mb-2">
+        <h2 class="content-header-title float-{{ $isRtl ? 'right' : 'left' }} mb-0">
+            @lang('school_calendar.title')
+        </h2>
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('school_calendar.breadcrumb_home')</a></li>
+                <li class="breadcrumb-item active">@lang('school_calendar.title')</li>
+            </ol>
+        </div>
+    </div>
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
+        <a href="{{ route('manage.school-calendar.create') }}" class="btn btn-primary">
+            <i class="la la-plus"></i> @lang('school_calendar.btn_add')
+        </a>
+    </div>
+</div>
+
+@include('components.alerts')
+
+<div class="card">
+    <div class="card-content collapse show">
+        <div class="card-body">
+            <div id="school-calendar"></div>
+        </div>
+    </div>
+</div>
+
+{{-- Upcoming events list --}}
+<div class="card mt-2">
+    <div class="card-header">
+        <h4 class="card-title">@lang('school_calendar.upcoming_events')</h4>
+    </div>
+    <div class="card-content collapse show">
+        <div class="card-body p-0">
+            @if($upcoming->isEmpty())
+                <p class="p-2 text-muted text-center">@lang('school_calendar.no_events')</p>
+            @else
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>@lang('school_calendar.field_title')</th>
+                            <th>@lang('school_calendar.field_type')</th>
+                            <th>@lang('school_calendar.field_start_date')</th>
+                            <th>@lang('school_calendar.field_end_date')</th>
+                            <th>@lang('school_calendar.field_audience')</th>
+                            <th>@lang('school_calendar.field_actions')</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($upcoming as $event)
+                        <tr>
+                            <td>
+                                <span class="fc-event-dot" style="background:{{ $event->eventTypeColor() }}"></span>
+                                {{ $event->title }}
+                            </td>
+                            <td><span class="badge badge-secondary">{{ $event->eventTypeLabel() }}</span></td>
+                            <td>{{ $event->start_date->format('Y-m-d') }}</td>
+                            <td>{{ $event->end_date ? $event->end_date->format('Y-m-d') : '—' }}</td>
+                            <td>
+                                @if($event->audience)
+                                    @foreach($event->audience as $aud)
+                                        <span class="badge badge-light">@lang('school_calendar.audience_' . $aud)</span>
+                                    @endforeach
+                                @endif
+                            </td>
+                            <td>
+                                <a href="{{ route('manage.school-calendar.edit', $event->id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="la la-edit"></i>
+                                </a>
+                                <form action="{{ route('manage.school-calendar.destroy', $event->id) }}" method="POST" class="d-inline" id="del-form-{{ $event->id }}">
+                                    @csrf @method('DELETE')
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="{{ $event->id }}" data-title="{{ $event->title }}">
+                                        <i class="la la-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script src="{{ asset('app-assets/vendors/js/extensions/moment.min.js') }}"></script>
+<script src="{{ asset('app-assets/vendors/js/extensions/fullcalendar.min.js') }}"></script>
+@if(app()->getLocale() === 'ar')
+@endif
+<script>
+$(document).ready(function () {
+    var isRtl = {{ $isRtl ? 'true' : 'false' }};
+
+    $('#school-calendar').fullCalendar({
+        header: {
+            left:   isRtl ? 'next,prev today' : 'prev,next today',
+            center: 'title',
+            right:  'month,agendaWeek,agendaDay'
+        },
+        locale:   isRtl ? 'ar' : 'en',
+        isRTL:    isRtl,
+        editable: false,
+        eventLimit: true,
+        events: {
+            url: '{{ route('manage.school-calendar.events.json') }}',
+            error: function () {
+                console.error('Failed to load calendar events');
+            }
+        },
+        eventRender: function (event, element) {
+            if (event.extendedProps && event.extendedProps.location) {
+                element.find('.fc-title').after(
+                    $('<div class="fc-location" style="font-size:.75em;opacity:.8"></div>')
+                        .text(event.extendedProps.location)
+                );
+            }
+        },
+        eventClick: function (event) {
+            if (event.extendedProps && event.extendedProps.edit_url) {
+                window.location.href = event.extendedProps.edit_url;
+            }
+        }
+    });
+
+    // Delete confirmation
+    $(document).on('click', '.btn-delete', function () {
+        var id    = $(this).data('id');
+        var title = $(this).data('title');
+        var msg   = '@lang('school_calendar.confirm_delete')'.replace(':title', title);
+
+        window.vcConfirm({ title: msg }).then(function (r) {
+            if (r.isConfirmed) {
+                document.getElementById('del-form-' + id).submit();
+            }
+        });
+    });
+});
+</script>
+@endpush
