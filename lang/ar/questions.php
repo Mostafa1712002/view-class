@@ -52,6 +52,8 @@ return [
         'created_at' => 'تاريخ الإضافة',
         'standard' => 'يحتوي على معيار',
         'actions' => 'التحكم',
+        'code' => 'الكود',
+        'content_type' => 'نوع المحتوى',
     ],
 
     'filters' => [
@@ -63,6 +65,17 @@ return [
         'lesson' => 'الدرس',
         'status' => 'الحالة',
         'all' => 'الكل',
+        'code' => 'كود السؤال',
+        'content_type' => 'نوع المحتوى',
+        'source' => 'المصدر',
+        'has_image' => 'به صورة',
+        'full_image_only' => 'صورة كاملة فقط',
+    ],
+
+    'content_type' => [
+        'text'  => 'نصي',
+        'image' => 'صورة',
+        'mixed' => 'مختلط',
     ],
 
     'form' => [
@@ -131,7 +144,11 @@ return [
         'no_attachment' => 'لا يوجد مرفق',
         'open_attachment' => 'فتح المرفق',
         'close' => 'إغلاق',
+        'code' => 'كود السؤال',
     ],
+
+    'has_image' => 'له صورة',
+    'no_image' => 'لا توجد صورة',
 
     'flash' => [
         'created' => 'تمت إضافة السؤال',

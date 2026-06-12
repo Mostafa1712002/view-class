@@ -30,18 +30,7 @@ class BankQuestionController extends Controller
             ->with(['lesson', 'creator'])
             ->latest();
 
-        if ($type = $request->get('type')) {
-            $query->where('type', $type);
-        }
-        if (($difficulty = $request->get('difficulty')) !== null && $difficulty !== '') {
-            $query->where('difficulty', (int) $difficulty);
-        }
-        if ($lessonId = $request->get('lesson_id')) {
-            $query->where('lesson_id', $lessonId);
-        }
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
-        }
+        // Legacy text search (body_ar / body_en)
         if ($q = $request->get('q')) {
             $query->where(function ($w) use ($q) {
                 $w->where('body_ar', 'like', "%{$q}%")
@@ -49,10 +38,59 @@ class BankQuestionController extends Controller
             });
         }
 
+        // Question code search
+        if ($code = $request->get('code')) {
+            $query->where('question_code', 'like', "%{$code}%");
+        }
+
+        // Type filter
+        if ($type = $request->get('type')) {
+            $query->where('type', $type);
+        }
+
+        // Content type filter (text / image / mixed)
+        if ($contentType = $request->get('content_type')) {
+            $query->where('question_content_type', $contentType);
+        }
+
+        // Difficulty filter
+        if (($difficulty = $request->get('difficulty')) !== null && $difficulty !== '') {
+            $query->where('difficulty', (int) $difficulty);
+        }
+
+        // Status filter
+        if ($status = $request->get('status')) {
+            $query->where('status', $status);
+        }
+
+        // Source filter
+        if ($source = $request->get('source')) {
+            $query->where('source', 'like', "%{$source}%");
+        }
+
+        // Lesson filter
+        if ($lessonId = $request->get('lesson_id')) {
+            $query->where('lesson_id', $lessonId);
+        }
+
+        // Image flags
+        if ($request->boolean('has_image')) {
+            $query->whereNotNull('attachment_path');
+        }
+        if ($request->boolean('full_image_only')) {
+            $query->where('is_full_image_question', true);
+        }
+
         $questions = $query->paginate(25)->withQueryString();
         $lessons = $this->lessonsForBank($bank);
 
-        return view('admin.question-banks.questions.index', compact('bank', 'questions', 'lessons'));
+        // Per-type counts for the bank header
+        $typeCounts = $bank->questions()
+            ->selectRaw('type, COUNT(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        return view('admin.question-banks.questions.index', compact('bank', 'questions', 'lessons', 'typeCounts'));
     }
 
     public function create(Request $request, int $bankId): View

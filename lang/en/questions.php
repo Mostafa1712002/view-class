@@ -52,6 +52,8 @@ return [
         'created_at' => 'Created at',
         'standard' => 'Has standard',
         'actions' => 'Actions',
+        'code' => 'Code',
+        'content_type' => 'Content type',
     ],
 
     'filters' => [
@@ -63,6 +65,17 @@ return [
         'lesson' => 'Lesson',
         'status' => 'Status',
         'all' => 'All',
+        'code' => 'Question code',
+        'content_type' => 'Content type',
+        'source' => 'Source',
+        'has_image' => 'Has image',
+        'full_image_only' => 'Full-image only',
+    ],
+
+    'content_type' => [
+        'text'  => 'Text',
+        'image' => 'Image',
+        'mixed' => 'Mixed',
     ],
 
     'form' => [
@@ -131,7 +144,11 @@ return [
         'no_attachment' => 'No attachment',
         'open_attachment' => 'Open attachment',
         'close' => 'Close',
+        'code' => 'Question code',
     ],
+
+    'has_image' => 'Has image',
+    'no_image' => 'No image',
 
     'flash' => [
         'created' => 'Question added',

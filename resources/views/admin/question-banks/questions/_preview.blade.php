@@ -1,7 +1,10 @@
 @php
-    $answer = $question->answer_data ?? [];
+    $answer  = $question->answer_data ?? [];
+    $ctype   = $question->question_content_type ?? 'text';
+    $isFull  = $question->is_full_image_question;
 @endphp
 <div class="preview-card">
+    {{-- Meta row --}}
     <div class="row-meta">
         <div><b>@lang('questions.preview.type'):</b> @lang('questions.types.'.$question->type)</div>
         <div><b>@lang('questions.preview.points'):</b> {{ rtrim(rtrim(number_format((float)$question->points, 2), '0'), '.') }}</div>
@@ -11,28 +14,80 @@
         @if($question->lesson)
             <div><b>@lang('questions.preview.lesson'):</b> {{ $question->lesson->name_ar }}</div>
         @endif
+        @if($question->question_code)
+            <div><b>@lang('questions.preview.code'):</b> <span style="font-family:monospace;background:#f1f5f9;padding:2px 6px;border-radius:4px;">{{ $question->question_code }}</span></div>
+        @endif
     </div>
 
-    <div class="mb-3">
-        <b>@lang('questions.preview.body'):</b>
-        <div class="p-2 mt-1" style="background:#f8fafc; border-radius:8px;">
-            {!! nl2br(e($question->body_ar)) !!}
-        </div>
-    </div>
-
-    @if($question->attachment_path)
+    {{-- Question body / image (content-type aware) --}}
+    @if($isFull)
+        {{-- Full-image: image is the question; show code header + full-width image --}}
+        @if($question->question_code)
+            <div class="mb-2"><b>@lang('questions.columns.code'):</b> {{ $question->question_code }}</div>
+        @endif
+        @if($question->attachment_path)
+            <div class="mb-3 text-center">
+                <img src="{{ asset('storage/' . $question->attachment_path) }}"
+                     loading="lazy"
+                     class="img-fluid"
+                     style="max-height:400px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;"
+                     alt="">
+            </div>
+        @endif
+    @elseif($ctype === 'image')
+        {{-- Image-only --}}
+        @if($question->attachment_path)
+            <div class="mb-3 text-center">
+                <img src="{{ asset('storage/' . $question->attachment_path) }}"
+                     loading="lazy"
+                     class="img-fluid"
+                     style="max-height:400px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;"
+                     alt="">
+            </div>
+        @else
+            <div class="mb-3 text-muted"><i class="la la-image"></i> @lang('questions.preview.no_attachment')</div>
+        @endif
+    @elseif($ctype === 'mixed')
+        {{-- Mixed: text body + image below --}}
         <div class="mb-3">
-            <b>@lang('questions.preview.attachment'):</b>
-            <a href="{{ asset('storage/'.$question->attachment_path) }}" target="_blank" class="btn btn-sm btn-outline-info ms-2">
-                <i class="la la-paperclip"></i> @lang('questions.preview.open_attachment')
-            </a>
+            <b>@lang('questions.preview.body'):</b>
+            <div class="p-2 mt-1" style="background:#f8fafc; border-radius:8px;">
+                {!! nl2br(e($question->body_ar)) !!}
+            </div>
         </div>
+        @if($question->attachment_path)
+            <div class="mb-3 text-center">
+                <img src="{{ asset('storage/' . $question->attachment_path) }}"
+                     loading="lazy"
+                     class="img-fluid"
+                     style="max-height:350px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;"
+                     alt="">
+            </div>
+        @endif
+    @else
+        {{-- Text --}}
+        <div class="mb-3">
+            <b>@lang('questions.preview.body'):</b>
+            <div class="p-2 mt-1" style="background:#f8fafc; border-radius:8px;">
+                {!! nl2br(e($question->body_ar)) !!}
+            </div>
+        </div>
+        {{-- Still show attachment link if one was attached (legacy data) --}}
+        @if($question->attachment_path)
+            <div class="mb-3">
+                <b>@lang('questions.preview.attachment'):</b>
+                <a href="{{ asset('storage/'.$question->attachment_path) }}" target="_blank" class="btn btn-sm btn-outline-info ms-2">
+                    <i class="la la-paperclip"></i> @lang('questions.preview.open_attachment')
+                </a>
+            </div>
+        @endif
     @endif
 
+    {{-- Answer section --}}
     @switch($question->type)
         @case('mcq')
             @php
-                $opts = $answer['options'] ?? [];
+                $opts    = $answer['options'] ?? [];
                 $correct = $answer['correct'] ?? null;
             @endphp
             <div class="mb-2"><b>@lang('questions.preview.answers'):</b></div>
