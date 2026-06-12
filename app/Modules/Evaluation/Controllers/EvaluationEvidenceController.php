@@ -5,6 +5,7 @@ namespace App\Modules\Evaluation\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Evaluation;
 use App\Models\EvaluationEvidence;
+use App\Modules\Evaluation\Actions\ReviewEvidence;
 use App\Modules\Evaluation\Actions\UploadEvidence;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,11 +14,15 @@ use Illuminate\Validation\ValidationException;
 /**
  * Task 12 — attach / remove evidence (files or links) bound to a specific
  * item or indicator of an evaluation, from the execution screen.
+ *
+ * Phase B (#204) — adds approve / reject / request-edit review endpoints.
  */
 class EvaluationEvidenceController extends Controller
 {
-    public function __construct(private readonly UploadEvidence $evidence)
-    {
+    public function __construct(
+        private readonly UploadEvidence $evidence,
+        private readonly ReviewEvidence $review,
+    ) {
     }
 
     public function store(Request $request, int $evaluation): RedirectResponse
@@ -28,7 +33,8 @@ class EvaluationEvidenceController extends Controller
         }
 
         $data = $request->validate([
-            'type'               => ['required', 'in:file,link'],
+            // Phase B: extended accepted types (backward-compatible — old file|link still valid)
+            'type'               => ['required', 'in:file,image,pdf,link,document,system,auto_platform'],
             'item_id'            => ['nullable', 'integer'],
             'indicator_id'       => ['nullable', 'integer'],
             'url'                => ['nullable', 'url', 'max:2048'],
@@ -85,6 +91,58 @@ class EvaluationEvidenceController extends Controller
 
         return redirect()->route('admin.evaluations.execute.show', $eval->id)
             ->with('status', __('evaluation.evidence.flash.removed'));
+    }
+
+    // -----------------------------------------------------------------------
+    // Phase B (#204) — evidence review endpoints
+    // TODO Phase D: granular evidence permissions (upload/approve/reject/delete evidence)
+    // -----------------------------------------------------------------------
+
+    /** Approve a specific evidence record and re-score the parent evaluation. */
+    public function approve(Request $request, EvaluationEvidence $evidence): RedirectResponse
+    {
+        return $this->runReview($evidence, 'approved', null);
+    }
+
+    /** Reject a specific evidence record (requires a reason note). */
+    public function reject(Request $request, EvaluationEvidence $evidence): RedirectResponse
+    {
+        $data = $request->validate([
+            'note' => ['required', 'string', 'max:1000'],
+        ]);
+
+        return $this->runReview($evidence, 'rejected', $data['note']);
+    }
+
+    /** Flag evidence as needing edits from the uploader. */
+    public function requestEdit(Request $request, EvaluationEvidence $evidence): RedirectResponse
+    {
+        $data = $request->validate([
+            'note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        return $this->runReview($evidence, 'needs_edit', $data['note'] ?? null);
+    }
+
+    private function runReview(EvaluationEvidence $evidence, string $decision, ?string $note): RedirectResponse
+    {
+        try {
+            $this->review->execute($evidence, $decision, $note, auth()->user());
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        $flashKey = match ($decision) {
+            'approved'   => __('evaluation.evidence_approve_flash'),
+            'rejected'   => __('evaluation.evidence_reject_flash'),
+            'needs_edit' => __('evaluation.evidence_request_edit_flash'),
+            default      => __('evaluation.evidence.flash.added'),
+        };
+
+        $evalId = $evidence->evaluation_id;
+
+        return redirect()->route('admin.evaluations.execute.show', $evalId)
+            ->with('status', $flashKey);
     }
 
     private function resolveMine(int $id): Evaluation|RedirectResponse

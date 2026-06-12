@@ -478,4 +478,30 @@ return [
             'delete_others'         => 'You cannot delete evidence uploaded by someone else.',
         ],
     ],
+
+    // Phase B (#204) — evidence approval statuses & review actions
+    'evidence_status_uploaded'        => 'Uploaded',
+    'evidence_status_pending_approval'=> 'Pending approval',
+    'evidence_status_approved'        => 'Approved',
+    'evidence_status_rejected'        => 'Rejected',
+    'evidence_status_needs_edit'      => 'Needs edit',
+
+    'evidence_source_manual'          => 'Manual',
+    'evidence_source_system'          => 'System',
+    'evidence_source_auto_platform'   => 'Auto-platform',
+
+    'evidence_approve'                => 'Approve',
+    'evidence_reject'                 => 'Reject',
+    'evidence_request_edit'           => 'Request edit',
+    'evidence_reject_reason'          => 'Rejection reason',
+    'evidence_request_edit_note'      => 'Note (optional)',
+    'evidence_reject_reason_required' => 'A rejection reason is required.',
+    'evidence_awaiting_approval'      => 'Awaiting evidence approval',
+    'evidence_gated_message'          => 'Score held — evidence must be approved before it counts.',
+    'evidence_review_invalid_decision'=> 'Invalid review decision.',
+    'evidence_reviewed_by'            => 'Approved by :name on :date',
+
+    'evidence_approve_flash'          => 'Evidence approved.',
+    'evidence_reject_flash'           => 'Evidence rejected.',
+    'evidence_request_edit_flash'     => 'Edit request sent.',
 ];

@@ -478,4 +478,30 @@ return [
             'delete_others'         => 'لا يمكنك حذف شاهد رفعه مستخدم آخر.',
         ],
     ],
+
+    // Phase B (#204) — evidence approval statuses & review actions
+    'evidence_status_uploaded'        => 'مرفوع',
+    'evidence_status_pending_approval'=> 'بانتظار المراجعة',
+    'evidence_status_approved'        => 'معتمد',
+    'evidence_status_rejected'        => 'مرفوض',
+    'evidence_status_needs_edit'      => 'يحتاج تعديل',
+
+    'evidence_source_manual'          => 'يدوي',
+    'evidence_source_system'          => 'نظام',
+    'evidence_source_auto_platform'   => 'منصة تلقائي',
+
+    'evidence_approve'                => 'اعتماد',
+    'evidence_reject'                 => 'رفض',
+    'evidence_request_edit'           => 'طلب تعديل',
+    'evidence_reject_reason'          => 'سبب الرفض',
+    'evidence_request_edit_note'      => 'ملاحظة (اختياري)',
+    'evidence_reject_reason_required' => 'يجب إدخال سبب الرفض.',
+    'evidence_awaiting_approval'      => 'بانتظار اعتماد الشاهد',
+    'evidence_gated_message'          => 'الدرجة موقوفة — يحتاج الشاهد اعتماداً قبل الاحتساب.',
+    'evidence_review_invalid_decision'=> 'قرار المراجعة غير صحيح.',
+    'evidence_reviewed_by'            => 'اعتمد بواسطة :name بتاريخ :date',
+
+    'evidence_approve_flash'          => 'تم اعتماد الشاهد.',
+    'evidence_reject_flash'           => 'تم رفض الشاهد.',
+    'evidence_request_edit_flash'     => 'تم إرسال طلب التعديل.',
 ];

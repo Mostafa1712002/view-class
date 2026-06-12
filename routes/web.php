@@ -653,6 +653,13 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ad
     // Evidence (Task 12)
     Route::post('evaluations/execute/{evaluation}/evidence', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'store'])->name('evaluations.execute.evidence.store');
     Route::delete('evaluations/execute/{evaluation}/evidence/{evidence}', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'destroy'])->name('evaluations.execute.evidence.destroy');
+    // Phase B (#204) — evidence review (approve / reject / request-edit)
+    // TODO Phase D: replace role-gate below with granular evidence permissions
+    Route::middleware('role:super-admin,school-admin')->group(function () {
+        Route::post('evidence/{evidence}/approve', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'approve'])->name('evidence.approve');
+        Route::post('evidence/{evidence}/reject', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'reject'])->name('evidence.reject');
+        Route::post('evidence/{evidence}/request-edit', [\App\Modules\Evaluation\Controllers\EvaluationEvidenceController::class, 'requestEdit'])->name('evidence.requestEdit');
+    });
     // Subject comment on result (Sprint 8 Item 1)
     Route::post('evaluations/execute/{evaluation}/comment', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'comment'])->name('evaluations.comment');
 });

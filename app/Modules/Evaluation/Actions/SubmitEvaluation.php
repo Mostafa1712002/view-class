@@ -6,6 +6,7 @@ use App\Models\Evaluation;
 use App\Modules\Evaluation\Actions\Concerns\WritesResponses;
 use App\Modules\Evaluation\Enums\EvaluationStatus;
 use App\Modules\Evaluation\Enums\FormType;
+use App\Modules\Evaluation\Scoring\EvidenceGate;
 use App\Modules\Evaluation\Scoring\ScoringStrategyFactory;
 use App\Modules\Evaluation\Services\AuditTrail;
 use App\Modules\Evaluation\Services\EvaluationNotifier;
@@ -62,6 +63,12 @@ class SubmitEvaluation
 
             // 3) Score against the frozen payload.
             $result = (new ScoringStrategyFactory())->for($type)->score($evaluation, $payload);
+
+            // 3b) Phase B (#204) — evidence-approval gate.
+            // Items that require evidence approval but have no approved evidence yet
+            // contribute 0 to the score (flagged gated=true in breakdown). When
+            // evidence is later approved, ReviewEvidence re-scores the evaluation.
+            $result = EvidenceGate::apply($evaluation, $result);
 
             // 4) Decide terminal status (Phase 3: completed; approval cycle is Phase 4).
             $requiresApproval = (bool) $form->setting('require_approval', false);
