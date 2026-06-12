@@ -403,6 +403,20 @@ return [
             'calculated'         => 'النسبة المحتسبة',
             'of_100'             => 'من 100%',
         ],
+        'alerts' => [
+            'item_required'       => 'بند إجباري لم يكتمل',
+            'evidence_missing'    => 'شاهد إلزامي لم يُرفع',
+            'evidence_unapproved' => 'شاهد مرفوع لم يُعتمد',
+            'needs_review'        => 'بانتظار المراجعة',
+            'locked'              => 'بند مقفل',
+        ],
+        'item_status' => [
+            'draft'          => 'مسودة',
+            'pending_review' => 'بانتظار المراجعة',
+            'approved'       => 'معتمد',
+            'completed'      => 'مكتمل',
+            'rejected'       => 'مرفوض',
+        ],
         'summary' => [
             'title'              => 'ملخص النسب',
             'total_weight'       => 'إجمالي أوزان البنود',

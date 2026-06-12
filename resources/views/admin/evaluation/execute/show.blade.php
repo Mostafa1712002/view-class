@@ -207,17 +207,41 @@
         <form method="POST" action="{{ route('admin.evaluations.execute.submit', $evaluation->id) }}" id="ex-form">
             @csrf
             @foreach ($items as $item)
-                @php $iid = $item['id']; $nodeKey = 'item:'.$iid; @endphp
+                @php
+                    $iid = $item['id']; $nodeKey = 'item:'.$iid;
+                    $meta = ($itemMeta ?? [])[$iid] ?? ['status'=>null,'has_evidence'=>false,'evidence_pending'=>false];
+                    $answered = $type === 'rubric' || $type === 'percentage'
+                        ? array_key_exists($iid, $responses['items'] ?? [])
+                        : collect($item['indicators'] ?? [])->contains(fn($ind) => array_key_exists($ind['id'], $responses['indicators'] ?? []));
+                    $isLocked   = in_array($meta['status'], ['pending_review','approved'], true) || in_array($iid, $lockedItemIds ?? [], true);
+                    $needsReview= $meta['status'] === 'pending_review';
+                    $alerts = [];
+                    if (!empty($item['is_required']) && !$answered) $alerts[] = ['danger', __('evaluation.execute.alerts.item_required')];
+                    if (!empty($item['evidence_required']) && !$meta['has_evidence']) $alerts[] = ['warning', __('evaluation.execute.alerts.evidence_missing')];
+                    if ($meta['has_evidence'] && $meta['evidence_pending'] && !empty($item['evidence_needs_approval'])) $alerts[] = ['info', __('evaluation.execute.alerts.evidence_unapproved')];
+                    if ($needsReview) $alerts[] = ['secondary', __('evaluation.execute.alerts.needs_review')];
+                    if ($isLocked) $alerts[] = ['dark', __('evaluation.execute.alerts.locked')];
+                @endphp
                 <div class="ex-item">
                     <div class="ex-item-head d-flex justify-content-between align-items-center">
                         <span class="fw-bold">{{ $item['name'] }}
                             @if (!empty($item['is_required']))<span class="badge bg-danger">@lang('evaluation.execute.required_badge')</span>@endif
                             @if (!empty($item['evidence_required']))<span class="badge bg-warning text-dark">@lang('evaluation.execute.evidence_badge')</span>@endif
+                            @if (!empty($item['responsible_role']))<span class="badge bg-light text-dark border">{{ $item['responsible_role'] }}</span>@endif
+                            @if (!empty($item['calc_method']))<span class="badge bg-light text-dark border">@lang('evaluation_items.calc_methods.'.$item['calc_method'])</span>@endif
+                            @if ($meta['status'])<span class="badge bg-info">@lang('evaluation.execute.item_status.'.$meta['status'], [], $meta['status'])</span>@endif
                         </span>
                         @if ($type !== 'checklist')<span class="badge bg-secondary">{{ $item['weight'] }}%</span>@endif
                     </div>
                     <div class="ex-item-body">
                         @if (!empty($item['description']))<p class="text-muted small">{{ $item['description'] }}</p>@endif
+                        @if (!empty($alerts))
+                            <div class="mb-2">
+                                @foreach ($alerts as [$lvl, $msg])
+                                    <span class="badge bg-{{ $lvl }}{{ $lvl === 'warning' ? ' text-dark' : '' }} me-1"><i class="la la-exclamation-circle"></i> {{ $msg }}</span>
+                                @endforeach
+                            </div>
+                        @endif
 
                         @if ($type === 'rubric')
                             @php $chosen = $responses['items'][$iid] ?? null; @endphp

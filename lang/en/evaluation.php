@@ -403,6 +403,20 @@ return [
             'calculated'         => 'Calculated',
             'of_100'             => 'of 100%',
         ],
+        'alerts' => [
+            'item_required'       => 'Required item not completed',
+            'evidence_missing'    => 'Mandatory evidence not uploaded',
+            'evidence_unapproved' => 'Evidence uploaded, not approved',
+            'needs_review'        => 'Awaiting review',
+            'locked'              => 'Item locked',
+        ],
+        'item_status' => [
+            'draft'          => 'Draft',
+            'pending_review' => 'Awaiting review',
+            'approved'       => 'Approved',
+            'completed'      => 'Completed',
+            'rejected'       => 'Rejected',
+        ],
         'summary' => [
             'title'              => 'Percentage summary',
             'total_weight'       => 'Total item weights',

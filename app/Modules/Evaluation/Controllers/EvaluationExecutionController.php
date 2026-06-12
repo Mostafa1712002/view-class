@@ -187,6 +187,7 @@ class EvaluationExecutionController extends Controller
             'isSubjectViewer' => $isSubjectViewer,
             'canComment'      => $canComment,
             'summary'         => $this->buildSummary($eval, $payload),
+            'itemMeta'        => $this->buildItemMeta($eval),
         ]);
     }
 
@@ -261,6 +262,7 @@ class EvaluationExecutionController extends Controller
             // Summary panel reflects ALL items/parties (the unfiltered snapshot),
             // so the General-Manager view of a shared evaluation shows the full picture.
             'summary'          => $this->buildSummary($eval, $payload),
+            'itemMeta'         => $this->buildItemMeta($eval),
         ]);
     }
 
@@ -491,6 +493,43 @@ class EvaluationExecutionController extends Controller
             'pending_review'     => $pendingReview,
             'weights_balanced'   => abs($totalWeight - 100.0) <= 0.01,
         ];
+    }
+
+    /**
+     * Per-item runtime state for the #206 §2 alerts/badges: the item's review
+     * status, whether any evidence is attached, and whether attached evidence is
+     * still awaiting approval.
+     *
+     * @return array<int,array{status:?string,has_evidence:bool,evidence_pending:bool}>
+     */
+    private function buildItemMeta(Evaluation $eval): array
+    {
+        $meta = [];
+
+        foreach ($eval->responses as $r) {
+            if ($r->item_id === null) {
+                continue;
+            }
+            $iid = (int) $r->item_id;
+            $meta[$iid] ??= ['status' => null, 'has_evidence' => false, 'evidence_pending' => false];
+            if ($r->item_status !== null) {
+                $meta[$iid]['status'] = $r->item_status;
+            }
+        }
+
+        foreach ($eval->evidences as $e) {
+            if ($e->item_id === null) {
+                continue;
+            }
+            $iid = (int) $e->item_id;
+            $meta[$iid] ??= ['status' => null, 'has_evidence' => false, 'evidence_pending' => false];
+            $meta[$iid]['has_evidence'] = true;
+            if (($e->status ?? 'pending') !== 'approved') {
+                $meta[$iid]['evidence_pending'] = true;
+            }
+        }
+
+        return $meta;
     }
 
     /** Evidence grouped by node: 'item:ID' / 'ind:ID' => [evidence...]. */
