@@ -31,6 +31,8 @@ class SaveEvaluationForm
                 'internal_notes'           => $data['internal_notes'] ?? null,
                 'type'                     => $type,
                 'usage_domain'             => $data['usage_domain'],
+                // Phase E (#202): shared_mode — one evaluation per subject, items distributed by responsible_role
+                'shared_mode'              => (bool) ($data['shared_mode'] ?? false),
                 'start_date'               => $data['start_date'] ?? null,
                 'close_date'               => $data['close_date'] ?? null,
                 'levels_count'             => $this->levelCountFor($type, $data),

@@ -16,7 +16,7 @@ class EvaluationForm extends Model
 
     protected $fillable = [
         'school_id', 'created_by', 'title', 'description', 'internal_notes',
-        'type', 'usage_domain', 'status', 'levels_count', 'start_date', 'close_date',
+        'type', 'usage_domain', 'status', 'shared_mode', 'levels_count', 'start_date', 'close_date',
         'is_class_visit_only', 'links_to_job_performance', 'settings', 'job_perf_settings',
         'published_at', 'closed_at', 'archived_at',
     ];
@@ -25,6 +25,7 @@ class EvaluationForm extends Model
         'type'                     => FormType::class,
         'usage_domain'             => UsageDomain::class,
         'status'                   => FormStatus::class,
+        'shared_mode'              => 'boolean',
         'levels_count'             => 'integer',
         'start_date'               => 'datetime',
         'close_date'               => 'datetime',

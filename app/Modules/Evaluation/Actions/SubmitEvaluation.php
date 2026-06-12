@@ -3,6 +3,7 @@
 namespace App\Modules\Evaluation\Actions;
 
 use App\Models\Evaluation;
+use App\Models\EvaluationResponse;
 use App\Modules\Evaluation\Actions\Concerns\WritesResponses;
 use App\Modules\Evaluation\Enums\EvaluationStatus;
 use App\Modules\Evaluation\Enums\FormType;
@@ -21,6 +22,11 @@ use Illuminate\Validation\ValidationException;
  * for the form type against the snapshot payload → persist aggregates + breakdown
  * → flip status (completed, or pending_approval if the form requires approval)
  * → notify. After submit the evaluation is locked (re-editable only via reopen).
+ *
+ * Phase E (#202/#203): in shared_mode, "submit" means "submit MY items", setting
+ * their item_status to 'completed' (or 'pending_review' if form requires approval).
+ * The overall evaluation status is derived from the set of all item_statuses.
+ * The legacy path (shared_mode=0) is completely unchanged.
  */
 class SubmitEvaluation
 {
@@ -33,11 +39,12 @@ class SubmitEvaluation
     }
 
     /**
-     * @param array $answers see WritesResponses::syncResponses()
+     * @param array    $answers       see WritesResponses::syncResponses()
+     * @param string[] $userRoleSlugs roles of the current user (shared mode only)
      *
      * @throws ValidationException when locked or completeness/evidence gates fail.
      */
-    public function submit(Evaluation $evaluation, array $answers, ?string $generalNotes): Evaluation
+    public function submit(Evaluation $evaluation, array $answers, ?string $generalNotes, int $userId = 0, array $userRoleSlugs = []): Evaluation
     {
         if ($evaluation->status instanceof EvaluationStatus && $evaluation->status->isLocked()) {
             throw ValidationException::withMessages([
@@ -45,7 +52,15 @@ class SubmitEvaluation
             ]);
         }
 
-        $form     = $evaluation->form;
+        $evaluation->loadMissing('form');
+        $form = $evaluation->form;
+
+        // --- Phase E (#202): Shared mode branch ---
+        if ($form && $form->shared_mode) {
+            return $this->submitShared($evaluation, $answers, $generalNotes, $userId, $userRoleSlugs, $form);
+        }
+
+        // --- Legacy branch (shared_mode=0): untouched ---
         $snapshot = $evaluation->snapshot;
         $payload  = $snapshot->payload ?? [];
         $type     = $form->type ?? FormType::tryFrom((string) ($payload['form']['type'] ?? ''));
@@ -174,6 +189,254 @@ class SubmitEvaluation
         }
 
         return array_values(array_unique($problems));
+    }
+
+    /**
+     * Phase E (#202/#203) — Shared-mode submit.
+     *
+     * Writes the current user's items with item_status='completed' (or 'pending_review'
+     * if the form requires approval). Other users' responses are preserved.
+     * After writing, recomputes the full score and derives the aggregate status.
+     */
+    private function submitShared(
+        Evaluation $evaluation,
+        array $answers,
+        ?string $generalNotes,
+        int $userId,
+        array $userRoleSlugs,
+        \App\Models\EvaluationForm $form
+    ): Evaluation {
+        $evaluation->loadMissing('snapshot');
+        $snapshot = $evaluation->snapshot;
+        $payload  = $snapshot->payload ?? [];
+        $type     = $form->type ?? FormType::tryFrom((string) ($payload['form']['type'] ?? ''));
+
+        return DB::transaction(function () use ($evaluation, $answers, $generalNotes, $userId, $userRoleSlugs, $form, $payload, $type) {
+            // Resolve item IDs this user is responsible for.
+            $responsibleItemIds = $this->responsibleItemIdsFromPayload($payload, $userRoleSlugs);
+
+            // Per-item lock check (#203): items already approved/pending_review are locked.
+            $evaluation->loadMissing('responses');
+            $lockedItems = $evaluation->responses
+                ->whereIn('item_id', $responsibleItemIds)
+                ->whereIn('item_status', ['pending_review', 'approved'])
+                ->pluck('item_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+
+            if (!empty($lockedItems)) {
+                throw ValidationException::withMessages([
+                    'items' => __('evaluation.execute.errors.item_locked'),
+                ]);
+            }
+
+            // Delete only the current user's items so we can re-insert with updated status.
+            if (!empty($responsibleItemIds)) {
+                $evaluation->responses()
+                    ->whereIn('item_id', $responsibleItemIds)
+                    ->delete();
+            }
+
+            // Determine terminal item_status for submitted items.
+            $requiresApproval = (bool) $form->setting('require_approval', false);
+            $itemStatus       = $requiresApproval ? 'pending_review' : 'completed';
+
+            // Write items with terminal status + timestamps.
+            $this->syncSharedSubmitResponses(
+                $evaluation, $payload, $type, $answers, $responsibleItemIds,
+                $userId, $itemStatus
+            );
+
+            // Reload ALL responses for scoring.
+            $evaluation->load(['responses', 'evidences']);
+
+            // Score against full response set (unchanged scorer).
+            $result = (new ScoringStrategyFactory())->for($type)->score($evaluation, $payload);
+            $result = EvidenceGate::apply($evaluation, $result);
+
+            // Derive aggregate evaluation status from item_status set.
+            $aggregateStatus = $this->deriveAggregateStatusFromSet(
+                $evaluation->responses->pluck('item_status')->unique()->values()->all(),
+                $requiresApproval
+            );
+
+            $evaluation->fill([
+                'status'          => $aggregateStatus,
+                'total_score'     => $result->total,
+                'max_score'       => $result->max,
+                'percentage'      => $result->percentage,
+                'grade_label'     => $result->gradeLabel,
+                'score_breakdown' => $result->toArray(),
+                'general_notes'   => $generalNotes,
+            ]);
+            $this->refreshCounters($evaluation);
+            $evaluation->save();
+
+            $this->audit->record(
+                'submit_shared',
+                "تسليم بنود مشتركة — تقييم #{$evaluation->id} — المستخدم #{$userId} — النتيجة {$result->percentage}% ({$result->gradeLabel})",
+                $evaluation,
+                null,
+                $evaluation->toArray()
+            );
+
+            return $evaluation->refresh();
+        });
+    }
+
+    /**
+     * Phase E — Write the current user's responses with the terminal item_status.
+     * Mirrors syncSharedResponses in SaveEvaluationDraft but sets item_status + submitted_at.
+     */
+    private function syncSharedSubmitResponses(
+        Evaluation $evaluation,
+        array $payload,
+        FormType $type,
+        array $answers,
+        array $responsibleItemIds,
+        int $userId,
+        string $itemStatus
+    ): void {
+        if (empty($responsibleItemIds)) {
+            return;
+        }
+
+        $responsibleSet = array_flip($responsibleItemIds);
+        $items          = $this->snapshotItems($payload);
+        $levelIds       = $this->snapshotLevelIds($payload);
+        $itemNotes      = is_array($answers['item_notes'] ?? null) ? $answers['item_notes'] : [];
+
+        $itemRoleMap = [];
+        foreach (($payload['items'] ?? []) as $item) {
+            if (is_array($item) && isset($item['id'])) {
+                $itemRoleMap[(int) $item['id']] = $item['responsible_role'] ?? null;
+            }
+        }
+
+        $rows = [];
+
+        if ($type === FormType::Rubric) {
+            $chosen = is_array($answers['items'] ?? null) ? $answers['items'] : [];
+            foreach ($items as $itemId => $item) {
+                if (!isset($responsibleSet[$itemId])) {
+                    continue;
+                }
+                $levelId = isset($chosen[$itemId]) ? (int) $chosen[$itemId] : null;
+                $note    = $this->snapshotNoteFromAnswers($itemNotes, $itemId);
+                if ($levelId === null && $note === null) {
+                    continue;
+                }
+                $rows[] = [
+                    'item_id'          => $itemId,
+                    'indicator_id'     => null,
+                    'level_id'         => $levelId !== null && in_array($levelId, $levelIds, true) ? $levelId : null,
+                    'note'             => $note,
+                    'filled_by'        => $userId,
+                    'responsible_role' => $itemRoleMap[$itemId] ?? null,
+                    'item_status'      => $itemStatus,
+                    'submitted_at'     => now(),
+                ];
+            }
+        } else {
+            $chosen = is_array($answers['indicators'] ?? null) ? $answers['indicators'] : [];
+            foreach ($items as $itemId => $item) {
+                if (!isset($responsibleSet[$itemId])) {
+                    continue;
+                }
+                foreach ($item['indicators'] as $indicatorId => $indicator) {
+                    if (!array_key_exists($indicatorId, $chosen)) {
+                        continue;
+                    }
+                    $raw = $chosen[$indicatorId];
+                    if ($type === FormType::Checklist) {
+                        $rows[] = [
+                            'item_id'          => $itemId,
+                            'indicator_id'     => $indicatorId,
+                            'level_id'         => null,
+                            'checklist_value'  => (bool) ((int) $raw === 1 || $raw === '1' || $raw === true),
+                            'filled_by'        => $userId,
+                            'responsible_role' => $itemRoleMap[$itemId] ?? null,
+                            'item_status'      => $itemStatus,
+                            'submitted_at'     => now(),
+                        ];
+                    } else {
+                        $levelId = (int) $raw;
+                        if ($levelId <= 0 || !in_array($levelId, $levelIds, true)) {
+                            continue;
+                        }
+                        $rows[] = [
+                            'item_id'          => $itemId,
+                            'indicator_id'     => $indicatorId,
+                            'level_id'         => $levelId,
+                            'filled_by'        => $userId,
+                            'responsible_role' => $itemRoleMap[$itemId] ?? null,
+                            'item_status'      => $itemStatus,
+                            'submitted_at'     => now(),
+                        ];
+                    }
+                }
+            }
+        }
+
+        foreach ($rows as $row) {
+            EvaluationResponse::create(array_merge(['evaluation_id' => $evaluation->id], $row));
+        }
+    }
+
+    /**
+     * Phase E — Derive evaluation-level aggregate status from item_status set.
+     */
+    private function deriveAggregateStatusFromSet(array $statuses, bool $requiresApproval): EvaluationStatus
+    {
+        if (empty($statuses)) {
+            return EvaluationStatus::Draft;
+        }
+
+        if (in_array('pending_review', $statuses, true)) {
+            return EvaluationStatus::PendingApproval;
+        }
+
+        $hasAnyDraft = in_array('draft', $statuses, true);
+
+        if (!$hasAnyDraft && !in_array('rejected', $statuses, true)) {
+            // All items are completed or approved.
+            return EvaluationStatus::Completed;
+        }
+
+        return EvaluationStatus::Draft;
+    }
+
+    /**
+     * Phase E — Item IDs from snapshot assigned to one of the given roles.
+     *
+     * @param  string[] $userRoleSlugs
+     * @return int[]
+     */
+    private function responsibleItemIdsFromPayload(array $payload, array $userRoleSlugs): array
+    {
+        $ids = [];
+        foreach (($payload['items'] ?? []) as $item) {
+            if (!is_array($item) || ($item['status'] ?? 'active') === 'disabled') {
+                continue;
+            }
+            $responsible = $item['responsible_role'] ?? null;
+            if ($responsible !== null && in_array($responsible, $userRoleSlugs, true)) {
+                $ids[] = (int) $item['id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /** @param array<int|string,mixed> $notes */
+    private function snapshotNoteFromAnswers(array $notes, int $itemId): ?string
+    {
+        $val = $notes[$itemId] ?? null;
+        $val = is_string($val) ? trim($val) : null;
+
+        return ($val === null || $val === '') ? null : $val;
     }
 
     /** Approver candidates for the form's school (Phase 3 placeholder until Task 14). */

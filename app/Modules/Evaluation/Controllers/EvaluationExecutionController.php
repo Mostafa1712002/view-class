@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Modules\Evaluation\Actions\SaveEvaluationDraft;
 use App\Modules\Evaluation\Actions\StartEvaluation;
 use App\Modules\Evaluation\Actions\SubmitEvaluation;
+use App\Modules\Evaluation\Permissions\EvaluationPermissions;
 use App\Modules\Evaluation\Repositories\Contracts\EvaluationFormRepository;
 use App\Modules\Evaluation\Repositories\Contracts\EvaluationRepository;
 use App\Modules\Evaluation\Services\AuditTrail;
@@ -144,13 +145,23 @@ class EvaluationExecutionController extends Controller
             return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.form.not_found'));
         }
 
-        $userId    = (int) auth()->id();
+        $userId = (int) auth()->id();
+        $form   = $eval->form;
+
+        // --- Phase E (#202): Shared mode access check ---
+        // In shared mode, any user who is assigned to this form (has a responsible role)
+        // may access the execution screen. Legacy: only the evaluator may.
+        if ($form && $form->shared_mode) {
+            return $this->showShared($eval, $userId, $form);
+        }
+
+        // --- Legacy branch ---
         $isEvaluator = (int) $eval->evaluator_id === $userId;
         // The subject may view their OWN result read-only when the form allows it
         // and the evaluation has reached a viewable state.
         $isSubjectViewer = (int) $eval->subject_id === $userId
             && $eval->subject_type === 'user'
-            && (bool) ($eval->form?->setting('allow_subject_view_results', false))
+            && (bool) ($form?->setting('allow_subject_view_results', false))
             && in_array($eval->status?->value, ['completed', 'approved', 'locked'], true);
 
         if (!$isEvaluator && !$isSubjectViewer) {
@@ -161,14 +172,14 @@ class EvaluationExecutionController extends Controller
         $payload = $eval->snapshot?->payload ?? [];
 
         $canComment = $isSubjectViewer
-            && (bool) ($eval->form?->setting('allow_subject_comment', false))
+            && (bool) ($form?->setting('allow_subject_comment', false))
             && in_array($eval->status?->value, ['completed', 'approved', 'locked'], true);
 
         return view('admin.evaluation.execute.show', [
             'evaluation'      => $eval,
-            'form'            => $eval->form,
+            'form'            => $form,
             'payload'         => $payload,
-            'type'            => $eval->form?->type?->value ?? ($payload['form']['type'] ?? null),
+            'type'            => $form?->type?->value ?? ($payload['form']['type'] ?? null),
             'responses'       => $this->indexResponses($eval),
             'evidences'       => $this->indexEvidences($eval),
             'locked'          => ($eval->status?->isLocked() ?? false) || !$isEvaluator,
@@ -178,6 +189,109 @@ class EvaluationExecutionController extends Controller
         ]);
     }
 
+    /**
+     * Phase E (#202) — Show shared-mode execution screen.
+     *
+     * Determines which snapshot items the current user may fill:
+     *  - view_all_items permission → see all items; items not in user's roles are read-only.
+     *  - otherwise → see only items whose responsible_role ∈ current user's role slugs.
+     */
+    private function showShared(Evaluation $eval, int $userId, EvaluationForm $form): View|RedirectResponse
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
+        }
+
+        // Collect current user's role slugs for filtering.
+        $userRoleSlugs = method_exists($user, 'roles')
+            ? $user->roles->pluck('slug')->all()
+            : [];
+
+        $canViewAll = method_exists($user, 'canEval')
+            ? $user->canEval(EvaluationPermissions::VIEW_ALL_ITEMS)
+            : $user->isSuperAdmin();
+
+        $eval->load(['responses', 'evidences', 'form', 'snapshot', 'subject:id,name', 'comments.user']);
+        $payload = $eval->snapshot?->payload ?? [];
+
+        // Build a filtered payload: items the user can see (and flag which they can edit).
+        [$visiblePayload, $editableItemIds, $readOnlyItemIds] = $this->filterSharedPayload(
+            $payload, $userRoleSlugs, $canViewAll
+        );
+
+        // If user has no editable items and no view_all permission, deny.
+        if (empty($editableItemIds) && !$canViewAll) {
+            return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
+        }
+
+        // Responses already locked if their item_status is pending_review/approved
+        $lockedItemIds = $eval->responses
+            ->whereIn('item_status', ['pending_review', 'approved'])
+            ->pluck('item_id')
+            ->map(fn ($id) => (int) $id)
+            ->flip()
+            ->all();
+
+        return view('admin.evaluation.execute.show', [
+            'evaluation'       => $eval,
+            'form'             => $form,
+            'payload'          => $visiblePayload,
+            'type'             => $form->type?->value ?? ($payload['form']['type'] ?? null),
+            'responses'        => $this->indexResponses($eval),
+            'evidences'        => $this->indexEvidences($eval),
+            'locked'           => $eval->status?->isLocked() ?? false,
+            'editable'         => true,  // item-level gate applied via editableItemIds
+            'isSubjectViewer'  => false,
+            'canComment'       => false,
+            // Phase E extras passed to the view (for progressive enhancement)
+            'sharedMode'       => true,
+            'editableItemIds'  => $editableItemIds,
+            'readOnlyItemIds'  => $readOnlyItemIds,
+            'lockedItemIds'    => array_keys($lockedItemIds),
+            'userRoleSlugs'    => $userRoleSlugs,
+        ]);
+    }
+
+    /**
+     * Phase E — Filter snapshot items by responsible_role for the current user.
+     *
+     * @return array{array, int[], int[]}  [filtered payload, editable item ids, read-only item ids]
+     */
+    private function filterSharedPayload(array $payload, array $userRoleSlugs, bool $canViewAll): array
+    {
+        $editableItemIds = [];
+        $readOnlyItemIds = [];
+        $filteredItems   = [];
+
+        foreach (($payload['items'] ?? []) as $item) {
+            if (!is_array($item) || ($item['status'] ?? 'active') === 'disabled') {
+                continue;
+            }
+
+            $responsible = $item['responsible_role'] ?? null;
+            $itemId      = (int) $item['id'];
+
+            // User can edit this item if responsible_role matches one of their roles.
+            $canEdit = $responsible !== null && in_array($responsible, $userRoleSlugs, true);
+
+            if ($canEdit) {
+                $editableItemIds[] = $itemId;
+                $filteredItems[]   = $item;
+            } elseif ($canViewAll) {
+                // view_all_items: show but read-only
+                $readOnlyItemIds[] = $itemId;
+                $filteredItems[]   = $item;
+            }
+            // else: item not visible to this user at all
+        }
+
+        $filteredPayload          = $payload;
+        $filteredPayload['items'] = $filteredItems;
+
+        return [$filteredPayload, $editableItemIds, $readOnlyItemIds];
+    }
+
     public function draft(Request $request, int $evaluation): RedirectResponse
     {
         $eval = $this->resolveMine($evaluation);
@@ -185,8 +299,12 @@ class EvaluationExecutionController extends Controller
             return $eval;
         }
 
+        // Phase E (#202): pass user context for shared-mode item scoping.
+        $userId        = (int) auth()->id();
+        $userRoleSlugs = $this->currentUserRoleSlugs();
+
         try {
-            $this->drafter->save($eval, $this->answers($request), $request->input('general_notes'));
+            $this->drafter->save($eval, $this->answers($request), $request->input('general_notes'), $userId, $userRoleSlugs);
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }
@@ -202,8 +320,12 @@ class EvaluationExecutionController extends Controller
             return $eval;
         }
 
+        // Phase E (#202): pass user context for shared-mode item scoping.
+        $userId        = (int) auth()->id();
+        $userRoleSlugs = $this->currentUserRoleSlugs();
+
         try {
-            $this->submitter->submit($eval, $this->answers($request), $request->input('general_notes'));
+            $this->submitter->submit($eval, $this->answers($request), $request->input('general_notes'), $userId, $userRoleSlugs);
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }
@@ -260,6 +382,22 @@ class EvaluationExecutionController extends Controller
 
     /* --------------------------------------------------------------- helpers */
 
+    /**
+     * Phase E (#202) — Role slugs for the currently authenticated user.
+     * Used to scope item responsibility in shared-mode save/submit.
+     *
+     * @return string[]
+     */
+    private function currentUserRoleSlugs(): array
+    {
+        $user = auth()->user();
+        if (!$user || !method_exists($user, 'roles')) {
+            return [];
+        }
+
+        return $user->roles->pluck('slug')->all();
+    }
+
     /** Pull the answer arrays out of the request in a shape WritesResponses expects. */
     private function answers(Request $request): array
     {
@@ -304,11 +442,25 @@ class EvaluationExecutionController extends Controller
         return $out;
     }
 
-    /** Resolve an evaluation that belongs to the current evaluator (scope guard). */
+    /** Resolve an evaluation the current user may act on.
+     *
+     * Legacy: must be the evaluator.
+     * Shared (#202): any authenticated user is allowed (item-level gates apply later).
+     */
     private function resolveMine(int $id): Evaluation|RedirectResponse
     {
-        $eval = Evaluation::query()->whereKey($id)->first();
-        if (!$eval || (int) $eval->evaluator_id !== (int) auth()->id()) {
+        $eval = Evaluation::query()->whereKey($id)->with('form')->first();
+        if (!$eval) {
+            return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
+        }
+
+        // Phase E: shared evaluations have no single evaluator — allow any authenticated user through.
+        if ($eval->form && $eval->form->shared_mode) {
+            return $eval;
+        }
+
+        // Legacy: must be the evaluator.
+        if ((int) $eval->evaluator_id !== (int) auth()->id()) {
             return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
         }
 

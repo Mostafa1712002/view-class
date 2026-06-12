@@ -71,6 +71,22 @@
 </div>
 <div id="ev-checklist-note" class="alert alert-info" style="display:none;">@lang('evaluation.form.fields.checklist_note')</div>
 
+{{-- Phase E (#202): Shared mode toggle --}}
+<div class="card p-3 mb-3" style="background:#f0f8ff;border:1px solid #b8d4f0;border-radius:12px;">
+    <h6 class="mb-2" style="color:#1a5276;"><i class="la la-users"></i> @lang('evaluation.form.shared_mode_title', [], 'وضع التقييم المشترك')</h6>
+    <div class="form-check">
+        <input type="hidden" name="shared_mode" value="0">
+        <input type="checkbox" name="shared_mode" value="1" id="shared_mode" class="form-check-input"
+               {{ old('shared_mode', $f?->shared_mode ?? false) ? 'checked' : '' }}>
+        <label class="form-check-label" for="shared_mode">
+            @lang('evaluation.form.toggles.shared_mode', [], 'تقييم مشترك (بند واحد لكل معلم يملأه أكثر من مقيّم)')
+        </label>
+    </div>
+    <small class="text-muted d-block mt-1">
+        @lang('evaluation.form.shared_mode_help', [], 'عند تفعيل هذا الخيار، يتشارك جميع المقيّمين في تقييم واحد لكل معلم؛ كل مقيّم يملأ فقط البنود المسندة لدوره.')
+    </small>
+</div>
+
 {{-- Settings toggles --}}
 <h6 class="mt-2 mb-2" style="font-weight:700;color:var(--gold-500);"><i class="la la-cog"></i> @lang('evaluation.form.settings_title')</h6>
 <div class="row">

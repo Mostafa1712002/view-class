@@ -27,6 +27,8 @@ class EvaluationFormRequest extends FormRequest
             'internal_notes' => ['nullable', 'string'],
             'type'           => ['required', Rule::in($types)],
             'usage_domain'   => ['required', Rule::in($domains)],
+            // Phase E (#202) — shared evaluation mode flag
+            'shared_mode'    => ['nullable', 'boolean'],
             'levels_count'   => ['nullable', 'integer', 'min:2', 'max:10'],
             'level_labels'   => ['nullable', 'array'],
             'level_labels.*' => ['nullable', 'string', 'max:100'],

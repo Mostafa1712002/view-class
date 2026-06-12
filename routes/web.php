@@ -600,6 +600,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('evaluations/approvals/{evaluation}/reject', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'reject'])->name('evaluations.approvals.reject');
     Route::post('evaluations/approvals/{evaluation}/review', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'requestReview'])->name('evaluations.approvals.review');
     Route::post('evaluations/approvals/{evaluation}/reopen', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'reopen'])->name('evaluations.approvals.reopen');
+    // Phase E (#203) — Per-item approve/reject/return (shared_mode evaluations only)
+    Route::post('evaluations/approvals/{evaluation}/items/{response}/approve', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'approveItem'])->name('evaluations.approvals.item.approve');
+    Route::post('evaluations/approvals/{evaluation}/items/{response}/reject', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'rejectItem'])->name('evaluations.approvals.item.reject');
+    Route::post('evaluations/approvals/{evaluation}/items/{response}/return', [\App\Modules\Evaluation\Controllers\EvaluationApprovalController::class, 'returnItem'])->name('evaluations.approvals.item.return');
 
     // Job-performance linkage results (Sprint 8 Task 15 — الربط بتقييم الأداء الوظيفي)
     Route::get('job-performance', [\App\Modules\Evaluation\Controllers\JobPerformanceController::class, 'index'])->name('job-performance.index');

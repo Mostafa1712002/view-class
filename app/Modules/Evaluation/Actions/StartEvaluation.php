@@ -48,6 +48,14 @@ class StartEvaluation
             ]);
         }
 
+        // --- Phase E (#202): Shared mode branch ---
+        // In shared_mode the form has ONE evaluation per subject regardless of which
+        // evaluator is starting. All evaluators for this subject converge on the SAME row.
+        if ($form->shared_mode) {
+            return $this->startShared($form, $snapshot, $subjectId);
+        }
+
+        // --- Legacy branch (shared_mode=0): ONE evaluation per (evaluator, subject) ---
         // Resume an existing in-progress evaluation rather than duplicating.
         $existing = Evaluation::query()
             ->where('form_id', $form->id)
@@ -75,6 +83,48 @@ class StartEvaluation
         $this->audit->record(
             'start',
             "بدء تقييم على النموذج «{$form->title}» (مقيّم #{$evaluatorId} ← مستهدف #{$subjectId})",
+            $evaluation,
+            null,
+            $evaluation->toArray()
+        );
+
+        return $evaluation;
+    }
+
+    /**
+     * Phase E (#202) — Find-or-create the SINGLE shared evaluation for a (form, subject) pair.
+     *
+     * evaluator_id is left NULL on the shared row; individual contributions are tracked
+     * through evaluation_responses.filled_by instead.
+     */
+    private function startShared(EvaluationForm $form, \App\Models\EvaluationFormSnapshot $snapshot, int $subjectId): Evaluation
+    {
+        // The shared evaluation is keyed by (form_id, subject_id) with no evaluator constraint.
+        $existing = Evaluation::query()
+            ->where('form_id', $form->id)
+            ->where('subject_type', 'user')
+            ->where('subject_id', $subjectId)
+            ->whereNull('class_visit_id')
+            ->latest('id')
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $evaluation = Evaluation::create([
+            'form_id'      => $form->id,
+            'snapshot_id'  => $snapshot->id,
+            'evaluator_id' => null,   // shared: no single evaluator owns this row
+            'subject_type' => 'user',
+            'subject_id'   => $subjectId,
+            'school_id'    => $form->school_id,
+            'status'       => EvaluationStatus::Draft,
+        ]);
+
+        $this->audit->record(
+            'start_shared',
+            "بدء تقييم مشترك على النموذج «{$form->title}» (مستهدف #{$subjectId})",
             $evaluation,
             null,
             $evaluation->toArray()
