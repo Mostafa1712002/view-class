@@ -445,6 +445,8 @@ return [
             'not_assigned'         => 'You are not assigned to this form.',
             'not_yours'            => 'This evaluation is not yours.',
             'locked'               => 'This evaluation is locked and cannot be edited.',
+            'item_locked'          => 'Some items are locked (under review or approved) and cannot be edited.',
+            'nothing_to_submit'    => 'You have no items available to submit.',
         ],
     ],
     'evidence' => [

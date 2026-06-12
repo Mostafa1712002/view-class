@@ -119,15 +119,23 @@ class SaveEvaluationDraft
                 ]);
             }
 
-            // Delete ONLY the current user's existing responses (by item_id membership).
-            if (!empty($responsibleItemIds)) {
+            // Items already filled by ANOTHER user must not be deleted or overwritten.
+            $ownedByOthers = $evaluation->responses
+                ->whereIn('item_id', $responsibleItemIds)
+                ->filter(fn ($r) => $r->filled_by !== null && (int) $r->filled_by !== (int) $userId)
+                ->pluck('item_id')->map(fn ($id) => (int) $id)->unique()->values()->all();
+            $writableItemIds = array_values(array_diff($responsibleItemIds, $ownedByOthers));
+
+            // Delete ONLY the current user's own rows among writable items.
+            if (!empty($writableItemIds)) {
                 $evaluation->responses()
-                    ->whereIn('item_id', $responsibleItemIds)
+                    ->where('filled_by', $userId)
+                    ->whereIn('item_id', $writableItemIds)
                     ->delete();
             }
 
             // Re-write the current user's responses with per-item metadata.
-            $this->syncSharedResponses($evaluation, $payload, $type, $answers, $responsibleItemIds, $userId, $userRoleSlugs);
+            $this->syncSharedResponses($evaluation, $payload, $type, $answers, $writableItemIds, $userId, $userRoleSlugs);
 
             // Reload ALL responses (other users' + newly written) for scoring.
             $evaluation->load(['responses', 'evidences']);

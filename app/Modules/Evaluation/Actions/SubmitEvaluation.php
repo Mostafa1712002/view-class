@@ -130,10 +130,14 @@ class SubmitEvaluation
      *
      * @return string[]
      */
-    private function gateProblems(Evaluation $evaluation, array $payload, FormType $type, $form): array
+    private function gateProblems(Evaluation $evaluation, array $payload, FormType $type, $form, ?array $onlyItemIds = null): array
     {
         $problems  = [];
         $items     = $this->snapshotItems($payload);
+        // Shared mode: gate only the subset of items the submitter is responsible for.
+        if ($onlyItemIds !== null) {
+            $items = array_intersect_key($items, array_flip($onlyItemIds));
+        }
         $byItem    = [];   // item_id => response (rubric)
         $byInd     = [];   // indicator_id => response (rating/checklist)
         foreach ($evaluation->responses as $r) {
@@ -232,20 +236,39 @@ class SubmitEvaluation
                 ]);
             }
 
-            // Delete only the current user's items so we can re-insert with updated status.
-            if (!empty($responsibleItemIds)) {
-                $evaluation->responses()
-                    ->whereIn('item_id', $responsibleItemIds)
-                    ->delete();
+            // Items already filled by ANOTHER user must never be deleted or overwritten.
+            $ownedByOthers = $evaluation->responses
+                ->whereIn('item_id', $responsibleItemIds)
+                ->filter(fn ($r) => $r->filled_by !== null && (int) $r->filled_by !== (int) $userId)
+                ->pluck('item_id')->map(fn ($id) => (int) $id)->unique()->values()->all();
+            $writableItemIds = array_values(array_diff($responsibleItemIds, $ownedByOthers));
+
+            if (empty($writableItemIds)) {
+                throw ValidationException::withMessages([
+                    'submit' => __('evaluation.execute.errors.nothing_to_submit'),
+                ]);
             }
+
+            // Completeness + mandatory-evidence gate, scoped to THIS user's items
+            // (so a partial shared submit can't skip required answers/evidence).
+            $problems = $this->gateProblems($evaluation, $payload, $type, $form, $writableItemIds);
+            if ($problems !== []) {
+                throw ValidationException::withMessages(['submit' => $problems]);
+            }
+
+            // Delete only the current user's OWN rows among writable items.
+            $evaluation->responses()
+                ->where('filled_by', $userId)
+                ->whereIn('item_id', $writableItemIds)
+                ->delete();
 
             // Determine terminal item_status for submitted items.
             $requiresApproval = (bool) $form->setting('require_approval', false);
             $itemStatus       = $requiresApproval ? 'pending_review' : 'completed';
 
-            // Write items with terminal status + timestamps.
+            // Write the user's items with terminal status + timestamps.
             $this->syncSharedSubmitResponses(
-                $evaluation, $payload, $type, $answers, $responsibleItemIds,
+                $evaluation, $payload, $type, $answers, $writableItemIds,
                 $userId, $itemStatus
             );
 
