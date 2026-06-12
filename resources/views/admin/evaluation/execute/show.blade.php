@@ -50,6 +50,51 @@
         <div class="col-md-4"><strong>@lang('evaluation.form.fields.status'):</strong> <span class="badge bg-info">{{ $evaluation->status?->label() }}</span></div>
     </div>
 
+    {{-- #206 §4: Percentage summary panel --}}
+    @isset($summary)
+    <div class="card mb-3" style="border:1px solid #f0e6d2;border-radius:12px;background:#fffdf8;">
+        <div class="card-body py-3">
+            <h6 class="mb-3"><i class="la la-chart-pie"></i> @lang('evaluation.execute.summary.title')</h6>
+            <div class="row text-center g-2">
+                <div class="col-6 col-md">
+                    <div class="text-muted small">@lang('evaluation.execute.summary.total_weight')</div>
+                    <div class="h5 mb-0">{{ rtrim(rtrim(number_format($summary['total_weight'],2),'0'),'.') }}%
+                        @if(!$summary['weights_balanced'])<i class="la la-exclamation-triangle text-warning" title="@lang('evaluation.execute.summary.weights_unbalanced')"></i>@endif
+                    </div>
+                </div>
+                <div class="col-6 col-md">
+                    <div class="text-muted small">@lang('evaluation.execute.summary.completed_weight')</div>
+                    <div class="h5 mb-0 text-success">{{ rtrim(rtrim(number_format($summary['completed_weight'],2),'0'),'.') }}%</div>
+                </div>
+                <div class="col-6 col-md">
+                    <div class="text-muted small">@lang('evaluation.execute.summary.incomplete_weight')</div>
+                    <div class="h5 mb-0 text-danger">{{ rtrim(rtrim(number_format($summary['incomplete_weight'],2),'0'),'.') }}%</div>
+                </div>
+                <div class="col-6 col-md">
+                    <div class="text-muted small">@lang('evaluation.execute.summary.current_percentage')</div>
+                    <div class="h5 mb-0" style="color:var(--gold-600,#b8860b);">{{ rtrim(rtrim(number_format($summary['current_percentage'],2),'0'),'.') }}%</div>
+                </div>
+                <div class="col-6 col-md">
+                    <div class="text-muted small">@lang('evaluation.execute.summary.pending_review')</div>
+                    <div class="h5 mb-0">{{ $summary['pending_review'] }}</div>
+                </div>
+            </div>
+            @if(!empty($summary['missing_items']))
+                <hr class="my-2">
+                <div class="small">
+                    <strong class="text-danger">@lang('evaluation.execute.summary.missing_items') ({{ count($summary['missing_items']) }}):</strong>
+                    @foreach($summary['missing_items'] as $mi)
+                        <span class="badge bg-light text-dark border">{{ $mi['name'] }}@if($mi['role']) — {{ $mi['role'] }}@endif</span>
+                    @endforeach
+                    @if(!empty($summary['incomplete_roles']))
+                        <div class="mt-1 text-muted">@lang('evaluation.execute.summary.incomplete_roles'): {{ implode('، ', $summary['incomplete_roles']) }}</div>
+                    @endif
+                </div>
+            @endif
+        </div>
+    </div>
+    @endisset
+
     @if ($evaluation->status?->value !== 'draft')
         {{-- Result / read-only view (submitted, completed, approved, locked, ...) --}}
         <div class="card ex-result-card mb-3">

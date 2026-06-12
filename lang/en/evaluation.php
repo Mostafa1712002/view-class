@@ -403,6 +403,17 @@ return [
             'calculated'         => 'Calculated',
             'of_100'             => 'of 100%',
         ],
+        'summary' => [
+            'title'              => 'Percentage summary',
+            'total_weight'       => 'Total item weights',
+            'completed_weight'   => 'Completed weight',
+            'incomplete_weight'  => 'Incomplete weight',
+            'current_percentage' => 'Current final percentage',
+            'pending_review'     => 'Items awaiting review',
+            'missing_items'      => 'Missing items',
+            'incomplete_roles'   => 'Parties not completed',
+            'weights_unbalanced' => 'Weights do not total 100%',
+        ],
         'preview' => [
             'title'      => 'Preliminary result (estimate)',
             'total'      => 'Total',

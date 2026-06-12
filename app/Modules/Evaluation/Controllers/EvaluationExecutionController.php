@@ -186,6 +186,7 @@ class EvaluationExecutionController extends Controller
             'editable'        => $isEvaluator && in_array($eval->status?->value, ['draft'], true),
             'isSubjectViewer' => $isSubjectViewer,
             'canComment'      => $canComment,
+            'summary'         => $this->buildSummary($eval, $payload),
         ]);
     }
 
@@ -257,6 +258,9 @@ class EvaluationExecutionController extends Controller
             'readOnlyItemIds'  => $readOnlyItemIds,
             'lockedItemIds'    => array_keys($lockedItemIds),
             'userRoleSlugs'    => $userRoleSlugs,
+            // Summary panel reflects ALL items/parties (the unfiltered snapshot),
+            // so the General-Manager view of a shared evaluation shows the full picture.
+            'summary'          => $this->buildSummary($eval, $payload),
         ]);
     }
 
@@ -439,6 +443,54 @@ class EvaluationExecutionController extends Controller
         }
 
         return ['items' => $byItem, 'indicators' => $byInd, 'notes' => $notes];
+    }
+
+    /**
+     * Build the percentage summary panel data (#206 §4): total item weights,
+     * how much weight is completed vs still outstanding, the current final
+     * percentage, which items are still missing and which responsible parties
+     * have not finished, and how many items await review.
+     *
+     * @param  array<string,mixed> $payload Unfiltered snapshot payload.
+     * @return array<string,mixed>
+     */
+    private function buildSummary(Evaluation $eval, array $payload): array
+    {
+        $items = collect($payload['items'] ?? [])
+            ->filter(fn ($i) => is_array($i) && ($i['status'] ?? 'active') !== 'disabled')
+            ->values();
+
+        $totalWeight = round((float) $items->sum(fn ($i) => (float) ($i['weight'] ?? 0)), 2);
+
+        // An item is "answered" if it has at least one response row carrying a value.
+        $answeredItemIds = $eval->responses
+            ->filter(fn ($r) => $r->level_id !== null || $r->score !== null || $r->checklist_value !== null)
+            ->pluck('item_id')->filter()->map(fn ($id) => (int) $id)->unique()->all();
+
+        $completedWeight = round((float) $items
+            ->filter(fn ($i) => in_array((int) ($i['id'] ?? 0), $answeredItemIds, true))
+            ->sum(fn ($i) => (float) ($i['weight'] ?? 0)), 2);
+
+        $missing = $items
+            ->filter(fn ($i) => !in_array((int) ($i['id'] ?? 0), $answeredItemIds, true))
+            ->map(fn ($i) => ['name' => $i['name'] ?? '—', 'role' => $i['responsible_role'] ?? null])
+            ->values()->all();
+
+        $incompleteRoles = collect($missing)->pluck('role')->filter()->unique()->values()->all();
+
+        $pendingReview = $eval->responses->where('item_status', 'pending_review')
+            ->pluck('item_id')->filter()->unique()->count();
+
+        return [
+            'total_weight'       => $totalWeight,
+            'completed_weight'   => $completedWeight,
+            'incomplete_weight'  => round($totalWeight - $completedWeight, 2),
+            'current_percentage' => (float) ($eval->percentage ?? 0),
+            'missing_items'      => $missing,
+            'incomplete_roles'   => $incompleteRoles,
+            'pending_review'     => $pendingReview,
+            'weights_balanced'   => abs($totalWeight - 100.0) <= 0.01,
+        ];
     }
 
     /** Evidence grouped by node: 'item:ID' / 'ind:ID' => [evidence...]. */

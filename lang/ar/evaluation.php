@@ -403,6 +403,17 @@ return [
             'calculated'         => 'النسبة المحتسبة',
             'of_100'             => 'من 100%',
         ],
+        'summary' => [
+            'title'              => 'ملخص النسب',
+            'total_weight'       => 'إجمالي أوزان البنود',
+            'completed_weight'   => 'النسب المكتملة',
+            'incomplete_weight'  => 'النسب غير المكتملة',
+            'current_percentage' => 'النسبة النهائية الحالية',
+            'pending_review'     => 'بنود بانتظار المراجعة',
+            'missing_items'      => 'البنود الناقصة',
+            'incomplete_roles'   => 'جهات لم تكمل بنودها',
+            'weights_unbalanced' => 'مجموع الأوزان لا يساوي 100%',
+        ],
         'preview' => [
             'title'      => 'النتيجة المبدئية (تقديرية)',
             'total'      => 'المجموع',
