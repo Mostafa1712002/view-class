@@ -105,6 +105,37 @@
         </div>
     </div>
 
+    {{-- #213: question code + content type + full-image toggle --}}
+    <div class="row g-3 mt-1">
+        <div class="col-md-3 col-6">
+            <label class="form-label">@lang('questions.form.code')</label>
+            <input type="text" name="question_code" maxlength="60"
+                   class="form-control @error('question_code') is-invalid @enderror"
+                   value="{{ old('question_code', $question->question_code ?? '') }}"
+                   placeholder="@lang('questions.form.code_placeholder')">
+            @error('question_code')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <span class="helper">@lang('questions.form.code_help')</span>
+        </div>
+        <div class="col-md-3 col-6">
+            <label class="form-label">@lang('questions.form.content_type')</label>
+            <select name="question_content_type" id="q-content-type" class="form-select">
+                @foreach(['text','image','mixed'] as $ct)
+                    <option value="{{ $ct }}" {{ old('question_content_type', $question->question_content_type ?? 'text') === $ct ? 'selected' : '' }}>
+                        @lang('questions.content_type.'.$ct)
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4 col-12 d-flex align-items-end">
+            <label class="d-flex align-items-center gap-2 mb-2">
+                <input type="hidden" name="is_full_image_question" value="0">
+                <input type="checkbox" name="is_full_image_question" id="q-full-image" value="1"
+                       {{ old('is_full_image_question', $question->is_full_image_question ?? false) ? 'checked' : '' }}>
+                @lang('questions.form.is_full_image')
+            </label>
+        </div>
+    </div>
+
     <div class="mt-3">
         <details>
             <summary>{{ __('questions.form.attachment') }}</summary>
@@ -124,9 +155,11 @@
     </div>
 
     <div class="mt-3">
-        <label class="form-label">@lang('questions.form.body_ar') <span class="text-danger">*</span></label>
-        <textarea name="body_ar" rows="4" class="form-control @error('body_ar') is-invalid @enderror"
-                  required>{{ old('body_ar', $question->body_ar ?? '') }}</textarea>
+        <label class="form-label">@lang('questions.form.body_ar') <span class="text-danger" id="body-ar-req">*</span>
+            <span class="helper">@lang('questions.form.body_ar_help')</span></label>
+        {{-- Not HTML-required: a full-image question has no text head (server validates conditionally). --}}
+        <textarea name="body_ar" rows="4" class="form-control @error('body_ar') is-invalid @enderror">{{ old('body_ar', $question->body_ar ?? '') }}</textarea>
+        @error('body_ar')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         @error('body_ar')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 

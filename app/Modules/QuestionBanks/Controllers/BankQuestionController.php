@@ -11,6 +11,8 @@ use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class BankQuestionController extends Controller
@@ -116,22 +118,32 @@ class BankQuestionController extends Controller
     public function store(Request $request, int $bankId): RedirectResponse
     {
         $bank = $this->resolveBank($bankId);
-        $data = $this->validateQuestion($request);
+        $data = $this->validateQuestion($request, $bank);
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
             $attachmentPath = $request->file('attachment')->store('bank-questions/'.$bank->id, 'public');
         }
 
+        $isFullImage = $request->boolean('is_full_image_question');
+        // A full-image question must actually carry an image.
+        if ($isFullImage && ! $attachmentPath) {
+            throw ValidationException::withMessages(['attachment' => __('questions.errors.image_required')]);
+        }
+
         $bank->questions()->create([
             'lesson_id' => $data['lesson_id'] ?? null,
             'type' => $data['type'],
-            'body_ar' => $data['body_ar'],
+            'question_code' => $data['question_code'] ?? null,
+            'question_content_type' => $this->resolveContentType($data, $attachmentPath, $isFullImage),
+            'is_full_image_question' => $isFullImage,
+            'body_ar' => $data['body_ar'] ?? null,
             'body_en' => $data['body_en'] ?? null,
             'answer_data' => $this->extractAnswerData($data, $request),
             'difficulty' => $data['difficulty'] ?? 1,
             'points' => $data['points'] ?? 1,
             'attachment_path' => $attachmentPath,
+            'source' => 'manual',
             'status' => $data['status'] ?? 'approved',
             'created_by' => auth()->id(),
         ]);
@@ -154,7 +166,7 @@ class BankQuestionController extends Controller
     {
         $bank = $this->resolveBank($bankId);
         $question = $bank->questions()->whereKey($questionId)->firstOrFail();
-        $data = $this->validateQuestion($request);
+        $data = $this->validateQuestion($request, $bank, $question->id);
 
         $attachmentPath = $question->attachment_path;
         if ($request->boolean('remove_attachment') && $attachmentPath) {
@@ -168,10 +180,18 @@ class BankQuestionController extends Controller
             $attachmentPath = $request->file('attachment')->store('bank-questions/'.$bank->id, 'public');
         }
 
+        $isFullImage = $request->boolean('is_full_image_question');
+        if ($isFullImage && ! $attachmentPath) {
+            throw ValidationException::withMessages(['attachment' => __('questions.errors.image_required')]);
+        }
+
         $question->update([
             'lesson_id' => $data['lesson_id'] ?? null,
             'type' => $data['type'],
-            'body_ar' => $data['body_ar'],
+            'question_code' => $data['question_code'] ?? null,
+            'question_content_type' => $this->resolveContentType($data, $attachmentPath, $isFullImage),
+            'is_full_image_question' => $isFullImage,
+            'body_ar' => $data['body_ar'] ?? null,
             'body_en' => $data['body_en'] ?? null,
             'answer_data' => $this->extractAnswerData($data, $request),
             'difficulty' => $data['difficulty'] ?? 1,
@@ -235,11 +255,26 @@ class BankQuestionController extends Controller
         return $bank;
     }
 
-    private function validateQuestion(Request $request): array
+    private function validateQuestion(Request $request, QuestionBank $bank, ?int $ignoreId = null): array
     {
+        // A full-image question carries no text head, so the question code is the
+        // only way to find it — make it mandatory there and optional otherwise.
+        $isFullImage = $request->boolean('is_full_image_question');
+
         return $request->validate([
             'type' => ['required', 'in:'.implode(',', BankQuestion::TYPES)],
-            'body_ar' => ['required', 'string'],
+            'question_code' => [
+                $isFullImage ? 'required' : 'nullable',
+                'string', 'max:60',
+                // Codes must be unique within the same bank (#213).
+                Rule::unique('bank_questions', 'question_code')
+                    ->where(fn ($q) => $q->where('question_bank_id', $bank->id)->whereNull('deleted_at'))
+                    ->ignore($ignoreId),
+            ],
+            'question_content_type' => ['nullable', 'in:text,image,mixed'],
+            'is_full_image_question' => ['nullable', 'boolean'],
+            // Text head is required unless the whole question is an image.
+            'body_ar' => [$isFullImage ? 'nullable' : 'required', 'string'],
             'body_en' => ['nullable', 'string'],
             'difficulty' => ['nullable', 'integer', 'min:1', 'max:3'],
             'points' => ['nullable', 'numeric', 'min:0', 'max:9999'],
@@ -259,7 +294,26 @@ class BankQuestionController extends Controller
             'blanks' => ['nullable', 'array'],
             'blanks.*' => ['nullable', 'string'],
             'short_answer' => ['nullable', 'string'],
+        ], [
+            'question_code.required' => __('questions.errors.code_required_image'),
+            'question_code.unique'   => __('questions.errors.code_duplicate'),
         ]);
+    }
+
+    /**
+     * Resolve the stored content type. An explicit choice wins; otherwise we
+     * infer it: full-image → image, text + an attachment → mixed, else text.
+     */
+    private function resolveContentType(array $data, ?string $attachmentPath, bool $isFullImage): string
+    {
+        $explicit = $data['question_content_type'] ?? null;
+        if (in_array($explicit, ['text', 'image', 'mixed'], true)) {
+            return $explicit;
+        }
+        if ($isFullImage) {
+            return 'image';
+        }
+        return $attachmentPath ? 'mixed' : 'text';
     }
 
     private function extractAnswerData(array $data, Request $request): ?array

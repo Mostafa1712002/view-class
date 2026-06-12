@@ -78,6 +78,12 @@ return [
         'mixed' => 'Mixed',
     ],
 
+    'errors' => [
+        'code_required_image' => 'Please enter a question code so it can be found when an error is reported.',
+        'code_duplicate'      => 'This question code is already used in this bank — please enter a different one.',
+        'image_required'      => 'A full-image question must have an image uploaded.',
+    ],
+
     'form' => [
         'sections' => [
             'info' => 'Question info',
@@ -93,7 +99,13 @@ return [
         'attachment_help' => 'Image / PDF / audio / video — up to 10 MB',
         'remove_attachment' => 'Remove the current attachment',
         'body_ar' => 'Question text (Arabic)',
+        'body_ar_help' => 'Not required if the question is a full image',
         'body_en' => 'Question text (English — optional)',
+        'code' => 'Question code',
+        'code_placeholder' => 'e.g. Q-1024',
+        'code_help' => 'Optional for text questions; required for a full-image question. Unique within the bank.',
+        'content_type' => 'Content type',
+        'is_full_image' => 'Full-image question (no text head)',
 
         'mcq' => [
             'add_option' => 'Add option',
