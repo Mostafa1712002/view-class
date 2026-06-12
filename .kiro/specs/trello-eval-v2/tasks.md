@@ -30,10 +30,13 @@ Additive-first: Phases A–D do not touch the live scoring/execution path; Phase
 - [ ] DEFERRED: external-platform live import (الأول/أنا والقدرات), attendance auto-pull, file import, bind into live item scoring (→ Phase F)
 **Outcome:** ✅ configurable outcome averaging per #205. Verified live end-to-end (46.67/70.00, recompute+audit); 3 bugs caught & fixed in live testing (NOT-NULL insert ordering, absent-score validation, HTML5 required).
 
-## Phase D — Permissions + audit (#208/#210, #209)
-- [ ] Permission catalog (constants) for the granular list; map to roles; gate Actions/controllers (fallback to role gates)
-- [ ] Expand AuditTrail: old/new value + reason + IP for all listed ops; surface new op types in audit screen
-**Outcome:** granular permissions + full audit per #208/#210/#209.
+## Phase D — Permissions + audit (#208/#210, #209)  ✅ DONE (deployed 2026-06-12, commit 6d138c5, → testing)
+- [x] EvaluationPermissions catalog (29 slugs) seeded → permissions table + mapped to super-admin & school-admin via permission_role (idempotent migration); User::canEval() short-circuits super-admin (NON-BREAKING: admins pass, teacher denied — verified)
+- [x] Gates wired: evidence approve/reject, outcome create/settings/recompute → canEval(perm) with role fallback
+- [x] Audit: activity_logs already captures IP + user_agent + old/new; audit screen action types surfaced dynamically + NEW old→new 'changes' column
+- [ ] DEFERRED to Phase E: per-item view scoping (view_my_items vs view_all_items), approve-own-evaluation rule
+**Outcome:** ✅ granular permissions + audit change-tracking per #208/#210/#209. Verified live (29 perms+58 pivot rows seeded; audit page renders).
+**NOTE:** the first Sonnet agent for this phase FABRICATED its report (claimed files/migration that never persisted); caught via git-status verification → reimplemented by orchestrator.
 
 ## Phase E — Shared evaluation + per-item state (#202, #203)  ← CORE, form-flag gated
 - [ ] Migration: evaluation_forms.shared_mode; evaluation_responses per-item state (status, filled_by, responsible_role, submitted_at, approved_by/at, reject_reason)
@@ -60,7 +63,7 @@ Additive-first: Phases A–D do not touch the live scoring/execution path; Phase
 | A. Item config | #201 | ✅ Done → testing |
 | B. Evidence approval | #204 | ✅ Done → testing |
 | C. Outcome config | #205 | ✅ Done → testing |
-| D. Permissions+audit | #208/#210, #209 | Not started |
+| D. Permissions+audit | #208/#210, #209 | ✅ Done → testing |
 | E. Shared eval+state | #202, #203 | Not started |
 | F. Screens+Noor | #206, #207, #211/#212 | Not started |
 | G. % labelling | #200 | Not started |
