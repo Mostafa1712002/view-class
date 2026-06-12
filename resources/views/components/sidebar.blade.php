@@ -76,6 +76,13 @@
 
             <li class="nav-item" data-section="educational"><a href="#"><i class="la la-compass"></i><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
 
+            {{-- === Special Education module === --}}
+            <li class="nav-item {{ request()->routeIs('manage.special-education.*') ? 'active' : '' }}" data-section="educational">
+                <a href="{{ Route::has('manage.special-education.index') ? route('manage.special-education.index') : '#' }}">
+                    <i class="la la-hand-holding-heart"></i><span class="menu-title">@lang('special_education.title')</span>
+                </a>
+            </li>
+
             <li class="nav-item has-sub {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" data-section="educational">
                 <a href="#"><i class="la la-chart-bar"></i><span class="menu-title">@lang('shell.nav_reports')</span></a>
                 <ul class="menu-content">

@@ -955,3 +955,6 @@ require __DIR__.'/../app/Modules/Discussion/Routes/web.php';
 
 // === Virtual Classrooms module ===
 require __DIR__.'/../app/Modules/VirtualClasses/Routes/web.php';
+
+// === Special Education module ===
+require __DIR__.'/../app/Modules/SpecialEducation/Routes/web.php';

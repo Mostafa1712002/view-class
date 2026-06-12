@@ -55,6 +55,8 @@ use App\Modules\Discussion\Repositories\Contracts\DiscussionRepository;
 use App\Modules\Discussion\Repositories\DiscussionEloquentRepository;
 use App\Modules\VirtualClasses\Repositories\Contracts\VirtualClassRepositoryInterface;
 use App\Modules\VirtualClasses\Repositories\VirtualClassRepository;
+use App\Modules\SpecialEducation\Repositories\Contracts\SpecialEducationRepository;
+use App\Modules\SpecialEducation\Repositories\EloquentSpecialEducationRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -86,6 +88,7 @@ class RepositoryServiceProvider extends ServiceProvider
         SchoolEventRepository::class          => EloquentSchoolEventRepository::class,
         DiscussionRepository::class              => DiscussionEloquentRepository::class,
         VirtualClassRepositoryInterface::class   => VirtualClassRepository::class,
+        SpecialEducationRepository::class        => EloquentSpecialEducationRepository::class,
     ];
 
     public function register(): void
