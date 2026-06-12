@@ -4,6 +4,7 @@ namespace App\Modules\VirtualClasses\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
+use Illuminate\Validation\Rule;
 use App\Modules\VirtualClasses\Repositories\Contracts\VirtualClassRepositoryInterface;
 use App\Services\ZoomService;
 use Illuminate\Http\RedirectResponse;
@@ -49,16 +50,18 @@ class VirtualClassController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $schoolId = $this->activeSchoolId();
+
         $data = $request->validate([
             'title'            => ['required', 'string', 'max:160'],
             'description'      => ['nullable', 'string'],
-            'teacher_id'       => ['required', 'integer', 'exists:users,id'],
+            // teacher_id must belong to the actor's active school (no cross-tenant assignment)
+            'teacher_id'       => ['required', 'integer', Rule::exists('users', 'id')->where(fn ($q) => $schoolId ? $q->where('school_id', $schoolId) : $q)],
             'scheduled_at'     => ['required', 'date', 'after:now'],
             'duration_minutes' => ['required', 'integer', 'min:10', 'max:480'],
             'audience'         => ['nullable', 'array'],
         ]);
 
-        $schoolId = $this->activeSchoolId();
         $zoomData = null;
 
         // Attempt Zoom meeting creation — failure is non-fatal
@@ -118,17 +121,25 @@ class VirtualClassController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $vc = $this->resolveOwned($id);
+        $schoolId = $this->activeSchoolId();
 
         $data = $request->validate([
             'title'            => ['required', 'string', 'max:160'],
             'description'      => ['nullable', 'string'],
-            'teacher_id'       => ['required', 'integer', 'exists:users,id'],
+            'teacher_id'       => ['required', 'integer', Rule::exists('users', 'id')->where(fn ($q) => $schoolId ? $q->where('school_id', $schoolId) : $q)],
             'scheduled_at'     => ['required', 'date'],
             'duration_minutes' => ['required', 'integer', 'min:10', 'max:480'],
             'audience'         => ['nullable', 'array'],
         ]);
 
         $data['audience'] = $data['audience'] ?? ['all'];
+
+        // Only admins may reassign the session to a different teacher; a teacher
+        // editing their own session cannot hand it to someone else.
+        $actor = auth()->user();
+        if (! ($actor->isSuperAdmin() || $actor->isSchoolAdmin())) {
+            $data['teacher_id'] = $vc->teacher_id;
+        }
 
         $this->repo->update($vc->id, $data);
 

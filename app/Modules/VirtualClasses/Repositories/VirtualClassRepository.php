@@ -23,9 +23,28 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
 
     public function forStudent(int $userId, int $schoolId, int $perPage = 20): LengthAwarePaginator
     {
+        // Classes the student is enrolled in (to scope class-targeted sessions).
+        $classIds = \Illuminate\Support\Facades\DB::table('class_student')
+            ->where('student_id', $userId)
+            ->pluck('class_id')
+            ->all();
+
         return VirtualClass::query()
             ->where('school_id', $schoolId)
             ->whereIn('status', ['scheduled', 'live'])
+            // Audience must target students (or everyone).
+            ->where(function ($q) {
+                $q->whereJsonContains('audience', 'all')
+                  ->orWhereJsonContains('audience', 'students');
+            })
+            // Class-targeted sessions only show to students in that class; school-wide
+            // sessions (class_id NULL) show to all.
+            ->where(function ($q) use ($classIds) {
+                $q->whereNull('class_id');
+                if (! empty($classIds)) {
+                    $q->orWhereIn('class_id', $classIds);
+                }
+            })
             ->with(['teacher:id,name,name_ar'])
             ->orderBy('scheduled_at')
             ->paginate($perPage)
