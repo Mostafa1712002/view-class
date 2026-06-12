@@ -450,7 +450,9 @@ return [
             'save_draft' => 'حفظ كمسودة',
             'submit'     => 'تسليم التقييم',
             'add_evidence' => 'إضافة شاهد',
+            'print'      => 'طباعة',
         ],
+        'rejection_reason' => 'سبب الرفض',
         'submit_confirm' => 'تسليم التقييم نهائيًا؟ لن يمكن تعديله بعد التسليم.',
         'flash' => [
             'draft_saved'   => 'تم حفظ المسودة.',

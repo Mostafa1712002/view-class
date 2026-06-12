@@ -450,7 +450,9 @@ return [
             'save_draft'   => 'Save as draft',
             'submit'       => 'Submit evaluation',
             'add_evidence' => 'Add evidence',
+            'print'        => 'Print',
         ],
+        'rejection_reason' => 'Rejection reason',
         'submit_confirm' => 'Submit the evaluation? It cannot be edited afterwards.',
         'flash' => [
             'draft_saved'   => 'Draft saved.',

@@ -35,6 +35,7 @@
         </div>
     </div>
     <div class="content-header-right col-md-4 col-12 text-end">
+        <button type="button" onclick="window.print()" class="btn btn-outline-secondary"><i class="la la-print"></i> @lang('evaluation.execute.actions.print')</button>
         <a href="{{ route('admin.evaluations.subjects', $form->id) }}" class="btn btn-outline-secondary"><i class="la la-arrow-right"></i> @lang('evaluation.execute.back')</a>
     </div>
 </div>
@@ -94,6 +95,14 @@
         </div>
     </div>
     @endisset
+
+    {{-- #206 §3: rejection reason (shown when the evaluation/items were sent back) --}}
+    @if (!empty($evaluation->rejection_reason))
+        <div class="alert alert-danger">
+            <strong><i class="la la-times-circle"></i> @lang('evaluation.execute.rejection_reason'):</strong>
+            {{ $evaluation->rejection_reason }}
+        </div>
+    @endif
 
     @if ($evaluation->status?->value !== 'draft')
         {{-- Result / read-only view (submitted, completed, approved, locked, ...) --}}
