@@ -877,3 +877,32 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('noor/{log}/execute', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'execute'])->name('noor.execute');
     Route::get('noor/{log}/errors', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'errorsReport'])->name('noor.errors');
 });
+
+// === Appointments card #197 (Phase 1) ===
+// Staff schedule management (super-admin, school-admin, teacher)
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])
+    ->prefix('manage/appointment-schedules')
+    ->name('manage.appointment-schedules.')
+    ->group(function () {
+        Route::get('/', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'index'])->name('index');
+        Route::get('create', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'create'])->name('create');
+        Route::post('/', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'store'])->name('store');
+        Route::get('{id}', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/toggle', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'toggle'])->name('toggle');
+        Route::post('{id}/copy', [\App\Modules\Appointments\Controllers\AppointmentScheduleController::class, 'copy'])->name('copy');
+    });
+
+// Admin appointment settings – bookable roles (super-admin, school-admin only)
+Route::middleware(['auth', 'role:super-admin,school-admin'])
+    ->prefix('admin/appointment-settings')
+    ->name('admin.appointment-settings.')
+    ->group(function () {
+        Route::get('/', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'index'])->name('index');
+        Route::post('/', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'store'])->name('store');
+        Route::put('{id}', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/toggle', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'toggle'])->name('toggle');
+    });

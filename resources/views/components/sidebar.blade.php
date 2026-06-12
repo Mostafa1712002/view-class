@@ -91,11 +91,22 @@
                 </ul>
             </li>
 
-            <li class="nav-item has-sub" data-section="educational">
+            {{-- === Appointments card #197 (Phase 1) === --}}
+            <li class="nav-item has-sub {{ (request()->routeIs('manage.appointment-schedules.*') || request()->routeIs('admin.appointment-settings.*')) ? 'active open' : '' }}" data-section="educational">
                 <a href="#"><i class="la la-calendar"></i><span class="menu-title">@lang('shell.nav_appointments')</span></a>
                 <ul class="menu-content">
-                    <li><a href="#"><i class="la la-cog"></i><span class="menu-item">@lang('shell.nav_appointments_settings')</span></a></li>
-                    <li><a href="#"><i class="la la-calendar-check"></i><span class="menu-item">@lang('shell.nav_my_appointments')</span></a></li>
+                    <li class="{{ request()->routeIs('manage.appointment-schedules.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('manage.appointment-schedules.index') ? route('manage.appointment-schedules.index') : '#' }}">
+                            <i class="la la-calendar-check"></i><span class="menu-item">@lang('shell.nav_my_appointments')</span>
+                        </a>
+                    </li>
+                    @if($isStaff)
+                    <li class="{{ request()->routeIs('admin.appointment-settings.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('admin.appointment-settings.index') ? route('admin.appointment-settings.index') : '#' }}">
+                            <i class="la la-cog"></i><span class="menu-item">@lang('shell.nav_appointments_settings')</span>
+                        </a>
+                    </li>
+                    @endif
                 </ul>
             </li>
 
