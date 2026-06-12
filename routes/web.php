@@ -952,3 +952,6 @@ Route::middleware(['auth'])
 
 // === Discussion Rooms module ===
 require __DIR__.'/../app/Modules/Discussion/Routes/web.php';
+
+// === Virtual Classrooms module ===
+require __DIR__.'/../app/Modules/VirtualClasses/Routes/web.php';

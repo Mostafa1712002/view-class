@@ -156,7 +156,16 @@
             <li class="nav-item" data-section="communication"><a href="#"><i class="la la-bullhorn"></i><span class="menu-title">@lang('shell.nav_announcements')</span></a></li>
             <li class="nav-item" data-section="communication"><a href="#"><i class="la la-th-large"></i><span class="menu-title">@lang('shell.nav_classified_ads')</span></a></li>
             <li class="nav-item" data-section="communication"><a href="#"><i class="la la-calendar-alt"></i><span class="menu-title">@lang('shell.nav_calendar')</span></a></li>
-            <li class="nav-item" data-section="communication"><a href="#"><i class="la la-video"></i><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a></li>
+            @php
+                $vcIsStaff  = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin() || $sidebarUser->isTeacher());
+                $vcRoute    = $vcIsStaff
+                    ? (Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : '#')
+                    : (Route::has('my.virtual-classes.index') ? route('my.virtual-classes.index') : '#');
+                $vcActive   = request()->routeIs('manage.virtual-classes.*') || request()->routeIs('my.virtual-classes.*');
+            @endphp
+            <li class="nav-item {{ $vcActive ? 'active' : '' }}" data-section="communication">
+                <a href="{{ $vcRoute }}"><i class="la la-video"></i><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a>
+            </li>
             @php
                 $discIsStaff   = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin() || $sidebarUser->isTeacher());
                 $discRoute     = $discIsStaff
