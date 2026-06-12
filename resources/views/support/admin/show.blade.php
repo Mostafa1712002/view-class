@@ -28,7 +28,6 @@
     </div>
 </div>
 
-@include('components.alerts')
 
 <div class="row">
     {{-- Main column: details + replies + reply form --}}

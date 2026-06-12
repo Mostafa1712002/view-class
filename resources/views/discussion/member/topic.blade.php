@@ -26,7 +26,6 @@
     </div>
 </div>
 
-@include('components.alerts')
 
 {{-- Topic body --}}
 <div class="card mb-2">

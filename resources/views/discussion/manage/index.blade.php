@@ -25,7 +25,6 @@
     </div>
 </div>
 
-@include('components.alerts')
 
 {{-- Filter --}}
 <div class="card mb-2">

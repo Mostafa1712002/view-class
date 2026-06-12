@@ -98,7 +98,6 @@
     </div>
 </div>
 
-@include('components.alerts')
 
 @php
     $total    = $schedules->total();

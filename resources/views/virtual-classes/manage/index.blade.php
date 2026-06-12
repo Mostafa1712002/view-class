@@ -27,7 +27,6 @@
     </div>
 </div>
 
-@include('components.alerts')
 
 <div class="card">
     <div class="card-content">

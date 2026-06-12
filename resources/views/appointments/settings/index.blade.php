@@ -47,7 +47,6 @@
     </div>
 </div>
 
-@include('components.alerts')
 
 {{-- Add role form --}}
 <div class="card mb-2">

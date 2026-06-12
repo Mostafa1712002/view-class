@@ -9,14 +9,17 @@
     ];
     $selectedAudience = old('audience', $vc ? ($vc->audience ?? ['all']) : ['all']);
 
-    // Populate teacher list from the same school
+    // Teacher list = real teachers/school-admins of the ACTIVE school, matching the
+    // store/update validation (which scopes teacher_id to the active school). Do NOT
+    // include super-admins or default to the current user — a super-admin acting in a
+    // school is not a bookable teacher and would fail the school-scoped validation.
     $authUser  = auth()->user();
     $schoolId  = session('scope.school_id') ?? $authUser->school_id;
-    $teachers  = \App\Models\User::whereHas('roles', fn($q) => $q->whereIn('slug', ['teacher', 'school-admin', 'super-admin']))
-                    ->when($schoolId && ! $authUser->isSuperAdmin(), fn($q) => $q->where('school_id', $schoolId))
+    $teachers  = \App\Models\User::whereHas('roles', fn($q) => $q->whereIn('slug', ['teacher', 'school-admin']))
+                    ->when($schoolId, fn($q) => $q->where('school_id', $schoolId))
                     ->orderBy('name')
                     ->get(['id', 'name', 'name_ar']);
-    $defaultTeacher = old('teacher_id', $vc?->teacher_id ?? $authUser->id);
+    $defaultTeacher = old('teacher_id', $vc?->teacher_id);
 @endphp
 
 <div class="row">

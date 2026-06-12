@@ -23,7 +23,6 @@
     </div>
 </div>
 
-@include('components.alerts')
 
 {{-- Ticket details card --}}
 <div class="card mb-2">
