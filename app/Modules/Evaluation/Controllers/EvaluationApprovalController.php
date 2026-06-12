@@ -391,11 +391,37 @@ class EvaluationApprovalController extends Controller
         $base = fn (): Builder => Evaluation::query()
             ->when($schoolId !== null, fn (Builder $q) => $q->where('school_id', $schoolId));
 
+        // Performance aggregates over evaluations that have a computed score
+        // (completed/approved). Scoped to the same school boundary.
+        $scored = (clone $base())->whereIn('status', [
+            EvaluationStatus::Completed->value,
+            EvaluationStatus::Approved->value,
+        ]);
+
+        // Item/evidence backlog counts, joined through evaluations to honour scope.
+        $itemsPendingReview = \App\Models\EvaluationResponse::query()
+            ->where('item_status', 'pending_review')
+            ->whereHas('evaluation', fn (Builder $q) => $q->when($schoolId !== null, fn ($w) => $w->where('school_id', $schoolId)))
+            ->distinct()
+            ->count('item_id');
+
+        $evidencePending = \App\Models\EvaluationEvidence::query()
+            ->where('status', '!=', 'approved')
+            ->whereHas('evaluation', fn (Builder $q) => $q->when($schoolId !== null, fn ($w) => $w->where('school_id', $schoolId)))
+            ->count();
+
         return [
-            'pending'      => (clone $base())->where('status', EvaluationStatus::PendingApproval->value)->count(),
-            'completed'    => (clone $base())->where('status', EvaluationStatus::Completed->value)->count(),
-            'needs_review' => (clone $base())->where('status', EvaluationStatus::NeedsReview->value)->count(),
-            'approved'     => (clone $base())->where('status', EvaluationStatus::Approved->value)->count(),
+            'pending'        => (clone $base())->where('status', EvaluationStatus::PendingApproval->value)->count(),
+            'completed'      => (clone $base())->where('status', EvaluationStatus::Completed->value)->count(),
+            'needs_review'   => (clone $base())->where('status', EvaluationStatus::NeedsReview->value)->count(),
+            'approved'       => (clone $base())->where('status', EvaluationStatus::Approved->value)->count(),
+            // Analytical metrics (#207)
+            'teachers'       => (int) (clone $base())->where('subject_type', 'user')->distinct()->count('subject_id'),
+            'avg_performance'=> round((float) (clone $scored)->avg('percentage'), 1),
+            'max_pct'        => round((float) (clone $scored)->max('percentage'), 1),
+            'min_pct'        => round((float) (clone $scored)->min('percentage'), 1),
+            'items_pending_review' => $itemsPendingReview,
+            'evidence_pending'     => $evidencePending,
         ];
     }
 

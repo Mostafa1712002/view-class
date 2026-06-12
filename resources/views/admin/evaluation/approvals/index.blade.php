@@ -43,13 +43,35 @@
 
     {{-- KPI tiles --}}
     <div class="row ev-kpis mb-3">
-        @foreach (['pending' => 'la-hourglass-half', 'completed' => 'la-check', 'needs_review' => 'la-exclamation-triangle', 'approved' => 'la-check-double'] as $key => $icon)
+        @php
+            // count tiles + percentage tiles (#207 analytical metrics)
+            $countTiles = [
+                'teachers' => 'la-chalkboard-teacher', 'completed' => 'la-check', 'pending' => 'la-hourglass-half',
+                'approved' => 'la-check-double', 'needs_review' => 'la-exclamation-triangle',
+                'items_pending_review' => 'la-list', 'evidence_pending' => 'la-paperclip',
+            ];
+            $pctTiles = ['avg_performance' => 'la-chart-line', 'max_pct' => 'la-arrow-up', 'min_pct' => 'la-arrow-down'];
+        @endphp
+        @foreach ($countTiles as $key => $icon)
             <div class="col-md-3 col-6 mb-2">
                 <div class="card h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="label">@lang('eval_approval.kpis.'.$key)</div>
-                            <div class="value">{{ $stats[$key] }}</div>
+                            <div class="value">{{ $stats[$key] ?? 0 }}</div>
+                        </div>
+                        <span class="icon"><i class="la {{ $icon }}"></i></span>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+        @foreach ($pctTiles as $key => $icon)
+            <div class="col-md-3 col-6 mb-2">
+                <div class="card h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="label">@lang('eval_approval.kpis.'.$key)</div>
+                            <div class="value">{{ rtrim(rtrim(number_format((float) ($stats[$key] ?? 0), 1), '0'), '.') }}%</div>
                         </div>
                         <span class="icon"><i class="la {{ $icon }}"></i></span>
                     </div>

@@ -13,6 +13,12 @@ return [
         'completed'    => 'مكتملة',
         'needs_review' => 'بحاجة لمراجعة',
         'approved'     => 'معتمدة',
+        'teachers'             => 'عدد المعلمين',
+        'items_pending_review' => 'بنود بانتظار المراجعة',
+        'evidence_pending'     => 'شواهد بانتظار الاعتماد',
+        'avg_performance'      => 'متوسط الأداء العام',
+        'max_pct'              => 'أعلى نسبة تقييم',
+        'min_pct'              => 'أقل نسبة تقييم',
     ],
 
     'filters' => [

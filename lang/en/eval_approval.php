@@ -13,6 +13,12 @@ return [
         'completed'    => 'Completed',
         'needs_review' => 'Needs review',
         'approved'     => 'Approved',
+        'teachers'             => 'Teachers',
+        'items_pending_review' => 'Items awaiting review',
+        'evidence_pending'     => 'Evidence pending approval',
+        'avg_performance'      => 'Average performance',
+        'max_pct'              => 'Highest score',
+        'min_pct'              => 'Lowest score',
     ],
 
     'filters' => [
