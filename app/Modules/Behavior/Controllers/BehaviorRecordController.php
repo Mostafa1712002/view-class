@@ -33,12 +33,93 @@ class BehaviorRecordController extends Controller
         $schoolId = $this->activeSchoolId();
         $role = $tab === 'teacher' ? 'teacher' : 'student';
 
+        // A plain teacher may only record behaviour for students they actually
+        // teach (#192: "لا يسجل المعلم سلوك لطالب لا يدرسه"). Admins/supervisors see all.
+        $restrictIds = $this->restrictStudentIds($tab);
+
         return User::query()
             ->whereHas('roles', fn ($r) => $r->where('slug', $role))
             ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+            ->when($restrictIds !== null, fn ($w) => $w->whereIn('id', $restrictIds))
             ->orderBy('name')
             ->limit(1000)
             ->get(['id', 'name']);
+    }
+
+    /**
+     * When the actor is a plain teacher recording *student* behaviour, return the
+     * set of student IDs they are allowed to record for. Returns null when no
+     * restriction applies (admin/supervisor/super-admin, or the teacher tab).
+     *
+     * @return array<int>|null
+     */
+    private function restrictStudentIds(string $tab): ?array
+    {
+        if ($tab !== 'student') {
+            return null;
+        }
+
+        $actor = auth()->user();
+        $isPlainTeacher = $actor && $actor->isTeacher() && ! $actor->isSchoolAdmin() && ! $actor->isSuperAdmin();
+        if (! $isPlainTeacher) {
+            return null;
+        }
+
+        return $this->teachingStudentIds((int) $actor->id, $this->activeSchoolId());
+    }
+
+    /**
+     * Resolve the student IDs a teacher teaches, unioning the three places the
+     * teacher⇄class link is recorded: classes they lead, classes on their
+     * timetable (schedule_periods → schedules.class_id), and classes whose
+     * section they teach (subject_teacher.section_id). Students are matched on
+     * both enrolment sources (class_student pivot + users.class_room_id).
+     *
+     * @return array<int>
+     */
+    private function teachingStudentIds(int $teacherId, ?int $schoolId): array
+    {
+        $classIds = collect();
+
+        // 1) classes they lead
+        $classIds = $classIds->merge(
+            DB::table('classes')->where('lead_teacher_id', $teacherId)->pluck('id')
+        );
+
+        // 2) classes on their timetable
+        $classIds = $classIds->merge(
+            DB::table('schedule_periods')
+                ->join('schedules', 'schedules.id', '=', 'schedule_periods.schedule_id')
+                ->where('schedule_periods.teacher_id', $teacherId)
+                ->pluck('schedules.class_id')
+        );
+
+        // 3) classes whose section they are assigned to teach
+        $sectionIds = DB::table('subject_teacher')
+            ->where('user_id', $teacherId)
+            ->whereNotNull('section_id')
+            ->pluck('section_id');
+        if ($sectionIds->isNotEmpty()) {
+            $classIds = $classIds->merge(
+                DB::table('classes')->whereIn('section_id', $sectionIds)->pluck('id')
+            );
+        }
+
+        $classIds = $classIds->filter()->unique()->values();
+        if ($classIds->isEmpty()) {
+            return [];
+        }
+
+        $studentIds = DB::table('users')
+            ->where(function ($w) use ($classIds) {
+                $w->whereIn('class_room_id', $classIds)
+                    ->orWhereIn('id', DB::table('class_student')->whereIn('class_id', $classIds)->select('student_id'));
+            })
+            ->whereNull('deleted_at')
+            ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+            ->pluck('id');
+
+        return $studentIds->map(fn ($id) => (int) $id)->all();
     }
 
     private function behaviorsFor(string $tab)
@@ -87,10 +168,12 @@ class BehaviorRecordController extends Controller
         if ($request->filled('student')) {
             $schoolId = $this->activeSchoolId();
             $role = $tab === 'teacher' ? 'teacher' : 'student';
+            $restrictIds = $this->restrictStudentIds($tab);
             $lockedUser = User::query()
                 ->whereKey((int) $request->get('student'))
                 ->whereHas('roles', fn ($r) => $r->where('slug', $role))
                 ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+                ->when($restrictIds !== null, fn ($w) => $w->whereIn('id', $restrictIds))
                 ->first(['id', 'name']);
         }
 
@@ -171,6 +254,10 @@ class BehaviorRecordController extends Controller
         // The subject must actually hold the role for this tab, and behave within scope.
         $subject = User::query()->whereKey($data['subject_user_id'])
             ->whereHas('roles', fn ($r) => $r->where('slug', $role))->firstOrFail();
+
+        // A plain teacher may only record for students they teach (#192).
+        $restrictIds = $this->restrictStudentIds($tab);
+        abort_if($restrictIds !== null && ! in_array((int) $subject->id, $restrictIds, true), 403);
 
         $behavior = Behavior::query()->with('group')->findOrFail($data['behavior_id']);
         abort_unless(optional($behavior->group)->scope === $tab, 422);
