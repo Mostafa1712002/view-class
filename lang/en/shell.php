@@ -77,6 +77,8 @@ return [
     'nav_appointments' => 'Appointments',
     'nav_appointments_settings' => 'Appointment settings',
     'nav_my_appointments' => 'My appointments',
+    'nav_appointments_bookings' => 'Incoming Bookings',
+    'nav_my_appointments_booking' => 'Book Appointment',
     'nav_attendance_report' => 'Absence report',
     'nav_attendance_aggregate' => 'Aggregate absence report',
     'nav_attendance_list' => 'Student absence list',

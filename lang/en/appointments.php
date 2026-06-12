@@ -158,8 +158,95 @@ return [
     'filter_apply'     => 'Apply',
     'filter_reset'     => 'Reset',
     'filter_q'         => 'Search by title',
+    'filter_q_student' => 'Search by student name',
     'filter_status'    => 'Status',
     'filter_mode'      => 'Mode',
     'filter_date_from' => 'From Date',
     'filter_date_to'   => 'To Date',
+
+    // ── Phase 2: Booking Flow ──────────────────────────────────────────────
+
+    // Page titles
+    'my_bookings_title'     => 'My Appointments',
+    'manage_bookings_title' => 'Manage Bookings',
+    'booking_show_title'    => 'Booking Details',
+
+    // Booking statuses
+    'booking_status_requested' => 'Requested',
+    'booking_status_confirmed' => 'Confirmed',
+    'booking_status_rejected'  => 'Rejected',
+    'booking_status_cancelled' => 'Cancelled',
+    'booking_status_completed' => 'Completed',
+
+    // Form fields — booking
+    'field_bookable_role'    => 'Role / Function',
+    'field_subject'          => 'Subject',
+    'field_target_person'    => 'Target Person',
+    'field_reason'           => 'Reason',
+    'field_appointment_date' => 'Appointment Date',
+    'field_appointment_time' => 'Appointment Time',
+    'field_contact_method'   => 'Contact Method',
+    'field_attachment'       => 'Attachment (optional)',
+    'field_child'            => 'Student',
+    'field_decided_by'       => 'Decided By',
+    'field_decision_at'      => 'Decision Date',
+    'field_decision_note'    => 'Decision Note',
+
+    // Table headers — booking
+    'table_bookable_role'  => 'Role',
+    'table_target_person'  => 'Target Person',
+    'table_date_time'      => 'Date & Time',
+    'table_contact_method' => 'Contact',
+    'table_student'        => 'Student',
+    'table_booked_by'      => 'Booked By',
+
+    // Placeholders
+    'placeholder_select_role'    => 'Select a role',
+    'placeholder_select_subject' => 'Select a subject',
+    'placeholder_select_person'  => 'Select a person',
+    'placeholder_select_child'   => 'Select a student',
+    'placeholder_choose_file'    => 'Choose file',
+    'placeholder_reject_note'    => 'Write reason for rejection...',
+
+    // Sections
+    'section_child'   => 'Select Student',
+    'section_role'    => 'Select Role',
+    'section_details' => 'Appointment Details',
+    'booking_details_section' => 'Booking Details',
+    'decision_section'        => 'Decision',
+    'decision_action_title'   => 'Action',
+
+    // Buttons — booking
+    'btn_book_new'          => 'Book New Appointment',
+    'btn_book_submit'       => 'Submit Booking',
+    'btn_cancel_booking'    => 'Cancel',
+    'btn_confirm_booking'   => 'Confirm Appointment',
+    'btn_reject_booking'    => 'Reject Appointment',
+    'btn_complete_booking'  => 'Mark as Completed',
+    'btn_view_attachment'   => 'View Attachment',
+    'btn_back_to_list'      => 'Back to List',
+
+    // Confirms
+    'booking_confirm_cancel'  => 'Cancel this appointment?',
+    'booking_confirm_action'  => 'Confirm this appointment?',
+    'booking_complete_action' => 'Mark this appointment as completed?',
+    'booking_reject_action'   => 'Reject this appointment?',
+
+    // Flash messages — booking
+    'booking_flash_created'       => 'Appointment request submitted successfully.',
+    'booking_flash_cancelled'     => 'Appointment cancelled.',
+    'booking_flash_cancel_denied' => 'This appointment cannot be cancelled.',
+    'booking_flash_confirmed'     => 'Appointment confirmed.',
+    'booking_flash_rejected'      => 'Appointment rejected.',
+    'booking_flash_completed'     => 'Appointment marked as completed.',
+
+    // Empty states — booking
+    'booking_empty_title'  => 'No appointments yet',
+    'booking_empty_hint'   => 'Book your first appointment using the button below.',
+    'manage_empty_title'   => 'No bookings yet',
+    'manage_empty_hint'    => 'No booking requests have been received yet.',
+
+    // Labels
+    'label_booking'             => 'booking(s)',
+    'label_all_school_bookings' => 'All school bookings',
 ];

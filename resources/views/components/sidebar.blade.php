@@ -98,8 +98,8 @@
                 </ul>
             </li>
 
-            {{-- === Appointments card #197 (Phase 1) === --}}
-            <li class="nav-item has-sub {{ (request()->routeIs('manage.appointment-schedules.*') || request()->routeIs('admin.appointment-settings.*')) ? 'active open' : '' }}" data-section="educational">
+            {{-- === Appointments card #197 (Phase 1) + #175/#184 (Phase 2) === --}}
+            <li class="nav-item has-sub {{ (request()->routeIs('manage.appointment-schedules.*') || request()->routeIs('admin.appointment-settings.*') || request()->routeIs('manage.appointments.*')) ? 'active open' : '' }}" data-section="educational">
                 <a href="#"><i class="la la-calendar"></i><span class="menu-title">@lang('shell.nav_appointments')</span></a>
                 <ul class="menu-content">
                     <li class="{{ request()->routeIs('manage.appointment-schedules.*') ? 'active' : '' }}">
@@ -108,6 +108,11 @@
                         </a>
                     </li>
                     @if($isStaff)
+                    <li class="{{ request()->routeIs('manage.appointments.*') ? 'active' : '' }}">
+                        <a href="{{ Route::has('manage.appointments.index') ? route('manage.appointments.index') : '#' }}">
+                            <i class="la la-list-alt"></i><span class="menu-item">@lang('shell.nav_appointments_bookings')</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.appointment-settings.*') ? 'active' : '' }}">
                         <a href="{{ Route::has('admin.appointment-settings.index') ? route('admin.appointment-settings.index') : '#' }}">
                             <i class="la la-cog"></i><span class="menu-item">@lang('shell.nav_appointments_settings')</span>
@@ -371,12 +376,20 @@
                 <li class="nav-item {{ request()->routeIs('student.grades') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.grades') }}"><i class="la la-graduation-cap"></i><span class="menu-title">@lang('shell.portal_my_grades')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.attendance') }}"><i class="la la-check-square"></i><span class="menu-title">@lang('shell.portal_my_attendance')</span></a></li>
                 {{-- === Books card 65 === --}}<li class="nav-item {{ request()->routeIs('student.books.*') ? 'active' : '' }}" data-section="educational"><a href="{{ Route::has('student.books.index') ? route('student.books.index') : '#' }}"><i class="la la-book-open"></i><span class="menu-title">@lang('shell.nav_books')</span></a></li>
+                {{-- === Appointments Phase 2 — student === --}}
+                <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}"><i class="la la-calendar-plus"></i><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>
+                </li>
             @endif
 
             @if($sidebarUser && $sidebarUser->isParent())
                 <li class="navigation-header sec-communication"><span>@lang('shell.portal_parent')</span></li>
                 <li class="nav-item {{ request()->routeIs('parent.dashboard') ? 'active' : '' }}" data-section="communication"><a href="{{ route('parent.dashboard') }}"><i class="la la-home"></i><span class="menu-title">@lang('shell.portal_dashboard')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('parent.contact-teacher') ? 'active' : '' }}" data-section="communication"><a href="{{ route('parent.contact-teacher') }}"><i class="la la-envelope"></i><span class="menu-title">@lang('shell.portal_contact_teacher')</span></a></li>
+                {{-- === Appointments Phase 2 — parent === --}}
+                <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="communication">
+                    <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}"><i class="la la-calendar-plus"></i><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>
+                </li>
             @endif
 
         </ul>

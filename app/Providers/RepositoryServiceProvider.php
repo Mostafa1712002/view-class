@@ -45,7 +45,9 @@ use App\Modules\Evaluation\Repositories\Contracts\ClassVisitRepository;
 use App\Modules\Evaluation\Repositories\EloquentEvaluationFormRepository;
 use App\Modules\Evaluation\Repositories\EloquentEvaluationRepository;
 use App\Modules\Evaluation\Repositories\EloquentClassVisitRepository;
+use App\Modules\Appointments\Repositories\Contracts\AppointmentRepository;
 use App\Modules\Appointments\Repositories\Contracts\AppointmentScheduleRepository;
+use App\Modules\Appointments\Repositories\EloquentAppointmentRepository;
 use App\Modules\Appointments\Repositories\EloquentAppointmentScheduleRepository;
 use App\Modules\Support\Repositories\Contracts\SupportTicketRepository;
 use App\Modules\Support\Repositories\EloquentSupportTicketRepository;
@@ -83,6 +85,7 @@ class RepositoryServiceProvider extends ServiceProvider
         EvaluationFormRepository::class => EloquentEvaluationFormRepository::class,
         EvaluationRepository::class => EloquentEvaluationRepository::class,
         ClassVisitRepository::class => EloquentClassVisitRepository::class,
+        AppointmentRepository::class         => EloquentAppointmentRepository::class,
         AppointmentScheduleRepository::class => EloquentAppointmentScheduleRepository::class,
         SupportTicketRepository::class        => EloquentSupportTicketRepository::class,
         SchoolEventRepository::class          => EloquentSchoolEventRepository::class,

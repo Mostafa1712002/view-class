@@ -77,6 +77,8 @@ return [
     'nav_appointments' => 'المواعيد',
     'nav_appointments_settings' => 'إعدادات المواعيد',
     'nav_my_appointments' => 'مواعيدي',
+    'nav_appointments_bookings' => 'الحجوزات الواردة',
+    'nav_my_appointments_booking' => 'حجز موعد',
     'nav_attendance_report' => 'تقرير الغياب',
     'nav_attendance_aggregate' => 'تقرير الغيابات المجمّع',
     'nav_attendance_list' => 'قائمة غياب الطلاب',

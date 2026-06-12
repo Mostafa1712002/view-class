@@ -158,8 +158,95 @@ return [
     'filter_apply'      => 'تطبيق',
     'filter_reset'      => 'إعادة ضبط',
     'filter_q'          => 'بحث بالعنوان',
+    'filter_q_student'  => 'بحث باسم الطالب',
     'filter_status'     => 'الحالة',
     'filter_mode'       => 'الطريقة',
     'filter_date_from'  => 'من تاريخ',
     'filter_date_to'    => 'إلى تاريخ',
+
+    // ── Phase 2: Booking Flow ──────────────────────────────────────────────
+
+    // Page titles
+    'my_bookings_title'     => 'مواعيدي',
+    'manage_bookings_title' => 'إدارة الحجوزات',
+    'booking_show_title'    => 'تفاصيل الحجز',
+
+    // Booking statuses
+    'booking_status_requested' => 'مطلوب',
+    'booking_status_confirmed' => 'مؤكد',
+    'booking_status_rejected'  => 'مرفوض',
+    'booking_status_cancelled' => 'ملغي',
+    'booking_status_completed' => 'مكتمل',
+
+    // Form fields — booking
+    'field_bookable_role'    => 'الدور / الوظيفة',
+    'field_subject'          => 'المادة',
+    'field_target_person'    => 'الشخص المعني',
+    'field_reason'           => 'السبب',
+    'field_appointment_date' => 'تاريخ الموعد',
+    'field_appointment_time' => 'وقت الموعد',
+    'field_contact_method'   => 'طريقة التواصل',
+    'field_attachment'       => 'مرفق (اختياري)',
+    'field_child'            => 'الطالب',
+    'field_decided_by'       => 'تم القرار بواسطة',
+    'field_decision_at'      => 'تاريخ القرار',
+    'field_decision_note'    => 'ملاحظة القرار',
+
+    // Table headers — booking
+    'table_bookable_role'  => 'الوظيفة',
+    'table_target_person'  => 'الشخص المعني',
+    'table_date_time'      => 'التاريخ والوقت',
+    'table_contact_method' => 'التواصل',
+    'table_student'        => 'الطالب',
+    'table_booked_by'      => 'الحاجز',
+
+    // Placeholders
+    'placeholder_select_role'    => 'اختر الدور',
+    'placeholder_select_subject' => 'اختر المادة',
+    'placeholder_select_person'  => 'اختر الشخص',
+    'placeholder_select_child'   => 'اختر الطالب',
+    'placeholder_choose_file'    => 'اختر ملفاً',
+    'placeholder_reject_note'    => 'اكتب سبب الرفض...',
+
+    // Sections
+    'section_child'   => 'اختيار الطالب',
+    'section_role'    => 'اختيار الوظيفة',
+    'section_details' => 'تفاصيل الموعد',
+    'booking_details_section' => 'تفاصيل الحجز',
+    'decision_section'        => 'القرار',
+    'decision_action_title'   => 'إجراء',
+
+    // Buttons — booking
+    'btn_book_new'          => 'حجز موعد جديد',
+    'btn_book_submit'       => 'تأكيد الحجز',
+    'btn_cancel_booking'    => 'إلغاء',
+    'btn_confirm_booking'   => 'تأكيد الموعد',
+    'btn_reject_booking'    => 'رفض الموعد',
+    'btn_complete_booking'  => 'تحديد كمكتمل',
+    'btn_view_attachment'   => 'عرض المرفق',
+    'btn_back_to_list'      => 'العودة للقائمة',
+
+    // Confirms
+    'booking_confirm_cancel'  => 'هل تريد إلغاء هذا الموعد؟',
+    'booking_confirm_action'  => 'هل تريد تأكيد هذا الموعد؟',
+    'booking_complete_action' => 'هل تريد تحديد هذا الموعد كمكتمل؟',
+    'booking_reject_action'   => 'هل تريد رفض هذا الموعد؟',
+
+    // Flash messages — booking
+    'booking_flash_created'       => 'تم إرسال طلب الموعد بنجاح.',
+    'booking_flash_cancelled'     => 'تم إلغاء الموعد.',
+    'booking_flash_cancel_denied' => 'لا يمكن إلغاء هذا الموعد.',
+    'booking_flash_confirmed'     => 'تم تأكيد الموعد.',
+    'booking_flash_rejected'      => 'تم رفض الموعد.',
+    'booking_flash_completed'     => 'تم تحديد الموعد كمكتمل.',
+
+    // Empty states — booking
+    'booking_empty_title'  => 'لا توجد مواعيد بعد',
+    'booking_empty_hint'   => 'احجز موعدك الأول من خلال الزر أدناه.',
+    'manage_empty_title'   => 'لا توجد حجوزات بعد',
+    'manage_empty_hint'    => 'لم يتم تلقي أي حجوزات حتى الآن.',
+
+    // Labels
+    'label_booking'             => 'حجز',
+    'label_all_school_bookings' => 'جميع حجوزات المدرسة',
 ];

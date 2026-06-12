@@ -907,6 +907,23 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
         Route::post('{id}/toggle', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'toggle'])->name('toggle');
     });
 
+// === Appointments card #175 / #184 (Phase 2) ===
+// Student / parent booking flow
+Route::middleware(['auth'])->prefix('my/appointments')->name('my.appointments.')->group(function () {
+    Route::get('/people',       [\App\Modules\Appointments\Controllers\AppointmentBookingController::class, 'people'])->name('people');
+    Route::get('/',             [\App\Modules\Appointments\Controllers\AppointmentBookingController::class, 'index'])->name('index');
+    Route::get('/create',       [\App\Modules\Appointments\Controllers\AppointmentBookingController::class, 'create'])->name('create');
+    Route::post('/',            [\App\Modules\Appointments\Controllers\AppointmentBookingController::class, 'store'])->name('store');
+    Route::post('{id}/cancel',  [\App\Modules\Appointments\Controllers\AppointmentBookingController::class, 'cancel'])->name('cancel');
+});
+
+// Staff booking management (super-admin, school-admin, teacher)
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('manage/appointments')->name('manage.appointments.')->group(function () {
+    Route::get('/',              [\App\Modules\Appointments\Controllers\AppointmentBookingManagementController::class, 'index'])->name('index');
+    Route::get('{id}',           [\App\Modules\Appointments\Controllers\AppointmentBookingManagementController::class, 'show'])->name('show');
+    Route::post('{id}/decide',   [\App\Modules\Appointments\Controllers\AppointmentBookingManagementController::class, 'decide'])->name('decide');
+});
+
 // ==========================================
 // Support Tickets
 // ==========================================
