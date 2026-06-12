@@ -189,6 +189,14 @@
                 <a href="{{ $discRoute }}"><i class="la la-comments"></i><span class="menu-title">@lang('shell.nav_discussion_rooms')</span></a>
             </li>
 
+            {{-- Behaviour records — teacher-only link (#192). Admins reach it via the
+                 behaviour section below; teachers get a direct link here. --}}
+            @if($sidebarUser && $sidebarUser->isTeacher() && ! $sidebarUser->isSchoolAdmin() && ! $sidebarUser->isSuperAdmin())
+            <li class="nav-item {{ request()->routeIs('admin.behavior.records.*') ? 'active' : '' }}" data-section="system">
+                <a href="{{ route('admin.behavior.records.index') }}"><i class="la la-balance-scale"></i><span class="menu-title">@lang('behavior.records.title')</span></a>
+            </li>
+            @endif
+
             <li class="nav-item has-sub" data-section="communication">
                 <a href="{{ route('messages.index') }}"><i class="la la-inbox"></i><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
                 <ul class="menu-content">

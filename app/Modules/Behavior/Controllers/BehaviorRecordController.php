@@ -59,10 +59,16 @@ class BehaviorRecordController extends Controller
         $schoolId = $this->activeSchoolId();
         $q = trim((string) $request->get('q', ''));
 
+        // A teacher (not admin) sees only the records they recorded — not the whole
+        // school's disciplinary log (#192).
+        $actor = auth()->user();
+        $teacherOnly = $actor && $actor->isTeacher() && ! $actor->isSchoolAdmin() && ! $actor->isSuperAdmin();
+
         $records = BehaviorRecord::query()
             ->with(['subject', 'behavior', 'action', 'recorder'])
             ->where('scope', $tab)
             ->when($schoolId, fn ($w) => $w->where(fn ($x) => $x->where('school_id', $schoolId)->orWhereNull('school_id')))
+            ->when($teacherOnly, fn ($w) => $w->where('recorded_by', $actor->id))
             ->when($q !== '', fn ($w) => $w->whereHas('subject', fn ($s) => $s->where('name', 'like', '%'.$q.'%')))
             ->orderByDesc('id')
             ->limit(500)

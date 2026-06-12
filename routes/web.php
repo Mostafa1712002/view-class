@@ -331,10 +331,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::delete('behavior/actions/{id}', [\App\Modules\Behavior\Controllers\BehaviorActionController::class, 'destroy'])->whereNumber('id')->name('behavior.actions.destroy');
 
     // === Behaviour: records / apply behaviour (تسجيل السلوك) — card #115 / Task 19 ===
-    Route::get('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'index'])->name('behavior.records.index');
-    Route::get('behavior/records/create', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'create'])->name('behavior.records.create');
-    Route::get('behavior/records/actions', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'actions'])->name('behavior.records.actions');
-    Route::post('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'store'])->name('behavior.records.store');
+    // NOTE (#192): the view/log records routes (index/create/actions/store) are
+    // registered in the teacher-inclusive admin group below so teachers can record
+    // behaviour for their school. Deleting a record stays admin-only here.
     Route::delete('behavior/records/{id}', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'destroy'])->whereNumber('id')->name('behavior.records.destroy');
 
     // === E-canteen: canteens management (المقصف الإلكتروني) — card #116 / Task 20 ===
@@ -665,6 +664,14 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin')->name('admin.')->group(function () {
     // My Evaluations landing (Task 9 — التقييمات: required of me / my results)
     Route::get('my-evaluations', [\App\Modules\Evaluation\Controllers\MyEvaluationsController::class, 'index'])->name('my-evaluations.index');
+
+    // Behaviour records — view + log (#192). Teacher-inclusive; the controller is
+    // school-scoped (activeSchoolId). Behaviour CONFIG (groups/behaviours/actions) and
+    // record DELETE stay admin-only in the group above.
+    Route::get('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'index'])->name('behavior.records.index');
+    Route::get('behavior/records/create', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'create'])->name('behavior.records.create');
+    Route::get('behavior/records/actions', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'actions'])->name('behavior.records.actions');
+    Route::post('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'store'])->name('behavior.records.store');
     // Subject picker (Task 10)
     Route::get('evaluations/{form}/subjects', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'subjects'])->name('evaluations.subjects');
     // Execution screen (Task 11)
