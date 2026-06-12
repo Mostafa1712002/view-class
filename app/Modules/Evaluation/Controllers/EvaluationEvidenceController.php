@@ -7,6 +7,7 @@ use App\Models\Evaluation;
 use App\Models\EvaluationEvidence;
 use App\Modules\Evaluation\Actions\ReviewEvidence;
 use App\Modules\Evaluation\Actions\UploadEvidence;
+use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +20,8 @@ use Illuminate\Validation\ValidationException;
  */
 class EvaluationEvidenceController extends Controller
 {
+    use HasSchoolScope;
+
     public function __construct(
         private readonly UploadEvidence $evidence,
         private readonly ReviewEvidence $review,
@@ -126,6 +129,15 @@ class EvaluationEvidenceController extends Controller
 
     private function runReview(EvaluationEvidence $evidence, string $decision, ?string $note): RedirectResponse
     {
+        // Multi-tenant guard: the route binds the evidence by id, so verify its
+        // parent evaluation belongs to the reviewer's active school before acting.
+        // A super-admin (activeSchoolId() === null) is unscoped and may review any.
+        $scopeSchoolId = $this->activeSchoolId();
+        $evaluationSchoolId = (int) optional($evidence->evaluation)->school_id;
+        if ($scopeSchoolId !== null && $evaluationSchoolId !== (int) $scopeSchoolId) {
+            abort(403);
+        }
+
         try {
             $this->review->execute($evidence, $decision, $note, auth()->user());
         } catch (ValidationException $e) {
