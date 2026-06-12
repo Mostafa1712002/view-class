@@ -615,6 +615,17 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     // Evaluation audit log (Sprint 8 P7 — سجل العمليات)
     Route::get('evaluations/audit', [\App\Modules\Evaluation\Controllers\EvaluationAuditController::class, 'index'])->name('eval-audit.index');
 
+    // Educational Outcomes — Phase C (#205 — بند الناتج التعليمي وطريقة احتسابه)
+    Route::prefix('evaluations/outcomes')->name('evaluations.outcomes.')->group(function () {
+        Route::get('/',          [\App\Modules\Evaluation\Controllers\EducationalOutcomeController::class, 'index'])->name('index');
+        Route::get('/settings',  [\App\Modules\Evaluation\Controllers\EducationalOutcomeController::class, 'settings'])->name('settings');
+        Route::post('/settings', [\App\Modules\Evaluation\Controllers\EducationalOutcomeController::class, 'updateSettings'])->name('settings.update');
+        Route::get('/create',    [\App\Modules\Evaluation\Controllers\EducationalOutcomeController::class, 'create'])->name('create');
+        Route::post('/',         [\App\Modules\Evaluation\Controllers\EducationalOutcomeController::class, 'store'])->name('store');
+        Route::get('/{outcome}', [\App\Modules\Evaluation\Controllers\EducationalOutcomeController::class, 'show'])->name('show');
+        Route::post('/{outcome}/recompute', [\App\Modules\Evaluation\Controllers\EducationalOutcomeController::class, 'recompute'])->name('recompute');
+    });
+
     // Grades Management
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
     Route::post('grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');
