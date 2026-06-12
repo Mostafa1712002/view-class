@@ -138,6 +138,15 @@ class EvaluationEvidenceController extends Controller
             abort(403);
         }
 
+        // Phase D (#208/#210): granular permission gate (super-admin + school-admin
+        // hold these by default, so existing access is preserved).
+        $perm = match ($decision) {
+            'approved'   => \App\Modules\Evaluation\Permissions\EvaluationPermissions::APPROVE_EVIDENCE,
+            'rejected'   => \App\Modules\Evaluation\Permissions\EvaluationPermissions::REJECT_EVIDENCE,
+            default      => \App\Modules\Evaluation\Permissions\EvaluationPermissions::APPROVE_EVIDENCE,
+        };
+        abort_unless(auth()->user()?->canEval($perm), 403);
+
         try {
             $this->review->execute($evidence, $decision, $note, auth()->user());
         } catch (ValidationException $e) {

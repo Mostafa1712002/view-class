@@ -83,6 +83,7 @@
                             <th>@lang('eval_audit.cols.action')</th>
                             <th>@lang('eval_audit.cols.model')</th>
                             <th style="white-space:normal; min-width:260px;">@lang('eval_audit.cols.description')</th>
+                            <th style="white-space:normal; min-width:200px;">@lang('eval_audit.cols.changes')</th>
                             <th>@lang('eval_audit.cols.ip')</th>
                         </tr>
                     </thead>
@@ -110,6 +111,33 @@
                                     @endif
                                 </td>
                                 <td style="white-space:normal;">{{ $log->description }}</td>
+                                <td style="white-space:normal;">
+                                    @php
+                                        $old = $log->old_values ?? [];
+                                        $new = $log->new_values ?? [];
+                                        $changedKeys = array_values(array_unique(array_filter(
+                                            array_keys($old + $new),
+                                            fn ($k) => ($old[$k] ?? null) != ($new[$k] ?? null)
+                                                && ! in_array($k, ['updated_at', 'created_at'], true)
+                                        )));
+                                    @endphp
+                                    @if (! empty($changedKeys))
+                                        <details>
+                                            <summary class="text-muted small">{{ count($changedKeys) }} @lang('eval_audit.changed_fields')</summary>
+                                            <ul class="small mb-0 ps-3">
+                                                @foreach (array_slice($changedKeys, 0, 8) as $k)
+                                                    <li><span class="fw-bold">{{ $k }}</span>:
+                                                        <span class="text-danger">{{ \Illuminate\Support\Str::limit(is_scalar($old[$k] ?? null) ? (string) ($old[$k] ?? '—') : json_encode($old[$k] ?? null, JSON_UNESCAPED_UNICODE), 40) }}</span>
+                                                        →
+                                                        <span class="text-success">{{ \Illuminate\Support\Str::limit(is_scalar($new[$k] ?? null) ? (string) ($new[$k] ?? '—') : json_encode($new[$k] ?? null, JSON_UNESCAPED_UNICODE), 40) }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </details>
+                                    @else
+                                        <span class="bool-no">—</span>
+                                    @endif
+                                </td>
                                 <td class="text-muted small">{{ $log->ip_address }}</td>
                             </tr>
                         @endforeach

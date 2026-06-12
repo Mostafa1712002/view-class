@@ -227,6 +227,16 @@ class User extends Authenticatable
         return false;
     }
 
+    /**
+     * Evaluation-module permission check (Phase D, #208/#210).
+     * Super-admins always pass; everyone else needs the granular permission.
+     * Used to gate evaluation actions without locking out existing admins.
+     */
+    public function canEval(string $permission): bool
+    {
+        return $this->isSuperAdmin() || $this->hasPermission($permission);
+    }
+
     public function assignRole(Role $role): void
     {
         $this->roles()->syncWithoutDetaching($role);

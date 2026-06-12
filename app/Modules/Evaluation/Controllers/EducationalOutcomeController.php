@@ -9,6 +9,7 @@ use App\Modules\Evaluation\Actions\RecomputeEducationalOutcome;
 use App\Modules\Evaluation\Enums\OutcomeApprovalStatus;
 use App\Modules\Evaluation\Enums\OutcomeMethod;
 use App\Modules\Evaluation\Http\Requests\StoreEvaluationOutcomeRequest;
+use App\Modules\Evaluation\Permissions\EvaluationPermissions;
 use App\Modules\Evaluation\Services\EducationalOutcomeResolver;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
@@ -80,12 +81,9 @@ class EducationalOutcomeController extends Controller
     /** Save the school-level outcome method. Super-admins may also set the global default. */
     public function updateSettings(Request $request): RedirectResponse
     {
-        // Changing the outcome-averaging method is an admin-only mutation (it can
-        // alter teachers' evaluation results). Explicit gate in addition to the
-        // route's role middleware. TODO Phase D: swap for the granular
-        // EvaluationOutcomePermissions::MANAGE_OUTCOME_METHOD permission once seeded.
-        $actor = auth()->user();
-        abort_unless($actor && ($actor->isSuperAdmin() || $actor->isSchoolAdmin()), 403);
+        // Changing the outcome-averaging method is gated on the granular permission
+        // (super-admin + school-admin hold it by default — non-breaking).
+        abort_unless(auth()->user()?->canEval(EvaluationPermissions::MANAGE_OUTCOME_METHOD), 403);
 
         $validMethods = array_column(OutcomeMethod::cases(), 'value');
 
@@ -124,6 +122,8 @@ class EducationalOutcomeController extends Controller
     /** Compute and persist a new educational outcome. */
     public function store(StoreEvaluationOutcomeRequest $request): RedirectResponse
     {
+        abort_unless(auth()->user()?->canEval(EvaluationPermissions::CREATE), 403);
+
         $schoolId = $this->activeSchoolId();
         // An outcome must belong to a school (school_id is NOT NULL). A super-admin
         // with no school selected, or any unscoped non-admin, cannot create one.
@@ -178,6 +178,7 @@ class EducationalOutcomeController extends Controller
             && ($schoolId === null || (int) $outcome->school_id !== (int) $schoolId)) {
             abort(403);
         }
+        abort_unless(auth()->user()?->canEval(EvaluationPermissions::RECOMPUTE_OUTCOME), 403);
 
         $validMethods = array_column(OutcomeMethod::cases(), 'value');
 
