@@ -73,6 +73,8 @@
                         <tr>
                             <th style="width:30px;"></th>
                             <th>@lang('evaluation_items.items.columns.name')</th>
+                            <th style="width:130px;">@lang('evaluation_items.items.columns.responsible_role')</th>
+                            <th style="width:110px;">@lang('evaluation_items.items.columns.item_type')</th>
                             @if ($isWeighted)<th style="width:90px;">@lang('evaluation_items.items.columns.weight')</th>@endif
                             <th style="width:90px;">@lang('evaluation_items.items.columns.max_score')</th>
                             <th style="width:80px;">@lang('evaluation_items.items.columns.required')</th>
@@ -95,6 +97,20 @@
                                 <td class="fw-bold">
                                     {{ $item->name }}
                                     @if ($item->description)<div class="text-muted small fw-normal">{{ \Illuminate\Support\Str::limit($item->description, 80) }}</div>@endif
+                                </td>
+                                <td>
+                                    @if ($item->responsible_role)
+                                        <span class="badge badge-light-secondary">{{ $item->responsible_role }}</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($item->item_type && $item->item_type !== 'manual')
+                                        <span class="badge badge-light-info">@lang('evaluation_items.item_types.'.$item->item_type)</span>
+                                    @else
+                                        <span class="text-muted small">@lang('evaluation_items.item_types.manual')</span>
+                                    @endif
                                 </td>
                                 @if ($isWeighted)<td>{{ rtrim(rtrim(number_format((float)$item->weight, 2), '0'), '.') }}%</td>@endif
                                 <td>{{ rtrim(rtrim(number_format((float)$item->max_score, 2), '0'), '.') }}</td>
@@ -122,7 +138,15 @@
                                                     data-allow_note="{{ $item->allow_note ? 1 : 0 }}"
                                                     data-visible_to_evaluator_only="{{ $item->visible_to_evaluator_only ? 1 : 0 }}"
                                                     data-visible_to_subject_after_result="{{ $item->visible_to_subject_after_result ? 1 : 0 }}"
-                                                    data-status="{{ $item->status }}">
+                                                    data-status="{{ $item->status }}"
+                                                    data-responsible_role="{{ $item->responsible_role }}"
+                                                    data-item_type="{{ $item->item_type ?? 'manual' }}"
+                                                    data-calc_method="{{ $item->calc_method ?? 'manual' }}"
+                                                    data-evidence_needs_approval="{{ $item->evidence_needs_approval ? 1 : 0 }}"
+                                                    data-editable_after_review="{{ $item->editable_after_review ? 1 : 0 }}"
+                                                    data-editable_after_approval="{{ $item->editable_after_approval ? 1 : 0 }}"
+                                                    data-min_percentage="{{ $item->min_percentage }}"
+                                                    data-internal_notes="{{ $item->internal_notes }}">
                                                     <i class="la la-pen"></i> @lang('evaluation_items.actions.edit')
                                                 </button>
                                             @endif
@@ -209,6 +233,56 @@
                             </div>
                         @endforeach
                     </div>
+
+                    {{-- Phase A (v2) — Advanced config --}}
+                    <hr class="my-3">
+                    <p class="text-muted small mb-2"><i class="la la-cog"></i> @lang('evaluation_items.items.advanced_config')</p>
+                    <div class="row">
+                        <div class="col-md-4 col-12 mb-3">
+                            <label class="form-label">@lang('evaluation_items.items.fields.responsible_role')</label>
+                            <input type="text" name="responsible_role" id="f-responsible_role" class="form-control" maxlength="40"
+                                   placeholder="@lang('evaluation_items.items.fields.responsible_role_placeholder')">
+                        </div>
+                        <div class="col-md-4 col-12 mb-3">
+                            <label class="form-label">@lang('evaluation_items.items.fields.item_type')</label>
+                            <select name="item_type" id="f-item_type" class="form-control">
+                                <option value="manual">@lang('evaluation_items.item_types.manual')</option>
+                                <option value="auto">@lang('evaluation_items.item_types.auto')</option>
+                                <option value="evidence_only">@lang('evaluation_items.item_types.evidence_only')</option>
+                                <option value="mixed">@lang('evaluation_items.item_types.mixed')</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-12 mb-3">
+                            <label class="form-label">@lang('evaluation_items.items.fields.calc_method')</label>
+                            <select name="calc_method" id="f-calc_method" class="form-control">
+                                <option value="manual">@lang('evaluation_items.calc_methods.manual')</option>
+                                <option value="auto_platform">@lang('evaluation_items.calc_methods.auto_platform')</option>
+                                <option value="after_evidence">@lang('evaluation_items.calc_methods.after_evidence')</option>
+                                <option value="external">@lang('evaluation_items.calc_methods.external')</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-12 mb-3">
+                            <label class="form-label">@lang('evaluation_items.items.fields.min_percentage')</label>
+                            <input type="number" name="min_percentage" id="f-min_percentage" class="form-control" min="0" max="100" step="0.01"
+                                   placeholder="@lang('evaluation_items.items.fields.min_percentage_placeholder')">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">@lang('evaluation_items.items.fields.internal_notes')</label>
+                            <textarea name="internal_notes" id="f-internal_notes" rows="2" class="form-control"
+                                      placeholder="@lang('evaluation_items.items.fields.internal_notes_placeholder')"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        @foreach (['evidence_needs_approval','editable_after_review','editable_after_approval'] as $flag)
+                            <div class="col-md-4 col-6 mb-2">
+                                <div class="form-check">
+                                    <input type="hidden" name="{{ $flag }}" value="0">
+                                    <input type="checkbox" name="{{ $flag }}" value="1" id="f-{{ $flag }}" class="form-check-input">
+                                    <label class="form-check-label" for="f-{{ $flag }}">@lang('evaluation_items.items.fields.'.$flag)</label>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal">@lang('evaluation_items.actions.cancel')</button>
@@ -226,7 +300,8 @@ jQuery(function ($) {
     var updateBase = @json(url('admin/evaluations/'.$form->id.'/items'));
     var reorderUrl = @json(route('admin.evaluations.items.reorder', $form->id));
     var csrf = @json(csrf_token());
-    var flags = ['is_required','needs_evidence','evidence_required','allow_note','visible_to_evaluator_only','visible_to_subject_after_result'];
+    var flags = ['is_required','needs_evidence','evidence_required','allow_note','visible_to_evaluator_only','visible_to_subject_after_result',
+                 'evidence_needs_approval','editable_after_review','editable_after_approval'];
 
     function openModal() {
         if (window.bootstrap) { new bootstrap.Modal(document.getElementById('ev-item-modal')).show(); }
@@ -240,6 +315,9 @@ jQuery(function ($) {
         $('#ev-item-method').val('POST');
         $('#f-max_score').val(100);
         @if($isWeighted) $('#f-weight').val(0); @endif
+        $('#f-item_type').val('manual');
+        $('#f-calc_method').val('manual');
+        $('#f-min_percentage').val('');
         openModal();
     });
 
@@ -254,6 +332,12 @@ jQuery(function ($) {
         $('#f-max_score').val(d.max_score);
         $('#f-status').val(d.status);
         flags.forEach(function (f) { $('#f-' + f).prop('checked', String(d[f]) === '1'); });
+        // Phase A (v2) advanced fields
+        $('#f-responsible_role').val(d.responsible_role || '');
+        $('#f-item_type').val(d.item_type || 'manual');
+        $('#f-calc_method').val(d.calc_method || 'manual');
+        $('#f-min_percentage').val(d.min_percentage || '');
+        $('#f-internal_notes').val(d.internal_notes || '');
         openModal();
     });
 

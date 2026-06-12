@@ -15,15 +15,17 @@ return [
         'weight_remaining' => 'Remaining',
         'of_100'       => 'of 100%',
         'columns' => [
-            'order'      => '#',
-            'name'       => 'Item name',
-            'weight'     => 'Weight',
-            'max_score'  => 'Max score',
-            'required'   => 'Required',
-            'evidence'   => 'Evidence',
-            'indicators' => 'Indicators',
-            'status'     => 'Status',
-            'actions'    => 'Actions',
+            'order'            => '#',
+            'name'             => 'Item name',
+            'responsible_role' => 'Responsible role',
+            'item_type'        => 'Type',
+            'weight'           => 'Weight',
+            'max_score'        => 'Max score',
+            'required'         => 'Required',
+            'evidence'         => 'Evidence',
+            'indicators'       => 'Indicators',
+            'status'           => 'Status',
+            'actions'          => 'Actions',
         ],
         'fields' => [
             'name'             => 'Item name',
@@ -38,7 +40,20 @@ return [
             'visible_to_evaluator_only'       => 'Visible to evaluator only',
             'visible_to_subject_after_result' => 'Visible to subject after result',
             'status'           => 'Status',
+            // Phase A (v2)
+            'responsible_role'               => 'Responsible role',
+            'responsible_role_placeholder'   => 'e.g. school-admin, supervisor',
+            'item_type'                      => 'Item type',
+            'calc_method'                    => 'Calc method',
+            'evidence_needs_approval'        => 'Evidence needs approval',
+            'editable_after_review'          => 'Editable after review',
+            'editable_after_approval'        => 'Editable after approval',
+            'min_percentage'                 => 'Min percentage (%)',
+            'min_percentage_placeholder'     => 'Leave blank for no minimum',
+            'internal_notes'                 => 'Internal notes',
+            'internal_notes_placeholder'     => 'Notes not shown to the evaluator',
         ],
+        'advanced_config' => 'Advanced item config',
     ],
 
     // ── Indicators ──────────────────────────────────────────────────
@@ -74,6 +89,22 @@ return [
             'status'           => 'Status',
         ],
         'level_only_rubric' => 'Level binding is available for Rubric forms only.',
+    ],
+
+    // ── Item types (Phase A v2) ──────────────────────────────────────
+    'item_types' => [
+        'manual'        => 'Manual',
+        'auto'          => 'Auto',
+        'evidence_only' => 'Evidence only',
+        'mixed'         => 'Mixed',
+    ],
+
+    // ── Calc methods (Phase A v2) ────────────────────────────────────
+    'calc_methods' => [
+        'manual'         => 'Manual',
+        'auto_platform'  => 'Auto (platform)',
+        'after_evidence' => 'After evidence approval',
+        'external'       => 'External',
     ],
 
     // ── Shared ──────────────────────────────────────────────────────

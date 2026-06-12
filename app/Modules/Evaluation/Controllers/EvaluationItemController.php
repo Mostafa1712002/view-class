@@ -159,6 +159,15 @@ class EvaluationItemController extends Controller
             'visible_to_evaluator_only'       => ['nullable', 'boolean'],
             'visible_to_subject_after_result' => ['nullable', 'boolean'],
             'status'                          => ['nullable', 'in:active,disabled'],
+            // Phase A (v2) advanced item config
+            'responsible_role'                => ['nullable', 'string', 'max:40'],
+            'item_type'                       => ['nullable', 'in:manual,auto,evidence_only,mixed'],
+            'calc_method'                     => ['nullable', 'in:manual,auto_platform,after_evidence,external'],
+            'evidence_needs_approval'         => ['nullable', 'boolean'],
+            'editable_after_review'           => ['nullable', 'boolean'],
+            'editable_after_approval'         => ['nullable', 'boolean'],
+            'min_percentage'                  => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'internal_notes'                  => ['nullable', 'string'],
         ]);
     }
 

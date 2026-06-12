@@ -15,15 +15,17 @@ return [
         'weight_remaining' => 'المتبقي',
         'of_100'       => 'من 100%',
         'columns' => [
-            'order'      => '#',
-            'name'       => 'اسم العنصر',
-            'weight'     => 'الوزن',
-            'max_score'  => 'أعلى درجة',
-            'required'   => 'إجباري',
-            'evidence'   => 'الشواهد',
-            'indicators' => 'المؤشرات',
-            'status'     => 'الحالة',
-            'actions'    => 'التحكم',
+            'order'            => '#',
+            'name'             => 'اسم العنصر',
+            'responsible_role' => 'الجهة المسؤولة',
+            'item_type'        => 'النوع',
+            'weight'           => 'الوزن',
+            'max_score'        => 'أعلى درجة',
+            'required'         => 'إجباري',
+            'evidence'         => 'الشواهد',
+            'indicators'       => 'المؤشرات',
+            'status'           => 'الحالة',
+            'actions'          => 'التحكم',
         ],
         'fields' => [
             'name'             => 'اسم العنصر',
@@ -38,7 +40,20 @@ return [
             'visible_to_evaluator_only'       => 'مرئي للمقيّم فقط',
             'visible_to_subject_after_result' => 'مرئي لمن يُقيَّم بعد النتيجة',
             'status'           => 'الحالة',
+            // Phase A (v2)
+            'responsible_role'               => 'الجهة المسؤولة',
+            'responsible_role_placeholder'   => 'مثال: school-admin، supervisor',
+            'item_type'                      => 'نوع العنصر',
+            'calc_method'                    => 'طريقة الاحتساب',
+            'evidence_needs_approval'        => 'الشواهد تحتاج موافقة',
+            'editable_after_review'          => 'قابل للتعديل بعد الإرسال للمراجعة',
+            'editable_after_approval'        => 'قابل للتعديل بعد الاعتماد',
+            'min_percentage'                 => 'الحد الأدنى (%)',
+            'min_percentage_placeholder'     => 'اتركه فارغاً إن لم يكن هناك حد أدنى',
+            'internal_notes'                 => 'ملاحظات داخلية',
+            'internal_notes_placeholder'     => 'ملاحظات لا تظهر للمقيّم',
         ],
+        'advanced_config' => 'الإعدادات المتقدمة للعنصر',
     ],
 
     // ── Indicators (المؤشرات) ──────────────────────────────────────
@@ -74,6 +89,22 @@ return [
             'status'           => 'الحالة',
         ],
         'level_only_rubric' => 'ربط المستوى متاح لنماذج الروبرك فقط.',
+    ],
+
+    // ── Item types (Phase A v2) ──────────────────────────────────────
+    'item_types' => [
+        'manual'        => 'يدوي',
+        'auto'          => 'تلقائي',
+        'evidence_only' => 'شواهد فقط',
+        'mixed'         => 'مختلط',
+    ],
+
+    // ── Calc methods (Phase A v2) ────────────────────────────────────
+    'calc_methods' => [
+        'manual'         => 'يدوي',
+        'auto_platform'  => 'تلقائي من المنصة',
+        'after_evidence' => 'بعد اعتماد الشواهد',
+        'external'       => 'خارجي',
     ],
 
     // ── Shared ──────────────────────────────────────────────────────

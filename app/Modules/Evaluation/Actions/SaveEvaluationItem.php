@@ -45,6 +45,17 @@ class SaveEvaluationItem
                 'visible_to_evaluator_only'       => (bool) ($data['visible_to_evaluator_only'] ?? false),
                 'visible_to_subject_after_result' => (bool) ($data['visible_to_subject_after_result'] ?? false),
                 'status'                          => ($data['status'] ?? 'active') === 'disabled' ? 'disabled' : 'active',
+                // Phase A (v2) advanced item config — all optional, fall back to DB defaults
+                'responsible_role'                => ($data['responsible_role'] ?? null) ?: null,
+                'item_type'                       => $data['item_type'] ?? 'manual',
+                'calc_method'                     => $data['calc_method'] ?? 'manual',
+                'evidence_needs_approval'         => (bool) ($data['evidence_needs_approval'] ?? false),
+                'editable_after_review'           => (bool) ($data['editable_after_review'] ?? false),
+                'editable_after_approval'         => (bool) ($data['editable_after_approval'] ?? false),
+                'min_percentage'                  => isset($data['min_percentage']) && $data['min_percentage'] !== ''
+                                                        ? round((float) $data['min_percentage'], 2)
+                                                        : null,
+                'internal_notes'                  => $data['internal_notes'] ?? null,
             ];
 
             if ($item === null) {
