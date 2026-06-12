@@ -38,7 +38,7 @@ links to exams/assignments/subjects/grades intact. Deployable slices.
 ## Progress
 | Phase | Card | Status |
 |-------|------|--------|
-| 1 Schema | #215 | ✅ Done |
+| 1 Schema | #215 | ✅ Done → testing |
 | 2 Import | #214 | Not started |
 | 3 UI | #216 | Not started |
 | 4 Perms/states | #217 | Not started |
