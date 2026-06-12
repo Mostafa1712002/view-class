@@ -59,6 +59,8 @@ use App\Modules\VirtualClasses\Repositories\Contracts\VirtualClassRepositoryInte
 use App\Modules\VirtualClasses\Repositories\VirtualClassRepository;
 use App\Modules\SpecialEducation\Repositories\Contracts\SpecialEducationRepository;
 use App\Modules\SpecialEducation\Repositories\EloquentSpecialEducationRepository;
+use App\Modules\Certificates\Repositories\Contracts\CertificateRepository;
+use App\Modules\Certificates\Repositories\EloquentCertificateRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -92,6 +94,7 @@ class RepositoryServiceProvider extends ServiceProvider
         DiscussionRepository::class              => DiscussionEloquentRepository::class,
         VirtualClassRepositoryInterface::class   => VirtualClassRepository::class,
         SpecialEducationRepository::class        => EloquentSpecialEducationRepository::class,
+        CertificateRepository::class             => EloquentCertificateRepository::class,
     ];
 
     public function register(): void

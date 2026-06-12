@@ -954,6 +954,22 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/supp
     Route::post('/{ticket}/status', [\App\Modules\Support\Controllers\AdminSupportController::class, 'updateStatus'])->name('updateStatus');
 });
 
+// === Certificates module (#192 §9 / #172) ===
+Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/certificates')->name('admin.certificates.')->group(function () {
+    Route::get('/', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'create'])->name('create');
+    Route::post('/', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'store'])->name('store');
+    Route::get('/{certificate}/edit', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'edit'])->name('edit');
+    Route::put('/{certificate}', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'update'])->name('update');
+    Route::post('/{certificate}/publish', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'publish'])->name('publish');
+    Route::delete('/{certificate}', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'destroy'])->name('destroy');
+});
+
+// Teacher / student / parent: read-only certificates view
+Route::middleware(['auth', 'role:teacher,student,parent'])->prefix('my/certificates')->name('my.certificates.')->group(function () {
+    Route::get('/', [\App\Modules\Certificates\Controllers\MyCertificateController::class, 'index'])->name('index');
+});
+
 // === School Calendar card #196 / #174 / #179 / #186 ===
 // Staff CRUD (super-admin, school-admin, teacher)
 Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])

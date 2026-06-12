@@ -327,6 +327,26 @@
                 <a href="{{ $sidebarSupportRoute }}"><i class="la la-life-ring"></i><span class="menu-title">@lang('shell.nav_support')</span></a>
             </li>
             <li class="nav-item" data-section="system"><a href="#"><i class="la la-user-plus"></i><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
+
+            {{-- === Certificates admin link (#192 §9 / #172) === --}}
+            @if($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
+            <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="system">
+                <a href="{{ Route::has('admin.certificates.index') ? route('admin.certificates.index') : '#' }}">
+                    <i class="la la-certificate"></i>
+                    <span class="menu-title">@lang('certificates.title')</span>
+                </a>
+            </li>
+            @endif
+            @endif
+
+            {{-- === Certificates: teacher / student / parent read link (#192 §9 / #172) === --}}
+            @if($sidebarUser && ($sidebarUser->isTeacher() || $sidebarUser->isStudent() || $sidebarUser->isParent()))
+            <li class="nav-item {{ request()->routeIs('my.certificates.*') ? 'active' : '' }}">
+                <a href="{{ Route::has('my.certificates.index') ? route('my.certificates.index') : '#' }}">
+                    <i class="la la-certificate"></i>
+                    <span class="menu-title">@lang('certificates.my_title')</span>
+                </a>
+            </li>
             @endif
 
             {{-- === School Calendar card #196 / #174 / #179 / #186 === --}}
