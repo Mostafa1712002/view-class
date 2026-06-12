@@ -432,6 +432,13 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('question-banks/{bankId}/questions/{questionId}/duplicate', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'duplicate'])->name('question-banks.questions.duplicate');
     Route::delete('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'destroy'])->name('question-banks.questions.destroy');
 
+    // Question Bank — Excel import (card #214) — must be before any {questionId} wildcard
+    Route::get('question-banks/{bankId}/questions/import', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'form'])->name('question-banks.questions.import.form');
+    Route::get('question-banks/{bankId}/questions/import/template', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'template'])->name('question-banks.questions.import.template');
+    Route::post('question-banks/{bankId}/questions/import/preview', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'preview'])->name('question-banks.questions.import.preview');
+    Route::post('question-banks/{bankId}/questions/import/{batchId}/execute', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'execute'])->name('question-banks.questions.import.execute');
+    Route::get('question-banks/{bankId}/questions/import/{batchId}/errors.csv', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'errorsReport'])->name('question-banks.questions.import.errors');
+
     // Question Bank — curation actions (T3/T5)
     Route::post('question-banks/{id}/approve', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'approve'])->name('question-banks.approve');
     Route::post('question-banks/{id}/promote', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'promote'])->name('question-banks.promote');

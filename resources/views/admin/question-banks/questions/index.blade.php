@@ -143,7 +143,19 @@
                     @endforeach
                 </ul>
             </div>
-            <div class="text-muted small">{{ $questions->total() }} @lang('questions.index_title')</div>
+            {{-- Import buttons — gated same as the rest of this controller (role middleware).
+                 TODO #217: replace with granular QB import permission. --}}
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="{{ route('admin.question-banks.questions.import.form', $bank->id) }}"
+                   class="btn btn-success btn-sm">
+                    <i class="la la-file-excel"></i> @lang('question_import.page_title')
+                </a>
+                <a href="{{ route('admin.question-banks.questions.import.template', $bank->id) }}"
+                   class="btn btn-outline-secondary btn-sm">
+                    <i class="la la-download"></i> @lang('question_import.download_template')
+                </a>
+                <div class="text-muted small">{{ $questions->total() }} @lang('questions.index_title')</div>
+            </div>
         </div>
 
         <div class="table-responsive">
