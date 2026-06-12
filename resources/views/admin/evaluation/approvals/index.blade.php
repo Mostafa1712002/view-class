@@ -83,7 +83,11 @@
     {{-- Filters --}}
     <form action="{{ route('admin.evaluations.approvals.index') }}" method="GET" class="card filters-card p-3 mb-3">
         <div class="row g-2 align-items-end">
-            <div class="col-md-4 col-6">
+            <div class="col-md-3 col-6">
+                <label class="form-label">@lang('eval_approval.filters.teacher')</label>
+                <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control" placeholder="@lang('eval_approval.filters.teacher_placeholder')">
+            </div>
+            <div class="col-md-3 col-6">
                 <label class="form-label">@lang('eval_approval.filters.status')</label>
                 <select name="status" class="form-control">
                     <option value="">@lang('eval_approval.filters.all')</option>
@@ -92,7 +96,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4 col-6">
+            <div class="col-md-3 col-6">
                 <label class="form-label">@lang('eval_approval.filters.form')</label>
                 <select name="form" class="form-control select2">
                     <option value="">@lang('eval_approval.filters.all')</option>
@@ -100,6 +104,13 @@
                         <option value="{{ $f->id }}" {{ (int) ($filters['form'] ?? 0) === $f->id ? 'selected' : '' }}>{{ $f->title }}</option>
                     @endforeach
                 </select>
+            </div>
+            <div class="col-md-3 col-6">
+                <label class="form-label">@lang('eval_approval.filters.pct_range')</label>
+                <div class="d-flex gap-1">
+                    <input type="number" name="pct_min" value="{{ $filters['pct_min'] ?? '' }}" class="form-control" placeholder="0" min="0" max="100" step="0.01">
+                    <input type="number" name="pct_max" value="{{ $filters['pct_max'] ?? '' }}" class="form-control" placeholder="100" min="0" max="100" step="0.01">
+                </div>
             </div>
             <div class="col-md-4 col-12 d-flex gap-1 align-items-end">
                 <button type="submit" class="btn ev-add-btn flex-grow-1"><i class="la la-search"></i> @lang('eval_approval.filters.show')</button>
@@ -120,6 +131,9 @@
                             <th>@lang('eval_approval.columns.subject')</th>
                             <th>@lang('eval_approval.columns.evaluator')</th>
                             <th>@lang('eval_approval.columns.score')</th>
+                            <th class="text-center">@lang('eval_approval.columns.answered')</th>
+                            <th class="text-center">@lang('eval_approval.columns.evidence')</th>
+                            <th class="text-center">@lang('eval_approval.columns.pending_review')</th>
                             <th>@lang('eval_approval.columns.status')</th>
                             <th>@lang('eval_approval.columns.submitted')</th>
                             <th class="text-end" style="width:90px;">@lang('eval_approval.columns.actions')</th>
@@ -133,6 +147,15 @@
                                 <td>{{ $ev->subject?->name ?? '—' }}</td>
                                 <td>{{ $ev->evaluator?->name ?? '—' }}</td>
                                 <td>{{ $ev->percentage !== null ? $ev->percentage.'%' : '—' }}</td>
+                                <td class="text-center">{{ $ev->answered_count }}</td>
+                                <td class="text-center">{{ $ev->evidence_count }}</td>
+                                <td class="text-center">
+                                    @if ($ev->pending_review_count > 0)
+                                        <span class="badge bg-warning text-dark">{{ $ev->pending_review_count }}</span>
+                                    @else
+                                        <span class="text-muted">0</span>
+                                    @endif
+                                </td>
                                 <td><span class="ev-pill {{ $ev->status?->value }}">{{ $ev->status?->label() }}</span></td>
                                 <td><span class="text-muted small">{{ optional($ev->submitted_at)->format('Y-m-d') ?? '—' }}</span></td>
                                 <td class="text-end">

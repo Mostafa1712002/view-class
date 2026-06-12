@@ -56,13 +56,28 @@ class EvaluationApprovalController extends Controller
 
         $status = $request->string('status')->toString() ?: null;
         $formId = $request->integer('form') ?: null;
+        $q      = trim((string) $request->get('q', '')) ?: null;
+        $pctMin = $request->filled('pct_min') ? (float) $request->get('pct_min') : null;
+        $pctMax = $request->filled('pct_max') ? (float) $request->get('pct_max') : null;
 
         $evaluations = Evaluation::query()
             ->with(['form:id,title', 'evaluator:id,name', 'subject:id,name'])
+            // Per-row analytical counts (#207): answered items, evidence, and the
+            // items still awaiting review.
+            ->withCount([
+                'responses as answered_count',
+                'evidences as evidence_count',
+                'responses as pending_review_count' => fn (Builder $q) => $q->where('item_status', 'pending_review'),
+            ])
             ->whereIn('status', self::QUEUE)
             ->when($schoolId !== null, fn (Builder $q) => $q->where('school_id', $schoolId))
             ->when($status !== null, fn (Builder $q) => $q->where('status', $status))
             ->when($formId !== null, fn (Builder $q) => $q->where('form_id', $formId))
+            // Filter by the evaluated teacher's name.
+            ->when($q !== null, fn (Builder $w) => $w->whereHas('subject', fn (Builder $s) => $s->where('name', 'like', '%'.$q.'%')))
+            // Final-percentage range.
+            ->when($pctMin !== null, fn (Builder $w) => $w->where('percentage', '>=', $pctMin))
+            ->when($pctMax !== null, fn (Builder $w) => $w->where('percentage', '<=', $pctMax))
             ->orderByDesc('submitted_at')
             ->orderByDesc('id')
             ->paginate(25)
@@ -70,7 +85,7 @@ class EvaluationApprovalController extends Controller
 
         return view('admin.evaluation.approvals.index', [
             'evaluations' => $evaluations,
-            'filters'     => ['status' => $status, 'form' => $formId],
+            'filters'     => ['status' => $status, 'form' => $formId, 'q' => $q, 'pct_min' => $pctMin, 'pct_max' => $pctMax],
             'stats'       => $this->stats($schoolId),
             'statuses'    => $this->queueStatusOptions(),
             'forms'       => $this->scopedForms($schoolId),

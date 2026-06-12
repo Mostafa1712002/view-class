@@ -27,6 +27,9 @@ return [
         'all'     => 'الكل',
         'show'    => 'تصفية',
         'reset'   => 'إعادة تعيين',
+        'teacher'             => 'المعلم',
+        'teacher_placeholder' => 'اسم المعلم...',
+        'pct_range'           => 'النسبة النهائية (من / إلى)',
     ],
 
     'columns' => [
@@ -38,6 +41,9 @@ return [
         'status'     => 'الحالة',
         'submitted'  => 'تاريخ التسليم',
         'actions'    => 'إجراءات',
+        'answered'       => 'بنود مُجابة',
+        'evidence'       => 'شواهد',
+        'pending_review' => 'بانتظار المراجعة',
     ],
 
     'actions' => [

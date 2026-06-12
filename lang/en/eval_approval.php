@@ -27,6 +27,9 @@ return [
         'all'     => 'All',
         'show'    => 'Filter',
         'reset'   => 'Reset',
+        'teacher'             => 'Teacher',
+        'teacher_placeholder' => 'Teacher name...',
+        'pct_range'           => 'Final % (from / to)',
     ],
 
     'columns' => [
@@ -38,6 +41,9 @@ return [
         'status'     => 'Status',
         'submitted'  => 'Submitted',
         'actions'    => 'Actions',
+        'answered'       => 'Answered',
+        'evidence'       => 'Evidence',
+        'pending_review' => 'Awaiting review',
     ],
 
     'actions' => [
