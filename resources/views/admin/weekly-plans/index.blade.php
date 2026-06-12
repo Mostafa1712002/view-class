@@ -4,21 +4,17 @@
 
 @section('content')
 <div class="content-header row">
-    <div class="content-header-left col-md-9 col-12 mb-2">
-        <div class="row breadcrumbs-top">
-            <div class="col-12">
-                <h2 class="content-header-title float-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} mb-0">الخطط الأسبوعية</h2>
-                <div class="breadcrumb-wrapper">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
-                        <li class="breadcrumb-item active">الخطط الأسبوعية</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
+    <div class="content-header-left col-md-7 col-12 mb-2">
+        <h2 class="content-header-title mb-0">@lang('weekly_plan.page_title')</h2>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
+            <li class="breadcrumb-item active">@lang('weekly_plan.breadcrumb')</li>
+        </ol>
     </div>
-    <div class="content-header-right text-md-left col-md-3 col-12">
-        <a href="{{ route('manage.weekly-plans.create') }}" class="btn btn-primary"><i data-feather="plus"></i> @lang('common.create') خطة</a>
+    <div class="content-header-right col-md-5 col-12 text-md-right">
+        <a href="{{ route('manage.weekly-plans.create') }}" class="btn btn-primary btn-sm">
+            <i class="la la-plus"></i> @lang('weekly_plan.btn_add_plan')
+        </a>
     </div>
 </div>
 
@@ -79,8 +75,8 @@
                     </select>
                 </div>
                 <div class="col-md-2 mb-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-outline-primary ml-1">بحث</button>
-                    <a href="{{ route('manage.weekly-plans.index') }}" class="btn btn-outline-secondary">إعادة</a>
+                    <button type="submit" class="btn btn-primary btn-sm ml-1"><i class="la la-search"></i> بحث</button>
+                    <a href="{{ route('manage.weekly-plans.index') }}" class="btn btn-outline-secondary btn-sm"><i class="la la-times"></i> إعادة</a>
                 </div>
             </form>
         </div>
@@ -136,21 +132,21 @@
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('manage.weekly-plans.show', $plan) }}" class="btn btn-sm btn-info" title="عرض"><i data-feather="eye"></i></a>
+                            <a href="{{ route('manage.weekly-plans.show', $plan) }}" class="btn btn-sm btn-outline-primary" title="عرض"><i class="la la-eye"></i></a>
                             @if($plan->canEdit(auth()->user()))
-                            <a href="{{ route('manage.weekly-plans.edit', $plan) }}" class="btn btn-sm btn-warning" title="تعديل"><i data-feather="edit"></i></a>
+                            <a href="{{ route('manage.weekly-plans.edit', $plan) }}" class="btn btn-sm btn-outline-secondary" title="تعديل"><i class="la la-edit"></i></a>
                             @endif
-                            <a href="{{ route('manage.weekly-plans.duplicate', $plan) }}" class="btn btn-sm btn-secondary" title="نسخ للأسبوع القادم"><i data-feather="copy"></i></a>
+                            <a href="{{ route('manage.weekly-plans.duplicate', $plan) }}" class="btn btn-sm btn-outline-secondary" title="نسخ للأسبوع القادم"><i class="la la-copy"></i></a>
                             @if(auth()->user()->isSuperAdmin() || auth()->user()->isSchoolAdmin())
                                 @if($plan->is_locked)
                                 <form action="{{ route('manage.weekly-plans.unlock', $plan) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm btn-success" title="فتح القفل"><i data-feather="unlock"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="فتح القفل"><i class="la la-lock-open"></i></button>
                                 </form>
                                 @else
                                 <form action="{{ route('manage.weekly-plans.lock', $plan) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm btn-danger" title="قفل"><i data-feather="lock"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="قفل"><i class="la la-lock"></i></button>
                                 </form>
                                 @endif
                             @endif

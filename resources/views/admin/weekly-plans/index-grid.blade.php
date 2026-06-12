@@ -16,16 +16,6 @@
 @push('styles')
 <style>
     /* ===== Weekly Plan — light + gold accent (card 66) ============= */
-    .wp-header { margin-bottom: 1.25rem; }
-    .wp-header h2 {
-        font-size: 1.5rem; font-weight: 700; color: #0f172a;
-        margin-bottom: .15rem; letter-spacing: -.2px;
-    }
-    .wp-header .subtitle { color: #64748b; font-size: .88rem; }
-    .wp-header .breadcrumb {
-        padding: 0; margin: 0; background: transparent; font-size: .85rem;
-    }
-    .wp-header .breadcrumb-item + .breadcrumb-item::before { color: #cbd5e1; }
 
     /* KPI strip */
     .wp-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
@@ -76,29 +66,6 @@
         border-color: #fbbf24;
         box-shadow: 0 0 0 .2rem rgba(207,160,70,.16); outline: none;
     }
-
-    /* Buttons */
-    .btn-gold {
-        background: linear-gradient(135deg, #fcd34d, #d97706);
-        border: 1px solid #d97706; color: #fff;
-        font-weight: 600; padding: .5rem 1.1rem; border-radius: 10px;
-        box-shadow: 0 1px 2px rgba(207,160,70,.18);
-        display: inline-flex; align-items: center; gap: .4rem;
-        transition: transform .15s ease, box-shadow .2s ease;
-    }
-    .btn-gold:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(207,160,70,.22); }
-    .btn-ghost {
-        background: #fff; border: 1px solid #e2e8f0; color: #334155;
-        font-weight: 600; padding: .5rem 1rem; border-radius: 10px;
-        display: inline-flex; align-items: center; gap: .35rem;
-        transition: all .15s ease;
-    }
-    .btn-ghost:hover { background: #f8fafc; color: #0f172a; border-color: #cbd5e1; }
-    .btn-ghost.btn-danger-outline { color: #b91c1c; border-color: #fecaca; }
-    .btn-ghost.btn-danger-outline:hover { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
-    .btn-ghost.btn-success-outline { color: #15803d; border-color: #bbf7d0; }
-    .btn-ghost.btn-success-outline:hover { background: #dcfce7; color: #14532d; }
-    .btn-ghost i { color: #b45309; }
 
     /* Week navigator */
     .wp-week-nav {
@@ -221,17 +188,25 @@
 @endpush
 
 @section('content')
-<div class="content-body wp-page">
-
-    {{-- Header --}}
-    <div class="wp-header">
-        <h2>@lang('weekly_plan.page_title')</h2>
-        <div class="subtitle">@lang('weekly_plan.subtitle')</div>
-        <ol class="breadcrumb mt-1">
+<div class="content-header row">
+    <div class="content-header-left col-md-7 col-12 mb-2">
+        <h2 class="content-header-title mb-0">@lang('weekly_plan.page_title')</h2>
+        <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
             <li class="breadcrumb-item active">@lang('weekly_plan.breadcrumb')</li>
         </ol>
     </div>
+    <div class="content-header-right col-md-5 col-12 text-md-right">
+        <a href="{{ route('manage.weekly-plans.create') }}" class="btn btn-primary btn-sm">
+            <i class="la la-plus"></i> @lang('weekly_plan.btn_add_plan')
+        </a>
+        <a href="{{ route('manage.weekly-plan-notes.index') }}" class="btn btn-secondary btn-sm">
+            <i class="la la-sticky-note"></i> @lang('weekly_plan.btn_ready_notes')
+        </a>
+    </div>
+</div>
+
+<div class="content-body wp-page">
 
     @include('components.alerts')
 
@@ -310,10 +285,10 @@
                            placeholder="@lang('weekly_plan.filter_search_placeholder')">
                 </div>
                 <div class="col-md-3 col-sm-6 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn-gold">
+                    <button type="submit" class="btn btn-primary btn-sm">
                         <i class="la la-search"></i> @lang('weekly_plan.btn_search')
                     </button>
-                    <button type="button" class="btn-ghost" id="wpAdvancedToggle">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="wpAdvancedToggle">
                         <i class="la la-sliders-h"></i> @lang('weekly_plan.btn_advanced')
                     </button>
                 </div>
@@ -351,7 +326,7 @@
                     <input type="date" name="date" value="{{ request('date') }}" class="form-control wp-auto">
                 </div>
                 <div class="col-12 d-flex align-items-end gap-2">
-                    <a href="{{ route('manage.weekly-plans.index', ['view' => 'grid', 'week_start' => $weekStart->toDateString()]) }}" class="btn-ghost">
+                    <a href="{{ route('manage.weekly-plans.index', ['view' => 'grid', 'week_start' => $weekStart->toDateString()]) }}" class="btn btn-outline-secondary btn-sm">
                         <i class="la la-times"></i> @lang('weekly_plan.btn_reset')
                     </a>
                 </div>
@@ -362,13 +337,13 @@
     {{-- Week navigator --}}
     <div class="wp-week-nav">
         <div class="nav-left">
-            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->subWeek()->toDateString()])) }}" class="btn-ghost">
+            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->subWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
                 <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> @lang('weekly_plan.week_prev')
             </a>
-            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => now()->startOfWeek(\Carbon\Carbon::SUNDAY)->toDateString()])) }}" class="btn-gold">
+            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => now()->startOfWeek(\Carbon\Carbon::SUNDAY)->toDateString()])) }}" class="btn btn-primary btn-sm">
                 <i class="la la-calendar-day"></i> @lang('weekly_plan.week_now')
             </a>
-            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->addWeek()->toDateString()])) }}" class="btn-ghost">
+            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->addWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
                 @lang('weekly_plan.week_next') <i class="la la-arrow-{{ $isRtl ? 'left' : 'right' }}"></i>
             </a>
         </div>
@@ -379,24 +354,18 @@
             {{ $weekEnd->format('Y-m-d') }}
         </div>
         <div class="nav-tools">
-            <a href="{{ route('manage.weekly-plans.pdf', request()->query()) }}" target="_blank" class="btn-ghost btn-danger-outline">
+            <a href="{{ route('manage.weekly-plans.pdf', request()->query()) }}" target="_blank" class="btn btn-outline-danger btn-sm">
                 <i class="la la-file-pdf"></i> @lang('weekly_plan.btn_pdf')
             </a>
-            <a href="{{ route('manage.weekly-plans.excel', request()->query()) }}" class="btn-ghost btn-success-outline">
+            <a href="{{ route('manage.weekly-plans.excel', request()->query()) }}" class="btn btn-outline-success btn-sm">
                 <i class="la la-file-excel"></i> @lang('weekly_plan.btn_excel')
             </a>
             <div class="wp-cols-dropdown">
-                <button type="button" class="btn-ghost" id="wpColsToggle">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="wpColsToggle">
                     <i class="la la-columns"></i> @lang('weekly_plan.btn_columns')
                 </button>
                 <div class="wp-cols-menu" id="wpColsMenu"></div>
             </div>
-            <a href="{{ route('manage.weekly-plan-notes.index') }}" class="btn-ghost">
-                <i class="la la-sticky-note"></i> @lang('weekly_plan.btn_ready_notes')
-            </a>
-            <a href="{{ route('manage.weekly-plans.create') }}" class="btn-gold">
-                <i class="la la-plus"></i> @lang('weekly_plan.btn_add_plan')
-            </a>
         </div>
     </div>
 

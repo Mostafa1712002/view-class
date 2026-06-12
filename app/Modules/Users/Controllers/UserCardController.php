@@ -115,11 +115,14 @@ class UserCardController extends Controller
             @mkdir($tmp, 0775, true);
         }
 
+        // For Arabic locale use xbriyaz (bundled, full Arabic shaping + kashida).
+        // For English/LTR fall back to dejavusans.  autoLangToFont still fires
+        // for any language that differs from the default, so mixed content is fine.
         $mpdf = new \Mpdf\Mpdf([
             'mode'             => 'utf-8',
             'format'           => 'A4',
             'orientation'      => 'P',
-            'default_font'     => 'dejavusans',
+            'default_font'     => $isRtl ? 'xbriyaz' : 'dejavusans',
             'autoScriptToLang' => true,
             'autoLangToFont'   => true,
             'tempDir'          => $tmp,

@@ -166,7 +166,7 @@ class WeeklyPlanController extends Controller
             'mode'             => 'utf-8',
             'format'           => 'A4',
             'orientation'      => 'L',           // landscape — 9 columns need the width
-            'default_font'     => 'dejavusans',
+            'default_font'     => 'xbriyaz',     // Arabic-primary content; xbriyaz shapes Arabic (dejavusans is crude)
             'autoScriptToLang' => true,
             'autoLangToFont'   => true,
             'tempDir'          => $tmp,

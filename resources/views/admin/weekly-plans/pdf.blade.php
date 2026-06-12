@@ -7,7 +7,9 @@
         /* mPDF-compatible CSS — no flex/grid; tables + inline-block only */
         * { box-sizing: border-box; }
         body {
-            font-family: 'dejavusans', 'DejaVu Sans', sans-serif;
+            /* Arabic-primary content: use xbriyaz (bundled, full Arabic shaping).
+               Do NOT force dejavusans here — its Arabic glyphs are unshaped/crude. */
+            font-family: xbriyaz, 'XB Riyaz', dejavusans, sans-serif;
             direction: rtl;
             font-size: 10px;
             color: #1e293b;
