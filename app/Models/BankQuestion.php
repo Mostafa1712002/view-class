@@ -36,7 +36,15 @@ class BankQuestion extends Model
 
     protected $fillable = [
         'question_bank_id',
+        'question_code',
+        'question_content_type',
+        'is_full_image_question',
         'lesson_id',
+        'unit_id',
+        'week_id',
+        'skill_id',
+        'standard_id',
+        'domain_id',
         'type',
         'body_ar',
         'body_en',
@@ -44,14 +52,30 @@ class BankQuestion extends Model
         'difficulty',
         'points',
         'attachment_path',
+        'source',
+        'explanation',
         'status',
         'created_by',
+        'reviewed_by',
+        'reviewed_at',
+        'rejected_reason',
+        'imported_by',
+        'import_batch_id',
+        'external_platform',
+        'external_id',
+        'sync_status',
+        'last_synced_at',
+        'metadata',
     ];
 
     protected $casts = [
         'answer_data' => 'array',
+        'metadata' => 'array',
         'difficulty' => 'integer',
         'points' => 'decimal:2',
+        'is_full_image_question' => 'boolean',
+        'reviewed_at' => 'datetime',
+        'last_synced_at' => 'datetime',
     ];
 
     public function bank(): BelongsTo
@@ -67,6 +91,21 @@ class BankQuestion extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function importer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'imported_by');
+    }
+
+    public function importBatch(): BelongsTo
+    {
+        return $this->belongsTo(QuestionImportBatch::class, 'import_batch_id');
     }
 
     public function getDisplayBodyAttribute(): string
