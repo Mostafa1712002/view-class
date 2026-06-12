@@ -99,6 +99,7 @@ return [
         'created'         => 'Educational outcome computed and saved successfully.',
         'recomputed'      => 'Outcome recomputed successfully.',
         'settings_saved'  => 'Calculation settings saved.',
+        'select_school_first' => 'Please select a school before adding an outcome.',
     ],
 
     // Validation messages

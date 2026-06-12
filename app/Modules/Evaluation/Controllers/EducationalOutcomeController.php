@@ -45,6 +45,9 @@ class EducationalOutcomeController extends Controller
     public function index(): View
     {
         $schoolId = $this->activeSchoolId();
+        // A null scope is only the global view for super-admins; for anyone else
+        // it would leak every school's outcomes — deny it.
+        abort_if($schoolId === null && ! auth()->user()?->isSuperAdmin(), 403);
 
         $outcomes = EvaluationOutcome::query()
             ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
@@ -77,6 +80,13 @@ class EducationalOutcomeController extends Controller
     /** Save the school-level outcome method. Super-admins may also set the global default. */
     public function updateSettings(Request $request): RedirectResponse
     {
+        // Changing the outcome-averaging method is an admin-only mutation (it can
+        // alter teachers' evaluation results). Explicit gate in addition to the
+        // route's role middleware. TODO Phase D: swap for the granular
+        // EvaluationOutcomePermissions::MANAGE_OUTCOME_METHOD permission once seeded.
+        $actor = auth()->user();
+        abort_unless($actor && ($actor->isSuperAdmin() || $actor->isSchoolAdmin()), 403);
+
         $validMethods = array_column(OutcomeMethod::cases(), 'value');
 
         $data = $request->validate([
@@ -115,6 +125,11 @@ class EducationalOutcomeController extends Controller
     public function store(StoreEvaluationOutcomeRequest $request): RedirectResponse
     {
         $schoolId = $this->activeSchoolId();
+        // An outcome must belong to a school (school_id is NOT NULL). A super-admin
+        // with no school selected, or any unscoped non-admin, cannot create one.
+        if ($schoolId === null) {
+            return back()->withInput()->with('error', __('evaluation_outcomes.flash.select_school_first'));
+        }
 
         $data = $request->validated();
         $data['school_id'] = $schoolId;
@@ -137,7 +152,10 @@ class EducationalOutcomeController extends Controller
     public function show(EvaluationOutcome $outcome): View
     {
         $schoolId = $this->activeSchoolId();
-        if ($schoolId !== null && (int) $outcome->school_id !== (int) $schoolId) {
+        // Non-super-admins must be scoped to the outcome's own school; a null
+        // scope (super-admin only) is a global view, denied for everyone else.
+        if (! auth()->user()?->isSuperAdmin()
+            && ($schoolId === null || (int) $outcome->school_id !== (int) $schoolId)) {
             abort(403);
         }
 
@@ -154,7 +172,10 @@ class EducationalOutcomeController extends Controller
     public function recompute(Request $request, EvaluationOutcome $outcome): RedirectResponse
     {
         $schoolId = $this->activeSchoolId();
-        if ($schoolId !== null && (int) $outcome->school_id !== (int) $schoolId) {
+        // Non-super-admins must be scoped to the outcome's own school; a null
+        // scope (super-admin only) is a global view, denied for everyone else.
+        if (! auth()->user()?->isSuperAdmin()
+            && ($schoolId === null || (int) $outcome->school_id !== (int) $schoolId)) {
             abort(403);
         }
 

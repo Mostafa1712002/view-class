@@ -99,6 +99,7 @@ return [
         'created'         => 'تمّ احتساب الناتج التعليمي بنجاح.',
         'recomputed'      => 'تمّت إعادة الاحتساب بنجاح.',
         'settings_saved'  => 'تمّ حفظ إعدادات الاحتساب.',
+        'select_school_first' => 'يجب اختيار مدرسة أولاً قبل إضافة ناتج تعليمي.',
     ],
 
     // Validation messages
