@@ -48,8 +48,12 @@ class AdminCertificateController extends Controller
         $data = $request->validated();
         $schoolId = $this->activeSchoolId();
 
+        // A non super-admin must have a concrete school scope (no null-scope tenant bypass).
+        abort_if(! auth()->user()->isSuperAdmin() && $schoolId === null, 403);
+
         $data['school_id'] = $schoolId;
-        $data['issued_by'] = $data['issued_by'] ?? auth()->id();
+        // The issuer is always the acting admin — never client-supplied.
+        $data['issued_by'] = auth()->id();
 
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('certificates', 'public');
@@ -67,11 +71,7 @@ class AdminCertificateController extends Controller
     {
         $cert = $this->certificates->find($certificate);
         abort_if(! $cert, 404);
-
-        $user = auth()->user();
-        if (! $user->isSuperAdmin()) {
-            abort_unless($cert->school_id === $this->activeSchoolId(), 404);
-        }
+        $this->authorizeCert($cert);
 
         $schoolId = $this->activeSchoolId();
         $recipients = $this->getSchoolUsers($schoolId);
@@ -86,11 +86,7 @@ class AdminCertificateController extends Controller
     {
         $cert = $this->certificates->find($certificate);
         abort_if(! $cert, 404);
-
-        $user = auth()->user();
-        if (! $user->isSuperAdmin()) {
-            abort_unless($cert->school_id === $this->activeSchoolId(), 404);
-        }
+        $this->authorizeCert($cert);
 
         $data = $request->validated();
 
@@ -114,11 +110,7 @@ class AdminCertificateController extends Controller
     {
         $cert = $this->certificates->find($certificate);
         abort_if(! $cert, 404);
-
-        $user = auth()->user();
-        if (! $user->isSuperAdmin()) {
-            abort_unless($cert->school_id === $this->activeSchoolId(), 404);
-        }
+        $this->authorizeCert($cert);
 
         $this->certificates->publish($cert);
 
@@ -131,11 +123,7 @@ class AdminCertificateController extends Controller
     {
         $cert = $this->certificates->find($certificate);
         abort_if(! $cert, 404);
-
-        $user = auth()->user();
-        if (! $user->isSuperAdmin()) {
-            abort_unless($cert->school_id === $this->activeSchoolId(), 404);
-        }
+        $this->authorizeCert($cert);
 
         // Delete the file from disk if it exists
         if ($cert->file_path) {
@@ -147,6 +135,24 @@ class AdminCertificateController extends Controller
         return redirect()
             ->route('admin.certificates.index')
             ->with('success', __('certificates.flash.deleted'));
+    }
+
+    /**
+     * Guard a single certificate against cross-tenant access. Super-admins are
+     * global; everyone else must have a concrete active school that matches the
+     * certificate's school_id. A null active school for a non super-admin is a
+     * hard 403 (no null-scope bypass), never a silent match.
+     */
+    private function authorizeCert(Certificate $cert): void
+    {
+        $user = auth()->user();
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $schoolId = $this->activeSchoolId();
+        abort_if($schoolId === null, 403);
+        abort_unless($cert->school_id === $schoolId, 404);
     }
 
     /**

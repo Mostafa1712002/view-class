@@ -72,7 +72,10 @@ class EloquentCertificateRepository implements CertificateRepository
 
     public function forTeacher(?int $schoolId, int $userId): Collection
     {
+        // Published only — a teacher must not see draft/unpublished certificates,
+        // including drafts that merely name them as recipient or issuer.
         return Certificate::query()
+            ->published()
             ->forSchool($schoolId)
             ->where(function ($w) use ($userId) {
                 $w->where('recipient_user_id', $userId)

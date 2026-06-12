@@ -97,24 +97,6 @@
                         @enderror
                     </div>
 
-                    {{-- Issued By --}}
-                    <div class="col-md-6 mb-1">
-                        <label>@lang('certificates.fields.issued_by')</label>
-                        <select name="issued_by"
-                                class="form-control select2 @error('issued_by') is-invalid @enderror">
-                            <option value="">—</option>
-                            @foreach($recipients as $u)
-                                <option value="{{ $u->id }}"
-                                    @selected((string) old('issued_by', $isEdit ? $certificate->issued_by : '') === (string) $u->id)>
-                                    {{ $u->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('issued_by')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
                     {{-- Issue Date --}}
                     <div class="col-md-6 mb-1">
                         <label>@lang('certificates.fields.issue_date') <span class="text-danger">*</span></label>
