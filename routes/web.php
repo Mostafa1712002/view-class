@@ -949,3 +949,6 @@ Route::middleware(['auth'])
         Route::get('events.json', [\App\Modules\SchoolCalendar\Controllers\MyCalendarController::class, 'eventsJson'])->name('events.json');
         Route::get('/', [\App\Modules\SchoolCalendar\Controllers\MyCalendarController::class, 'index'])->name('index');
     });
+
+// === Discussion Rooms module ===
+require __DIR__.'/../app/Modules/Discussion/Routes/web.php';

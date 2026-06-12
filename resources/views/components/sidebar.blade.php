@@ -157,7 +157,16 @@
             <li class="nav-item" data-section="communication"><a href="#"><i class="la la-th-large"></i><span class="menu-title">@lang('shell.nav_classified_ads')</span></a></li>
             <li class="nav-item" data-section="communication"><a href="#"><i class="la la-calendar-alt"></i><span class="menu-title">@lang('shell.nav_calendar')</span></a></li>
             <li class="nav-item" data-section="communication"><a href="#"><i class="la la-video"></i><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a></li>
-            <li class="nav-item" data-section="communication"><a href="#"><i class="la la-comments"></i><span class="menu-title">@lang('shell.nav_discussion_rooms')</span></a></li>
+            @php
+                $discIsStaff   = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin() || $sidebarUser->isTeacher());
+                $discRoute     = $discIsStaff
+                    ? (Route::has('manage.discussion-rooms.index') ? route('manage.discussion-rooms.index') : '#')
+                    : (Route::has('discussion.index') ? route('discussion.index') : '#');
+                $discActive    = request()->routeIs('manage.discussion-rooms.*') || request()->routeIs('discussion.*');
+            @endphp
+            <li class="nav-item {{ $discActive ? 'active' : '' }}" data-section="communication">
+                <a href="{{ $discRoute }}"><i class="la la-comments"></i><span class="menu-title">@lang('shell.nav_discussion_rooms')</span></a>
+            </li>
 
             <li class="nav-item has-sub" data-section="communication">
                 <a href="{{ route('messages.index') }}"><i class="la la-inbox"></i><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
