@@ -15,9 +15,12 @@ class EvaluationEvidence extends Model
         'evaluation_id', 'item_id', 'indicator_id', 'type', 'file_id', 'url',
         'original_name', 'mime', 'size', 'description', 'internal_notes',
         'visible_to_subject', 'uploaded_by',
-        // Phase B (#204) — approval workflow
-        'status', 'source', 'reviewed_by', 'reviewed_at', 'review_note',
     ];
+
+    // Phase B (#204) — approval-workflow fields (status, source, reviewed_by,
+    // reviewed_at, review_note) are deliberately NOT mass-assignable. They are set
+    // only by trusted server code (ReviewEvidence; future system/auto sources) via
+    // explicit assignment, so a crafted upload request cannot pre-approve evidence.
 
     protected $casts = [
         'size'               => 'integer',

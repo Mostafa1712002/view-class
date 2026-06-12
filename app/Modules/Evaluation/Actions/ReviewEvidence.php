@@ -73,12 +73,14 @@ class ReviewEvidence
         return DB::transaction(function () use ($evidence, $newStatus, $note, $actor) {
             $old = $evidence->toArray();
 
-            $evidence->fill([
-                'status'      => $newStatus,
-                'reviewed_by' => $actor->id,
-                'reviewed_at' => now(),
-                'review_note' => $note,
-            ])->save();
+            // Explicit assignment (NOT mass-assign): these are guarded workflow
+            // fields, intentionally excluded from $fillable so only this trusted
+            // action can change an evidence's approval state.
+            $evidence->status      = $newStatus;
+            $evidence->reviewed_by = $actor->id;
+            $evidence->reviewed_at = now();
+            $evidence->review_note = $note;
+            $evidence->save();
 
             $this->audit->record(
                 'evidence.review',
