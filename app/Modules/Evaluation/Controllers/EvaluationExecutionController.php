@@ -203,6 +203,13 @@ class EvaluationExecutionController extends Controller
             return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
         }
 
+        // Tenant guard: a shared evaluation has no single evaluator, but the actor
+        // must still belong to its school (super-admin with null scope is global).
+        $schoolId = $this->activeSchoolId();
+        if ($schoolId !== null && (int) $eval->school_id !== (int) $schoolId) {
+            return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
+        }
+
         // Collect current user's role slugs for filtering.
         $userRoleSlugs = method_exists($user, 'roles')
             ? $user->roles->pluck('slug')->all()
@@ -454,8 +461,13 @@ class EvaluationExecutionController extends Controller
             return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
         }
 
-        // Phase E: shared evaluations have no single evaluator — allow any authenticated user through.
+        // Phase E: shared evaluations have no single evaluator, but the actor must
+        // still belong to the evaluation's school (super-admin null scope = global).
         if ($eval->form && $eval->form->shared_mode) {
+            $schoolId = $this->activeSchoolId();
+            if ($schoolId !== null && (int) $eval->school_id !== (int) $schoolId) {
+                return redirect()->route('admin.my-evaluations.index')->with('error', __('evaluation.execute.errors.not_yours'));
+            }
             return $eval;
         }
 
