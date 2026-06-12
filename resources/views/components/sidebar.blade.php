@@ -279,7 +279,15 @@
                 </ul>
             </li>
 
-            <li class="nav-item" data-section="system"><a href="#"><i class="la la-life-ring"></i><span class="menu-title">@lang('shell.nav_support')</span></a></li>
+            @php
+                $sidebarSupportRoute = ($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
+                    ? (Route::has('admin.support.index') ? route('admin.support.index') : '#')
+                    : (Route::has('my.support.index') ? route('my.support.index') : '#');
+                $sidebarSupportActive = request()->routeIs('admin.support.*') || request()->routeIs('my.support.*');
+            @endphp
+            <li class="nav-item {{ $sidebarSupportActive ? 'active' : '' }}" data-section="system">
+                <a href="{{ $sidebarSupportRoute }}"><i class="la la-life-ring"></i><span class="menu-title">@lang('shell.nav_support')</span></a>
+            </li>
             <li class="nav-item" data-section="system"><a href="#"><i class="la la-user-plus"></i><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
             @endif
 

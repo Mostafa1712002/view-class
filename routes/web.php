@@ -906,3 +906,22 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
         Route::delete('{id}', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'destroy'])->name('destroy');
         Route::post('{id}/toggle', [\App\Modules\Appointments\Controllers\AppointmentBookableRoleController::class, 'toggle'])->name('toggle');
     });
+
+// ==========================================
+// Support Tickets
+// ==========================================
+Route::middleware(['auth'])->prefix('my/support')->name('my.support.')->group(function () {
+    Route::get('/', [\App\Modules\Support\Controllers\UserSupportController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Modules\Support\Controllers\UserSupportController::class, 'create'])->name('create');
+    Route::post('/', [\App\Modules\Support\Controllers\UserSupportController::class, 'store'])->name('store');
+    Route::get('/{ticket}', [\App\Modules\Support\Controllers\UserSupportController::class, 'show'])->name('show');
+    Route::post('/{ticket}/reply', [\App\Modules\Support\Controllers\UserSupportController::class, 'reply'])->name('reply');
+});
+
+Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/support')->name('admin.support.')->group(function () {
+    Route::get('/', [\App\Modules\Support\Controllers\AdminSupportController::class, 'index'])->name('index');
+    Route::get('/{ticket}', [\App\Modules\Support\Controllers\AdminSupportController::class, 'show'])->name('show');
+    Route::post('/{ticket}/reply', [\App\Modules\Support\Controllers\AdminSupportController::class, 'reply'])->name('reply');
+    Route::post('/{ticket}/assign', [\App\Modules\Support\Controllers\AdminSupportController::class, 'assign'])->name('assign');
+    Route::post('/{ticket}/status', [\App\Modules\Support\Controllers\AdminSupportController::class, 'updateStatus'])->name('updateStatus');
+});
