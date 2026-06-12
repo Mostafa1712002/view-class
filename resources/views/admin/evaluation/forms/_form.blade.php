@@ -70,6 +70,7 @@
     <small class="text-muted">@lang('evaluation.form.fields.levels_help')</small>
 </div>
 <div id="ev-checklist-note" class="alert alert-info" style="display:none;">@lang('evaluation.form.fields.checklist_note')</div>
+<div id="ev-percentage-note" class="alert alert-info" style="display:none;">@lang('evaluation.form.fields.percentage_note')</div>
 
 {{-- Phase E (#202): Shared mode toggle --}}
 <div class="card p-3 mb-3" style="background:#f0f8ff;border:1px solid #b8d4f0;border-radius:12px;">
@@ -145,8 +146,11 @@ jQuery(function ($) {
     var T = { levelN: @json(__('evaluation.form.fields.level_n', ['n' => '__N__'])) };
     var $type = $('#ev-type'), $countWrap = $('#ev-levels-count-wrap'), $count = $('#ev-levels-count');
     var $block = $('#ev-levels-block'), $list = $('#ev-levels-list'), $note = $('#ev-checklist-note');
+    var $pctNote = $('#ev-percentage-note');
 
-    function isChecklist() { return $type.val() === 'checklist'; }
+    // Only rubric & rating_scale use a levels configuration. Checklist and
+    // percentage have no levels (percentage: the evaluator types a 0–100 value).
+    function usesLevels() { var t = $type.val(); return t === 'rubric' || t === 'rating_scale'; }
 
     function renderLevels() {
         var n = Math.max(2, Math.min(10, parseInt($count.val(), 10) || 4));
@@ -160,16 +164,19 @@ jQuery(function ($) {
     }
 
     function applyType() {
-        if (isChecklist()) {
-            $block.hide(); $countWrap.hide(); $note.show();
-        } else {
-            $block.show(); $countWrap.show(); $note.hide();
+        var t = $type.val();
+        if (usesLevels()) {
+            $block.show(); $countWrap.show(); $note.hide(); $pctNote.hide();
             if ($list.find('input').length === 0) renderLevels();
+        } else {
+            $block.hide(); $countWrap.hide();
+            $note.toggle(t === 'checklist');
+            $pctNote.toggle(t === 'percentage');
         }
     }
 
     $type.on('change', applyType);
-    $count.on('input change', function () { if (!isChecklist()) renderLevels(); });
+    $count.on('input change', function () { if (usesLevels()) renderLevels(); });
     applyType();
 
     // Job-performance settings panel toggle.

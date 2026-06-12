@@ -26,12 +26,14 @@ class FormCompletenessChecker
             $problems[] = __('evaluation.checks.no_items');
         }
 
-        if ($form->indicators()->where('status', 'active')->count() === 0) {
+        // Percentage forms have no indicators by design (one direct 0–100 value per item).
+        if ($form->type !== FormType::Percentage
+            && $form->indicators()->where('status', 'active')->count() === 0) {
             $problems[] = __('evaluation.checks.no_indicators');
         }
 
-        // Weighted types must sum to 100%.
-        if (in_array($form->type, [FormType::Rubric, FormType::RatingScale], true) && $items->isNotEmpty()) {
+        // Weighted types must sum to 100% (rubric, rating scale, percentage).
+        if (in_array($form->type, [FormType::Rubric, FormType::RatingScale, FormType::Percentage], true) && $items->isNotEmpty()) {
             $sum = (float) $items->sum('weight');
             if (abs($sum - 100.0) > 0.01) {
                 $problems[] = __('evaluation.checks.weights_not_100', ['sum' => rtrim(rtrim(number_format($sum, 2), '0'), '.')]);

@@ -55,6 +55,24 @@ trait WritesResponses
                     'note'         => $note,
                 ];
             }
+        } elseif ($type === FormType::Percentage) {
+            // One row per item; the evaluator's 0–100 percentage is stored on `score`.
+            $chosen = is_array($answers['items'] ?? null) ? $answers['items'] : [];
+            foreach ($items as $itemId => $item) {
+                $hasVal = array_key_exists($itemId, $chosen) && $chosen[$itemId] !== '' && $chosen[$itemId] !== null;
+                $score  = $hasVal ? max(0.0, min(100.0, (float) $chosen[$itemId])) : null;
+                $note   = $this->note($itemNotes, $itemId);
+                if ($score === null && $note === null) {
+                    continue;
+                }
+                $rows[] = [
+                    'item_id'      => $itemId,
+                    'indicator_id' => null,
+                    'level_id'     => null,
+                    'score'        => $score,
+                    'note'         => $note,
+                ];
+            }
         } else {
             // rating_scale + checklist: one row per indicator
             $chosen = is_array($answers['indicators'] ?? null) ? $answers['indicators'] : [];

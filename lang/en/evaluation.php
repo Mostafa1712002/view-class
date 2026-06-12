@@ -5,6 +5,7 @@ return [
         'rubric'       => 'Rubric',
         'rating_scale' => 'Rating Scale',
         'checklist'    => 'Checklist',
+        'percentage'   => 'Percentage',
     ],
     'domains' => [
         'teacher'            => 'Teacher evaluation',
@@ -128,6 +129,7 @@ return [
             'level_n'       => 'Level :n',
             'levels_help'   => 'Order levels from lowest to highest.',
             'checklist_note'=> 'Checklist type needs no multiple levels — met / not met is enough.',
+            'percentage_note'=> 'Percentage type needs no levels — the evaluator enters a value out of 100 per item, and each item weight is set by the admin (weights must total 100%).',
             'start_date'    => 'Start date',
             'close_date'    => 'Close date',
             'internal_notes'                  => 'Internal notes',
@@ -396,6 +398,10 @@ return [
             'pick_level'    => 'Pick a level',
             'met'           => 'Met',
             'not_met'       => 'Not met',
+            'entered_percentage' => 'Entered percentage',
+            'weight'             => 'Item weight',
+            'calculated'         => 'Calculated',
+            'of_100'             => 'of 100%',
         ],
         'preview' => [
             'title'      => 'Preliminary result (estimate)',

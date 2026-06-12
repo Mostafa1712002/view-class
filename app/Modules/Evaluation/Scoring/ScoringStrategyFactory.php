@@ -26,6 +26,7 @@ final class ScoringStrategyFactory
             FormType::Rubric      => new RubricScorer(),
             FormType::RatingScale => new RatingScaleScorer(),
             FormType::Checklist   => new ChecklistScorer(),
+            FormType::Percentage  => new PercentageScorer(),
             default               => throw new InvalidArgumentException(
                 'No scoring strategy for evaluation form type: '
                 . (is_string($type) ? $type : $type->value)

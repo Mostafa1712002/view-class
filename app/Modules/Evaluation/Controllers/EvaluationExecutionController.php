@@ -427,7 +427,11 @@ class EvaluationExecutionController extends Controller
                     ? (bool) $r->checklist_value
                     : ($r->level_id !== null ? (int) $r->level_id : null);
             } elseif ($r->item_id !== null) {
-                $byItem[(int) $r->item_id] = $r->level_id !== null ? (int) $r->level_id : null;
+                // Rubric stores the chosen level on the item row; percentage stores
+                // the evaluator's 0–100 value on `score` (level_id is null then).
+                $byItem[(int) $r->item_id] = $r->level_id !== null
+                    ? (int) $r->level_id
+                    : ($r->score !== null ? (float) $r->score : null);
                 if ($r->note !== null) {
                     $notes[(int) $r->item_id] = $r->note;
                 }

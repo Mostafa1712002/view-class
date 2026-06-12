@@ -131,6 +131,16 @@
                         @foreach ($levels as $lvl)
                             <div>@if($chosen===$lvl['id'])<i class="la la-check-circle text-success"></i>@else<i class="la la-circle text-muted"></i>@endif {{ $lvl['label'] }}</div>
                         @endforeach
+                    @elseif ($type === 'percentage')
+                        @php
+                            $entered = $responses['items'][$item['id']] ?? null;
+                            $calc    = $entered !== null ? round((float) $entered * (float) $item['weight'] / 100, 2) : 0;
+                        @endphp
+                        <div>
+                            @lang('evaluation.execute.fields.entered_percentage'):
+                            <strong>{{ $entered !== null ? rtrim(rtrim(number_format((float) $entered, 2), '0'), '.') . '%' : '—' }}</strong>
+                            <span class="text-muted small">(@lang('evaluation.execute.fields.weight'): {{ $item['weight'] }}% — @lang('evaluation.execute.fields.calculated'): {{ $calc }}%)</span>
+                        </div>
                     @else
                         @foreach (($item['indicators'] ?? []) as $ind)
                             @if (($ind['status'] ?? 'active') === 'disabled') @continue @endif
@@ -175,6 +185,21 @@
                                 @endforeach
                             </div>
                             {{-- Evidence at item level for rubric --}}
+                            @include('admin.evaluation.execute._evidence', ['nodeType'=>'item','nodeId'=>$iid,'nodeKey'=>$nodeKey])
+                        @elseif ($type === 'percentage')
+                            @php $chosen = $responses['items'][$iid] ?? null; @endphp
+                            <div class="d-flex align-items-center gap-2" style="max-width:420px;">
+                                <input type="number" name="items[{{ $iid }}]" class="form-control form-control-sm ex-pct"
+                                       min="0" max="100" step="0.01" data-weight="{{ $item['weight'] }}"
+                                       value="{{ $chosen !== null ? rtrim(rtrim(number_format((float) $chosen, 2), '0'), '.') : '' }}"
+                                       placeholder="0 - 100">
+                                <span class="text-muted small text-nowrap">
+                                    @lang('evaluation.execute.fields.of_100')
+                                    · @lang('evaluation.execute.fields.weight'): {{ $item['weight'] }}%
+                                    · @lang('evaluation.execute.fields.calculated'): <span class="ex-pct-calc fw-bold">{{ $chosen !== null ? round((float) $chosen * (float) $item['weight'] / 100, 2) : 0 }}</span>%
+                                </span>
+                            </div>
+                            {{-- Evidence at item level for percentage --}}
                             @include('admin.evaluation.execute._evidence', ['nodeType'=>'item','nodeId'=>$iid,'nodeKey'=>$nodeKey])
                         @else
                             @foreach (($item['indicators'] ?? []) as $ind)
@@ -306,6 +331,17 @@ jQuery(function ($) {
         var f = $('#ev-del-form');
         f.attr('action', f.data('base') + '/' + $(this).data('id'));
         f.appendTo('body').trigger('submit');
+    });
+
+    // Percentage items: live-update the calculated contribution (entered% × weight%).
+    $(document).on('input', '.ex-pct', function () {
+        var $i = $(this);
+        var pct = parseFloat($i.val());
+        if (isNaN(pct)) pct = 0;
+        pct = Math.max(0, Math.min(100, pct));
+        var w = parseFloat($i.data('weight')) || 0;
+        var calc = Math.round((pct * w / 100) * 100) / 100;
+        $i.closest('.d-flex').find('.ex-pct-calc').text(calc);
     });
 });
 </script>
