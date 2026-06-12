@@ -30,6 +30,9 @@ return [
         'teacher'             => 'Teacher',
         'teacher_placeholder' => 'Teacher name...',
         'pct_range'           => 'Final % (from / to)',
+        'date_range'          => 'Submitted (from / to)',
+        'has_pending_review'      => 'Has items awaiting review',
+        'has_unapproved_evidence' => 'Has unapproved evidence',
     ],
 
     'columns' => [

@@ -112,6 +112,23 @@
                     <input type="number" name="pct_max" value="{{ $filters['pct_max'] ?? '' }}" class="form-control" placeholder="100" min="0" max="100" step="0.01">
                 </div>
             </div>
+            <div class="col-md-3 col-6">
+                <label class="form-label">@lang('eval_approval.filters.date_range')</label>
+                <div class="d-flex gap-1">
+                    <input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}" class="form-control">
+                    <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-5 col-12 d-flex flex-wrap gap-3 align-items-center">
+                <label class="d-flex align-items-center gap-1 small mb-0">
+                    <input type="checkbox" name="has_pending_review" value="1" {{ !empty($filters['has_pending_review']) ? 'checked' : '' }}>
+                    @lang('eval_approval.filters.has_pending_review')
+                </label>
+                <label class="d-flex align-items-center gap-1 small mb-0">
+                    <input type="checkbox" name="has_unapproved_evidence" value="1" {{ !empty($filters['has_unapproved_evidence']) ? 'checked' : '' }}>
+                    @lang('eval_approval.filters.has_unapproved_evidence')
+                </label>
+            </div>
             <div class="col-md-4 col-12 d-flex gap-1 align-items-end">
                 <button type="submit" class="btn ev-add-btn flex-grow-1"><i class="la la-search"></i> @lang('eval_approval.filters.show')</button>
                 <a href="{{ route('admin.evaluations.approvals.index') }}" class="btn btn-outline-secondary" title="@lang('eval_approval.filters.reset')"><i class="la la-redo"></i></a>

@@ -30,6 +30,9 @@ return [
         'teacher'             => 'المعلم',
         'teacher_placeholder' => 'اسم المعلم...',
         'pct_range'           => 'النسبة النهائية (من / إلى)',
+        'date_range'          => 'تاريخ التسليم (من / إلى)',
+        'has_pending_review'      => 'بنود بانتظار المراجعة',
+        'has_unapproved_evidence' => 'شواهد غير معتمدة',
     ],
 
     'columns' => [

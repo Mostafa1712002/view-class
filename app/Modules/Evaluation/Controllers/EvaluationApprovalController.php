@@ -59,6 +59,10 @@ class EvaluationApprovalController extends Controller
         $q      = trim((string) $request->get('q', '')) ?: null;
         $pctMin = $request->filled('pct_min') ? (float) $request->get('pct_min') : null;
         $pctMax = $request->filled('pct_max') ? (float) $request->get('pct_max') : null;
+        $dateFrom = $request->filled('date_from') ? $request->string('date_from')->toString() : null;
+        $dateTo   = $request->filled('date_to') ? $request->string('date_to')->toString() : null;
+        $hasPendingReview      = $request->boolean('has_pending_review');
+        $hasUnapprovedEvidence = $request->boolean('has_unapproved_evidence');
 
         $evaluations = Evaluation::query()
             ->with(['form:id,title', 'evaluator:id,name', 'subject:id,name'])
@@ -78,6 +82,12 @@ class EvaluationApprovalController extends Controller
             // Final-percentage range.
             ->when($pctMin !== null, fn (Builder $w) => $w->where('percentage', '>=', $pctMin))
             ->when($pctMax !== null, fn (Builder $w) => $w->where('percentage', '<=', $pctMax))
+            // Submission date range.
+            ->when($dateFrom !== null, fn (Builder $w) => $w->whereDate('submitted_at', '>=', $dateFrom))
+            ->when($dateTo !== null, fn (Builder $w) => $w->whereDate('submitted_at', '<=', $dateTo))
+            // "Why incomplete" boolean filters (#207).
+            ->when($hasPendingReview, fn (Builder $w) => $w->whereHas('responses', fn (Builder $r) => $r->where('item_status', 'pending_review')))
+            ->when($hasUnapprovedEvidence, fn (Builder $w) => $w->whereHas('evidences', fn (Builder $e) => $e->where('status', '!=', 'approved')))
             ->orderByDesc('submitted_at')
             ->orderByDesc('id')
             ->paginate(25)
@@ -85,7 +95,13 @@ class EvaluationApprovalController extends Controller
 
         return view('admin.evaluation.approvals.index', [
             'evaluations' => $evaluations,
-            'filters'     => ['status' => $status, 'form' => $formId, 'q' => $q, 'pct_min' => $pctMin, 'pct_max' => $pctMax],
+            'filters'     => [
+                'status' => $status, 'form' => $formId, 'q' => $q,
+                'pct_min' => $pctMin, 'pct_max' => $pctMax,
+                'date_from' => $dateFrom, 'date_to' => $dateTo,
+                'has_pending_review' => $hasPendingReview,
+                'has_unapproved_evidence' => $hasUnapprovedEvidence,
+            ],
             'stats'       => $this->stats($schoolId),
             'statuses'    => $this->queueStatusOptions(),
             'forms'       => $this->scopedForms($schoolId),
