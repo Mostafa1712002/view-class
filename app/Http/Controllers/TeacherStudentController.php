@@ -33,6 +33,11 @@ class TeacherStudentController extends Controller
         $teacher  = auth()->user();
         $schoolId = $this->activeSchoolId();
 
+        // A non super-admin must operate within a concrete school. Without one,
+        // the teaching-students resolver would not be school-scoped, so expose
+        // nothing (no null-scope cross-tenant leakage).
+        abort_if($schoolId === null && ! $teacher->isSuperAdmin(), 403);
+
         $allowedIds = $this->teachingStudentIds((int) $teacher->id, $schoolId);
 
         $query = User::whereIn('id', $allowedIds)
@@ -64,6 +69,8 @@ class TeacherStudentController extends Controller
     {
         $teacher  = auth()->user();
         $schoolId = $this->activeSchoolId();
+
+        abort_if($schoolId === null && ! $teacher->isSuperAdmin(), 403);
 
         $allowedIds = $this->teachingStudentIds((int) $teacher->id, $schoolId);
 
@@ -113,6 +120,9 @@ class TeacherStudentController extends Controller
             ->get();
 
         // ── Grades (published, current year) ─────────────────────────────────
+        // $student is already authorised: it is in $allowedIds, which is
+        // school-scoped, so these grades belong to this school. (The grades
+        // table has no school_id column to scope on directly.)
         $grades = Grade::with('subject')
             ->where('student_id', $student)
             ->where('is_published', true)
