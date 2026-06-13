@@ -170,8 +170,7 @@ class ExamQuestionController extends Controller
      */
     public function bankPicker(Request $request, Exam $exam)
     {
-        $schoolId = $this->activeSchoolId();
-        $this->assertExamBelongsToSchool($exam, $schoolId);
+        $schoolId = $this->resolveExamSchool($exam);
 
         // Base query: approved questions from this school's banks only.
         $query = BankQuestion::query()
@@ -216,8 +215,7 @@ class ExamQuestionController extends Controller
      */
     public function addFromBank(Request $request, Exam $exam)
     {
-        $schoolId = $this->activeSchoolId();
-        $this->assertExamBelongsToSchool($exam, $schoolId);
+        $schoolId = $this->resolveExamSchool($exam);
 
         $request->validate([
             'bank_question_ids'   => ['required', 'array', 'min:1'],
@@ -328,20 +326,32 @@ class ExamQuestionController extends Controller
     }
 
     /**
-     * Abort if the exam does not belong to the active school.
-     * Prevents cross-tenant writes.
+     * Resolve the school to scope bank questions by, enforcing tenant access.
+     *
+     * - Super-admin (no single active school) operates on the exam's own school.
+     * - A scoped admin/teacher must have an active school that matches the exam's.
+     * Returns the effective school id, or aborts 403 on a cross-tenant attempt.
      */
-    private function assertExamBelongsToSchool(Exam $exam, ?int $schoolId): void
+    private function resolveExamSchool(Exam $exam): int
     {
-        if (! $schoolId) {
-            abort(403, 'لم يتم تحديد المدرسة.');
+        $examSchoolId = $exam->classRoom?->school_id ?? null;
+        if (! $examSchoolId) {
+            abort(403, 'لا يمكن تحديد مدرسة هذا الاختبار.');
         }
 
-        // Exam is school-scoped via its class (class_id → class_room → school_id).
-        $examSchoolId = $exam->classRoom?->school_id ?? null;
-        if ($examSchoolId && (int) $examSchoolId !== (int) $schoolId) {
-            abort(403, 'لا يمكن الوصول إلى هذا الاختبار.');
+        $schoolId = $this->activeSchoolId();
+
+        // Super-admin: no single active school → act within the exam's school.
+        if ($schoolId === null) {
+            abort_if(! auth()->user()->isSuperAdmin(), 403, 'لم يتم تحديد المدرسة.');
+
+            return (int) $examSchoolId;
         }
+
+        // Scoped actor: their active school must own the exam.
+        abort_if((int) $examSchoolId !== (int) $schoolId, 403, 'لا يمكن الوصول إلى هذا الاختبار.');
+
+        return (int) $schoolId;
     }
 
     /**
