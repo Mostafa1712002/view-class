@@ -66,6 +66,22 @@
                     </div>
                 </div>
 
+                {{-- #186: a parent may link the ticket to one of their children --}}
+                @if(!empty($children) && $children->count())
+                    <div class="form-group">
+                        <label for="related_student_id">@lang('support.field_related_student')</label>
+                        <select name="related_student_id" id="related_student_id" class="form-control select2 @error('related_student_id') is-invalid @enderror">
+                            <option value="">— @lang('support.placeholder_select_student') —</option>
+                            @foreach($children as $child)
+                                <option value="{{ $child->id }}" @selected((string)old('related_student_id') === (string)$child->id)>{{ $child->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('related_student_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                @endif
+
                 <div class="form-group">
                     <label for="subject">@lang('support.field_subject') <span class="text-danger">*</span></label>
                     <input type="text" name="subject" id="subject" maxlength="160"

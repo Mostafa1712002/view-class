@@ -16,6 +16,13 @@ return [
 
     // Fields
     'field_subject'            => 'الموضوع',
+    'field_related_student'     => 'الطالب المرتبط',
+    'placeholder_select_student' => 'اختر الطالب',
+    'count_all'                 => 'الكل',
+    'count_open'               => 'جديدة',
+    'count_in_progress'        => 'جاري التنفيذ',
+    'count_resolved'           => 'تم حلها',
+    'count_closed'             => 'مغلقة',
     'field_category'           => 'التصنيف',
     'field_status'             => 'الحالة',
     'field_priority'           => 'الأولوية',

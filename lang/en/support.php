@@ -16,6 +16,13 @@ return [
 
     // Fields
     'field_subject'            => 'Subject',
+    'field_related_student'     => 'Related student',
+    'placeholder_select_student' => 'Select student',
+    'count_all'                 => 'All',
+    'count_open'               => 'New',
+    'count_in_progress'        => 'In progress',
+    'count_resolved'           => 'Resolved',
+    'count_closed'             => 'Closed',
     'field_category'           => 'Category',
     'field_status'             => 'Status',
     'field_priority'           => 'Priority',

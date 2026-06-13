@@ -27,6 +27,25 @@
     </div>
 </div>
 
+{{-- #186: status counters --}}
+@isset($counts)
+<div class="row mb-2">
+    @foreach([['all','la-list','secondary'],['open','la-folder-open','info'],['in_progress','la-spinner','warning'],['resolved','la-check','success'],['closed','la-lock','dark']] as [$key,$icon,$color])
+        <div class="col-6 col-md mb-2">
+            <div class="card mb-0">
+                <div class="card-body py-2 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small">@lang('support.count_'.$key)</div>
+                        <div class="h4 mb-0">{{ $counts[$key] }}</div>
+                    </div>
+                    <i class="la {{ $icon }} text-{{ $color }}" style="font-size:1.6rem;"></i>
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>
+@endisset
+
 
 <div class="card">
     <div class="card-content">
@@ -36,6 +55,7 @@
                     <tr>
                         <th>#</th>
                         <th>@lang('support.field_subject')</th>
+                        <th>@lang('support.field_related_student')</th>
                         <th>@lang('support.field_category')</th>
                         <th>@lang('support.field_status')</th>
                         <th>@lang('support.field_priority')</th>
@@ -48,6 +68,7 @@
                         <tr>
                             <td>{{ $ticket->id }}</td>
                             <td>{{ $ticket->subject }}</td>
+                            <td>{{ $ticket->relatedStudent?->name ?? '—' }}</td>
                             <td>{{ __('support.category_' . $ticket->category) }}</td>
                             <td>
                                 <span class="badge badge-{{ $ticket->statusColor() }}">

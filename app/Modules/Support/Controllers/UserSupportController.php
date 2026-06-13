@@ -23,12 +23,29 @@ class UserSupportController extends Controller
             auth()->id()
         );
 
-        return view('support.user.index', compact('tickets'));
+        // Status counters for the user's own tickets (#186).
+        $base = \App\Models\SupportTicket::query()
+            ->where('school_id', $this->activeSchoolId())
+            ->where('created_by', auth()->id());
+        $counts = [
+            'all'         => (clone $base)->count(),
+            'open'        => (clone $base)->where('status', 'open')->count(),
+            'in_progress' => (clone $base)->where('status', 'in_progress')->count(),
+            'resolved'    => (clone $base)->where('status', 'resolved')->count(),
+            'closed'      => (clone $base)->where('status', 'closed')->count(),
+        ];
+
+        return view('support.user.index', compact('tickets', 'counts'));
     }
 
     public function create(): View
     {
-        return view('support.user.create');
+        $user = auth()->user();
+        $children = $user->isParent()
+            ? $user->children()->get(['users.id', 'users.name'])
+            : collect();
+
+        return view('support.user.create', compact('children'));
     }
 
     public function store(StoreTicketRequest $request): RedirectResponse
@@ -36,14 +53,15 @@ class UserSupportController extends Controller
         $user = auth()->user();
 
         $ticket = $this->tickets->create([
-            'school_id'    => $this->activeSchoolId(),
-            'created_by'   => $user->id,
-            'creator_role' => $user->roles->first()?->slug ?? 'user',
-            'category'     => $request->validated('category'),
-            'subject'      => $request->validated('subject'),
-            'body'         => $request->validated('body'),
-            'priority'     => $request->validated('priority') ?? 'normal',
-            'status'       => 'open',
+            'school_id'          => $this->activeSchoolId(),
+            'created_by'         => $user->id,
+            'related_student_id' => $request->validated('related_student_id'),
+            'creator_role'       => $user->roles->first()?->slug ?? 'user',
+            'category'           => $request->validated('category'),
+            'subject'            => $request->validated('subject'),
+            'body'               => $request->validated('body'),
+            'priority'           => $request->validated('priority') ?? 'normal',
+            'status'             => 'open',
         ]);
 
         return redirect()

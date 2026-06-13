@@ -14,6 +14,7 @@ class SupportTicket extends Model
     protected $fillable = [
         'school_id',
         'created_by',
+        'related_student_id',
         'creator_role',
         'category',
         'subject',
@@ -42,6 +43,11 @@ class SupportTicket extends Model
     public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function relatedStudent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'related_student_id');
     }
 
     public function school(): BelongsTo

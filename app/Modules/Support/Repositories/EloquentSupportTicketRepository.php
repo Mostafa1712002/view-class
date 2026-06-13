@@ -15,7 +15,7 @@ class EloquentSupportTicketRepository implements SupportTicketRepository
         return SupportTicket::query()
             ->where('school_id', $schoolId)
             ->where('created_by', $userId)
-            ->with(['creator:id,name,name_ar', 'assignee:id,name,name_ar'])
+            ->with(['creator:id,name,name_ar', 'assignee:id,name,name_ar', 'relatedStudent:id,name'])
             ->latest('id')
             ->paginate(20)
             ->withQueryString();
