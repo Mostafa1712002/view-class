@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
 use App\Models\Attendance;
+use App\Models\Certificate;
 use App\Models\Exam;
 use App\Models\Grade;
 use App\Models\StudentExam;
@@ -277,6 +278,167 @@ class StudentController extends Controller
         $days = ['sunday' => 'الأحد', 'monday' => 'الإثنين', 'tuesday' => 'الثلاثاء', 'wednesday' => 'الأربعاء', 'thursday' => 'الخميس'];
 
         return view('student.schedule', compact('student', 'class', 'schedule', 'periods', 'days'));
+    }
+
+    // =========================================================
+    // Card #172 — absence reports, portfolio, exam schedule
+    // =========================================================
+
+    /**
+     * Reports index — links to the three absence sub-reports.
+     */
+    public function reportsIndex(): View
+    {
+        return view('student.reports.index');
+    }
+
+    /**
+     * Absence days — full-day absences (absent + excused) with date filter.
+     */
+    public function absenceDays(Request $request): View
+    {
+        $student   = auth()->user();
+        $academicYear = AcademicYear::where('is_current', true)->first();
+
+        $query = $student->attendances()
+            ->with(['subject', 'classRoom'])
+            ->whereIn('status', ['absent', 'excused'])
+            ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
+            ->when($request->filled('from'), fn ($q) => $q->whereDate('date', '>=', $request->from))
+            ->when($request->filled('to'),   fn ($q) => $q->whereDate('date', '<=', $request->to))
+            ->orderByDesc('date');
+
+        $absences = $query->get();
+
+        return view('student.reports.absence-days', compact('absences', 'academicYear'));
+    }
+
+    /**
+     * Absence summary — present / absent / late / excused counts + rate.
+     */
+    public function absenceSummary(): View
+    {
+        $student      = auth()->user();
+        $academicYear = AcademicYear::where('is_current', true)->first();
+
+        $all = $student->attendances()
+            ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
+            ->get();
+
+        $total   = $all->count();
+        $present = $all->where('status', 'present')->count();
+        $absent  = $all->where('status', 'absent')->count();
+        $late    = $all->where('status', 'late')->count();
+        $excused = $all->where('status', 'excused')->count();
+
+        $attendanceRate = $total > 0 ? round((($present + $late) / $total) * 100, 1) : 0;
+
+        $stats = compact('total', 'present', 'absent', 'late', 'excused', 'attendanceRate');
+
+        return view('student.reports.absence-summary', compact('stats', 'academicYear'));
+    }
+
+    /**
+     * Absence by subject — absences grouped by subject_id (period attendance).
+     * Falls back gracefully if no subject is linked (groups as "بدون مادة").
+     */
+    public function absenceBySubject(): View
+    {
+        $student      = auth()->user();
+        $academicYear = AcademicYear::where('is_current', true)->first();
+
+        $absences = $student->attendances()
+            ->with('subject')
+            ->whereIn('status', ['absent', 'excused'])
+            ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
+            ->orderByDesc('date')
+            ->get();
+
+        // Group by subject name; rows without a linked subject go to "بدون مادة"
+        $grouped = $absences->groupBy(fn ($a) => $a->subject?->name ?? 'بدون مادة');
+
+        return view('student.reports.absence-by-subject', compact('grouped', 'academicYear'));
+    }
+
+    /**
+     * Exam schedule — all published exams for the student's class(es),
+     * sorted chronologically, with the student's own result attached.
+     */
+    public function examSchedule(): View
+    {
+        $student      = auth()->user();
+        $academicYear = AcademicYear::where('is_current', true)->first();
+        $classIds     = $student->enrolledClassIds();
+
+        $exams = collect();
+        $resultsByExam = collect();
+
+        if (! empty($classIds)) {
+            $exams = Exam::whereIn('class_id', $classIds)
+                ->where('is_published', true)
+                ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
+                ->with('subject')
+                ->orderBy('start_time')
+                ->get();
+
+            // Student's submitted attempts keyed by exam_id
+            $resultsByExam = $student->studentExams()
+                ->whereNotNull('submitted_at')
+                ->whereIn('exam_id', $exams->pluck('id'))
+                ->get()
+                ->keyBy('exam_id');
+        }
+
+        return view('student.reports.exam-schedule', compact('exams', 'resultsByExam', 'academicYear'));
+    }
+
+    /**
+     * Portfolio — aggregate of certificates, grades, exam results, attendance.
+     */
+    public function portfolio(): View
+    {
+        $student      = auth()->user();
+        $academicYear = AcademicYear::where('is_current', true)->first();
+
+        // Published certificates issued to this student
+        $certificates = Certificate::where('recipient_user_id', $student->id)
+            ->where('status', 'published')
+            ->when($student->school_id, fn ($q) => $q->where('school_id', $student->school_id))
+            ->orderByDesc('issue_date')
+            ->get();
+
+        // Published grades with subject
+        $grades = $student->grades()
+            ->where('is_published', true)
+            ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
+            ->with('subject')
+            ->get();
+
+        $avgGrade  = $grades->count() > 0 ? round($grades->avg('total'), 1) : null;
+        $topGrades = $grades->sortByDesc('total')->take(5);
+
+        // Recent submitted exam results
+        $examResults = $student->studentExams()
+            ->whereNotNull('submitted_at')
+            ->with(['exam.subject'])
+            ->latest('submitted_at')
+            ->take(10)
+            ->get();
+
+        // Attendance rate for current year
+        $allAttendances = $student->attendances()
+            ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
+            ->get();
+        $attTotal        = $allAttendances->count();
+        $attPresent      = $allAttendances->where('status', 'present')->count();
+        $attLate         = $allAttendances->where('status', 'late')->count();
+        $attendanceRate  = $attTotal > 0 ? round((($attPresent + $attLate) / $attTotal) * 100, 1) : 0;
+
+        return view('student.portfolio', compact(
+            'student', 'academicYear', 'certificates',
+            'grades', 'avgGrade', 'topGrades',
+            'examResults', 'attendanceRate'
+        ));
     }
 
     /**

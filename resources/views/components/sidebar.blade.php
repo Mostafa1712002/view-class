@@ -432,6 +432,10 @@
                 <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="educational">
                     <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}"><i class="la la-calendar-plus"></i><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>
                 </li>
+                {{-- === Student reports & portfolio — card #172 === --}}
+                <li class="nav-item {{ request()->routeIs('student.reports.*') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.reports.index') }}"><i class="la la-chart-pie"></i><span class="menu-title">تقارير الغياب</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.portfolio') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.portfolio') }}"><i class="la la-medal"></i><span class="menu-title">ملف الإنجاز</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.reports.exam-schedule') ? 'active' : '' }}" data-section="educational"><a href="{{ route('student.reports.exam-schedule') }}"><i class="la la-clipboard-list"></i><span class="menu-title">جدول الاختبارات</span></a></li>
             @endif
 
             @if($sidebarUser && $sidebarUser->isParent())
