@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BankQuestion extends Model
@@ -91,6 +92,22 @@ class BankQuestion extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Exam questions copied from this bank question (usage tracking + used-question guards).
+     */
+    public function examUses(): HasMany
+    {
+        return $this->hasMany(ExamQuestion::class, 'source_bank_question_id');
+    }
+
+    /**
+     * Whether this question is currently used in any exam (blocks hard-delete → archive instead).
+     */
+    public function isUsedInExam(): bool
+    {
+        return $this->examUses()->exists();
     }
 
     public function reviewer(): BelongsTo
