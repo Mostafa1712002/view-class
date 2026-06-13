@@ -73,9 +73,10 @@ class MailboxController extends Controller
             'is_draft'           => $isDraft,
         ]);
 
-        // Handle file attachment
+        // Handle file attachment — store on the PRIVATE disk; it is served only
+        // through the authorized download() action, never a public URL.
         if ($request->hasFile('attachment')) {
-            $path = $request->file('attachment')->store("mails/{$mail->id}", 'public');
+            $path = $request->file('attachment')->store("mails/{$mail->id}", 'local');
             $mail->update(['attachment_path' => $path]);
         }
 
@@ -102,25 +103,61 @@ class MailboxController extends Controller
 
     public function show(int $mail): View
     {
-        $userId  = auth()->id();
-        $message = InternalMail::withTrashed()
+        [$message, $isSender, $recipientRow] = $this->authorizeMail($mail);
+
+        // Mark as read for the recipient
+        if ($recipientRow) {
+            $this->mailbox->markRead($mail, auth()->id());
+            $recipientRow->refresh();
+        }
+
+        return view('mailbox.show', compact('message', 'isSender', 'recipientRow'));
+    }
+
+    /**
+     * Stream a mail's attachment from the private disk, only to its sender or a
+     * recipient (same authorization as show()). Never exposed via a public URL.
+     */
+    public function download(int $mail): \Symfony\Component\HttpFoundation\Response
+    {
+        [$message] = $this->authorizeMail($mail);
+
+        abort_unless($message->attachment_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($message->attachment_path), 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download(
+            $message->attachment_path,
+            basename($message->attachment_path),
+            ['Content-Disposition' => 'attachment']
+        );
+    }
+
+    /**
+     * Load a mail and assert the current user may see it: sender or recipient,
+     * and within the user's school (super-admin is global). Returns
+     * [InternalMail, isSender, ?recipientRow].
+     *
+     * @return array{0:InternalMail,1:bool,2:?InternalMailRecipient}
+     */
+    private function authorizeMail(int $mail): array
+    {
+        $user   = auth()->user();
+        $userId = $user->id;
+
+        $message = InternalMail::query()
             ->with(['sender:id,name', 'recipients.recipient:id,name', 'relatedStudent:id,name'])
             ->findOrFail($mail);
 
-        $isSender    = $message->sender_id === $userId;
+        // Tenant scope: a non super-admin may never read another school's mail.
+        abort_if($message->school_id !== $this->activeSchoolId() && ! $user->isSuperAdmin(), 404);
+
+        $isSender     = $message->sender_id === $userId;
         $recipientRow = InternalMailRecipient::where('mail_id', $mail)
             ->where('recipient_id', $userId)
             ->first();
 
         abort_unless($isSender || $recipientRow !== null, 403);
 
-        // Mark as read for the recipient
-        if ($recipientRow) {
-            $this->mailbox->markRead($mail, $userId);
-            $recipientRow->refresh();
-        }
-
-        return view('mailbox.show', compact('message', 'isSender', 'recipientRow'));
+        return [$message, $isSender, $recipientRow];
     }
 
     public function star(int $mail): RedirectResponse

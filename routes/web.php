@@ -981,6 +981,7 @@ Route::middleware(['auth'])->prefix('my/mailbox')->name('my.mailbox.')->group(fu
         ->whereIn('folder', ['inbox', 'sent', 'drafts', 'starred', 'important', 'task', 'archive', 'trash'])
         ->name('folder');
     Route::get('/{mail}', [\App\Modules\Mail\Controllers\MailboxController::class, 'show'])->whereNumber('mail')->name('show');
+    Route::get('/{mail}/attachment', [\App\Modules\Mail\Controllers\MailboxController::class, 'download'])->whereNumber('mail')->name('attachment');
     Route::post('/{mail}/star', [\App\Modules\Mail\Controllers\MailboxController::class, 'star'])->name('star');
     Route::post('/{mail}/unstar', [\App\Modules\Mail\Controllers\MailboxController::class, 'unstar'])->name('unstar');
     Route::post('/{mail}/archive', [\App\Modules\Mail\Controllers\MailboxController::class, 'archive'])->name('archive');

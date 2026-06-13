@@ -154,8 +154,8 @@
                 <hr>
                 <div class="mt-2">
                     <i class="la la-paperclip text-muted"></i>
-                    <a href="{{ Storage::disk('public')->url($message->attachment_path) }}"
-                       target="_blank" class="btn btn-sm btn-outline-primary ml-1">
+                    <a href="{{ route('my.mailbox.attachment', $message->id) }}"
+                       class="btn btn-sm btn-outline-primary ml-1">
                         <i class="la la-download"></i> @lang('mailbox.download')
                     </a>
                 </div>
