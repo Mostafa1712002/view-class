@@ -87,7 +87,7 @@ class SubjectContentController extends Controller
             'type'            => ['required', 'in:video,attachment,link'],
             'title'           => ['required', 'string', 'max:255'],
             'description'     => ['nullable', 'string'],
-            'url'             => ['nullable', 'required_if:type,video,link', 'string', 'max:512'],
+            'url'             => ['nullable', 'required_if:type,video,link', 'url:http,https', 'max:512'],
             'file'            => [
                 'nullable',
                 'required_if:type,attachment',
@@ -228,10 +228,22 @@ class SubjectContentController extends Controller
             return true;
         }
 
-        // Student: must be in the same school and subject grade level
+        // Student: must be in the same school, ENROLLED in the subject (grade
+        // level match), and the content published + available.
         if ($user->hasRole('student') && $user->school_id === $content->school_id) {
             // Verify the subject belongs to this student's school
             if ($subject->school_id !== $user->school_id) {
+                return false;
+            }
+            // Enrollment: the subject's grade_levels must contain the student's
+            // class grade level (mirrors StudentSubjectController). Prevents a
+            // student pulling content from a subject they are not enrolled in.
+            $gradeLevel = optional($user->classRoom)->grade_level;
+            if ($gradeLevel === null) {
+                return false;
+            }
+            $grades = array_map('strval', (array) ($subject->grade_levels ?? []));
+            if (! in_array((string) $gradeLevel, $grades, true)) {
                 return false;
             }
             // Verify content is published and available

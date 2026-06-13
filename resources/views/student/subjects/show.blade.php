@@ -157,9 +157,10 @@
                         <div class="ci-desc">{{ Str::limit($v->description, 80) }}</div>
                     @endif
                 </div>
-                @if($v->url)
+                @php $vUrl = preg_match('#^https?://#i', (string) $v->url) ? $v->url : null; @endphp
+                @if($vUrl)
                     <div class="ci-action">
-                        <a href="{{ $v->url }}" target="_blank" rel="noopener"
+                        <a href="{{ $vUrl }}" target="_blank" rel="noopener noreferrer"
                            class="btn btn-sm btn-outline-primary">
                             <i class="la la-external-link-alt"></i> مشاهدة
                         </a>
@@ -221,9 +222,10 @@
                         <div class="ci-desc">{{ Str::limit($lk->description, 80) }}</div>
                     @endif
                 </div>
-                @if($lk->url)
+                @php $lkUrl = preg_match('#^https?://#i', (string) $lk->url) ? $lk->url : null; @endphp
+                @if($lkUrl)
                     <div class="ci-action">
-                        <a href="{{ $lk->url }}" target="_blank" rel="noopener"
+                        <a href="{{ $lkUrl }}" target="_blank" rel="noopener noreferrer"
                            class="btn btn-sm btn-outline-success">
                             <i class="la la-external-link-alt"></i> فتح الرابط
                         </a>
@@ -333,8 +335,9 @@
                     <span class="status-chip {{ $vc->status === 'live' ? 'active' : ($vc->status === 'scheduled' ? 'pending' : 'expired') }}">
                         {{ $vc->statusLabel() }}
                     </span>
-                    @if($vc->isJoinable() && $vc->join_url)
-                        <a href="{{ $vc->join_url }}" target="_blank" rel="noopener"
+                    @php $vcUrl = preg_match('#^https?://#i', (string) $vc->join_url) ? $vc->join_url : null; @endphp
+                    @if($vc->isJoinable() && $vcUrl)
+                        <a href="{{ $vcUrl }}" target="_blank" rel="noopener noreferrer"
                            class="btn btn-sm btn-success">
                             <i class="la la-sign-in-alt"></i> انضمام
                         </a>
