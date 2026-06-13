@@ -18,6 +18,7 @@ return [
     'section_system' => 'النظام',
 
     'nav_subjects' => 'إدارة المواد',
+    'nav_assignments' => 'الواجبات',
     'nav_questions_bank' => 'بنك الأسئلة',
     'nav_exam_schedule' => 'جدول الاختبارات',
     'nav_periods' => 'الحصص',
