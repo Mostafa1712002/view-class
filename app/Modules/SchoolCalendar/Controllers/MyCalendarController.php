@@ -38,7 +38,7 @@ class MyCalendarController extends Controller
 
         $events = $this->repo->forRange($schoolId, $from, $to, $audienceKey);
 
-        return response()->json($events->map(fn ($e) => [
+        $out = $events->map(fn ($e) => [
             'id'    => $e->id,
             'title' => $e->title,
             'start' => $e->all_day
@@ -57,6 +57,50 @@ class MyCalendarController extends Controller
                 'location'    => $e->location,
                 'description' => $e->description,
             ],
-        ])->values());
+        ])->values()->all();
+
+        // #180: the current user's appointments appear on their calendar.
+        $appointments = \App\Models\Appointment::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->where(fn ($q) => $q->where('student_id', $user->id)->orWhere('target_user_id', $user->id))
+            ->whereBetween('appointment_date', [$from, $to])
+            ->get();
+        foreach ($appointments as $a) {
+            $out[] = [
+                'id'            => 'appt-' . $a->id,
+                'title'         => 'موعد',
+                'start'         => $a->appointment_date->toDateString() . 'T' . ($a->appointment_time ?: '00:00:00'),
+                'end'           => null,
+                'allDay'        => false,
+                'color'         => '#0ea5e9',
+                'extendedProps' => ['event_type' => 'appointment', 'type_label' => 'موعد', 'description' => (string) $a->status],
+            ];
+        }
+
+        // #180: virtual classes the user is involved with appear on their calendar.
+        $vcQuery = \App\Models\VirtualClass::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->whereNotNull('scheduled_at')
+            ->whereBetween('scheduled_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+            ->where('status', '!=', 'cancelled');
+        if ($user && $user->isStudent()) {
+            $vcQuery->whereIn('class_id', $user->enrolledClassIds() ?: [0]);
+        } elseif ($user && $user->isTeacher()) {
+            $vcQuery->where('teacher_id', $user->id);
+        }
+        foreach ($vcQuery->get() as $vc) {
+            $start = $vc->scheduled_at;
+            $out[] = [
+                'id'            => 'vc-' . $vc->id,
+                'title'         => $vc->title,
+                'start'         => $start->format('Y-m-d\TH:i:s'),
+                'end'           => $vc->duration_minutes ? $start->copy()->addMinutes($vc->duration_minutes)->format('Y-m-d\TH:i:s') : null,
+                'allDay'        => false,
+                'color'         => '#8b5cf6',
+                'extendedProps' => ['event_type' => 'virtual_class', 'type_label' => 'فصل افتراضي', 'description' => (string) $vc->description],
+            ];
+        }
+
+        return response()->json($out);
     }
 }
