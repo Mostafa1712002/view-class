@@ -164,8 +164,39 @@ class BankQuestionController extends Controller
 
     public function update(Request $request, int $bankId, int $questionId): RedirectResponse
     {
-        $bank = $this->resolveBank($bankId);
+        $bank     = $this->resolveBank($bankId);
         $question = $bank->questions()->whereKey($questionId)->firstOrFail();
+
+        // ── Guard 3a: block non-privileged users from editing an approved question ──
+        // School-admin and super-admin may edit approved questions; teachers cannot.
+        if ($question->status === BankQuestion::STATUS_APPROVED) {
+            $user = auth()->user();
+            if (! ($user->isSuperAdmin() || $user->isSchoolAdmin())) {
+                return redirect()
+                    ->route('admin.question-banks.questions.index', $bank->id)
+                    ->with('error', __('exam_bank.guard_approved_edit_blocked'));
+            }
+        }
+
+        // ── Guard 3b: block editing a question used in a published/active exam ──
+        // "Published" = exam.status in [active, scheduled, completed] OR is_published=true.
+        // Only super-admin may force-edit in that case; everyone else must duplicate.
+        $usedInPublishedExam = \App\Models\ExamQuestion::query()
+            ->where('source_bank_question_id', $question->id)
+            ->whereHas('exam', function ($q) {
+                $q->where(function ($or) {
+                    $or->whereIn('status', ['active', 'scheduled', 'completed'])
+                       ->orWhere('is_published', true);
+                });
+            })
+            ->exists();
+
+        if ($usedInPublishedExam && ! auth()->user()->isSuperAdmin()) {
+            return redirect()
+                ->route('admin.question-banks.questions.index', $bank->id)
+                ->with('error', __('exam_bank.guard_used_published_edit_blocked'));
+        }
+
         $data = $this->validateQuestion($request, $bank, $question->id);
 
         $attachmentPath = $question->attachment_path;
@@ -207,8 +238,22 @@ class BankQuestionController extends Controller
 
     public function destroy(int $bankId, int $questionId): RedirectResponse
     {
-        $bank = $this->resolveBank($bankId);
+        $bank     = $this->resolveBank($bankId);
         $question = $bank->questions()->whereKey($questionId)->firstOrFail();
+
+        // ── Guard 1: archive instead of delete when the question is used in any exam ──
+        $isUsed = \App\Models\ExamQuestion::query()
+            ->where('source_bank_question_id', $question->id)
+            ->exists();
+
+        if ($isUsed) {
+            $question->update(['status' => BankQuestion::STATUS_ARCHIVED]);
+
+            return redirect()
+                ->route('admin.question-banks.questions.index', $bank->id)
+                ->with('error', __('exam_bank.guard_used_delete_archived'));
+        }
+
         $question->delete();
 
         return redirect()
