@@ -88,6 +88,20 @@ class MailboxController extends Controller
                 'mail_id'      => $mail->id,
                 'recipient_id' => (int) $recipientId,
             ]);
+
+            // #180: a sent message generates a notification for the recipient.
+            if (! $isDraft) {
+                \App\Models\Notification::create([
+                    'user_id'     => (int) $recipientId,
+                    'type'        => 'message_received',
+                    'title'       => __('mailbox.notify.title'),
+                    'body'        => $mail->subject,
+                    'icon'        => 'la la-envelope',
+                    'color'       => $mail->importance === 'urgent' ? 'danger' : ($mail->importance === 'important' ? 'warning' : 'info'),
+                    'action_url'  => route('my.mailbox.show', $mail->id),
+                    'action_text' => __('mailbox.notify.action'),
+                ]);
+            }
         }
 
         if ($isDraft) {

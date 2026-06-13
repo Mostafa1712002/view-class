@@ -3,6 +3,10 @@
 return [
     'title'              => 'Internal Mailbox',
     'compose'            => 'New Message',
+    'notify'             => [
+        'title'  => 'New message in your mailbox',
+        'action' => 'Open message',
+    ],
     'inbox'              => 'Inbox',
     'sent'               => 'Sent',
     'drafts'             => 'Drafts',
