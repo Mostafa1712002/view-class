@@ -61,6 +61,11 @@ class ClassRoom extends Model
         return $this->hasMany(WeeklyPlan::class, 'class_id');
     }
 
+    public function exams(): HasMany
+    {
+        return $this->hasMany(Exam::class, 'class_id');
+    }
+
     public function getActiveSchedule()
     {
         return $this->schedules()->active()->first();
