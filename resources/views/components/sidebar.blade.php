@@ -446,6 +446,10 @@
                 <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="communication">
                     <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}"><i class="la la-calendar-plus"></i><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>
                 </li>
+                {{-- === Libraries — card #182 === --}}
+                <li class="nav-item {{ request()->routeIs('my.libraries.*') ? 'active' : '' }}" data-section="communication">
+                    <a href="{{ Route::has('my.libraries.index') ? route('my.libraries.index') : '#' }}"><i class="la la-bookmark"></i><span class="menu-title">@lang('shell.nav_libraries')</span></a>
+                </li>
             @endif
 
         </ul>

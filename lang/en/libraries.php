@@ -2,6 +2,15 @@
 
 return [
     'breadcrumb' => 'Libraries',
+
+    'my' => [
+        'title'          => 'Libraries',
+        'public_section' => 'Public Library',
+        'private_section' => 'Private Libraries (My Children)',
+        'no_private'     => 'No private libraries are currently available for your children',
+        'filter_btn'     => 'Filter',
+        'col_actions'    => 'Actions',
+    ],
     'public' => [
         'title' => 'Public Library',
         'add_item' => 'Add Item',
