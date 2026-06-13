@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\BankQuestion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,6 +18,7 @@ class ExamQuestion extends Model
         'marks',
         'explanation',
         'order',
+        'source_bank_question_id',
     ];
 
     protected $casts = [
@@ -35,6 +37,15 @@ class ExamQuestion extends Model
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class);
+    }
+
+    /**
+     * The bank question this exam question was copied from (nullable).
+     * Used to enforce delete→archive and edit→copy guards on the source question.
+     */
+    public function sourceBankQuestion(): BelongsTo
+    {
+        return $this->belongsTo(BankQuestion::class, 'source_bank_question_id');
     }
 
     public function answers(): HasMany

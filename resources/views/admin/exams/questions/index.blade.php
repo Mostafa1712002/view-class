@@ -20,6 +20,10 @@
                 <i class="bi bi-plus-lg me-1"></i>
                 إضافة سؤال
             </a>
+            <a href="{{ route('admin.exams.questions.bank-picker', $exam) }}" class="btn btn-outline-primary">
+                <i class="bi bi-bank me-1"></i>
+                إضافة من بنك الأسئلة
+            </a>
             <a href="{{ route('admin.exams.show', $exam) }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-right me-1"></i>
                 العودة للاختبار
@@ -74,6 +78,11 @@
                                     <span class="badge bg-dark">{{ $loop->iteration }}</span>
                                     <span class="badge bg-info">{{ $question->type_label }}</span>
                                     <span class="badge bg-secondary">{{ number_format($question->marks, 1) }} درجة</span>
+                                    @if($question->source_bank_question_id)
+                                        <span class="badge bg-primary" title="{{ __('exam_bank.from_bank_badge') }}">
+                                            <i class="bi bi-bank"></i>
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="btn-group btn-group-sm">
                                     <form action="{{ route('admin.exams.questions.duplicate', [$exam, $question]) }}" method="POST" class="d-inline">

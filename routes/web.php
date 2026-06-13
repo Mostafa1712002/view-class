@@ -532,6 +532,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::delete('exams/{exam}/questions/{question}', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::post('exams/{exam}/questions/reorder', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'reorder'])->name('exams.questions.reorder');
     Route::post('exams/{exam}/questions/{question}/duplicate', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'duplicate'])->name('exams.questions.duplicate');
+    // #217 — Add questions from bank
+    Route::get('exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'bankPicker'])->name('exams.questions.bank-picker');
+    Route::post('exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'addFromBank'])->name('exams.questions.add-from-bank');
 
     // Evaluation Forms (Sprint 8 — نماذج التقييم)
     Route::get('evaluations', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'index'])->name('evaluations.index');
