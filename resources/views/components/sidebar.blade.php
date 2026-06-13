@@ -197,15 +197,27 @@
             </li>
             @endif
 
-            <li class="nav-item has-sub" data-section="communication">
-                <a href="{{ route('messages.index') }}"><i class="la la-inbox"></i><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
+            <li class="nav-item has-sub {{ request()->routeIs('my.mailbox.*') ? 'active open' : '' }}" data-section="communication">
+                <a href="{{ Route::has('my.mailbox.index') ? route('my.mailbox.index') : '#' }}"><i class="la la-inbox"></i><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
                 <ul class="menu-content">
-                    <li><a href="{{ route('messages.create') }}"><i class="la la-edit"></i><span class="menu-item">@lang('shell.nav_mail_new')</span></a></li>
-                    <li class="{{ request()->routeIs('messages.index') ? 'active' : '' }}"><a href="{{ route('messages.index') }}"><i class="la la-inbox"></i><span class="menu-item">@lang('shell.nav_mail_inbox')</span></a></li>
-                    <li><a href="#"><i class="la la-paper-plane"></i><span class="menu-item">@lang('shell.nav_mail_sent')</span></a></li>
-                    <li><a href="#"><i class="la la-file"></i><span class="menu-item">@lang('shell.nav_mail_drafts')</span></a></li>
-                    <li><a href="#"><i class="la la-archive"></i><span class="menu-item">@lang('shell.nav_mail_archive')</span></a></li>
-                    <li><a href="#"><i class="la la-trash"></i><span class="menu-item">@lang('shell.nav_mail_trash')</span></a></li>
+                    <li class="{{ request()->routeIs('my.mailbox.create') ? 'active' : '' }}">
+                        <a href="{{ Route::has('my.mailbox.create') ? route('my.mailbox.create') : '#' }}"><i class="la la-edit"></i><span class="menu-item">@lang('shell.nav_mail_new')</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('my.mailbox.index') || (request()->routeIs('my.mailbox.folder') && request()->route('folder') === 'inbox') ? 'active' : '' }}">
+                        <a href="{{ Route::has('my.mailbox.index') ? route('my.mailbox.index') : '#' }}"><i class="la la-inbox"></i><span class="menu-item">@lang('shell.nav_mail_inbox')</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('my.mailbox.folder') && request()->route('folder') === 'sent' ? 'active' : '' }}">
+                        <a href="{{ Route::has('my.mailbox.folder') ? route('my.mailbox.folder', 'sent') : '#' }}"><i class="la la-paper-plane"></i><span class="menu-item">@lang('shell.nav_mail_sent')</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('my.mailbox.folder') && request()->route('folder') === 'drafts' ? 'active' : '' }}">
+                        <a href="{{ Route::has('my.mailbox.folder') ? route('my.mailbox.folder', 'drafts') : '#' }}"><i class="la la-file"></i><span class="menu-item">@lang('shell.nav_mail_drafts')</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('my.mailbox.folder') && request()->route('folder') === 'archive' ? 'active' : '' }}">
+                        <a href="{{ Route::has('my.mailbox.folder') ? route('my.mailbox.folder', 'archive') : '#' }}"><i class="la la-archive"></i><span class="menu-item">@lang('shell.nav_mail_archive')</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('my.mailbox.folder') && request()->route('folder') === 'trash' ? 'active' : '' }}">
+                        <a href="{{ Route::has('my.mailbox.folder') ? route('my.mailbox.folder', 'trash') : '#' }}"><i class="la la-trash"></i><span class="menu-item">@lang('shell.nav_mail_trash')</span></a>
+                    </li>
                 </ul>
             </li>
 

@@ -61,6 +61,8 @@ use App\Modules\SpecialEducation\Repositories\Contracts\SpecialEducationReposito
 use App\Modules\SpecialEducation\Repositories\EloquentSpecialEducationRepository;
 use App\Modules\Certificates\Repositories\Contracts\CertificateRepository;
 use App\Modules\Certificates\Repositories\EloquentCertificateRepository;
+use App\Modules\Mail\Repositories\Contracts\MailboxRepository;
+use App\Modules\Mail\Repositories\EloquentMailboxRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -95,6 +97,7 @@ class RepositoryServiceProvider extends ServiceProvider
         VirtualClassRepositoryInterface::class   => VirtualClassRepository::class,
         SpecialEducationRepository::class        => EloquentSpecialEducationRepository::class,
         CertificateRepository::class             => EloquentCertificateRepository::class,
+        MailboxRepository::class                 => EloquentMailboxRepository::class,
     ];
 
     public function register(): void

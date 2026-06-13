@@ -970,6 +970,27 @@ Route::middleware(['auth', 'role:teacher,student,parent'])->prefix('my/certifica
     Route::get('/', [\App\Modules\Certificates\Controllers\MyCertificateController::class, 'index'])->name('index');
 });
 
+// ==========================================
+// Internal Mailbox
+// ==========================================
+Route::middleware(['auth'])->prefix('my/mailbox')->name('my.mailbox.')->group(function () {
+    Route::get('/', [\App\Modules\Mail\Controllers\MailboxController::class, 'index'])->name('index');
+    Route::get('/compose', [\App\Modules\Mail\Controllers\MailboxController::class, 'create'])->name('create');
+    Route::post('/', [\App\Modules\Mail\Controllers\MailboxController::class, 'store'])->name('store');
+    Route::get('/folder/{folder}', [\App\Modules\Mail\Controllers\MailboxController::class, 'index'])
+        ->whereIn('folder', ['inbox', 'sent', 'drafts', 'starred', 'important', 'task', 'archive', 'trash'])
+        ->name('folder');
+    Route::get('/{mail}', [\App\Modules\Mail\Controllers\MailboxController::class, 'show'])->whereNumber('mail')->name('show');
+    Route::post('/{mail}/star', [\App\Modules\Mail\Controllers\MailboxController::class, 'star'])->name('star');
+    Route::post('/{mail}/unstar', [\App\Modules\Mail\Controllers\MailboxController::class, 'unstar'])->name('unstar');
+    Route::post('/{mail}/archive', [\App\Modules\Mail\Controllers\MailboxController::class, 'archive'])->name('archive');
+    Route::post('/{mail}/unarchive', [\App\Modules\Mail\Controllers\MailboxController::class, 'unarchive'])->name('unarchive');
+    Route::post('/{mail}/trash', [\App\Modules\Mail\Controllers\MailboxController::class, 'trash'])->name('trash');
+    Route::post('/{mail}/restore', [\App\Modules\Mail\Controllers\MailboxController::class, 'restore'])->name('restore');
+    Route::post('/{mail}/task', [\App\Modules\Mail\Controllers\MailboxController::class, 'toggleTask'])->name('task');
+    Route::delete('/{mail}', [\App\Modules\Mail\Controllers\MailboxController::class, 'destroy'])->name('destroy');
+});
+
 // === School Calendar card #196 / #174 / #179 / #186 ===
 // Staff CRUD (super-admin, school-admin, teacher)
 Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])
