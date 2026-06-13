@@ -84,15 +84,61 @@ class EloquentSurveyRepository implements SurveyRepository
             'submitted_at' => now(),
         ]);
 
+        // Whitelist: only persist answers for questions that belong to THIS survey,
+        // and coerce each value to what its question type allows (no arbitrary
+        // question_id injection, no out-of-range ratings or off-list choices).
+        $questions = $survey->questions->keyBy('id');
+
         foreach ($answers as $questionId => $value) {
+            $question = $questions->get((int) $questionId);
+            if (! $question) {
+                continue; // not a question of this survey — skip
+            }
+
+            $clean = $this->sanitizeAnswer($question, $value);
+            if ($clean === null) {
+                continue;
+            }
+
             SurveyAnswer::create([
                 'response_id' => $response->id,
-                'question_id' => (int) $questionId,
-                'value'       => is_array($value) ? json_encode($value) : $value,
+                'question_id' => $question->id,
+                'value'       => $clean,
             ]);
         }
 
         return $response;
+    }
+
+    /**
+     * Coerce a submitted value to what the question type allows. Returns the
+     * storable string, or null to skip an invalid/empty answer.
+     */
+    private function sanitizeAnswer(SurveyQuestion $question, mixed $value): ?string
+    {
+        $options = is_array($question->options) ? $question->options : [];
+
+        switch ($question->type) {
+            case 'rating':
+                $n = (int) $value;
+                return ($n >= 1 && $n <= 5) ? (string) $n : null;
+
+            case 'single_choice':
+                $v = is_array($value) ? reset($value) : $value;
+                return in_array($v, $options, true) ? (string) $v : null;
+
+            case 'multiple_choice':
+                $vals = array_values(array_filter(
+                    (array) $value,
+                    fn ($v) => in_array($v, $options, true)
+                ));
+                return $vals === [] ? null : json_encode(array_values($vals), JSON_UNESCAPED_UNICODE);
+
+            case 'text':
+            default:
+                $v = is_array($value) ? '' : trim((string) $value);
+                return $v === '' ? null : mb_substr($v, 0, 5000);
+        }
     }
 
     public function publishedForUser(?int $schoolId, string $audience): Collection

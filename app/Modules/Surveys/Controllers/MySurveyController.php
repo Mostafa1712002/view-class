@@ -81,6 +81,10 @@ class MySurveyController extends Controller
 
     private function assertCanTake(Survey $survey, \App\Models\User $user): void
     {
+        // Tenant scope: a survey belongs to its school. Only that school's users
+        // (or anyone, for a global/null-school survey) may take it. No cross-tenant.
+        abort_unless($survey->school_id === null || $survey->school_id === $user->school_id, 404);
+
         // Must be published
         abort_unless($survey->status === 'published', 404);
 
