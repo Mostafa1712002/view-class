@@ -252,6 +252,17 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
     }
 
     /**
+     * IDs of active banks a school may draw questions from: own + company general/shared.
+     */
+    public function visibleBankIds(?int $schoolId): array
+    {
+        return $this->baseQuery($schoolId)
+            ->where('status', QuestionBank::STATUS_ACTIVE)
+            ->pluck('id')
+            ->all();
+    }
+
+    /**
      * Base query for the index: respects school scope and company boundary, excludes templates.
      */
     private function baseQuery(?int $schoolId): Builder

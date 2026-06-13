@@ -14,6 +14,9 @@ use Illuminate\Http\Request;
 class ExamQuestionController extends Controller
 {
     use HasSchoolScope;
+
+    public function __construct(private QuestionBankRepository $banks) {}
+
     /**
      * Display questions for an exam.
      */
@@ -172,15 +175,21 @@ class ExamQuestionController extends Controller
     {
         $schoolId = $this->resolveExamSchool($exam);
 
-        // Base query: approved questions from this school's banks only.
+        // Banks this school may draw from: own private + company general/shared.
+        $bankIds = $this->banks->visibleBankIds($schoolId);
+
+        // Base query: approved questions from the visible banks only.
         $query = BankQuestion::query()
-            ->whereHas('bank', fn ($q) => $q->where('school_id', $schoolId))
+            ->whereIn('question_bank_id', $bankIds ?: [0])
             ->where('status', BankQuestion::STATUS_APPROVED)
             ->with(['bank:id,name_ar,name_en', 'lesson:id,name_ar']);
 
         // Optional filters for UX
         if ($bankId = $request->integer('bank_id')) {
-            $query->where('question_bank_id', $bankId);
+            // Keep the filter within the visible set.
+            if (in_array($bankId, $bankIds, true)) {
+                $query->where('question_bank_id', $bankId);
+            }
         }
         if ($type = $request->get('type')) {
             $query->where('type', $type);
@@ -192,8 +201,7 @@ class ExamQuestionController extends Controller
         $bankQuestions = $query->orderByDesc('id')->paginate(30)->withQueryString();
 
         // Banks dropdown for filter
-        $banks = QuestionBank::where('school_id', $schoolId)
-            ->where('status', QuestionBank::STATUS_ACTIVE)
+        $banks = QuestionBank::whereIn('id', $bankIds ?: [0])
             ->orderBy('name_ar')
             ->get(['id', 'name_ar', 'name_en']);
 
@@ -224,11 +232,12 @@ class ExamQuestionController extends Controller
 
         $ids = $request->input('bank_question_ids');
 
-        // Load bank questions scoped to this school + approved status only.
+        // Load bank questions scoped to the school's visible banks + approved status only.
+        $bankIds = $this->banks->visibleBankIds($schoolId);
         $bankQuestions = BankQuestion::query()
             ->whereIn('id', $ids)
             ->where('status', BankQuestion::STATUS_APPROVED)
-            ->whereHas('bank', fn ($q) => $q->where('school_id', $schoolId))
+            ->whereIn('question_bank_id', $bankIds ?: [0])
             ->get();
 
         if ($bankQuestions->isEmpty()) {

@@ -49,4 +49,10 @@ interface QuestionBankRepository
      * owned by $targetSchoolId. Returns the new bank.
      */
     public function copyToSchool(QuestionBank $generalBank, int $targetSchoolId, int $createdBy): QuestionBank;
+
+    /**
+     * IDs of active banks a school may draw questions from: its own private banks
+     * plus company-wide general/shared banks. Respects the tenant/company boundary.
+     */
+    public function visibleBankIds(?int $schoolId): array;
 }
