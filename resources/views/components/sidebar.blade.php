@@ -415,6 +415,9 @@
                 <li class="nav-item {{ request()->routeIs('teacher.attendance.index') ? 'active' : '' }}" data-section="educational">
                     <a href="{{ route('teacher.attendance.index') }}"><i class="la la-check-square"></i><span class="menu-title">@lang('shell.portal_record_attendance')</span></a>
                 </li>
+                <li class="nav-item {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ Route::has('admin.assignments.index') ? route('admin.assignments.index') : '#' }}"><i class="la la-tasks"></i><span class="menu-title">@lang('shell.nav_assignments')</span></a>
+                </li>
                 <li class="nav-item {{ request()->routeIs('admin.my-evaluations.*') || request()->routeIs('admin.evaluations.subjects') || request()->routeIs('admin.evaluations.execute.*') ? 'active' : '' }}" data-section="educational">
                     <a href="{{ Route::has('admin.my-evaluations.index') ? route('admin.my-evaluations.index') : '#' }}"><i class="la la-star"></i><span class="menu-title">@lang('shell.nav_evaluations')</span></a>
                 </li>

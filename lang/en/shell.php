@@ -18,6 +18,7 @@ return [
     'section_system' => 'System',
 
     'nav_subjects' => 'Subject Management',
+    'nav_assignments' => 'Assignments',
     'nav_questions_bank' => 'Question Bank',
     'nav_exam_schedule' => 'Exam Schedule',
     'nav_periods' => 'Periods',
