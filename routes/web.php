@@ -705,7 +705,36 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ma
     Route::get('books', [\App\Modules\Books\Controllers\BookController::class, 'index'])->name('books.index');
     // BookGradeController::index — school-scoped: resolveBookSchoolId() → activeSchoolId() line 31
     Route::get('books/grades', [\App\Modules\Books\Controllers\BookGradeController::class, 'index'])->name('books.grades');
+
+    // === Subject content management — cards #171 ===
+    // Security: SubjectContentController::resolveSubject() checks school scope +
+    // teaching assignment for teachers; admins bypass the teaching check.
+    Route::get(
+        'subjects/{subject}/contents',
+        [\App\Modules\Subjects\Controllers\SubjectContentController::class, 'index']
+    )->name('subject-contents.index');
+    Route::post(
+        'subjects/{subject}/contents',
+        [\App\Modules\Subjects\Controllers\SubjectContentController::class, 'store']
+    )->name('subject-contents.store');
+    Route::post(
+        'subjects/{subject}/contents/{content}/toggle-publish',
+        [\App\Modules\Subjects\Controllers\SubjectContentController::class, 'togglePublish']
+    )->whereNumber('subject')->whereNumber('content')->name('subject-contents.toggle-publish');
+    Route::delete(
+        'subjects/{subject}/contents/{content}',
+        [\App\Modules\Subjects\Controllers\SubjectContentController::class, 'destroy']
+    )->whereNumber('subject')->whereNumber('content')->name('subject-contents.destroy');
 });
+
+// Subject content download — accessible to teachers, admins AND students;
+// the controller method re-checks access before streaming the private file.
+// Uses a dedicated prefix to avoid role-guard collision with the manage group above.
+Route::middleware(['auth'])
+    ->get(
+        'manage/subjects/{subject}/contents/{content}/download',
+        [\App\Modules\Subjects\Controllers\SubjectContentController::class, 'download']
+    )->whereNumber('subject')->whereNumber('content')->name('manage.subject-contents.download');
 
 // Subjects — read (index, lesson-tree, domains)
 Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin')->name('admin.')->group(function () {
@@ -807,6 +836,11 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('reports/absence-by-subject', [\App\Http\Controllers\StudentController::class, 'absenceBySubject'])->name('reports.absence-by-subject');
     Route::get('reports/exam-schedule', [\App\Http\Controllers\StudentController::class, 'examSchedule'])->name('reports.exam-schedule');
     Route::get('portfolio', [\App\Http\Controllers\StudentController::class, 'portfolio'])->name('portfolio');
+    // === Student subjects cards + content hub — card #171 ===
+    // Security: StudentSubjectController verifies the subject is in the
+    // student's grade-level subject list before showing content.
+    Route::get('subjects', [\App\Http\Controllers\StudentSubjectController::class, 'index'])->name('subjects.index');
+    Route::get('subjects/{subject}', [\App\Http\Controllers\StudentSubjectController::class, 'show'])->whereNumber('subject')->name('subjects.show');
 });
 
 // Parent Routes
