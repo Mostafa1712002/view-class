@@ -334,7 +334,8 @@ class ExamQuestionController extends Controller
      */
     private function resolveExamSchool(Exam $exam): int
     {
-        $examSchoolId = $exam->classRoom?->school_id ?? null;
+        // A class is school-scoped through its section: class.section_id → sections.school_id.
+        $examSchoolId = $exam->classRoom?->section?->school_id ?? null;
         if (! $examSchoolId) {
             abort(403, 'لا يمكن تحديد مدرسة هذا الاختبار.');
         }
