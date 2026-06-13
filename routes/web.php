@@ -169,12 +169,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     Route::put('weekly-plan-notes/{id}', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'update'])->name('weekly-plan-notes.update');
     Route::delete('weekly-plan-notes/{id}', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'destroy'])->name('weekly-plan-notes.destroy');
 
-    // === Books card 65 ===
-    Route::get('books', [\App\Modules\Books\Controllers\BookController::class, 'index'])->name('books.index');
+    // === Books card 65 — write routes (create/edit/delete) — admin-only ===
     Route::get('books/create', [\App\Modules\Books\Controllers\BookController::class, 'create'])->name('books.create');
     Route::post('books', [\App\Modules\Books\Controllers\BookController::class, 'store'])->name('books.store');
-    // Books — bulk grade↔book management screen
-    Route::get('books/grades', [\App\Modules\Books\Controllers\BookGradeController::class, 'index'])->name('books.grades');
+    // Books — bulk grade↔book management (POST/save is write-only — admin-only)
     Route::post('books/grades', [\App\Modules\Books\Controllers\BookGradeController::class, 'save'])->name('books.grades.save');
     Route::get('books/{id}/edit', [\App\Modules\Books\Controllers\BookController::class, 'edit'])->name('books.edit');
     Route::put('books/{id}', [\App\Modules\Books\Controllers\BookController::class, 'update'])->name('books.update');
@@ -395,52 +393,43 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('subjects/import/template', [\App\Modules\Subjects\Controllers\SubjectController::class, 'importTemplate'])->name('subjects.import.template');
     Route::post('subjects/import', [\App\Modules\Subjects\Controllers\SubjectController::class, 'importStore'])->name('subjects.import.store');
 
-    Route::get('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'index'])->name('subjects.index');
+    // Subjects — write routes (create/edit/delete) — admin-only
     Route::get('subjects/create', [\App\Modules\Subjects\Controllers\SubjectController::class, 'create'])->name('subjects.create');
     Route::post('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'store'])->name('subjects.store');
     Route::get('subjects/{id}/edit', [\App\Modules\Subjects\Controllers\SubjectController::class, 'edit'])->name('subjects.edit');
     Route::put('subjects/{id}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'update'])->name('subjects.update');
     Route::delete('subjects/{id}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroy'])->name('subjects.destroy');
 
-    Route::get('subjects/{id}/lesson-tree', [\App\Modules\Subjects\Controllers\SubjectController::class, 'lessonTree'])->name('subjects.lesson-tree');
+    // Subject lesson-tree write routes (unit/lesson create/delete) — admin-only
     Route::post('subjects/{id}/units', [\App\Modules\Subjects\Controllers\SubjectController::class, 'storeUnit'])->name('subjects.units.store');
     Route::delete('subjects/{id}/units/{unitId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyUnit'])->name('subjects.units.destroy');
     Route::post('subjects/{id}/units/{unitId}/lessons', [\App\Modules\Subjects\Controllers\SubjectController::class, 'storeLesson'])->name('subjects.lessons.store');
     Route::delete('subjects/{id}/units/{unitId}/lessons/{lessonId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyLesson'])->name('subjects.lessons.destroy');
 
-    // Subject domains (المجالات) — card 90
-    Route::get('subjects/{id}/domains', [\App\Modules\Subjects\Controllers\SubjectController::class, 'domains'])->name('subjects.domains');
+    // Subject domains (المجالات) — write routes — admin-only
     Route::post('subjects/{id}/domains', [\App\Modules\Subjects\Controllers\SubjectController::class, 'storeDomain'])->name('subjects.domains.store');
     Route::put('subjects/{id}/domains/{domainId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'updateDomain'])->name('subjects.domains.update');
     Route::delete('subjects/{id}/domains/{domainId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyDomain'])->name('subjects.domains.destroy');
 
-    // Question Banks (Sprint 4 phase 2)
-    Route::get('question-banks/library', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'library'])->name('question-banks.library');
+    // Question Banks — write routes (create/edit/delete/approve/promote/import) — admin-only
     Route::post('question-banks/library/{id}/clone', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'clone'])->name('question-banks.library.clone');
-
-    Route::get('question-banks', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'index'])->name('question-banks.index');
     Route::get('question-banks/create', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'create'])->name('question-banks.create');
     Route::post('question-banks', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'store'])->name('question-banks.store');
     Route::get('question-banks/{id}/edit', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'edit'])->name('question-banks.edit');
     Route::put('question-banks/{id}', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'update'])->name('question-banks.update');
     Route::delete('question-banks/{id}', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'destroy'])->name('question-banks.destroy');
-
-    Route::get('question-banks/{bankId}/questions', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'index'])->name('question-banks.questions.index');
     Route::get('question-banks/{bankId}/questions/create', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'create'])->name('question-banks.questions.create');
     Route::post('question-banks/{bankId}/questions', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'store'])->name('question-banks.questions.store');
     Route::get('question-banks/{bankId}/questions/{questionId}/edit', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'edit'])->name('question-banks.questions.edit');
     Route::put('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'update'])->name('question-banks.questions.update');
-    Route::get('question-banks/{bankId}/questions/{questionId}/preview', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'preview'])->name('question-banks.questions.preview');
     Route::post('question-banks/{bankId}/questions/{questionId}/duplicate', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'duplicate'])->name('question-banks.questions.duplicate');
     Route::delete('question-banks/{bankId}/questions/{questionId}', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'destroy'])->name('question-banks.questions.destroy');
-
     // Question Bank — Excel import (card #214) — must be before any {questionId} wildcard
     Route::get('question-banks/{bankId}/questions/import', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'form'])->name('question-banks.questions.import.form');
     Route::get('question-banks/{bankId}/questions/import/template', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'template'])->name('question-banks.questions.import.template');
     Route::post('question-banks/{bankId}/questions/import/preview', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'preview'])->name('question-banks.questions.import.preview');
     Route::post('question-banks/{bankId}/questions/import/{batchId}/execute', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'execute'])->name('question-banks.questions.import.execute');
     Route::get('question-banks/{bankId}/questions/import/{batchId}/errors.csv', [\App\Modules\QuestionBanks\Controllers\QuestionImportController::class, 'errorsReport'])->name('question-banks.questions.import.errors');
-
     // Question Bank — curation actions (T3/T5)
     Route::post('question-banks/{id}/approve', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'approve'])->name('question-banks.approve');
     Route::post('question-banks/{id}/promote', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'promote'])->name('question-banks.promote');
@@ -459,33 +448,29 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
 
     // Libraries module (public + private + virtual labs)
     Route::prefix('libraries')->name('libraries.')->group(function () {
-        // Public library
-        Route::get('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'index'])->name('public.index');
+        // Public library — write routes (create/edit/delete/rate/comment) — admin-only
         Route::get('public/create', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'create'])->name('public.create');
         Route::post('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'store'])->name('public.store');
         Route::get('public/{id}/edit', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'edit'])->whereNumber('id')->name('public.edit');
         Route::put('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'update'])->whereNumber('id')->name('public.update');
         Route::delete('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'destroy'])->whereNumber('id')->name('public.destroy');
-        // Ratings + comments (card #97)
-        Route::get('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'show'])->whereNumber('id')->name('public.show');
+        // Ratings + comments (card #97) — write routes — admin-only
         Route::post('public/{id}/rate', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'rate'])->whereNumber('id')->name('public.rate');
         Route::post('public/{id}/react', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'react'])->whereNumber('id')->name('public.react');
         Route::post('public/{id}/comments', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'storeComment'])->whereNumber('id')->name('public.comments.store');
         Route::delete('public/{id}/comments/{commentId}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'destroyComment'])->whereNumber('id')->whereNumber('commentId')->name('public.comments.destroy');
 
-        // Private libraries
-        Route::get('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'index'])->name('private.index');
+        // Private libraries — write routes (create/edit/delete/items) — admin-only
         Route::get('private/create', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'create'])->name('private.create');
         Route::get('private/class-members', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'classMembers'])->name('private.class-members');
         Route::post('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'store'])->name('private.store');
         Route::get('private/{id}/edit', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'edit'])->name('private.edit');
         Route::put('private/{id}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'update'])->name('private.update');
         Route::delete('private/{id}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'destroy'])->name('private.destroy');
-        Route::get('private/{id}/items', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'items'])->name('private.items');
         Route::post('private/{id}/items', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'storeItem'])->name('private.items.store');
         Route::delete('private/{id}/items/{itemId}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'destroyItem'])->name('private.items.destroy');
 
-        // Virtual labs
+        // Virtual labs — not school-scoped, so index/show remain admin-only as well
         Route::get('labs', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'index'])->name('labs.index');
         Route::get('labs/manage', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'manage'])->name('labs.manage');
         Route::get('labs/create', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'create'])->name('labs.create');
@@ -694,6 +679,56 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ad
     });
     // Subject comment on result (Sprint 8 Item 1)
     Route::post('evaluations/execute/{evaluation}/comment', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'comment'])->name('evaluations.comment');
+});
+
+// =========================================================================
+// Read-only access for teachers — cards #189 / #190
+// Write routes (create/edit/delete/approve/promote/import) remain in the
+// admin-only groups above.  Controllers verified school-scoped via
+// HasSchoolScope::activeSchoolId() / findScoped() before this section.
+// =========================================================================
+
+// Question Banks — read (index, library, questions index, question preview)
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin')->name('admin.')->group(function () {
+    // QuestionBankController::index — school-scoped: activeSchoolId() line 23
+    Route::get('question-banks/library', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'library'])->name('question-banks.library');
+    Route::get('question-banks', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'index'])->name('question-banks.index');
+    // BankQuestionController::index — school-scoped: resolveBank() → findScoped() line 252-253
+    Route::get('question-banks/{bankId}/questions', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'index'])->name('question-banks.questions.index');
+    // BankQuestionController::preview — school-scoped: resolveBank() → findScoped() line 252-253
+    Route::get('question-banks/{bankId}/questions/{questionId}/preview', [\App\Modules\QuestionBanks\Controllers\BankQuestionController::class, 'preview'])->name('question-banks.questions.preview');
+});
+
+// Books — read (index, grades view)
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('manage')->name('manage.')->group(function () {
+    // BookController::index — school-scoped: activeSchoolId() line 28
+    Route::get('books', [\App\Modules\Books\Controllers\BookController::class, 'index'])->name('books.index');
+    // BookGradeController::index — school-scoped: resolveBookSchoolId() → activeSchoolId() line 31
+    Route::get('books/grades', [\App\Modules\Books\Controllers\BookGradeController::class, 'index'])->name('books.grades');
+});
+
+// Subjects — read (index, lesson-tree, domains)
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin')->name('admin.')->group(function () {
+    // SubjectController::index — school-scoped: activeSchoolId() line 25
+    Route::get('subjects', [\App\Modules\Subjects\Controllers\SubjectController::class, 'index'])->name('subjects.index');
+    // SubjectController::lessonTree — school-scoped: findScoped() line 113-114
+    Route::get('subjects/{id}/lesson-tree', [\App\Modules\Subjects\Controllers\SubjectController::class, 'lessonTree'])->name('subjects.lesson-tree');
+    // SubjectController::domains — school-scoped: findScoped() line 132-133
+    Route::get('subjects/{id}/domains', [\App\Modules\Subjects\Controllers\SubjectController::class, 'domains'])->name('subjects.domains');
+});
+
+// Libraries (public + private) — read (index, show, items)
+// NOTE: VirtualLabController has no school scoping — labs.index / labs.show are DEFERRED
+// and remain admin-only in the group above.
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin/libraries')->name('admin.libraries.')->group(function () {
+    // PublicLibraryController::index — school-scoped: activeSchoolId() line 24
+    Route::get('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'index'])->name('public.index');
+    // PublicLibraryController::show — school-scoped: findScoped() line 75
+    Route::get('public/{id}', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'show'])->whereNumber('id')->name('public.show');
+    // PrivateLibraryController::index — school-scoped: activeSchoolId() line 32
+    Route::get('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'index'])->name('private.index');
+    // PrivateLibraryController::items — school-scoped: findScoped() line 92
+    Route::get('private/{id}/items', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'items'])->name('private.items');
 });
 
 // Teacher Routes

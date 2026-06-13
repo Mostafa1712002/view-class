@@ -421,6 +421,22 @@
                 <li class="nav-item {{ request()->routeIs('admin.my-evaluations.*') || request()->routeIs('admin.evaluations.subjects') || request()->routeIs('admin.evaluations.execute.*') ? 'active' : '' }}" data-section="educational">
                     <a href="{{ Route::has('admin.my-evaluations.index') ? route('admin.my-evaluations.index') : '#' }}"><i class="la la-star"></i><span class="menu-title">@lang('shell.nav_evaluations')</span></a>
                 </li>
+                {{-- === Question Banks read access — cards #189/#190 === --}}
+                <li class="nav-item {{ request()->routeIs('admin.question-banks.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ Route::has('admin.question-banks.index') ? route('admin.question-banks.index') : '#' }}"><i class="la la-database"></i><span class="menu-title">@lang('shell.nav_questions_bank')</span></a>
+                </li>
+                {{-- === Books read access — cards #189/#190 === --}}
+                <li class="nav-item {{ request()->routeIs('manage.books.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ Route::has('manage.books.index') ? route('manage.books.index') : '#' }}"><i class="la la-book"></i><span class="menu-title">@lang('shell.nav_books')</span></a>
+                </li>
+                {{-- === Libraries read access — cards #189/#190 === --}}
+                <li class="nav-item {{ request()->routeIs('admin.libraries.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ Route::has('admin.libraries.public.index') ? route('admin.libraries.public.index') : '#' }}"><i class="la la-bookmark"></i><span class="menu-title">@lang('shell.nav_libraries')</span></a>
+                </li>
+                {{-- === Subjects read access — cards #189/#190 === --}}
+                <li class="nav-item {{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}"><i class="la la-book-open"></i><span class="menu-title">@lang('shell.nav_subjects')</span></a>
+                </li>
             @endif
 
             @if($sidebarUser && $sidebarUser->isStudent())
