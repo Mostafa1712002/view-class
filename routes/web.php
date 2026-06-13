@@ -756,6 +756,13 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     // === Books card 65 + digital reader card 103 ===
     Route::get('books', [\App\Modules\Books\Controllers\StudentBookController::class, 'index'])->name('books.index');
     Route::get('books/{id}/read', [\App\Modules\Books\Controllers\StudentBookController::class, 'read'])->whereNumber('id')->name('books.read');
+    // === Absence reports + portfolio + exam schedule — card #172 ===
+    Route::get('reports', [\App\Http\Controllers\StudentController::class, 'reportsIndex'])->name('reports.index');
+    Route::get('reports/absence-days', [\App\Http\Controllers\StudentController::class, 'absenceDays'])->name('reports.absence-days');
+    Route::get('reports/absence-summary', [\App\Http\Controllers\StudentController::class, 'absenceSummary'])->name('reports.absence-summary');
+    Route::get('reports/absence-by-subject', [\App\Http\Controllers\StudentController::class, 'absenceBySubject'])->name('reports.absence-by-subject');
+    Route::get('reports/exam-schedule', [\App\Http\Controllers\StudentController::class, 'examSchedule'])->name('reports.exam-schedule');
+    Route::get('portfolio', [\App\Http\Controllers\StudentController::class, 'portfolio'])->name('portfolio');
 });
 
 // Parent Routes
