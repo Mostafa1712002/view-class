@@ -281,6 +281,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('my/policies', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'index'])->name('policies.my.index');
     Route::get('my/policies/{id}', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'show'])->whereNumber('id')->name('policies.my.show');
 
+    // === Parent Libraries page (ولي الأمر) — card #182 ===
+    Route::get('my/libraries', [\App\Modules\Libraries\Controllers\ParentLibraryController::class, 'index'])->name('my.libraries.index');
+
     // === Parent canteen controls (ولي الأمر) — card #116 / Task 20 part 4b ===
     Route::get('my/canteen', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'index'])->name('my.canteen.index');
     Route::put('my/canteen/{student}/limit', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'updateLimit'])->whereNumber('student')->name('my.canteen.limit');
