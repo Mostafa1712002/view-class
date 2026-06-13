@@ -97,8 +97,9 @@
                             @if($item->file_path)
                                 <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="@lang('libraries.actions.download')"><i class="la la-download"></i></a>
                             @endif
-                            @if($item->external_url)
-                                <a href="{{ $item->external_url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="@lang('libraries.actions.open')"><i class="la la-external-link-alt"></i></a>
+                            @php $safeUrl = preg_match('#^https?://#i', (string) $item->external_url) ? $item->external_url : null; @endphp
+                            @if($safeUrl)
+                                <a href="{{ $safeUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary" title="@lang('libraries.actions.open')"><i class="la la-external-link-alt"></i></a>
                             @endif
                             @if(Route::has('admin.libraries.public.show'))
                                 <a href="{{ route('admin.libraries.public.show', $item->id) }}" class="btn btn-sm btn-outline-info ms-auto" title="@lang('libraries.show.details')"><i class="la la-star"></i></a>
