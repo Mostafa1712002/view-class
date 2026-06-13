@@ -437,6 +437,10 @@
                 <li class="nav-item {{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}" data-section="educational">
                     <a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}"><i class="la la-book-open"></i><span class="menu-title">@lang('shell.nav_subjects')</span></a>
                 </li>
+                {{-- === My Students — cards #191/#198 === --}}
+                <li class="nav-item {{ request()->routeIs('teacher.students.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ route('teacher.students.index') }}"><i class="la la-users"></i><span class="menu-title">@lang('teacher_students.sidebar_link')</span></a>
+                </li>
             @endif
 
             @if($sidebarUser && $sidebarUser->isStudent())

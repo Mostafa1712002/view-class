@@ -773,6 +773,12 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('te
     Route::get('attendance/daily-report', [\App\Http\Controllers\Admin\AttendanceController::class, 'dailyReport'])->name('attendance.daily-report');
     Route::get('attendance/student-report', [\App\Http\Controllers\Admin\AttendanceController::class, 'studentReport'])->name('attendance.student-report');
     Route::get('attendance/class-report', [\App\Http\Controllers\Admin\AttendanceController::class, 'classReport'])->name('attendance.class-report');
+
+    // My Students — cards #191 / #198
+    // Security: TeacherStudentController resolves teachingStudentIds() before
+    // returning any data; show() aborts 403 if the student is not in that set.
+    Route::get('students', [\App\Http\Controllers\TeacherStudentController::class, 'index'])->name('students.index');
+    Route::get('students/{student}', [\App\Http\Controllers\TeacherStudentController::class, 'show'])->whereNumber('student')->name('students.show');
 });
 
 // Student Routes
