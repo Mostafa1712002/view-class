@@ -954,6 +954,27 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/supp
     Route::post('/{ticket}/status', [\App\Modules\Support\Controllers\AdminSupportController::class, 'updateStatus'])->name('updateStatus');
 });
 
+// ==========================================
+// Surveys module (Trello #185)
+// ==========================================
+Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/surveys')->name('admin.surveys.')->group(function () {
+    Route::get('/', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'create'])->name('create');
+    Route::post('/', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'store'])->name('store');
+    Route::get('/{survey}/edit', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'edit'])->whereNumber('survey')->name('edit');
+    Route::put('/{survey}', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'update'])->whereNumber('survey')->name('update');
+    Route::post('/{survey}/publish', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'publish'])->whereNumber('survey')->name('publish');
+    Route::post('/{survey}/close', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'close'])->whereNumber('survey')->name('close');
+    Route::get('/{survey}/results', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'results'])->whereNumber('survey')->name('results');
+    Route::delete('/{survey}', [\App\Modules\Surveys\Controllers\AdminSurveyController::class, 'destroy'])->whereNumber('survey')->name('destroy');
+});
+
+Route::middleware(['auth'])->prefix('my/surveys')->name('my.surveys.')->group(function () {
+    Route::get('/', [\App\Modules\Surveys\Controllers\MySurveyController::class, 'index'])->name('index');
+    Route::get('/{survey}', [\App\Modules\Surveys\Controllers\MySurveyController::class, 'show'])->whereNumber('survey')->name('show');
+    Route::post('/{survey}', [\App\Modules\Surveys\Controllers\MySurveyController::class, 'submit'])->whereNumber('survey')->name('submit');
+});
+
 // === Certificates module (#192 §9 / #172) ===
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/certificates')->name('admin.certificates.')->group(function () {
     Route::get('/', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'index'])->name('index');
