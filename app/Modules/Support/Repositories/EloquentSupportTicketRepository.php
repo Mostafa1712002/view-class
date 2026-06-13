@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class EloquentSupportTicketRepository implements SupportTicketRepository
 {
-    public function getUserTickets(int $schoolId, int $userId): LengthAwarePaginator
+    public function getUserTickets(?int $schoolId, int $userId): LengthAwarePaginator
     {
         return SupportTicket::query()
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->where('created_by', $userId)
             ->with(['creator:id,name,name_ar', 'assignee:id,name,name_ar', 'relatedStudent:id,name'])
             ->latest('id')

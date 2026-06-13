@@ -12,7 +12,7 @@ interface SupportTicketRepository
     /**
      * Get tickets created by a specific user within a school.
      */
-    public function getUserTickets(int $schoolId, int $userId): LengthAwarePaginator;
+    public function getUserTickets(?int $schoolId, int $userId): LengthAwarePaginator;
 
     /**
      * Get all tickets for a school with optional filters (admin view).

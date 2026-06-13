@@ -23,9 +23,11 @@ class UserSupportController extends Controller
             auth()->id()
         );
 
-        // Status counters for the user's own tickets (#186).
+        // Status counters for the user's own tickets (#186). Null active school
+        // (super-admin) is unscoped, matching getUserTickets().
+        $schoolId = $this->activeSchoolId();
         $base = \App\Models\SupportTicket::query()
-            ->where('school_id', $this->activeSchoolId())
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->where('created_by', auth()->id());
         $counts = [
             'all'         => (clone $base)->count(),
