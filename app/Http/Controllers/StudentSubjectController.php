@@ -42,7 +42,12 @@ class StudentSubjectController extends Controller
             ->where('is_active', true);
 
         if ($gradeLevel !== null) {
-            $query->whereJsonContains('grade_levels', (int) $gradeLevel);
+            // grade_levels is stored as a JSON array of STRINGS (e.g. ["1"]),
+            // so match both the string and int forms to be robust.
+            $query->where(function ($w) use ($gradeLevel) {
+                $w->whereJsonContains('grade_levels', (string) $gradeLevel)
+                    ->orWhereJsonContains('grade_levels', (int) $gradeLevel);
+            });
         }
 
         return $query->orderBy('certificate_order')->orderBy('name')->get();
