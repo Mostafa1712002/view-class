@@ -395,6 +395,22 @@ class StudentController extends Controller
     /**
      * Portfolio — aggregate of certificates, grades, exam results, attendance.
      */
+    /**
+     * The student's own special-education record (read-only), if any. Scoped to
+     * the logged-in student — never another student's record (#173).
+     */
+    public function specialEducation(): View
+    {
+        $student = auth()->user();
+
+        $record = \App\Models\SpecialEducationStudent::with(['specialist:id,name', 'plans', 'notes'])
+            ->where('student_id', $student->id)
+            ->when($student->school_id, fn ($q) => $q->where('school_id', $student->school_id))
+            ->first();
+
+        return view('student.special-education', compact('record'));
+    }
+
     public function portfolio(): View
     {
         $student      = auth()->user();

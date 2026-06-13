@@ -813,6 +813,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('te
 // Student Routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('dashboard', [\App\Http\Controllers\StudentController::class, 'dashboard'])->name('dashboard');
+    Route::get('special-education', [\App\Http\Controllers\StudentController::class, 'specialEducation'])->name('special-education');
     Route::get('grades', [\App\Http\Controllers\StudentController::class, 'grades'])->name('grades');
     Route::get('attendance', [\App\Http\Controllers\StudentController::class, 'attendance'])->name('attendance');
     Route::get('exams', [\App\Http\Controllers\StudentController::class, 'exams'])->name('exams');
