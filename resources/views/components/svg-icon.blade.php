@@ -1,0 +1,1 @@
+<svg class="vc-ico {{ $class ?? '' }}" width="{{ $size ?? 18 }}" height="{{ $size ?? 18 }}" fill="currentColor" aria-hidden="true" focusable="false"><use href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.svg') }}#{{ $name }}"></use></svg>

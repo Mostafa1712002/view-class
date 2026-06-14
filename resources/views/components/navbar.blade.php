@@ -3,7 +3,7 @@
 <style>
 /* ── Notification bell + dropdown (gold/light, RTL-aware) ───────────────── */
 .vc-notif-bell { position: relative; }
-.vc-notif-bell.has-unread .la-bell { color: var(--gold-500, #c9a04b); }
+.vc-notif-bell.has-unread .vc-ico { color: var(--gold-500, #c9a04b); }
 .vc-notif-count {
     position: absolute; top: 2px; inset-inline-end: 2px;
     min-width: 17px; height: 17px; padding: 0 4px;
@@ -118,11 +118,19 @@
         {{-- Left cluster: brand + mobile toggle --}}
         <div class="shell-nav-left d-flex align-items-center">
             <a class="nav-link nav-menu-main menu-toggle hidden-xs d-md-inline-block p-0 me-2" href="#" aria-label="@lang('shell.menu_toggle')">
-                <i class="la la-bars la-2x text-white"></i>
+                <x-svg-icon name="list" class="text-white" size="24" />
             </a>
             <a class="navbar-brand d-flex align-items-center m-0 p-0" href="{{ route('dashboard') }}">
-                <img class="brand-logo" alt="@lang('auth.app_name')" src="{{ asset('app-assets/images/logo/logo.png') }}" style="height: 32px;">
-                <span class="brand-text ms-1 d-none d-lg-inline text-white">@lang('auth.app_name')</span>
+                @if(!empty($brand_logo))
+                    <img class="brand-logo" alt="{{ $brand_name_ar ?? 'المنصة الذهبية' }}" src="{{ asset($brand_logo) }}" style="height: 32px;">
+                    <span class="brand-text ms-1 d-none d-lg-inline text-white">{{ $brand_name_ar ?? 'المنصة الذهبية' }}</span>
+                @else
+                    <span class="brand-text-logo d-flex align-items-center gap-1" style="line-height:1; user-select:none;">
+                        <span style="display:inline-block; width:8px; height:28px; background:#C9A227; border-radius:3px; flex-shrink:0;"></span>
+                        <span class="ms-1 fw-bold text-white d-none d-lg-inline" style="font-size:1.05rem; letter-spacing:.01em;">{{ $brand_name_ar ?? 'المنصة الذهبية' }}</span>
+                        <span class="ms-1 fw-bold text-white d-inline d-lg-none text-nowrap" style="font-size:.78rem;">{{ $brand_name_ar ?? 'المنصة الذهبية' }}</span>
+                    </span>
+                @endif
             </a>
             @if($shellSchoolName)
                 <div class="shell-school-meta d-none d-xxl-flex text-white ms-3" style="flex-direction:column; line-height:1.1; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -171,13 +179,13 @@
             <li class="nav-item" data-shell-hide-xs>
                 <a class="nav-link" href="#" title="@lang('shell.search')" aria-label="@lang('shell.search')"
                    onclick="event.preventDefault(); const bar=document.getElementById('shell-search-bar'); if(bar){bar.classList.toggle('d-none'); const i=bar.querySelector('input'); if(i && !bar.classList.contains('d-none')) i.focus();}">
-                    <i class="ficon la la-search"></i>
+                    <x-svg-icon name="search" class="ficon" size="18" />
                 </a>
             </li>
 
             <li class="nav-item dropdown" data-shell-hide-xs>
                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" title="@lang('shell.switch_language')">
-                    <i class="ficon la la-globe"></i>
+                    <x-svg-icon name="globe" class="ficon" size="18" />
                     <span class="d-none d-lg-inline ms-1">{{ strtoupper($shellLocale) }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
@@ -194,13 +202,13 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('messages.index') }}" title="@lang('shell.nav_mailbox')">
-                        <i class="ficon la la-envelope"></i>
+                        <x-svg-icon name="envelope" class="ficon" size="18" />
                     </a>
                 </li>
 
                 <li class="dropdown dropdown-notification nav-item vc-notif">
                     <a class="nav-link nav-link-label vc-notif-bell {{ $unreadCount > 0 ? 'has-unread' : '' }}" href="#" data-toggle="dropdown" data-display="static" title="@lang('shell.notifications_heading')">
-                        <i class="ficon la la-bell"></i>
+                        <x-svg-icon name="bell" class="ficon" size="18" />
                         @if($unreadCount > 0)
                             <span class="vc-notif-count">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
                         @endif
@@ -208,13 +216,13 @@
                     <div class="dropdown-menu dropdown-menu-{{ $shellIsRtl ? 'left' : 'right' }} vc-notif-dd">
                         <div class="vc-notif-head">
                             <span class="vc-notif-head-title">
-                                <i class="la la-bell"></i> @lang('shell.notifications_heading')
+                                <x-svg-icon name="bell" size="15" /> @lang('shell.notifications_heading')
                                 @if($unreadCount > 0)<span class="vc-notif-chip">{{ $unreadCount }}</span>@endif
                             </span>
                             @if($unreadCount > 0)
                                 <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="m-0 p-0">
                                     @csrf
-                                    <button type="submit" class="vc-notif-markall"><i class="la la-check-double"></i> @lang('shell.notifications_mark_all')</button>
+                                    <button type="submit" class="vc-notif-markall"><x-svg-icon name="check2-all" size="14" /> @lang('shell.notifications_mark_all')</button>
                                 </form>
                             @endif
                         </div>
@@ -227,19 +235,19 @@
                                     <span class="vc-notif-body">
                                         <span class="vc-notif-title">{{ $notification->title }}</span>
                                         <span class="vc-notif-text">{{ Str::limit($notification->body, 70) }}</span>
-                                        <span class="vc-notif-time"><i class="la la-clock"></i> {{ $notification->created_at->diffForHumans() }}</span>
+                                        <span class="vc-notif-time"><x-svg-icon name="clock" size="12" /> {{ $notification->created_at->diffForHumans() }}</span>
                                     </span>
                                     <span class="vc-notif-dot" aria-hidden="true"></span>
                                 </a>
                             @empty
                                 <div class="vc-notif-empty">
-                                    <span class="vc-notif-empty-ico"><i class="la la-bell"></i></span>
+                                    <span class="vc-notif-empty-ico"><x-svg-icon name="bell" size="28" /></span>
                                     <p class="vc-notif-empty-title">@lang('shell.notifications_empty')</p>
                                     <p class="vc-notif-empty-sub">@lang('shell.notifications_empty_sub')</p>
                                 </div>
                             @endforelse
                         </div>
-                        <a class="vc-notif-foot" href="{{ route('notifications.index') }}">@lang('shell.notifications_view_all') <i class="la la-angle-{{ $shellIsRtl ? 'left' : 'right' }}"></i></a>
+                        <a class="vc-notif-foot" href="{{ route('notifications.index') }}">@lang('shell.notifications_view_all') <x-svg-icon name="{{ $shellIsRtl ? 'arrow-left' : 'arrow-right' }}" size="14" /></a>
                     </div>
                 </li>
 
@@ -247,7 +255,7 @@
                 @if($shellRoles->count() > 0)
                     <li class="nav-item dropdown" data-shell-hide-xs>
                         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" title="@lang('shell.select_role')">
-                            <i class="ficon la la-user-shield"></i>
+                            <x-svg-icon name="shield-lock" class="ficon" size="18" />
                             <span class="d-none d-xl-inline ms-1">{{ session('current_role', $shellRoles->first()->name) }}</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
@@ -276,16 +284,16 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
                         <a class="dropdown-item" href="{{ url('/profile/edit') }}">
-                            <i class="la la-user"></i> @lang('shell.profile_edit')
+                            <x-svg-icon name="person" size="16" /> @lang('shell.profile_edit')
                         </a>
                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#change-password-modal">
-                            <i class="la la-lock"></i> @lang('shell.change_password')
+                            <x-svg-icon name="lock" size="16" /> @lang('shell.change_password')
                         </a>
                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#upload-avatar-modal">
-                            <i class="la la-image"></i> @lang('shell.upload_avatar')
+                            <x-svg-icon name="image" size="16" /> @lang('shell.upload_avatar')
                         </a>
                         <a class="dropdown-item" href="#">
-                            <i class="la la-book"></i> @lang('shell.user_guide')
+                            <x-svg-icon name="book" size="16" /> @lang('shell.user_guide')
                         </a>
                         <div class="dropdown-divider"></div>
                         <h6 class="dropdown-header">@lang('shell.font_size')</h6>
@@ -297,7 +305,7 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <i class="la la-power-off"></i> @lang('auth.logout')
+                            <x-svg-icon name="box-arrow-right" size="16" /> @lang('auth.logout')
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                             @csrf
