@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse as SymfonyStreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class NoorImportController extends Controller
 {
@@ -47,6 +48,38 @@ class NoorImportController extends Controller
         $history = $this->history($user);
 
         return view('admin.noor.form', compact('types', 'schools', 'lockedSchoolId', 'academicYears', 'history'));
+    }
+
+    /**
+     * Download the sample CSV template (UTF-8 BOM so Excel opens Arabic correctly).
+     */
+    public function downloadTemplate(Request $request): SymfonyStreamedResponse
+    {
+        return response()->streamDownload(function () {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // BOM for Excel Arabic
+            fputcsv($out, [
+                'م',
+                'رقم الطالب',
+                'اسم الطالب',
+                'الجنس',
+                'الجنسية',
+                'تاريخ الميلاد',
+                'الصف',
+                'الفصل',
+                'حالة الطالب',
+                'اسم ولي الأمر',
+                'هوية ولي الأمر',
+                'جوال ولي الأمر',
+                'البريد الإلكتروني',
+            ]);
+            // Two sample rows
+            fputcsv($out, [1, '1099000001', 'محمد عبدالله الأحمد', 'ذكر', 'سعودي', '2005/01/15', 'الأول الثانوي', 'أ', 'مقيد', 'عبدالله الأحمد', '1050000001', '0501234567', 'student1@noor.local']);
+            fputcsv($out, [2, '1099000002', 'عبدالرحمن علي السالم', 'ذكر', 'سعودي', '2005/03/20', 'الأول الثانوي', 'أ', 'مقيد', 'علي السالم', '1050000002', '0507654321', 'student2@noor.local']);
+            fclose($out);
+        }, 'noor-template-students.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     /**

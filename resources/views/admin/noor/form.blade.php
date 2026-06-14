@@ -10,6 +10,14 @@
             <li class="breadcrumb-item active">@lang('noor.breadcrumb')</li>
         </ol>
     </div>
+    <div class="content-header-right text-md-end col-md-4 col-12 d-md-block d-none">
+        <a href="{{ route('admin.noor.template') }}" class="btn btn-sm btn-outline-success">
+            <i class="la la-file-csv"></i> @lang('noor.template_download')
+        </a>
+        <a href="{{ route('admin.noor.settings') }}" class="btn btn-sm btn-outline-secondary mr-1">
+            <i class="la la-cog"></i> @lang('noor.settings.page_title')
+        </a>
+    </div>
 </div>
 
 <div class="content-body">
@@ -80,6 +88,12 @@
                             <label class="form-label" for="file">@lang('noor.file_label') <span class="text-danger">*</span></label>
                             <input type="file" name="file" id="file" class="form-control" accept=".xlsx,.xls,.csv,.txt" required>
                             <small class="text-muted d-block mt-1">@lang('noor.file_hint')</small>
+                            <small class="d-block mt-1">
+                                <a href="{{ route('admin.noor.template') }}" class="text-success">
+                                    <i class="la la-download"></i> @lang('noor.template_download')
+                                </a>
+                                — @lang('noor.template_hint')
+                            </small>
                         </div>
 
                         <div class="d-flex justify-content-end">

@@ -248,7 +248,7 @@ final class ImportNoorUsersAction
             'phone' => $row->phone,
             'email' => $email,
             'gender' => $this->normalizeGender($row->gender) ?? 'male',
-            'birth_date' => $row->birthDate,
+            'date_of_birth' => $row->birthDate,
             'specialization' => $row->specialization,
             // Best-effort class assignment from the Noor grade/class columns.
             'section_id' => $sectionId = $this->matchSection($row->grade, $schoolId),
