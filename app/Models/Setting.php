@@ -95,6 +95,15 @@ class Setting extends Model
                 ['key' => 'parent_grade_notification', 'value' => '1', 'type' => 'boolean', 'description' => 'إشعار ولي الأمر بالدرجات'],
                 ['key' => 'parent_absence_notification', 'value' => '1', 'type' => 'boolean', 'description' => 'إشعار ولي الأمر بالغياب'],
             ],
+            'brand' => [
+                ['key' => 'brand_name_ar',         'value' => 'المنصة الذهبية',  'type' => 'string', 'description' => 'اسم المنصة بالعربية'],
+                ['key' => 'brand_name_en',         'value' => 'Golden Platform', 'type' => 'string', 'description' => 'Platform name (English)'],
+                ['key' => 'brand_logo',            'value' => '',                'type' => 'string', 'description' => 'مسار شعار المنصة'],
+                ['key' => 'brand_favicon',         'value' => '',                'type' => 'string', 'description' => 'مسار الـ favicon'],
+                ['key' => 'brand_primary_color',   'value' => '#C9A227',         'type' => 'string', 'description' => 'اللون الأساسي'],
+                ['key' => 'brand_secondary_color', 'value' => '#14233A',         'type' => 'string', 'description' => 'اللون الثانوي'],
+                ['key' => 'brand_font',            'value' => 'Cairo',           'type' => 'string', 'description' => 'خط المنصة'],
+            ],
         ];
     }
 }

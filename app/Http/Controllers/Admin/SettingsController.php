@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -17,29 +18,55 @@ class SettingsController extends Controller
     {
         $user = Auth::user();
         $schoolId = $user->school_id;
+        $isSuperAdmin = $user->isSuperAdmin();
 
         $settings = [
-            'general' => Setting::getByGroup('general', $schoolId),
-            'academic' => Setting::getByGroup('academic', $schoolId),
+            'general'       => Setting::getByGroup('general', $schoolId),
+            'academic'      => Setting::getByGroup('academic', $schoolId),
             'notifications' => Setting::getByGroup('notifications', $schoolId),
         ];
 
+        // Brand settings are platform-level (school_id = null), editable by super-admin only.
+        if ($isSuperAdmin) {
+            $settings['brand'] = Setting::getByGroup('brand', null);
+        }
+
         $defaults = Setting::getDefaults();
 
-        return view('admin.settings.index', compact('settings', 'defaults'));
+        return view('admin.settings.index', compact('settings', 'defaults', 'isSuperAdmin'));
     }
 
     public function update(Request $request)
     {
         $user = Auth::user();
         $schoolId = $user->school_id;
+        $isSuperAdmin = $user->isSuperAdmin();
 
         $defaults = Setting::getDefaults();
 
         foreach ($defaults as $group => $groupSettings) {
+            // Brand settings are platform-level; only super-admin may change them.
+            if ($group === 'brand') {
+                if (! $isSuperAdmin) {
+                    continue;
+                }
+                // Save brand settings at platform level (school_id = null).
+                foreach ($groupSettings as $setting) {
+                    $key   = $setting['key'];
+                    $type  = $setting['type'];
+                    $value = $request->input($key);
+                    if ($value !== null) {
+                        Setting::set($key, $value, $type, null, 'brand');
+                    }
+                }
+                // Flush the cached platform brand so views pick up the new values immediately.
+                Cache::forget('platform_brand');
+                continue;
+            }
+
             foreach ($groupSettings as $setting) {
-                $key = $setting['key'];
-                $type = $setting['type'];
+                $key   = $setting['key'];
+                $type  = $setting['type'];
                 $value = $request->input($key);
 
                 if ($type === 'boolean') {

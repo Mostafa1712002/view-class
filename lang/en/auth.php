@@ -12,7 +12,7 @@ return [
     'invalid_credentials' => 'Invalid username or password',
     'account_disabled' => 'This account is disabled. Please contact the administrator.',
     'logout' => 'Sign Out',
-    'app_name' => 'Al-Awwal',
+    'app_name' => 'Golden Platform',
     'tagline' => 'Integrated Educational Platform',
     'version_label' => 'Version',
 ];

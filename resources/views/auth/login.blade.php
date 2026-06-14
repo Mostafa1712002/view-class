@@ -168,7 +168,7 @@
         <div class="auth-card card">
             <div class="card-body p-4">
                 <div class="brand-logo">
-                    <img src="{{ asset('img/brand/al-awwal-logo.png') }}" alt="@lang('auth.app_name')">
+                    <img src="{{ !empty($brand_logo) ? asset('storage/' . $brand_logo) : asset('img/brand/golden-platform-logo.png') }}" alt="@lang('auth.app_name')">
                     <h2 class="mt-2">@lang('auth.app_name')</h2>
                     <div class="version text-muted">@lang('auth.tagline')</div>
                 </div>

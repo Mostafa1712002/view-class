@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClassRoom;
 use App\Models\School;
 use App\Models\Section;
+use App\Models\Setting;
 use App\Models\User;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Database\Eloquent\Builder;
@@ -95,7 +96,7 @@ class UserCardController extends Controller
                 ->with('error', __('user_cards.flash_no_users'));
         }
 
-        $platform = config('app.name', 'الأول');
+        $platform = Setting::get('brand_name_ar', 'المنصة الذهبية', null);
         $url      = config('app.url', request()->getSchemeAndHttpHost());
 
         $cards = $users->map(fn (User $u) => $this->cardFor($u))->values();

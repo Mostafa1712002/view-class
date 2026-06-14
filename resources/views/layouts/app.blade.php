@@ -35,7 +35,7 @@
         .swal2-toast { box-shadow: 0 10px 30px rgba(30, 25, 10, .18) !important; border: 1px solid #efe6cf; }
         .swal2-popup.swal2-toast .swal2-title { font-size: .95rem; }
     </style>
-    {{-- Al-Awwal brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
+    {{-- Golden Platform brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
     @if(!$isRtl)
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
     @endif
@@ -65,7 +65,7 @@
     <!-- END Custom CSS-->
 
     <style>
-        /* ============ Al-Awwal brand tokens (Sprint 5 — الهوية) ============ */
+        /* ============ Golden Platform brand tokens ============ */
         :root {
             --gold-100: #f6d27a;
             --gold-200: #e3b85c;

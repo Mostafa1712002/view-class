@@ -85,9 +85,9 @@
 <div class="container-fluid">
     <div class="pd-hero">
         <div class="logo">
-            <img src="{{ asset('img/brand/al-awwal-logo.png') }}" alt="@lang('auth.app_name')"
+            <img src="{{ !empty($brand_logo) ? asset('storage/' . $brand_logo) : asset('img/brand/golden-platform-logo.png') }}" alt="@lang('auth.app_name')"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-            <span class="logo-fallback" style="display:none">ف</span>
+            <span class="logo-fallback" style="display:none">م</span>
         </div>
         <div>
             <div class="platform-name">@lang('auth.app_name')</div>

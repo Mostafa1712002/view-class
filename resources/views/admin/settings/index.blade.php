@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
-@section('title', 'إعدادات المدرسة')
+@section('title', 'الإعدادات')
 
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">إعدادات المدرسة</h1>
+        <h1 class="h3 mb-0">الإعدادات</h1>
     </div>
 
     @if(session('success'))
@@ -76,6 +76,46 @@
                         @endforeach
                     </div>
                 </div>
+
+                {{-- ═══════════════════════════════════════════════════════════════
+                     Brand identity — visible to super-admin only.
+                     Values are stored at platform level (school_id = null).
+                ═══════════════════════════════════════════════════════════════ --}}
+                @if($isSuperAdmin)
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning bg-opacity-10">
+                        <h5 class="mb-0"><i class="la la-paint-brush me-2"></i>هوية المنصة (Golden Platform)</h5>
+                        <small class="text-muted">هذه الإعدادات تؤثر على جميع شاشات المنصة — تظهر للمشرف العام فقط</small>
+                    </div>
+                    <div class="card-body">
+                        @foreach($defaults['brand'] as $setting)
+                            @php
+                                $currentVal = $settings['brand'][$setting['key']] ?? $setting['value'];
+                            @endphp
+                            <div class="mb-3">
+                                <label class="form-label">{{ $setting['description'] }}</label>
+                                @if(in_array($setting['key'], ['brand_primary_color', 'brand_secondary_color']))
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="color" name="{{ $setting['key'] }}"
+                                            class="form-control form-control-color"
+                                            value="{{ $currentVal }}"
+                                            style="width:60px; height:38px;">
+                                        <input type="text" name="{{ $setting['key'] }}_hex"
+                                            class="form-control brand-color-text"
+                                            value="{{ $currentVal }}"
+                                            placeholder="#C9A227"
+                                            readonly>
+                                    </div>
+                                @else
+                                    <input type="text" name="{{ $setting['key'] }}" class="form-control"
+                                        value="{{ $currentVal }}"
+                                        placeholder="{{ $setting['value'] }}">
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
 
             <div class="col-lg-4">
@@ -149,6 +189,15 @@ document.getElementById('logo-input').addEventListener('change', function(e) {
         };
         reader.readAsDataURL(file);
     }
+});
+
+// Sync color picker ↔ text input (read-only mirror for the hex value)
+document.querySelectorAll('input[type="color"]').forEach(function(picker) {
+    picker.addEventListener('input', function() {
+        var textInput = picker.closest('.d-flex').querySelector('.brand-color-text');
+        if (textInput) { textInput.value = picker.value; }
+        // Also keep the real named input in sync (the color picker IS the real input)
+    });
 });
 </script>
 @endpush
