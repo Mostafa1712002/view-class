@@ -14,7 +14,9 @@ class CheckPermission
             return redirect()->route('login');
         }
 
-        if (!$request->user()->hasPermission($permission)) {
+        // Use canDo() which: (1) bypasses for super-admin, (2) applies default-allow
+        // when job-title has no configured permissions yet.
+        if (!$request->user()->canDo($permission)) {
             abort(403, 'غير مصرح لك بتنفيذ هذا الإجراء');
         }
 

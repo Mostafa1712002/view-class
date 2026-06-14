@@ -4,6 +4,7 @@ namespace App\Modules\Users\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobTitle;
+use App\Models\Role;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,21 +17,28 @@ class JobTitleController extends Controller
     public function index(): View
     {
         $jobTitles = JobTitle::query()
+            ->with(['role', 'permissions'])
+            ->withCount('users')
             ->forSchool($this->activeSchoolId())
             ->orderByRaw('school_id IS NULL DESC')
             ->orderBy('sort_order')
             ->get();
-        return view('admin.users.job_titles.index', compact('jobTitles'));
+
+        $roles = Role::orderBy('name')->get();
+
+        return view('admin.users.job_titles.index', compact('jobTitles', 'roles'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'slug' => 'required|string|max:64',
-            'name_ar' => 'required|string|max:120',
-            'name_en' => 'required|string|max:120',
-            'sort_order' => 'nullable|integer|min:0',
-            'is_active' => 'sometimes|boolean',
+            'slug'        => 'required|string|max:64',
+            'name_ar'     => 'required|string|max:120',
+            'name_en'     => 'required|string|max:120',
+            'description' => 'nullable|string|max:500',
+            'role_id'     => 'nullable|integer|exists:roles,id',
+            'sort_order'  => 'nullable|integer|min:0',
+            'is_active'   => 'sometimes|boolean',
         ]);
         $data['school_id'] = $this->activeSchoolId();
         $data['is_active'] = (bool) ($data['is_active'] ?? true);
@@ -51,15 +59,19 @@ class JobTitleController extends Controller
             // global title — only super-admin may edit
             abort_unless(auth()->user()?->isSuperAdmin(), 403);
         }
+
         $data = $request->validate([
-            'name_ar' => 'required|string|max:120',
-            'name_en' => 'required|string|max:120',
-            'sort_order' => 'nullable|integer|min:0',
-            'is_active' => 'sometimes|boolean',
+            'name_ar'     => 'required|string|max:120',
+            'name_en'     => 'required|string|max:120',
+            'description' => 'nullable|string|max:500',
+            'role_id'     => 'nullable|integer|exists:roles,id',
+            'sort_order'  => 'nullable|integer|min:0',
+            'is_active'   => 'sometimes|boolean',
         ]);
         $data['is_active'] = (bool) ($data['is_active'] ?? $jobTitle->is_active);
         $data['sort_order'] ??= $jobTitle->sort_order;
         $jobTitle->update($data);
+
         return redirect()->route('admin.users.job-titles.index')
             ->with('status', __('users.job_title_updated'));
     }
@@ -73,6 +85,7 @@ class JobTitleController extends Controller
             abort(403);
         }
         $jobTitle->delete();
+
         return redirect()->route('admin.users.job-titles.index')
             ->with('status', __('users.job_title_deleted'));
     }

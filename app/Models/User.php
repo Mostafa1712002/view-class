@@ -238,12 +238,62 @@ class User extends Authenticatable
     }
 
     /**
-     * General-purpose gated permission check.
-     * Super-admins always pass; others need the named permission slug.
+     * General-purpose gated permission check with default-allow-when-unconfigured.
+     *
+     * Decision tree:
+     *   1. super-admin → always allow
+     *   2. role has permission_role entry → allow (legacy RBAC path)
+     *   3. user has a job title with configured permissions:
+     *       3a. job title has this permission → allow
+     *       3b. job title does NOT have this permission → deny
+     *   4. no job title, OR job title has NO permissions configured → allow (default)
+     *
+     * Rule 4 ensures existing users are never accidentally locked out when no
+     * job-title permission matrix has been configured yet.
      */
     public function canDo(string $permission): bool
     {
-        return $this->isSuperAdmin() || $this->hasPermission($permission);
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        // Legacy role-based check (permission_role table)
+        if ($this->hasPermission($permission)) {
+            return true;
+        }
+
+        // Default-allow-when-unconfigured applies ONLY to read-only ".view"
+        // permissions, so existing users (whose job-title matrix isn't set up
+        // yet) keep seeing menus and read pages. Every write/manage action
+        // (create/edit/delete/archive/approve/import/export/manage_permissions/
+        // login_as_user/...) is DENIED until explicitly granted — fail closed.
+        $isReadOnly = str_ends_with($permission, '.view');
+
+        // Job-title based check (job_title_permissions table)
+        $jobTitle = $this->jobTitle;
+        if ($jobTitle === null) {
+            return $isReadOnly;
+        }
+
+        // If the job title has no configured permission rows at all, only the
+        // read-only default survives.
+        $configured = $jobTitle->permissions()->count();
+        if ($configured === 0) {
+            return $isReadOnly;
+        }
+
+        return $jobTitle->hasPermission($permission);
+    }
+
+    /**
+     * Sidebar helper: can the user view a module's main page?
+     * Uses canDo() so the default-allow rule applies automatically.
+     *
+     * @param string $module e.g. 'question_banks', 'students', 'reports'
+     */
+    public function canViewModule(string $module): bool
+    {
+        return $this->canDo("{$module}.view");
     }
 
     public function assignRole(Role $role): void

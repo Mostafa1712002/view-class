@@ -448,4 +448,26 @@ return [
     // Viewing confirm
     'impersonate_confirm_question' => 'هل تريد الدخول للإطلاع على حساب هذا المستخدم؟',
     'impersonate_confirm_yes' => 'نعم، دخول للإطلاع',
+
+    // Job title permissions matrix (Task 8)
+    'jt_permissions'           => 'صلاحيات المسمى الوظيفي',
+    'jt_manage_permissions'    => 'إدارة الصلاحيات',
+    'jt_copy_permissions'      => 'نسخ الصلاحيات من مسمى آخر',
+    'jt_permissions_saved'     => 'تم حفظ الصلاحيات بنجاح',
+    'jt_permissions_copied'    => 'تم نسخ الصلاحيات بنجاح',
+    'jt_description'           => 'الوصف',
+    'jt_linked_role'           => 'الدور الرئيسي',
+    'jt_user_count'            => 'عدد المستخدمين',
+    'jt_scope_all'             => 'كل النظام',
+    'jt_scope_company'         => 'الشركة',
+    'jt_scope_group'           => 'المجمع',
+    'jt_scope_school'          => 'المدرسة',
+    'jt_scope_stage'           => 'المرحلة',
+    'jt_scope_class'           => 'الصف',
+    'jt_scope_section'         => 'الفصل',
+    'jt_scope_subject'         => 'المادة',
+    'jt_scope_own_students'    => 'الطلاب المرتبطون فقط',
+    'jt_scope_own_subjects'    => 'المواد المسندة فقط',
+    'jt_scope_own'             => 'بياناته فقط',
+    'jt_no_permissions'        => 'لا توجد صلاحيات مضبوطة (الوصول الافتراضي)',
 ];

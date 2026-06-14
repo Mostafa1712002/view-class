@@ -256,10 +256,32 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('admins/{id}/supervisees', [\App\Modules\Users\Controllers\AdminController::class, 'supervisees'])->name('admins.supervisees');
         Route::post('admins/{id}/supervisees', [\App\Modules\Users\Controllers\AdminController::class, 'syncSupervisees'])->name('admins.supervisees.sync');
 
-        Route::get('job-titles', [\App\Modules\Users\Controllers\JobTitleController::class, 'index'])->name('job-titles.index');
-        Route::post('job-titles', [\App\Modules\Users\Controllers\JobTitleController::class, 'store'])->name('job-titles.store');
-        Route::put('job-titles/{jobTitle}', [\App\Modules\Users\Controllers\JobTitleController::class, 'update'])->name('job-titles.update');
-        Route::delete('job-titles/{jobTitle}', [\App\Modules\Users\Controllers\JobTitleController::class, 'destroy'])->name('job-titles.destroy');
+        // Job Titles management — protected by job_titles.* permissions.
+        // canDo() default-allow rule means users with unconfigured job titles still have access.
+        Route::middleware(['permission:job_titles.view'])->group(function () {
+            Route::get('job-titles', [\App\Modules\Users\Controllers\JobTitleController::class, 'index'])->name('job-titles.index');
+        });
+        Route::middleware(['permission:job_titles.create'])->group(function () {
+            Route::post('job-titles', [\App\Modules\Users\Controllers\JobTitleController::class, 'store'])->name('job-titles.store');
+        });
+        Route::middleware(['permission:job_titles.edit'])->group(function () {
+            Route::put('job-titles/{jobTitle}', [\App\Modules\Users\Controllers\JobTitleController::class, 'update'])->name('job-titles.update');
+        });
+        Route::middleware(['permission:job_titles.delete'])->group(function () {
+            Route::delete('job-titles/{jobTitle}', [\App\Modules\Users\Controllers\JobTitleController::class, 'destroy'])->name('job-titles.destroy');
+        });
+        // Permission matrix routes — backend-protected
+        Route::middleware(['permission:job_titles.manage_permissions'])->group(function () {
+            Route::get('job-titles/{jobTitle}/permissions',
+                [\App\Modules\Users\Controllers\JobTitlePermissionsController::class, 'index'])
+                ->name('job-titles.permissions.index');
+            Route::post('job-titles/{jobTitle}/permissions',
+                [\App\Modules\Users\Controllers\JobTitlePermissionsController::class, 'update'])
+                ->name('job-titles.permissions.update');
+            Route::post('job-titles/{jobTitle}/permissions/copy',
+                [\App\Modules\Users\Controllers\JobTitlePermissionsController::class, 'copy'])
+                ->name('job-titles.permissions.copy');
+        });
 
         Route::get('cards', [\App\Modules\Users\Controllers\UserCardController::class, 'index'])->name('cards.index');
         Route::post('cards/generate', [\App\Modules\Users\Controllers\UserCardController::class, 'generate'])->name('cards.generate');

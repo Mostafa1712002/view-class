@@ -285,8 +285,9 @@
                                 <tr>
                                     <th>@lang('users.name')</th>
                                     <th>@lang('users.jt_slug')</th>
+                                    <th>الدور</th>
+                                    <th class="text-center">المستخدمون</th>
                                     <th>@lang('users.jt_active')</th>
-                                    <th class="text-center">@lang('users.jt_sort_order')</th>
                                     <th class="text-{{ $isRtl ? 'start' : 'end' }}">@lang('users.actions')</th>
                                 </tr>
                             </thead>
@@ -296,9 +297,22 @@
                                     <td data-label="@lang('users.name')">
                                         <div class="jt-name-primary">{{ $isRtl ? $jt->name_ar : $jt->name_en }}</div>
                                         <div class="jt-name-secondary">{{ $isRtl ? $jt->name_en : $jt->name_ar }}</div>
+                                        @if($jt->description)
+                                            <div style="font-size:.77rem;color:#94a3b8;margin-top:.15rem;">{{ \Illuminate\Support\Str::limit($jt->description, 55) }}</div>
+                                        @endif
                                     </td>
                                     <td data-label="@lang('users.jt_slug')">
                                         <span class="jt-slug-code">{{ $jt->slug }}</span>
+                                    </td>
+                                    <td data-label="الدور">
+                                        @if($jt->role)
+                                            <span class="jt-pill" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;">{{ $jt->role->name }}</span>
+                                        @else
+                                            <span style="color:#94a3b8;font-size:.8rem;">—</span>
+                                        @endif
+                                    </td>
+                                    <td data-label="المستخدمون" class="text-center">
+                                        <span class="jt-sort">{{ $jt->users_count ?? 0 }}</span>
                                     </td>
                                     <td data-label="@lang('users.jt_active')">
                                         @if($jt->is_active)
@@ -311,11 +325,18 @@
                                         @else
                                             <span class="jt-pill scope-school">@lang('users.jt_school')</span>
                                         @endif
-                                    </td>
-                                    <td data-label="@lang('users.jt_sort_order')" class="text-center">
-                                        <span class="jt-sort">{{ $jt->sort_order }}</span>
+                                        @if($jt->permissions->isNotEmpty())
+                                            <span class="jt-pill" style="background:#fef3c7;color:#92400e;border-color:#fde68a;font-size:.72rem;">
+                                                {{ $jt->permissions->count() }} صلاحية
+                                            </span>
+                                        @endif
                                     </td>
                                     <td data-label="@lang('users.actions')" class="actions-cell text-{{ $isRtl ? 'start' : 'end' }}">
+                                        <a href="{{ route('admin.users.job-titles.permissions.index', $jt->id) }}"
+                                           class="jt-action-btn" title="إدارة الصلاحيات"
+                                           style="color:#C9A227;text-decoration:none;font-size:.82rem;">
+                                            <i class="la la-shield-alt"></i> الصلاحيات
+                                        </a>
                                         @if($jt->school_id !== null || auth()->user()->isSuperAdmin())
                                             <form action="{{ route('admin.users.job-titles.destroy', $jt->id) }}" method="POST" class="d-inline" onsubmit="return confirm('@lang('users.delete')?');">
                                                 @csrf @method('DELETE')
@@ -328,7 +349,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5">
+                                    <td colspan="6">
                                         <div class="jt-empty">
                                             <i class="la la-inbox"></i>
                                             <div class="lbl">@lang('users.no_results')</div>
@@ -373,6 +394,23 @@
                             <label class="form-label">@lang('users.jt_sort_order')</label>
                             <input type="number" name="sort_order" class="form-control" min="0"
                                    value="{{ old('sort_order', 0) }}" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف <span class="hint">(اختياري)</span></label>
+                            <textarea name="description" class="form-control" rows="2"
+                                      placeholder="وصف مختصر للمسمى الوظيفي"
+                                      style="font-size:.88rem;">{{ old('description') }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الدور الرئيسي <span class="hint">(اختياري)</span></label>
+                            <select name="role_id" class="form-control">
+                                <option value="">— بدون دور مرتبط —</option>
+                                @foreach($roles as $role)
+                                    <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                        {{ $role->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="jt-toggle">
