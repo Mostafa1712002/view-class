@@ -115,11 +115,20 @@
 
 <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-semi-light bg-info navbar-shadow shell-navbar-row">
     <div class="navbar-wrapper shell-row">
-        {{-- Left cluster: brand + mobile toggle --}}
-        <div class="shell-nav-left d-flex align-items-center">
-            <a class="nav-link nav-menu-main menu-toggle hidden-xs d-md-inline-block p-0 me-2" href="#" aria-label="@lang('shell.menu_toggle')">
-                <x-svg-icon name="list" class="text-white" size="24" />
+        {{-- Left cluster: brand + toggles --}}
+        <div class="shell-nav-left d-flex align-items-center gap-1">
+            {{-- Desktop sidebar mini-toggle (hidden on mobile — mobile uses its own btn) --}}
+            <a class="nav-link nav-menu-main menu-toggle d-none d-md-inline-flex p-0 me-1" href="#" aria-label="@lang('shell.menu_toggle')" style="color:#fff; align-items:center; width:34px; height:34px; justify-content:center; border-radius:7px; transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='transparent'">
+                <x-svg-icon name="list" class="text-white" size="22" />
             </a>
+            {{-- Mobile hamburger — opens the off-canvas drawer --}}
+            <button id="gp-mobile-menu-btn" type="button"
+                class="d-flex d-md-none align-items-center justify-content-center p-0 me-1"
+                style="width:34px;height:34px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:7px;cursor:pointer;transition:background .15s;"
+                onclick="typeof gpOpenMobileDrawer === 'function' && gpOpenMobileDrawer()"
+                aria-label="@lang('shell.menu_toggle')">
+                <x-svg-icon name="list" class="text-white" size="20" />
+            </button>
             <a class="navbar-brand d-flex align-items-center m-0 p-0" href="{{ route('dashboard') }}">
                 @if(!empty($brand_logo))
                     <img class="brand-logo" alt="{{ $brand_name_ar ?? 'المنصة الذهبية' }}" src="{{ asset($brand_logo) }}" style="height: 32px;">

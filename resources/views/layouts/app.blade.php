@@ -199,28 +199,22 @@
         #shell-scope-form .select2-selection__arrow { height: 32px !important; }
         #shell-scope-form .select2-selection__arrow b { border-top-color: #fff !important; }
 
-        /* ============ Sidebar — section differentiation + icon styling ============ */
+        /* ============ Sidebar — layout integration (GP Sidebar v2) ============ */
+        /* The sidebar component owns all the visual rules. Here we only handle
+           layout concerns so the theme's app-menu.js keeps working correctly. */
         .main-menu.menu-light .navigation > li > a {
-            padding: .55rem .85rem; border-radius: 8px; margin: 2px 10px;
-            font-size: .92rem;
+            /* base layout is set in sidebar.blade.php; keep theme hooks alive */
         }
-        .main-menu.menu-light .navigation > li.active > a {
-            background: linear-gradient(118deg, var(--gold-300) 0%, var(--gold-200) 100%);
-            color: var(--white-100) !important;
-            box-shadow: 0 4px 18px rgba(207,160,70,.35);
-        }
-        .main-menu.menu-light .navigation > li.active > a i { color: #fff; }
-        .main-menu.menu-light .navigation > li > a > i {
-            font-size: 1.15rem; width: 22px; text-align: center;
-            margin-{{ $isRtl ? 'left' : 'right' }}: 10px;
-        }
-        /* ============ Sidebar — prevent menu-title truncation ============ */
+        /* Prevent menu-title truncation */
         .main-menu .navigation > li > a .menu-title,
         .main-menu .navigation li ul.menu-content li a .menu-item {
             white-space: normal !important;
             overflow: visible !important;
             text-overflow: unset !important;
         }
+        /* Ensure the theme body class 2-columns / menu-expanded still work */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu { width: 260px; }
+        body.vertical-layout.vertical-menu.menu-expanded .app-content { margin-inline-start: 260px; }
 
         /* ============ Table improvements for sub-pages ============ */
         .table thead th {
@@ -256,48 +250,16 @@
         }
         #shell-scope-mobile select option { color: #333; background: #fff; }
 
-        /* LA 1.3 renamed the font — the theme's original chevron (\f112 + 'LineAwesome') stopped
-           resolving when we upgraded. Re-emit the arrow using LA 1.3's glyph + font name. */
-        .main-menu .navigation li.has-sub > a:not(.mm-next)::after {
+        /* LA 1.3 chevron is now handled inside sidebar.blade.php directly.
+           Keep a fallback so old-style li.has-sub (if any) still work. */
+        .main-menu .navigation li.has-sub > a:not([data-label]):not(.mm-next)::after {
             font-family: 'Line Awesome Free' !important;
             font-weight: 900 !important;
             content: "{{ $isRtl ? '\f104' : '\f105' }}" !important;
-            font-size: .95rem;
-            opacity: .55;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            {{ $isRtl ? 'left' : 'right' }}: 14px;
-            transition: transform .2s;
+            font-size: .85rem; opacity: .45;
+            position: absolute; top: 50%; transform: translateY(-50%);
+            {{ $isRtl ? 'left' : 'right' }}: 14px; transition: transform .2s;
         }
-        .main-menu .navigation li.has-sub.open > a:not(.mm-next)::after { transform: translateY(-50%) rotate(-90deg); opacity: .85; }
-        .main-menu .navigation li ul.menu-content li a {
-            padding: .45rem .75rem .45rem 2.2rem; font-size: .87rem; border-radius: 6px;
-        }
-
-        /* 4 distinct sections — tint the header band + add a coloured edge on children */
-        .main-menu .navigation-header {
-            margin: 14px 10px 6px; padding: 8px 14px;
-            border-radius: 8px; background: #f4f6f8;
-            font-weight: 700; letter-spacing: .3px; font-size: .78rem;
-            text-transform: uppercase; opacity: .95;
-        }
-        .main-menu .navigation-header > span { font-weight: 700; opacity: 1; }
-
-        /* Section 1 — برامج نوعية (purple) */
-        .main-menu .navigation-header.sec-programs { background: linear-gradient(135deg, #e8e0ff, #f3efff); color: #6f42c1; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #6f42c1; }
-        /* Section 2 — عمليات تعليمية (blue) */
-        .main-menu .navigation-header.sec-educational { background: linear-gradient(135deg, #d9edff, #eef7ff); color: #1e88e5; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #1e88e5; }
-        /* Section 3 — عمليات التواصل (orange) */
-        .main-menu .navigation-header.sec-communication { background: linear-gradient(135deg, #fff3e0, #fff8ed); color: #f57c00; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #f57c00; }
-        /* Section 4 — إعدادات النظام (green) */
-        .main-menu .navigation-header.sec-system { background: linear-gradient(135deg, #e1f5e7, #effaf3); color: #2e7d32; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #2e7d32; }
-        /* Section-specific icon tint via data-section attribute on each li */
-        .main-menu li[data-section="programs"] > a > i { color: #6f42c1; }
-        .main-menu li[data-section="educational"] > a > i { color: #1e88e5; }
-        .main-menu li[data-section="communication"] > a > i { color: #f57c00; }
-        .main-menu li[data-section="system"] > a > i { color: #2e7d32; }
-        .main-menu li.active[data-section] > a > i { color: #fff !important; }
 
         /* ============ Light theme — opt-in via body.theme-light (Slice 1 reworked) ============
            Clean white background, soft hairline cards, gold used only as accent.
