@@ -17,7 +17,10 @@
             <li class="breadcrumb-item active">@lang('question_banks.create_title')</li>
         </ol>
     </div>
-    <div class="content-header-right col-md-3 col-12 text-md-right d-flex align-items-start justify-content-md-end pt-1">
+    <div class="content-header-right col-md-3 col-12 text-md-right d-flex align-items-start justify-content-md-end gap-2 pt-1">
+        <a href="{{ route('admin.question-banks.batch.create') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="la la-th-list"></i> @lang('question_banks.batch_create_link')
+        </a>
         <a href="{{ route('admin.question-banks.index') }}" class="btn-reset">
             <i class="la la-arrow-right"></i> @lang('question_banks.form.cancel')
         </a>

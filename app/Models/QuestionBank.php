@@ -56,6 +56,7 @@ class QuestionBank extends Model
     public const SOURCE_LIBRARY = 'library';
     public const SOURCE_IMPORT = 'import';
     public const SOURCE_ANA_QUDURAT = 'ana_qudurat';
+    public const SOURCE_AL_AWWAL    = 'al_awwal';
 
     public const CATEGORY_SCHOOL = 'school';
     public const CATEGORY_QUDURAT = 'qudurat';

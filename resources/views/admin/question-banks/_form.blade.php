@@ -4,23 +4,29 @@
     <h3 class="qb-form-section__title">@lang('question_banks.form.section_basic')</h3>
     <div class="row">
         <div class="col-md-6 mb-3">
-            <label class="form-label">@lang('question_banks.form.name_ar') <span class="text-danger">*</span></label>
-            <input type="text" name="name_ar" value="{{ old('name_ar', $bank->name_ar) }}"
-                   class="form-control @error('name_ar') is-invalid @enderror" required>
-            @error('name_ar')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <label class="form-label">@lang('question_banks.subject_for_bank') <span class="text-danger">*</span></label>
+            @php
+                $selectedSubjectId = old('subject_id', $bank->exists ? optional($bank->subjects->first())->id : null);
+            @endphp
+            <select name="subject_id" id="qb-subject-select"
+                    class="form-control @error('subject_id') is-invalid @enderror" required>
+                <option value="">— @lang('question_banks.subject_for_bank') —</option>
+                @foreach($subjects as $subject)
+                    <option value="{{ $subject->id }}"
+                            data-name="{{ $subject->name }}"
+                            @selected($selectedSubjectId == $subject->id)>
+                        {{ $subject->name }}@if($subject->name_en) ({{ $subject->name_en }})@endif
+                    </option>
+                @endforeach
+            </select>
+            @error('subject_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <small class="text-muted">@lang('question_banks.name_auto_hint')</small>
         </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">@lang('question_banks.form.name_en')</label>
-            <input type="text" name="name_en" value="{{ old('name_en', $bank->name_en) }}"
-                   class="form-control @error('name_en') is-invalid @enderror">
-            @error('name_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
-        <div class="col-12 mb-3">
-            <label class="form-label">@lang('question_banks.form.description')</label>
-            <textarea name="description" rows="2"
-                      class="form-control @error('description') is-invalid @enderror">{{ old('description', $bank->description) }}</textarea>
-            @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
+        {{-- Hidden fields: name_ar auto-populated by JS from subject selection --}}
+        <input type="hidden" name="name_ar" id="qb-name-ar-hidden"
+               value="{{ old('name_ar', $bank->name_ar) }}">
+        <input type="hidden" name="name_en" id="qb-name-en-hidden"
+               value="{{ old('name_en', $bank->name_en) }}">
         @php
             $canManageGeneral = auth()->user()?->isSuperAdmin() || auth()->user()?->isSchoolAdmin();
         @endphp
@@ -183,7 +189,7 @@
                 <input type="hidden" name="is_ana_qudurat_linkable" value="0">
                 <input type="checkbox" name="is_ana_qudurat_linkable" value="1"
                        {{ old('is_ana_qudurat_linkable', $bank->is_ana_qudurat_linkable) ? 'checked' : '' }}>
-                <span>@lang('question_banks.form.is_ana_qudurat_linkable')</span>
+                <span>@lang('question_banks.form.is_al_awwal_linkable')</span>
             </label>
         </div>
         <div class="col-12 mb-3">
@@ -205,16 +211,37 @@
 </div>
 
 <script>
-    (function () {
-        var visSel = document.querySelector('select[name="visibility"]');
-        var shareSection = document.getElementById('qb-share-section');
-        if (!visSel || !shareSection) return;
-        function sync() {
-            shareSection.style.display = visSel.value === 'public' ? '' : 'none';
+(function () {
+    // Auto-derive bank name from selected subject
+    var subSel    = document.getElementById('qb-subject-select');
+    var nameAr    = document.getElementById('qb-name-ar-hidden');
+    var nameEn    = document.getElementById('qb-name-en-hidden');
+    if (subSel && nameAr) {
+        function syncName() {
+            var opt = subSel.options[subSel.selectedIndex];
+            if (opt && opt.value) {
+                nameAr.value = 'بنك أسئلة ' + (opt.dataset.name || opt.text.split('(')[0].trim());
+                if (nameEn && opt.dataset.nameEn) {
+                    nameEn.value = 'Question Bank — ' + opt.dataset.nameEn;
+                }
+            }
         }
-        visSel.addEventListener('change', sync);
-        sync();
-    })();
+        subSel.addEventListener('change', syncName);
+        // Sync on load only if no existing name_ar (new bank)
+        if (!nameAr.value) { syncName(); }
+    }
+})();
+(function () {
+    // Show/hide sharing section based on visibility
+    var visSel = document.querySelector('select[name="visibility"]');
+    var shareSection = document.getElementById('qb-share-section');
+    if (!visSel || !shareSection) return;
+    function sync() {
+        shareSection.style.display = visSel.value === 'public' ? '' : 'none';
+    }
+    visSel.addEventListener('change', sync);
+    sync();
+})();
 </script>
 
 <div class="qb-form-actions">

@@ -77,10 +77,22 @@ class QuestionBankController extends Controller
         $vocab = $this->vocabulary();
 
         return view('admin.question-banks.create', array_merge([
-            'bank' => $bank,
-            'subjects' => $subjects,
-            'teachers' => $teachers,
+            'bank'         => $bank,
+            'subjects'     => $subjects,
+            'teachers'     => $teachers,
             'shareSchools' => $shareSchools,
+        ], $vocab));
+    }
+
+    public function createBatch(): View
+    {
+        $schoolId = $this->activeSchoolId();
+        $subjects = $this->subjectsForSchool($schoolId);
+        $vocab    = $this->vocabulary();
+
+        return view('admin.question-banks.create-batch', array_merge([
+            'subjects'     => $subjects,
+            'shareSchools' => $this->schoolsForSharing(),
         ], $vocab));
     }
 
@@ -93,25 +105,38 @@ class QuestionBankController extends Controller
             abort(403, __('question_banks.error_general_forbidden'));
         }
 
-        $subjectIds = $request->input('subject_ids', []);
+        // Auto-derive bank name from the single subject_id when provided.
+        $singleSubjectId = $data['subject_id'] ?? null;
+        if ($singleSubjectId) {
+            $subject = Subject::find($singleSubjectId);
+            $derivedNameAr = $subject ? ('بنك أسئلة ' . $subject->name) : ($data['name_ar'] ?? '');
+            $derivedNameEn = $subject?->name_en ? ('Question Bank — ' . $subject->name_en) : ($data['name_en'] ?? null);
+        } else {
+            $derivedNameAr = $data['name_ar'] ?? '';
+            $derivedNameEn = $data['name_en'] ?? null;
+        }
+
+        $subjectIds  = $singleSubjectId ? [$singleSubjectId] : $request->input('subject_ids', []);
         $memberRoles = $request->input('member_roles', []);
-        $schoolIds = $data['visibility'] === 'public' ? ($data['school_ids'] ?? []) : [];
+        $schoolIds   = $data['visibility'] === 'public' ? ($data['school_ids'] ?? []) : [];
 
         $payload = [
-            'name_ar' => $data['name_ar'],
-            'name_en' => $data['name_en'] ?? null,
-            'description' => $data['description'] ?? null,
-            'school_id' => $this->resolveSchoolForPayload($data),
-            'is_library' => false,
-            'visibility' => $data['visibility'],
-            'status' => $data['status'],
-            'source' => $data['source'],
-            'grade_level' => $data['grade_level'] ?? null,
-            'category_type' => $data['category_type'] ?? null,
+            'name_ar'                 => $derivedNameAr,
+            'name_en'                 => $derivedNameEn,
+            'description'             => $data['description'] ?? null,
+            'school_id'               => $this->resolveSchoolForPayload($data),
+            'is_library'              => false,
+            'visibility'              => $data['visibility'],
+            'status'                  => $data['status'],
+            'source'                  => $data['source'],
+            'grade_level'             => $data['grade_level'] ?? null,
+            'category_type'           => $data['category_type'] ?? null,
             'is_ana_qudurat_linkable' => (bool) ($data['is_ana_qudurat_linkable'] ?? false),
-            'exportable' => (bool) ($data['exportable'] ?? true),
-            'external_platform' => $data['external_platform'] ?? null,
-            'created_by' => auth()->id(),
+            'exportable'              => (bool) ($data['exportable'] ?? true),
+            'external_platform'       => $data['source'] === QuestionBank::SOURCE_AL_AWWAL
+                                            ? 'al_awwal'
+                                            : ($data['external_platform'] ?? null),
+            'created_by'              => auth()->id(),
         ];
 
         $this->banks->create($payload, $subjectIds, $memberRoles, $schoolIds);
@@ -119,6 +144,84 @@ class QuestionBankController extends Controller
         return redirect()
             ->route('admin.question-banks.index')
             ->with('success', __('question_banks.flash_created'));
+    }
+
+    public function storeBatch(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'visibility'    => ['required', 'in:public,private'],
+            'status'        => ['required', 'in:active,inactive,under_review,archived'],
+            'source'        => ['required', 'in:manual,al_awwal,library,import'],
+            'grade_level'   => ['nullable', 'integer', 'min:1', 'max:12'],
+            'term'          => ['nullable', 'string', 'max:100'],
+            'subject_ids'   => ['required', 'array', 'min:1'],
+            'subject_ids.*' => ['integer', 'exists:subjects,id'],
+            'school_ids'    => ['nullable', 'array'],
+            'school_ids.*'  => ['integer', 'exists:schools,id'],
+            'skip_existing' => ['nullable', 'boolean'],
+        ]);
+
+        if ($data['visibility'] === 'public' && ! $this->canManageGeneralBanks()) {
+            abort(403, __('question_banks.error_general_forbidden'));
+        }
+
+        $schoolId     = $this->resolveSchoolForPayload($data);
+        $skipExisting = (bool) ($data['skip_existing'] ?? true);
+        $schoolIds    = $data['visibility'] === 'public' ? ($data['school_ids'] ?? []) : [];
+        $memberRoles  = [];
+        $termValue    = $data['term'] ?? null;
+
+        $created = 0;
+        $skipped = 0;
+
+        foreach ($data['subject_ids'] as $subjectId) {
+            $subject = Subject::find($subjectId);
+            if (! $subject) {
+                continue;
+            }
+
+            // Duplicate check: same school + subject + grade + term
+            $duplicateQuery = QuestionBank::query()
+                ->where('school_id', $schoolId)
+                ->where('grade_level', $data['grade_level'] ?? null)
+                ->whereHas('subjects', fn ($q) => $q->where('subjects.id', $subjectId));
+
+            if ($termValue !== null) {
+                $duplicateQuery->whereJsonContains('metadata->term', $termValue);
+            }
+
+            if ($duplicateQuery->exists()) {
+                if ($skipExisting) {
+                    $skipped++;
+                    continue;
+                }
+            }
+
+            $payload = [
+                'name_ar'                 => 'بنك أسئلة ' . $subject->name,
+                'name_en'                 => $subject->name_en ? 'Question Bank — ' . $subject->name_en : null,
+                'school_id'               => $schoolId,
+                'is_library'              => false,
+                'visibility'              => $data['visibility'],
+                'status'                  => $data['status'],
+                'source'                  => $data['source'],
+                'grade_level'             => $data['grade_level'] ?? null,
+                'is_ana_qudurat_linkable' => false,
+                'exportable'              => true,
+                'external_platform'       => $data['source'] === QuestionBank::SOURCE_AL_AWWAL ? 'al_awwal' : null,
+                'metadata'                => $termValue ? ['term' => $termValue] : null,
+                'created_by'              => auth()->id(),
+            ];
+
+            $this->banks->create($payload, [$subjectId], $memberRoles, $schoolIds);
+            $created++;
+        }
+
+        $message = $skipped > 0
+            ? __('question_banks.batch_created_partial', ['created' => $created, 'skipped' => $skipped])
+            : __('question_banks.batch_created_success', ['count' => $created]);
+
+        return redirect()->route('admin.question-banks.index')->with('success', $message);
     }
 
     public function edit(int $id): View
@@ -274,23 +377,24 @@ class QuestionBankController extends Controller
     private function validateBank(Request $request): array
     {
         return $request->validate([
-            'name_ar' => ['required', 'string', 'max:255'],
-            'name_en' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'visibility' => ['required', 'in:public,private'],
-            'status' => ['required', 'in:active,inactive,under_review,archived'],
-            'source' => ['required', 'in:manual,library,import,ana_qudurat'],
-            'grade_level' => ['nullable', 'integer', 'min:1', 'max:12'],
-            'category_type' => ['nullable', 'in:school,qudurat,verbal,quantitative,speed_reading'],
+            'name_ar'                 => ['nullable', 'string', 'max:255'],
+            'name_en'                 => ['nullable', 'string', 'max:255'],
+            'description'             => ['nullable', 'string', 'max:1000'],
+            'visibility'              => ['required', 'in:public,private'],
+            'status'                  => ['required', 'in:active,inactive,under_review,archived'],
+            'source'                  => ['required', 'in:manual,al_awwal,library,import,ana_qudurat'],
+            'grade_level'             => ['nullable', 'integer', 'min:1', 'max:12'],
+            'category_type'           => ['nullable', 'in:school,qudurat,verbal,quantitative,speed_reading'],
             'is_ana_qudurat_linkable' => ['nullable', 'boolean'],
-            'exportable' => ['nullable', 'boolean'],
-            'external_platform' => ['nullable', 'string', 'max:100'],
-            'subject_ids' => ['nullable', 'array'],
-            'subject_ids.*' => ['integer', 'exists:subjects,id'],
-            'member_roles' => ['nullable', 'array'],
-            'member_roles.*' => ['nullable', 'in:viewer,editor'],
-            'school_ids' => ['nullable', 'array'],
-            'school_ids.*' => ['integer', 'exists:schools,id'],
+            'exportable'              => ['nullable', 'boolean'],
+            'external_platform'       => ['nullable', 'string', 'max:100'],
+            'subject_id'              => ['nullable', 'integer', 'exists:subjects,id'],
+            'subject_ids'             => ['nullable', 'array'],
+            'subject_ids.*'           => ['integer', 'exists:subjects,id'],
+            'member_roles'            => ['nullable', 'array'],
+            'member_roles.*'          => ['nullable', 'in:viewer,editor'],
+            'school_ids'              => ['nullable', 'array'],
+            'school_ids.*'            => ['integer', 'exists:schools,id'],
         ]);
     }
 
@@ -400,9 +504,11 @@ class QuestionBankController extends Controller
                 QuestionBank::STATUS_ARCHIVED => __('question_banks.status_archived'),
             ],
             'sources' => [
-                QuestionBank::SOURCE_MANUAL => __('question_banks.source_manual'),
-                QuestionBank::SOURCE_LIBRARY => __('question_banks.source_library'),
-                QuestionBank::SOURCE_IMPORT => __('question_banks.source_import'),
+                QuestionBank::SOURCE_MANUAL    => __('question_banks.source_manual'),
+                QuestionBank::SOURCE_AL_AWWAL  => __('question_banks.source_al_awwal'),
+                QuestionBank::SOURCE_LIBRARY   => __('question_banks.source_library'),
+                QuestionBank::SOURCE_IMPORT    => __('question_banks.source_import'),
+                // Keep for display of legacy records only:
                 QuestionBank::SOURCE_ANA_QUDURAT => __('question_banks.source_ana_qudurat'),
             ],
             'grades' => __('question_banks.grades'),
