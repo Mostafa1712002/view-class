@@ -64,6 +64,10 @@
     <link rel="stylesheet" type="text/css" href="{{ asset($customCss) }}">
     <!-- END Custom CSS-->
 
+    <!-- BEGIN Design System — Golden Platform unified tokens & components -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/design-system.css') }}">
+    <!-- END Design System -->
+
     <style>
         /* ============ Golden Platform brand tokens ============ */
         :root {

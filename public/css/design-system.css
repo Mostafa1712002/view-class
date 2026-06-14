@@ -1,0 +1,988 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  ViewClass — Design System  v1.0
+ *  المنصة الذهبية — Gold & Navy Brand Identity
+ *
+ *  SAFE TO LAYER: this sheet loads AFTER all theme/Bootstrap CSS.
+ *  It only adds new classes and :root tokens — it never removes or
+ *  resets existing theme rules.
+ *
+ *  Tokens follow the project's existing naming convention:
+ *  --gold-* already exists in <head> inline styles; here we add:
+ *    • the full gold scale (200–700)
+ *    • --navy, --navy-light, --navy-dark
+ *    • neutrals, surfaces, status colors
+ *    • spacing, radius, shadow, and typography tokens
+ *
+ *  Component classes are prefixed with `.ds-` to avoid collisions.
+ *  Additionally, global overrides for the .theme-light body state
+ *  unify Bootstrap primitives (cards, tables, forms, badges, modals)
+ *  with the gold/navy palette without per-page edits.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   1. DESIGN TOKENS  (CSS custom properties)
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+    /* ── Gold scale ── */
+    /* These extend the existing --gold-100…500 already defined in <head>.
+       We redefine them here to make the design system self-contained and
+       add the missing 600/700 steps for pressed/dark states. */
+    --gold-50:  #fdf8ed;
+    --gold-100: #f6e8b8;
+    --gold-200: #e3b85c;   /* light accent */
+    --gold-300: #cfa046;   /* hover accent  */
+    --gold-400: #c9a227;   /* brand gold (primary action)  */
+    --gold-500: #9c6b1f;   /* dark accent / hover states */
+    --gold-600: #7a5018;   /* pressed / deep */
+    --gold-700: #5c3b10;   /* darkest — text on light gold bg */
+
+    /* ── Navy scale ── */
+    --navy:         #14233a;   /* brand navy — dark surfaces, sidebar */
+    --navy-light:   #1e3556;   /* lighter navy for hover / secondary bg */
+    --navy-dark:    #0d1826;   /* deeper navy for pressed states */
+    --navy-muted:   #2a4266;   /* desaturated navy for borders */
+
+    /* ── Neutral / Gray scale (warm-tinted toward navy) ── */
+    --gray-50:  #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e5e9ef;
+    --gray-300: #d1d8e0;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+
+    /* ── Surface & background ── */
+    --surface-bg:      #f8fafc;   /* page background */
+    --surface-card:    #ffffff;   /* card / panel */
+    --surface-raised:  #ffffff;   /* modals, popovers */
+    --surface-subtle:  #f1f5f9;   /* sidebar-item hover, table head */
+    --surface-overlay: rgba(15, 23, 42, .48);  /* modal backdrop */
+
+    /* ── Text ── */
+    --text-base:      #0f172a;   /* primary body text */
+    --text-secondary: #475569;   /* labels, captions */
+    --text-tertiary:  #94a3b8;   /* placeholders, footnotes */
+    --text-inverse:   #ffffff;   /* text on dark/gold surfaces */
+    --text-link:      var(--gold-400);
+    --text-link-hover:var(--gold-500);
+
+    /* ── Border ── */
+    --border-subtle:  #e5e9ef;
+    --border-default: #d1d8e0;
+    --border-strong:  #94a3b8;
+    --border-brand:   var(--gold-400);
+
+    /* ── Status colors ── */
+    --status-success:     #16a34a;
+    --status-success-bg:  #f0fdf4;
+    --status-success-bdr: #bbf7d0;
+    --status-success-text:#15803d;
+
+    --status-danger:      #dc2626;
+    --status-danger-bg:   #fef2f2;
+    --status-danger-bdr:  #fecaca;
+    --status-danger-text: #b91c1c;
+
+    --status-warning:     #d97706;
+    --status-warning-bg:  #fffbeb;
+    --status-warning-bdr: #fde68a;
+    --status-warning-text:#92400e;
+
+    --status-info:        #0284c7;
+    --status-info-bg:     #eff6ff;
+    --status-info-bdr:    #bae6fd;
+    --status-info-text:   #0c4a6e;
+
+    /* ── Radius ── */
+    --radius-xs:  4px;
+    --radius-sm:  6px;
+    --radius-md:  10px;   /* already used — kept consistent */
+    --radius-lg:  14px;
+    --radius-xl:  20px;
+    --radius-pill:9999px;
+
+    /* ── Shadows ── */
+    --shadow-xs:  0 1px 2px rgba(15, 23, 42, .05);
+    --shadow-sm:  0 1px 3px rgba(15, 23, 42, .08), 0 4px 10px rgba(15, 23, 42, .04);
+    --shadow-md:  0 4px 14px rgba(15, 23, 42, .08), 0 10px 24px rgba(15, 23, 42, .06);
+    --shadow-lg:  0 8px 24px rgba(15, 23, 42, .10), 0 20px 48px rgba(15, 23, 42, .08);
+    --shadow-gold:0 4px 14px rgba(201, 162, 39, .28);
+    --shadow-focus:0 0 0 3px rgba(201, 162, 39, .22);
+
+    /* ── Spacing scale ── */
+    --space-1:  .25rem;   /*  4px */
+    --space-2:  .5rem;    /*  8px */
+    --space-3:  .75rem;   /* 12px */
+    --space-4:  1rem;     /* 16px */
+    --space-5:  1.25rem;  /* 20px */
+    --space-6:  1.5rem;   /* 24px */
+    --space-8:  2rem;     /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+
+    /* ── Typography ── */
+    --font-sans: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+    --font-size-xs:   .75rem;    /* 12px */
+    --font-size-sm:   .8125rem;  /* 13px */
+    --font-size-base: .9375rem;  /* 15px — comfortable for Arabic */
+    --font-size-md:   1rem;      /* 16px */
+    --font-size-lg:   1.125rem;
+    --font-size-xl:   1.25rem;
+    --font-size-2xl:  1.5rem;
+    --font-size-3xl:  1.875rem;
+    --line-height-tight:  1.35;
+    --line-height-base:   1.65;
+    --line-height-relaxed:1.8;
+
+    /* ── Transitions ── */
+    --transition-fast:   120ms cubic-bezier(.4, 0, .2, 1);
+    --transition-base:   200ms cubic-bezier(.4, 0, .2, 1);
+    --transition-slow:   320ms cubic-bezier(.4, 0, .2, 1);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   2. TYPOGRAPHY — global base (Cairo already loaded via Google Fonts)
+   ───────────────────────────────────────────────────────────────────────── */
+body.theme-light {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: var(--text-base);
+    background-color: var(--surface-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.theme-light h1,
+body.theme-light h2,
+body.theme-light h3,
+body.theme-light h4,
+body.theme-light h5,
+body.theme-light h6 {
+    line-height: var(--line-height-tight);
+    color: var(--gray-900);
+    font-weight: 700;
+}
+
+body.theme-light .text-muted,
+body.theme-light small.text-muted,
+body.theme-light .text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   3. BOOTSTRAP PRIMARY COLOUR — platform-wide gold override
+   Targets the Bootstrap 4 primitives so all pages benefit automatically.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Links */
+a { color: var(--text-link); }
+a:hover { color: var(--text-link-hover); text-decoration: none; }
+
+/* Primary button (extends existing definition in layout head) */
+.btn-primary,
+.btn-primary:focus {
+    background: linear-gradient(135deg, var(--gold-300) 0%, var(--gold-500) 100%) !important;
+    border-color: var(--gold-400) !important;
+    color: var(--text-inverse) !important;
+    box-shadow: var(--shadow-gold) !important;
+    font-weight: 600;
+    letter-spacing: .2px;
+    transition: transform var(--transition-base), box-shadow var(--transition-base) !important;
+}
+.btn-primary:hover,
+.btn-primary:active {
+    background: linear-gradient(135deg, var(--gold-400) 0%, var(--gold-600) 100%) !important;
+    border-color: var(--gold-500) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(201, 162, 39, .38) !important;
+}
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs) !important;
+}
+
+/* Secondary / outline */
+.btn-secondary,
+.btn-outline-secondary {
+    border-color: var(--border-default) !important;
+    color: var(--text-secondary) !important;
+    transition: border-color var(--transition-fast), color var(--transition-fast),
+                background var(--transition-fast) !important;
+}
+.btn-secondary:hover,
+.btn-outline-secondary:hover {
+    background: var(--gray-50) !important;
+    border-color: var(--gold-300) !important;
+    color: var(--gold-500) !important;
+}
+
+/* Danger */
+.btn-danger {
+    background-color: var(--status-danger) !important;
+    border-color: var(--status-danger) !important;
+    color: #fff !important;
+}
+.btn-danger:hover {
+    background-color: var(--status-danger-text) !important;
+    border-color: var(--status-danger-text) !important;
+}
+
+/* Success */
+.btn-success {
+    background-color: var(--status-success) !important;
+    border-color: var(--status-success) !important;
+    color: #fff !important;
+}
+.btn-success:hover {
+    background-color: var(--status-success-text) !important;
+    border-color: var(--status-success-text) !important;
+}
+
+/* Warning */
+.btn-warning {
+    background-color: var(--status-warning) !important;
+    border-color: var(--status-warning) !important;
+    color: #fff !important;
+}
+
+/* Base button refinements */
+.btn {
+    border-radius: var(--radius-sm) !important;
+    font-weight: 500;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+                background var(--transition-fast), border-color var(--transition-fast);
+}
+.btn:active { transform: translateY(1px); }
+.btn-sm { border-radius: var(--radius-xs) !important; font-size: var(--font-size-sm); }
+.btn-lg { border-radius: var(--radius-md) !important; }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   4. CARDS — unified surface treatment on theme-light pages
+   ───────────────────────────────────────────────────────────────────────── */
+body.theme-light .card {
+    background: var(--surface-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm);
+    color: var(--text-base);
+}
+body.theme-light .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: var(--space-4) var(--space-5);
+}
+body.theme-light .card-body {
+    padding: var(--space-5);
+    color: var(--text-base);
+}
+body.theme-light .card-footer {
+    background: var(--gray-50);
+    border-top: 1px solid var(--border-subtle);
+    padding: var(--space-3) var(--space-5);
+}
+body.theme-light .card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+body.theme-light .card-subtitle { color: var(--text-secondary); }
+
+/* Stat tiles get a hover lift; data tables and filters stay stable */
+body.theme-light .card.ds-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   5. TABLES — clean, readable, RTL-safe
+   ───────────────────────────────────────────────────────────────────────── */
+body.theme-light .table {
+    color: var(--text-base);
+    border-color: var(--border-subtle);
+}
+body.theme-light .table thead th {
+    background: var(--gray-50) !important;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border-subtle) !important;
+    white-space: nowrap;
+    padding: var(--space-3) var(--space-4);
+}
+body.theme-light .table tbody tr {
+    border-color: var(--border-subtle);
+    transition: background var(--transition-fast);
+}
+body.theme-light .table tbody tr:hover {
+    background: var(--gold-50) !important;
+}
+body.theme-light .table td,
+body.theme-light .table th {
+    vertical-align: middle;
+    border-color: var(--border-subtle);
+    padding: var(--space-3) var(--space-4);
+}
+
+/* Zebra optional — add .ds-table-zebra to a .table */
+body.theme-light .table.ds-table-zebra tbody tr:nth-child(even) {
+    background: var(--gray-50);
+}
+
+/* Tight variant for dense data */
+body.theme-light .table.ds-table-tight td,
+body.theme-light .table.ds-table-tight th {
+    padding: var(--space-2) var(--space-3);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   6. FORMS — inputs, selects, labels, validation
+   ───────────────────────────────────────────────────────────────────────── */
+body.theme-light .form-control,
+body.theme-light .form-select,
+.form-control,
+.form-select {
+    border-color: var(--border-default);
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-base);
+    font-size: var(--font-size-base);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+body.theme-light .form-control::placeholder,
+.form-control::placeholder {
+    color: var(--text-tertiary);
+}
+body.theme-light .form-control:focus,
+body.theme-light .form-select:focus,
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--gold-400) !important;
+    box-shadow: var(--shadow-focus) !important;
+    outline: none;
+}
+
+/* Valid / Invalid states */
+body.theme-light .form-control.is-valid,
+.form-control.is-valid {
+    border-color: var(--status-success) !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, .15) !important;
+}
+body.theme-light .form-control.is-invalid,
+.form-control.is-invalid {
+    border-color: var(--status-danger) !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .12) !important;
+}
+.invalid-feedback { color: var(--status-danger-text); font-size: var(--font-size-sm); }
+.valid-feedback   { color: var(--status-success-text); font-size: var(--font-size-sm); }
+
+/* Labels */
+body.theme-light label,
+.col-form-label,
+label {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+    margin-bottom: var(--space-1);
+}
+
+/* Form group spacing (used in non-Bootstrap-5 views) */
+body.theme-light .form-group { margin-bottom: var(--space-5); }
+
+/* Help text */
+body.theme-light .form-text,
+.form-text {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-1);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   7. BADGES & STATUS CHIPS
+   ───────────────────────────────────────────────────────────────────────── */
+.badge {
+    border-radius: var(--radius-pill) !important;
+    font-weight: 600 !important;
+    font-size: var(--font-size-xs) !important;
+    padding: 3px 9px !important;
+    letter-spacing: .2px;
+}
+
+/* ds-badge-* — explicit status variants */
+.ds-badge-success {
+    background: var(--status-success-bg) !important;
+    color: var(--status-success-text) !important;
+    border: 1px solid var(--status-success-bdr) !important;
+}
+.ds-badge-danger {
+    background: var(--status-danger-bg) !important;
+    color: var(--status-danger-text) !important;
+    border: 1px solid var(--status-danger-bdr) !important;
+}
+.ds-badge-warning {
+    background: var(--status-warning-bg) !important;
+    color: var(--status-warning-text) !important;
+    border: 1px solid var(--status-warning-bdr) !important;
+}
+.ds-badge-info {
+    background: var(--status-info-bg) !important;
+    color: var(--status-info-text) !important;
+    border: 1px solid var(--status-info-bdr) !important;
+}
+.ds-badge-gold {
+    background: var(--gold-50) !important;
+    color: var(--gold-700) !important;
+    border: 1px solid #e3c97a !important;
+}
+.ds-badge-navy {
+    background: var(--navy) !important;
+    color: var(--text-inverse) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   8. ALERTS — themed flash messages (already handled via SweetAlert2 toasts
+      for short messages, but long error lists use plain .alert)
+   ───────────────────────────────────────────────────────────────────────── */
+.alert {
+    border-radius: var(--radius-md) !important;
+    border-width: 1px !important;
+    font-size: var(--font-size-base);
+    padding: var(--space-4) var(--space-5);
+}
+.alert-success {
+    background: var(--status-success-bg) !important;
+    border-color: var(--status-success-bdr) !important;
+    color: var(--status-success-text) !important;
+}
+.alert-danger {
+    background: var(--status-danger-bg) !important;
+    border-color: var(--status-danger-bdr) !important;
+    color: var(--status-danger-text) !important;
+}
+.alert-warning {
+    background: var(--status-warning-bg) !important;
+    border-color: var(--status-warning-bdr) !important;
+    color: var(--status-warning-text) !important;
+}
+.alert-info {
+    background: var(--status-info-bg) !important;
+    border-color: var(--status-info-bdr) !important;
+    color: var(--status-info-text) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   9. MODALS — layered, focused, accessible
+   ───────────────────────────────────────────────────────────────────────── */
+.modal-content {
+    border: none !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+.modal-header {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--border-subtle) !important;
+    padding: var(--space-4) var(--space-6);
+}
+.modal-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--gray-900);
+}
+.modal-body {
+    padding: var(--space-6);
+    color: var(--text-base);
+}
+.modal-footer {
+    background: var(--gray-50);
+    border-top: 1px solid var(--border-subtle) !important;
+    padding: var(--space-4) var(--space-6);
+    gap: var(--space-2);
+}
+.modal-backdrop { background-color: rgba(14, 22, 36, .5) !important; }
+
+/* Gold-accent modal variant */
+.modal-header.ds-modal-gold {
+    background: linear-gradient(135deg, var(--gold-50) 0%, #fdf3d4 100%);
+    border-bottom-color: #e3c97a !important;
+}
+.modal-header.ds-modal-gold .modal-title { color: var(--gold-700); }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   10. TABS — unified across the app
+   ───────────────────────────────────────────────────────────────────────── */
+.nav-tabs {
+    border-bottom: 2px solid var(--border-subtle) !important;
+    gap: var(--space-1);
+}
+.nav-tabs .nav-link {
+    border: none !important;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0 !important;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    padding: var(--space-3) var(--space-4);
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+.nav-tabs .nav-link:hover {
+    color: var(--gold-500);
+    background: var(--gold-50);
+}
+.nav-tabs .nav-link.active {
+    color: var(--gold-500) !important;
+    background: transparent !important;
+    border-bottom: 2px solid var(--gold-400) !important;
+    margin-bottom: -2px;
+    font-weight: 700;
+}
+.tab-content { padding-top: var(--space-5); }
+
+/* Pills variant */
+.nav-pills .nav-link {
+    border-radius: var(--radius-pill) !important;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    padding: var(--space-2) var(--space-4);
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+.nav-pills .nav-link.active {
+    background: linear-gradient(135deg, var(--gold-300), var(--gold-500)) !important;
+    color: var(--text-inverse) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   11. BREADCRUMBS
+   ───────────────────────────────────────────────────────────────────────── */
+body.theme-light .breadcrumb {
+    background: transparent;
+    padding: var(--space-1) 0;
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+body.theme-light .breadcrumb-item a {
+    color: var(--text-tertiary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+body.theme-light .breadcrumb-item a:hover {
+    color: var(--gold-400);
+}
+body.theme-light .breadcrumb-item.active {
+    color: var(--gold-500);
+    font-weight: 600;
+}
+body.theme-light .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--text-tertiary);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   12. PAGINATION
+   ───────────────────────────────────────────────────────────────────────── */
+.pagination {
+    gap: var(--space-1);
+}
+.page-item .page-link {
+    border-radius: var(--radius-sm) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    padding: var(--space-2) var(--space-3);
+    transition: background var(--transition-fast), color var(--transition-fast),
+                border-color var(--transition-fast);
+}
+.page-item .page-link:hover {
+    background: var(--gold-50) !important;
+    border-color: var(--gold-300) !important;
+    color: var(--gold-500) !important;
+}
+.page-item.active .page-link {
+    background: linear-gradient(135deg, var(--gold-300), var(--gold-500)) !important;
+    border-color: var(--gold-400) !important;
+    color: var(--text-inverse) !important;
+    box-shadow: var(--shadow-gold);
+}
+.page-item.disabled .page-link {
+    color: var(--text-tertiary) !important;
+    background: var(--gray-50) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   13. EMPTY STATES
+   ───────────────────────────────────────────────────────────────────────── */
+.ds-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16) var(--space-8);
+    text-align: center;
+    color: var(--text-secondary);
+}
+.ds-empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-xl);
+    background: var(--gold-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-5);
+    font-size: 2rem;
+    color: var(--gold-400);
+}
+.ds-empty-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: var(--space-2);
+}
+.ds-empty-desc {
+    font-size: var(--font-size-base);
+    color: var(--text-tertiary);
+    max-width: 42ch;
+    margin: 0 auto var(--space-5);
+    line-height: var(--line-height-relaxed);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   14. LOADING — spinners & skeleton
+   ───────────────────────────────────────────────────────────────────────── */
+.ds-spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2.5px solid var(--gold-100);
+    border-top-color: var(--gold-400);
+    border-radius: var(--radius-pill);
+    animation: ds-spin 700ms linear infinite;
+}
+.ds-spinner-lg {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-width: 3.5px;
+}
+
+@keyframes ds-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Skeleton shimmer */
+.ds-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--gray-100) 25%,
+        var(--gray-50)  50%,
+        var(--gray-100) 75%
+    );
+    background-size: 400% 100%;
+    border-radius: var(--radius-sm);
+    animation: ds-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes ds-shimmer {
+    0%   { background-position: 100% 50%; }
+    100% { background-position:   0% 50%; }
+}
+
+.ds-skeleton-text {
+    height: 1em;
+    border-radius: var(--radius-pill);
+    margin-bottom: var(--space-2);
+}
+.ds-skeleton-text:last-child { width: 60%; }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   15. DS-CARD COMPONENT — explicit opt-in with ds- prefix
+   (For new views that want the "premium" card surface — existing cards
+    benefit from the .theme-light global rules in section 4 above)
+   ───────────────────────────────────────────────────────────────────────── */
+.ds-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+.ds-card-header {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.ds-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+.ds-card-body {
+    padding: var(--space-5);
+}
+.ds-card-footer {
+    padding: var(--space-3) var(--space-5);
+    background: var(--gray-50);
+    border-top: 1px solid var(--border-subtle);
+}
+/* Gold accent strip on leading edge */
+.ds-card.ds-card-accent {
+    border-inline-start: 3px solid var(--gold-400) !important;
+}
+/* Navy variant */
+.ds-card.ds-card-navy {
+    background: var(--navy);
+    border-color: var(--navy-muted);
+    color: var(--text-inverse);
+}
+.ds-card.ds-card-navy .ds-card-title { color: var(--text-inverse); }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   16. STATUS INDICATOR — dots used in tables and lists
+   ───────────────────────────────────────────────────────────────────────── */
+.ds-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    vertical-align: middle;
+    margin-inline-end: var(--space-1);
+}
+.ds-dot-success { background: var(--status-success); }
+.ds-dot-danger  { background: var(--status-danger); }
+.ds-dot-warning { background: var(--status-warning); }
+.ds-dot-info    { background: var(--status-info); }
+.ds-dot-gold    { background: var(--gold-400); }
+.ds-dot-neutral { background: var(--gray-400); }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   17. DROPDOWN MENUS
+   ───────────────────────────────────────────────────────────────────────── */
+.dropdown-menu {
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-md);
+    padding: var(--space-1) 0;
+}
+.dropdown-item {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    padding: var(--space-2) var(--space-4);
+    border-radius: 0;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: var(--gold-50) !important;
+    color: var(--gold-600) !important;
+}
+.dropdown-item.active,
+.dropdown-item:active {
+    background: linear-gradient(135deg, var(--gold-300), var(--gold-500)) !important;
+    color: var(--text-inverse) !important;
+}
+.dropdown-divider {
+    border-color: var(--border-subtle) !important;
+    margin: var(--space-1) 0;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   18. PROGRESS BARS
+   ───────────────────────────────────────────────────────────────────────── */
+body.theme-light .progress {
+    background: var(--gray-100);
+    border-radius: var(--radius-pill);
+    height: 6px;
+    overflow: hidden;
+}
+body.theme-light .progress-bar {
+    background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
+    border-radius: var(--radius-pill);
+    transition: width var(--transition-slow);
+}
+body.theme-light .progress-bar.bg-success { background: var(--status-success) !important; }
+body.theme-light .progress-bar.bg-danger  { background: var(--status-danger)  !important; }
+body.theme-light .progress-bar.bg-warning { background: var(--status-warning) !important; }
+body.theme-light .progress-bar.bg-info    { background: var(--status-info)    !important; }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   19. UTILITY HELPERS — layout, spacing, colours used across views
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Gold text */
+.text-gold        { color: var(--gold-400) !important; }
+.text-gold-dark   { color: var(--gold-600) !important; }
+.text-navy        { color: var(--navy) !important; }
+.text-brand       { color: var(--gold-500) !important; }
+
+/* Gold backgrounds */
+.bg-gold          { background: var(--gold-400) !important; color: var(--text-inverse); }
+.bg-gold-light    { background: var(--gold-50)  !important; }
+.bg-navy          { background: var(--navy)     !important; color: var(--text-inverse); }
+.bg-surface       { background: var(--surface-bg) !important; }
+
+/* Divider */
+.ds-divider {
+    border: none;
+    border-top: 1px solid var(--border-subtle);
+    margin: var(--space-5) 0;
+}
+
+/* Action icon button — small round icon button in table action cells */
+.ds-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-card);
+    color: var(--text-secondary);
+    font-size: .9rem;
+    transition: background var(--transition-fast), color var(--transition-fast),
+                border-color var(--transition-fast);
+    cursor: pointer;
+}
+.ds-action-btn:hover { background: var(--gold-50); color: var(--gold-500); border-color: var(--gold-300); }
+.ds-action-btn.ds-action-danger:hover { background: var(--status-danger-bg); color: var(--status-danger-text); border-color: var(--status-danger-bdr); }
+
+/* Search bar pattern (used on index pages) */
+.ds-search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+}
+.ds-search .form-control { max-width: 280px; }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   20. ACCESSIBILITY — focus rings, motion, contrast
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Visible keyboard focus ring for interactive elements */
+:focus-visible {
+    outline: 2px solid var(--gold-400);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+}
+
+/* Honour prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+    .ds-spinner { animation: none; border-top-color: var(--gold-400); }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   21. RTL CORRECTIONS — logical props for components not yet using them
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Ensure badge padding symmetry in RTL */
+[dir="rtl"] .badge { letter-spacing: 0; }
+
+/* Pagination chevrons */
+[dir="rtl"] .page-item:first-child .page-link,
+[dir="rtl"] .page-item:last-child .page-link {
+    border-radius: var(--radius-sm) !important;
+}
+
+/* Dropdown align: in RTL, anchors open to the start side */
+[dir="rtl"] .dropdown-menu:not(.dropdown-menu-right) {
+    right: 0;
+    left: auto;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   22. THEME-LIGHT TABLE HEADER — override Bootstrap blue "primary" tint
+   ───────────────────────────────────────────────────────────────────────── */
+body.theme-light .table thead.thead-dark th,
+body.theme-light .table thead.ds-thead-gold th {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%) !important;
+    color: var(--text-inverse) !important;
+    border-bottom-color: var(--navy-muted) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   23. PRINT — hide chrome, keep data readable
+   ───────────────────────────────────────────────────────────────────────── */
+@media print {
+    .main-menu, .header-navbar, footer,
+    .btn, .breadcrumb, .content-header-right { display: none !important; }
+    .app-content { margin: 0 !important; padding: 0 !important; }
+    body { background: #fff !important; color: #000 !important; font-size: 12px; }
+    .card { border: 1px solid #ccc !important; box-shadow: none !important; border-radius: 4px !important; }
+    .table thead th { background: #f0f0f0 !important; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   24. CONTENT HEADER ACCENT — ensure the gold bar is always rendered
+   (the layout head already defines this, but the design system anchors
+    the token values so updates in one place cascade everywhere)
+   ───────────────────────────────────────────────────────────────────────── */
+.app-content .content-header.row::before {
+    background: linear-gradient(180deg, var(--gold-200), var(--gold-500)) !important;
+}
+.app-content .content-header.row .breadcrumb-item.active {
+    color: var(--gold-500);
+    font-weight: 600;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   25. RESPONSIVE — stack adjustments for mobile
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+    body.theme-light .card-body { padding: var(--space-4); }
+    body.theme-light .card-header { padding: var(--space-3) var(--space-4); }
+    .modal-body { padding: var(--space-4); }
+    .modal-header, .modal-footer { padding: var(--space-3) var(--space-4); }
+    .ds-empty { padding: var(--space-10) var(--space-4); }
+}
+
+@media (max-width: 575.98px) {
+    .ds-search .form-control { max-width: 100%; }
+    body.theme-light .table thead th {
+        font-size: .72rem;
+        padding: var(--space-2) var(--space-3);
+    }
+}
