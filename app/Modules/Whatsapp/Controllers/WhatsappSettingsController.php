@@ -23,6 +23,16 @@ class WhatsappSettingsController extends Controller
     ) {}
 
     /**
+     * Ensure the current user may manage the given school's settings
+     * (super-admin, or a school-admin of that same school).
+     */
+    private function assertCanManageSchool(School $school): void
+    {
+        $user = auth()->user();
+        abort_if(! $user || (! $user->isSuperAdmin() && (int) $user->school_id !== (int) $school->id), 403);
+    }
+
+    /**
      * Super-admin: paginated list of schools with their WhatsApp settings.
      * School-admin: redirect directly to their school's edit form.
      */
@@ -48,6 +58,8 @@ class WhatsappSettingsController extends Controller
      */
     public function edit(School $school): View
     {
+        $this->assertCanManageSchool($school);
+
         $setting = $this->repo->findOrCreateForSchool($school);
 
         return view('admin.whatsapp.settings', compact('school', 'setting'));
@@ -58,6 +70,8 @@ class WhatsappSettingsController extends Controller
      */
     public function update(School $school, WhatsappSettingsRequest $request): RedirectResponse
     {
+        $this->assertCanManageSchool($school);
+
         $setting = $this->repo->findOrCreateForSchool($school);
         $data    = $request->validated();
 

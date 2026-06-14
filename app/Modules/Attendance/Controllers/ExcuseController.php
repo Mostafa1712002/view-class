@@ -70,6 +70,15 @@ class ExcuseController extends Controller
 
         $reviewer = auth()->user();
 
+        // Multi-tenant guard: a non-super-admin may only review excuses for
+        // students in their own school.
+        $student = $attendance->student;
+        abort_if(
+            ! $reviewer || (! $reviewer->isSuperAdmin() && (int) ($student?->school_id) !== (int) $reviewer->school_id),
+            403,
+            'غير مصرح لك بمراجعة هذا العذر.'
+        );
+
         if ($attendance->excuse_status !== 'pending') {
             return back()->with('error', 'هذا العذر تمت مراجعته مسبقاً أو لم يُقدَّم بعد.');
         }

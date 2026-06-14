@@ -101,7 +101,10 @@ class NoorSettingsController extends Controller
 
     private function authorise(Request $request): void
     {
+        // The noor_connection_settings row is global (system-wide), so only a
+        // super-admin may read/write it — a school-admin writing it would alter
+        // the integration for every school (privilege escalation).
         $user = $request->user();
-        abort_unless($user && ($user->isSuperAdmin() || $user->isSchoolAdmin()), 403);
+        abort_unless($user && $user->isSuperAdmin(), 403);
     }
 }
