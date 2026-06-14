@@ -9,7 +9,6 @@ use App\Models\ClassRoom;
 use App\Models\Grade;
 use App\Models\Subject;
 use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -56,10 +55,12 @@ class ReportController extends Controller
             ? AcademicYear::find($request->academic_year_id)
             : AcademicYear::where('is_current', true)->first();
 
-        $enrollment = $student->classEnrollments()
-            ->where('academic_year_id', $academicYear?->id)
-            ->with('classRoom.section')
-            ->first();
+        // Resolve the student's class from the real sources: the class_room_id
+        // column or the class_student pivot (enrolledClasses). Shaped as an
+        // object exposing ->classRoom so the shared views keep working.
+        $classRoom = $student->classRoom ?: $student->enrolledClasses()->first();
+        $classRoom?->loadMissing('section');
+        $enrollment = $classRoom ? (object) ['classRoom' => $classRoom] : null;
 
         $grades = Grade::where('student_id', $student->id)
             ->where('academic_year_id', $academicYear?->id)
@@ -107,10 +108,12 @@ class ReportController extends Controller
             ? AcademicYear::find($request->academic_year_id)
             : AcademicYear::where('is_current', true)->first();
 
-        $enrollment = $student->classEnrollments()
-            ->where('academic_year_id', $academicYear?->id)
-            ->with('classRoom.section')
-            ->first();
+        // Resolve the student's class from the real sources: the class_room_id
+        // column or the class_student pivot (enrolledClasses). Shaped as an
+        // object exposing ->classRoom so the shared views keep working.
+        $classRoom = $student->classRoom ?: $student->enrolledClasses()->first();
+        $classRoom?->loadMissing('section');
+        $enrollment = $classRoom ? (object) ['classRoom' => $classRoom] : null;
 
         $grades = Grade::where('student_id', $student->id)
             ->where('academic_year_id', $academicYear?->id)
@@ -131,17 +134,13 @@ class ReportController extends Controller
 
         $attendanceStats = $this->getAttendanceStats($student->id, $academicYear?->id);
 
-        $pdf = Pdf::loadView('admin.reports.pdf.student-card', compact(
-            'student',
-            'academicYear',
-            'enrollment',
-            'grades',
-            'attendanceStats'
-        ));
+        $html = view('admin.reports.pdf.student-card', compact(
+            'student', 'academicYear', 'enrollment', 'grades', 'attendanceStats'
+        ))->render();
 
-        $pdf->setPaper('a4', 'portrait');
+        $filename = "student-card-{$student->id}.pdf";
 
-        return $pdf->download("student-card-{$student->id}.pdf");
+        return $this->mpdfResponse($html, $filename, 'P');
     }
 
     /**
@@ -160,9 +159,9 @@ class ReportController extends Controller
             ? AcademicYear::find($request->academic_year_id)
             : AcademicYear::where('is_current', true)->first();
 
-        $students = User::whereHas('classEnrollments', function ($query) use ($class, $academicYear) {
-            $query->where('class_id', $class->id)
-                ->where('academic_year_id', $academicYear?->id);
+        $students = User::where(function ($query) use ($class) {
+            $query->where('class_room_id', $class->id)
+                ->orWhereHas('enrolledClasses', fn ($q) => $q->where('classes.id', $class->id));
         })->get();
 
         $subjectId = $request->subject_id;
@@ -225,9 +224,9 @@ class ReportController extends Controller
             ? AcademicYear::find($request->academic_year_id)
             : AcademicYear::where('is_current', true)->first();
 
-        $students = User::whereHas('classEnrollments', function ($query) use ($class, $academicYear) {
-            $query->where('class_id', $class->id)
-                ->where('academic_year_id', $academicYear?->id);
+        $students = User::where(function ($query) use ($class) {
+            $query->where('class_room_id', $class->id)
+                ->orWhereHas('enrolledClasses', fn ($q) => $q->where('classes.id', $class->id));
         })->get();
 
         $subjectId = $request->subject_id;
@@ -257,18 +256,13 @@ class ReportController extends Controller
         $classAverage = $studentsData->avg('average');
         $classAttendanceRate = $studentsData->avg('attendance_rate');
 
-        $pdf = Pdf::loadView('admin.reports.pdf.class-report', compact(
-            'class',
-            'academicYear',
-            'subject',
-            'studentsData',
-            'classAverage',
-            'classAttendanceRate'
-        ));
+        $html = view('admin.reports.pdf.class-report', compact(
+            'class', 'academicYear', 'subject', 'studentsData', 'classAverage', 'classAttendanceRate'
+        ))->render();
 
-        $pdf->setPaper('a4', 'landscape');
+        $filename = "class-report-{$class->id}.pdf";
 
-        return $pdf->download("class-report-{$class->id}.pdf");
+        return $this->mpdfResponse($html, $filename, 'L');
     }
 
     /**
@@ -285,9 +279,9 @@ class ReportController extends Controller
         $month = $request->month ?? now()->format('Y-m');
         $academicYear = AcademicYear::where('is_current', true)->first();
 
-        $students = User::whereHas('classEnrollments', function ($query) use ($class, $academicYear) {
-            $query->where('class_id', $class->id)
-                ->where('academic_year_id', $academicYear?->id);
+        $students = User::where(function ($query) use ($class) {
+            $query->where('class_room_id', $class->id)
+                ->orWhereHas('enrolledClasses', fn ($q) => $q->where('classes.id', $class->id));
         })->get();
 
         $startDate = \Carbon\Carbon::createFromFormat('Y-m', $month)->startOfMonth();
@@ -338,9 +332,9 @@ class ReportController extends Controller
         $month = $request->month ?? now()->format('Y-m');
         $academicYear = AcademicYear::where('is_current', true)->first();
 
-        $students = User::whereHas('classEnrollments', function ($query) use ($class, $academicYear) {
-            $query->where('class_id', $class->id)
-                ->where('academic_year_id', $academicYear?->id);
+        $students = User::where(function ($query) use ($class) {
+            $query->where('class_room_id', $class->id)
+                ->orWhereHas('enrolledClasses', fn ($q) => $q->where('classes.id', $class->id));
         })->get();
 
         $startDate = \Carbon\Carbon::createFromFormat('Y-m', $month)->startOfMonth();
@@ -364,15 +358,11 @@ class ReportController extends Controller
             ];
         });
 
-        $pdf = Pdf::loadView('admin.reports.pdf.attendance-report', compact(
-            'class',
-            'month',
-            'attendanceData'
-        ));
+        $html = view('admin.reports.pdf.attendance-report', compact('class', 'month', 'attendanceData'))->render();
 
-        $pdf->setPaper('a4', 'portrait');
+        $filename = "attendance-report-{$class->id}-{$month}.pdf";
 
-        return $pdf->download("attendance-report-{$class->id}-{$month}.pdf");
+        return $this->mpdfResponse($html, $filename, 'P');
     }
 
     /**
@@ -423,10 +413,12 @@ class ReportController extends Controller
         $classes = $classesQuery->with('section')->get();
 
         $classStats = $classes->map(function ($class) use ($academicYear) {
-            $studentIds = DB::table('class_enrollments')
+            $studentIds = DB::table('class_student')
                 ->where('class_id', $class->id)
-                ->where('academic_year_id', $academicYear?->id)
-                ->pluck('student_id');
+                ->pluck('student_id')
+                ->merge(User::where('class_room_id', $class->id)->pluck('id'))
+                ->unique()
+                ->values();
 
             $gradesAvg = Grade::whereIn('student_id', $studentIds)
                 ->where('academic_year_id', $academicYear?->id)
@@ -530,5 +522,47 @@ class ReportController extends Controller
         });
 
         return view('admin.reports.schools-general', compact('rows'));
+    }
+
+    /**
+     * Shared mPDF helper — renders pre-built HTML to PDF and returns a response.
+     * Uses xbriyaz font for proper Arabic glyph shaping + RTL bidi.
+     */
+    private function mpdfResponse(string $html, string $filename, string $orientation = 'P'): \Illuminate\Http\Response
+    {
+        $tmp = storage_path('app/mpdf');
+        if (!is_dir($tmp)) {
+            @mkdir($tmp, 0775, true);
+        }
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'             => 'utf-8',
+            'format'           => 'A4',
+            'orientation'      => $orientation,
+            'default_font'     => 'xbriyaz',
+            'autoScriptToLang' => true,
+            'autoLangToFont'   => true,
+            'tempDir'          => $tmp,
+            'margin_top'       => 15,
+            'margin_bottom'    => 15,
+            'margin_left'      => 12,
+            'margin_right'     => 12,
+        ]);
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->SetHTMLFooter(
+            '<div style="text-align:center;font-size:8px;color:#94a3b8;font-family:dejavusans;">'
+            . 'صفحة {PAGENO} من {nb}'
+            . '</div>'
+        );
+        $mpdf->WriteHTML($html);
+
+        return response(
+            $mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN),
+            200,
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]
+        );
     }
 }

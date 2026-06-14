@@ -2,6 +2,29 @@
 
 @section('title', 'تقرير حضور الطالب')
 
+@push('styles')
+<style>
+@media print {
+    @page { size: A4; margin: 1.5cm 1.5cm 2cm; }
+    .main-menu, .header-navbar, footer.footer, .content-header, .breadcrumb-wrapper,
+    .no-print, .pagination, nav, form { display: none !important; }
+    body::before {
+        content: "{{ $brand_name_ar ?? 'المنصة الذهبية' }} — تقرير حضور الطالب";
+        display: block;
+        background: {{ $brand_secondary_color ?? '#14233A' }};
+        color: {{ $brand_primary_color ?? '#C9A227' }};
+        font-size: 14pt; font-weight: bold; text-align: center;
+        padding: 8px; margin-bottom: 12px;
+    }
+    .card { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+    table { width: 100% !important; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc !important; padding: 4px 6px; font-size: 9pt; }
+    th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    a[href]:after { content: ''; }
+}
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">

@@ -9,7 +9,6 @@ use App\Models\Subject;
 use App\Models\TimeSlot;
 use App\Models\User;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -36,13 +35,46 @@ class SchoolScheduleController extends Controller
     {
         [$slots, $entries, $filters] = $this->loadSchedule($request);
 
-        $pdf = Pdf::loadView('admin.school-schedule.pdf', [
-            'slots' => $slots,
+        $html = view('admin.school-schedule.pdf', [
+            'slots'   => $slots,
             'entries' => $entries,
             'filters' => $filters,
-        ])->setPaper('a4', 'landscape');
+        ])->render();
 
-        return $pdf->stream('school-schedule.pdf');
+        $tmp = storage_path('app/mpdf');
+        if (!is_dir($tmp)) {
+            @mkdir($tmp, 0775, true);
+        }
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'             => 'utf-8',
+            'format'           => 'A4',
+            'orientation'      => 'L',
+            'default_font'     => 'xbriyaz',
+            'autoScriptToLang' => true,
+            'autoLangToFont'   => true,
+            'tempDir'          => $tmp,
+            'margin_top'       => 12,
+            'margin_bottom'    => 12,
+            'margin_left'      => 10,
+            'margin_right'     => 10,
+        ]);
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->SetHTMLFooter(
+            '<div style="text-align:center;font-size:8px;color:#94a3b8;font-family:dejavusans;">'
+            . 'صفحة {PAGENO} من {nb}'
+            . '</div>'
+        );
+        $mpdf->WriteHTML($html);
+
+        return response(
+            $mpdf->Output('school-schedule.pdf', \Mpdf\Output\Destination::STRING_RETURN),
+            200,
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="school-schedule.pdf"',
+            ]
+        );
     }
 
     private function loadSchedule(Request $request): array

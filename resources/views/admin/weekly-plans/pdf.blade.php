@@ -172,7 +172,7 @@
             <tr>
                 <td class="pdf-title">
                     الخطة الأسبوعية
-                    <div class="pdf-subtitle">{{ config('app.name', 'الأول') }}</div>
+                    <div class="pdf-subtitle">{{ $brand_name_ar ?? config('app.name', 'المنصة الذهبية') }}</div>
                 </td>
                 <td class="pdf-meta-right">
                     {{ $weekStart->format('Y-m-d') }} — {{ $weekEnd->format('Y-m-d') }}<br>
@@ -237,7 +237,7 @@
 
     {{-- ── Footer ──────────────────────────────────────────────────────── --}}
     <div class="pdf-footer">
-        {{ config('app.name', 'الأول') }} &nbsp;•&nbsp; {{ config('app.url') }} &nbsp;•&nbsp; {{ now()->format('Y') }}
+        {{ $brand_name_ar ?? config('app.name', 'المنصة الذهبية') }} &nbsp;•&nbsp; {{ config('app.url') }} &nbsp;•&nbsp; {{ now()->format('Y') }}
     </div>
 
 </body>

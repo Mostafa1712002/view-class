@@ -7,7 +7,6 @@ use App\Models\Attendance;
 use App\Models\ClassRoom;
 use App\Models\Grade;
 use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
@@ -38,8 +37,7 @@ class ExportController extends Controller
             ->get();
 
         if ($format === 'pdf') {
-            $pdf = Pdf::loadView('admin.exports.pdf.students', compact('students'));
-            return $pdf->download('students.pdf');
+            return $this->mpdfResponse('admin.exports.pdf.students', compact('students'), 'students.pdf');
         }
 
         $headers = ['الاسم', 'البريد الإلكتروني', 'الهاتف', 'الصف', 'المرحلة', 'تاريخ التسجيل'];
@@ -67,8 +65,7 @@ class ExportController extends Controller
             ->get();
 
         if ($format === 'pdf') {
-            $pdf = Pdf::loadView('admin.exports.pdf.teachers', compact('teachers'));
-            return $pdf->download('teachers.pdf');
+            return $this->mpdfResponse('admin.exports.pdf.teachers', compact('teachers'), 'teachers.pdf');
         }
 
         $headers = ['الاسم', 'البريد الإلكتروني', 'الهاتف', 'المواد', 'تاريخ التسجيل'];
@@ -100,8 +97,7 @@ class ExportController extends Controller
         $grades = $query->get();
 
         if ($format === 'pdf') {
-            $pdf = Pdf::loadView('admin.exports.pdf.grades', compact('grades'));
-            return $pdf->download('grades.pdf');
+            return $this->mpdfResponse('admin.exports.pdf.grades', compact('grades'), 'grades.pdf', 'L');
         }
 
         $headers = ['الطالب', 'المادة', 'الاختبار', 'الدرجة', 'الدرجة القصوى', 'النسبة', 'التاريخ'];
@@ -138,8 +134,7 @@ class ExportController extends Controller
         $attendance = $query->orderBy('date')->get();
 
         if ($format === 'pdf') {
-            $pdf = Pdf::loadView('admin.exports.pdf.attendance', compact('attendance', 'dateFrom', 'dateTo'));
-            return $pdf->download('attendance.pdf');
+            return $this->mpdfResponse('admin.exports.pdf.attendance', compact('attendance', 'dateFrom', 'dateTo'), 'attendance.pdf');
         }
 
         $headers = ['التاريخ', 'الطالب', 'الصف', 'الحالة', 'ملاحظات'];
@@ -173,5 +168,48 @@ class ExportController extends Controller
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
+    }
+
+    /**
+     * Shared mPDF helper — uses xbriyaz font for proper Arabic shaping + RTL bidi.
+     */
+    private function mpdfResponse(string $viewName, array $data, string $filename, string $orientation = 'P'): \Illuminate\Http\Response
+    {
+        $html = view($viewName, $data)->render();
+
+        $tmp = storage_path('app/mpdf');
+        if (!is_dir($tmp)) {
+            @mkdir($tmp, 0775, true);
+        }
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'             => 'utf-8',
+            'format'           => 'A4',
+            'orientation'      => $orientation,
+            'default_font'     => 'xbriyaz',
+            'autoScriptToLang' => true,
+            'autoLangToFont'   => true,
+            'tempDir'          => $tmp,
+            'margin_top'       => 15,
+            'margin_bottom'    => 15,
+            'margin_left'      => 12,
+            'margin_right'     => 12,
+        ]);
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->SetHTMLFooter(
+            '<div style="text-align:center;font-size:8px;color:#94a3b8;font-family:dejavusans;">'
+            . 'صفحة {PAGENO} من {nb}'
+            . '</div>'
+        );
+        $mpdf->WriteHTML($html);
+
+        return response(
+            $mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN),
+            200,
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
     }
 }

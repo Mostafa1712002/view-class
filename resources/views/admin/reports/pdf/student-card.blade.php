@@ -1,238 +1,145 @@
+@php
+    $pdf_title  = 'بطاقة الطالب';
+    $pdf_school = optional($enrollment?->classRoom?->section)->name ?? '';
+    $pdf_date   = now()->format('Y-m-d');
+@endphp
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>بطاقة الطالب - {{ $student->name }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'DejaVu Sans', sans-serif;
-            direction: rtl;
-            font-size: 12px;
-            line-height: 1.6;
-            color: #333;
-        }
-        .header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 3px solid #0d6efd;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            color: #0d6efd;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-        .student-info {
-            background: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        .student-info table {
-            width: 100%;
-        }
-        .student-info td {
-            padding: 5px 10px;
-        }
-        .student-info .label {
-            color: #666;
-            font-size: 11px;
-        }
-        .student-info .value {
-            font-weight: bold;
-        }
-        .stats-row {
-            display: table;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .stat-box {
-            display: table-cell;
-            width: 25%;
-            text-align: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-        }
-        .stat-box h3 {
-            font-size: 20px;
-            color: #0d6efd;
-            margin-bottom: 5px;
-        }
-        .stat-box p {
-            font-size: 10px;
-            color: #666;
-        }
-        .section-title {
-            background: #0d6efd;
-            color: white;
-            padding: 8px 15px;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        table.grades {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table.grades th,
-        table.grades td {
-            border: 1px solid #dee2e6;
-            padding: 8px;
-            text-align: center;
-        }
-        table.grades th {
-            background: #e9ecef;
-            font-weight: bold;
-        }
-        table.grades tfoot {
-            background: #f8f9fa;
-            font-weight: bold;
-        }
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 10px;
-            color: white;
-        }
-        .badge-success { background: #198754; }
-        .badge-danger { background: #dc3545; }
-        .footer {
-            text-align: center;
-            padding: 15px;
-            border-top: 1px solid #dee2e6;
-            color: #666;
-            font-size: 10px;
-            margin-top: 20px;
-        }
-    </style>
+    <title>بطاقة الطالب — {{ $student->name }}</title>
+    @include('partials.pdf.styles')
 </head>
 <body>
-    <div class="header">
-        <h1>بطاقة الطالب</h1>
-        <p>{{ $academicYear?->name }}</p>
-    </div>
 
-    <div class="student-info">
-        <table>
-            <tr>
-                <td style="width: 33%;">
-                    <span class="label">اسم الطالب</span><br>
-                    <span class="value">{{ $student->name }}</span>
-                </td>
-                <td style="width: 33%;">
-                    <span class="label">الصف</span><br>
-                    <span class="value">{{ $enrollment?->classRoom?->name ?? 'غير مسجل' }}</span>
-                </td>
-                <td style="width: 33%;">
-                    <span class="label">المرحلة</span><br>
-                    <span class="value">{{ $enrollment?->classRoom?->section?->name ?? '-' }}</span>
-                </td>
-            </tr>
-        </table>
-    </div>
+@include('partials.pdf.header')
 
-    <div class="stats-row">
-        <div class="stat-box">
-            <h3>{{ $grades->count() }}</h3>
-            <p>عدد المواد</p>
-        </div>
-        <div class="stat-box">
-            @php $overallAverage = $grades->count() > 0 ? round($grades->avg('average'), 1) : 0; @endphp
-            <h3>{{ $overallAverage }}%</h3>
-            <p>المعدل العام</p>
-        </div>
-        <div class="stat-box">
-            <h3>{{ $attendanceStats['rate'] }}%</h3>
-            <p>نسبة الحضور</p>
-        </div>
-        <div class="stat-box">
-            <h3>{{ $attendanceStats['absent'] }}</h3>
-            <p>أيام الغياب</p>
-        </div>
-    </div>
+{{-- Student info --}}
+<table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:9.5px;">
+    <tr>
+        <td style="width:33%; padding:6px 8px; background:#f8f9fa; border:1px solid #dee2e6;">
+            <span style="color:#666; font-size:8px; display:block;">اسم الطالب</span>
+            <strong>{{ $student->name }}</strong>
+        </td>
+        <td style="width:33%; padding:6px 8px; background:#f8f9fa; border:1px solid #dee2e6;">
+            <span style="color:#666; font-size:8px; display:block;">الصف</span>
+            <strong>{{ $enrollment?->classRoom?->name ?? 'غير مسجل' }}</strong>
+        </td>
+        <td style="width:33%; padding:6px 8px; background:#f8f9fa; border:1px solid #dee2e6;">
+            <span style="color:#666; font-size:8px; display:block;">المرحلة</span>
+            <strong>{{ $enrollment?->classRoom?->section?->name ?? '—' }}</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding:6px 8px; background:#f8f9fa; border:1px solid #dee2e6;">
+            <span style="color:#666; font-size:8px; display:block;">العام الدراسي</span>
+            <strong>{{ $academicYear?->name ?? '—' }}</strong>
+        </td>
+        <td style="padding:6px 8px; background:#f8f9fa; border:1px solid #dee2e6;">
+            <span style="color:#666; font-size:8px; display:block;">اسم المستخدم</span>
+            <strong>{{ $student->username ?? '—' }}</strong>
+        </td>
+        <td style="padding:6px 8px; background:#f8f9fa; border:1px solid #dee2e6;"></td>
+    </tr>
+</table>
 
-    <div class="section-title">الدرجات حسب المادة</div>
-    @if($grades->count() > 0)
-        <table class="grades">
-            <thead>
-                <tr>
-                    <th>@lang('common.subject')</th>
-                    <th>الفترة الأولى</th>
-                    <th>الفترة الثانية</th>
-                    <th>الفترة الثالثة</th>
-                    <th>الفترة الرابعة</th>
-                    <th>المعدل</th>
-                    <th>@lang('common.status')</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($grades as $subjectData)
-                    <tr>
-                        <td style="text-align: right;">{{ $subjectData['subject']->name }}</td>
-                        <td>{{ $subjectData['terms']->get('الفترة الأولى')?->total ?? '-' }}</td>
-                        <td>{{ $subjectData['terms']->get('الفترة الثانية')?->total ?? '-' }}</td>
-                        <td>{{ $subjectData['terms']->get('الفترة الثالثة')?->total ?? '-' }}</td>
-                        <td>{{ $subjectData['terms']->get('الفترة الرابعة')?->total ?? '-' }}</td>
-                        <td><strong>{{ $subjectData['average'] }}%</strong></td>
-                        <td>
-                            <span class="badge badge-{{ $subjectData['average'] >= 50 ? 'success' : 'danger' }}">
-                                {{ $subjectData['average'] >= 50 ? 'ناجح' : 'راسب' }}
-                            </span>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td style="text-align: right;"><strong>المعدل العام</strong></td>
-                    <td colspan="4"></td>
-                    <td><strong>{{ $overallAverage }}%</strong></td>
-                    <td>
-                        <span class="badge badge-{{ $overallAverage >= 50 ? 'success' : 'danger' }}">
-                            {{ $overallAverage >= 50 ? 'ناجح' : 'راسب' }}
-                        </span>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-    @else
-        <p style="text-align: center; padding: 20px; color: #666;">لا توجد درجات مسجلة</p>
-    @endif
+{{-- KPIs --}}
+@php $overallAverage = $grades->count() > 0 ? round($grades->avg('average'), 1) : 0; @endphp
+<table class="stat-row">
+    <tr>
+        <td>
+            <span class="stat-value">{{ $grades->count() }}</span>
+            <span class="stat-label">عدد المواد</span>
+        </td>
+        <td>
+            <span class="stat-value">{{ $overallAverage }}%</span>
+            <span class="stat-label">المعدل العام</span>
+        </td>
+        <td>
+            <span class="stat-value">{{ $attendanceStats['rate'] }}%</span>
+            <span class="stat-label">نسبة الحضور</span>
+        </td>
+        <td>
+            <span class="stat-value" style="color:#dc3545;">{{ $attendanceStats['absent'] }}</span>
+            <span class="stat-label">أيام الغياب</span>
+        </td>
+    </tr>
+</table>
 
-    <div class="section-title">إحصائيات الحضور</div>
-    <table class="grades">
+<div class="section-title">الدرجات حسب المادة</div>
+
+@if($grades->count() > 0)
+<table class="pdf-table">
+    <thead>
+        <tr>
+            <th style="text-align:right;">المادة</th>
+            <th>الفترة الأولى</th>
+            <th>الفترة الثانية</th>
+            <th>الفترة الثالثة</th>
+            <th>الفترة الرابعة</th>
+            <th>المعدل</th>
+            <th>الحالة</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($grades as $subjectData)
+        <tr>
+            <td style="text-align:right;">{{ $subjectData['subject']->name }}</td>
+            <td style="text-align:center; font-family:dejavusans;">{{ $subjectData['terms']->get('الفترة الأولى')?->total ?? '—' }}</td>
+            <td style="text-align:center; font-family:dejavusans;">{{ $subjectData['terms']->get('الفترة الثانية')?->total ?? '—' }}</td>
+            <td style="text-align:center; font-family:dejavusans;">{{ $subjectData['terms']->get('الفترة الثالثة')?->total ?? '—' }}</td>
+            <td style="text-align:center; font-family:dejavusans;">{{ $subjectData['terms']->get('الفترة الرابعة')?->total ?? '—' }}</td>
+            <td style="text-align:center;"><strong>{{ $subjectData['average'] }}%</strong></td>
+            <td style="text-align:center;">
+                <span class="badge badge-{{ $subjectData['average'] >= 50 ? 'success' : 'danger' }}">
+                    {{ $subjectData['average'] >= 50 ? 'ناجح' : 'راسب' }}
+                </span>
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+    <tfoot>
+        <tr>
+            <td style="text-align:right;"><strong>المعدل العام</strong></td>
+            <td colspan="4"></td>
+            <td style="text-align:center;"><strong>{{ $overallAverage }}%</strong></td>
+            <td style="text-align:center;">
+                <span class="badge badge-{{ $overallAverage >= 50 ? 'success' : 'danger' }}">
+                    {{ $overallAverage >= 50 ? 'ناجح' : 'راسب' }}
+                </span>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+@else
+<p style="text-align:center; padding:20px; color:#666;">لا توجد درجات مسجلة</p>
+@endif
+
+<div class="section-title" style="margin-top:14px;">إحصائيات الحضور</div>
+<table class="pdf-table">
+    <thead>
         <tr>
             <th>إجمالي الأيام</th>
-            <th>@lang('common.present')</th>
-            <th>@lang('common.absent')</th>
+            <th>حاضر</th>
+            <th>غائب</th>
             <th>متأخر</th>
             <th>بعذر</th>
             <th>نسبة الحضور</th>
         </tr>
+    </thead>
+    <tbody>
         <tr>
-            <td>{{ $attendanceStats['total'] }}</td>
-            <td>{{ $attendanceStats['present'] }}</td>
-            <td>{{ $attendanceStats['absent'] }}</td>
-            <td>{{ $attendanceStats['late'] }}</td>
-            <td>{{ $attendanceStats['excused'] }}</td>
-            <td><strong>{{ $attendanceStats['rate'] }}%</strong></td>
+            <td style="text-align:center; font-family:dejavusans;">{{ $attendanceStats['total'] }}</td>
+            <td style="text-align:center; color:#198754; font-family:dejavusans;">{{ $attendanceStats['present'] }}</td>
+            <td style="text-align:center; color:#dc3545; font-family:dejavusans;">{{ $attendanceStats['absent'] }}</td>
+            <td style="text-align:center; color:#b45309; font-family:dejavusans;">{{ $attendanceStats['late'] }}</td>
+            <td style="text-align:center; color:#0dcaf0; font-family:dejavusans;">{{ $attendanceStats['excused'] }}</td>
+            <td style="text-align:center;"><strong>{{ $attendanceStats['rate'] }}%</strong></td>
         </tr>
-    </table>
+    </tbody>
+</table>
 
-    <div class="footer">
-        <p>تم إنشاء هذا التقرير بتاريخ {{ now()->format('Y-m-d H:i') }}</p>
-        <p>المنصة الذهبية للتعليم</p>
-    </div>
+@include('partials.pdf.footer')
+
 </body>
 </html>
