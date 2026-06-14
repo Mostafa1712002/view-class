@@ -177,11 +177,13 @@ return [
     'platform_name' => 'اسم المنصة',
     'platform_url' => 'رابط الموقع',
 
-    // Impersonation
-    'impersonating_banner' => 'أنت تتصفح حالياً بصلاحية المستخدم :name. اضغط هنا لإيقاف الانتحال.',
-    'stop_impersonating' => 'إيقاف الانتحال',
-    'impersonate_started' => 'تم تسجيل الدخول باسم :name',
+    // Viewing (formerly Impersonation)
+    'impersonating_banner' => 'أنت الآن في وضع الإطلاع على حساب :name (:role). اضغط لإنهاء وضع الإطلاع.',
+    'stop_impersonating' => 'إنهاء الإطلاع',
+    'impersonate_started' => 'تم تسجيل الدخول للإطلاع على حساب :name',
     'impersonate_stopped' => 'تم العودة إلى حسابك',
+    'view_as_student' => 'دخول للإطلاع على حساب الطالب',
+    'view_as_parent' => 'دخول للإطلاع على حساب ولي الأمر',
 
     // Cards
     'cards_help' => 'يمكنك توليد بطاقات تحتوي على بيانات الدخول لكل مستخدم لطباعتها وتوزيعها عليهم.',
@@ -443,7 +445,7 @@ return [
     'assignment_none' => 'لا توجد صلاحيات مسندة لهذا المعلم بعد.',
     'assignment_delete_confirm' => 'هل تريد حذف هذه الصلاحية؟',
 
-    // Impersonation confirm
-    'impersonate_confirm_question' => 'هل تريد تسجيل الدخول كهذا المستخدم؟',
-    'impersonate_confirm_yes' => 'نعم، تسجيل الدخول',
+    // Viewing confirm
+    'impersonate_confirm_question' => 'هل تريد الدخول للإطلاع على حساب هذا المستخدم؟',
+    'impersonate_confirm_yes' => 'نعم، دخول للإطلاع',
 ];

@@ -653,15 +653,31 @@
     <div class="app-content content">
         <div class="content-wrapper">
             @if(session('impersonator_id'))
+                @php
+                    $__viewingUser = auth()->user();
+                    $__viewingRole = $__viewingUser?->isSuperAdmin()  ? __('users.admins')
+                        : ($__viewingUser?->isSchoolAdmin()           ? __('users.admins')
+                        : ($__viewingUser?->isTeacher()               ? __('users.teachers')
+                        : ($__viewingUser?->isParent()                ? __('users.parents')
+                        : ($__viewingUser?->isStudent()               ? __('users.students')
+                        : ''))));
+                @endphp
                 <form action="{{ route('admin.users.impersonate.stop') }}" method="POST" class="m-0">
                     @csrf
-                    <div class="alert alert-warning d-flex justify-content-between align-items-center mb-1" style="border:2px solid #f0ad4e;">
-                        <span>
-                            <i class="la la-user-secret"></i>
-                            @lang('users.impersonating_banner', ['name' => auth()->user()?->name])
+                    <div class="d-flex align-items-center justify-content-between px-3 py-2 mb-1"
+                         style="background:linear-gradient(135deg,#1a2f4e 0%,#2c4a72 100%);border-right:4px solid #c9a227;color:#fff;border-radius:4px;">
+                        <span class="d-flex align-items-center gap-2">
+                            <i class="la la-eye" style="font-size:1.2rem;color:#c9a227;"></i>
+                            <strong style="color:#c9a227;">وضع الإطلاع</strong>
+                            <span class="mx-1">|</span>
+                            @lang('users.impersonating_banner', [
+                                'name' => $__viewingUser?->name,
+                                'role' => $__viewingRole,
+                            ])
                         </span>
-                        <button class="btn btn-sm btn-outline-danger">
-                            @lang('users.stop_impersonating')
+                        <button type="submit" class="btn btn-sm ms-3"
+                                style="background:#c9a227;color:#1a2f4e;font-weight:600;border:none;white-space:nowrap;">
+                            <i class="la la-sign-out-alt"></i> @lang('users.stop_impersonating')
                         </button>
                     </div>
                 </form>

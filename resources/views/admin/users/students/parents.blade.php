@@ -57,6 +57,14 @@
                                 <td>
                                     <a class="btn btn-sm btn-soft" href="{{ route('admin.users.parents.show', $p->id) }}"><i class="la la-eye"></i></a>
                                     <a class="btn btn-sm btn-soft" href="{{ route('admin.users.parents.edit', $p->id) }}"><i class="la la-edit"></i></a>
+                                    @if(auth()->user()->canDo('viewing.login_as_user'))
+                                    <form action="{{ route('admin.users.impersonate.start', $p->id) }}" method="POST" class="d-inline m-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-soft" title="@lang('users.view_as_parent')">
+                                            <i class="la la-eye"></i> @lang('users.view_as_parent')
+                                        </button>
+                                    </form>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

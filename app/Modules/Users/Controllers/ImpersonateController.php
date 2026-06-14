@@ -18,7 +18,7 @@ class ImpersonateController extends Controller
     public function confirm(Request $request, int $id): \Illuminate\Contracts\View\View|RedirectResponse
     {
         $me = Auth::user();
-        abort_unless($me && $me->isSuperAdmin(), 403);
+        abort_unless($me && ($me->isSuperAdmin() || $me->canDo('viewing.login_as_user')), 403);
 
         $target = User::query()->whereKey($id)->first();
         if (!$target) {
@@ -31,7 +31,7 @@ class ImpersonateController extends Controller
     public function start(Request $request, int $id): RedirectResponse
     {
         $me = Auth::user();
-        abort_unless($me && $me->isSuperAdmin(), 403);
+        abort_unless($me && ($me->isSuperAdmin() || $me->canDo('viewing.login_as_user')), 403);
 
         $target = User::query()->whereKey($id)->first();
         if (!$target) {
@@ -41,19 +41,25 @@ class ImpersonateController extends Controller
             return back();
         }
 
+        $actorRole  = $this->primaryRoleLabel($me);
+        $targetRole = $this->primaryRoleLabel($target);
+
         DB::table('activity_logs')->insert([
-            'user_id' => $me->id,
-            'action' => 'impersonate.start',
-            'model_type' => User::class,
-            'model_id' => $target->id,
-            'description' => "Impersonating user #{$target->id} ({$target->username})",
-            'ip_address' => $request->ip(),
-            'user_agent' => substr((string) $request->userAgent(), 0, 255),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'user_id'     => $me->id,
+            'action'      => 'impersonate.start',
+            'model_type'  => User::class,
+            'model_id'    => $target->id,
+            'description' => "دخول للإطلاع: {$me->username} ({$actorRole}) اطلع على حساب #{$target->id} {$target->username} ({$targetRole})",
+            'ip_address'  => $request->ip(),
+            'user_agent'  => substr((string) $request->userAgent(), 0, 255),
+            'created_at'  => now(),
+            'updated_at'  => now(),
         ]);
 
         $request->session()->put('impersonator_id', $me->id);
+        $request->session()->put('impersonator_role', $actorRole);
+        $request->session()->put('impersonating_target_name', $target->name);
+        $request->session()->put('impersonating_target_role', $targetRole);
         Auth::loginUsingId($target->id);
 
         return redirect()->route('dashboard');
@@ -65,18 +71,39 @@ class ImpersonateController extends Controller
         if (!$impersonatorId) {
             return redirect()->route('dashboard');
         }
+
+        $targetId   = Auth::id();
+        $targetUser = User::query()->whereKey($targetId)->first();
+        $actorRole  = $request->session()->pull('impersonator_role', '');
+        $targetRole = $request->session()->pull('impersonating_target_role', '');
+        $targetName = $request->session()->pull('impersonating_target_name', $targetUser?->username ?? '');
+
         DB::table('activity_logs')->insert([
-            'user_id' => $impersonatorId,
-            'action' => 'impersonate.stop',
-            'model_type' => User::class,
-            'model_id' => Auth::id(),
-            'description' => 'Stopped impersonating',
-            'ip_address' => $request->ip(),
-            'user_agent' => substr((string) $request->userAgent(), 0, 255),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'user_id'     => $impersonatorId,
+            'action'      => 'impersonate.stop',
+            'model_type'  => User::class,
+            'model_id'    => $targetId,
+            'description' => "إنهاء الإطلاع: عاد المستخدم ({$actorRole}) من حساب #{$targetId} {$targetName} ({$targetRole})",
+            'ip_address'  => $request->ip(),
+            'user_agent'  => substr((string) $request->userAgent(), 0, 255),
+            'created_at'  => now(),
+            'updated_at'  => now(),
         ]);
         Auth::loginUsingId($impersonatorId);
         return redirect()->route('admin.users.students.index');
+    }
+
+    /**
+     * Return the primary Arabic role label for the given user (for activity log readability).
+     */
+    private function primaryRoleLabel(User $user): string
+    {
+        if ($user->isSuperAdmin())  return 'مدير النظام';
+        if ($user->isSchoolAdmin()) return 'مدير مدرسة';
+        if ($user->isTeacher())     return 'معلم';
+        if ($user->isParent())      return 'ولي أمر';
+        if ($user->isStudent())     return 'طالب';
+        $first = $user->roles()->first();
+        return $first?->name ?? 'مستخدم';
     }
 }

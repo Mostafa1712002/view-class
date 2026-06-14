@@ -102,6 +102,14 @@
         <a href="{{ route('admin.users.parents.students', $parent->id) }}" class="btn-ghost">
             <i class="la la-user-graduate"></i> @lang('users.parent_link_children')
         </a>
+        @if(auth()->user()->canDo('viewing.login_as_user'))
+        <form action="{{ route('admin.users.impersonate.start', $parent->id) }}" method="POST" class="m-0">
+            @csrf
+            <button type="submit" class="btn-ghost">
+                <i class="la la-eye"></i> @lang('users.view_as_parent')
+            </button>
+        </form>
+        @endif
         <a href="{{ route('admin.users.parents.index') }}" class="btn-ghost">
             <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> @lang('users.parent_back')
         </a>
@@ -181,6 +189,7 @@
                                     <th>@lang('users.name')</th>
                                     <th>@lang('users.class')</th>
                                     <th>@lang('users.parent_relationship')</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -194,6 +203,17 @@
                                     </td>
                                     <td>{{ optional($c->classRoom)->name ?? '—' }}</td>
                                     <td>{{ $c->pivot->relationship ?? '—' }}</td>
+                                    <td>
+                                        @if(auth()->user()->canDo('viewing.login_as_user'))
+                                        <form action="{{ route('admin.users.impersonate.start', $c->id) }}" method="POST" class="m-0">
+                                            @csrf
+                                            <button type="submit" class="btn-ghost" style="padding:.3rem .6rem;font-size:.8rem;"
+                                                    title="@lang('users.view_as_student')">
+                                                <i class="la la-eye"></i> @lang('users.view_as_student')
+                                            </button>
+                                        </form>
+                                        @endif
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>

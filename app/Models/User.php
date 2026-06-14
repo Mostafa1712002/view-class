@@ -237,6 +237,15 @@ class User extends Authenticatable
         return $this->isSuperAdmin() || $this->hasPermission($permission);
     }
 
+    /**
+     * General-purpose gated permission check.
+     * Super-admins always pass; others need the named permission slug.
+     */
+    public function canDo(string $permission): bool
+    {
+        return $this->isSuperAdmin() || $this->hasPermission($permission);
+    }
+
     public function assignRole(Role $role): void
     {
         $this->roles()->syncWithoutDetaching($role);
