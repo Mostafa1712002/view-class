@@ -65,6 +65,10 @@ use App\Modules\Mail\Repositories\Contracts\MailboxRepository;
 use App\Modules\Mail\Repositories\EloquentMailboxRepository;
 use App\Modules\Surveys\Repositories\Contracts\SurveyRepository;
 use App\Modules\Surveys\Repositories\EloquentSurveyRepository;
+use App\Modules\Whatsapp\Repositories\Contracts\WhatsappSettingsRepository;
+use App\Modules\Whatsapp\Repositories\EloquentWhatsappSettingsRepository;
+use App\Modules\Attendance\Repositories\Contracts\AttendanceRepository;
+use App\Modules\Attendance\Repositories\EloquentAttendanceRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -101,6 +105,8 @@ class RepositoryServiceProvider extends ServiceProvider
         CertificateRepository::class             => EloquentCertificateRepository::class,
         MailboxRepository::class                 => EloquentMailboxRepository::class,
         SurveyRepository::class                  => EloquentSurveyRepository::class,
+        WhatsappSettingsRepository::class        => EloquentWhatsappSettingsRepository::class,
+        AttendanceRepository::class              => EloquentAttendanceRepository::class,
     ];
 
     public function register(): void

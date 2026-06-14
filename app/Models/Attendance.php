@@ -21,6 +21,12 @@ class Attendance extends Model
         'arrival_time',
         'notes',
         'notified_parent',
+        // Excuse fields — added by Task 7 migration
+        'excuse_status',
+        'excuse_text',
+        'excuse_submitted_at',
+        'excuse_reviewed_at',
+        'excuse_reviewed_by',
     ];
 
     protected $casts = [
@@ -28,6 +34,8 @@ class Attendance extends Model
         'arrival_time' => 'datetime:H:i',
         'period' => 'integer',
         'notified_parent' => 'boolean',
+        'excuse_submitted_at' => 'datetime',
+        'excuse_reviewed_at'  => 'datetime',
     ];
 
     public const STATUSES = [

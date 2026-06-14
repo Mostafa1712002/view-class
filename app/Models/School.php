@@ -68,6 +68,11 @@ class School extends Model
         return $this->hasMany(\App\Modules\SmsServices\Models\SmsSender::class);
     }
 
+    public function whatsappSetting()
+    {
+        return $this->hasOne(\App\Modules\Whatsapp\Models\SchoolWhatsappSetting::class);
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

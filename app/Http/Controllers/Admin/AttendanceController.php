@@ -8,6 +8,7 @@ use App\Models\ClassRoom;
 use App\Models\Subject;
 use App\Models\AcademicYear;
 use App\Models\User;
+use App\Modules\Attendance\Jobs\NotifyAbsenceJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -80,9 +81,11 @@ class AttendanceController extends Controller
             'attendances.*.notes' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $notifyIds = [];
+
+        DB::transaction(function () use ($request, &$notifyIds) {
             foreach ($request->attendances as $data) {
-                Attendance::updateOrCreate(
+                $attendance = Attendance::updateOrCreate(
                     [
                         'student_id' => $data['student_id'],
                         'class_id' => $request->class_id,
@@ -98,8 +101,17 @@ class AttendanceController extends Controller
                         'notes' => $data['notes'] ?? null,
                     ]
                 );
+
+                if (in_array($data['status'], ['absent', 'late'], true)) {
+                    $notifyIds[] = $attendance->id;
+                }
             }
         });
+
+        // Dispatch parent notifications after the transaction commits (non-blocking)
+        foreach ($notifyIds as $id) {
+            dispatch(new NotifyAbsenceJob($id));
+        }
 
         return back()->with('success', 'تم حفظ الحضور بنجاح.');
     }

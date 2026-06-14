@@ -412,6 +412,8 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::delete('subjects/{id}/domains/{domainId}', [\App\Modules\Subjects\Controllers\SubjectController::class, 'destroyDomain'])->name('subjects.domains.destroy');
 
     // Question Banks — write routes (create/edit/delete/approve/promote/import) — admin-only
+    Route::get('question-banks/batch/create', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'createBatch'])->name('question-banks.batch.create');
+    Route::post('question-banks/batch/store', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'storeBatch'])->name('question-banks.batch.store');
     Route::post('question-banks/library/{id}/clone', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'clone'])->name('question-banks.library.clone');
     Route::get('question-banks/create', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'create'])->name('question-banks.create');
     Route::post('question-banks', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'store'])->name('question-banks.store');
@@ -973,9 +975,14 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/sett
 // === Noor card 58 ===
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('noor', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'form'])->name('noor.form');
+    Route::get('noor/template', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'downloadTemplate'])->name('noor.template');
     Route::post('noor/preview', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'preview'])->name('noor.preview');
     Route::post('noor/{log}/execute', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'execute'])->name('noor.execute');
     Route::get('noor/{log}/errors', [\App\Modules\NoorImport\Controllers\NoorImportController::class, 'errorsReport'])->name('noor.errors');
+    // Method 2 & 3 — Settings (scaffolded; no live API calls)
+    Route::get('noor/settings', [\App\Modules\NoorImport\Controllers\NoorSettingsController::class, 'index'])->name('noor.settings');
+    Route::post('noor/settings', [\App\Modules\NoorImport\Controllers\NoorSettingsController::class, 'save'])->name('noor.settings.save');
+    Route::post('noor/settings/test-connection', [\App\Modules\NoorImport\Controllers\NoorSettingsController::class, 'testConnection'])->name('noor.settings.test');
 });
 
 // === Appointments card #197 (Phase 1) ===
@@ -1134,3 +1141,29 @@ require __DIR__.'/../app/Modules/VirtualClasses/Routes/web.php';
 
 // === Special Education module ===
 require __DIR__.'/../app/Modules/SpecialEducation/Routes/web.php';
+
+// === WhatsApp Settings & Logs (Admin) — Task 7 ===
+Route::middleware(['auth', 'role:super-admin,school-admin'])
+    ->prefix('admin/whatsapp')
+    ->name('admin.whatsapp.')
+    ->group(function () {
+        Route::get('settings', [\App\Modules\Whatsapp\Controllers\WhatsappSettingsController::class, 'index'])->name('index');
+        Route::get('settings/{school}/edit', [\App\Modules\Whatsapp\Controllers\WhatsappSettingsController::class, 'edit'])->name('edit');
+        Route::put('settings/{school}', [\App\Modules\Whatsapp\Controllers\WhatsappSettingsController::class, 'update'])->name('update');
+        Route::get('logs', [\App\Modules\Whatsapp\Controllers\WhatsappSettingsController::class, 'logs'])->name('logs');
+        Route::post('logs/{log}/resend', [\App\Modules\Whatsapp\Controllers\WhatsappSettingsController::class, 'resend'])->name('resend');
+    });
+
+// === Attendance Excuse — Admin Review — Task 7 ===
+Route::middleware(['auth', 'role:super-admin,school-admin'])
+    ->group(function () {
+        Route::post('admin/attendance/{attendance}/excuse/review', [\App\Modules\Attendance\Controllers\ExcuseController::class, 'review'])->name('admin.attendance.excuse.review');
+    });
+
+// === Attendance Excuse — Parent Submission — Task 7 ===
+Route::middleware(['auth', 'role:parent'])
+    ->prefix('parent')
+    ->name('parent.')
+    ->group(function () {
+        Route::post('child/{child}/attendance/{attendance}/excuse', [\App\Modules\Attendance\Controllers\ExcuseController::class, 'store'])->name('attendance.excuse');
+    });

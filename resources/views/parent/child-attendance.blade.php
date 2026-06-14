@@ -84,6 +84,19 @@
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
         {{-- Attendance Details --}}
         <div class="card">
             <div class="card-header">
@@ -92,28 +105,70 @@
             <div class="card-body">
                 @if($attendances->count() > 0)
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>@lang('common.created_at')</th>
+                                    <th>التاريخ</th>
                                     <th>اليوم</th>
-                                    <th class="text-center">@lang('common.status')</th>
-                                    <th>@lang('common.subject')</th>
+                                    <th>النوع</th>
+                                    <th>المادة</th>
+                                    <th>الحصة</th>
+                                    <th>المعلم</th>
+                                    <th class="text-center">الحالة</th>
+                                    <th class="text-center">حالة العذر</th>
                                     <th>ملاحظات</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($attendances as $attendance)
                                     <tr>
-                                        <td>{{ $attendance->date->format('Y-m-d') }}</td>
+                                        <td class="text-nowrap">{{ $attendance->date->format('Y-m-d') }}</td>
                                         <td>{{ $attendance->date->translatedFormat('l') }}</td>
+                                        <td>
+                                            @if($attendance->period)
+                                                <span class="badge bg-info text-dark">حصة</span>
+                                            @else
+                                                <span class="badge bg-secondary">يومي</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $attendance->subject?->name ?? '—' }}</td>
+                                        <td>
+                                            @if($attendance->period)
+                                                الحصة {{ $attendance->period }}
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td>{{ $attendance->teacher?->name ?? '—' }}</td>
                                         <td class="text-center">
                                             <span class="badge bg-{{ $attendance->status_color }}">
                                                 {{ $attendance->status_label }}
                                             </span>
                                         </td>
-                                        <td>{{ $attendance->subject->name ?? '-' }}</td>
-                                        <td>{{ $attendance->notes ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if($attendance->excuse_status === 'accepted')
+                                                <span class="badge bg-success">مقبول</span>
+                                            @elseif($attendance->excuse_status === 'rejected')
+                                                <span class="badge bg-danger">مرفوض</span>
+                                            @elseif($attendance->excuse_status === 'pending')
+                                                <span class="badge bg-warning text-dark">قيد المراجعة</span>
+                                            @else
+                                                <span class="text-muted small">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small">{{ $attendance->notes ?? '—' }}</span>
+                                        </td>
+                                        <td>
+                                            @if(in_array($attendance->status, ['absent', 'late']) && $attendance->excuse_status === null)
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#excuse-modal-{{ $attendance->id }}">
+                                                    <i class="bi bi-pencil-square me-1"></i>تقديم عذر
+                                                </button>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -137,4 +192,48 @@
         </div>
     @endif
 </div>
+
+{{-- Excuse Submission Modals --}}
+@if($stats)
+    @foreach($attendances as $attendance)
+        @if(in_array($attendance->status, ['absent', 'late']) && $attendance->excuse_status === null)
+        <div class="modal fade" id="excuse-modal-{{ $attendance->id }}" tabindex="-1"
+             aria-labelledby="excuse-label-{{ $attendance->id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="excuse-label-{{ $attendance->id }}">
+                            تقديم عذر —
+                            {{ $attendance->date->format('Y-m-d') }}
+                            ({{ $attendance->status_label }})
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="POST"
+                          action="{{ route('parent.attendance.excuse', [$child->id, $attendance->id]) }}">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    نص العذر <span class="text-danger">*</span>
+                                </label>
+                                <textarea name="excuse_text" rows="4" class="form-control" required
+                                          minlength="5" maxlength="1000"
+                                          placeholder="اكتب سبب الغياب أو التأخر..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i>إرسال العذر
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endforeach
+@endif
+
 @endsection
