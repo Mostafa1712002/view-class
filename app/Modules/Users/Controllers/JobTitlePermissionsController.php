@@ -109,11 +109,20 @@ class JobTitlePermissionsController extends Controller
     {
         $this->assertCanManage($jobTitle);
 
+        // A non-super-admin may only grant school-level or narrower data scopes;
+        // the system-wide scopes (all/company/group) are super-admin only,
+        // otherwise a school-admin could escalate a job title beyond their school.
+        $wideScopes   = ['all', 'company', 'group'];
+        $narrowScopes = ['school', 'stage', 'class', 'section', 'subject', 'own_students', 'own_subjects', 'own'];
+        $allowedScopes = auth()->user()?->isSuperAdmin()
+            ? array_merge($wideScopes, $narrowScopes)
+            : $narrowScopes;
+
         $request->validate([
             'permissions'   => 'nullable|array',
             'permissions.*' => 'string',
             'scopes'        => 'nullable|array',
-            'scopes.*'      => 'string|in:all,company,group,school,stage,class,section,subject,own_students,own_subjects,own',
+            'scopes.*'      => ['string', \Illuminate\Validation\Rule::in($allowedScopes)],
         ]);
 
         $selectedSlugs = $request->input('permissions', []);
@@ -126,8 +135,12 @@ class JobTitlePermissionsController extends Controller
         foreach ($selectedSlugs as $slug) {
             $perm = $permMap->get($slug);
             if ($perm) {
+                $scope = $scopes[$slug] ?? 'school';
+                if (! in_array($scope, $allowedScopes, true)) {
+                    $scope = 'school'; // clamp anything not allowed for this actor
+                }
                 $syncData[$perm->id] = [
-                    'scope'      => $scopes[$slug] ?? 'school',
+                    'scope'      => $scope,
                     'updated_at' => now(),
                     'created_at' => now(),
                 ];
