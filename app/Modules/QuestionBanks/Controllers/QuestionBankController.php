@@ -10,6 +10,7 @@ use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class QuestionBankController extends Controller
@@ -148,6 +149,18 @@ class QuestionBankController extends Controller
 
     public function storeBatch(Request $request): RedirectResponse
     {
+        // Multi-tenant scope: a non-super-admin may only batch-create banks for
+        // subjects that belong to their own school (or company/global subjects
+        // with a null school_id). Super-admin (null active school) is unrestricted.
+        $activeSchoolId = $this->activeSchoolId();
+        $subjectScope = Rule::exists('subjects', 'id')->where(function ($q) use ($activeSchoolId) {
+            if ($activeSchoolId !== null) {
+                $q->where(function ($qq) use ($activeSchoolId) {
+                    $qq->where('school_id', $activeSchoolId)->orWhereNull('school_id');
+                });
+            }
+        });
+
         $data = $request->validate([
             'visibility'    => ['required', 'in:public,private'],
             'status'        => ['required', 'in:active,inactive,under_review,archived'],
@@ -155,7 +168,7 @@ class QuestionBankController extends Controller
             'grade_level'   => ['nullable', 'integer', 'min:1', 'max:12'],
             'term'          => ['nullable', 'string', 'max:100'],
             'subject_ids'   => ['required', 'array', 'min:1'],
-            'subject_ids.*' => ['integer', 'exists:subjects,id'],
+            'subject_ids.*' => ['integer', $subjectScope],
             'school_ids'    => ['nullable', 'array'],
             'school_ids.*'  => ['integer', 'exists:schools,id'],
             'skip_existing' => ['nullable', 'boolean'],
@@ -175,10 +188,13 @@ class QuestionBankController extends Controller
         $skipped = 0;
 
         foreach ($data['subject_ids'] as $subjectId) {
-            $subject = Subject::find($subjectId);
-            if (! $subject) {
-                continue;
-            }
+            // Re-verify scope inside the loop (defense in depth); reject cross-tenant.
+            $subject = Subject::where('id', $subjectId)
+                ->when($activeSchoolId !== null, fn ($q) => $q->where(
+                    fn ($qq) => $qq->where('school_id', $activeSchoolId)->orWhereNull('school_id')
+                ))
+                ->first();
+            abort_if(! $subject, 403, __('question_banks.error_general_forbidden'));
 
             // Duplicate check: same school + subject + grade + term
             $duplicateQuery = QuestionBank::query()

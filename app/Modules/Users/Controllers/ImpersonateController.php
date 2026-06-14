@@ -15,6 +15,25 @@ class ImpersonateController extends Controller
      * GET confirmation page. Hitting POST-only /impersonate via a bare URL
      * yields a 405/419; this presents a tiny CSRF-protected confirm form.
      */
+    /**
+     * Privilege guard: a non-super-admin viewer may only view-login as a
+     * non-admin user within their OWN school. Prevents privilege escalation
+     * (viewing into a super-admin / school-admin / another school's account).
+     */
+    private function assertCanViewTarget(User $me, User $target): void
+    {
+        if ($me->isSuperAdmin()) {
+            return;
+        }
+        abort_if(
+            $target->isSuperAdmin()
+                || $target->isSchoolAdmin()
+                || (int) $target->school_id !== (int) $me->school_id,
+            403,
+            'لا يمكنك الدخول للإطلاع على هذا الحساب.'
+        );
+    }
+
     public function confirm(Request $request, int $id): \Illuminate\Contracts\View\View|RedirectResponse
     {
         $me = Auth::user();
@@ -24,6 +43,7 @@ class ImpersonateController extends Controller
         if (!$target) {
             return redirect()->route('dashboard')->with('error', __('users.not_found'));
         }
+        $this->assertCanViewTarget($me, $target);
 
         return view('admin.users.impersonate-confirm', compact('target'));
     }
@@ -40,6 +60,7 @@ class ImpersonateController extends Controller
         if ($target->id === $me->id) {
             return back();
         }
+        $this->assertCanViewTarget($me, $target);
 
         $actorRole  = $this->primaryRoleLabel($me);
         $targetRole = $this->primaryRoleLabel($target);
