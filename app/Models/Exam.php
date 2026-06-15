@@ -28,6 +28,7 @@ class Exam extends Model
         'shuffle_questions',
         'shuffle_answers',
         'attempts_allowed',
+        'max_exit_attempts',
         'status',
     ];
 
@@ -42,6 +43,7 @@ class Exam extends Model
         'shuffle_questions' => 'boolean',
         'shuffle_answers' => 'boolean',
         'attempts_allowed' => 'integer',
+        'max_exit_attempts' => 'integer',
     ];
 
     public const TYPES = [

@@ -175,7 +175,9 @@ class StudentExamController extends Controller
     }
 
     /**
-     * Number of distinct exit attempts after which the exam auto-ends.
+     * Fallback number of distinct exit attempts after which the exam auto-ends.
+     * Used only when an exam has no explicit per-exam limit configured
+     * (see Exam::max_exit_attempts — Trello #229).
      */
     public const AUTO_END_THRESHOLD = 3;
 
@@ -213,12 +215,13 @@ class StudentExamController extends Controller
         [$device, $browser] = $this->parseUserAgent($ua);
 
         $autoEnded = false;
+        $threshold = $exam->max_exit_attempts ?: self::AUTO_END_THRESHOLD;
 
-        DB::transaction(function () use ($attempt, $exam, $student, $type, $ua, $device, $browser, $request, &$autoEnded) {
+        DB::transaction(function () use ($attempt, $exam, $student, $type, $ua, $device, $browser, $request, $threshold, &$autoEnded) {
             $attempt->increment('exit_attempts_count');
             $count = $attempt->exit_attempts_count;
 
-            $autoEnded = $count >= self::AUTO_END_THRESHOLD && $attempt->submitted_at === null;
+            $autoEnded = $count >= $threshold && $attempt->submitted_at === null;
 
             ExamExitAttempt::create([
                 'student_exam_id' => $attempt->id,
@@ -242,7 +245,7 @@ class StudentExamController extends Controller
         return response()->json([
             'logged' => true,
             'count' => $attempt->exit_attempts_count,
-            'threshold' => self::AUTO_END_THRESHOLD,
+            'threshold' => $threshold,
             'auto_ended' => $autoEnded,
         ]);
     }

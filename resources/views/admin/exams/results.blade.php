@@ -127,10 +127,30 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-outline-info" data-toggle="modal" data-bs-toggle="modal" data-target="#answersModal{{ $studentExam->id }}" data-bs-target="#answersModal{{ $studentExam->id }}">
-                                            <i class="bi bi-eye"></i>
-                                            عرض الإجابات
-                                        </button>
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            <button type="button" class="btn btn-sm btn-outline-info" data-toggle="modal" data-bs-toggle="modal" data-target="#answersModal{{ $studentExam->id }}" data-bs-target="#answersModal{{ $studentExam->id }}">
+                                                <i class="bi bi-eye"></i>
+                                                عرض الإجابات
+                                            </button>
+
+                                            {{-- === Anti-cheat (ac) — Trello #229 ===
+                                                 Re-open control: only for attempts auto-locked by the
+                                                 tab-exit limit, and only for users allowed to edit exams. --}}
+                                            @if($studentExam->auto_ended && auth()->user()->canDo('exams.edit'))
+                                                <form method="POST" action="{{ route('admin.exams.attempts.reopen', [$exam, $studentExam]) }}"
+                                                      onsubmit="return confirm('سيتم إعادة فتح الاختبار لهذا الطالب وتصفير عدّاد محاولات الخروج. هل تريد المتابعة؟');">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-warning">
+                                                        <i class="bi bi-unlock"></i>
+                                                        إعادة فتح الاختبار
+                                                    </button>
+                                                </form>
+                                            @elseif($studentExam->auto_ended)
+                                                <span class="badge bg-danger align-self-center">
+                                                    <i class="bi bi-lock-fill"></i> مُقفل
+                                                </span>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
 

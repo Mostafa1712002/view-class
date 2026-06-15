@@ -134,6 +134,15 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">عدد مرات الخروج المسموحة</label>
+                                <input type="number" name="max_exit_attempts" class="form-control @error('max_exit_attempts') is-invalid @enderror" value="{{ old('max_exit_attempts', $exam->max_exit_attempts) }}" min="1" max="50" required>
+                                <small class="text-muted">يُقفل الاختبار تلقائياً بعد تجاوز هذا العدد من محاولات الخروج من التبويب.</small>
+                                @error('max_exit_attempts')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="row">

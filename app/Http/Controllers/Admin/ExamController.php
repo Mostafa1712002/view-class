@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamQuestion;
+use App\Models\StudentExam;
 use App\Models\Subject;
 use App\Models\ClassRoom;
 use App\Models\AcademicYear;
@@ -111,6 +112,7 @@ class ExamController extends Controller
             'start_time' => 'nullable|date',
             'end_time' => 'nullable|date|after:start_time',
             'attempts_allowed' => 'required|integer|min:1|max:10',
+            'max_exit_attempts' => 'required|integer|min:1|max:50',
             'shuffle_questions' => 'boolean',
             'shuffle_answers' => 'boolean',
             'show_results' => 'boolean',
@@ -180,6 +182,7 @@ class ExamController extends Controller
             'start_time' => 'nullable|date',
             'end_time' => 'nullable|date|after:start_time',
             'attempts_allowed' => 'required|integer|min:1|max:10',
+            'max_exit_attempts' => 'required|integer|min:1|max:50',
             'shuffle_questions' => 'boolean',
             'shuffle_answers' => 'boolean',
             'show_results' => 'boolean',
@@ -268,5 +271,45 @@ class ExamController extends Controller
         }]);
 
         return view('admin.exams.results', compact('exam'));
+    }
+
+    /**
+     * === Anti-cheat card (ac) — Trello #229 ===
+     * Re-open a student's attempt that was auto-locked after exceeding the
+     * tab-exit limit, so the student can resume / retake. Clears the lock and
+     * resets the exit counter; the student's saved answers are preserved.
+     *
+     * Gated by the `exams.edit` permission (admins + teachers). Teachers may
+     * only re-open attempts belonging to their own exams — mirrors how every
+     * other exam action is scoped (super-admin / school-admin pass through,
+     * otherwise teacher_id must match the authed user).
+     */
+    public function reopenAttempt(Exam $exam, StudentExam $studentExam)
+    {
+        if (! Auth::user()->canDo('exams.edit')) {
+            abort(403, 'ليس لديك صلاحية إعادة فتح الاختبار.');
+        }
+
+        // The studentExam must actually belong to this exam.
+        if ($studentExam->exam_id !== $exam->id) {
+            abort(404);
+        }
+
+        // Ownership: non-admins may only manage their own exams.
+        if (! Auth::user()->hasAnyRole(['super-admin', 'school-admin'])
+            && $exam->teacher_id !== Auth::id()) {
+            abort(403, 'هذا الاختبار لا يخصك.');
+        }
+
+        $studentExam->forceFill([
+            'submitted_at' => null,
+            'auto_ended' => false,
+            'status' => 'in_progress',
+            'exit_attempts_count' => 0,
+            'session_token' => null,
+            'started_at' => $studentExam->started_at ?? now(),
+        ])->save();
+
+        return back()->with('success', 'تم إعادة فتح الاختبار للطالب. يمكنه الآن استكمال الاختبار.');
     }
 }

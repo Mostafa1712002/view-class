@@ -52,7 +52,7 @@
             <i class="bi bi-shield-exclamation me-2"></i>
             <span>
                 هذا الاختبار محمي ضد الغش. لا تغادر الصفحة ولا تغيّر التبويب ولا تفتح الاختبار في نافذة أخرى.
-                تُسجَّل كل محاولة خروج، وبعد {{ \App\Http\Controllers\StudentExamController::AUTO_END_THRESHOLD }} محاولات يتم إنهاء الاختبار تلقائياً.
+                تُسجَّل كل محاولة خروج، وبعد {{ $exam->max_exit_attempts ?: \App\Http\Controllers\StudentExamController::AUTO_END_THRESHOLD }} محاولات يتم إنهاء الاختبار تلقائياً.
             </span>
         </div>
 
@@ -135,7 +135,7 @@
     var exitUrl     = "{{ route('student.exams.exit-attempt', $exam) }}";
     var beatUrl     = "{{ route('student.exams.heartbeat', $exam) }}";
     var resultUrl   = "{{ route('student.exams.result', $exam) }}";
-    var threshold   = {{ \App\Http\Controllers\StudentExamController::AUTO_END_THRESHOLD }};
+    var threshold   = {{ $exam->max_exit_attempts ?: \App\Http\Controllers\StudentExamController::AUTO_END_THRESHOLD }};
 
     var form        = document.getElementById('exam-form');
     var overlay     = document.getElementById('exam-lock-overlay');
