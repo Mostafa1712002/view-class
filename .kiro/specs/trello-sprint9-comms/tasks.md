@@ -15,7 +15,7 @@ Order minimizes shared-file conflicts (sidebar/header/template serialized).
 - [x] B3 #219 تيمبلت موحد — unified template + visual identity all roles  (VOeHxydN)
 - [x] B4 #170 هيكل حساب الطالب — student account shell/header/sidebar/dashboard  (nKHlmgKv)
 - [x] B5 #162 بطاقات المستخدمين — user cards fixes/gaps  (xTKbhPVi)
-- [ ] B6 #173 المكتبة العامة... (student account: libraries, files, virtual labs, appts, SpecialEd, policies)  (DLm2PbYp)
+- [x] B6 #173 المكتبة العامة... (student account: libraries, files, virtual labs, appts, SpecialEd, policies)  (DLm2PbYp)
 
 ## Batch C — Sprint 9 communications (15 cards; new modules can build parallel, deploy serial)
 - [ ] C0 #231 Sprint 9 overview / عمليات التواصل  (oi6gWI7x)
