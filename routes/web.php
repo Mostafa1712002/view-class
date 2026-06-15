@@ -1208,3 +1208,8 @@ Route::middleware(['auth', 'role:parent'])
 
 // === Announcements module (Sprint 9 — Task 2) ===
 require __DIR__.'/../app/Modules/Announcements/Routes/web.php';
+
+// === Parents-as-contact — Communications (Sprint 9 — Trello #242) ===
+require __DIR__.'/../app/Modules/Communications/Routes/web.php';
+require __DIR__.'/../app/Modules/Whatsapp/Routes/web.php';
+require __DIR__.'/../app/Modules/SmsServices/Routes/web.php';

@@ -67,10 +67,14 @@ use App\Modules\Surveys\Repositories\Contracts\SurveyRepository;
 use App\Modules\Surveys\Repositories\EloquentSurveyRepository;
 use App\Modules\Whatsapp\Repositories\Contracts\WhatsappSettingsRepository;
 use App\Modules\Whatsapp\Repositories\EloquentWhatsappSettingsRepository;
+use App\Modules\Whatsapp\Repositories\Contracts\RecipientRepository;
+use App\Modules\Whatsapp\Repositories\EloquentRecipientRepository;
 use App\Modules\Attendance\Repositories\Contracts\AttendanceRepository;
 use App\Modules\Attendance\Repositories\EloquentAttendanceRepository;
 use App\Modules\Announcements\Repositories\Contracts\AnnouncementRepository;
 use App\Modules\Announcements\Repositories\EloquentAnnouncementRepository;
+use App\Modules\Communications\Repositories\Contracts\ParentsContactRepository;
+use App\Modules\Communications\Repositories\EloquentParentsContactRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -108,8 +112,10 @@ class RepositoryServiceProvider extends ServiceProvider
         MailboxRepository::class                 => EloquentMailboxRepository::class,
         SurveyRepository::class                  => EloquentSurveyRepository::class,
         WhatsappSettingsRepository::class        => EloquentWhatsappSettingsRepository::class,
+        RecipientRepository::class               => EloquentRecipientRepository::class,
         AttendanceRepository::class              => EloquentAttendanceRepository::class,
         AnnouncementRepository::class            => EloquentAnnouncementRepository::class,
+        ParentsContactRepository::class          => EloquentParentsContactRepository::class,
     ];
 
     public function register(): void
