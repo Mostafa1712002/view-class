@@ -73,6 +73,8 @@ use App\Modules\SpecialEducation\Repositories\Contracts\SpecialEducationReposito
 use App\Modules\SpecialEducation\Repositories\EloquentSpecialEducationRepository;
 use App\Modules\Certificates\Repositories\Contracts\CertificateRepository;
 use App\Modules\Certificates\Repositories\EloquentCertificateRepository;
+use App\Modules\Certificates\Repositories\Contracts\CertificateTemplateRepository;
+use App\Modules\Certificates\Repositories\EloquentCertificateTemplateRepository;
 use App\Modules\Mail\Repositories\Contracts\MailboxRepository;
 use App\Modules\Mail\Repositories\EloquentMailboxRepository;
 use App\Modules\Surveys\Repositories\Contracts\SurveyRepository;
@@ -128,6 +130,7 @@ class RepositoryServiceProvider extends ServiceProvider
         VirtualClassRepositoryInterface::class   => VirtualClassRepository::class,
         SpecialEducationRepository::class        => EloquentSpecialEducationRepository::class,
         CertificateRepository::class             => EloquentCertificateRepository::class,
+        CertificateTemplateRepository::class     => EloquentCertificateTemplateRepository::class,
         MailboxRepository::class                 => EloquentMailboxRepository::class,
         SurveyRepository::class                  => EloquentSurveyRepository::class,
         WhatsappSettingsRepository::class        => EloquentWhatsappSettingsRepository::class,

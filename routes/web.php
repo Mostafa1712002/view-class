@@ -1068,23 +1068,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ma
 });
 
 // ==========================================
-// Support Tickets
+// Support Tickets (Trello #267) — routes moved to the module file
 // ==========================================
-Route::middleware(['auth'])->prefix('my/support')->name('my.support.')->group(function () {
-    Route::get('/', [\App\Modules\Support\Controllers\UserSupportController::class, 'index'])->name('index');
-    Route::get('/create', [\App\Modules\Support\Controllers\UserSupportController::class, 'create'])->name('create');
-    Route::post('/', [\App\Modules\Support\Controllers\UserSupportController::class, 'store'])->name('store');
-    Route::get('/{ticket}', [\App\Modules\Support\Controllers\UserSupportController::class, 'show'])->name('show');
-    Route::post('/{ticket}/reply', [\App\Modules\Support\Controllers\UserSupportController::class, 'reply'])->name('reply');
-});
-
-Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/support')->name('admin.support.')->group(function () {
-    Route::get('/', [\App\Modules\Support\Controllers\AdminSupportController::class, 'index'])->name('index');
-    Route::get('/{ticket}', [\App\Modules\Support\Controllers\AdminSupportController::class, 'show'])->name('show');
-    Route::post('/{ticket}/reply', [\App\Modules\Support\Controllers\AdminSupportController::class, 'reply'])->name('reply');
-    Route::post('/{ticket}/assign', [\App\Modules\Support\Controllers\AdminSupportController::class, 'assign'])->name('assign');
-    Route::post('/{ticket}/status', [\App\Modules\Support\Controllers\AdminSupportController::class, 'updateStatus'])->name('updateStatus');
-});
+require __DIR__.'/../app/Modules/Support/Routes/web.php';
 
 // ==========================================
 // Surveys module (Trello #185)
@@ -1107,21 +1093,9 @@ Route::middleware(['auth'])->prefix('my/surveys')->name('my.surveys.')->group(fu
     Route::post('/{survey}', [\App\Modules\Surveys\Controllers\MySurveyController::class, 'submit'])->whereNumber('survey')->name('submit');
 });
 
-// === Certificates module (#192 §9 / #172) ===
-Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin/certificates')->name('admin.certificates.')->group(function () {
-    Route::get('/', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'index'])->name('index');
-    Route::get('/create', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'create'])->name('create');
-    Route::post('/', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'store'])->name('store');
-    Route::get('/{certificate}/edit', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'edit'])->name('edit');
-    Route::put('/{certificate}', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'update'])->name('update');
-    Route::post('/{certificate}/publish', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'publish'])->name('publish');
-    Route::delete('/{certificate}', [\App\Modules\Certificates\Controllers\AdminCertificateController::class, 'destroy'])->name('destroy');
-});
-
-// Teacher / student / parent: read-only certificates view
-Route::middleware(['auth', 'role:teacher,student,parent'])->prefix('my/certificates')->name('my.certificates.')->group(function () {
-    Route::get('/', [\App\Modules\Certificates\Controllers\MyCertificateController::class, 'index'])->name('index');
-});
+// === Certificates module (#192 §9 / #172 / #266) ===
+// Migrated to permission:-based gating; full route set lives in the module file.
+require base_path('app/Modules/Certificates/Routes/web.php');
 
 // ==========================================
 // Internal Mailbox
@@ -1216,3 +1190,8 @@ require __DIR__.'/../app/Modules/SmsServices/Routes/web.php';
 
 // === Question-Bank rebuild — CORE screens (#249/#250/#253) ===
 require __DIR__.'/../app/Modules/QuestionBankCore/Routes/web.php';
+
+// === Sprint 10 — Attendance subsystem (#261/#262/#263 student, #264 teacher, #265 QR) ===
+require __DIR__.'/../app/Modules/Attendance/Routes/web.php';
+require __DIR__.'/../app/Modules/TeacherAttendance/Routes/web.php';
+require __DIR__.'/../app/Modules/Qr/Routes/web.php';
