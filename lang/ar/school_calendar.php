@@ -31,11 +31,17 @@ return [
     'field_actions'    => 'الإجراءات',
 
     // Event types
-    'type_holiday'  => 'إجازة',
-    'type_exam'     => 'اختبار',
-    'type_activity' => 'نشاط',
-    'type_meeting'  => 'اجتماع',
-    'type_other'    => 'أخرى',
+    'type_general'       => 'حدث عام',
+    'type_private'       => 'حدث خاص',
+    'type_holiday'       => 'إجازة',
+    'type_exam'          => 'اختبار',
+    'type_meeting'       => 'اجتماع',
+    'type_activity'      => 'نشاط',
+    'type_admin'         => 'موعد إداري',
+    'type_virtual_class' => 'فصل افتراضي',
+    'type_alert'         => 'تنبيه',
+    'type_occasion'      => 'مناسبة مدرسية',
+    'type_other'         => 'أخرى',
 
     // Audience
     'audience_all'      => 'الجميع',
@@ -58,6 +64,21 @@ return [
     'flash_created' => 'تم إنشاء الحدث بنجاح.',
     'flash_updated' => 'تم تحديث الحدث بنجاح.',
     'flash_deleted' => 'تم حذف الحدث بنجاح.',
+
+    // Print
+    'btn_print'    => 'طباعة',
+    'print_title'  => 'تقويم المدرسة',
+    'print_range'  => 'الفترة',
+    'print_day'    => 'طباعة يومي',
+    'print_week'   => 'طباعة أسبوعي',
+    'print_month'  => 'طباعة شهري',
+    'view_day'     => 'يومي',
+    'view_week'    => 'أسبوعي',
+    'view_month'   => 'شهري',
+
+    // Validation
+    'err_end_before_start'      => 'لا يمكن أن يكون تاريخ النهاية قبل تاريخ البداية.',
+    'err_end_time_before_start' => 'لا يمكن أن يكون وقت النهاية قبل وقت البداية في نفس اليوم.',
 
     // Misc
     'upcoming_events'   => 'الأحداث القادمة (3 أشهر)',

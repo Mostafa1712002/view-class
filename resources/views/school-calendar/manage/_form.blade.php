@@ -1,6 +1,6 @@
 @php
     $isRtl       = app()->getLocale() === 'ar';
-    $eventTypes  = ['holiday' => __('school_calendar.type_holiday'), 'exam' => __('school_calendar.type_exam'), 'activity' => __('school_calendar.type_activity'), 'meeting' => __('school_calendar.type_meeting'), 'other' => __('school_calendar.type_other')];
+    $eventTypes  = collect(\App\Models\SchoolEvent::TYPES)->mapWithKeys(fn ($t) => [$t => __('school_calendar.type_' . $t)])->all();
     $audienceOpts = ['all' => __('school_calendar.audience_all'), 'students' => __('school_calendar.audience_students'), 'parents' => __('school_calendar.audience_parents'), 'teachers' => __('school_calendar.audience_teachers'), 'staff' => __('school_calendar.audience_staff')];
     $colors = ['#e74c3c' => __('school_calendar.color_red'), '#e67e22' => __('school_calendar.color_orange'), '#f1c40f' => __('school_calendar.color_yellow'), '#2ecc71' => __('school_calendar.color_green'), '#3498db' => __('school_calendar.color_blue'), '#9b59b6' => __('school_calendar.color_purple'), '#95a5a6' => __('school_calendar.color_gray')];
     $selectedAudience = old('audience', $event ? ($event->audience ?? ['all']) : ['all']);
@@ -21,7 +21,7 @@
         <label class="required">@lang('school_calendar.field_type')</label>
         <select name="event_type" class="form-control @error('event_type') is-invalid @enderror" required>
             @foreach($eventTypes as $val => $label)
-            <option value="{{ $val }}" {{ old('event_type', $event?->event_type ?? 'other') === $val ? 'selected' : '' }}>
+            <option value="{{ $val }}" {{ old('event_type', $event?->event_type ?? 'general') === $val ? 'selected' : '' }}>
                 {{ $label }}
             </option>
             @endforeach

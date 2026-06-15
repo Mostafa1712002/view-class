@@ -28,9 +28,23 @@
         </div>
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
+        @if(auth()->user()->canDo('calendar.print'))
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <i class="la la-print"></i> @lang('school_calendar.btn_print')
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="{{ route('manage.school-calendar.print', ['view' => 'day']) }}" target="_blank">@lang('school_calendar.print_day')</a>
+                <a class="dropdown-item" href="{{ route('manage.school-calendar.print', ['view' => 'week']) }}" target="_blank">@lang('school_calendar.print_week')</a>
+                <a class="dropdown-item" href="{{ route('manage.school-calendar.print', ['view' => 'month']) }}" target="_blank">@lang('school_calendar.print_month')</a>
+            </div>
+        </div>
+        @endif
+        @if(auth()->user()->canDo('calendar.create_event'))
         <a href="{{ route('manage.school-calendar.create') }}" class="btn btn-primary">
             <i class="la la-plus"></i> @lang('school_calendar.btn_add')
         </a>
+        @endif
     </div>
 </div>
 
@@ -83,15 +97,22 @@
                                 @endif
                             </td>
                             <td>
+                                @if(auth()->user()->canDo('calendar.edit_event'))
                                 <a href="{{ route('manage.school-calendar.edit', $event->id) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="la la-edit"></i>
                                 </a>
+                                @endif
+                                @if(auth()->user()->canDo('calendar.delete_event'))
                                 <form action="{{ route('manage.school-calendar.destroy', $event->id) }}" method="POST" class="d-inline" id="del-form-{{ $event->id }}">
                                     @csrf @method('DELETE')
                                     <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="{{ $event->id }}" data-title="{{ $event->title }}">
                                         <i class="la la-trash"></i>
                                     </button>
                                 </form>
+                                @endif
+                                @if(! auth()->user()->canDo('calendar.edit_event') && ! auth()->user()->canDo('calendar.delete_event'))
+                                    <span class="text-muted">—</span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

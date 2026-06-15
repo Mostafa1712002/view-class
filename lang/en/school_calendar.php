@@ -31,11 +31,17 @@ return [
     'field_actions'    => 'Actions',
 
     // Event types
-    'type_holiday'  => 'Holiday',
-    'type_exam'     => 'Exam',
-    'type_activity' => 'Activity',
-    'type_meeting'  => 'Meeting',
-    'type_other'    => 'Other',
+    'type_general'       => 'General Event',
+    'type_private'       => 'Private Event',
+    'type_holiday'       => 'Holiday',
+    'type_exam'          => 'Exam',
+    'type_meeting'       => 'Meeting',
+    'type_activity'      => 'Activity',
+    'type_admin'         => 'Administrative Appointment',
+    'type_virtual_class' => 'Virtual Class',
+    'type_alert'         => 'Alert',
+    'type_occasion'      => 'School Occasion',
+    'type_other'         => 'Other',
 
     // Audience
     'audience_all'      => 'Everyone',
@@ -58,6 +64,21 @@ return [
     'flash_created' => 'Event created successfully.',
     'flash_updated' => 'Event updated successfully.',
     'flash_deleted' => 'Event deleted successfully.',
+
+    // Print
+    'btn_print'    => 'Print',
+    'print_title'  => 'School Calendar',
+    'print_range'  => 'Period',
+    'print_day'    => 'Print Daily',
+    'print_week'   => 'Print Weekly',
+    'print_month'  => 'Print Monthly',
+    'view_day'     => 'Daily',
+    'view_week'    => 'Weekly',
+    'view_month'   => 'Monthly',
+
+    // Validation
+    'err_end_before_start'      => 'End date cannot be before the start date.',
+    'err_end_time_before_start' => 'End time cannot be before the start time on the same day.',
 
     // Misc
     'upcoming_events'   => 'Upcoming Events (3 months)',

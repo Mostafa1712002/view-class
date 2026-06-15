@@ -15,13 +15,22 @@ class MyCalendarController extends Controller
 
     public function __construct(private SchoolEventRepository $repo) {}
 
+    private function authorizeCalendar(string $permission): void
+    {
+        if (! auth()->check() || ! auth()->user()->canDo($permission)) {
+            abort(403, __('school_calendar.access_denied'));
+        }
+    }
+
     public function index(): View
     {
+        $this->authorizeCalendar('calendar.view');
         return view('school-calendar.view.index');
     }
 
     public function eventsJson(Request $request): JsonResponse
     {
+        $this->authorizeCalendar('calendar.view');
         $user     = auth()->user();
         $schoolId = $this->activeSchoolId();
         $from     = $request->get('start', now()->startOfMonth()->toDateString());

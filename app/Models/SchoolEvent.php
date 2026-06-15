@@ -14,6 +14,12 @@ class SchoolEvent extends Model
 
     protected $table = 'school_events';
 
+    /** Event types supported by the school calendar (card #233). */
+    public const TYPES = [
+        'general', 'private', 'holiday', 'exam', 'meeting',
+        'activity', 'admin', 'virtual_class', 'alert', 'occasion',
+    ];
+
     protected $fillable = [
         'school_id',
         'title',
@@ -63,13 +69,9 @@ class SchoolEvent extends Model
 
     public function eventTypeLabel(): string
     {
-        return match ($this->event_type) {
-            'holiday'  => __('school_calendar.type_holiday'),
-            'exam'     => __('school_calendar.type_exam'),
-            'activity' => __('school_calendar.type_activity'),
-            'meeting'  => __('school_calendar.type_meeting'),
-            default    => __('school_calendar.type_other'),
-        };
+        $key = in_array($this->event_type, self::TYPES, true) ? $this->event_type : 'general';
+
+        return __('school_calendar.type_' . $key);
     }
 
     public function eventTypeColor(): string
@@ -79,11 +81,17 @@ class SchoolEvent extends Model
         }
 
         return match ($this->event_type) {
-            'holiday'  => '#e74c3c',
-            'exam'     => '#e67e22',
-            'activity' => '#2ecc71',
-            'meeting'  => '#3498db',
-            default    => '#95a5a6',
+            'general'       => '#3498db',
+            'private'       => '#7f8c8d',
+            'holiday'       => '#e74c3c',
+            'exam'          => '#e67e22',
+            'meeting'       => '#2980b9',
+            'activity'      => '#2ecc71',
+            'admin'         => '#34495e',
+            'virtual_class' => '#8b5cf6',
+            'alert'         => '#f1c40f',
+            'occasion'      => '#9b59b6',
+            default         => '#95a5a6',
         };
     }
 }
