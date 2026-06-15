@@ -11,6 +11,8 @@
     $canEdit    = $user->canDo('question_banks.edit');
     $canDelete  = $user->canDo('question_banks.delete');
     $canArchive = $user->canDo('question_banks.archive');
+    $canApprove = $user->canDo('question_banks.approve');
+    $canReject  = $user->canDo('question_banks.reject');
 @endphp
 
 @push('styles')
@@ -64,7 +66,13 @@
                     <a href="{{ route('admin.qb.questions.create') }}" class="btn btn-warning btn-sm">
                         <x-svg-icon name="plus-circle-fill" :size="15" /> إضافة سؤال جديد
                     </a>
+                    <a href="{{ route('admin.qb.questions.create', ['category' => 'tahsili']) }}" class="btn btn-outline-warning btn-sm">
+                        <x-svg-icon name="mortarboard-fill" :size="15" /> إضافة سؤال تحصيلي
+                    </a>
                 @endif
+                <a href="{{ route('admin.qb.passages.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <x-svg-icon name="card-text" :size="15" /> أسئلة القطعة
+                </a>
                 <a href="{{ route('admin.qb.scope.index') }}" class="btn btn-outline-secondary btn-sm">
                     <x-svg-icon name="diagram-3-fill" :size="15" /> اختيار المدارس والصفوف
                 </a>
@@ -250,6 +258,25 @@
                                                     <x-svg-icon name="pencil-fill" :size="14" />
                                                 </a>
                                             @endif
+                                            {{-- #256 review transitions --}}
+                                            @if($canEdit && in_array($q->status, ['draft','rejected'], true))
+                                                <form method="POST" action="{{ route('admin.qb.questions.submit', $q->id) }}" class="d-inline" onsubmit="return confirm('إرسال هذا السؤال للمراجعة؟')">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-outline-secondary" title="إرسال للمراجعة"><x-svg-icon name="send-fill" :size="14" /></button>
+                                                </form>
+                                            @endif
+                                            @if($canApprove && $q->status !== 'approved')
+                                                <form method="POST" action="{{ route('admin.qb.questions.approve', $q->id) }}" class="d-inline" onsubmit="return confirm('اعتماد هذا السؤال؟')">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-outline-success" title="اعتماد"><x-svg-icon name="check2-circle" :size="14" /></button>
+                                                </form>
+                                            @endif
+                                            @if($canReject && !in_array($q->status, ['rejected','archived'], true))
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="رفض"
+                                                    onclick="qbRejectModal('{{ route('admin.qb.questions.reject', $q->id) }}')">
+                                                    <x-svg-icon name="x-circle-fill" :size="14" />
+                                                </button>
+                                            @endif
                                             @if($canCreate)
                                                 <form method="POST" action="{{ route('admin.qb.questions.duplicate', $q->id) }}" class="d-inline">
                                                     @csrf
@@ -297,10 +324,35 @@
         </div>
     </div>
 </div>
+{{-- #256 reject reason modal --}}
+<div class="modal fade" id="qbRejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" method="POST" id="qbRejectForm">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title">رفض السؤال</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">سبب الرفض <span class="text-danger">*</span></label>
+                <textarea name="rejected_reason" class="form-control" rows="3" required placeholder="اكتب سبب رفض السؤال…"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="submit" class="btn btn-danger">رفض السؤال</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
+function qbRejectModal(url) {
+    const form = document.getElementById('qbRejectForm');
+    form.setAttribute('action', url);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('qbRejectModal')).show();
+}
 function qbLoadModal(url, title) {
     const modalEl = document.getElementById('qbModal');
     document.getElementById('qbModalTitle').textContent = title;

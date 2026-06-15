@@ -55,7 +55,9 @@ class StoreQuestionRequest extends FormRequest
             'semester_id' => ['nullable', 'integer', 'exists:academic_terms,id'],
             'week_id'     => ['nullable', 'integer', 'exists:study_weeks,id'],
             'skill_id'    => ['nullable', 'integer', 'exists:skills,id'],
+            'standard_id' => ['nullable', 'integer', 'exists:standards,id'],
             'lesson_id'   => ['nullable', 'integer', 'exists:subject_lessons,id'],
+            'passage_id'  => ['nullable', 'integer', 'exists:passages,id'],
 
             'attachment'        => ['nullable', 'file', 'max:10240'],
             'remove_attachment' => ['nullable', 'boolean'],

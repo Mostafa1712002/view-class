@@ -66,7 +66,15 @@ class QuestionController extends Controller
             $type = 'mcq';
         }
 
-        $question = new BankQuestion(['type' => $type, 'difficulty' => 1, 'points' => 1, 'status' => 'approved']);
+        $category = $request->get('category', 'normal');
+        if (! in_array($category, ['normal', 'tahsili'], true)) {
+            $category = 'normal';
+        }
+
+        $question = new BankQuestion([
+            'type' => $type, 'difficulty' => 1, 'points' => 1,
+            'status' => 'approved', 'question_category' => $category,
+        ]);
 
         return view('admin.qb.questions.create', $this->formData($schoolId, $question));
     }
@@ -81,6 +89,7 @@ class QuestionController extends Controller
 
         $data = $request->validated();
         $data = $this->resolveAttachment($request, $bank, $data, null);
+        $data['status'] = $this->resolveCreateStatus($bank, $data['status'] ?? null);
 
         app(CreateQuestion::class)->execute($bank, $data);
 
@@ -118,6 +127,7 @@ class QuestionController extends Controller
 
         $data = $request->validated();
         $data = $this->resolveAttachment($request, $question->bank, $data, $question);
+        $data['status'] = $this->resolveUpdateStatus($question, $data['status'] ?? null);
 
         app(UpdateQuestion::class)->execute($question, $data);
 
@@ -199,6 +209,69 @@ class QuestionController extends Controller
     }
 
     /**
+     * #256 — submit a question for review (any status → pending_review). Gated by
+     * .edit (an author may send their own draft for review). No approve needed.
+     */
+    public function submit(int $questionId): RedirectResponse
+    {
+        abort_unless(auth()->user()->canDo('question_banks.edit'), 403);
+
+        $question = $this->loadScopedQuestion($questionId);
+        $question->update([
+            'status'          => BankQuestion::STATUS_PENDING_REVIEW,
+            'rejected_reason' => null,
+            'reviewed_by'     => null,
+            'reviewed_at'     => null,
+        ]);
+        ActivityLog::log('question_banks.edit', "إرسال سؤال للمراجعة (#{$question->id})", $question);
+
+        return redirect()->route('admin.qb.questions.index')->with('success', 'تم إرسال السؤال للمراجعة.');
+    }
+
+    /**
+     * #256 — approve a question (→ approved). Gated by .approve (fails closed).
+     */
+    public function approve(int $questionId): RedirectResponse
+    {
+        abort_unless(auth()->user()->canDo('question_banks.approve'), 403);
+
+        $question = $this->loadScopedQuestion($questionId);
+        $question->update([
+            'status'          => BankQuestion::STATUS_APPROVED,
+            'rejected_reason' => null,
+            'reviewed_by'     => auth()->id(),
+            'reviewed_at'     => now(),
+        ]);
+        ActivityLog::log('question_banks.approve', "اعتماد سؤال (#{$question->id})", $question);
+
+        return redirect()->route('admin.qb.questions.index')->with('success', 'تم اعتماد السؤال.');
+    }
+
+    /**
+     * #256 — reject a question (→ rejected, with a stored reason). Gated by .reject.
+     */
+    public function reject(Request $request, int $questionId): RedirectResponse
+    {
+        abort_unless(auth()->user()->canDo('question_banks.reject'), 403);
+
+        $reason = trim((string) $request->input('rejected_reason', ''));
+        if ($reason === '') {
+            return back()->with('error', 'يجب إدخال سبب الرفض.');
+        }
+
+        $question = $this->loadScopedQuestion($questionId);
+        $question->update([
+            'status'          => BankQuestion::STATUS_REJECTED,
+            'rejected_reason' => $reason,
+            'reviewed_by'     => auth()->id(),
+            'reviewed_at'     => now(),
+        ]);
+        ActivityLog::log('question_banks.reject', "رفض سؤال (#{$question->id})", $question, null, ['reason' => $reason]);
+
+        return redirect()->route('admin.qb.questions.index')->with('success', 'تم رفض السؤال.');
+    }
+
+    /**
      * Answer fragment (الإجابة الصحيحة) — gated; only privileged users see it.
      */
     public function answer(int $questionId): View
@@ -235,6 +308,71 @@ class QuestionController extends Controller
 
     // ── helpers ───────────────────────────────────────────────────────────
 
+    /**
+     * Load a question within the caller's school scope or 404.
+     */
+    private function loadScopedQuestion(int $questionId): BankQuestion
+    {
+        $schoolId = $this->scopedSchoolId();
+        $question = $this->questions->findScoped($questionId, $schoolId);
+        abort_if(! $question, 404);
+
+        return $question;
+    }
+
+    /**
+     * #256 — status a NEW question may take, clamped by permission. On a bank that
+     * requires approval, the safe default is pending_review (so a non-approver's
+     * question waits for review, per the card). On an auto-approve bank, approved
+     * is the normal birth state.
+     */
+    private function resolveCreateStatus(QuestionBank $bank, ?string $requested): string
+    {
+        $default = $bank->requires_approval ? BankQuestion::STATUS_PENDING_REVIEW : BankQuestion::STATUS_APPROVED;
+
+        return $this->clampStatus($bank, $requested ?? $default, $default);
+    }
+
+    /**
+     * #256 — status an EDIT may set, clamped by permission. A no-op edit keeps the
+     * current status (so editing an approved question on a requires_approval bank
+     * doesn't silently demote it). A move to a gated state needs the privilege.
+     */
+    private function resolveUpdateStatus(BankQuestion $question, ?string $requested): string
+    {
+        $requested ??= $question->status;
+        if ($requested === $question->status) {
+            return $question->status;
+        }
+
+        return $this->clampStatus($question->bank, $requested, $question->status);
+    }
+
+    /**
+     * Coerce a requested status to one the current user is allowed to set.
+     *   - `approved`  needs .approve, OR the bank not requiring approval (auto-approve).
+     *   - `rejected`  needs .reject.
+     *   - draft / pending_review / archived pass through.
+     * The fallback returned on a denied `approved` is never itself `approved`.
+     */
+    private function clampStatus(QuestionBank $bank, string $requested, string $fallback): string
+    {
+        if (! in_array($requested, BankQuestion::STATUSES, true)) {
+            return $fallback;
+        }
+
+        $user = auth()->user();
+        if ($requested === BankQuestion::STATUS_APPROVED
+            && ! ($user->canDo('question_banks.approve') || ! $bank->requires_approval)) {
+            return BankQuestion::STATUS_PENDING_REVIEW;
+        }
+        if ($requested === BankQuestion::STATUS_REJECTED && ! $user->canDo('question_banks.reject')) {
+            return $fallback;
+        }
+
+        return $requested;
+    }
+
     private function formData(?int $schoolId, BankQuestion $question): array
     {
         return [
@@ -244,6 +382,7 @@ class QuestionController extends Controller
             'subjects'   => $this->scope->subjectsForSchool($schoolId),
             'semesters'  => $schoolId ? $this->scope->semestersForSchool($schoolId) : collect(),
             'skills'     => $this->scope->skillsForSchool($schoolId),
+            'standards'  => \App\Modules\QuestionBankCore\Models\Standard::where('status', 'active')->orderBy('name')->get(['id', 'name', 'subject_id']),
             'types'      => $this->typeLabels(),
             'statuses'   => $this->statusLabels(),
             'difficulties' => $this->difficultyLabels(),

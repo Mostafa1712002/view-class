@@ -62,7 +62,7 @@
                     <select name="question_bank_id" class="form-select" required @disabled($isEdit)>
                         <option value="">— اختر البنك —</option>
                         @foreach($banks as $b)
-                            <option value="{{ $b->id }}" @selected(old('question_bank_id', $isEdit ? $question->question_bank_id : null) == $b->id)>{{ $b->name_ar }}</option>
+                            <option value="{{ $b->id }}" @selected(old('question_bank_id', $question->question_bank_id ?? null) == $b->id)>{{ $b->name_ar }}</option>
                         @endforeach
                     </select>
                     @if($isEdit)<input type="hidden" name="question_bank_id" value="{{ $question->question_bank_id }}">@endif
@@ -120,10 +120,32 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">نوع التصنيف</label>
-                    <select name="question_category" class="form-select">
-                        <option value="normal" @selected(old('question_category', $question->question_category ?? 'normal') === 'normal')>عادي</option>
+                    @php $curCategory = old('question_category', $question->question_category ?? 'normal'); @endphp
+                    <select name="question_category" id="qCategory" class="form-select" @disabled($curCategory === 'passage')>
+                        <option value="normal" @selected($curCategory === 'normal')>عادي</option>
+                        <option value="tahsili" @selected($curCategory === 'tahsili')>تحصيلي</option>
+                        @if($curCategory === 'passage')
+                            <option value="passage" selected>قطعة</option>
+                        @endif
                     </select>
-                    <div class="helper">التحصيلي والقطعة في شاشات منفصلة</div>
+                    @if($curCategory === 'passage')
+                        <input type="hidden" name="question_category" value="passage">
+                        <div class="helper">سؤال تابع لقطعة قرائية.</div>
+                    @else
+                        <div class="helper">سؤال التحصيلي يُستخدم في اختبارات التحصيلي وله تصنيفه المستقل.</div>
+                    @endif
+                </div>
+
+                {{-- #251 tahsili-only classification (المجال/المعيار). Shown when التصنيف=تحصيلي. --}}
+                <div class="col-md-3 qb-tahsili-field" style="{{ $curCategory === 'tahsili' ? '' : 'display:none;' }}">
+                    <label class="form-label">المعيار (التحصيلي)</label>
+                    <select name="standard_id" id="qStandard" class="form-select">
+                        <option value="">— لا شيء —</option>
+                        @foreach(($standards ?? collect()) as $st)
+                            <option value="{{ $st->id }}" @selected(old('standard_id', $question->standard_id ?? null) == $st->id)>{{ $st->name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="helper">المجال والمعيار مدعومان للتحصيلي (المهارة غير مشترطة).</div>
                 </div>
             </div>
         </div>
@@ -243,7 +265,7 @@
 
     <div class="d-flex gap-2 mb-4">
         <button type="submit" class="btn btn-warning">{{ $isEdit ? 'حفظ التعديلات' : 'إضافة السؤال' }}</button>
-        <a href="{{ route('admin.qb.questions.index') }}" class="btn btn-outline-secondary">رجوع</a>
+        <a href="{{ $backUrl ?? route('admin.qb.questions.index') }}" class="btn btn-outline-secondary">رجوع</a>
     </div>
 </div>
 
@@ -273,6 +295,15 @@
     }
     fullImg.addEventListener('change', syncFullImage);
     syncFullImage();
+
+    // #251 — reveal tahsili-only fields (المعيار) when category = tahsili
+    const category = document.getElementById('qCategory');
+    if (category) {
+        category.addEventListener('change', function () {
+            const show = this.value === 'tahsili';
+            document.querySelectorAll('.qb-tahsili-field').forEach(el => el.style.display = show ? '' : 'none');
+        });
+    }
 
     // skills filtered by subject
     const subject = document.getElementById('qSubject');

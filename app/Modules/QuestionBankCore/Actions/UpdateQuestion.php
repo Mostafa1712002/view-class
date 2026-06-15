@@ -27,12 +27,14 @@ final class UpdateQuestion
 
         return DB::transaction(function () use ($question, $data, $answers, $old) {
             $question->update([
+                'question_category'     => $data['question_category'] ?? $question->question_category,
                 'subject_id'            => $data['subject_id'] ?? null,
                 'grade_id'              => $data['grade_id'] ?? null,
                 'class_id'              => $data['class_id'] ?? null,
                 'semester_id'           => $data['semester_id'] ?? null,
                 'week_id'               => $data['week_id'] ?? null,
                 'skill_id'              => $data['skill_id'] ?? null,
+                'standard_id'           => $data['standard_id'] ?? null,
                 'lesson_id'             => $data['lesson_id'] ?? null,
                 'type'                  => $data['type'],
                 'question_code'         => $data['question_code'] ?? null,

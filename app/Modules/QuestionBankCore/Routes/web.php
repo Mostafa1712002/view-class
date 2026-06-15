@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\QuestionBankCore\Controllers\PassageController;
 use App\Modules\QuestionBankCore\Controllers\QuestionController;
 use App\Modules\QuestionBankCore\Controllers\ScopeSelectorController;
 use Illuminate\Support\Facades\Route;
@@ -54,4 +55,21 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
         Route::post('questions/{questionId}/duplicate', [QuestionController::class, 'duplicate'])->name('questions.duplicate');
         Route::post('questions/{questionId}/archive', [QuestionController::class, 'archive'])->name('questions.archive');
         Route::delete('questions/{questionId}', [QuestionController::class, 'destroy'])->name('questions.destroy');
+
+        // #256 — review workflow transitions (canDo: edit / approve / reject)
+        Route::post('questions/{questionId}/submit', [QuestionController::class, 'submit'])->name('questions.submit');
+        Route::post('questions/{questionId}/approve', [QuestionController::class, 'approve'])->name('questions.approve');
+        Route::post('questions/{questionId}/reject', [QuestionController::class, 'reject'])->name('questions.reject');
+
+        // #252 — passages (reading-comprehension) CRUD + child attachment
+        Route::get('passages', [PassageController::class, 'index'])->name('passages.index');
+        Route::get('passages/create', [PassageController::class, 'create'])->name('passages.create');
+        Route::post('passages', [PassageController::class, 'store'])->name('passages.store');
+        Route::get('passages/{passageId}', [PassageController::class, 'show'])->name('passages.show');
+        Route::get('passages/{passageId}/edit', [PassageController::class, 'edit'])->name('passages.edit');
+        Route::put('passages/{passageId}', [PassageController::class, 'update'])->name('passages.update');
+        Route::delete('passages/{passageId}', [PassageController::class, 'destroy'])->name('passages.destroy');
+        Route::get('passages/{passageId}/questions/create', [PassageController::class, 'createQuestion'])->name('passages.questions.create');
+        Route::post('passages/{passageId}/questions', [PassageController::class, 'storeQuestion'])->name('passages.questions.store');
+        Route::delete('passages/{passageId}/questions/{questionId}', [PassageController::class, 'detachQuestion'])->name('passages.questions.detach');
     });

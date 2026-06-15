@@ -18,10 +18,12 @@ use App\Modules\Scope\Repositories\EloquentScopeRepository;
 use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
 use App\Modules\QuestionBanks\Repositories\EloquentQuestionBankRepository;
 use App\Modules\QuestionBankCore\Repositories\Contracts\CompoundRepository;
+use App\Modules\QuestionBankCore\Repositories\Contracts\PassageRepository;
 use App\Modules\QuestionBankCore\Repositories\Contracts\QuestionRepository;
 use App\Modules\QuestionBankCore\Repositories\Contracts\SkillRepository;
 use App\Modules\QuestionBankCore\Repositories\Contracts\StandardRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentCompoundRepository;
+use App\Modules\QuestionBankCore\Repositories\EloquentPassageRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentQuestionRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentSkillRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentStandardRepository;
@@ -105,6 +107,7 @@ class RepositoryServiceProvider extends ServiceProvider
         SkillRepository::class => EloquentSkillRepository::class,
         StandardRepository::class => EloquentStandardRepository::class,
         QuestionRepository::class => EloquentQuestionRepository::class,
+        PassageRepository::class => EloquentPassageRepository::class,
         GradeReportRepository::class => EloquentGradeReportRepository::class,
         LessonRepository::class => EloquentLessonRepository::class,
         LibraryRepository::class => EloquentLibraryRepository::class,
