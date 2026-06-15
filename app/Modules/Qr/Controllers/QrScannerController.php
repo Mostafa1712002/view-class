@@ -116,7 +116,9 @@ class QrScannerController extends Controller
         // mark non-scanned students of the class absent (canonical attendances)
         $marked = 0;
         if ($data['class_id']) {
-            $class = ClassRoom::with('students')->find($data['class_id']);
+            $class = ClassRoom::with(['students', 'section'])->find($data['class_id']);
+            // Class must be inside the caller's school (super-admin null scope = any).
+            abort_unless($class && ($schoolId === null || (int) optional($class->section)->school_id === $schoolId), 403, 'هذا الفصل خارج نطاق صلاحيتك.');
             $yearId = \App\Models\AcademicYear::where('is_current', true)->value('id');
             foreach ($class->students as $student) {
                 $scanned = QrScan::where('student_id', $student->id)

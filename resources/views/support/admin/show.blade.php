@@ -74,7 +74,8 @@
                     @if($ticket->problem_url)
                     <div class="row mb-1">
                         <div class="col-md-4 font-weight-bold">@lang('support.field_problem_url')</div>
-                        <div class="col-md-8"><a href="{{ $ticket->problem_url }}" target="_blank" rel="noopener">{{ $ticket->problem_url }}</a></div>
+                        @php $safeUrl = \Illuminate\Support\Str::startsWith(strtolower((string) $ticket->problem_url), ['http://','https://']) ? $ticket->problem_url : '#'; @endphp
+                        <div class="col-md-8"><a href="{{ $safeUrl }}" target="_blank" rel="noopener noreferrer">{{ $ticket->problem_url }}</a></div>
                     </div>
                     @endif
                     @if($ticket->attachment_path)

@@ -116,9 +116,9 @@ class UserSupportController extends Controller
     {
         $ticket = $this->resolveOwn($ticket);
         abort_if(! $ticket->attachment_path, 404);
-        abort_unless(Storage::disk('public')->exists($ticket->attachment_path), 404);
+        abort_unless(Storage::disk('local')->exists($ticket->attachment_path), 404);
 
-        return Storage::disk('public')->download($ticket->attachment_path);
+        return Storage::disk('local')->download($ticket->attachment_path);
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -138,6 +138,6 @@ class UserSupportController extends Controller
             return null;
         }
 
-        return $request->file('attachment')->store('support', 'public');
+        return $request->file('attachment')->store('support', 'local');
     }
 }

@@ -29,7 +29,7 @@ class StoreTicketRequest extends FormRequest
             'department'         => ['nullable', Rule::in(SupportTicket::DEPARTMENTS)],
             'subject'            => ['required', 'string', 'max:160'],
             'body'               => ['required', 'string'],
-            'problem_url'        => ['nullable', 'url', 'max:500'],
+            'problem_url'        => ['nullable', 'url', 'starts_with:http://,https://', 'max:500'],
             'priority'           => ['nullable', 'in:low,normal,high,urgent'],
             'related_student_id' => $relatedStudentRule,
             'attachment'         => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt,zip'],

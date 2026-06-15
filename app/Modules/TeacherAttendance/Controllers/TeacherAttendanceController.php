@@ -14,6 +14,8 @@ use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -89,8 +91,12 @@ class TeacherAttendanceController extends Controller
         $data = $request->validate([
             'date'                => ['required', 'date'],
             'period'              => ['nullable', 'integer', 'min:1', 'max:12'],
-            'class_id'            => ['nullable', 'integer', 'exists:classes,id'],
-            'subject_id'          => ['nullable', 'integer', 'exists:subjects,id'],
+            'class_id'            => ['nullable', 'integer', Rule::exists('classes', 'id')->where(
+                fn ($q) => $schoolId ? $q->whereIn('section_id', DB::table('sections')->where('school_id', $schoolId)->select('id')) : $q
+            )],
+            'subject_id'          => ['nullable', 'integer', Rule::exists('subjects', 'id')->where(
+                fn ($q) => $schoolId ? $q->where(fn ($w) => $w->where('school_id', $schoolId)->orWhereNull('school_id')) : $q
+            )],
             'rows'                => ['required', 'array', 'min:1'],
             'rows.*.teacher_id'   => ['required', 'integer', 'exists:users,id'],
             'rows.*.status'       => ['required', 'in:present,absent,late,excused'],

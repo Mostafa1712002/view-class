@@ -119,6 +119,12 @@ class StudentAttendanceController extends Controller
         $class = ClassRoom::with('section')->findOrFail($data['class_id']);
         abort_unless($this->query->classInScope($class, $schoolId), 403, 'هذا الفصل خارج نطاق صلاحيتك.');
 
+        // Each row's student must actually belong to this class (no cross-class/tenant write).
+        $allowedIds = $class->students()->pluck('users.id')->all();
+        foreach ($data['rows'] as $row) {
+            abort_unless(in_array((int) $row['student_id'], $allowedIds, true), 403, 'طالب خارج هذا الفصل.');
+        }
+
         $yearId = $this->query->currentAcademicYearId();
         $recorder = $request->user();
         $saved = 0;
@@ -160,6 +166,12 @@ class StudentAttendanceController extends Controller
 
         $class = ClassRoom::with('section')->findOrFail($data['class_id']);
         abort_unless($this->query->classInScope($class, $schoolId), 403, 'هذا الفصل خارج نطاق صلاحيتك.');
+
+        // Selected students must belong to this class (no cross-class/tenant write).
+        $allowedIds = $class->students()->pluck('users.id')->all();
+        foreach ($data['student_ids'] as $sid) {
+            abort_unless(in_array((int) $sid, $allowedIds, true), 403, 'طالب خارج هذا الفصل.');
+        }
 
         $yearId = $this->query->currentAcademicYearId();
         $recorder = $request->user();

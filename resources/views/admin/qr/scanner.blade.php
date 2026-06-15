@@ -62,11 +62,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
           .then(function (res) {
             var box = document.getElementById('scanResult');
-            box.innerHTML = '<div class="alert alert-' + (res.d.success ? 'success' : 'danger') + '">' + res.d.message + '</div>';
+            // Build via textContent — never inject server strings as HTML (XSS).
+            box.textContent = '';
+            var alert = document.createElement('div');
+            alert.className = 'alert alert-' + (res.d.success ? 'success' : 'danger');
+            alert.textContent = res.d.message || '';
+            box.appendChild(alert);
             if (res.d.success && res.d.student) {
                 var li = document.createElement('li');
                 li.className = 'list-group-item d-flex justify-content-between';
-                li.innerHTML = '<span>' + res.d.student.name + '</span><span class="badge badge-success">' + res.d.status + '</span>';
+                var nameSpan = document.createElement('span');
+                nameSpan.textContent = res.d.student.name || '';
+                var badge = document.createElement('span');
+                badge.className = 'badge badge-success';
+                badge.textContent = res.d.status || '';
+                li.appendChild(nameSpan);
+                li.appendChild(badge);
                 document.getElementById('recentList').prepend(li);
             }
         }).catch(function () {
