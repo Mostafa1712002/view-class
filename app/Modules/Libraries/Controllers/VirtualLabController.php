@@ -41,6 +41,42 @@ class VirtualLabController extends Controller
         return view('admin.libraries.labs.index', compact('categories', 'activeCategory', 'labs'));
     }
 
+    /**
+     * Student-facing virtual labs (card #173).
+     *
+     * Labs are platform-wide (no school_id / subject_id columns exist on
+     * virtual_labs), so every active lab is treated as public to students.
+     * Category sidebar + experiment cards reuse the same lab grid as admin.
+     */
+    public function studentIndex(Request $request): View
+    {
+        $categories = VirtualLabCategory::query()
+            ->whereNull('parent_id')
+            ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')])
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $activeCategory = null;
+        if ($request->filled('category')) {
+            $activeCategory = VirtualLabCategory::query()->where('slug', $request->get('category'))->first();
+        }
+
+        $labs = VirtualLab::query()
+            ->where('is_active', true)
+            ->when($activeCategory, function ($q) use ($activeCategory) {
+                $childIds = $activeCategory->children()->pluck('id')->push($activeCategory->id);
+                $q->whereIn('category_id', $childIds);
+            })
+            ->with('category')
+            ->orderBy('sort_order')
+            ->orderByDesc('id')
+            ->paginate(24)
+            ->withQueryString();
+
+        return view('student.labs.index', compact('categories', 'activeCategory', 'labs'));
+    }
+
     public function manage(): View
     {
         $labs = VirtualLab::query()

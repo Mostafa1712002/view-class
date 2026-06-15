@@ -873,6 +873,16 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     // student's grade-level subject list before showing content.
     Route::get('subjects', [\App\Http\Controllers\StudentSubjectController::class, 'index'])->name('subjects.index');
     Route::get('subjects/{subject}', [\App\Http\Controllers\StudentSubjectController::class, 'show'])->whereNumber('subject')->name('subjects.show');
+
+    // === Student library hub (general/private/my-files tabs) — card #173 ===
+    Route::get('libraries', [\App\Modules\Libraries\Controllers\StudentLibraryController::class, 'index'])->name('libraries.index');
+    Route::get('libraries/files/{source}/{id}/download', [\App\Modules\Libraries\Controllers\StudentLibraryController::class, 'downloadFile'])
+        ->whereNumber('id')->whereIn('source', ['submission', 'file', 'mail', 'evidence', 'ticket'])->name('libraries.files.download');
+    Route::delete('libraries/files/{source}/{id}', [\App\Modules\Libraries\Controllers\StudentLibraryController::class, 'destroyFile'])
+        ->whereNumber('id')->whereIn('source', ['submission', 'file', 'mail', 'evidence', 'ticket'])->name('libraries.files.destroy');
+
+    // === Student virtual labs (المعامل الافتراضية) — card #173 ===
+    Route::get('labs', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'studentIndex'])->name('labs.index');
 });
 
 // Parent Routes

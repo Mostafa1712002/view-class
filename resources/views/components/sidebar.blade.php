@@ -876,10 +876,25 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-student-libraries">
-                <li class="nav-item {{ request()->routeIs('my.libraries.*') ? 'active' : '' }}" data-section="student">
-                    <a href="{{ Route::has('my.libraries.index') ? route('my.libraries.index') : '#' }}" data-label="@lang('shell.nav_libraries')">
-                        <x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span>
-                        @unless(Route::has('my.libraries.index'))<small style="opacity:.6; margin-inline-start:auto; font-size:.65rem;">@lang('shell.coming_soon')</small>@endunless
+                {{-- card #173 — general/private/my-files tabs --}}
+                <li class="nav-item {{ request()->routeIs('student.libraries.*') && request('tab','public')==='public' ? 'active' : '' }}" data-section="student">
+                    <a href="{{ route('student.libraries.index', ['tab'=>'public']) }}" data-label="@lang('student.library.tab_public')">
+                        <x-svg-icon name="globe" class="vc-ico" /><span class="menu-title">@lang('student.library.tab_public')</span>
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('student.libraries.*') && request('tab')==='private' ? 'active' : '' }}" data-section="student">
+                    <a href="{{ route('student.libraries.index', ['tab'=>'private']) }}" data-label="@lang('student.library.tab_private')">
+                        <x-svg-icon name="lock" class="vc-ico" /><span class="menu-title">@lang('student.library.tab_private')</span>
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('student.libraries.*') && request('tab')==='files' ? 'active' : '' }}" data-section="student">
+                    <a href="{{ route('student.libraries.index', ['tab'=>'files']) }}" data-label="@lang('student.library.tab_files')">
+                        <x-svg-icon name="folder" class="vc-ico" /><span class="menu-title">@lang('student.library.tab_files')</span>
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('student.labs.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ route('student.labs.index') }}" data-label="@lang('student.labs.title')">
+                        <x-svg-icon name="eyedropper" class="vc-ico" /><span class="menu-title">@lang('student.labs.title')</span>
                     </a>
                 </li>
             </div>
