@@ -10,6 +10,11 @@
     $matchingPairs = $answer['pairs'] ?? [['left'=>'','right'=>''],['left'=>'','right'=>'']];
     $blanks = $answer['blanks'] ?? [''];
     $curType = old('type', $question->type ?? 'mcq');
+
+    // #247/#250 §10 — per-answer images come from the normalized question_answers
+    // rows (answer_image / column_a_image / column_b_image), keyed by sort_order.
+    $answerRows = ($isEdit ?? false) ? $question->answers->keyBy('sort_order') : collect();
+    $imgUrl = fn ($p) => $p ? \Illuminate\Support\Facades\Storage::disk('public')->url($p) : null;
 @endphp
 
 @push('styles')
@@ -23,6 +28,11 @@
     .qbf .pair-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
     .qbf .pair-row .form-control { flex:1; }
     .qbf .pair-row .arrow { color:#94a3b8; }
+    .qbf .ans-img-btn { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; color:#7a5d12; cursor:pointer; flex-shrink:0; margin:0; }
+    .qbf .ans-img-btn:hover { background:#fffbeb; border-color:#e3c97a; }
+    .qbf .ans-img-btn.has-file { background:#dcfce7; border-color:#86efac; color:#166534; }
+    .qbf .ans-thumb { flex-shrink:0; }
+    .qbf .ans-thumb img { width:38px; height:38px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0; }
     .qbf .scope-school { border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; margin-bottom:8px; }
     .qbf .scope-school.selected { border-color:#d4af37; background:#fffbeb; }
     .qbf .compound-title { font-weight:700; color:#7a5d12; margin:10px 0 6px; }
@@ -217,9 +227,16 @@
             <div class="answer-block {{ $curType === 'mcq' ? 'active' : '' }}" data-type="mcq">
                 <div id="mcqOptions">
                     @foreach($mcqOptions as $i => $opt)
+                        @php $optImg = optional($answerRows->get($i))->answer_image; @endphp
                         <div class="opt-row">
                             <span class="opt-letter">{{ chr(65 + $i) }}</span>
                             <input type="text" name="options_ar[]" class="form-control" value="{{ old('options_ar.'.$i, $opt) }}" placeholder="نص الخيار">
+                            <label class="ans-img-btn" title="صورة الخيار">
+                                <x-svg-icon name="image" :size="15" />
+                                <input type="file" name="option_images[{{ $i }}]" accept="image/*" class="d-none" onchange="qbPreview(this)">
+                            </label>
+                            <input type="hidden" name="option_images_keep[{{ $i }}]" value="{{ $optImg }}">
+                            <span class="ans-thumb">@if($optImg)<img src="{{ $imgUrl($optImg) }}">@endif</span>
                             <label class="d-flex align-items-center gap-1 mb-0" style="font-size:12px;white-space:nowrap;">
                                 <input type="radio" name="correct_index" value="{{ $i }}" @checked((string)old('correct_index', $mcqCorrect) === (string)$i)> صحيحة
                             </label>
@@ -228,7 +245,7 @@
                     @endforeach
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="qbAddOption()">+ إضافة خيار</button>
-                <div class="helper">خياران على الأقل، مع تحديد الإجابة الصحيحة.</div>
+                <div class="helper">خياران على الأقل، مع تحديد الإجابة الصحيحة. يمكن أن يكون الخيار نصًا أو صورة أو الاثنين معًا.</div>
             </div>
 
             {{-- True/False --}}
@@ -270,16 +287,33 @@
             <div class="answer-block {{ $curType === 'matching' ? 'active' : '' }}" data-type="matching">
                 <div id="pairList">
                     @foreach($matchingPairs as $i => $pair)
+                        @php
+                            $row = $answerRows->get($i);
+                            $laImg = optional($row)->column_a_image;
+                            $lbImg = optional($row)->column_b_image;
+                        @endphp
                         <div class="pair-row">
                             <input type="text" name="matching_left[]" class="form-control" value="{{ old('matching_left.'.$i, $pair['left'] ?? '') }}" placeholder="عمود أ">
+                            <label class="ans-img-btn" title="صورة عمود أ">
+                                <x-svg-icon name="image" :size="15" />
+                                <input type="file" name="matching_left_images[{{ $i }}]" accept="image/*" class="d-none" onchange="qbPreview(this)">
+                            </label>
+                            <input type="hidden" name="matching_left_images_keep[{{ $i }}]" value="{{ $laImg }}">
+                            <span class="ans-thumb">@if($laImg)<img src="{{ $imgUrl($laImg) }}">@endif</span>
                             <span class="arrow">⟷</span>
                             <input type="text" name="matching_right[]" class="form-control" value="{{ old('matching_right.'.$i, $pair['right'] ?? '') }}" placeholder="عمود ب">
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.pair-row').remove();">&times;</button>
+                            <label class="ans-img-btn" title="صورة عمود ب">
+                                <x-svg-icon name="image" :size="15" />
+                                <input type="file" name="matching_right_images[{{ $i }}]" accept="image/*" class="d-none" onchange="qbPreview(this)">
+                            </label>
+                            <input type="hidden" name="matching_right_images_keep[{{ $i }}]" value="{{ $lbImg }}">
+                            <span class="ans-thumb">@if($lbImg)<img src="{{ $imgUrl($lbImg) }}">@endif</span>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.pair-row').remove(); qbReindexPairs();">&times;</button>
                         </div>
                     @endforeach
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="qbAddPair()">+ إضافة زوج</button>
-                <div class="helper">زوجان صحيحان على الأقل.</div>
+                <div class="helper">زوجان صحيحان على الأقل. يمكن أن يكون كل طرف نصًا أو صورة.</div>
             </div>
         </div>
     </div>
@@ -355,7 +389,16 @@ function qbReletter() {
     document.querySelectorAll('#mcqOptions .opt-row').forEach((row, i) => {
         row.querySelector('.opt-letter').textContent = String.fromCharCode(65 + i);
         row.querySelector('input[type=radio]').value = i;
+        // keep per-answer image array indexes aligned with the option position
+        const f = row.querySelector('input[type=file][name^="option_images["]');
+        if (f) f.name = `option_images[${i}]`;
+        const k = row.querySelector('input[type=hidden][name^="option_images_keep["]');
+        if (k) k.name = `option_images_keep[${i}]`;
     });
+}
+function qbPreview(input) {
+    const btn = input.closest('.ans-img-btn');
+    if (btn) btn.classList.toggle('has-file', input.files && input.files.length > 0);
 }
 function qbAddOption() {
     const list = document.getElementById('mcqOptions');
@@ -364,6 +407,10 @@ function qbAddOption() {
     row.className = 'opt-row';
     row.innerHTML = `<span class="opt-letter">${String.fromCharCode(65 + i)}</span>
         <input type="text" name="options_ar[]" class="form-control" placeholder="نص الخيار">
+        <label class="ans-img-btn" title="صورة الخيار"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/></svg>
+            <input type="file" name="option_images[${i}]" accept="image/*" class="d-none" onchange="qbPreview(this)"></label>
+        <input type="hidden" name="option_images_keep[${i}]" value="">
+        <span class="ans-thumb"></span>
         <label class="d-flex align-items-center gap-1 mb-0" style="font-size:12px;white-space:nowrap;"><input type="radio" name="correct_index" value="${i}"> صحيحة</label>
         <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.opt-row').remove(); qbReletter();">&times;</button>`;
     list.appendChild(row);
@@ -378,14 +425,32 @@ function qbAddBlank() {
         <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.opt-row').remove();">&times;</button>`;
     list.appendChild(row);
 }
+function qbPairImgBtn(side, i) {
+    return `<label class="ans-img-btn" title="صورة"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/></svg>
+        <input type="file" name="matching_${side}_images[${i}]" accept="image/*" class="d-none" onchange="qbPreview(this)"></label>
+        <input type="hidden" name="matching_${side}_images_keep[${i}]" value=""><span class="ans-thumb"></span>`;
+}
+function qbReindexPairs() {
+    document.querySelectorAll('#pairList .pair-row').forEach((row, i) => {
+        ['left', 'right'].forEach(side => {
+            const f = row.querySelector(`input[type=file][name^="matching_${side}_images["]`);
+            if (f) f.name = `matching_${side}_images[${i}]`;
+            const k = row.querySelector(`input[type=hidden][name^="matching_${side}_images_keep["]`);
+            if (k) k.name = `matching_${side}_images_keep[${i}]`;
+        });
+    });
+}
 function qbAddPair() {
     const list = document.getElementById('pairList');
+    const i = list.children.length;
     const row = document.createElement('div');
     row.className = 'pair-row';
     row.innerHTML = `<input type="text" name="matching_left[]" class="form-control" placeholder="عمود أ">
+        ${qbPairImgBtn('left', i)}
         <span class="arrow">⟷</span>
         <input type="text" name="matching_right[]" class="form-control" placeholder="عمود ب">
-        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.pair-row').remove();">&times;</button>`;
+        ${qbPairImgBtn('right', i)}
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.pair-row').remove(); qbReindexPairs();">&times;</button>`;
     list.appendChild(row);
 }
 </script>

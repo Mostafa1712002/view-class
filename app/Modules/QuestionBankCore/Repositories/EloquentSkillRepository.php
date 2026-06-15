@@ -28,6 +28,28 @@ class EloquentSkillRepository implements SkillRepository
             ->get();
     }
 
+    public function paginateForAdmin(?int $schoolId, array $filters, int $perPage = 20): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->scopedQuery($schoolId)
+            ->with(['subject:id,name', 'semester:id,name', 'week:id,name'])
+            ->when($filters['q'] ?? null, fn (Builder $q, $term) => $q->where('name', 'like', "%{$term}%"))
+            ->when($filters['subject_id'] ?? null, fn (Builder $q, $v) => $q->where('subject_id', $v))
+            ->when($filters['semester_id'] ?? null, fn (Builder $q, $v) => $q->where('semester_id', $v))
+            ->when($filters['skill_type'] ?? null, fn (Builder $q, $v) => $q->where('skill_type', $v))
+            ->when(($filters['status'] ?? null), fn (Builder $q, $v) => $q->where('status', $v))
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function insertMany(array $rows): void
+    {
+        if ($rows === []) {
+            return;
+        }
+        Skill::query()->insert($rows);
+    }
+
     public function find(int $id): ?Skill
     {
         return Skill::query()->with(['subject', 'semester', 'week', 'assignments'])->find($id);

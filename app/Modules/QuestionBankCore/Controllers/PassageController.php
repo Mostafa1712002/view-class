@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\BankQuestion;
 use App\Modules\QuestionBankCore\Actions\CreateQuestion;
+use App\Modules\QuestionBankCore\Controllers\Concerns\ResolvesAnswerImages;
 use App\Modules\QuestionBankCore\Http\Requests\StoreQuestionRequest;
 use App\Modules\QuestionBankCore\Models\Passage;
 use App\Modules\QuestionBankCore\Repositories\Contracts\PassageRepository;
@@ -32,6 +33,7 @@ use Illuminate\View\View;
 class PassageController extends Controller
 {
     use HasSchoolScope;
+    use ResolvesAnswerImages;
 
     public function __construct(
         private PassageRepository $passages,
@@ -244,6 +246,7 @@ class PassageController extends Controller
             ? $request->file('attachment')->store('bank-questions/'.$bank->id, 'public')
             : null;
         $data['question_content_type'] = $data['attachment_path'] ? 'mixed' : 'text';
+        $data = $this->resolveAnswerImages($request, $bank, $data);
         // Same approval gate as the normal question path: a non-approver on a
         // requires_approval bank can't self-approve a passage child.
         $default = $bank->requires_approval ? BankQuestion::STATUS_PENDING_REVIEW : BankQuestion::STATUS_APPROVED;

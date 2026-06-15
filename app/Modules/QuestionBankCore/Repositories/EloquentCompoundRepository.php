@@ -17,6 +17,19 @@ class EloquentCompoundRepository implements CompoundRepository
             ->get();
     }
 
+    public function paginateForAdmin(array $filters, int $perPage = 20): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return Compound::query()
+            ->with('schools:id,name,name_ar')
+            ->withCount('schools')
+            ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($w) => $w->where('name_ar', 'like', "%{$term}%")->orWhere('name_en', 'like', "%{$term}%")))
+            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
+            ->orderBy('sort_order')
+            ->orderBy('name_ar')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
     public function find(int $id): ?Compound
     {
         return Compound::query()->with('schools')->find($id);

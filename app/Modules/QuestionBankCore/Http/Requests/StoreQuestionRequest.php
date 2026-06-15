@@ -86,6 +86,21 @@ class StoreQuestionRequest extends FormRequest
             'matching_right.*' => ['nullable', 'string'],
             'blanks'          => ['nullable', 'array'],
             'blanks.*'        => ['nullable', 'string'],
+
+            // #247/#250 §10 — per-answer images (MCQ options + matching columns).
+            // Files arrive as parallel arrays indexed the same as the text inputs.
+            'option_images'        => ['nullable', 'array'],
+            'option_images.*'      => ['nullable', 'image', 'max:5120'],
+            'option_images_keep'   => ['nullable', 'array'],
+            'option_images_keep.*' => ['nullable', 'string'],
+            'matching_left_images'        => ['nullable', 'array'],
+            'matching_left_images.*'      => ['nullable', 'image', 'max:5120'],
+            'matching_left_images_keep'   => ['nullable', 'array'],
+            'matching_left_images_keep.*' => ['nullable', 'string'],
+            'matching_right_images'        => ['nullable', 'array'],
+            'matching_right_images.*'      => ['nullable', 'image', 'max:5120'],
+            'matching_right_images_keep'   => ['nullable', 'array'],
+            'matching_right_images_keep.*' => ['nullable', 'string'],
         ];
     }
 
@@ -107,15 +122,15 @@ class StoreQuestionRequest extends FormRequest
             $type = $this->input('type');
 
             if ($type === 'mcq') {
-                $options = array_values(array_filter(
-                    (array) $this->input('options_ar', []),
-                    static fn ($o) => $o !== null && trim((string) $o) !== ''
-                ));
-                if (count($options) < 2) {
-                    $v->errors()->add('options_ar', 'يجب إدخال خيارين على الأقل.');
+                // An option counts as present if it has text OR an image (new upload
+                // or a kept existing path). Keep the indexing identical to MapAnswerData
+                // so correct_index points at the right surviving option.
+                $present = $this->presentOptionIndexes();
+                if (count($present) < 2) {
+                    $v->errors()->add('options_ar', 'يجب إدخال خيارين على الأقل (نص أو صورة).');
                 }
                 $correct = $this->input('correct_index', $this->input('correct'));
-                if (! is_numeric($correct) || (int) $correct < 0 || (int) $correct >= count($options)) {
+                if (! is_numeric($correct) || ! in_array((int) $correct, $present, true)) {
                     $v->errors()->add('correct_index', 'يجب تحديد الإجابة الصحيحة.');
                 }
             }
@@ -140,14 +155,57 @@ class StoreQuestionRequest extends FormRequest
                 $pairs = 0;
                 $count = max(count($left), count($right));
                 for ($i = 0; $i < $count; $i++) {
-                    if (trim((string) ($left[$i] ?? '')) !== '' && trim((string) ($right[$i] ?? '')) !== '') {
+                    $hasLeft  = trim((string) ($left[$i] ?? '')) !== '' || $this->columnHasImage('left', $i);
+                    $hasRight = trim((string) ($right[$i] ?? '')) !== '' || $this->columnHasImage('right', $i);
+                    if ($hasLeft && $hasRight) {
                         $pairs++;
                     }
                 }
                 if ($pairs < 2) {
-                    $v->errors()->add('matching_left', 'يجب إدخال زوجين صحيحين على الأقل.');
+                    $v->errors()->add('matching_left', 'يجب إدخال زوجين صحيحين على الأقل (نص أو صورة في كل عمود).');
                 }
             }
         });
+    }
+
+    /**
+     * MCQ option indexes that are "present" — i.e. carry text OR an image (a new
+     * upload or a kept existing path). Used by both the min-2 check and the
+     * correct-answer check so they agree with MapAnswerData's indexing.
+     *
+     * @return array<int,int>
+     */
+    private function presentOptionIndexes(): array
+    {
+        $texts = (array) $this->input('options_ar', []);
+        $keep  = (array) $this->input('option_images_keep', []);
+        $files = $this->file('option_images', []) ?: [];
+
+        $count = max(count($texts), count($keep), count($files));
+        $present = [];
+        for ($i = 0; $i < $count; $i++) {
+            $hasText  = trim((string) ($texts[$i] ?? '')) !== '';
+            $hasKeep  = trim((string) ($keep[$i] ?? '')) !== '';
+            $hasFile  = isset($files[$i]) && $files[$i] !== null;
+            if ($hasText || $hasKeep || $hasFile) {
+                $present[] = $i;
+            }
+        }
+
+        return $present;
+    }
+
+    /**
+     * Whether a matching column side at index $i has an image (new upload or kept).
+     */
+    private function columnHasImage(string $side, int $i): bool
+    {
+        $keepKey  = "matching_{$side}_images_keep";
+        $fileKey  = "matching_{$side}_images";
+        $keep = (array) $this->input($keepKey, []);
+        $files = $this->file($fileKey, []) ?: [];
+
+        return (isset($files[$i]) && $files[$i] !== null)
+            || trim((string) ($keep[$i] ?? '')) !== '';
     }
 }

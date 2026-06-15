@@ -8,6 +8,7 @@ use App\Models\BankQuestion;
 use App\Models\QuestionBank;
 use App\Modules\QuestionBankCore\Actions\CreateQuestion;
 use App\Modules\QuestionBankCore\Actions\UpdateQuestion;
+use App\Modules\QuestionBankCore\Controllers\Concerns\ResolvesAnswerImages;
 use App\Modules\QuestionBankCore\Http\Requests\StoreQuestionRequest;
 use App\Modules\QuestionBankCore\Repositories\Contracts\QuestionRepository;
 use App\Modules\QuestionBankCore\Services\QbScopeService;
@@ -29,6 +30,7 @@ use Illuminate\View\View;
 class QuestionController extends Controller
 {
     use HasSchoolScope;
+    use ResolvesAnswerImages;
 
     public function __construct(
         private QuestionRepository $questions,
@@ -89,6 +91,7 @@ class QuestionController extends Controller
 
         $data = $request->validated();
         $data = $this->resolveAttachment($request, $bank, $data, null);
+        $data = $this->resolveAnswerImages($request, $bank, $data);
         $data['status'] = $this->resolveCreateStatus($bank, $data['status'] ?? null);
 
         app(CreateQuestion::class)->execute($bank, $data);
@@ -127,6 +130,7 @@ class QuestionController extends Controller
 
         $data = $request->validated();
         $data = $this->resolveAttachment($request, $question->bank, $data, $question);
+        $data = $this->resolveAnswerImages($request, $question->bank, $data);
         $data['status'] = $this->resolveUpdateStatus($question, $data['status'] ?? null);
 
         app(UpdateQuestion::class)->execute($question, $data);

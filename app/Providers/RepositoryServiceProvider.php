@@ -22,7 +22,9 @@ use App\Modules\QuestionBankCore\Repositories\Contracts\PassageRepository;
 use App\Modules\QuestionBankCore\Repositories\Contracts\QuestionRepository;
 use App\Modules\QuestionBankCore\Repositories\Contracts\SkillRepository;
 use App\Modules\QuestionBankCore\Repositories\Contracts\StandardRepository;
+use App\Modules\QuestionBankCore\Repositories\Contracts\WeekRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentCompoundRepository;
+use App\Modules\QuestionBankCore\Repositories\EloquentWeekRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentPassageRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentQuestionRepository;
 use App\Modules\QuestionBankCore\Repositories\EloquentSkillRepository;
@@ -106,6 +108,7 @@ class RepositoryServiceProvider extends ServiceProvider
         CompoundRepository::class => EloquentCompoundRepository::class,
         SkillRepository::class => EloquentSkillRepository::class,
         StandardRepository::class => EloquentStandardRepository::class,
+        WeekRepository::class => EloquentWeekRepository::class,
         QuestionRepository::class => EloquentQuestionRepository::class,
         PassageRepository::class => EloquentPassageRepository::class,
         GradeReportRepository::class => EloquentGradeReportRepository::class,

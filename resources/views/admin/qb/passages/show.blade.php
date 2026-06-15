@@ -69,13 +69,17 @@
                         </h2>
                         <div id="pgq{{ $q->id }}" class="accordion-collapse collapse" data-bs-parent="#pgQuestions">
                             <div class="accordion-body">
+                                @php $imgUrl = fn ($p) => $p ? \Illuminate\Support\Facades\Storage::disk('public')->url($p) : null; @endphp
                                 <p class="mb-2"><strong>نص السؤال:</strong> {{ $q->body_ar ?: '— (صورة كاملة)' }}</p>
-                                {{-- per-type answer summary --}}
+                                {{-- per-type answer summary (reads normalized rows so answer images show) --}}
                                 @if($q->type === 'mcq')
-                                    <ul class="mb-2">
-                                        @foreach(($ans['options'] ?? []) as $oi => $opt)
-                                            <li class="{{ ($ans['correct'] ?? null) === $oi ? 'text-success fw-bold' : '' }}">
-                                                {{ chr(65 + $oi) }}. {{ $opt }} @if(($ans['correct'] ?? null) === $oi)✓@endif
+                                    <ul class="mb-2 list-unstyled">
+                                        @foreach($q->answers as $oi => $r)
+                                            <li class="{{ $r->is_correct ? 'text-success fw-bold' : '' }} d-flex align-items-center gap-2 mb-1">
+                                                <span>{{ chr(65 + $oi) }}.</span>
+                                                @if($r->answer_image)<img src="{{ $imgUrl($r->answer_image) }}" style="max-width:90px;border-radius:6px;border:1px solid #e2e8f0;">@endif
+                                                <span>{{ $r->answer_text }}</span>
+                                                @if($r->is_correct)<span>✓</span>@endif
                                             </li>
                                         @endforeach
                                     </ul>
@@ -86,7 +90,17 @@
                                 @elseif($q->type === 'fill_blank')
                                     <p class="mb-2">الفراغات: <strong>{{ implode(' | ', $ans['blanks'] ?? []) }}</strong></p>
                                 @elseif($q->type === 'matching')
-                                    <ul class="mb-2">@foreach(($ans['pairs'] ?? []) as $pair)<li>{{ $pair['left'] ?? '' }} ⟷ {{ $pair['right'] ?? '' }}</li>@endforeach</ul>
+                                    <ul class="mb-2 list-unstyled">
+                                        @foreach($q->answers as $r)
+                                            <li class="d-flex align-items-center gap-2 mb-1">
+                                                @if($r->column_a_image)<img src="{{ $imgUrl($r->column_a_image) }}" style="max-width:70px;border-radius:6px;">@endif
+                                                <span>{{ $r->column_a_text }}</span>
+                                                <span class="text-muted">⟷</span>
+                                                @if($r->column_b_image)<img src="{{ $imgUrl($r->column_b_image) }}" style="max-width:70px;border-radius:6px;">@endif
+                                                <span>{{ $r->column_b_text }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
                                 @endif
                                 <div class="d-flex gap-2">
                                     @if($canEdit)<a href="{{ route('admin.qb.questions.edit', $q->id) }}" class="btn btn-sm btn-outline-primary">تعديل السؤال</a>@endif

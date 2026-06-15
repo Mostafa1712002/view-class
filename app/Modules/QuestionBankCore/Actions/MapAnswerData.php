@@ -31,27 +31,64 @@ final class MapAnswerData
 
     private function mcq(array $data): array
     {
-        $options = array_values(array_filter(
-            $data['options_ar'] ?? [],
-            static fn ($v) => $v !== null && $v !== ''
-        ));
+        // An option is kept if it has text OR a resolved image path. The resolved
+        // image paths (index → stored path) are supplied by the controller and
+        // keyed by the ORIGINAL option index, so we walk the original indexes and
+        // re-pack into a dense list — keeping options + correct aligned.
+        $texts = $data['options_ar'] ?? [];
+        $imagePaths = $data['option_image_paths'] ?? []; // [origIndex => path]
         $correctRaw = $data['correct_index'] ?? $data['correct'] ?? null;
-        $correct = is_numeric($correctRaw) ? (int) $correctRaw : null;
+        $correctOrig = is_numeric($correctRaw) ? (int) $correctRaw : null;
 
+        $count = max(
+            count($texts),
+            $imagePaths ? (max(array_keys($imagePaths)) + 1) : 0
+        );
+
+        $options = [];   // legacy JSON: option text (kept for backward compat)
         $rows = [];
-        foreach ($options as $i => $text) {
+        $newCorrect = null;
+        $dense = 0;
+        for ($i = 0; $i < $count; $i++) {
+            $text = isset($texts[$i]) ? trim((string) $texts[$i]) : '';
+            $image = $imagePaths[$i] ?? null;
+            if ($text === '' && ! $image) {
+                continue; // empty option — drop
+            }
+            if ($correctOrig === $i) {
+                $newCorrect = $dense;
+            }
+            $options[] = $text;
             $rows[] = [
-                'answer_text'         => $text,
-                'answer_content_type' => 'text',
-                'is_correct'          => $correct === $i,
-                'sort_order'          => $i,
+                'answer_text'         => $text !== '' ? $text : null,
+                'answer_image'        => $image,
+                'answer_content_type' => $this->contentType($text, $image),
+                'is_correct'          => $correctOrig === $i,
+                'sort_order'          => $dense,
             ];
+            $dense++;
         }
 
         return [
-            'json' => ['options' => $options, 'correct' => $correct],
+            'json' => ['options' => $options, 'correct' => $newCorrect],
             'rows' => $rows,
         ];
+    }
+
+    /**
+     * Resolve the answer_content_type enum from what the answer actually carries.
+     * DB enum is ('text','image','text_and_image') — note NOT 'mixed'.
+     */
+    private function contentType(string $text, ?string $image): string
+    {
+        if ($image && $text !== '') {
+            return 'text_and_image';
+        }
+        if ($image) {
+            return 'image';
+        }
+
+        return 'text';
     }
 
     private function trueFalse(array $data): array
@@ -89,7 +126,14 @@ final class MapAnswerData
     {
         $left = $data['matching_left'] ?? [];
         $right = $data['matching_right'] ?? [];
-        $count = max(count($left), count($right));
+        $leftImages = $data['matching_left_image_paths'] ?? [];   // [origIndex => path]
+        $rightImages = $data['matching_right_image_paths'] ?? [];
+        $count = max(
+            count($left),
+            count($right),
+            $leftImages ? (max(array_keys($leftImages)) + 1) : 0,
+            $rightImages ? (max(array_keys($rightImages)) + 1) : 0
+        );
 
         $pairs = [];
         $rows = [];
@@ -97,16 +141,21 @@ final class MapAnswerData
         for ($i = 0; $i < $count; $i++) {
             $l = trim((string) ($left[$i] ?? ''));
             $r = trim((string) ($right[$i] ?? ''));
-            if ($l === '' || $r === '') {
+            $li = $leftImages[$i] ?? null;
+            $ri = $rightImages[$i] ?? null;
+            // A side is present if it has text OR an image.
+            if (($l === '' && ! $li) || ($r === '' && ! $ri)) {
                 continue;
             }
             $pairs[] = ['left' => $l, 'right' => $r];
             $rows[] = [
-                'answer_content_type' => 'text',
+                'answer_content_type' => $this->contentType($l !== '' ? $l : $r, $li ?? $ri),
                 'is_correct'          => true,
                 'sort_order'          => $sort++,
-                'column_a_text'       => $l,
-                'column_b_text'       => $r,
+                'column_a_text'       => $l !== '' ? $l : null,
+                'column_a_image'      => $li,
+                'column_b_text'       => $r !== '' ? $r : null,
+                'column_b_image'      => $ri,
             ];
         }
 

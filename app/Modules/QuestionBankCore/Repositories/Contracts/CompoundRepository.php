@@ -9,6 +9,13 @@ interface CompoundRepository
 {
     public function listActive(): Collection;
 
+    /**
+     * Paginated admin list (incl. inactive) with schools eager-loaded + optional q filter.
+     *
+     * @param  array<string,mixed>  $filters
+     */
+    public function paginateForAdmin(array $filters, int $perPage = 20): \Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
     public function find(int $id): ?Compound;
 
     public function create(array $data): Compound;

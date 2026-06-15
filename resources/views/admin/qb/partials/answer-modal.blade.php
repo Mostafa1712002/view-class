@@ -15,9 +15,15 @@
         <ul class="list-group">
             @foreach($rows as $r)
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>{{ $r->column_a_text }}</span>
+                    <span class="d-inline-flex align-items-center gap-2">
+                        @if($r->column_a_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($r->column_a_image) }}" style="max-width:90px;border-radius:6px;">@endif
+                        {{ $r->column_a_text }}
+                    </span>
                     <span class="text-muted">⟷</span>
-                    <span>{{ $r->column_b_text }}</span>
+                    <span class="d-inline-flex align-items-center gap-2">
+                        @if($r->column_b_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($r->column_b_image) }}" style="max-width:90px;border-radius:6px;">@endif
+                        {{ $r->column_b_text }}
+                    </span>
                 </li>
             @endforeach
         </ul>

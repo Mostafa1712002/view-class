@@ -20,6 +20,19 @@ class EloquentStandardRepository implements StandardRepository
             ->get();
     }
 
+    public function paginateForAdmin(array $filters, int $perPage = 20): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return Standard::query()
+            ->with(['subject:id,name', 'domain:id,name'])
+            ->when($filters['q'] ?? null, fn (Builder $q, $term) => $q->where(fn ($w) => $w->where('name', 'like', "%{$term}%")->orWhere('code', 'like', "%{$term}%")))
+            ->when($filters['subject_id'] ?? null, fn (Builder $q, $v) => $q->where('subject_id', $v))
+            ->when($filters['status'] ?? null, fn (Builder $q, $v) => $q->where('status', $v))
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
     public function find(int $id): ?Standard
     {
         return Standard::query()->with(['subject', 'domain'])->find($id);
