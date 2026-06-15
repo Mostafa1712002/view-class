@@ -28,14 +28,14 @@
 
 
 {{-- Topic body --}}
-<div class="card mb-2">
-    <div class="card-header d-flex justify-content-between align-items-start">
+<div class="ds-card mb-2">
+    <div class="ds-card-header d-flex justify-content-between align-items-start flex-wrap gap-1">
         <div>
             @if($topic->is_pinned)
-                <span class="badge badge-warning mr-1"><i class="la la-thumbtack"></i> @lang('discussion.pinned_badge')</span>
+                <span class="ds-badge-gold mr-1"><x-svg-icon name="pin-angle" :size="12" /> @lang('discussion.pinned_badge')</span>
             @endif
             @if($topic->is_closed)
-                <span class="badge badge-secondary mr-1">@lang('discussion.closed_badge')</span>
+                <span class="ds-badge-warning mr-1">@lang('discussion.closed_badge')</span>
             @endif
             <strong>{{ $topic->title }}</strong>
         </div>
@@ -45,39 +45,39 @@
                 {{-- Toggle comments on this topic (discussion.toggle_comments) --}}
                 <form method="POST" action="{{ route('manage.discussion-rooms.topics.toggle-comments', $topic->id) }}" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-xs {{ $topic->comments_closed ? 'btn-secondary' : 'btn-outline-secondary' }}"
-                            title="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}">
-                        <i class="la {{ $topic->comments_closed ? 'la-comment-slash' : 'la-comment' }}"></i>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"
+                            title="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}"
+                            aria-label="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}">
+                        <x-svg-icon name="{{ $topic->comments_closed ? 'slash-circle' : 'chat' }}" :size="14" />
                         {{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}
                     </button>
                 </form>
                 {{-- Hide / show topic --}}
                 <form method="POST" action="{{ route('manage.discussion-rooms.topics.hide', $topic->id) }}" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-xs {{ $topic->is_hidden ? 'btn-dark' : 'btn-outline-dark' }}"
-                            title="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}">
-                        <i class="la {{ $topic->is_hidden ? 'la-eye-slash' : 'la-eye' }}"></i>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"
+                            title="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}"
+                            aria-label="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}">
+                        <x-svg-icon name="{{ $topic->is_hidden ? 'eye-slash' : 'eye' }}" :size="14" />
                     </button>
                 </form>
             @endif
         </div>
     </div>
-    <div class="card-content">
-        <div class="card-body">
-            {!! nl2br(e($topic->body)) !!}
-        </div>
+    <div class="ds-card-body">
+        {!! nl2br(e($topic->body)) !!}
     </div>
 </div>
 
 {{-- Comments / Replies --}}
-<div class="card mb-2">
-    <div class="card-header">
-        <h5 class="card-title mb-0">
-            <i class="la la-comments"></i>
+<div class="ds-card mb-2">
+    <div class="ds-card-header">
+        <h5 class="ds-card-title mb-0">
+            <x-svg-icon name="chat-dots" :size="16" />
             @lang('discussion.field_comments_count'): {{ $topic->comments_count }}
         </h5>
     </div>
-    <div class="card-content">
+    <div class="ds-card-body p-0">
         @forelse($comments as $comment)
             <div class="border-bottom px-3 py-2" id="comment-{{ $comment->id }}">
                 <div class="d-flex justify-content-between">
@@ -95,10 +95,11 @@
                                   id="deleteComment{{ $comment->id }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-xs btn-outline-danger"
+                                <button type="button" class="ds-action-btn text-danger"
                                         onclick="vcConfirm({ title: '{{ __('discussion.confirm_delete_comment') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('deleteComment{{ $comment->id }}').submit(); } })"
-                                        title="@lang('discussion.btn_delete')">
-                                    <i class="la la-trash"></i>
+                                        title="@lang('discussion.btn_delete')"
+                                        aria-label="@lang('discussion.btn_delete')">
+                                    <x-svg-icon name="trash" :size="15" />
                                 </button>
                             </form>
                         @elseif($isStaff)
@@ -109,10 +110,11 @@
                                   id="staffDeleteComment{{ $comment->id }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-xs btn-outline-danger"
+                                <button type="button" class="ds-action-btn text-danger"
                                         onclick="vcConfirm({ title: '{{ __('discussion.confirm_delete_comment') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('staffDeleteComment{{ $comment->id }}').submit(); } })"
-                                        title="@lang('discussion.btn_delete')">
-                                    <i class="la la-trash"></i>
+                                        title="@lang('discussion.btn_delete')"
+                                        aria-label="@lang('discussion.btn_delete')">
+                                    <x-svg-icon name="trash" :size="15" />
                                 </button>
                             </form>
                         @endif
@@ -120,8 +122,9 @@
                 </div>
             </div>
         @empty
-            <div class="text-center text-muted py-3">
-                @lang('discussion.empty_comments')
+            <div class="ds-empty py-3">
+                <div class="ds-empty-icon"><x-svg-icon name="chat" :size="36" /></div>
+                <div class="ds-empty-title">@lang('discussion.empty_comments')</div>
             </div>
         @endforelse
     </div>
@@ -130,39 +133,37 @@
 {{-- Reply form (hidden if comments not allowed) --}}
 @if($topic->is_closed)
     <div class="alert alert-secondary">
-        <i class="la la-lock"></i> @lang('discussion.topic_closed_notice')
+        <x-svg-icon name="lock" :size="15" /> @lang('discussion.topic_closed_notice')
     </div>
 @elseif(!$topic->room->allow_comments)
     <div class="alert alert-secondary">
-        <i class="la la-comment-slash"></i> @lang('discussion.comments_disabled_notice')
+        <x-svg-icon name="slash-circle" :size="15" /> @lang('discussion.comments_disabled_notice')
     </div>
 @elseif($topic->comments_closed)
     <div class="alert alert-secondary">
-        <i class="la la-comment-slash"></i> @lang('discussion.topic_comments_disabled_notice')
+        <x-svg-icon name="slash-circle" :size="15" /> @lang('discussion.topic_comments_disabled_notice')
     </div>
 @else
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0"><i class="la la-reply"></i> @lang('discussion.btn_reply')</h5>
+    <div class="ds-card">
+        <div class="ds-card-header">
+            <h5 class="ds-card-title mb-0"><x-svg-icon name="reply" :size="16" /> @lang('discussion.btn_reply')</h5>
         </div>
-        <div class="card-content">
-            <div class="card-body">
-                <form action="{{ route('discussion.comment.store', $topic->id) }}" method="POST" id="replyForm">
-                    @csrf
-                    <div class="form-group">
-                        <textarea name="body" id="replyBody" rows="4"
-                            class="form-control @error('body') is-invalid @enderror"
-                            placeholder="{{ __('discussion.placeholder_body') }}"
-                            required>{{ old('body') }}</textarea>
-                        @error('body')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="la la-paper-plane"></i> @lang('discussion.btn_reply')
-                    </button>
-                </form>
-            </div>
+        <div class="ds-card-body">
+            <form action="{{ route('discussion.comment.store', $topic->id) }}" method="POST" id="replyForm">
+                @csrf
+                <div class="form-group">
+                    <textarea name="body" id="replyBody" rows="4"
+                        class="form-control @error('body') is-invalid @enderror"
+                        placeholder="{{ __('discussion.placeholder_body') }}"
+                        required>{{ old('body') }}</textarea>
+                    @error('body')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <x-svg-icon name="send" :size="15" /> @lang('discussion.btn_reply')
+                </button>
+            </form>
         </div>
     </div>
 @endif

@@ -20,40 +20,41 @@
     </div>
     <div class="content-header-right text-md-right col-md-3 col-12 d-md-block d-none">
         <a href="{{ route('manage.discussion-rooms.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('discussion.btn_create_room')
+            <x-svg-icon name="plus-lg" :size="16" /> @lang('discussion.btn_create_room')
         </a>
     </div>
 </div>
 
 
 {{-- Filter --}}
-<div class="card mb-2">
-    <div class="card-content">
-        <div class="card-body py-1">
-            <form method="GET" action="{{ route('manage.discussion-rooms.index') }}" class="form-row align-items-end">
-                <div class="col-md-3 col-sm-6 mb-1">
-                    <label class="mb-0 small">@lang('discussion.filter_status')</label>
-                    <select name="status" class="form-control form-control-sm">
-                        <option value="">— @lang('discussion.filter_all') —</option>
-                        <option value="active" @selected(($filters['status'] ?? '') === 'active')>@lang('discussion.status_active')</option>
-                        <option value="closed" @selected(($filters['status'] ?? '') === 'closed')>@lang('discussion.status_closed')</option>
-                    </select>
-                </div>
-                <div class="col-md-3 col-sm-6 mb-1 d-flex gap-1">
-                    <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="la la-search"></i> @lang('discussion.filter_apply')
-                    </button>
-                    <a href="{{ route('manage.discussion-rooms.index') }}" class="btn btn-sm btn-secondary ml-1">
-                        <i class="la la-redo"></i> @lang('discussion.filter_reset')
-                    </a>
-                </div>
-            </form>
-        </div>
+<div class="ds-card mb-2">
+    <div class="ds-card-body py-1">
+        <form method="GET" action="{{ route('manage.discussion-rooms.index') }}" class="form-row align-items-end">
+            <div class="col-md-3 col-sm-6 mb-1">
+                <label class="mb-0 small">@lang('discussion.filter_status')</label>
+                <select name="status" class="form-control form-control-sm">
+                    <option value="">— @lang('discussion.filter_all') —</option>
+                    <option value="active" @selected(($filters['status'] ?? '') === 'active')>@lang('discussion.status_active')</option>
+                    <option value="closed" @selected(($filters['status'] ?? '') === 'closed')>@lang('discussion.status_closed')</option>
+                </select>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-1 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <x-svg-icon name="search" :size="14" /> @lang('discussion.filter_apply')
+                </button>
+                <a href="{{ route('manage.discussion-rooms.index') }}" class="btn btn-sm btn-outline-secondary ml-1">
+                    <x-svg-icon name="arrow-counterclockwise" :size="14" /> @lang('discussion.filter_reset')
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-content">
+<div class="ds-card">
+    <div class="ds-card-header">
+        <span class="ds-card-title"><x-svg-icon name="chat-dots" :size="16" /> @lang('discussion.breadcrumb_manage')</span>
+    </div>
+    <div class="ds-card-body p-0">
         <div class="table-responsive">
             <table class="table table-bordered table-striped mb-0">
                 <thead>
@@ -84,30 +85,30 @@
                             <td><small class="text-muted">{{ $room->last_activity_at ? $room->last_activity_at->diffForHumans() : '—' }}</small></td>
                             <td>
                                 @if($room->status === 'active')
-                                    <span class="badge badge-success">@lang('discussion.status_active')</span>
+                                    <span class="ds-badge-success">@lang('discussion.status_active')</span>
                                 @else
-                                    <span class="badge badge-secondary">@lang('discussion.status_closed')</span>
+                                    <span class="ds-badge-warning">@lang('discussion.status_closed')</span>
                                 @endif
                                 @unless($room->allow_comments)
-                                    <span class="badge badge-light border" title="@lang('discussion.field_allow_comments')"><i class="la la-comment-slash"></i></span>
+                                    <span class="badge badge-light border" title="@lang('discussion.field_allow_comments')"><x-svg-icon name="slash-circle" :size="12" /></span>
                                 @endunless
                             </td>
                             <td>{{ optional($room->creator)->name }}</td>
                             <td>{{ $room->created_at->format('Y-m-d') }}</td>
                             <td class="text-nowrap">
                                 <a href="{{ route('discussion.room', $room->id) }}"
-                                   class="btn btn-sm btn-secondary" title="@lang('discussion.btn_view')">
-                                    <i class="la la-eye"></i>
+                                   class="ds-action-btn" title="@lang('discussion.btn_view')" aria-label="@lang('discussion.btn_view')">
+                                    <x-svg-icon name="eye" :size="15" />
                                 </a>
 
                                 <a href="{{ route('manage.discussion-rooms.report', $room->id) }}"
-                                   class="btn btn-sm btn-outline-info" title="@lang('discussion.btn_report')">
-                                    <i class="la la-chart-bar"></i>
+                                   class="ds-action-btn" title="@lang('discussion.btn_report')" aria-label="@lang('discussion.btn_report')">
+                                    <x-svg-icon name="bar-chart-line" :size="15" />
                                 </a>
 
                                 <a href="{{ route('manage.discussion-rooms.edit', $room->id) }}"
-                                   class="btn btn-sm btn-info" title="@lang('discussion.btn_edit')">
-                                    <i class="la la-edit"></i>
+                                   class="ds-action-btn" title="@lang('discussion.btn_edit')" aria-label="@lang('discussion.btn_edit')">
+                                    <x-svg-icon name="pencil" :size="15" />
                                 </a>
 
                                 {{-- Toggle comments (discussion.toggle_comments) --}}
@@ -116,9 +117,10 @@
                                       class="d-inline">
                                     @csrf
                                     <button type="submit"
-                                            class="btn btn-sm {{ $room->allow_comments ? 'btn-outline-secondary' : 'btn-secondary' }}"
-                                            title="{{ $room->allow_comments ? __('discussion.btn_disable_comments') : __('discussion.btn_enable_comments') }}">
-                                        <i class="la {{ $room->allow_comments ? 'la-comment' : 'la-comment-slash' }}"></i>
+                                            class="ds-action-btn"
+                                            title="{{ $room->allow_comments ? __('discussion.btn_disable_comments') : __('discussion.btn_enable_comments') }}"
+                                            aria-label="{{ $room->allow_comments ? __('discussion.btn_disable_comments') : __('discussion.btn_enable_comments') }}">
+                                        <x-svg-icon name="{{ $room->allow_comments ? 'chat' : 'slash-circle' }}" :size="15" />
                                     </button>
                                 </form>
 
@@ -128,10 +130,11 @@
                                           class="d-inline"
                                           id="closeRoomForm{{ $room->id }}">
                                         @csrf
-                                        <button type="button" class="btn btn-sm btn-warning"
+                                        <button type="button" class="ds-action-btn"
                                                 title="@lang('discussion.btn_close')"
+                                                aria-label="@lang('discussion.btn_close')"
                                                 onclick="vcConfirm({ title: '{{ __('discussion.confirm_close_room') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('closeRoomForm{{ $room->id }}').submit(); } })">
-                                            <i class="la la-lock"></i>
+                                            <x-svg-icon name="lock" :size="15" />
                                         </button>
                                     </form>
                                 @else
@@ -139,9 +142,10 @@
                                           action="{{ route('manage.discussion-rooms.reopen', $room->id) }}"
                                           class="d-inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-success"
-                                                title="@lang('discussion.btn_reopen')">
-                                            <i class="la la-unlock"></i>
+                                        <button type="submit" class="ds-action-btn"
+                                                title="@lang('discussion.btn_reopen')"
+                                                aria-label="@lang('discussion.btn_reopen')">
+                                            <x-svg-icon name="unlock" :size="15" />
                                         </button>
                                     </form>
                                 @endif
@@ -152,17 +156,27 @@
                                       id="deleteRoomForm{{ $room->id }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="btn btn-sm btn-danger"
+                                    <button type="button" class="ds-action-btn text-danger"
+                                            title="@lang('discussion.field_actions')"
+                                            aria-label="@lang('discussion.field_actions')"
                                             onclick="vcConfirm({ title: '{{ __('discussion.confirm_delete_room') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('deleteRoomForm{{ $room->id }}').submit(); } })">
-                                        <i class="la la-trash"></i>
+                                        <x-svg-icon name="trash" :size="15" />
                                     </button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-3">
-                                @lang('discussion.empty_rooms')
+                            <td colspan="9">
+                                <div class="ds-empty">
+                                    <div class="ds-empty-icon"><x-svg-icon name="chat-dots" :size="40" /></div>
+                                    <div class="ds-empty-title">@lang('discussion.empty_rooms')</div>
+                                    <div class="ds-empty-desc">
+                                        <a href="{{ route('manage.discussion-rooms.create') }}" class="btn btn-sm btn-primary mt-1">
+                                            <x-svg-icon name="plus-lg" :size="14" /> @lang('discussion.btn_create_room')
+                                        </a>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     @endforelse

@@ -23,8 +23,8 @@
         </div>
     </div>
     <div class="content-header-right text-md-right col-md-3 col-12 d-md-block d-none">
-        <a href="{{ route('discussion.room', $room->id) }}" class="btn btn-secondary">
-            <i class="la la-eye"></i> @lang('discussion.btn_view')
+        <a href="{{ route('discussion.room', $room->id) }}" class="btn btn-outline-secondary">
+            <x-svg-icon name="eye" :size="16" /> @lang('discussion.btn_view')
         </a>
     </div>
 </div>
@@ -33,49 +33,49 @@
 {{-- Stat cards --}}
 <div class="row">
     <div class="col-md-3 col-6 mb-2">
-        <div class="card text-center h-100">
-            <div class="card-content"><div class="card-body py-3">
-                <i class="la la-list-alt la-2x text-primary"></i>
-                <h3 class="mb-0 mt-1">{{ $report['topic_count'] }}</h3>
+        <div class="ds-card text-center h-100">
+            <div class="ds-card-body py-3">
+                <span class="text-gold"><x-svg-icon name="list-ul" :size="36" /></span>
+                <h3 class="mb-0 mt-1 text-navy">{{ $report['topic_count'] }}</h3>
                 <small class="text-muted">@lang('discussion.field_topics_count')</small>
-            </div></div>
+            </div>
         </div>
     </div>
     <div class="col-md-3 col-6 mb-2">
-        <div class="card text-center h-100">
-            <div class="card-content"><div class="card-body py-3">
-                <i class="la la-comments la-2x text-info"></i>
-                <h3 class="mb-0 mt-1">{{ $report['comment_count'] }}</h3>
+        <div class="ds-card text-center h-100">
+            <div class="ds-card-body py-3">
+                <span class="text-gold"><x-svg-icon name="chat-dots" :size="36" /></span>
+                <h3 class="mb-0 mt-1 text-navy">{{ $report['comment_count'] }}</h3>
                 <small class="text-muted">@lang('discussion.field_comments_total')</small>
-            </div></div>
+            </div>
         </div>
     </div>
     <div class="col-md-3 col-6 mb-2">
-        <div class="card text-center h-100">
-            <div class="card-content"><div class="card-body py-3">
-                <i class="la la-users la-2x text-success"></i>
-                <h3 class="mb-0 mt-1">{{ $report['participant_count'] }}</h3>
+        <div class="ds-card text-center h-100">
+            <div class="ds-card-body py-3">
+                <span class="text-gold"><x-svg-icon name="people" :size="36" /></span>
+                <h3 class="mb-0 mt-1 text-navy">{{ $report['participant_count'] }}</h3>
                 <small class="text-muted">@lang('discussion.field_participants')</small>
-            </div></div>
+            </div>
         </div>
     </div>
     <div class="col-md-3 col-6 mb-2">
-        <div class="card text-center h-100">
-            <div class="card-content"><div class="card-body py-3">
-                <i class="la la-clock la-2x text-warning"></i>
-                <h5 class="mb-0 mt-1">{{ $report['last_activity_at'] ? $report['last_activity_at']->diffForHumans() : '—' }}</h5>
+        <div class="ds-card text-center h-100">
+            <div class="ds-card-body py-3">
+                <span class="text-gold"><x-svg-icon name="clock" :size="36" /></span>
+                <h5 class="mb-0 mt-1 text-navy">{{ $report['last_activity_at'] ? $report['last_activity_at']->diffForHumans() : '—' }}</h5>
                 <small class="text-muted">@lang('discussion.field_last_activity')</small>
-            </div></div>
+            </div>
         </div>
     </div>
 </div>
 
 {{-- Top topics --}}
-<div class="card">
-    <div class="card-header">
-        <h4 class="card-title">{{ $room->title }}</h4>
+<div class="ds-card">
+    <div class="ds-card-header">
+        <span class="ds-card-title"><x-svg-icon name="list-ul" :size="16" /> {{ $room->title }}</span>
     </div>
-    <div class="card-content">
+    <div class="ds-card-body p-0">
         <div class="table-responsive">
             <table class="table table-bordered table-striped mb-0">
                 <thead>
@@ -98,7 +98,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-3">@lang('discussion.empty_topics')</td>
+                            <td colspan="5">
+                                <div class="ds-empty">
+                                    <div class="ds-empty-icon"><x-svg-icon name="list-ul" :size="36" /></div>
+                                    <div class="ds-empty-title">@lang('discussion.empty_topics')</div>
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -3,6 +3,7 @@
 namespace App\Modules\SmsServices\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Modules\SmsServices\Models\SchoolSmsSetting;
 use App\Modules\SmsServices\Models\SmsCreditLedger;
 use App\Modules\SmsServices\Models\SmsCreditRechargeRequest;
@@ -84,7 +85,7 @@ class CreditController extends Controller
             'receipt'           => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
-        SmsCreditRechargeRequest::create([
+        $recharge = SmsCreditRechargeRequest::create([
             'school_id'          => $schoolId,
             'requested_by'       => auth()->id(),
             'bank_name'          => $data['bank_name'],
@@ -97,6 +98,8 @@ class CreditController extends Controller
             'receipt_path'       => $request->file('receipt')->store('sms-credit-receipts', 'public'),
             'status'             => 'pending',
         ]);
+
+        ActivityLog::logCreate($recharge, 'طلب شحن رصيد رسائل: '.$recharge->amount_transferred);
 
         return redirect()->route('admin.sms.credit.index')
             ->with('success', __('sms_credit.request_submitted'));

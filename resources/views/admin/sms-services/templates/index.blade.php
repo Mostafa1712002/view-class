@@ -23,19 +23,19 @@
 <div class="content-body">
     @include('components.alerts')
 
-    {{-- blue search bar --}}
-    <form method="GET" class="card mb-2" style="background:#eaf2fb;border:1px solid #cfe0f5;">
+    {{-- search bar (gold/navy brand) --}}
+    <form method="GET" class="ds-card card mb-2" style="background:#fdf8ee;border:1px solid #e8d5a3;">
         <div class="card-body d-flex flex-wrap align-items-center gap-2 py-2">
-            <span class="fw-bold" style="color:#1d4e89;">بحث في النتائج</span>
+            <span class="fw-bold text-navy"><x-svg-icon name="search" :size="15" class="me-1" /> بحث في النتائج</span>
             <input type="search" name="q" value="{{ $q }}" class="form-control" style="max-width:320px;" placeholder="العنوان أو نص القالب">
             <button class="btn btn-sm btn-primary"><x-svg-icon name="search" :size="14" class="me-1" /> بحث</button>
             @if($q !== '')<a href="{{ route('admin.sms.templates.index') }}" class="btn btn-sm btn-outline-secondary">إلغاء</a>@endif
         </div>
     </form>
 
-    <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
-            <h4 class="card-title mb-0">قوالب الرسائل القصيرة</h4>
+    <div class="ds-card card">
+        <div class="ds-card-header card-header d-flex flex-wrap justify-content-between align-items-center">
+            <h4 class="ds-card-title card-title mb-0">قوالب الرسائل القصيرة</h4>
             <div class="d-flex gap-1">
                 @if($user->canDo('messages.templates'))
                 <a href="{{ route('admin.sms.templates.create') }}" class="btn btn-sm btn-primary">
@@ -83,10 +83,17 @@
                         </tr>
                     @empty
                         <tr><td colspan="6">
-                            <div class="empty-state text-center py-5">
-                                <div class="icon-wrap mb-2"><x-svg-icon name="chat-left-text" :size="48" class="ic-muted" /></div>
-                                <h5>لا توجد قوالب</h5>
-                                <p class="text-muted">أضف أول قالب لاستخدامه في إرسال الرسائل.</p>
+                            <div class="ds-empty">
+                                <div class="ds-empty-icon"><x-svg-icon name="chat-left-text" :size="30" /></div>
+                                <div class="ds-empty-title">لا توجد قوالب</div>
+                                <div class="ds-empty-desc">
+                                    @if($q !== '') لا توجد نتائج مطابقة لبحثك. @else أضف أول قالب لاستخدامه في إرسال الرسائل القصيرة وواتساب. @endif
+                                </div>
+                                @if($user->canDo('messages.templates') && $q === '')
+                                    <a href="{{ route('admin.sms.templates.create') }}" class="btn btn-primary btn-sm">
+                                        <x-svg-icon name="plus-lg" :size="14" class="me-1" /> إضافة قالب
+                                    </a>
+                                @endif
                             </div>
                         </td></tr>
                     @endforelse

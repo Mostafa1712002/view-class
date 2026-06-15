@@ -31,8 +31,8 @@ Order minimizes shared-file conflicts (sidebar/header/template serialized).
 - [ ] C10 #241 إعدادات رسائل الطلاب المجمعة ونماذج الرسائل  (TCtNYskB)
 - [x] C11 #242 إدارة أولياء الأمور كجهة تواصل  (cuoSJKJP)
 - [x] C12 #243 خدمات الرسائل الإضافية (sender name + credit)  (HWOUFFDr)
-- [ ] C13 #244 تحسين التصميم/UX لكل صفحات التواصل  (ectMOQsi)
-- [ ] C14 #245 اختبارات التواصل النهائية والتكامل  (P2320D7u)
+- [x] C13 #244 تحسين التصميم/UX لكل صفحات التواصل  (ectMOQsi)  — 40 comms views polished (ds-* + gold/navy + x-svg-icon + empty states); SMS template form rebuilt (grouped searchable chips + live preview + counter). See c13-c14.md. NOT committed/deployed.
+- [x] C14 #245 اختبارات التواصل النهائية والتكامل  (P2320D7u)  — route grid (admin/null-school/no-perm) PASS; core flows verified via HTTP+DB+activity-log; fixed missing activity-log on sender-name + credit requests. NOT committed/deployed.
 
 ## Progress
 | Batch | Cards | Done |

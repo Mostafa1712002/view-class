@@ -21,30 +21,33 @@
 </div>
 
 
-<div class="card">
-    <div class="card-content">
+<div class="ds-card">
+    <div class="ds-card-header">
+        <span class="ds-card-title"><x-svg-icon name="chat-dots" :size="16" /> @lang('discussion.breadcrumb_rooms')</span>
+    </div>
+    <div class="ds-card-body p-0">
         @forelse($rooms as $room)
             <div class="border-bottom px-3 py-2">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <a href="{{ route('discussion.room', $room->id) }}" class="font-weight-bold h5 mb-0">
-                            <i class="la la-comments text-primary mr-1"></i>{{ $room->title }}
+                            <span class="text-gold mr-1"><x-svg-icon name="chat-dots" :size="18" /></span>{{ $room->title }}
                         </a>
                         @if($room->description)
                             <p class="text-muted small mb-1">{{ $room->description }}</p>
                         @endif
                     </div>
                     <div class="text-right text-nowrap">
-                        <span class="badge badge-light border">
-                            <i class="la la-list-alt"></i> {{ $room->topics_count }}
+                        <span class="ds-badge-navy">
+                            <x-svg-icon name="list-ul" :size="13" /> {{ $room->topics_count }}
                         </span>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="text-center text-muted py-4">
-                <i class="la la-comments la-3x mb-2 d-block"></i>
-                @lang('discussion.empty_rooms')
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="chat-dots" :size="48" /></div>
+                <div class="ds-empty-title">@lang('discussion.empty_rooms')</div>
             </div>
         @endforelse
 

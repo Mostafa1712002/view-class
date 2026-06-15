@@ -21,18 +21,19 @@
     .pc-header h2 { font-size: 1.45rem; font-weight: 800; color: #0f172a; margin-bottom: .1rem; }
     .pc-header .breadcrumb { padding: 0; margin: 0; background: transparent; font-size: .85rem; }
     .pc-search-bar {
-        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+        background: linear-gradient(135deg, #1f2a44, #2d3a5c);
         border-radius: 14px; padding: .85rem 1rem; margin-bottom: 1.1rem;
-        box-shadow: 0 6px 18px rgba(37,99,235,.18);
+        box-shadow: 0 6px 18px rgba(31,42,68,.18);
+        border: 1px solid #c9a04b;
     }
-    .pc-search-bar .pc-search-title { color: #fff; font-weight: 700; font-size: .95rem; margin-bottom: .55rem; display:flex; align-items:center; gap:.4rem; }
+    .pc-search-bar .pc-search-title { color: #f2d999; font-weight: 700; font-size: .95rem; margin-bottom: .55rem; display:flex; align-items:center; gap:.4rem; }
     .pc-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .75rem; margin-bottom: 1.1rem; }
     .pc-kpi { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:.8rem 1rem; display:flex; align-items:center; gap:.7rem; }
     .pc-kpi .ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .pc-kpi .ico.b1 { background:linear-gradient(135deg,#fef3c7,#fde68a); color:#92400e; }
-    .pc-kpi .ico.b2 { background:linear-gradient(135deg,#dbeafe,#bfdbfe); color:#1d4ed8; }
+    .pc-kpi .ico.b2 { background:linear-gradient(135deg,#f6e7c1,#e8d5a3); color:#9c6b1f; }
     .pc-kpi .ico.b3 { background:linear-gradient(135deg,#dcfce7,#bbf7d0); color:#15803d; }
-    .pc-kpi .ico.b4 { background:linear-gradient(135deg,#ede9fe,#ddd6fe); color:#6d28d9; }
+    .pc-kpi .ico.b4 { background:linear-gradient(135deg,#1f2a44,#2d3a5c); color:#f2d999; }
     .pc-kpi .num { font-size:1.3rem; font-weight:800; color:#0f172a; line-height:1.1; }
     .pc-kpi .lbl { font-size:.78rem; color:#64748b; }
     .pc-count-pill { display:inline-flex; min-width:1.9rem; justify-content:center; padding:.12rem .5rem; border-radius:999px; font-weight:700; font-size:.8rem; }
@@ -151,25 +152,47 @@
                             <td class="text-center"><span class="pc-count-pill {{ $wa ? 'ds-badge-success' : 'muted' }}">{{ $wa }}</span></td>
                             <td class="text-center"><span class="pc-count-pill {{ $nt ? 'ds-badge-navy' : 'muted' }}">{{ $nt }}</span></td>
                             <td class="text-end">
-                                <div class="pc-actions" style="justify-content:flex-end">
-                                    <a href="{{ route('admin.parents-contact.show', $p->id) }}" class="ds-action-btn" title="عرض سجل التواصل" aria-label="عرض سجل التواصل">
-                                        <x-svg-icon name="eye" :size="15" />
-                                    </a>
-                                    @if(Route::has('admin.users.parents.show'))
-                                        <a href="{{ route('admin.users.parents.show', $p->id) }}" class="ds-action-btn" title="ملف ولي الأمر" aria-label="ملف ولي الأمر">
-                                            <x-svg-icon name="person-badge" :size="15" />
+                                <div class="pc-actions" style="justify-content:flex-end;align-items:center">
+                                    {{-- quick send from the row --}}
+                                    @if(Route::has('admin.whatsapp.send'))
+                                        <a href="{{ route('admin.whatsapp.send') }}" class="ds-action-btn" title="إرسال واتساب" aria-label="إرسال واتساب">
+                                            <x-svg-icon name="whatsapp" :size="15" />
                                         </a>
                                     @endif
-                                    @if(Route::has('admin.users.parents.students'))
-                                        <a href="{{ route('admin.users.parents.students', $p->id) }}" class="ds-action-btn" title="عرض الأبناء" aria-label="عرض الأبناء">
-                                            <x-svg-icon name="people" :size="15" />
+                                    @if(Route::has('admin.sms.send'))
+                                        <a href="{{ route('admin.sms.send') }}" class="ds-action-btn" title="إرسال رسالة قصيرة" aria-label="إرسال رسالة قصيرة">
+                                            <x-svg-icon name="chat-text" :size="15" />
                                         </a>
                                     @endif
-                                    @if($canManage && Route::has('admin.users.parents.edit'))
-                                        <a href="{{ route('admin.users.parents.edit', $p->id) }}" class="ds-action-btn" title="تعديل" aria-label="تعديل">
-                                            <x-svg-icon name="pencil" :size="15" />
-                                        </a>
-                                    @endif
+
+                                    {{-- professional control dropdown --}}
+                                    <div class="dropdown d-inline-block">
+                                        <button type="button" class="ds-action-btn" data-bs-toggle="dropdown" data-toggle="dropdown"
+                                                aria-expanded="false" title="إجراءات" aria-label="إجراءات">
+                                            <x-svg-icon name="three-dots-vertical" :size="15" />
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end">
+                                            <a class="dropdown-item" href="{{ route('admin.parents-contact.show', $p->id) }}">
+                                                <x-svg-icon name="eye" :size="14" class="me-1" /> سجل التواصل
+                                            </a>
+                                            @if(Route::has('admin.users.parents.show'))
+                                                <a class="dropdown-item" href="{{ route('admin.users.parents.show', $p->id) }}">
+                                                    <x-svg-icon name="person-badge" :size="14" class="me-1" /> ملف ولي الأمر
+                                                </a>
+                                            @endif
+                                            @if(Route::has('admin.users.parents.students'))
+                                                <a class="dropdown-item" href="{{ route('admin.users.parents.students', $p->id) }}">
+                                                    <x-svg-icon name="people" :size="14" class="me-1" /> عرض الأبناء
+                                                </a>
+                                            @endif
+                                            @if($canManage && Route::has('admin.users.parents.edit'))
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="{{ route('admin.users.parents.edit', $p->id) }}">
+                                                    <x-svg-icon name="pencil" :size="14" class="me-1" /> تعديل
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

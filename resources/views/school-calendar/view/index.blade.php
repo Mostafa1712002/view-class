@@ -29,11 +29,12 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-content collapse show">
-        <div class="card-body">
-            <div id="school-calendar-view"></div>
-        </div>
+<div class="ds-card card">
+    <div class="ds-card-header card-header">
+        <h5 class="ds-card-title"><x-svg-icon name="calendar3" :size="16" /> @lang('school_calendar.title')</h5>
+    </div>
+    <div class="card-body">
+        <div id="school-calendar-view"></div>
     </div>
 </div>
 

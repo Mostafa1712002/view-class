@@ -22,27 +22,30 @@
 @endphp
 
 @section('content')
-<div class="content-header row">
-    <div class="content-header-left col-md-9 col-12 mb-2">
-        <h2 class="content-header-title float-{{ $isRtl ? 'right' : 'left' }} mb-0">
+
+{{-- Page header + breadcrumb --}}
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+    <div>
+        <h2 style="margin:0;font-size:1.45rem;font-weight:800;color:var(--gray-900)">
             {{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}
         </h2>
-        <div class="breadcrumb-wrapper">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('my.mailbox.index') }}">@lang('mailbox.breadcrumb_mailbox')</a></li>
-                <li class="breadcrumb-item active">{{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}</li>
-            </ol>
-        </div>
+        <nav><ol class="breadcrumb" style="margin:0;padding:0;background:transparent">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('my.mailbox.index') }}">@lang('mailbox.breadcrumb_mailbox')</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}</li>
+        </ol></nav>
     </div>
+    <a href="{{ route('my.mailbox.index') }}" class="btn btn-outline-secondary btn-sm">
+        <x-svg-icon name="arrow-right" :size="15" /> @lang('mailbox.back')
+    </a>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h4 class="card-title">{{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}</h4>
+<div class="ds-card card">
+    <div class="ds-card-header card-header" style="display:flex;align-items:center;gap:.4rem">
+        <x-svg-icon name="{{ $isEdit ? 'pencil-square' : 'envelope' }}" :size="16" />
+        <h5 class="ds-card-title" style="margin:0">{{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}</h5>
     </div>
-    <div class="card-content">
-        <div class="card-body">
+    <div class="card-body">
             <form action="{{ $formAction }}" method="POST"
                   enctype="multipart/form-data" id="composeForm">
                 @csrf
@@ -173,18 +176,17 @@
 
                 <div class="form-actions">
                     <button type="submit" name="action" value="send" class="btn btn-primary">
-                        <i class="la la-paper-plane"></i> @lang('mailbox.send')
+                        <x-svg-icon name="send-fill" :size="15" /> @lang('mailbox.send')
                     </button>
                     <button type="submit" name="action" value="draft" class="btn btn-secondary mx-1">
-                        <i class="la la-save"></i> @lang('mailbox.save_draft')
+                        <x-svg-icon name="save" :size="15" /> @lang('mailbox.save_draft')
                     </button>
                     <a href="{{ route('my.mailbox.index') }}" class="btn btn-light mx-1">
-                        <i class="la la-arrow-left"></i> @lang('mailbox.back')
+                        <x-svg-icon name="arrow-right" :size="15" /> @lang('mailbox.back')
                     </a>
                 </div>
             </form>
         </div>
-    </div>
 </div>
 @endsection
 

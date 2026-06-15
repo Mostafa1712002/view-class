@@ -31,7 +31,7 @@
         @if(auth()->user()->canDo('calendar.print'))
         <div class="btn-group">
             <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                <i class="la la-print"></i> @lang('school_calendar.btn_print')
+                <x-svg-icon name="printer" :size="16" /> @lang('school_calendar.btn_print')
             </button>
             <div class="dropdown-menu">
                 <a class="dropdown-item" href="{{ route('manage.school-calendar.print', ['view' => 'day']) }}" target="_blank">@lang('school_calendar.print_day')</a>
@@ -42,85 +42,91 @@
         @endif
         @if(auth()->user()->canDo('calendar.create_event'))
         <a href="{{ route('manage.school-calendar.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('school_calendar.btn_add')
+            <x-svg-icon name="plus-lg" :size="16" /> @lang('school_calendar.btn_add')
         </a>
         @endif
     </div>
 </div>
 
 
-<div class="card">
-    <div class="card-content collapse show">
-        <div class="card-body">
-            <div id="school-calendar"></div>
-        </div>
+<div class="ds-card card">
+    <div class="ds-card-header card-header">
+        <h5 class="ds-card-title"><x-svg-icon name="calendar3" :size="16" /> @lang('school_calendar.title')</h5>
+    </div>
+    <div class="card-body">
+        <div id="school-calendar"></div>
     </div>
 </div>
 
 {{-- Upcoming events list --}}
-<div class="card mt-2">
-    <div class="card-header">
-        <h4 class="card-title">@lang('school_calendar.upcoming_events')</h4>
+<div class="ds-card card mt-2">
+    <div class="ds-card-header card-header">
+        <h5 class="ds-card-title"><x-svg-icon name="calendar-event" :size="16" /> @lang('school_calendar.upcoming_events')</h5>
     </div>
-    <div class="card-content collapse show">
-        <div class="card-body p-0">
-            @if($upcoming->isEmpty())
-                <p class="p-2 text-muted text-center">@lang('school_calendar.no_events')</p>
-            @else
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>@lang('school_calendar.field_title')</th>
-                            <th>@lang('school_calendar.field_type')</th>
-                            <th>@lang('school_calendar.field_start_date')</th>
-                            <th>@lang('school_calendar.field_end_date')</th>
-                            <th>@lang('school_calendar.field_audience')</th>
-                            <th>@lang('school_calendar.field_actions')</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($upcoming as $event)
-                        <tr>
-                            <td>
-                                <span class="fc-event-dot" style="background:{{ $event->eventTypeColor() }}"></span>
-                                {{ $event->title }}
-                            </td>
-                            <td><span class="badge badge-secondary">{{ $event->eventTypeLabel() }}</span></td>
-                            <td>{{ $event->start_date->format('Y-m-d') }}</td>
-                            <td>{{ $event->end_date ? $event->end_date->format('Y-m-d') : '—' }}</td>
-                            <td>
-                                @if($event->audience)
-                                    @foreach($event->audience as $aud)
-                                        <span class="badge badge-light">@lang('school_calendar.audience_' . $aud)</span>
-                                    @endforeach
-                                @endif
-                            </td>
-                            <td>
-                                @if(auth()->user()->canDo('calendar.edit_event'))
-                                <a href="{{ route('manage.school-calendar.edit', $event->id) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="la la-edit"></i>
-                                </a>
-                                @endif
-                                @if(auth()->user()->canDo('calendar.delete_event'))
-                                <form action="{{ route('manage.school-calendar.destroy', $event->id) }}" method="POST" class="d-inline" id="del-form-{{ $event->id }}">
-                                    @csrf @method('DELETE')
-                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="{{ $event->id }}" data-title="{{ $event->title }}">
-                                        <i class="la la-trash"></i>
-                                    </button>
-                                </form>
-                                @endif
-                                @if(! auth()->user()->canDo('calendar.edit_event') && ! auth()->user()->canDo('calendar.delete_event'))
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+    <div class="card-body p-0">
+        @if($upcoming->isEmpty())
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="calendar-x" :size="32" /></div>
+                <div class="ds-empty-title">@lang('school_calendar.no_events')</div>
+                <div class="ds-empty-desc">@lang('school_calendar.no_events')</div>
             </div>
-            @endif
+        @else
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>@lang('school_calendar.field_title')</th>
+                        <th>@lang('school_calendar.field_type')</th>
+                        <th>@lang('school_calendar.field_start_date')</th>
+                        <th>@lang('school_calendar.field_end_date')</th>
+                        <th>@lang('school_calendar.field_audience')</th>
+                        <th>@lang('school_calendar.field_actions')</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($upcoming as $event)
+                    <tr>
+                        <td>
+                            <span class="fc-event-dot" style="background:{{ $event->eventTypeColor() }}"></span>
+                            {{ $event->title }}
+                        </td>
+                        <td><span class="ds-badge-info badge">{{ $event->eventTypeLabel() }}</span></td>
+                        <td dir="ltr" class="text-start">{{ $event->start_date->format('Y-m-d') }}</td>
+                        <td dir="ltr" class="text-start">{{ $event->end_date ? $event->end_date->format('Y-m-d') : '—' }}</td>
+                        <td>
+                            @if($event->audience)
+                                @foreach($event->audience as $aud)
+                                    <span class="badge badge-light">@lang('school_calendar.audience_' . $aud)</span>
+                                @endforeach
+                            @endif
+                        </td>
+                        <td class="text-nowrap">
+                            @if(auth()->user()->canDo('calendar.edit_event'))
+                            <a href="{{ route('manage.school-calendar.edit', $event->id) }}"
+                               class="ds-action-btn" title="تعديل" aria-label="تعديل">
+                                <x-svg-icon name="pencil" :size="15" />
+                            </a>
+                            @endif
+                            @if(auth()->user()->canDo('calendar.delete_event'))
+                            <form action="{{ route('manage.school-calendar.destroy', $event->id) }}" method="POST" class="d-inline" id="del-form-{{ $event->id }}">
+                                @csrf @method('DELETE')
+                                <button type="button" class="ds-action-btn text-danger btn-delete"
+                                        data-id="{{ $event->id }}" data-title="{{ $event->title }}"
+                                        title="@lang('school_calendar.btn_delete')" aria-label="@lang('school_calendar.btn_delete')">
+                                    <x-svg-icon name="trash" :size="15" />
+                                </button>
+                            </form>
+                            @endif
+                            @if(! auth()->user()->canDo('calendar.edit_event') && ! auth()->user()->canDo('calendar.delete_event'))
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
+        @endif
     </div>
 </div>
 @endsection

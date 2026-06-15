@@ -26,30 +26,33 @@
     <div class="content-header-right text-md-right col-md-3 col-12 d-md-block d-none">
         @if($room->allow_topics || $isStaff)
             <a href="{{ route('discussion.topic.create', $room->id) }}" class="btn btn-primary">
-                <i class="la la-plus"></i> @lang('discussion.btn_new_topic')
+                <x-svg-icon name="plus-lg" :size="16" /> @lang('discussion.btn_new_topic')
             </a>
         @endif
     </div>
 </div>
 
 
-<div class="card">
-    <div class="card-content">
+<div class="ds-card">
+    <div class="ds-card-header">
+        <span class="ds-card-title"><x-svg-icon name="chat-square-dots" :size="16" /> {{ $room->title }}</span>
+    </div>
+    <div class="ds-card-body p-0">
         @forelse($topics as $topic)
             <div class="border-bottom px-3 py-2 {{ $topic->is_pinned ? 'bg-light' : '' }}">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         @if($topic->is_pinned)
-                            <span class="badge badge-warning mr-1"><i class="la la-thumbtack"></i> @lang('discussion.pinned_badge')</span>
+                            <span class="ds-badge-gold mr-1"><x-svg-icon name="pin-angle" :size="12" /> @lang('discussion.pinned_badge')</span>
                         @endif
                         @if($topic->is_closed)
-                            <span class="badge badge-secondary mr-1">@lang('discussion.closed_badge')</span>
+                            <span class="ds-badge-warning mr-1">@lang('discussion.closed_badge')</span>
                         @endif
                         @if($topic->comments_closed)
-                            <span class="badge badge-light border mr-1"><i class="la la-comment-slash"></i></span>
+                            <span class="badge badge-light border mr-1"><x-svg-icon name="slash-circle" :size="12" /></span>
                         @endif
                         @if($topic->is_hidden)
-                            <span class="badge badge-dark mr-1"><i class="la la-eye-slash"></i> @lang('discussion.btn_hide')</span>
+                            <span class="ds-badge-danger mr-1"><x-svg-icon name="eye-slash" :size="12" /> @lang('discussion.btn_hide')</span>
                         @endif
                         <a href="{{ route('discussion.topic', $topic->id) }}" class="font-weight-bold">
                             {{ $topic->title }}
@@ -62,8 +65,8 @@
                         </small>
                     </div>
                     <div class="text-right text-nowrap">
-                        <span class="badge badge-light border mr-1">
-                            <i class="la la-comment"></i> {{ $topic->comments_count }}
+                        <span class="ds-badge-navy mr-1">
+                            <x-svg-icon name="chat" :size="13" /> {{ $topic->comments_count }}
                         </span>
                         @if($isStaff)
                             {{-- Pin toggle --}}
@@ -71,9 +74,10 @@
                                   action="{{ route('manage.discussion-rooms.topics.pin', $topic->id) }}"
                                   class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn btn-xs {{ $topic->is_pinned ? 'btn-warning' : 'btn-outline-warning' }}"
-                                        title="{{ $topic->is_pinned ? __('discussion.btn_unpin') : __('discussion.btn_pin') }}">
-                                    <i class="la la-thumbtack"></i>
+                                <button type="submit" class="ds-action-btn {{ $topic->is_pinned ? 'text-warning' : '' }}"
+                                        title="{{ $topic->is_pinned ? __('discussion.btn_unpin') : __('discussion.btn_pin') }}"
+                                        aria-label="{{ $topic->is_pinned ? __('discussion.btn_unpin') : __('discussion.btn_pin') }}">
+                                    <x-svg-icon name="pin-angle" :size="15" />
                                 </button>
                             </form>
                             {{-- Close topic --}}
@@ -83,10 +87,11 @@
                                       class="d-inline"
                                       id="closeTopic{{ $topic->id }}">
                                     @csrf
-                                    <button type="button" class="btn btn-xs btn-outline-secondary"
+                                    <button type="button" class="ds-action-btn"
                                             onclick="vcConfirm({ title: '{{ __('discussion.confirm_close_topic') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('closeTopic{{ $topic->id }}').submit(); } })"
-                                            title="@lang('discussion.btn_close_topic')">
-                                        <i class="la la-lock"></i>
+                                            title="@lang('discussion.btn_close_topic')"
+                                            aria-label="@lang('discussion.btn_close_topic')">
+                                        <x-svg-icon name="lock" :size="15" />
                                     </button>
                                 </form>
                             @endif
@@ -96,9 +101,10 @@
                                   class="d-inline">
                                 @csrf
                                 <button type="submit"
-                                        class="btn btn-xs {{ $topic->comments_closed ? 'btn-secondary' : 'btn-outline-secondary' }}"
-                                        title="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}">
-                                    <i class="la {{ $topic->comments_closed ? 'la-comment-slash' : 'la-comment' }}"></i>
+                                        class="ds-action-btn {{ $topic->comments_closed ? 'text-danger' : '' }}"
+                                        title="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}"
+                                        aria-label="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}">
+                                    <x-svg-icon name="{{ $topic->comments_closed ? 'slash-circle' : 'chat' }}" :size="15" />
                                 </button>
                             </form>
                             {{-- Hide / show topic --}}
@@ -107,9 +113,10 @@
                                   class="d-inline">
                                 @csrf
                                 <button type="submit"
-                                        class="btn btn-xs {{ $topic->is_hidden ? 'btn-dark' : 'btn-outline-dark' }}"
-                                        title="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}">
-                                    <i class="la {{ $topic->is_hidden ? 'la-eye-slash' : 'la-eye' }}"></i>
+                                        class="ds-action-btn"
+                                        title="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}"
+                                        aria-label="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}">
+                                    <x-svg-icon name="{{ $topic->is_hidden ? 'eye-slash' : 'eye' }}" :size="15" />
                                 </button>
                             </form>
                             {{-- Delete topic --}}
@@ -119,10 +126,11 @@
                                   id="deleteTopic{{ $topic->id }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-xs btn-outline-danger"
+                                <button type="button" class="ds-action-btn text-danger"
                                         onclick="vcConfirm({ title: '{{ __('discussion.confirm_delete_topic') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('deleteTopic{{ $topic->id }}').submit(); } })"
-                                        title="@lang('discussion.btn_delete')">
-                                    <i class="la la-trash"></i>
+                                        title="@lang('discussion.btn_delete')"
+                                        aria-label="@lang('discussion.btn_delete')">
+                                    <x-svg-icon name="trash" :size="15" />
                                 </button>
                             </form>
                         @endif
@@ -130,9 +138,16 @@
                 </div>
             </div>
         @empty
-            <div class="text-center text-muted py-4">
-                <i class="la la-comment-dots la-3x mb-2 d-block"></i>
-                @lang('discussion.empty_topics')
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="chat-square-dots" :size="48" /></div>
+                <div class="ds-empty-title">@lang('discussion.empty_topics')</div>
+                @if($room->allow_topics || $isStaff)
+                    <div class="ds-empty-desc">
+                        <a href="{{ route('discussion.topic.create', $room->id) }}" class="btn btn-sm btn-primary mt-1">
+                            <x-svg-icon name="plus-lg" :size="14" /> @lang('discussion.btn_new_topic')
+                        </a>
+                    </div>
+                @endif
             </div>
         @endforelse
 

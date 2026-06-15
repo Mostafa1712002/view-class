@@ -22,12 +22,11 @@
 </div>
 
 
-<div class="card">
-    <div class="card-header">
-        <h4 class="card-title">@lang('discussion.page_title_edit_room'): {{ $room->title }}</h4>
+<div class="ds-card">
+    <div class="ds-card-header">
+        <span class="ds-card-title"><x-svg-icon name="pencil" :size="16" /> @lang('discussion.page_title_edit_room'): {{ $room->title }}</span>
     </div>
-    <div class="card-content">
-        <div class="card-body">
+    <div class="ds-card-body">
             <form action="{{ route('manage.discussion-rooms.update', $room->id) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -78,14 +77,13 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        <i class="la la-save"></i> @lang('discussion.btn_save')
+                        <x-svg-icon name="check-circle" :size="16" /> @lang('discussion.btn_save')
                     </button>
-                    <a href="{{ route('manage.discussion-rooms.index') }}" class="btn btn-secondary ml-1">
+                    <a href="{{ route('manage.discussion-rooms.index') }}" class="btn btn-outline-secondary ml-1">
                         @lang('discussion.btn_cancel')
                     </a>
                 </div>
             </form>
-        </div>
     </div>
 </div>
 @endsection

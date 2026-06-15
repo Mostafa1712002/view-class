@@ -26,7 +26,7 @@
     {{-- Balance card --}}
     <div class="row g-3 mb-3">
         <div class="col-sm-4 col-lg-3">
-            <div class="card text-center border-0" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;">
+            <div class="card text-center border-0" style="background:linear-gradient(135deg,#c9a04b,#a07830);color:#fff;">
                 <div class="card-body py-3">
                     <div style="font-size:.82rem;opacity:.85;margin-bottom:.25rem;">الرصيد المتاح</div>
                     <div style="font-size:2rem;font-weight:800;">{{ number_format($available) }}</div>
@@ -351,8 +351,8 @@
 @push('styles')
 <style>
     .bank-card { border: 2px solid #e2e8f0 !important; border-radius: 10px; }
-    .bank-card.selected { border-color: #1d4ed8 !important; background: #eff6ff; }
-    .bank-card:hover { border-color: #93c5fd !important; }
+    .bank-card.selected { border-color: #c9a04b !important; background: #fdf8ee; }
+    .bank-card:hover { border-color: #d4b06a !important; }
 </style>
 @endpush
 

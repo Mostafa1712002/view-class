@@ -22,22 +22,23 @@
 </div>
 
 
-<div class="card">
-    <div class="card-content collapse show">
-        <div class="card-body">
-            <form action="{{ route('manage.school-calendar.store') }}" method="POST">
-                @csrf
-                @include('school-calendar.manage._form', ['event' => null])
-                <div class="mt-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="la la-save"></i> @lang('school_calendar.btn_save')
-                    </button>
-                    <a href="{{ route('manage.school-calendar.index') }}" class="btn btn-secondary">
-                        @lang('school_calendar.btn_cancel')
-                    </a>
-                </div>
-            </form>
-        </div>
+<div class="ds-card card">
+    <div class="ds-card-header card-header">
+        <h5 class="ds-card-title"><x-svg-icon name="calendar-plus" :size="16" /> @lang('school_calendar.create_title')</h5>
+    </div>
+    <div class="ds-card-body card-body">
+        <form action="{{ route('manage.school-calendar.store') }}" method="POST">
+            @csrf
+            @include('school-calendar.manage._form', ['event' => null])
+            <div class="mt-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <x-svg-icon name="check-circle" :size="16" /> @lang('school_calendar.btn_save')
+                </button>
+                <a href="{{ route('manage.school-calendar.index') }}" class="btn btn-secondary">
+                    @lang('school_calendar.btn_cancel')
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

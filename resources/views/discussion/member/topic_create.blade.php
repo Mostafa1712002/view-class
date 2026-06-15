@@ -23,53 +23,51 @@
 </div>
 
 
-<div class="card">
-    <div class="card-header">
-        <h4 class="card-title">@lang('discussion.page_title_new_topic')</h4>
+<div class="ds-card">
+    <div class="ds-card-header">
+        <span class="ds-card-title"><x-svg-icon name="chat-square-dots" :size="16" /> @lang('discussion.page_title_new_topic')</span>
     </div>
-    <div class="card-content">
-        <div class="card-body">
-            @if($room->instructions)
-                <div class="alert alert-info">
-                    <i class="la la-info-circle"></i> {{ $room->instructions }}
-                </div>
-            @endif
-            <form action="{{ route('discussion.topic.store', $room->id) }}" method="POST" id="topicForm">
-                @csrf
+    <div class="ds-card-body">
+        @if($room->instructions)
+            <div class="alert alert-info">
+                <x-svg-icon name="info-circle" :size="15" /> {{ $room->instructions }}
+            </div>
+        @endif
+        <form action="{{ route('discussion.topic.store', $room->id) }}" method="POST" id="topicForm">
+            @csrf
 
-                <div class="form-group">
-                    <label for="title">@lang('discussion.field_title') <span class="text-danger">*</span></label>
-                    <input type="text" name="title" id="title" maxlength="200"
-                        class="form-control @error('title') is-invalid @enderror"
-                        value="{{ old('title') }}"
-                        placeholder="{{ __('discussion.placeholder_topic_title') }}"
-                        required>
-                    @error('title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+            <div class="form-group">
+                <label for="title">@lang('discussion.field_title') <span class="text-danger">*</span></label>
+                <input type="text" name="title" id="title" maxlength="200"
+                    class="form-control @error('title') is-invalid @enderror"
+                    value="{{ old('title') }}"
+                    placeholder="{{ __('discussion.placeholder_topic_title') }}"
+                    required>
+                @error('title')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
 
-                <div class="form-group">
-                    <label for="body">@lang('discussion.field_body') <span class="text-danger">*</span></label>
-                    <textarea name="body" id="body" rows="6"
-                        class="form-control @error('body') is-invalid @enderror"
-                        placeholder="{{ __('discussion.placeholder_body') }}"
-                        required>{{ old('body') }}</textarea>
-                    @error('body')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+            <div class="form-group">
+                <label for="body">@lang('discussion.field_body') <span class="text-danger">*</span></label>
+                <textarea name="body" id="body" rows="6"
+                    class="form-control @error('body') is-invalid @enderror"
+                    placeholder="{{ __('discussion.placeholder_body') }}"
+                    required>{{ old('body') }}</textarea>
+                @error('body')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="la la-paper-plane"></i> @lang('discussion.btn_save')
-                    </button>
-                    <a href="{{ route('discussion.room', $room->id) }}" class="btn btn-secondary ml-1">
-                        @lang('discussion.btn_cancel')
-                    </a>
-                </div>
-            </form>
-        </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <x-svg-icon name="send" :size="15" /> @lang('discussion.btn_save')
+                </button>
+                <a href="{{ route('discussion.room', $room->id) }}" class="btn btn-outline-secondary ml-1">
+                    @lang('discussion.btn_cancel')
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

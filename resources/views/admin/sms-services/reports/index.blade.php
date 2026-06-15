@@ -32,7 +32,7 @@
     @include('components.alerts')
 
     {{-- filter bar --}}
-    <form method="GET" action="{{ route('admin.sms.reports.index') }}" class="card mb-2" style="background:#eaf2fb;border:1px solid #cfe0f5;">
+    <form method="GET" action="{{ route('admin.sms.reports.index') }}" class="card mb-2" style="background:#fdf8ee;border:1px solid #e8d5a3;">
         <div class="card-body py-2">
             <div class="row g-2 align-items-end">
                 <div class="col-6 col-md-2">

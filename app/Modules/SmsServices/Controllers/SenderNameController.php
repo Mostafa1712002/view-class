@@ -3,6 +3,7 @@
 namespace App\Modules\SmsServices\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Modules\SmsServices\Models\SmsSender;
 use App\Modules\SmsServices\Models\SmsSenderAttachment;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
@@ -119,6 +120,8 @@ class SenderNameController extends Controller
                 ]);
             }
         }
+
+        ActivityLog::logCreate($sender, 'طلب اسم مرسل: '.$sender->name_ar);
 
         return redirect()->route('admin.sms.sender-name.index')
             ->with('success', __('sms_sender_name.submitted'));

@@ -4,6 +4,7 @@
 
 @section('title', $editing ? 'تعديل إعلان' : 'إعلان جديد')
 @section('page-title', $editing ? 'تعديل إعلان' : 'إعلان جديد')
+@section('body_class', 'theme-light')
 
 @php
     $sel = function ($key, $default = null) use ($announcement, $editing) {
@@ -21,8 +22,22 @@
 
 @section('content')
 <section class="vc-ann-form">
-    <div class="ls-header" style="margin-bottom:1rem">
-        <h2 style="margin:0">{{ $editing ? 'تعديل إعلان' : 'إعلان جديد' }}</h2>
+
+    {{-- Page header + breadcrumb --}}
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+        <div>
+            <h2 style="margin:0;font-size:1.45rem;font-weight:800;color:var(--gray-900)">
+                {{ $editing ? 'تعديل إعلان' : 'إعلان جديد' }}
+            </h2>
+            <nav><ol class="breadcrumb" style="margin:0;padding:0;background:transparent">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.announcements.index') }}">الإعلانات</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ $editing ? 'تعديل' : 'جديد' }}</li>
+            </ol></nav>
+        </div>
+        <a href="{{ route('admin.announcements.index') }}" class="btn btn-outline-secondary btn-sm">
+            <x-svg-icon name="arrow-right" :size="15" /> عودة
+        </a>
     </div>
 
     @if($errors->any())
@@ -41,133 +56,156 @@
         @if($editing) @method('PUT') @endif
         <input type="hidden" name="action" id="annAction" value="draft">
 
-        <div class="card" style="margin-bottom:1rem"><div class="card-body">
-            <div class="form-group">
-                <label class="form-label">العنوان <span class="text-danger">*</span></label>
-                <input type="text" name="title" class="form-control" required value="{{ $sel('title') }}">
+        {{-- Main content card --}}
+        <div class="ds-card card" style="margin-bottom:1rem">
+            <div class="ds-card-header card-header">
+                <h5 class="ds-card-title" style="margin:0;display:flex;align-items:center;gap:.35rem">
+                    <x-svg-icon name="megaphone" :size="16" /> محتوى الإعلان
+                </h5>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">التفاصيل</label>
-                <textarea name="body" id="annBody" rows="6" class="form-control">{{ $sel('body') }}</textarea>
-            </div>
-
-            @if($isSuper)
+            <div class="card-body">
                 <div class="form-group">
-                    <label class="form-label">المدرسة</label>
-                    <select name="school_id" class="form-control">
-                        @foreach($schools as $s)
-                            <option value="{{ $s->id }}" @selected((int)old('school_id', $editing ? $announcement->school_id : 0) === $s->id)>{{ $s->name }}</option>
+                    <label class="form-label">العنوان <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-control" required value="{{ $sel('title') }}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">التفاصيل</label>
+                    <textarea name="body" id="annBody" rows="6" class="form-control">{{ $sel('body') }}</textarea>
+                </div>
+
+                @if($isSuper)
+                    <div class="form-group">
+                        <label class="form-label">المدرسة</label>
+                        <select name="school_id" class="form-control">
+                            @foreach($schools as $s)
+                                <option value="{{ $s->id }}" @selected((int)old('school_id', $editing ? $announcement->school_id : 0) === $s->id)>{{ $s->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+
+                <div class="form-group">
+                    <label class="form-label">النوع</label>
+                    <select name="type" class="form-control">
+                        <option value="normal"    @selected($sel('type','normal')==='normal')>عادي</option>
+                        <option value="important" @selected($sel('type')==='important')>مهم</option>
+                        <option value="popup"     @selected($sel('type')==='popup')>منبثق</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        {{-- Targeting card --}}
+        <div class="ds-card card" style="margin-bottom:1rem">
+            <div class="ds-card-header card-header">
+                <h5 class="ds-card-title" style="margin:0;display:flex;align-items:center;gap:.35rem">
+                    <x-svg-icon name="people" :size="16" /> الفئة المستهدفة
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="form-label">الجمهور المستهدف</label>
+                    <select name="target_type" id="annTargetType" class="form-control">
+                        <option value="all"            @selected($targetType==='all')>كل المستخدمين</option>
+                        <option value="students"       @selected($targetType==='students')>الطلاب</option>
+                        <option value="teachers"       @selected($targetType==='teachers')>المعلمون</option>
+                        <option value="parents"        @selected($targetType==='parents')>أولياء الأمور</option>
+                        <option value="admins"         @selected($targetType==='admins')>الإداريون</option>
+                        <option value="specific_users" @selected($targetType==='specific_users')>مستخدمون محددون</option>
+                        <option value="specific_roles" @selected($targetType==='specific_roles')>أدوار محددة</option>
+                    </select>
+                </div>
+
+                <div class="form-group ann-cond" data-show="specific_users">
+                    <label class="form-label">اختر المستخدمين</label>
+                    <select name="user_target_ids[]" class="form-control" multiple size="6">
+                        @foreach($users as $u)
+                            <option value="{{ $u->id }}" @selected(in_array($u->id, $selectedUserTargets))>{{ $u->name }}</option>
                         @endforeach
                     </select>
                 </div>
-            @endif
 
-            <div class="form-group">
-                <label class="form-label">النوع</label>
-                <select name="type" class="form-control">
-                    <option value="normal"    @selected($sel('type','normal')==='normal')>عادي</option>
-                    <option value="important" @selected($sel('type')==='important')>مهم</option>
-                    <option value="popup"     @selected($sel('type')==='popup')>منبثق</option>
-                </select>
-            </div>
-        </div></div>
-
-        {{-- Targeting --}}
-        <div class="card" style="margin-bottom:1rem"><div class="card-body">
-            <h5>الفئة المستهدفة</h5>
-            <div class="form-group">
-                <select name="target_type" id="annTargetType" class="form-control">
-                    <option value="all"            @selected($targetType==='all')>كل المستخدمين</option>
-                    <option value="students"       @selected($targetType==='students')>الطلاب</option>
-                    <option value="teachers"       @selected($targetType==='teachers')>المعلمون</option>
-                    <option value="parents"        @selected($targetType==='parents')>أولياء الأمور</option>
-                    <option value="admins"         @selected($targetType==='admins')>الإداريون</option>
-                    <option value="specific_users" @selected($targetType==='specific_users')>مستخدمون محددون</option>
-                    <option value="specific_roles" @selected($targetType==='specific_roles')>أدوار محددة</option>
-                </select>
-            </div>
-
-            <div class="form-group ann-cond" data-show="specific_users">
-                <label class="form-label">اختر المستخدمين</label>
-                <select name="user_target_ids[]" class="form-control" multiple size="6">
-                    @foreach($users as $u)
-                        <option value="{{ $u->id }}" @selected(in_array($u->id, $selectedUserTargets))>{{ $u->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group ann-cond" data-show="specific_roles">
-                <label class="form-label">اختر الأدوار</label>
-                <select name="role_target_ids[]" class="form-control" multiple size="5">
-                    @foreach($roles as $r)
-                        <option value="{{ $r->id }}" @selected(in_array($r->id, $selectedRoleTargets))>{{ $r->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group ann-cond" data-show="students">
-                <label class="form-label">الصفوف</label>
-                <select name="grade_levels[]" class="form-control" multiple size="5">
-                    @foreach($gradeLevels as $g)
-                        <option value="{{ $g }}" @selected(in_array($g, $selectedGrades))>الصف {{ $g }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group ann-cond" data-show="students">
-                <label class="form-label">الفصول</label>
-                <select name="class_ids[]" class="form-control" multiple size="5">
-                    @foreach($classes as $c)
-                        <option value="{{ $c->id }}" @selected(in_array($c->id, $selectedClasses))>{{ $c->name }} (صف {{ $c->grade_level }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">المواد (اختياري)</label>
-                <select name="subject_ids[]" class="form-control" multiple size="4">
-                    @foreach($subjects as $sub)
-                        <option value="{{ $sub->id }}" @selected(in_array($sub->id, $selectedSubjects))>{{ $sub->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div></div>
-
-        {{-- Window + toggles --}}
-        <div class="card" style="margin-bottom:1rem"><div class="card-body">
-            <div style="display:flex;gap:1rem;flex-wrap:wrap">
-                <div class="form-group" style="flex:1;min-width:220px">
-                    <label class="form-label">تاريخ البداية</label>
-                    <input type="datetime-local" name="starts_at" class="form-control" value="{{ old('starts_at', $editing ? $fmt($announcement->starts_at) : '') }}">
+                <div class="form-group ann-cond" data-show="specific_roles">
+                    <label class="form-label">اختر الأدوار</label>
+                    <select name="role_target_ids[]" class="form-control" multiple size="5">
+                        @foreach($roles as $r)
+                            <option value="{{ $r->id }}" @selected(in_array($r->id, $selectedRoleTargets))>{{ $r->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div class="form-group" style="flex:1;min-width:220px">
-                    <label class="form-label">تاريخ النهاية</label>
-                    <input type="datetime-local" name="ends_at" class="form-control" value="{{ old('ends_at', $editing ? $fmt($announcement->ends_at) : '') }}">
+
+                <div class="form-group ann-cond" data-show="students">
+                    <label class="form-label">الصفوف</label>
+                    <select name="grade_levels[]" class="form-control" multiple size="5">
+                        @foreach($gradeLevels as $g)
+                            <option value="{{ $g }}" @selected(in_array($g, $selectedGrades))>الصف {{ $g }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group ann-cond" data-show="students">
+                    <label class="form-label">الفصول</label>
+                    <select name="class_ids[]" class="form-control" multiple size="5">
+                        @foreach($classes as $c)
+                            <option value="{{ $c->id }}" @selected(in_array($c->id, $selectedClasses))>{{ $c->name }} (صف {{ $c->grade_level }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">المواد (اختياري)</label>
+                    <select name="subject_ids[]" class="form-control" multiple size="4">
+                        @foreach($subjects as $sub)
+                            <option value="{{ $sub->id }}" @selected(in_array($sub->id, $selectedSubjects))>{{ $sub->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
+        </div>
 
-            <hr>
-            <div style="display:flex;flex-direction:column;gap:.5rem">
-                @php
-                    $toggles = [
-                        'show_on_login'    => 'يظهر عند تسجيل الدخول؟',
-                        'require_read_ack' => 'يحتاج تأكيد قراءة؟',
-                        'notify_internal'  => 'إشعار داخلي؟',
-                        'notify_sms'       => 'إشعار SMS؟',
-                        'notify_whatsapp'  => 'إشعار واتساب؟',
-                    ];
-                @endphp
-                @foreach($toggles as $name => $label)
-                    <label style="display:flex;gap:.5rem;align-items:center">
-                        <input type="hidden" name="{{ $name }}" value="0">
-                        <input type="checkbox" name="{{ $name }}" value="1" @checked(old($name, $editing ? $announcement->$name : false))>
-                        {{ $label }}
-                    </label>
-                @endforeach
+        {{-- Schedule & options card --}}
+        <div class="ds-card card" style="margin-bottom:1rem">
+            <div class="ds-card-header card-header">
+                <h5 class="ds-card-title" style="margin:0;display:flex;align-items:center;gap:.35rem">
+                    <x-svg-icon name="calendar-event" :size="16" /> الجدول والخيارات
+                </h5>
             </div>
-        </div></div>
+            <div class="card-body">
+                <div style="display:flex;gap:1rem;flex-wrap:wrap">
+                    <div class="form-group" style="flex:1;min-width:220px">
+                        <label class="form-label">تاريخ البداية</label>
+                        <input type="datetime-local" name="starts_at" class="form-control" value="{{ old('starts_at', $editing ? $fmt($announcement->starts_at) : '') }}">
+                    </div>
+                    <div class="form-group" style="flex:1;min-width:220px">
+                        <label class="form-label">تاريخ النهاية</label>
+                        <input type="datetime-local" name="ends_at" class="form-control" value="{{ old('ends_at', $editing ? $fmt($announcement->ends_at) : '') }}">
+                    </div>
+                </div>
 
+                <hr>
+                <div style="display:flex;flex-direction:column;gap:.5rem">
+                    @php
+                        $toggles = [
+                            'show_on_login'    => 'يظهر عند تسجيل الدخول؟',
+                            'require_read_ack' => 'يحتاج تأكيد قراءة؟',
+                            'notify_internal'  => 'إشعار داخلي؟',
+                            'notify_sms'       => 'إشعار SMS؟',
+                            'notify_whatsapp'  => 'إشعار واتساب؟',
+                        ];
+                    @endphp
+                    @foreach($toggles as $name => $label)
+                        <label style="display:flex;gap:.5rem;align-items:center;font-weight:500;cursor:pointer">
+                            <input type="hidden" name="{{ $name }}" value="0">
+                            <input type="checkbox" name="{{ $name }}" value="1" @checked(old($name, $editing ? $announcement->$name : false))>
+                            {{ $label }}
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- Form actions --}}
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:2rem">
             <button type="submit" class="btn btn-outline-secondary" onclick="document.getElementById('annAction').value='draft'">
                 <x-svg-icon name="save" :size="16" /> حفظ كمسودة
@@ -175,9 +213,12 @@
             <button type="submit" class="btn btn-primary" onclick="document.getElementById('annAction').value='publish'">
                 <x-svg-icon name="megaphone-fill" :size="16" /> نشر
             </button>
-            <a href="{{ route('admin.announcements.index') }}" class="btn btn-light"><x-svg-icon name="arrow-right" :size="16" /> عودة</a>
+            <a href="{{ route('admin.announcements.index') }}" class="btn btn-light">
+                <x-svg-icon name="arrow-right" :size="16" /> عودة
+            </a>
         </div>
     </form>
+
 </section>
 @endsection
 

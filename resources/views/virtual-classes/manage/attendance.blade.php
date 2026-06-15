@@ -31,23 +31,25 @@
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-4 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
         @if($u->canDo('virtual_classes.recalc_attendance'))
-        <form method="POST" action="{{ route('manage.virtual-classes.attendance.recalc', $vc->id) }}" class="d-inline">
+        <form method="POST" action="{{ route('manage.virtual-classes.attendance.recalc', $vc->id) }}" class="d-inline" id="recalcForm">
             @csrf
-            <button type="submit" class="btn btn-primary">
-                <x-svg-icon name="arrow-repeat" size="16" /> @lang('virtual_classes.btn_recalc')
+            <button type="button" class="btn btn-primary"
+                    onclick="return confirm('هل أنت متأكد من إعادة احتساب الحضور؟') && document.getElementById('recalcForm').submit()">
+                <x-svg-icon name="arrow-repeat" :size="16" /> @lang('virtual_classes.btn_recalc')
             </button>
         </form>
         @endif
         @if($u->canDo('virtual_classes.view_attendance'))
         <a href="{{ route('manage.virtual-classes.attendance.export', $vc->id) }}" class="btn btn-outline-success">
-            <x-svg-icon name="file-earmark-spreadsheet" size="16" /> @lang('virtual_classes.btn_export')
+            <x-svg-icon name="file-earmark-spreadsheet" :size="16" /> @lang('virtual_classes.btn_export')
         </a>
         @endif
         @if($u->canDo('virtual_classes.clear_cache'))
-        <form method="POST" action="{{ route('manage.virtual-classes.cache.clear', $vc->id) }}" class="d-inline">
+        <form method="POST" action="{{ route('manage.virtual-classes.cache.clear', $vc->id) }}" class="d-inline" id="clearCacheForm">
             @csrf
-            <button type="submit" class="btn btn-outline-secondary">
-                <x-svg-icon name="trash" size="16" /> @lang('virtual_classes.btn_clear_cache')
+            <button type="button" class="btn btn-outline-secondary"
+                    onclick="return confirm('هل أنت متأكد من حذف الكاش؟') && document.getElementById('clearCacheForm').submit()">
+                <x-svg-icon name="trash" :size="16" /> @lang('virtual_classes.btn_clear_cache')
             </button>
         </form>
         @endif
@@ -55,13 +57,18 @@
 </div>
 
 {{-- Summary cards (from cached recalc) --}}
+@php
+$summaryBadge = ['present' => 'ds-badge-success', 'late' => 'ds-badge-warning', 'partial' => 'ds-badge-info', 'absent' => 'ds-badge-danger'];
+@endphp
 @if($summary)
 <div class="row mb-2">
     @foreach(['present','late','partial','absent'] as $st)
-    <div class="col-6 col-md-3">
-        <div class="card border-{{ $statusColors[$st] }}">
+    <div class="col-6 col-md-3 mb-2">
+        <div class="ds-card card h-100">
             <div class="card-body py-2 text-center">
-                <div class="h4 mb-0 text-{{ $statusColors[$st] }}">{{ $summary[$st] ?? 0 }}</div>
+                <div class="h3 mb-0 {{ $st === 'present' ? 'text-gold' : '' }} {{ $st === 'absent' ? 'text-danger' : '' }} {{ $st === 'late' ? 'text-warning' : '' }} {{ $st === 'partial' ? 'text-info' : '' }}">
+                    {{ $summary[$st] ?? 0 }}
+                </div>
                 <small class="text-muted">@lang('virtual_classes.summary_' . $st)</small>
             </div>
         </div>
@@ -69,62 +76,65 @@
     @endforeach
 </div>
 @else
-<div class="alert alert-info">
-    <x-svg-icon name="info-circle" size="16" /> @lang('virtual_classes.summary_none')
+<div class="alert alert-info d-flex align-items-center gap-2">
+    <x-svg-icon name="info-circle" :size="16" /> @lang('virtual_classes.summary_none')
 </div>
 @endif
 
-<div class="card">
-    <div class="card-content">
-        <div class="card-body pb-1">
-            <input type="text" id="vcAttSearch" class="form-control"
-                   placeholder="@lang('virtual_classes.attendance_search')">
-        </div>
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped mb-0" id="vcAttTable">
-                <thead>
-                    <tr>
-                        <th>@lang('virtual_classes.att_student')</th>
-                        <th>@lang('virtual_classes.att_teacher')</th>
-                        <th>@lang('virtual_classes.att_subject')</th>
-                        <th>@lang('virtual_classes.att_class')</th>
-                        <th>@lang('virtual_classes.att_joined')</th>
-                        <th>@lang('virtual_classes.att_duration')</th>
-                        <th>@lang('virtual_classes.att_status')</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($attendees as $a)
-                    <tr>
-                        <td class="vc-att-name">
-                            {{ $isRtl && optional($a->student)->name_ar ? $a->student->name_ar : optional($a->student)->name }}
-                        </td>
-                        <td>{{ optional($vc->teacher)->name }}</td>
-                        <td>{{ optional($vc->subject)->name ?? '—' }}</td>
-                        <td>{{ optional($vc->classRoom)->name ?? '—' }}</td>
-                        <td class="text-nowrap">{{ optional($a->joined_at)->format('Y-m-d H:i') ?? '—' }}</td>
-                        <td>{{ $a->duration_minutes }}</td>
-                        <td>
-                            @if($a->attendance_status)
-                                <span class="badge badge-{{ $statusColors[$a->attendance_status] ?? 'secondary' }}">
-                                    @lang('virtual_classes.att_' . $a->attendance_status)
-                                </span>
-                            @else
-                                <span class="badge badge-light">—</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
-                            <x-svg-icon name="people" size="28" class="d-block mx-auto mb-2 text-muted" />
-                            @lang('virtual_classes.attendance_empty')
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+<div class="ds-card card">
+    <div class="ds-card-header card-header d-flex align-items-center gap-2">
+        <h5 class="ds-card-title mb-0"><x-svg-icon name="list-check" :size="16" /> @lang('virtual_classes.attendance_title')</h5>
+    </div>
+    <div class="card-body pb-1">
+        <input type="text" id="vcAttSearch" class="form-control"
+               placeholder="@lang('virtual_classes.attendance_search')">
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" id="vcAttTable">
+            <thead>
+                <tr>
+                    <th>@lang('virtual_classes.att_student')</th>
+                    <th>@lang('virtual_classes.att_teacher')</th>
+                    <th>@lang('virtual_classes.att_subject')</th>
+                    <th>@lang('virtual_classes.att_class')</th>
+                    <th>@lang('virtual_classes.att_joined')</th>
+                    <th>@lang('virtual_classes.att_duration')</th>
+                    <th>@lang('virtual_classes.att_status')</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($attendees as $a)
+                <tr>
+                    <td class="vc-att-name">
+                        {{ $isRtl && optional($a->student)->name_ar ? $a->student->name_ar : optional($a->student)->name }}
+                    </td>
+                    <td>{{ optional($vc->teacher)->name }}</td>
+                    <td>{{ optional($vc->subject)->name ?? '—' }}</td>
+                    <td>{{ optional($vc->classRoom)->name ?? '—' }}</td>
+                    <td class="text-nowrap" dir="ltr">{{ optional($a->joined_at)->format('Y-m-d H:i') ?? '—' }}</td>
+                    <td>{{ $a->duration_minutes }}</td>
+                    <td>
+                        @if($a->attendance_status)
+                            <span class="{{ $summaryBadge[$a->attendance_status] ?? 'badge-secondary' }} badge">
+                                @lang('virtual_classes.att_' . $a->attendance_status)
+                            </span>
+                        @else
+                            <span class="badge badge-light">—</span>
+                        @endif
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7">
+                        <div class="ds-empty">
+                            <div class="ds-empty-icon"><x-svg-icon name="people" :size="32" /></div>
+                            <div class="ds-empty-title">@lang('virtual_classes.attendance_empty')</div>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
