@@ -70,6 +70,14 @@
                         <x-svg-icon name="mortarboard-fill" :size="15" /> إضافة سؤال تحصيلي
                     </a>
                 @endif
+                @if($user->canDo('question_banks.import'))
+                    <a href="{{ route('admin.qb.import.index') }}" class="btn btn-outline-success btn-sm">
+                        <x-svg-icon name="upload" :size="15" /> استيراد من Excel
+                    </a>
+                @endif
+                <a href="{{ route('admin.qb.exams.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <x-svg-icon name="journal-check" :size="15" /> الاختبارات
+                </a>
                 <a href="{{ route('admin.qb.passages.index') }}" class="btn btn-outline-secondary btn-sm">
                     <x-svg-icon name="card-text" :size="15" /> أسئلة القطعة
                 </a>

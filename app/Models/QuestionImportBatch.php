@@ -26,6 +26,16 @@ class QuestionImportBatch extends Model
         'status',
         'preview_data',
         'created_by',
+        // QB rebuild (#254) — extended columns (migration qbcore_extend_import_tables)
+        'import_type',
+        'images_zip_path',
+        'valid_rows',
+        'invalid_rows',
+        'imported_by',
+        'started_at',
+        'finished_at',
+        'error_report_path',
+        'settings',
     ];
 
     protected $casts = [
@@ -33,6 +43,12 @@ class QuestionImportBatch extends Model
         'total_rows' => 'integer',
         'imported_rows' => 'integer',
         'failed_rows' => 'integer',
+        // #254 extended
+        'valid_rows' => 'integer',
+        'invalid_rows' => 'integer',
+        'settings' => 'array',
+        'started_at' => 'datetime',
+        'finished_at' => 'datetime',
     ];
 
     public function bank(): BelongsTo

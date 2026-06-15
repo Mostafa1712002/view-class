@@ -1,5 +1,7 @@
 <?php
 
+use App\Modules\QuestionBankCore\Controllers\ExamController;
+use App\Modules\QuestionBankCore\Controllers\ImportController;
 use App\Modules\QuestionBankCore\Controllers\PassageController;
 use App\Modules\QuestionBankCore\Controllers\QuestionController;
 use App\Modules\QuestionBankCore\Controllers\ScopeSelectorController;
@@ -72,4 +74,26 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
         Route::get('passages/{passageId}/questions/create', [PassageController::class, 'createQuestion'])->name('passages.questions.create');
         Route::post('passages/{passageId}/questions', [PassageController::class, 'storeQuestion'])->name('passages.questions.store');
         Route::delete('passages/{passageId}/questions/{questionId}', [PassageController::class, 'detachQuestion'])->name('passages.questions.detach');
+
+        // #254 — Excel import (gated by canDo question_banks.import in the controller)
+        Route::get('import', [ImportController::class, 'index'])->name('import.index');
+        Route::get('import/template', [ImportController::class, 'template'])->name('import.template');
+        Route::post('import/preview', [ImportController::class, 'preview'])->name('import.preview');
+        Route::post('import/{batchId}/confirm', [ImportController::class, 'confirm'])->name('import.confirm');
+        Route::get('import/{batchId}/errors', [ImportController::class, 'errorReport'])->name('import.errors');
+
+        // #255 — electronic & paper exams linked to bank questions (gated by exams.* in controller)
+        Route::get('exams', [ExamController::class, 'index'])->name('exams.index');
+        Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create');
+        Route::post('exams', [ExamController::class, 'store'])->name('exams.store');
+        Route::get('exams/{examId}', [ExamController::class, 'show'])->name('exams.show');
+        Route::get('exams/{examId}/results', [ExamController::class, 'results'])->name('exams.results');
+        Route::post('exams/{examId}/publish', [ExamController::class, 'publish'])->name('exams.publish');
+        Route::post('exams/{examId}/unpublish', [ExamController::class, 'unpublish'])->name('exams.unpublish');
+        Route::delete('exams/{examId}', [ExamController::class, 'destroy'])->name('exams.destroy');
+
+        // Bank-question picker → snapshot copy into qb_exam_questions
+        Route::get('exams/{examId}/picker', [ExamController::class, 'picker'])->name('exams.picker');
+        Route::post('exams/{examId}/picker', [ExamController::class, 'addFromBank'])->name('exams.add-from-bank');
+        Route::delete('exams/{examId}/questions/{examQuestionId}', [ExamController::class, 'removeQuestion'])->name('exams.questions.remove');
     });
