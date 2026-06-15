@@ -185,7 +185,7 @@
 
 <div class="content-body">
     @if(session('status'))
-        <div class="pl-alert"><i class="la la-check-circle"></i><span>{{ session('status') }}</span></div>
+        <div class="pl-alert"><x-svg-icon name="check-circle" /><span>{{ session('status') }}</span></div>
     @endif
 
     @php
@@ -205,13 +205,13 @@
     </div>
 
     <div class="pl-summary">
-        <i class="la la-info-circle"></i>
+        <x-svg-icon name="info-circle" />
         <div>
             <strong>{{ $parent->name }}</strong>
             <span class="d-block">@lang('users.parent_link_help')</span>
         </div>
         <span class="pl-counter ms-auto" id="pl-counter">
-            <i class="la la-user-graduate"></i>
+            <x-svg-icon name="mortarboard" />
             <span id="pl-counter-num">{{ count($linkedIds) }}</span>
             <span>/ <span id="pl-counter-total">0</span></span>
         </span>
@@ -224,10 +224,10 @@
 
         <div class="pl-card">
             <div class="head">
-                <h5><i class="la la-user-graduate"></i> @lang('users.parent_search_students')</h5>
+                <h5><x-svg-icon name="mortarboard" /> @lang('users.parent_search_students')</h5>
                 <form action="{{ route('admin.users.parents.students', $parent->id) }}" method="GET" class="pl-search-row m-0">
                     <input type="search" name="q" value="{{ $q ?? '' }}" placeholder="@lang('users.parent_search_hint')" />
-                    <button type="submit" class="btn-go" title="@lang('users.search')"><i class="la la-search"></i></button>
+                    <button type="submit" class="btn-go" title="@lang('users.search')"><x-svg-icon name="search" /></button>
                 </form>
             </div>
 
@@ -273,7 +273,7 @@
                                 <td>{{ optional($s->classRoom)->name ?? '—' }}</td>
                                 <td>{{ $s->gender ? __('users.gender_'.$s->gender) : '—' }}</td>
                                 <td class="text-center">
-                                    <span class="pl-pill linked"><i class="la la-link"></i>@lang('users.parent_currently_linked')</span>
+                                    <span class="pl-pill linked"><x-svg-icon name="link-45deg" />@lang('users.parent_currently_linked')</span>
                                 </td>
                             </tr>
                         @endforeach
@@ -299,7 +299,7 @@
                                 <td>{{ $s->gender ? __('users.gender_'.$s->gender) : '—' }}</td>
                                 <td class="text-center">
                                     @if($isLinked)
-                                        <span class="pl-pill linked"><i class="la la-link"></i>@lang('users.parent_currently_linked')</span>
+                                        <span class="pl-pill linked"><x-svg-icon name="link-45deg" />@lang('users.parent_currently_linked')</span>
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif
@@ -309,7 +309,7 @@
                             <tr>
                                 <td colspan="6">
                                     <div class="pl-empty">
-                                        <i class="la la-user-graduate"></i>
+                                        <x-svg-icon name="mortarboard" />
                                         <div>@lang('users.no_results')</div>
                                     </div>
                                 </td>
@@ -327,12 +327,12 @@
 
                 <div class="pl-actions-bar">
                     <div class="pl-quick">
-                        <button type="button" class="btn-ghost-sm" id="pl-select-all"><i class="la la-check-square"></i> @lang('users.parent_select_all')</button>
-                        <button type="button" class="btn-ghost-sm" id="pl-clear-all"><i class="la la-times"></i> @lang('users.parent_clear_all')</button>
+                        <button type="button" class="btn-ghost-sm" id="pl-select-all"><x-svg-icon name="check-square" /> @lang('users.parent_select_all')</button>
+                        <button type="button" class="btn-ghost-sm" id="pl-clear-all"><x-svg-icon name="x-lg" /> @lang('users.parent_clear_all')</button>
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{{ route('admin.users.parents.show', $parent->id) }}" class="btn-ghost">@lang('users.cancel')</a>
-                        <button type="submit" class="btn-gold"><i class="la la-save"></i> @lang('users.save')</button>
+                        <button type="submit" class="btn-gold"><x-svg-icon name="save" /> @lang('users.save')</button>
                     </div>
                 </div>
             </div>
