@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class VirtualClassRepository implements VirtualClassRepositoryInterface
 {
-    public function forStaff(int $userId, int $schoolId, bool $roleIsAdmin, string $tab = 'all', int $perPage = 20): LengthAwarePaginator
+    public function forStaff(int $userId, ?int $schoolId, bool $roleIsAdmin, string $tab = 'all', int $perPage = 20): LengthAwarePaginator
     {
         $query = VirtualClass::query()
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
             ->with(['teacher:id,name,name_ar', 'creator:id,name,name_ar', 'classRoom:id,name', 'subject:id,name']);
 
         if (! $roleIsAdmin) {
@@ -61,7 +61,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
         }
     }
 
-    public function forStudent(int $userId, int $schoolId, int $perPage = 20): LengthAwarePaginator
+    public function forStudent(int $userId, ?int $schoolId, int $perPage = 20): LengthAwarePaginator
     {
         $classIds = DB::table('class_student')
             ->where('student_id', $userId)
@@ -69,7 +69,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
             ->all();
 
         return VirtualClass::query()
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
             ->whereIn('status', ['scheduled', 'live'])
             ->where(function ($q) {
                 $q->whereJsonContains('audience', 'all')
@@ -87,7 +87,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
             ->withQueryString();
     }
 
-    public function find(int $id, int $schoolId): ?VirtualClass
+    public function find(int $id, ?int $schoolId): ?VirtualClass
     {
         return VirtualClass::with([
             'teacher:id,name,name_ar',
@@ -95,7 +95,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
             'classRoom:id,name',
             'subject:id,name',
         ])
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
             ->find($id);
     }
 
@@ -125,7 +125,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
         VirtualClass::findOrFail($id)->delete();
     }
 
-    public function recordEntry(int $virtualClassId, int $studentId, int $schoolId): VirtualClassAttendee
+    public function recordEntry(int $virtualClassId, int $studentId, ?int $schoolId): VirtualClassAttendee
     {
         $attendee = VirtualClassAttendee::firstOrNew([
             'virtual_class_id' => $virtualClassId,

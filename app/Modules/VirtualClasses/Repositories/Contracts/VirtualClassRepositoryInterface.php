@@ -15,17 +15,17 @@ interface VirtualClassRepositoryInterface
      *
      * @param string $tab one of: today | recorded | old | all
      */
-    public function forStaff(int $userId, int $schoolId, bool $roleIsAdmin, string $tab = 'all', int $perPage = 20): LengthAwarePaginator;
+    public function forStaff(int $userId, ?int $schoolId, bool $roleIsAdmin, string $tab = 'all', int $perPage = 20): LengthAwarePaginator;
 
     /**
      * Paginated list for students (upcoming + live classes for the school).
      */
-    public function forStudent(int $userId, int $schoolId, int $perPage = 20): LengthAwarePaginator;
+    public function forStudent(int $userId, ?int $schoolId, int $perPage = 20): LengthAwarePaginator;
 
     /**
      * Find a single virtual class, school-scoped.
      */
-    public function find(int $id, int $schoolId): ?VirtualClass;
+    public function find(int $id, ?int $schoolId): ?VirtualClass;
 
     public function create(array $data): VirtualClass;
 
@@ -38,7 +38,7 @@ interface VirtualClassRepositoryInterface
     /**
      * Record (or refresh) a participant's entry into a virtual class.
      */
-    public function recordEntry(int $virtualClassId, int $studentId, int $schoolId): VirtualClassAttendee;
+    public function recordEntry(int $virtualClassId, int $studentId, ?int $schoolId): VirtualClassAttendee;
 
     /**
      * All attendee log rows for a virtual class (with student eager-loaded).

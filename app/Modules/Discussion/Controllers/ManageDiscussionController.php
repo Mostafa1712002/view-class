@@ -262,6 +262,6 @@ class ManageDiscussionController extends Controller
         if ($user->isSuperAdmin()) {
             return;
         }
-        abort_if($resourceSchoolId !== $this->activeSchoolId(), 403);
+        abort_if($this->activeSchoolId() !== null && $resourceSchoolId !== $this->activeSchoolId(), 403);
     }
 }

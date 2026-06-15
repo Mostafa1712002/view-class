@@ -8,10 +8,10 @@ use Illuminate\Support\Collection;
 
 class EloquentSchoolEventRepository implements SchoolEventRepository
 {
-    public function forRange(int $schoolId, string $from, string $to, ?string $audienceKey = null): Collection
+    public function forRange(?int $schoolId, string $from, string $to, ?string $audienceKey = null): Collection
     {
         $query = SchoolEvent::query()
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
             ->where(function ($q) use ($from, $to) {
                 // Event overlaps the range: starts on or before $to AND ends (or starts) on or after $from
                 $q->where('start_date', '<=', $to)
@@ -32,10 +32,10 @@ class EloquentSchoolEventRepository implements SchoolEventRepository
         return $query->orderBy('start_date')->get();
     }
 
-    public function all(int $schoolId): Collection
+    public function all(?int $schoolId): Collection
     {
         return SchoolEvent::query()
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
             ->latest('id')
             ->get();
     }

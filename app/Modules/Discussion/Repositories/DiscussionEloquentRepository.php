@@ -13,10 +13,10 @@ class DiscussionEloquentRepository implements DiscussionRepository
 {
     // ── Rooms ────────────────────────────────────────────────────────────────
 
-    public function roomsForSchool(int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator
+    public function roomsForSchool(?int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
         $query = DiscussionRoom::query()
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
             ->with(['creator:id,name,name_ar']);
 
         if (! empty($filters['status'])) {
@@ -75,11 +75,11 @@ class DiscussionEloquentRepository implements DiscussionRepository
 
     // ── Topics ───────────────────────────────────────────────────────────────
 
-    public function topicsForRoom(int $roomId, int $schoolId, int $perPage = 20, bool $includeHidden = false): LengthAwarePaginator
+    public function topicsForRoom(int $roomId, ?int $schoolId, int $perPage = 20, bool $includeHidden = false): LengthAwarePaginator
     {
         return DiscussionTopic::query()
             ->where('room_id', $roomId)
-            ->where('school_id', $schoolId)
+            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
             ->when(! $includeHidden, fn ($q) => $q->where('is_hidden', false))
             ->with(['creator:id,name,name_ar'])
             ->orderByDesc('is_pinned')

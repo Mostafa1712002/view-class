@@ -16,7 +16,7 @@ interface DiscussionRepository
      *
      * @param array $filters  Optional: status
      */
-    public function roomsForSchool(int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator;
+    public function roomsForSchool(?int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator;
 
     public function findRoom(int $id): ?DiscussionRoom;
 
@@ -49,7 +49,7 @@ interface DiscussionRepository
      *
      * @param bool $includeHidden  Staff see hidden topics; members do not.
      */
-    public function topicsForRoom(int $roomId, int $schoolId, int $perPage = 20, bool $includeHidden = false): LengthAwarePaginator;
+    public function topicsForRoom(int $roomId, ?int $schoolId, int $perPage = 20, bool $includeHidden = false): LengthAwarePaginator;
 
     public function findTopic(int $id): ?DiscussionTopic;
 

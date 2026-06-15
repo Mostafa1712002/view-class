@@ -11,12 +11,12 @@ interface SchoolEventRepository
      * Return events for a school within a date range.
      * Optionally filtered to events visible to a given audience key.
      */
-    public function forRange(int $schoolId, string $from, string $to, ?string $audienceKey = null): Collection;
+    public function forRange(?int $schoolId, string $from, string $to, ?string $audienceKey = null): Collection;
 
     /**
      * Return all events for a school (latest first), no date filter.
      */
-    public function all(int $schoolId): Collection;
+    public function all(?int $schoolId): Collection;
 
     /**
      * Find an event by id (no school scope — caller must gate).
