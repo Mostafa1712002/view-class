@@ -57,6 +57,14 @@
                             @endif
                         </a>
                     @endforeach
+
+                    {{-- Notifications (التنبيهات) — links to the system notifications page --}}
+                    @if(Route::has('notifications.index'))
+                        <a href="{{ route('notifications.index') }}"
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><x-svg-icon name="bell-fill" :size="16" class="ic-info me-1" /> @lang('mailbox.notifications')</span>
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -68,6 +76,10 @@
         <div class="card mb-1">
             <div class="card-body py-1">
                 <form method="GET" action="{{ route('my.mailbox.folder', $folder) }}" class="d-flex flex-wrap align-items-center" style="gap:8px;">
+                    {{-- Search --}}
+                    <input type="search" name="search" class="form-control" style="width:auto;min-width:180px;"
+                           value="{{ $filters['search'] ?? '' }}" placeholder="@lang('mailbox.search_placeholder')">
+
                     {{-- Importance filter --}}
                     <select name="importance" class="form-control" style="width:auto;">
                         <option value="">— @lang('mailbox.all') —</option>
@@ -189,6 +201,28 @@
 
                                     {{-- Actions --}}
                                     <td class="text-nowrap">
+                                        @if($isDraftFolder && Route::has('my.mailbox.edit'))
+                                            {{-- Edit draft --}}
+                                            <a href="{{ route('my.mailbox.edit', $mail->id) }}" class="btn btn-sm btn-outline-primary" title="@lang('mailbox.edit_draft')">
+                                                <x-svg-icon name="pencil-fill" :size="16" />
+                                            </a>
+                                            {{-- Discard draft --}}
+                                            <form action="{{ route('my.mailbox.destroy', $mail->id) }}" method="POST" class="d-inline" id="discard-form-{{ $mail->id }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        title="@lang('mailbox.delete_permanently')"
+                                                        onclick="
+                                                            if(window.vcConfirm){
+                                                                window.vcConfirm({title:'@lang('mailbox.delete_permanently')?'}).then(r=>{if(r.isConfirmed)document.getElementById('discard-form-{{ $mail->id }}').submit();});
+                                                            } else {
+                                                                document.getElementById('discard-form-{{ $mail->id }}').submit();
+                                                            }">
+                                                    <x-svg-icon name="trash3-fill" :size="16" />
+                                                </button>
+                                            </form>
+                                        @endif
+
                                         @if(! $isSentFolder && ! $isDraftFolder && ! $isTrashFolder)
                                             {{-- Star / Unstar --}}
                                             @if($isStarred)

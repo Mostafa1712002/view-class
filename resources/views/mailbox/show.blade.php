@@ -46,6 +46,18 @@
             <strong>{{ $message->subject }}</strong>
         </div>
         <div class="d-flex flex-wrap" style="gap:6px;">
+            {{-- Reply / Forward (gated on mailbox.send in the controller) --}}
+            @if(Route::has('my.mailbox.reply'))
+                <a href="{{ route('my.mailbox.reply', $message->id) }}" class="btn btn-sm btn-primary">
+                    <i class="la la-reply"></i> @lang('mailbox.reply')
+                </a>
+            @endif
+            @if(Route::has('my.mailbox.forward'))
+                <a href="{{ route('my.mailbox.forward', $message->id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="la la-share"></i> @lang('mailbox.forward')
+                </a>
+            @endif
+
             @if($recipientRow)
                 {{-- Star / Unstar --}}
                 @if($recipientRow->starred)

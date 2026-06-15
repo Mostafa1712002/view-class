@@ -13,7 +13,17 @@ class StoreMailRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return auth()->check();
+        if (! auth()->check()) {
+            return false;
+        }
+
+        // Authorization runs before validation, so the permission gate is
+        // enforced regardless of payload validity: drafting needs
+        // mailbox.draft, sending needs mailbox.send. (The controller also
+        // gates as defence-in-depth.)
+        $permission = $this->input('action') === 'draft' ? 'mailbox.draft' : 'mailbox.send';
+
+        return auth()->user()->canDo($permission);
     }
 
     public function rules(): array

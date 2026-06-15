@@ -95,6 +95,25 @@ class EloquentMailboxRepository implements MailboxRepository
     // Private folder queries
     // -------------------------------------------------------------------------
 
+    /**
+     * Apply the shared mail-level filters (importance + free-text search on
+     * subject/body) to a query already constrained to the `mail` relation.
+     */
+    private function applyMailFilters($q, array $filters): void
+    {
+        if (! empty($filters['importance'])) {
+            $q->where('importance', $filters['importance']);
+        }
+
+        if (! empty($filters['search'])) {
+            $term = $filters['search'];
+            $q->where(function ($w) use ($term) {
+                $w->where('subject', 'like', "%{$term}%")
+                  ->orWhere('body', 'like', "%{$term}%");
+            });
+        }
+    }
+
     private function inbox(int $uid, array $filters, int $perPage): LengthAwarePaginator
     {
         $query = InternalMailRecipient::query()
@@ -104,9 +123,7 @@ class EloquentMailboxRepository implements MailboxRepository
             ->where('archived', false)
             ->whereHas('mail', function ($q) use ($filters) {
                 $q->where('is_draft', false);
-                if (! empty($filters['importance'])) {
-                    $q->where('importance', $filters['importance']);
-                }
+                $this->applyMailFilters($q, $filters);
             });
 
         if (! empty($filters['unread'])) {
@@ -123,21 +140,20 @@ class EloquentMailboxRepository implements MailboxRepository
             ->where('sender_id', $uid)
             ->where('is_draft', false);
 
-        if (! empty($filters['importance'])) {
-            $query->where('importance', $filters['importance']);
-        }
+        $this->applyMailFilters($query, $filters);
 
         return $query->orderByDesc('id')->paginate($perPage)->withQueryString();
     }
 
     private function drafts(int $uid, array $filters, int $perPage): LengthAwarePaginator
     {
-        return InternalMail::query()
+        $query = InternalMail::query()
             ->where('sender_id', $uid)
-            ->where('is_draft', true)
-            ->orderByDesc('id')
-            ->paginate($perPage)
-            ->withQueryString();
+            ->where('is_draft', true);
+
+        $this->applyMailFilters($query, $filters);
+
+        return $query->orderByDesc('id')->paginate($perPage)->withQueryString();
     }
 
     private function starred(int $uid, array $filters, int $perPage): LengthAwarePaginator
@@ -149,9 +165,7 @@ class EloquentMailboxRepository implements MailboxRepository
             ->where('trashed', false)
             ->whereHas('mail', function ($q) use ($filters) {
                 $q->where('is_draft', false);
-                if (! empty($filters['importance'])) {
-                    $q->where('importance', $filters['importance']);
-                }
+                $this->applyMailFilters($q, $filters);
             });
 
         if (! empty($filters['unread'])) {
@@ -170,9 +184,7 @@ class EloquentMailboxRepository implements MailboxRepository
             ->where('archived', false)
             ->whereHas('mail', function ($q) use ($filters) {
                 $q->where('is_draft', false)->where('importance', '!=', 'normal');
-                if (! empty($filters['importance'])) {
-                    $q->where('importance', $filters['importance']);
-                }
+                $this->applyMailFilters($q, $filters);
             });
 
         if (! empty($filters['unread'])) {
@@ -191,9 +203,7 @@ class EloquentMailboxRepository implements MailboxRepository
             ->where('trashed', false)
             ->whereHas('mail', function ($q) use ($filters) {
                 $q->where('is_draft', false);
-                if (! empty($filters['importance'])) {
-                    $q->where('importance', $filters['importance']);
-                }
+                $this->applyMailFilters($q, $filters);
             });
 
         if (! empty($filters['unread'])) {
@@ -212,9 +222,7 @@ class EloquentMailboxRepository implements MailboxRepository
             ->where('trashed', false)
             ->whereHas('mail', function ($q) use ($filters) {
                 $q->where('is_draft', false);
-                if (! empty($filters['importance'])) {
-                    $q->where('importance', $filters['importance']);
-                }
+                $this->applyMailFilters($q, $filters);
             });
 
         if (! empty($filters['unread'])) {
@@ -232,9 +240,7 @@ class EloquentMailboxRepository implements MailboxRepository
             ->where('trashed', true)
             ->whereHas('mail', function ($q) use ($filters) {
                 $q->where('is_draft', false);
-                if (! empty($filters['importance'])) {
-                    $q->where('importance', $filters['importance']);
-                }
+                $this->applyMailFilters($q, $filters);
             });
 
         if (! empty($filters['unread'])) {
