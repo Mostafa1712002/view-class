@@ -49,3 +49,13 @@ Order minimizes shared-file conflicts (sidebar/header/template serialized).
 - No `git add -A`/`.`. git pull --rebase before push. Deploy: ssh → git pull → migrate --force → caches → chown.
 - Independently verify live (real route/Playwright) — do NOT trust agent's self-report.
 - QA comment Arabic = what-was-done + numbered test steps; move to testing (69f0774def6235774c7409c5); assign card creator.
+
+## Expanded scope (user-approved 2026-06-15)
+Execution order after current Sprint 9 finishes:
+1. C6 #237 whatsapp + C11 #242 parents-contact — DONE local, awaiting SMS agent to co-deploy (shared RepositoryServiceProvider)
+2. SMS subsystem C7 #238 / C8 #239 / C9 #240 / C10 #241 / C12 #243 (provider creds requested from Mahmoud on #239; sends queued until then)
+3. C13 #244 comms UX polish + C14 #245 integration tests
+4. #221 QA BOUNCE (soc4avfb) — Mahmoud rejected: "design bad, sidebar broken, bigger font, clearer icons site-wide" → creative sidebar/header redesign + FULL icon-clarity sweep (the #220 long-tail). User chose "creative redesign + clear icons".
+5. NEW Question-Bank rebuild sprint: #247-259 (13 cards) — agent per card
+6. NEW Sprint 10: #260-274 (15 cards: attendance, certificates, support/tickets, admissions, parent CRM, educational websites, exports) — agent per card
+Deploy live one-at-a-time, QA Arabic + assign creator (Mahmoud 68905a1af157def85d18a667), each verified live incl. super-admin null-school case. Use scopedSchoolId() fail-closed helper for all school scoping.
