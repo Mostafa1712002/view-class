@@ -58,7 +58,7 @@ final class GenerateImportTemplate
         $spreadsheet = new Spreadsheet;
         $spreadsheet->getProperties()
             ->setTitle('QB Import Template')
-            ->setDescription('ViewClass — قالب استيراد الأسئلة');
+            ->setDescription(config('app.name').' — قالب استيراد الأسئلة');
 
         $this->buildQuestionsSheet($spreadsheet);
         $this->buildInstructionsSheet($spreadsheet);

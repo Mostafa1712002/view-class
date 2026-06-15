@@ -43,6 +43,11 @@
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     @if(session('error'))<div class="alert alert-warning">{{ session('error') }}</div>@endif
 
+    @include('admin.qb.partials.info-banner', [
+        'key' => 'qb-passages',
+        'slot' => '<b>أسئلة القطعة:</b> أنشئ القطعة القرائية أولًا، ثم أضف أسئلتها التابعة من صفحة عرض القطعة. تظهر الأسئلة التابعة مجمّعة أسفل نص القطعة.',
+    ])
+
     <div class="card mb-2"><div class="card-body py-2 d-flex flex-wrap gap-2">
         @if($canCreate)
             <a href="{{ route('admin.qb.passages.create') }}" class="btn btn-warning btn-sm">
@@ -87,11 +92,11 @@
 
     <div class="card"><div class="card-body p-0">
         @if($passages->total() === 0)
-            <div class="qb-empty">
-                <div class="ic"><x-svg-icon name="inbox-fill" :size="46" /></div>
-                <h5 class="mt-2">لا توجد قطع</h5>
-                <p class="mb-3">ابدأ بإضافة قطعة قرائية ثم أضف أسئلتها التابعة.</p>
-                @if($canCreate)<a href="{{ route('admin.qb.passages.create') }}" class="btn btn-warning btn-sm">إضافة قطعة</a>@endif
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="inbox-fill" :size="34" /></div>
+                <div class="ds-empty-title">لا توجد قطع</div>
+                <div class="ds-empty-desc">ابدأ بإضافة قطعة قرائية ثم أضف أسئلتها التابعة.</div>
+                @if($canCreate)<a href="{{ route('admin.qb.passages.create') }}" class="btn btn-warning btn-sm mt-2"><x-svg-icon name="plus-circle-fill" :size="15" /> إضافة قطعة</a>@endif
             </div>
         @else
             <div class="table-responsive">

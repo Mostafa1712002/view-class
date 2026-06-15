@@ -23,6 +23,9 @@
     .qx-d-electronic{background:#dbeafe;color:#1e40af}.qx-d-paper{background:#f1f5f9;color:#475569}
     .qx-st-draft{background:#e2e8f0;color:#475569}.qx-st-pub{background:#dcfce7;color:#166534}.qx-st-stop{background:#fee2e2;color:#991b1b}
     .qx-empty{padding:56px 16px;text-align:center;color:#64748b}.qx-empty .ic{font-size:46px;color:#cbd5e1}
+    .qx-stat-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .qx-stat-num{font-size:22px;font-weight:800;color:#0f172a;line-height:1}
+    .qx-stat-lbl{font-size:12px;color:#64748b;margin-top:3px}
 </style>
 @endpush
 
@@ -43,9 +46,43 @@
 @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
 @if (session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
-<div class="qx-info mb-3">
-    <b>الاختبارات الورقية:</b> مخصصة للطباعة والتوزيع على الطلاب في الفصل، وتحتاج لإدخال النتائج يدويًا أو تصحيح منفصل.<br>
-    <b>الاختبارات الإلكترونية:</b> يمكن للطالب الدخول إليها مباشرة من حسابه، ويتم التصحيح تلقائيًا حسب نوع السؤال، وتظهر النتائج حسب إعدادات الاختبار.
+@include('admin.qb.partials.info-banner', [
+    'key' => 'qb-exams',
+    'slot' => '<b>الاختبارات الورقية:</b> مخصصة للطباعة والتوزيع على الطلاب في الفصل، وتحتاج لإدخال النتائج يدويًا أو تصحيح منفصل.<br><b>الاختبارات الإلكترونية:</b> يمكن للطالب الدخول إليها مباشرة من حسابه، ويتم التصحيح تلقائيًا حسب نوع السؤال، وتظهر النتائج حسب إعدادات الاختبار.',
+])
+
+{{-- Stat cards (#257 §1) --}}
+@php
+    $countAll = $exams->total();
+    $countElectronic = $exams->getCollection()->where('delivery_type', 'electronic')->count();
+    $countPaper = $exams->getCollection()->where('delivery_type', 'paper')->count();
+    $countPublished = $exams->getCollection()->where('status', 'published')->count();
+@endphp
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+        <div class="card ds-stat h-100"><div class="card-body d-flex align-items-center gap-3">
+            <span class="qx-stat-ic" style="background:#fef3c7;color:#b8860b"><x-svg-icon name="journal-check" :size="20" /></span>
+            <div><div class="qx-stat-num">{{ $countAll }}</div><div class="qx-stat-lbl">إجمالي الاختبارات</div></div>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card ds-stat h-100"><div class="card-body d-flex align-items-center gap-3">
+            <span class="qx-stat-ic" style="background:#dbeafe;color:#1e40af"><x-svg-icon name="pc-display" :size="20" /></span>
+            <div><div class="qx-stat-num">{{ $countElectronic }}</div><div class="qx-stat-lbl">إلكتروني (بالصفحة)</div></div>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card ds-stat h-100"><div class="card-body d-flex align-items-center gap-3">
+            <span class="qx-stat-ic" style="background:#f1f5f9;color:#475569"><x-svg-icon name="printer" :size="20" /></span>
+            <div><div class="qx-stat-num">{{ $countPaper }}</div><div class="qx-stat-lbl">ورقي (بالصفحة)</div></div>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card ds-stat h-100"><div class="card-body d-flex align-items-center gap-3">
+            <span class="qx-stat-ic" style="background:#dcfce7;color:#166534"><x-svg-icon name="send-check" :size="20" /></span>
+            <div><div class="qx-stat-num">{{ $countPublished }}</div><div class="qx-stat-lbl">منشور (بالصفحة)</div></div>
+        </div></div>
+    </div>
 </div>
 
 <div class="card mb-3">
@@ -90,9 +127,15 @@
 <div class="card">
     <div class="card-body">
         @if ($exams->isEmpty())
-            <div class="qx-empty">
-                <div class="ic"><x-svg-icon name="inbox-fill" :size="46" /></div>
-                <p class="mt-2">لا توجد اختبارات بعد.</p>
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="inbox-fill" :size="34" /></div>
+                <div class="ds-empty-title">لا توجد اختبارات بعد</div>
+                <div class="ds-empty-desc">أنشئ اختبارًا إلكترونيًا أو ورقيًا ثم اختر أسئلته من بنك الأسئلة.</div>
+                @if ($canCreate)
+                    <a href="{{ route('admin.qb.exams.create', ['delivery_type' => 'electronic']) }}" class="btn btn-warning btn-sm mt-2">
+                        <x-svg-icon name="plus-circle-fill" :size="15" /> إضافة اختبار
+                    </a>
+                @endif
             </div>
         @else
             <div class="table-responsive">

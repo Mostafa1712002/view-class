@@ -28,16 +28,37 @@
     .qbf .compound-title { font-weight:700; color:#7a5d12; margin:10px 0 6px; }
     .answer-block { display:none; }
     .answer-block.active { display:block; }
+    .qbf .section-title span { color:#b8860b; font-weight:800; }
+    .qb-stepnav { position:sticky; top:0; z-index:5; }
+    .qb-steps { list-style:none; display:flex; flex-wrap:wrap; gap:6px; margin:0; padding:0; }
+    .qb-steps li { flex:1 1 auto; }
+    .qb-steps a { display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 10px; border-radius:10px; background:#f8fafc; border:1px solid #e2e8f0; color:#475569; font-size:13px; font-weight:600; text-decoration:none; transition:all .15s; }
+    .qb-steps a:hover { background:#fffbeb; border-color:#e3c97a; color:#7a5d12; }
+    .qb-steps .n { width:24px; height:24px; border-radius:50%; background:#fff; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center; font-weight:800; color:#b8860b; flex-shrink:0; }
+    html { scroll-behavior:smooth; }
+    [id^="qbSec"] { scroll-margin-top:72px; }
 </style>
 @endpush
 
 <input type="hidden" name="type" id="qType" value="{{ $curType }}">
 
 <div class="qbf">
+    {{-- Section navigator (#257 §3 — clear stepped sections without a fragile JS wizard) --}}
+    <div class="card mb-2 qb-stepnav">
+        <div class="card-body py-2">
+            <ol class="qb-steps">
+                <li><a href="#qbSec1"><span class="n">1</span> النطاق والمدارس</a></li>
+                <li><a href="#qbSec2"><span class="n">2</span> التصنيفات</a></li>
+                <li><a href="#qbSec3"><span class="n">3</span> محتوى السؤال</a></li>
+                <li><a href="#qbSec4"><span class="n">4</span> الإجابات</a></li>
+            </ol>
+        </div>
+    </div>
+
     {{-- ── Section 1: scope (#249 reusable component) ── --}}
-    <div class="card mb-2">
+    <div class="card mb-2" id="qbSec1">
         <div class="card-body">
-            <div class="section-title"><x-svg-icon name="diagram-3-fill" :size="16" /> تحديد نطاق السؤال</div>
+            <div class="section-title"><x-svg-icon name="diagram-3-fill" :size="16" /> <span>1.</span> تحديد نطاق السؤال</div>
             @include('admin.qb.partials.scope-selector', [
                 'tree' => $tree,
                 'scope' => $scopeService,
@@ -53,9 +74,9 @@
     </div>
 
     {{-- ── Section 2: classification ── --}}
-    <div class="card mb-2">
+    <div class="card mb-2" id="qbSec2">
         <div class="card-body">
-            <div class="section-title"><x-svg-icon name="tags-fill" :size="16" /> بيانات التصنيف</div>
+            <div class="section-title"><x-svg-icon name="tags-fill" :size="16" /> <span>2.</span> بيانات التصنيف</div>
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">بنك الأسئلة <span class="text-danger">*</span></label>
@@ -112,7 +133,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">حالة السؤال</label>
-                    <select name="status" class="form-select">
+                    <select name="status" id="qbStatusField" class="form-select">
                         @foreach($statuses as $k => $label)
                             <option value="{{ $k }}" @selected(old('status', $question->status ?? 'approved') === $k)>{{ $label }}</option>
                         @endforeach
@@ -152,9 +173,9 @@
     </div>
 
     {{-- ── Section 3: content ── --}}
-    <div class="card mb-2">
+    <div class="card mb-2" id="qbSec3">
         <div class="card-body">
-            <div class="section-title"><x-svg-icon name="card-text" :size="16" /> محتوى السؤال</div>
+            <div class="section-title"><x-svg-icon name="card-text" :size="16" /> <span>3.</span> محتوى السؤال</div>
             <div class="row g-3">
                 <div class="col-md-12">
                     <label class="form-label">نص السؤال</label>
@@ -188,9 +209,9 @@
     </div>
 
     {{-- ── Section 4: answers (per type) ── --}}
-    <div class="card mb-2">
+    <div class="card mb-2" id="qbSec4">
         <div class="card-body">
-            <div class="section-title"><x-svg-icon name="check2-circle" :size="16" /> الإجابات</div>
+            <div class="section-title"><x-svg-icon name="check2-circle" :size="16" /> <span>4.</span> الإجابات</div>
 
             {{-- MCQ --}}
             <div class="answer-block {{ $curType === 'mcq' ? 'active' : '' }}" data-type="mcq">
@@ -263,9 +284,15 @@
         </div>
     </div>
 
-    <div class="d-flex gap-2 mb-4">
-        <button type="submit" class="btn btn-warning">{{ $isEdit ? 'حفظ التعديلات' : 'إضافة السؤال' }}</button>
-        <a href="{{ $backUrl ?? route('admin.qb.questions.index') }}" class="btn btn-outline-secondary">رجوع</a>
+    <div class="qb-form-footer d-flex flex-wrap gap-2 mb-4 align-items-center">
+        <button type="submit" class="btn btn-warning">
+            <x-svg-icon name="check2-circle" :size="15" /> {{ $isEdit ? 'حفظ التعديلات' : 'إضافة السؤال' }}
+        </button>
+        {{-- حفظ كمسودة (#257 §3) — reuses the existing status=draft path, no backend change --}}
+        <button type="submit" class="btn btn-outline-secondary" onclick="document.getElementById('qbStatusField') && (document.getElementById('qbStatusField').value='draft');">
+            <x-svg-icon name="save" :size="15" /> حفظ كمسودة
+        </button>
+        <a href="{{ $backUrl ?? route('admin.qb.questions.index') }}" class="btn btn-outline-light text-dark border">رجوع</a>
     </div>
 </div>
 

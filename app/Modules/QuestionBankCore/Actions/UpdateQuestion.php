@@ -40,7 +40,8 @@ final class UpdateQuestion
                 'question_code'         => $data['question_code'] ?? null,
                 'question_content_type' => $data['question_content_type'],
                 'is_full_image_question' => (bool) ($data['is_full_image_question'] ?? false),
-                'body_ar'               => $data['body_ar'] ?? null,
+                // body_ar is NOT NULL; full-image questions have no text → coalesce to ''.
+                'body_ar'               => $data['body_ar'] ?? '',
                 'body_en'               => $data['body_en'] ?? null,
                 'explanation'           => $data['explanation'] ?? null,
                 'answer_data'           => $answers['json'],

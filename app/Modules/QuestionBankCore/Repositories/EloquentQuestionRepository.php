@@ -51,8 +51,19 @@ class EloquentQuestionRepository implements QuestionRepository
 
     public function isUsedInExam(int $questionId): bool
     {
-        return ExamQuestion::query()
+        // Legacy exams (exam_questions) AND the rebuilt QB exams (qb_exam_questions)
+        // both snapshot bank questions; a question referenced by either must be
+        // archived rather than hard-deleted.
+        $inLegacy = ExamQuestion::query()
             ->where('source_bank_question_id', $questionId)
+            ->exists();
+
+        if ($inLegacy) {
+            return true;
+        }
+
+        return \App\Modules\QuestionBankCore\Models\QbExamQuestion::query()
+            ->where('bank_question_id', $questionId)
             ->exists();
     }
 

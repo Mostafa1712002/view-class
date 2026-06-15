@@ -58,6 +58,11 @@
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     @if(session('error'))<div class="alert alert-warning">{{ session('error') }}</div>@endif
 
+    @include('admin.qb.partials.info-banner', [
+        'key' => 'qb-questions',
+        'slot' => '<b>قائمة الأسئلة:</b> تعرض كل أسئلة بنوك مدارسك. استخدم الفلاتر المتقدمة للبحث حسب البنك والمادة والمهارة والنوع والحالة. اضغط على <b>عرض الإجابة</b> أو <b>عرض الصفوف</b> لمعاينة تفاصيل كل سؤال داخل نافذة منبثقة.',
+    ])
+
     {{-- Toolbar --}}
     <div class="card mb-2">
         <div class="card-body py-2">
@@ -91,8 +96,18 @@
         </div>
     </div>
 
-    {{-- Filters --}}
+    {{-- Filters (collapsible — #257) --}}
+    @php $filtersActive = collect($filters)->filter(fn($v) => $v !== '' && $v !== null && $v !== false)->isNotEmpty(); @endphp
     <div class="card mb-2 qb-filters">
+        <div class="card-header py-2 d-flex align-items-center justify-content-between" role="button"
+             data-bs-toggle="collapse" data-bs-target="#qbFiltersBody" aria-expanded="{{ $filtersActive ? 'true' : 'false' }}" style="cursor:pointer;">
+            <span class="d-flex align-items-center gap-2" style="font-weight:600;font-size:13px;color:#0f172a;">
+                <x-svg-icon name="funnel-fill" :size="15" /> الفلاتر المتقدمة
+                @if($filtersActive)<span class="badge bg-warning text-dark">مفعّلة</span>@endif
+            </span>
+            <x-svg-icon name="chevron-down" :size="14" />
+        </div>
+        <div class="collapse {{ $filtersActive ? 'show' : '' }}" id="qbFiltersBody">
         <div class="card-body py-3">
             <form method="GET" action="{{ route('admin.qb.questions.index') }}">
                 <div class="row g-2">
@@ -190,18 +205,21 @@
                 </div>
             </form>
         </div>
+        </div>
     </div>
 
     {{-- Table --}}
     <div class="card">
         <div class="card-body p-0">
             @if($questions->total() === 0)
-                <div class="qb-empty">
-                    <div class="ic"><x-svg-icon name="inbox-fill" :size="46" /></div>
-                    <h5 class="mt-2">لا توجد أسئلة</h5>
-                    <p class="mb-3">لم يتم العثور على أسئلة مطابقة. ابدأ بإضافة سؤال جديد.</p>
+                <div class="ds-empty">
+                    <div class="ds-empty-icon"><x-svg-icon name="inbox-fill" :size="34" /></div>
+                    <div class="ds-empty-title">لا توجد أسئلة</div>
+                    <div class="ds-empty-desc">لم يتم العثور على أسئلة مطابقة. جرّب تعديل الفلاتر أو ابدأ بإضافة سؤال جديد.</div>
                     @if($canCreate)
-                        <a href="{{ route('admin.qb.questions.create') }}" class="btn btn-warning btn-sm">إضافة سؤال جديد</a>
+                        <a href="{{ route('admin.qb.questions.create') }}" class="btn btn-warning btn-sm mt-2">
+                            <x-svg-icon name="plus-circle-fill" :size="15" /> إضافة سؤال جديد
+                        </a>
                     @endif
                 </div>
             @else
