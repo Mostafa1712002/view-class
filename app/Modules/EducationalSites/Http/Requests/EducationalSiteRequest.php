@@ -30,7 +30,7 @@ class EducationalSiteRequest extends FormRequest
             'sort_order'     => ['nullable', 'integer', 'min:0', 'max:65535'],
             'opens_new_tab'  => ['nullable', 'boolean'],
             'is_active'      => ['nullable', 'boolean'],
-            'logo'           => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
+            'logo'           => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
         ];
     }
 
