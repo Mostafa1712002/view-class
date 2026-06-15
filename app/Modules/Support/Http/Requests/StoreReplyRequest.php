@@ -14,7 +14,8 @@ class StoreReplyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'body' => ['required', 'string'],
+            'body'       => ['required', 'string'],
+            'attachment' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt,zip'],
         ];
     }
 }

@@ -30,27 +30,35 @@
     </div>
     <div class="card-content">
         <div class="card-body">
-            <form action="{{ route('my.support.store') }}" method="POST" id="ticketForm">
+            <form action="{{ route('my.support.store') }}" method="POST" id="ticketForm" enctype="multipart/form-data">
                 @csrf
 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
-                            <label for="category">@lang('support.field_category') <span class="text-danger">*</span></label>
-                            <select name="category" id="category" class="form-control @error('category') is-invalid @enderror" required>
-                                <option value="">— @lang('support.placeholder_select_category') —</option>
-                                <option value="technical" @selected(old('category') === 'technical')>@lang('support.category_technical')</option>
-                                <option value="academic" @selected(old('category') === 'academic')>@lang('support.category_academic')</option>
-                                <option value="billing" @selected(old('category') === 'billing')>@lang('support.category_billing')</option>
-                                <option value="account" @selected(old('category') === 'account')>@lang('support.category_account')</option>
-                                <option value="other" @selected(old('category') === 'other')>@lang('support.category_other')</option>
+                            <label for="type">@lang('support.field_type')</label>
+                            <select name="type" id="type" class="form-control @error('type') is-invalid @enderror">
+                                <option value="">— @lang('support.placeholder_select_type') —</option>
+                                @foreach(\App\Models\SupportTicket::TYPES as $t)
+                                    <option value="{{ $t }}" @selected(old('type') === $t)>@lang('support.type_'.$t)</option>
+                                @endforeach
                             </select>
-                            @error('category')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="department">@lang('support.field_department')</label>
+                            <select name="department" id="department" class="form-control @error('department') is-invalid @enderror">
+                                <option value="">— @lang('support.placeholder_select_department') —</option>
+                                @foreach(\App\Models\SupportTicket::DEPARTMENTS as $d)
+                                    <option value="{{ $d }}" @selected(old('department') === $d)>@lang('support.dept_'.$d)</option>
+                                @endforeach
+                            </select>
+                            @error('department')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="priority">@lang('support.field_priority')</label>
                             <select name="priority" id="priority" class="form-control @error('priority') is-invalid @enderror">
@@ -59,11 +67,22 @@
                                 <option value="high" @selected(old('priority') === 'high')>@lang('support.priority_high')</option>
                                 <option value="urgent" @selected(old('priority') === 'urgent')>@lang('support.priority_urgent')</option>
                             </select>
-                            @error('priority')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            @error('priority')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">@lang('support.field_category') <span class="text-danger">*</span></label>
+                    <select name="category" id="category" class="form-control @error('category') is-invalid @enderror" required>
+                        <option value="">— @lang('support.placeholder_select_category') —</option>
+                        <option value="technical" @selected(old('category') === 'technical')>@lang('support.category_technical')</option>
+                        <option value="academic" @selected(old('category') === 'academic')>@lang('support.category_academic')</option>
+                        <option value="billing" @selected(old('category') === 'billing')>@lang('support.category_billing')</option>
+                        <option value="account" @selected(old('category') === 'account')>@lang('support.category_account')</option>
+                        <option value="other" @selected(old('category') === 'other')>@lang('support.category_other')</option>
+                    </select>
+                    @error('category')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 
                 {{-- #186: a parent may link the ticket to one of their children --}}
@@ -100,6 +119,22 @@
                     @error('body')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="problem_url">@lang('support.field_problem_url')</label>
+                    <input type="url" name="problem_url" id="problem_url"
+                        class="form-control @error('problem_url') is-invalid @enderror"
+                        value="{{ old('problem_url') }}" placeholder="{{ __('support.placeholder_problem_url') }}">
+                    @error('problem_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="attachment">@lang('support.field_attachment')</label>
+                    <input type="file" name="attachment" id="attachment"
+                        class="form-control-file @error('attachment') is-invalid @enderror">
+                    <small class="text-muted">@lang('support.attachment_hint')</small>
+                    @error('attachment')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
 
                 <div class="form-actions">

@@ -96,4 +96,84 @@ return [
     'badge_staff'              => 'دعم فني',
     'placeholder_select_category' => 'اختر التصنيف',
     'placeholder_user_id'      => 'رقم المستخدم',
+
+    // ─── #267 additions ───────────────────────────────────────────────────────
+
+    // Ticket type (نوع التذكرة)
+    'field_type'               => 'نوع التذكرة',
+    'placeholder_select_type'  => 'اختر النوع',
+    'type_bug'                 => 'خطأ تقني',
+    'type_inquiry'             => 'استفسار',
+    'type_feature'             => 'طلب تطوير',
+    'type_activate_user'       => 'تفعيل مستخدم',
+    'type_login_issue'         => 'مشكلة دخول',
+    'type_reports_issue'       => 'مشكلة تقارير',
+    'type_attendance_issue'    => 'مشكلة حضور وغياب',
+    'type_certificates_issue'  => 'مشكلة شهادات',
+    'type_registration_issue'  => 'مشكلة تسجيل',
+
+    // Department (القسم)
+    'field_department'         => 'القسم',
+    'placeholder_select_department' => 'اختر القسم',
+    'dept_assignments'         => 'الواجبات',
+    'dept_exams'               => 'الاختبارات',
+    'dept_virtual_classes'     => 'الفصول الافتراضية',
+    'dept_attendance'          => 'الحضور والغياب',
+    'dept_messages'            => 'الرسائل',
+    'dept_certificates'        => 'الشهادات',
+    'dept_admissions'          => 'القبول والتسجيل',
+    'dept_support'             => 'الدعم الفني',
+    'dept_other'               => 'أخرى',
+
+    // Problem link + attachments
+    'field_problem_url'        => 'رابط المشكلة',
+    'placeholder_problem_url'  => 'https://...',
+    'field_attachment'         => 'المرفق',
+    'field_attachments'        => 'المرفقات',
+    'btn_download_attachment'  => 'تحميل المرفق',
+    'attachment_hint'          => 'الحد الأقصى 5 ميجابايت (صور، PDF، Word، Excel، نصوص، ZIP).',
+    'no_attachment'            => 'لا يوجد مرفق',
+
+    // Admin table extra columns
+    'field_school'             => 'المدرسة',
+    'field_ticket_no'          => 'رقم التذكرة',
+
+    // Stat cards
+    'card_open'                => 'جديدة',
+    'card_in_progress'         => 'جاري التنفيذ',
+    'card_admin_replied'       => 'الأدمن رد',
+    'card_user_replied'        => 'المستخدم رد',
+    'card_closed'              => 'مغلق',
+    'card_of_total'            => 'من الإجمالي',
+
+    // Status log
+    'section_status_log'       => 'سجل تغيير الحالة',
+    'empty_status_log'         => 'لا توجد تغييرات على الحالة بعد.',
+    'empty_replies'            => 'لا توجد ردود بعد.',
+
+    // Actions
+    'btn_close'                => 'إغلاق',
+    'btn_reopen'               => 'إعادة فتح',
+    'btn_delete'               => 'حذف',
+    'confirm_close'            => 'هل تريد إغلاق هذه التذكرة؟',
+    'confirm_reopen'           => 'هل تريد إعادة فتح هذه التذكرة؟',
+    'confirm_delete'           => 'هل تريد حذف هذه التذكرة نهائياً؟',
+    'section_actions'          => 'الإجراءات',
+
+    // Flash
+    'flash_closed'             => 'تم إغلاق التذكرة.',
+    'flash_reopened'           => 'تمت إعادة فتح التذكرة.',
+    'flash_deleted'            => 'تم حذف التذكرة.',
+
+    // Filters extra
+    'filter_type'              => 'النوع',
+    'filter_department'        => 'القسم',
+
+    // Notifications
+    'notify_action_view'       => 'عرض التذكرة',
+    'notify_created_title'     => 'تذكرة دعم جديدة',
+    'notify_staff_reply_title' => 'رد جديد من الدعم الفني',
+    'notify_user_reply_title'  => 'رد جديد من المستخدم على التذكرة',
+    'notify_status_title'      => 'تغيّرت حالة التذكرة إلى: :status',
+    'notify_assigned_title'    => 'تم تحويل تذكرة دعم إليك',
 ];

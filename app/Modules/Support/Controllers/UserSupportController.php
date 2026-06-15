@@ -3,18 +3,26 @@
 namespace App\Modules\Support\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\SupportTicket;
 use App\Modules\Support\Http\Requests\StoreReplyRequest;
 use App\Modules\Support\Http\Requests\StoreTicketRequest;
 use App\Modules\Support\Repositories\Contracts\SupportTicketRepository;
+use App\Modules\Support\Services\SupportNotifier;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class UserSupportController extends Controller
 {
     use HasSchoolScope;
 
-    public function __construct(private SupportTicketRepository $tickets) {}
+    public function __construct(
+        private SupportTicketRepository $tickets,
+        private SupportNotifier $notifier,
+    ) {}
 
     public function index(): View
     {
@@ -23,10 +31,9 @@ class UserSupportController extends Controller
             auth()->id()
         );
 
-        // Status counters for the user's own tickets (#186). Null active school
-        // (super-admin) is unscoped, matching getUserTickets().
+        // Status counters for the user's own tickets (#186).
         $schoolId = $this->activeSchoolId();
-        $base = \App\Models\SupportTicket::query()
+        $base = SupportTicket::query()
             ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->where('created_by', auth()->id());
         $counts = [
@@ -59,12 +66,19 @@ class UserSupportController extends Controller
             'created_by'         => $user->id,
             'related_student_id' => $request->validated('related_student_id'),
             'creator_role'       => $user->roles->first()?->slug ?? 'user',
+            'type'               => $request->validated('type'),
             'category'           => $request->validated('category'),
+            'department'         => $request->validated('department'),
             'subject'            => $request->validated('subject'),
             'body'               => $request->validated('body'),
+            'problem_url'        => $request->validated('problem_url'),
             'priority'           => $request->validated('priority') ?? 'normal',
             'status'             => 'open',
+            'attachment_path'    => $this->storeAttachment($request),
         ]);
+
+        ActivityLog::logCreate($ticket, 'إنشاء تذكرة دعم');
+        $this->notifier->ticketCreated($ticket);
 
         return redirect()
             ->route('my.support.show', $ticket->id)
@@ -73,27 +87,57 @@ class UserSupportController extends Controller
 
     public function show(int $ticket): View
     {
-        $ticket = $this->tickets->find($ticket);
-        abort_if(! $ticket, 404);
-        abort_if($ticket->created_by !== auth()->id(), 403);
+        $ticket = $this->resolveOwn($ticket);
 
         return view('support.user.show', compact('ticket'));
     }
 
     public function reply(StoreReplyRequest $request, int $ticket): RedirectResponse
     {
-        $ticket = $this->tickets->find($ticket);
-        abort_if(! $ticket, 404);
-        abort_if($ticket->created_by !== auth()->id(), 403);
+        $ticket = $this->resolveOwn($ticket);
+        abort_if(in_array($ticket->status, ['resolved', 'closed'], true), 403);
 
         $this->tickets->addReply($ticket->id, [
-            'user_id'  => auth()->id(),
-            'body'     => $request->validated('body'),
-            'is_staff' => 0,
+            'user_id'         => auth()->id(),
+            'body'            => $request->validated('body'),
+            'is_staff'        => 0,
+            'attachment_path' => $this->storeAttachment($request),
         ]);
+
+        ActivityLog::log('support.reply', 'رد المستخدم على تذكرة دعم', $ticket);
+        $this->notifier->userReplied($ticket->fresh());
 
         return redirect()
             ->route('my.support.show', $ticket->id)
             ->with('success', __('support.flash_reply_sent'));
+    }
+
+    public function attachment(int $ticket)
+    {
+        $ticket = $this->resolveOwn($ticket);
+        abort_if(! $ticket->attachment_path, 404);
+        abort_unless(Storage::disk('public')->exists($ticket->attachment_path), 404);
+
+        return Storage::disk('public')->download($ticket->attachment_path);
+    }
+
+    // ─── Helpers ────────────────────────────────────────────────────────────────
+
+    private function resolveOwn(int $id): SupportTicket
+    {
+        $ticket = $this->tickets->find($id);
+        abort_if(! $ticket, 404);
+        abort_if($ticket->created_by !== auth()->id(), 403);
+
+        return $ticket;
+    }
+
+    private function storeAttachment(Request $request): ?string
+    {
+        if (! $request->hasFile('attachment')) {
+            return null;
+        }
+
+        return $request->file('attachment')->store('support', 'public');
     }
 }

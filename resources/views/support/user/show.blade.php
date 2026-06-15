@@ -36,13 +36,37 @@
     <div class="card-content">
         <div class="card-body">
             <div class="row mb-1">
+                <div class="col-md-3 font-weight-bold">@lang('support.field_type')</div>
+                <div class="col-md-9">{{ $ticket->typeLabel() }}</div>
+            </div>
+            <div class="row mb-1">
                 <div class="col-md-3 font-weight-bold">@lang('support.field_category')</div>
                 <div class="col-md-9">{{ __('support.category_' . $ticket->category) }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col-md-3 font-weight-bold">@lang('support.field_department')</div>
+                <div class="col-md-9">{{ $ticket->departmentLabel() }}</div>
             </div>
             <div class="row mb-1">
                 <div class="col-md-3 font-weight-bold">@lang('support.field_created_at')</div>
                 <div class="col-md-9">{{ $ticket->created_at->format('Y-m-d H:i') }}</div>
             </div>
+            @if($ticket->problem_url)
+            <div class="row mb-1">
+                <div class="col-md-3 font-weight-bold">@lang('support.field_problem_url')</div>
+                <div class="col-md-9"><a href="{{ $ticket->problem_url }}" target="_blank" rel="noopener">{{ $ticket->problem_url }}</a></div>
+            </div>
+            @endif
+            @if($ticket->attachment_path)
+            <div class="row mb-1">
+                <div class="col-md-3 font-weight-bold">@lang('support.field_attachments')</div>
+                <div class="col-md-9">
+                    <a href="{{ route('my.support.attachment', $ticket->id) }}" class="btn btn-sm btn-outline-primary">
+                        <x-svg-icon name="paperclip" size="14" /> @lang('support.btn_download_attachment')
+                    </a>
+                </div>
+            </div>
+            @endif
             @if($ticket->assignee)
             <div class="row mb-1">
                 <div class="col-md-3 font-weight-bold">@lang('support.field_assigned_to')</div>
@@ -88,7 +112,7 @@
     </div>
     <div class="card-content">
         <div class="card-body">
-            <form action="{{ route('my.support.reply', $ticket->id) }}" method="POST">
+            <form action="{{ route('my.support.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="form-group">
                     <label for="body">@lang('support.field_reply_body') <span class="text-danger">*</span></label>
@@ -99,8 +123,15 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="form-group">
+                    <label for="attachment">@lang('support.field_attachment')</label>
+                    <input type="file" name="attachment" id="attachment"
+                        class="form-control-file @error('attachment') is-invalid @enderror">
+                    <small class="text-muted">@lang('support.attachment_hint')</small>
+                    @error('attachment')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                </div>
                 <button type="submit" class="btn btn-primary">
-                    <i class="la la-paper-plane"></i> @lang('support.btn_send_reply')
+                    <x-svg-icon name="send" size="15" /> @lang('support.btn_send_reply')
                 </button>
             </form>
         </div>

@@ -5,6 +5,17 @@
 
 @php
     $isRtl = app()->getLocale() === 'ar';
+    $total = $counts['all'] ?? 0;
+    // Stat cards: key => [arabic label, status|reply_state value, css color, svg icon]
+    $cards = [
+        ['open',          'card_open',          ['status' => 'open'],                 'info',      'folder2-open'],
+        ['in_progress',   'card_in_progress',   ['status' => 'in_progress'],          'warning',   'hourglass-split'],
+        ['admin_replied', 'card_admin_replied', ['reply_state' => 'admin_replied'],   'primary',   'reply'],
+        ['user_replied',  'card_user_replied',  ['reply_state' => 'user_replied'],    'success',   'person'],
+        ['closed',        'card_closed',        ['status' => 'closed'],               'secondary', 'lock'],
+    ];
+    $activeStatus = $filters['status'] ?? null;
+    $activeReply  = $filters['reply_state'] ?? null;
 @endphp
 
 @section('content')
@@ -22,49 +33,84 @@
     </div>
 </div>
 
+@if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+
+{{-- Stat cards (click to filter) --}}
+<div class="row mb-1">
+    @foreach($cards as [$key, $labelKey, $param, $color, $icon])
+        @php
+            $isActive = (isset($param['status']) && $activeStatus === $param['status'])
+                     || (isset($param['reply_state']) && $activeReply === $param['reply_state']);
+            $pct = $total > 0 ? round(($counts[$key] ?? 0) / $total * 100) : 0;
+        @endphp
+        <div class="col-6 col-md mb-2">
+            <a href="{{ route('admin.support.index', $param) }}"
+               class="card mb-0 text-decoration-none {{ $isActive ? 'border-'.$color : '' }}"
+               style="display:block; {{ $isActive ? 'box-shadow:0 0 0 2px var(--'.$color.', #c9a04b);' : '' }}">
+                <div class="card-body py-2 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small">@lang('support.'.$labelKey)</div>
+                        <div class="h3 mb-0 text-{{ $color }}">{{ $counts[$key] ?? 0 }}</div>
+                        <div class="text-muted" style="font-size:.72rem">{{ $pct }}% @lang('support.card_of_total')</div>
+                    </div>
+                    <span class="badge badge-{{ $color }} d-flex align-items-center justify-content-center" style="width:42px;height:42px;border-radius:50%;">
+                        <x-svg-icon name="{{ $icon }}" size="18" />
+                    </span>
+                </div>
+            </a>
+        </div>
+    @endforeach
+</div>
 
 {{-- Filter bar --}}
 <div class="card mb-2">
     <div class="card-content">
         <div class="card-body py-1">
             <form method="GET" action="{{ route('admin.support.index') }}" class="form-row align-items-end">
-                <div class="col-md-3 col-sm-6 mb-1">
+                <div class="col-md-2 col-sm-6 mb-1">
                     <label class="mb-0 small">@lang('support.filter_status')</label>
                     <select name="status" class="form-control form-control-sm">
                         <option value="">— @lang('support.filter_all') —</option>
-                        <option value="open"        @selected(($filters['status'] ?? '') === 'open')>@lang('support.status_open')</option>
-                        <option value="in_progress" @selected(($filters['status'] ?? '') === 'in_progress')>@lang('support.status_in_progress')</option>
-                        <option value="resolved"    @selected(($filters['status'] ?? '') === 'resolved')>@lang('support.status_resolved')</option>
-                        <option value="closed"      @selected(($filters['status'] ?? '') === 'closed')>@lang('support.status_closed')</option>
+                        @foreach(['open','in_progress','resolved','closed'] as $s)
+                            <option value="{{ $s }}" @selected(($filters['status'] ?? '') === $s)>@lang('support.status_'.$s)</option>
+                        @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 col-sm-6 mb-1">
+                <div class="col-md-2 col-sm-6 mb-1">
                     <label class="mb-0 small">@lang('support.filter_priority')</label>
                     <select name="priority" class="form-control form-control-sm">
                         <option value="">— @lang('support.filter_all') —</option>
-                        <option value="low"    @selected(($filters['priority'] ?? '') === 'low')>@lang('support.priority_low')</option>
-                        <option value="normal" @selected(($filters['priority'] ?? '') === 'normal')>@lang('support.priority_normal')</option>
-                        <option value="high"   @selected(($filters['priority'] ?? '') === 'high')>@lang('support.priority_high')</option>
-                        <option value="urgent" @selected(($filters['priority'] ?? '') === 'urgent')>@lang('support.priority_urgent')</option>
+                        @foreach(['low','normal','high','urgent'] as $p)
+                            <option value="{{ $p }}" @selected(($filters['priority'] ?? '') === $p)>@lang('support.priority_'.$p)</option>
+                        @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 col-sm-6 mb-1">
-                    <label class="mb-0 small">@lang('support.filter_category')</label>
-                    <select name="category" class="form-control form-control-sm">
+                <div class="col-md-2 col-sm-6 mb-1">
+                    <label class="mb-0 small">@lang('support.filter_type')</label>
+                    <select name="type" class="form-control form-control-sm">
                         <option value="">— @lang('support.filter_all') —</option>
-                        <option value="technical" @selected(($filters['category'] ?? '') === 'technical')>@lang('support.category_technical')</option>
-                        <option value="academic"  @selected(($filters['category'] ?? '') === 'academic')>@lang('support.category_academic')</option>
-                        <option value="billing"   @selected(($filters['category'] ?? '') === 'billing')>@lang('support.category_billing')</option>
-                        <option value="account"   @selected(($filters['category'] ?? '') === 'account')>@lang('support.category_account')</option>
-                        <option value="other"     @selected(($filters['category'] ?? '') === 'other')>@lang('support.category_other')</option>
+                        @foreach(\App\Models\SupportTicket::TYPES as $t)
+                            <option value="{{ $t }}" @selected(($filters['type'] ?? '') === $t)>@lang('support.type_'.$t)</option>
+                        @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 col-sm-6 mb-1 d-flex gap-1">
+                <div class="col-md-2 col-sm-6 mb-1">
+                    <label class="mb-0 small">@lang('support.filter_department')</label>
+                    <select name="department" class="form-control form-control-sm">
+                        <option value="">— @lang('support.filter_all') —</option>
+                        @foreach(\App\Models\SupportTicket::DEPARTMENTS as $d)
+                            <option value="{{ $d }}" @selected(($filters['department'] ?? '') === $d)>@lang('support.dept_'.$d)</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4 col-sm-12 mb-1 d-flex gap-1">
                     <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="la la-search"></i> @lang('support.filter_apply')
+                        <x-svg-icon name="search" size="14" /> @lang('support.filter_apply')
                     </button>
                     <a href="{{ route('admin.support.index') }}" class="btn btn-sm btn-secondary ml-1">
-                        <i class="la la-redo"></i> @lang('support.filter_reset')
+                        <x-svg-icon name="arrow-clockwise" size="14" /> @lang('support.filter_reset')
                     </a>
                 </div>
             </form>
@@ -78,45 +124,42 @@
             <table class="table table-bordered table-striped mb-0">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>@lang('support.field_ticket_no')</th>
+                        <th>@lang('support.field_type')</th>
+                        <th>@lang('support.field_department')</th>
                         <th>@lang('support.field_subject')</th>
-                        <th>@lang('support.field_creator')</th>
-                        <th>@lang('support.field_category')</th>
                         <th>@lang('support.field_status')</th>
                         <th>@lang('support.field_priority')</th>
-                        <th>@lang('support.field_assigned_to')</th>
                         <th>@lang('support.field_created_at')</th>
+                        <th>@lang('support.field_school')</th>
+                        <th>@lang('support.field_creator')</th>
+                        <th>@lang('support.field_assigned_to')</th>
                         <th>@lang('support.field_actions')</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($tickets as $ticket)
                         <tr>
-                            <td>{{ $ticket->id }}</td>
+                            <td>#{{ $ticket->id }}</td>
+                            <td>{{ $ticket->typeLabel() }}</td>
+                            <td>{{ $ticket->departmentLabel() }}</td>
                             <td>{{ $ticket->subject }}</td>
-                            <td>{{ optional($ticket->creator)->name }}</td>
-                            <td>{{ __('support.category_' . $ticket->category) }}</td>
-                            <td>
-                                <span class="badge badge-{{ $ticket->statusColor() }}">
-                                    {{ $ticket->statusLabel() }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ $ticket->priorityColor() }}">
-                                    {{ $ticket->priorityLabel() }}
-                                </span>
-                            </td>
-                            <td>{{ optional($ticket->assignee)->name ?? '—' }}</td>
+                            <td><span class="badge badge-{{ $ticket->statusColor() }}">{{ $ticket->statusLabel() }}</span></td>
+                            <td><span class="badge badge-{{ $ticket->priorityColor() }}">{{ $ticket->priorityLabel() }}</span></td>
                             <td>{{ $ticket->created_at->format('Y-m-d H:i') }}</td>
+                            <td>{{ optional($ticket->school)->name ?? '—' }}</td>
+                            <td>{{ optional($ticket->creator)->name }}</td>
+                            <td>{{ optional($ticket->assignee)->name ?? '—' }}</td>
                             <td>
                                 <a href="{{ route('admin.support.show', $ticket->id) }}" class="btn btn-sm btn-info">
-                                    <i class="la la-eye"></i> @lang('support.btn_view')
+                                    <x-svg-icon name="eye" size="14" /> @lang('support.btn_view')
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-3">
+                            <td colspan="11" class="text-center text-muted py-4">
+                                <x-svg-icon name="inbox" size="28" class="d-block mx-auto mb-1 text-muted" />
                                 @lang('support.empty_tickets')
                             </td>
                         </tr>
@@ -125,9 +168,7 @@
             </table>
         </div>
         @if($tickets->hasPages())
-            <div class="p-2">
-                {{ $tickets->links() }}
-            </div>
+            <div class="p-2">{{ $tickets->links() }}</div>
         @endif
     </div>
 </div>

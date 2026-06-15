@@ -2,6 +2,7 @@
 
 namespace App\Modules\Support\Http\Requests;
 
+use App\Models\SupportTicket;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,11 +24,15 @@ class StoreTicketRequest extends FormRequest
             : ['nullable', 'prohibited'];
 
         return [
+            'type'               => ['nullable', Rule::in(SupportTicket::TYPES)],
             'category'           => ['required', 'string', 'max:40'],
+            'department'         => ['nullable', Rule::in(SupportTicket::DEPARTMENTS)],
             'subject'            => ['required', 'string', 'max:160'],
             'body'               => ['required', 'string'],
+            'problem_url'        => ['nullable', 'url', 'max:500'],
             'priority'           => ['nullable', 'in:low,normal,high,urgent'],
             'related_student_id' => $relatedStudentRule,
+            'attachment'         => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt,zip'],
         ];
     }
 }
