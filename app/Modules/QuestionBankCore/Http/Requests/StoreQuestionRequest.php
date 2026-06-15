@@ -29,6 +29,17 @@ class StoreQuestionRequest extends FormRequest
         $bankId = (int) $this->route('bankId');
         $ignoreId = $this->route('questionId') ? (int) $this->route('questionId') : null;
 
+        // passage_id must belong to a bank inside the caller's school scope
+        // (super-admin = any). Prevents attaching a question to another tenant's passage.
+        $user = auth()->user();
+        $passageRule = Rule::exists('passages', 'id');
+        if (! ($user?->isSuperAdmin() ?? false)) {
+            $passageRule->where(fn ($q) => $q->whereIn(
+                'question_bank_id',
+                \DB::table('question_banks')->where('school_id', $user?->school_id)->select('id')
+            ));
+        }
+
         return [
             'type'                   => ['required', 'in:'.implode(',', BankQuestion::TYPES)],
             'question_category'      => ['nullable', 'in:normal,tahsili,passage'],
@@ -57,7 +68,7 @@ class StoreQuestionRequest extends FormRequest
             'skill_id'    => ['nullable', 'integer', 'exists:skills,id'],
             'standard_id' => ['nullable', 'integer', 'exists:standards,id'],
             'lesson_id'   => ['nullable', 'integer', 'exists:subject_lessons,id'],
-            'passage_id'  => ['nullable', 'integer', 'exists:passages,id'],
+            'passage_id'  => ['nullable', 'integer', $passageRule],
 
             'attachment'        => ['nullable', 'file', 'max:10240'],
             'remove_attachment' => ['nullable', 'boolean'],

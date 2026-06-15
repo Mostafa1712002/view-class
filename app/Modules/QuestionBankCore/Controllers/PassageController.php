@@ -273,12 +273,18 @@ class PassageController extends Controller
         $passage = $this->loadScoped($passageId);
 
         DB::transaction(function () use ($passage, $questionId) {
-            $passage->questions()->detach($questionId);
-            BankQuestion::where('id', $questionId)->update([
-                'passage_id'  => null,
-                'status'      => BankQuestion::STATUS_ARCHIVED,
-                'archived_at' => now(),
-            ]);
+            // Only act if the question is actually attached to THIS passage —
+            // prevents archiving an arbitrary/out-of-scope question by id (IDOR).
+            $detached = $passage->questions()->detach($questionId);
+            abort_if($detached === 0, 404);
+
+            BankQuestion::where('id', $questionId)
+                ->where('passage_id', $passage->id)
+                ->update([
+                    'passage_id'  => null,
+                    'status'      => BankQuestion::STATUS_ARCHIVED,
+                    'archived_at' => now(),
+                ]);
         });
 
         ActivityLog::log('question_banks.delete', "إزالة سؤال (#{$questionId}) من القطعة (#{$passage->id})", $passage);
