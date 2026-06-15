@@ -29,6 +29,11 @@
     </div>
     <div class="card-content">
         <div class="card-body">
+            @if($room->instructions)
+                <div class="alert alert-info">
+                    <i class="la la-info-circle"></i> {{ $room->instructions }}
+                </div>
+            @endif
             <form action="{{ route('discussion.topic.store', $room->id) }}" method="POST" id="topicForm">
                 @csrf
 

@@ -24,9 +24,11 @@
         </div>
     </div>
     <div class="content-header-right text-md-right col-md-3 col-12 d-md-block d-none">
-        <a href="{{ route('discussion.topic.create', $room->id) }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('discussion.btn_new_topic')
-        </a>
+        @if($room->allow_topics || $isStaff)
+            <a href="{{ route('discussion.topic.create', $room->id) }}" class="btn btn-primary">
+                <i class="la la-plus"></i> @lang('discussion.btn_new_topic')
+            </a>
+        @endif
     </div>
 </div>
 
@@ -42,6 +44,12 @@
                         @endif
                         @if($topic->is_closed)
                             <span class="badge badge-secondary mr-1">@lang('discussion.closed_badge')</span>
+                        @endif
+                        @if($topic->comments_closed)
+                            <span class="badge badge-light border mr-1"><i class="la la-comment-slash"></i></span>
+                        @endif
+                        @if($topic->is_hidden)
+                            <span class="badge badge-dark mr-1"><i class="la la-eye-slash"></i> @lang('discussion.btn_hide')</span>
                         @endif
                         <a href="{{ route('discussion.topic', $topic->id) }}" class="font-weight-bold">
                             {{ $topic->title }}
@@ -82,6 +90,28 @@
                                     </button>
                                 </form>
                             @endif
+                            {{-- Toggle comments on this topic (discussion.toggle_comments) --}}
+                            <form method="POST"
+                                  action="{{ route('manage.discussion-rooms.topics.toggle-comments', $topic->id) }}"
+                                  class="d-inline">
+                                @csrf
+                                <button type="submit"
+                                        class="btn btn-xs {{ $topic->comments_closed ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                                        title="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}">
+                                    <i class="la {{ $topic->comments_closed ? 'la-comment-slash' : 'la-comment' }}"></i>
+                                </button>
+                            </form>
+                            {{-- Hide / show topic --}}
+                            <form method="POST"
+                                  action="{{ route('manage.discussion-rooms.topics.hide', $topic->id) }}"
+                                  class="d-inline">
+                                @csrf
+                                <button type="submit"
+                                        class="btn btn-xs {{ $topic->is_hidden ? 'btn-dark' : 'btn-outline-dark' }}"
+                                        title="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}">
+                                    <i class="la {{ $topic->is_hidden ? 'la-eye-slash' : 'la-eye' }}"></i>
+                                </button>
+                            </form>
                             {{-- Delete topic --}}
                             <form method="POST"
                                   action="{{ route('manage.discussion-rooms.topics.destroy', $topic->id) }}"

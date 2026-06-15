@@ -42,7 +42,8 @@ class DiscussionController extends Controller
         $this->assertSchool($room->school_id);
         abort_if($room->status !== 'active', 403);
 
-        $topics = $this->repo->topicsForRoom($roomId, $this->activeSchoolId());
+        // Staff see hidden topics; members do not.
+        $topics = $this->repo->topicsForRoom($roomId, $this->activeSchoolId(), 20, $this->isStaff());
 
         return view('discussion.member.room', compact('room', 'topics'));
     }
@@ -56,6 +57,8 @@ class DiscussionController extends Controller
         abort_if(! $room, 404);
         $this->assertSchool($room->school_id);
         abort_if($room->status !== 'active', 403);
+        // Room must allow new topics (staff may always post).
+        abort_if(! $room->allow_topics && ! $this->isStaff(), 403, __('discussion.topics_disabled_notice'));
 
         return view('discussion.member.topic_create', compact('room'));
     }
@@ -69,6 +72,7 @@ class DiscussionController extends Controller
         abort_if(! $room, 404);
         $this->assertSchool($room->school_id);
         abort_if($room->status !== 'active', 403);
+        abort_if(! $room->allow_topics && ! $this->isStaff(), 403, __('discussion.topics_disabled_notice'));
 
         $data = $request->validate([
             'title' => ['required', 'string', 'max:200'],
@@ -99,10 +103,17 @@ class DiscussionController extends Controller
 
         // Ensure the parent room is accessible
         abort_if(! $topic->room || $topic->room->status !== 'active', 403);
+        // Members cannot open a hidden topic; staff can.
+        abort_if($topic->is_hidden && ! $this->isStaff(), 404);
 
         $comments = $this->repo->commentsForTopic($topicId);
 
-        return view('discussion.member.topic', compact('topic', 'comments'));
+        // Whether replies are allowed: room flag + topic flag + topic not closed.
+        $commentsAllowed = $topic->room->allow_comments
+            && ! $topic->comments_closed
+            && ! $topic->is_closed;
+
+        return view('discussion.member.topic', compact('topic', 'comments', 'commentsAllowed'));
     }
 
     /**
@@ -114,7 +125,11 @@ class DiscussionController extends Controller
         abort_if(! $topic, 404);
         $this->assertSchool($topic->school_id);
         abort_if(! $topic->room || $topic->room->status !== 'active', 403);
+        abort_if($topic->is_hidden && ! $this->isStaff(), 404);
         abort_if($topic->is_closed, 403);
+        // Comments must be enabled at the room AND topic level (toggle_comments).
+        abort_if(! $topic->room->allow_comments, 403, __('discussion.comments_disabled_notice'));
+        abort_if($topic->comments_closed, 403, __('discussion.topic_comments_disabled_notice'));
 
         $data = $request->validate([
             'body' => ['required', 'string'],
@@ -161,5 +176,12 @@ class DiscussionController extends Controller
             return;
         }
         abort_if($resourceSchoolId !== $this->activeSchoolId(), 403);
+    }
+
+    private function isStaff(): bool
+    {
+        $user = auth()->user();
+
+        return $user && ($user->isSuperAdmin() || $user->isSchoolAdmin() || $user->isTeacher());
     }
 }

@@ -20,6 +20,8 @@ class DiscussionTopic extends Model
         'created_by',
         'is_pinned',
         'is_closed',
+        'comments_closed',
+        'is_hidden',
         'comments_count',
         'last_activity_at',
     ];
@@ -27,6 +29,8 @@ class DiscussionTopic extends Model
     protected $casts = [
         'is_pinned'        => 'boolean',
         'is_closed'        => 'boolean',
+        'comments_closed'  => 'boolean',
+        'is_hidden'        => 'boolean',
         'last_activity_at' => 'datetime',
         'room_id'          => 'integer',
         'school_id'        => 'integer',

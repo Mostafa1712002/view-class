@@ -9,6 +9,7 @@ return [
     'page_title_create_room'=> 'Create Discussion Room',
     'page_title_edit_room'  => 'Edit Discussion Room',
     'page_title_new_topic'  => 'New Topic',
+    'page_title_report'     => 'Room Report',
 
     // Breadcrumbs
     'breadcrumb_home'       => 'Home',
@@ -28,6 +29,13 @@ return [
     'field_comments_count'  => 'Replies',
     'field_last_activity'   => 'Last Activity',
     'field_pinned'          => 'Pinned',
+    'field_instructions'    => 'Room Instructions',
+    'field_allow_topics'    => 'Allow new topics',
+    'field_allow_comments'  => 'Allow comments',
+    'field_requires_approval' => 'Do posts require approval?',
+    'field_comments_total'  => 'Total Comments',
+    'field_participants'    => 'Participants',
+    'field_author'          => 'Author',
 
     // Status
     'status_active'         => 'Active',
@@ -45,6 +53,15 @@ return [
     'btn_pin'               => 'Pin',
     'btn_unpin'             => 'Unpin',
     'btn_close_topic'       => 'Close Topic',
+    'btn_reopen'            => 'Activate',
+    'btn_report'            => 'Report',
+    'btn_view'              => 'View',
+    'btn_disable_comments'  => 'Disable Comments',
+    'btn_enable_comments'   => 'Enable Comments',
+    'btn_disable_topic_comments' => 'Disable Comment',
+    'btn_enable_topic_comments'  => 'Enable Comment',
+    'btn_hide'              => 'Hide',
+    'btn_show'              => 'Show',
 
     // Placeholders / hints
     'placeholder_title'     => 'Enter room title',
@@ -76,12 +93,22 @@ return [
     'flash_topic_closed'    => 'Topic closed.',
     'flash_comment_added'   => 'Reply posted successfully.',
     'flash_comment_deleted' => 'Reply deleted successfully.',
+    'flash_room_reopened'   => 'Room activated successfully.',
+    'flash_comments_enabled'  => 'Comments enabled for this room.',
+    'flash_comments_disabled' => 'Comments disabled for this room.',
+    'flash_topic_comments_enabled'  => 'Comments enabled for this topic.',
+    'flash_topic_comments_disabled' => 'Comments disabled for this topic.',
+    'flash_topic_hidden'    => 'Topic hidden.',
+    'flash_topic_shown'     => 'Topic shown.',
 
     // Labels / misc
     'closed_badge'          => 'Closed',
     'pinned_badge'          => 'Pinned',
     'topic_closed_notice'   => 'This topic is closed and cannot accept new replies.',
     'room_closed_notice'    => 'This room is closed.',
+    'comments_disabled_notice'        => 'Comments are disabled in this room.',
+    'topic_comments_disabled_notice'  => 'Comments are disabled on this topic.',
+    'topics_disabled_notice'          => 'Creating new topics is disabled in this room.',
     'filter_all'            => 'All',
     'filter_status'         => 'Status',
     'filter_apply'          => 'Filter',

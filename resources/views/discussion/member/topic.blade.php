@@ -39,7 +39,28 @@
             @endif
             <strong>{{ $topic->title }}</strong>
         </div>
-        <small class="text-muted">{{ optional($topic->creator)->name }} — {{ $topic->created_at->format('Y-m-d H:i') }}</small>
+        <div class="text-right">
+            <small class="text-muted d-block mb-1">{{ optional($topic->creator)->name }} — {{ $topic->created_at->format('Y-m-d H:i') }}</small>
+            @if($isStaff)
+                {{-- Toggle comments on this topic (discussion.toggle_comments) --}}
+                <form method="POST" action="{{ route('manage.discussion-rooms.topics.toggle-comments', $topic->id) }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-xs {{ $topic->comments_closed ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                            title="{{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}">
+                        <i class="la {{ $topic->comments_closed ? 'la-comment-slash' : 'la-comment' }}"></i>
+                        {{ $topic->comments_closed ? __('discussion.btn_enable_topic_comments') : __('discussion.btn_disable_topic_comments') }}
+                    </button>
+                </form>
+                {{-- Hide / show topic --}}
+                <form method="POST" action="{{ route('manage.discussion-rooms.topics.hide', $topic->id) }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-xs {{ $topic->is_hidden ? 'btn-dark' : 'btn-outline-dark' }}"
+                            title="{{ $topic->is_hidden ? __('discussion.btn_show') : __('discussion.btn_hide') }}">
+                        <i class="la {{ $topic->is_hidden ? 'la-eye-slash' : 'la-eye' }}"></i>
+                    </button>
+                </form>
+            @endif
+        </div>
     </div>
     <div class="card-content">
         <div class="card-body">
@@ -106,10 +127,18 @@
     </div>
 </div>
 
-{{-- Reply form (hidden if topic closed) --}}
+{{-- Reply form (hidden if comments not allowed) --}}
 @if($topic->is_closed)
     <div class="alert alert-secondary">
         <i class="la la-lock"></i> @lang('discussion.topic_closed_notice')
+    </div>
+@elseif(!$topic->room->allow_comments)
+    <div class="alert alert-secondary">
+        <i class="la la-comment-slash"></i> @lang('discussion.comments_disabled_notice')
+    </div>
+@elseif($topic->comments_closed)
+    <div class="alert alert-secondary">
+        <i class="la la-comment-slash"></i> @lang('discussion.topic_comments_disabled_notice')
     </div>
 @else
     <div class="card">

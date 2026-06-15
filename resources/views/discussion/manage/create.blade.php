@@ -53,6 +53,30 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="instructions">@lang('discussion.field_instructions')</label>
+                    <textarea name="instructions" id="instructions" rows="2"
+                        class="form-control @error('instructions') is-invalid @enderror">{{ old('instructions') }}</textarea>
+                    @error('instructions')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="allow_topics" name="allow_topics" value="1" {{ old('allow_topics', '1') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="allow_topics">@lang('discussion.field_allow_topics')</label>
+                    </div>
+                    <div class="custom-control custom-switch mt-1">
+                        <input type="checkbox" class="custom-control-input" id="allow_comments" name="allow_comments" value="1" {{ old('allow_comments', '1') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="allow_comments">@lang('discussion.field_allow_comments')</label>
+                    </div>
+                    <div class="custom-control custom-switch mt-1">
+                        <input type="checkbox" class="custom-control-input" id="requires_approval" name="requires_approval" value="1" {{ old('requires_approval') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="requires_approval">@lang('discussion.field_requires_approval')</label>
+                    </div>
+                </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" id="submitBtn">
                         <i class="la la-save"></i> @lang('discussion.btn_save')

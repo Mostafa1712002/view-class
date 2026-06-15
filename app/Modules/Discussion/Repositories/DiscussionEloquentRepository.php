@@ -52,6 +52,22 @@ class DiscussionEloquentRepository implements DiscussionRepository
         return $room->fresh();
     }
 
+    public function reopenRoom(int $id): DiscussionRoom
+    {
+        $room = DiscussionRoom::findOrFail($id);
+        $room->update(['status' => 'active']);
+
+        return $room->fresh();
+    }
+
+    public function toggleRoomComments(int $id): DiscussionRoom
+    {
+        $room = DiscussionRoom::findOrFail($id);
+        $room->update(['allow_comments' => ! $room->allow_comments]);
+
+        return $room->fresh();
+    }
+
     public function deleteRoom(int $id): void
     {
         DiscussionRoom::findOrFail($id)->delete();
@@ -59,11 +75,12 @@ class DiscussionEloquentRepository implements DiscussionRepository
 
     // ── Topics ───────────────────────────────────────────────────────────────
 
-    public function topicsForRoom(int $roomId, int $schoolId, int $perPage = 20): LengthAwarePaginator
+    public function topicsForRoom(int $roomId, int $schoolId, int $perPage = 20, bool $includeHidden = false): LengthAwarePaginator
     {
         return DiscussionTopic::query()
             ->where('room_id', $roomId)
             ->where('school_id', $schoolId)
+            ->when(! $includeHidden, fn ($q) => $q->where('is_hidden', false))
             ->with(['creator:id,name,name_ar'])
             ->orderByDesc('is_pinned')
             ->orderByDesc('last_activity_at')
@@ -75,7 +92,7 @@ class DiscussionEloquentRepository implements DiscussionRepository
     {
         return DiscussionTopic::with([
             'creator:id,name,name_ar',
-            'room:id,school_id,title,status',
+            'room:id,school_id,title,status,allow_topics,allow_comments',
         ])->find($id);
     }
 
@@ -85,8 +102,11 @@ class DiscussionEloquentRepository implements DiscussionRepository
             'last_activity_at' => now(),
         ]));
 
-        // Increment room topics_count
-        DiscussionRoom::where('id', $topic->room_id)->increment('topics_count');
+        // Increment room topics_count + bubble last activity
+        DiscussionRoom::where('id', $topic->room_id)->update([
+            'topics_count'     => \DB::raw('topics_count + 1'),
+            'last_activity_at' => now(),
+        ]);
 
         return $topic;
     }
@@ -107,12 +127,64 @@ class DiscussionEloquentRepository implements DiscussionRepository
         return $topic->fresh();
     }
 
+    public function toggleTopicComments(int $id): DiscussionTopic
+    {
+        $topic = DiscussionTopic::findOrFail($id);
+        $topic->update(['comments_closed' => ! $topic->comments_closed]);
+
+        return $topic->fresh();
+    }
+
+    public function toggleTopicHidden(int $id): DiscussionTopic
+    {
+        $topic = DiscussionTopic::findOrFail($id);
+        $topic->update(['is_hidden' => ! $topic->is_hidden]);
+
+        return $topic->fresh();
+    }
+
     public function deleteTopic(int $id): void
     {
         $topic = DiscussionTopic::findOrFail($id);
-        // Decrement room counter before deleting
-        DiscussionRoom::where('id', $topic->room_id)->decrement('topics_count');
+        // Decrement room counters before deleting
+        DiscussionRoom::where('id', $topic->room_id)
+            ->where('topics_count', '>', 0)
+            ->decrement('topics_count');
+        DiscussionRoom::where('id', $topic->room_id)
+            ->where('comments_count', '>=', $topic->comments_count)
+            ->decrement('comments_count', $topic->comments_count);
         $topic->delete();
+    }
+
+    public function roomReport(int $roomId): array
+    {
+        $room = DiscussionRoom::findOrFail($roomId);
+
+        $topicCount   = DiscussionTopic::where('room_id', $roomId)->count();
+        $topicIds     = DiscussionTopic::where('room_id', $roomId)->pluck('id');
+        $commentCount = DiscussionComment::whereIn('topic_id', $topicIds)->count();
+
+        $participantIds = DiscussionComment::whereIn('topic_id', $topicIds)
+            ->pluck('user_id')
+            ->merge(DiscussionTopic::where('room_id', $roomId)->pluck('created_by'))
+            ->unique()
+            ->filter()
+            ->values();
+
+        $topTopics = DiscussionTopic::where('room_id', $roomId)
+            ->with('creator:id,name,name_ar')
+            ->orderByDesc('comments_count')
+            ->limit(5)
+            ->get();
+
+        return [
+            'room'              => $room,
+            'topic_count'       => $topicCount,
+            'comment_count'     => $commentCount,
+            'participant_count' => $participantIds->count(),
+            'last_activity_at'  => $room->last_activity_at,
+            'top_topics'        => $topTopics,
+        ];
     }
 
     // ── Comments ─────────────────────────────────────────────────────────────
@@ -136,6 +208,15 @@ class DiscussionEloquentRepository implements DiscussionRepository
             'last_activity_at' => now(),
         ]);
 
+        // Bubble up to the room (count + last activity)
+        $roomId = DiscussionTopic::where('id', $comment->topic_id)->value('room_id');
+        if ($roomId) {
+            DiscussionRoom::where('id', $roomId)->update([
+                'comments_count'   => \DB::raw('comments_count + 1'),
+                'last_activity_at' => now(),
+            ]);
+        }
+
         return $comment;
     }
 
@@ -148,11 +229,19 @@ class DiscussionEloquentRepository implements DiscussionRepository
     {
         $comment = DiscussionComment::findOrFail($id);
         $topicId = $comment->topic_id;
+        $roomId  = DiscussionTopic::where('id', $topicId)->value('room_id');
         $comment->delete();
 
         // Decrement topic comments_count (floor at 0)
         DiscussionTopic::where('id', $topicId)
             ->where('comments_count', '>', 0)
             ->decrement('comments_count');
+
+        // Decrement room comments_count (floor at 0)
+        if ($roomId) {
+            DiscussionRoom::where('id', $roomId)
+                ->where('comments_count', '>', 0)
+                ->decrement('comments_count');
+        }
     }
 }

@@ -16,19 +16,29 @@ class DiscussionRoom extends Model
         'school_id',
         'title',
         'description',
+        'instructions',
         'scope_type',
         'scope_id',
         'audience',
+        'allow_topics',
+        'allow_comments',
+        'requires_approval',
         'status',
         'created_by',
         'topics_count',
+        'comments_count',
+        'last_activity_at',
     ];
 
     protected $casts = [
-        'audience'   => 'array',
-        'scope_id'   => 'integer',
-        'school_id'  => 'integer',
-        'created_by' => 'integer',
+        'audience'          => 'array',
+        'scope_id'          => 'integer',
+        'school_id'         => 'integer',
+        'created_by'        => 'integer',
+        'allow_topics'      => 'boolean',
+        'allow_comments'    => 'boolean',
+        'requires_approval' => 'boolean',
+        'last_activity_at'  => 'datetime',
     ];
 
     public function creator(): BelongsTo

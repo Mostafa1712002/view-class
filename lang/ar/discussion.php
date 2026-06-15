@@ -9,6 +9,7 @@ return [
     'page_title_create_room'=> 'إنشاء غرفة نقاش',
     'page_title_edit_room'  => 'تعديل غرفة النقاش',
     'page_title_new_topic'  => 'موضوع جديد',
+    'page_title_report'     => 'تقرير الغرفة',
 
     // Breadcrumbs
     'breadcrumb_home'       => 'الرئيسية',
@@ -28,6 +29,13 @@ return [
     'field_comments_count'  => 'الردود',
     'field_last_activity'   => 'آخر نشاط',
     'field_pinned'          => 'مثبت',
+    'field_instructions'    => 'تعليمات الغرفة',
+    'field_allow_topics'    => 'السماح بإضافة موضوعات جديدة',
+    'field_allow_comments'  => 'السماح بالتعليقات',
+    'field_requires_approval' => 'هل تحتاج المشاركات إلى موافقة؟',
+    'field_comments_total'  => 'إجمالي التعليقات',
+    'field_participants'    => 'عدد المشاركين',
+    'field_author'          => 'الكاتب',
 
     // Status
     'status_active'         => 'نشطة',
@@ -45,6 +53,15 @@ return [
     'btn_pin'               => 'تثبيت',
     'btn_unpin'             => 'إلغاء التثبيت',
     'btn_close_topic'       => 'إغلاق الموضوع',
+    'btn_reopen'            => 'تفعيل',
+    'btn_report'            => 'تقرير',
+    'btn_view'              => 'عرض',
+    'btn_disable_comments'  => 'إيقاف التعليقات',
+    'btn_enable_comments'   => 'تفعيل التعليقات',
+    'btn_disable_topic_comments' => 'إيقاف التعليق',
+    'btn_enable_topic_comments'  => 'تفعيل التعليق',
+    'btn_hide'              => 'إخفاء',
+    'btn_show'             => 'إظهار',
 
     // Placeholders / hints
     'placeholder_title'     => 'أدخل عنوان الغرفة',
@@ -76,12 +93,22 @@ return [
     'flash_topic_closed'    => 'تم إغلاق الموضوع.',
     'flash_comment_added'   => 'تم إضافة ردك بنجاح.',
     'flash_comment_deleted' => 'تم حذف الرد بنجاح.',
+    'flash_room_reopened'   => 'تم تفعيل الغرفة بنجاح.',
+    'flash_comments_enabled'  => 'تم تفعيل التعليقات في الغرفة.',
+    'flash_comments_disabled' => 'تم إيقاف التعليقات في الغرفة.',
+    'flash_topic_comments_enabled'  => 'تم تفعيل التعليق على الموضوع.',
+    'flash_topic_comments_disabled' => 'تم إيقاف التعليق على الموضوع.',
+    'flash_topic_hidden'    => 'تم إخفاء الموضوع.',
+    'flash_topic_shown'     => 'تم إظهار الموضوع.',
 
     // Labels / misc
     'closed_badge'          => 'مغلق',
     'pinned_badge'          => 'مثبت',
     'topic_closed_notice'   => 'هذا الموضوع مغلق ولا يمكن إضافة ردود جديدة.',
     'room_closed_notice'    => 'هذه الغرفة مغلقة.',
+    'comments_disabled_notice'        => 'التعليقات معطلة في هذه الغرفة.',
+    'topic_comments_disabled_notice'  => 'التعليقات معطلة على هذا الموضوع.',
+    'topics_disabled_notice'          => 'إضافة موضوعات جديدة معطلة في هذه الغرفة.',
     'filter_all'            => 'الكل',
     'filter_status'         => 'الحالة',
     'filter_apply'          => 'تصفية',
