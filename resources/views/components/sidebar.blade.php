@@ -642,20 +642,6 @@ body.sidebar-mini .main-menu .navigation > li:hover > a::before { opacity: 1; }
                     <a href="{{ route('admin.canteens.index') }}" data-label="@lang('shell.nav_cafeteria')"><x-svg-icon name="cup-hot" class="vc-ico" /><span class="menu-title">@lang('shell.nav_cafeteria')</span></a>
                 </li>
 
-                {{-- العيادة --}}
-                <li class="nav-item has-sub" data-section="system">
-                    <a href="#" data-label="@lang('shell.nav_clinic')"><x-svg-icon name="bag-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_clinic')</span></a>
-                    <ul class="menu-content">
-                        <li><a href="#"><x-svg-icon name="building-fill-x" class="vc-ico" /><span class="menu-item">@lang('shell.nav_clinic_main')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="bug" class="vc-ico" /><span class="menu-item">@lang('shell.nav_diseases')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="capsule" class="vc-ico" /><span class="menu-item">@lang('shell.nav_medicines')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="capsule-pill" class="vc-ico" /><span class="menu-item">@lang('shell.nav_vaccinations')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="clipboard2-pulse" class="vc-ico" /><span class="menu-item">@lang('shell.nav_medical_records')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="arrow-left-right" class="vc-ico" /><span class="menu-item">@lang('shell.nav_clinic_referrals')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-item">@lang('shell.nav_diagnoses')</span></a></li>
-                    </ul>
-                </li>
-
                 {{-- السلوك --}}
                 <li class="nav-item has-sub {{ request()->routeIs('admin.behavior.*') ? 'active open' : '' }}" data-section="system">
                     <a href="#" data-label="@lang('shell.nav_behavior')"><x-svg-icon name="shield-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_behavior')</span></a>

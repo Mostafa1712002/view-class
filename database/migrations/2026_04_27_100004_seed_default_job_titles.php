@@ -13,7 +13,6 @@ return new class extends Migration {
             ['slug' => 'supervisor',      'name_ar' => 'مشرف تعليمي',        'name_en' => 'Educational Supervisor','sort_order' => 3],
             ['slug' => 'vice',            'name_ar' => 'وكيل',               'name_en' => 'Vice Principal',    'sort_order' => 4],
             ['slug' => 'activity_lead',   'name_ar' => 'رائد نشاط',          'name_en' => 'Activity Lead',     'sort_order' => 5],
-            ['slug' => 'clinic',          'name_ar' => 'مسؤول عيادة',        'name_en' => 'Clinic Officer',    'sort_order' => 6],
             ['slug' => 'canteen',         'name_ar' => 'مسؤول مقصف',         'name_en' => 'Canteen Officer',   'sort_order' => 7],
             ['slug' => 'counselor',       'name_ar' => 'مرشد طلابي',         'name_en' => 'Student Counselor', 'sort_order' => 8],
         ];
