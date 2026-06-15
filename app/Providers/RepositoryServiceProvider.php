@@ -69,6 +69,8 @@ use App\Modules\Whatsapp\Repositories\Contracts\WhatsappSettingsRepository;
 use App\Modules\Whatsapp\Repositories\EloquentWhatsappSettingsRepository;
 use App\Modules\Attendance\Repositories\Contracts\AttendanceRepository;
 use App\Modules\Attendance\Repositories\EloquentAttendanceRepository;
+use App\Modules\Announcements\Repositories\Contracts\AnnouncementRepository;
+use App\Modules\Announcements\Repositories\EloquentAnnouncementRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -107,6 +109,7 @@ class RepositoryServiceProvider extends ServiceProvider
         SurveyRepository::class                  => EloquentSurveyRepository::class,
         WhatsappSettingsRepository::class        => EloquentWhatsappSettingsRepository::class,
         AttendanceRepository::class              => EloquentAttendanceRepository::class,
+        AnnouncementRepository::class            => EloquentAnnouncementRepository::class,
     ];
 
     public function register(): void

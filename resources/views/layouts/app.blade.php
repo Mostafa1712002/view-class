@@ -705,6 +705,9 @@
     </div>
     <!-- END: Content -->
 
+    {{-- Announcements: popup-on-login modal (self-contained, guarded) --}}
+    @auth @include('announcements._login_popup') @endauth
+
     <!-- BEGIN: Footer -->
     <footer class="footer footer-static footer-light navbar-border">
         <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
