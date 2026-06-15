@@ -3,7 +3,11 @@
 @section('title', __('virtual_classes.title'))
 @section('body_class', 'theme-light')
 
-@php $isRtl = app()->getLocale() === 'ar'; @endphp
+@php
+    $isRtl = app()->getLocale() === 'ar';
+    $u     = auth()->user();
+    $tabs  = ['today' => 'tab_today', 'recorded' => 'tab_recorded', 'old' => 'tab_old', 'all' => 'tab_all'];
+@endphp
 
 @section('content')
 <div class="content-header row">
@@ -21,12 +25,25 @@
         </div>
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-md-block d-none">
+        @if($u->canDo('virtual_classes.create'))
         <a href="{{ route('manage.virtual-classes.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('virtual_classes.btn_create')
+            <x-svg-icon name="plus-lg" /> @lang('virtual_classes.btn_create')
         </a>
+        @endif
     </div>
 </div>
 
+{{-- Tabs (card #234) --}}
+<ul class="nav nav-tabs mb-2" role="tablist">
+    @foreach($tabs as $key => $labelKey)
+    <li class="nav-item">
+        <a class="nav-link {{ $tab === $key ? 'active' : '' }}"
+           href="{{ route('manage.virtual-classes.index', ['tab' => $key]) }}">
+            @lang('virtual_classes.' . $labelKey)
+        </a>
+    </li>
+    @endforeach
+</ul>
 
 <div class="card">
     <div class="card-content">
@@ -35,12 +52,14 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>@lang('virtual_classes.field_title')</th>
                         <th>@lang('virtual_classes.field_teacher')</th>
+                        <th>@lang('virtual_classes.field_subject')</th>
+                        <th>@lang('virtual_classes.field_class')</th>
+                        <th>@lang('virtual_classes.field_title')</th>
                         <th>@lang('virtual_classes.field_scheduled_at')</th>
                         <th>@lang('virtual_classes.field_duration')</th>
-                        <th>@lang('virtual_classes.field_status')</th>
-                        <th>@lang('virtual_classes.field_zoom')</th>
+                        <th>@lang('virtual_classes.field_platform')</th>
+                        <th>@lang('virtual_classes.field_started')</th>
                         <th>@lang('virtual_classes.field_actions')</th>
                     </tr>
                 </thead>
@@ -48,66 +67,86 @@
                     @forelse($classes as $vc)
                     <tr>
                         <td>{{ $vc->id }}</td>
-                        <td>
-                            <a href="{{ route('manage.virtual-classes.show', $vc->id) }}">
-                                {{ $vc->title }}
-                            </a>
-                            @if($vc->description)
-                                <br><small class="text-muted">{{ Str::limit($vc->description, 60) }}</small>
-                            @endif
-                        </td>
                         <td>{{ optional($vc->teacher)->name }}</td>
-                        <td>{{ $vc->scheduled_at->format('Y-m-d H:i') }}</td>
-                        <td>{{ $vc->duration_minutes }} @lang('virtual_classes.minutes')</td>
+                        <td>{{ optional($vc->subject)->name ?? '—' }}</td>
+                        <td>{{ optional($vc->classRoom)->name ?? '—' }}</td>
                         <td>
-                            <span class="badge badge-{{ $vc->statusColor() }}">{{ $vc->statusLabel() }}</span>
+                            <a href="{{ route('manage.virtual-classes.show', $vc->id) }}">{{ $vc->title }}</a>
+                            <span class="badge badge-{{ $vc->statusColor() }} ml-1">{{ $vc->statusLabel() }}</span>
                         </td>
+                        <td class="text-nowrap">{{ $vc->scheduled_at->format('Y-m-d H:i') }}</td>
+                        <td>{{ $vc->duration_minutes }} @lang('virtual_classes.minutes')</td>
+                        <td>{{ $vc->platformLabel() }}</td>
                         <td>
-                            @if($vc->zoom_meeting_id)
-                                <span class="badge badge-success"><i class="la la-video"></i> @lang('virtual_classes.zoom_linked')</span>
+                            @if($vc->started_at)
+                                <span class="badge badge-success" title="{{ $vc->started_at->format('Y-m-d H:i') }}">
+                                    <x-svg-icon name="check-lg" size="14" /> @lang('virtual_classes.started_yes')
+                                </span>
                             @else
-                                <span class="badge badge-light">@lang('virtual_classes.zoom_none')</span>
+                                <span class="badge badge-light">@lang('virtual_classes.started_no')</span>
                             @endif
                         </td>
                         <td class="text-nowrap">
+                            {{-- View --}}
                             <a href="{{ route('manage.virtual-classes.show', $vc->id) }}"
                                class="btn btn-sm btn-outline-info" title="@lang('virtual_classes.btn_show')">
-                                <i class="la la-eye"></i>
+                                <x-svg-icon name="eye" size="14" />
                             </a>
-                            @if($vc->status !== 'cancelled' && $vc->status !== 'ended')
+
+                            {{-- Start (host) — only inside the join window --}}
+                            @if($u->canDo('virtual_classes.start') && ($vc->isJoinable() || $vc->status === 'live') && $vc->status !== 'cancelled')
+                            <form method="POST" action="{{ route('manage.virtual-classes.start', $vc->id) }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-success" title="@lang('virtual_classes.btn_start')">
+                                    <x-svg-icon name="play-fill" size="14" />
+                                </button>
+                            </form>
+                            @endif
+
+                            {{-- Attendance --}}
+                            @if($u->canDo('virtual_classes.view_attendance'))
+                            <a href="{{ route('manage.virtual-classes.attendance', $vc->id) }}"
+                               class="btn btn-sm btn-outline-secondary" title="@lang('virtual_classes.btn_attendance')">
+                                <x-svg-icon name="people" size="14" />
+                            </a>
+                            @endif
+
+                            {{-- Edit / Cancel --}}
+                            @if($u->canDo('virtual_classes.edit') && $vc->status !== 'cancelled' && $vc->status !== 'ended')
                             <a href="{{ route('manage.virtual-classes.edit', $vc->id) }}"
                                class="btn btn-sm btn-outline-primary" title="@lang('virtual_classes.btn_edit')">
-                                <i class="la la-edit"></i>
+                                <x-svg-icon name="pencil" size="14" />
                             </a>
-                            <form method="POST"
-                                  action="{{ route('manage.virtual-classes.cancel', $vc->id) }}"
-                                  class="d-inline"
-                                  id="cancelVcForm{{ $vc->id }}">
+                            <form method="POST" action="{{ route('manage.virtual-classes.cancel', $vc->id) }}"
+                                  class="d-inline" id="cancelVcForm{{ $vc->id }}">
                                 @csrf
                                 <button type="button" class="btn btn-sm btn-outline-warning"
                                         title="@lang('virtual_classes.btn_cancel')"
                                         onclick="vcConfirm({ title: '{{ __('virtual_classes.confirm_cancel') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('cancelVcForm{{ $vc->id }}').submit(); } })">
-                                    <i class="la la-ban"></i>
+                                    <x-svg-icon name="slash-circle" size="14" />
                                 </button>
                             </form>
                             @endif
-                            <form method="POST"
-                                  action="{{ route('manage.virtual-classes.destroy', $vc->id) }}"
-                                  class="d-inline"
-                                  id="deleteVcForm{{ $vc->id }}">
+
+                            {{-- Delete --}}
+                            @if($u->canDo('virtual_classes.delete'))
+                            <form method="POST" action="{{ route('manage.virtual-classes.destroy', $vc->id) }}"
+                                  class="d-inline" id="deleteVcForm{{ $vc->id }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button" class="btn btn-sm btn-outline-danger"
                                         title="@lang('virtual_classes.btn_delete')"
                                         onclick="vcConfirm({ title: '{{ __('virtual_classes.confirm_delete') }}' }).then(function(r){ if(r.isConfirmed){ document.getElementById('deleteVcForm{{ $vc->id }}').submit(); } })">
-                                    <i class="la la-trash"></i>
+                                    <x-svg-icon name="trash" size="14" />
                                 </button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-3">
+                        <td colspan="10" class="text-center text-muted py-4">
+                            <x-svg-icon name="camera-video-off" size="28" class="d-block mx-auto mb-2 text-muted" />
                             @lang('virtual_classes.empty')
                         </td>
                     </tr>

@@ -23,10 +23,15 @@
             </ol>
         </div>
     </div>
-    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-md-block d-none">
-        @if($vc->status !== 'cancelled' && $vc->status !== 'ended')
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
+        @if(auth()->user()->canDo('virtual_classes.view_attendance'))
+        <a href="{{ route('manage.virtual-classes.attendance', $vc->id) }}" class="btn btn-outline-secondary">
+            <x-svg-icon name="people" size="16" /> @lang('virtual_classes.btn_attendance')
+        </a>
+        @endif
+        @if(auth()->user()->canDo('virtual_classes.edit') && $vc->status !== 'cancelled' && $vc->status !== 'ended')
         <a href="{{ route('manage.virtual-classes.edit', $vc->id) }}" class="btn btn-outline-primary">
-            <i class="la la-edit"></i> @lang('virtual_classes.btn_edit')
+            <x-svg-icon name="pencil" size="16" /> @lang('virtual_classes.btn_edit')
         </a>
         @endif
     </div>
@@ -50,8 +55,30 @@
                             <td>{{ optional($vc->teacher)->name }}</td>
                         </tr>
                         <tr>
+                            <th>@lang('virtual_classes.field_subject')</th>
+                            <td>{{ optional($vc->subject)->name ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <th>@lang('virtual_classes.field_class')</th>
+                            <td>{{ optional($vc->classRoom)->name ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <th>@lang('virtual_classes.field_platform')</th>
+                            <td>{{ $vc->platformLabel() }}</td>
+                        </tr>
+                        <tr>
                             <th>@lang('virtual_classes.field_scheduled_at')</th>
                             <td>{{ $vc->scheduled_at->format('Y-m-d H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <th>@lang('virtual_classes.field_started')</th>
+                            <td>
+                                @if($vc->started_at)
+                                    <span class="badge badge-success">{{ $vc->started_at->format('Y-m-d H:i') }}</span>
+                                @else
+                                    <span class="badge badge-light">@lang('virtual_classes.started_no')</span>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <th>@lang('virtual_classes.field_duration')</th>

@@ -69,6 +69,52 @@
         @error('duration_minutes') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
+    {{-- Platform --}}
+    <div class="col-12 col-md-4 form-group">
+        <label class="required">@lang('virtual_classes.field_platform')</label>
+        @php $selPlatform = old('platform', $vc?->platform ?? 'zoom'); @endphp
+        <select name="platform" id="vcPlatform" class="form-control @error('platform') is-invalid @enderror" required>
+            <option value="zoom"     {{ $selPlatform === 'zoom' ? 'selected' : '' }}>Zoom</option>
+            <option value="teams"    {{ $selPlatform === 'teams' ? 'selected' : '' }}>Microsoft Teams</option>
+            <option value="external" {{ $selPlatform === 'external' ? 'selected' : '' }}>@lang('virtual_classes.platform_external')</option>
+            <option value="internal" {{ $selPlatform === 'internal' ? 'selected' : '' }}>@lang('virtual_classes.platform_internal')</option>
+        </select>
+        @error('platform') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    {{-- Class --}}
+    <div class="col-12 col-md-4 form-group">
+        <label>@lang('virtual_classes.field_class')</label>
+        <select name="class_id" class="form-control @error('class_id') is-invalid @enderror">
+            <option value="">— @lang('virtual_classes.select_class') —</option>
+            @foreach(($classes ?? []) as $c)
+            <option value="{{ $c->id }}" {{ (int) old('class_id', $vc?->class_id) === $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+            @endforeach
+        </select>
+        @error('class_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        <small class="text-muted">@lang('virtual_classes.select_class')</small>
+    </div>
+
+    {{-- Subject --}}
+    <div class="col-12 col-md-4 form-group">
+        <label>@lang('virtual_classes.field_subject')</label>
+        <select name="subject_id" class="form-control @error('subject_id') is-invalid @enderror">
+            <option value="">— @lang('virtual_classes.select_subject') —</option>
+            @foreach(($subjects ?? []) as $s)
+            <option value="{{ $s->id }}" {{ (int) old('subject_id', $vc?->subject_id) === $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+            @endforeach
+        </select>
+        @error('subject_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    {{-- External URL (for Teams / external link) --}}
+    <div class="col-12 form-group" id="vcExternalUrlWrap" style="{{ in_array($selPlatform, ['teams','external']) ? '' : 'display:none' }}">
+        <label class="required">@lang('virtual_classes.field_external_url')</label>
+        <input type="url" name="external_url" class="form-control @error('external_url') is-invalid @enderror"
+               value="{{ old('external_url', $vc?->external_url) }}" maxlength="1000" placeholder="https://...">
+        @error('external_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
     {{-- Audience --}}
     <div class="col-12 form-group">
         <label>@lang('virtual_classes.field_audience')</label>
@@ -106,6 +152,11 @@ $(document).ready(function () {
         if ($(this).is(':checked')) {
             $('#vcAud_all').prop('checked', false);
         }
+    });
+    // Show the external-URL field only for Teams / external-link platforms.
+    $(document).on('change', '#vcPlatform', function () {
+        var needsUrl = ['teams', 'external'].indexOf($(this).val()) !== -1;
+        $('#vcExternalUrlWrap').toggle(needsUrl);
     });
 });
 </script>

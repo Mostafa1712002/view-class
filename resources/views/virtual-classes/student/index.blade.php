@@ -55,13 +55,20 @@
                                 <span class="badge badge-{{ $vc->statusColor() }}">{{ $vc->statusLabel() }}</span>
                             </td>
                             <td>
-                                @if($vc->isJoinable() && $vc->join_url)
-                                    <a href="{{ $vc->join_url }}" target="_blank" rel="noopener"
-                                       class="btn btn-sm btn-success">
-                                        <i class="la la-video"></i> @lang('virtual_classes.zoom_join')
-                                    </a>
+                                {{-- Join button appears only inside the 5-min window. Posting
+                                     through the join route records the student's entry time
+                                     (the source for attendance) before redirecting out. --}}
+                                @if($vc->isJoinable() && $vc->participantUrl())
+                                    <form method="POST" action="{{ route('my.virtual-classes.join', $vc->id) }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <x-svg-icon name="camera-video" size="14" /> @lang('virtual_classes.btn_join')
+                                        </button>
+                                    </form>
                                 @else
-                                    <span class="text-muted small">@lang('virtual_classes.join_not_yet')</span>
+                                    <span class="text-muted small" title="@lang('virtual_classes.join_window_hint')">
+                                        @lang('virtual_classes.join_not_yet')
+                                    </span>
                                 @endif
                             </td>
                         </tr>

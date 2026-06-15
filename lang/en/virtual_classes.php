@@ -79,4 +79,68 @@ return [
 
     // Student view
     'join_not_yet' => 'Not yet joinable',
+
+    // Tabs (card #234)
+    'tab_today'    => "Today's Classes",
+    'tab_recorded' => 'Recorded Classes',
+    'tab_old'      => 'Past Classes',
+    'tab_all'      => 'All Classes',
+
+    // Platforms
+    'field_platform'      => 'Platform',
+    'platform_external'   => 'External Link',
+    'platform_internal'   => 'Internal Platform',
+    'select_platform'     => 'Select Platform',
+    'field_external_url'  => 'External URL',
+
+    // Class / subject
+    'field_class'    => 'Class',
+    'field_subject'  => 'Subject',
+    'select_class'   => 'No specific class (everyone)',
+    'select_subject' => 'No subject',
+
+    // Start / join / started
+    'field_started'   => 'Teacher Started',
+    'btn_start'       => 'Start Class',
+    'btn_join'        => 'Join',
+    'started_yes'     => 'Started',
+    'started_no'      => 'Not started',
+
+    // Attendance window / actions
+    'btn_attendance'        => 'View Attendance',
+    'attendance_title'      => 'Attendance',
+    'btn_recalc'            => 'Recalculate Attendance',
+    'btn_export'            => 'Export to CSV',
+    'btn_clear_cache'       => 'Clear Cache',
+    'attendance_search'     => 'Search by student name…',
+    'attendance_empty'      => 'No attendance recorded for this class yet.',
+
+    // Attendance columns
+    'att_student'  => 'Student',
+    'att_teacher'  => 'Teacher',
+    'att_subject'  => 'Subject',
+    'att_class'    => 'Class',
+    'att_joined'   => 'Join Time',
+    'att_left'     => 'Leave Time',
+    'att_duration' => 'Duration (min)',
+    'att_status'   => 'Status',
+
+    // Attendance statuses (colored)
+    'att_present' => 'Present',
+    'att_absent'  => 'Absent',
+    'att_late'    => 'Late',
+    'att_partial' => 'Partial',
+
+    // Summary
+    'summary_present' => 'Present',
+    'summary_absent'  => 'Absent',
+    'summary_late'    => 'Late',
+    'summary_partial' => 'Partial',
+    'summary_total'   => 'Total',
+    'summary_none'    => 'Attendance not calculated yet. Click "Recalculate Attendance".',
+
+    // Flash
+    'flash_recalc'        => 'Attendance recalculated: :present present, :absent absent.',
+    'flash_cache_cleared' => 'Virtual class cache cleared.',
+    'join_window_hint'    => 'The join button appears only 5 minutes before the start time.',
 ];
