@@ -50,8 +50,10 @@ class EloquentSmsSettingsRepository implements SmsSettingsRepository
 
     public function listApprovedSendersForSchool(School $school): Collection
     {
+        // Sprint-9 widened the sender workflow: a usable sender is now
+        // 'accepted' or 'active' (legacy 'approved' kept for backward compat).
         return SmsSender::where('school_id', $school->id)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'accepted', 'active'])
             ->orderBy('name_ar')
             ->get();
     }
