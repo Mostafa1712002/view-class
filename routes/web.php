@@ -1195,3 +1195,9 @@ require __DIR__.'/../app/Modules/QuestionBankCore/Routes/web.php';
 require __DIR__.'/../app/Modules/Attendance/Routes/web.php';
 require __DIR__.'/../app/Modules/TeacherAttendance/Routes/web.php';
 require __DIR__.'/../app/Modules/Qr/Routes/web.php';
+
+// === Sprint 10 — Educational websites (#270) — NET-NEW ===
+require __DIR__.'/../app/Modules/EducationalSites/Routes/web.php';
+
+// === Sprint 10 — Admissions / Registration (#268) — NET-NEW ===
+require __DIR__.'/../app/Modules/Admissions/Routes/web.php';

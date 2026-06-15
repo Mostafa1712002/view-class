@@ -57,6 +57,8 @@ use App\Modules\Evaluation\Repositories\Contracts\ClassVisitRepository;
 use App\Modules\Evaluation\Repositories\EloquentEvaluationFormRepository;
 use App\Modules\Evaluation\Repositories\EloquentEvaluationRepository;
 use App\Modules\Evaluation\Repositories\EloquentClassVisitRepository;
+use App\Modules\Admissions\Repositories\Contracts\AdmissionRepository;
+use App\Modules\Admissions\Repositories\EloquentAdmissionRepository;
 use App\Modules\Appointments\Repositories\Contracts\AppointmentRepository;
 use App\Modules\Appointments\Repositories\Contracts\AppointmentScheduleRepository;
 use App\Modules\Appointments\Repositories\EloquentAppointmentRepository;
@@ -87,8 +89,12 @@ use App\Modules\Attendance\Repositories\Contracts\AttendanceRepository;
 use App\Modules\Attendance\Repositories\EloquentAttendanceRepository;
 use App\Modules\Announcements\Repositories\Contracts\AnnouncementRepository;
 use App\Modules\Announcements\Repositories\EloquentAnnouncementRepository;
+use App\Modules\Communications\Repositories\Contracts\ParentCrmRepository;
+use App\Modules\Communications\Repositories\EloquentParentCrmRepository;
 use App\Modules\Communications\Repositories\Contracts\ParentsContactRepository;
 use App\Modules\Communications\Repositories\EloquentParentsContactRepository;
+use App\Modules\EducationalSites\Repositories\Contracts\EducationalSiteRepository;
+use App\Modules\EducationalSites\Repositories\EloquentEducationalSiteRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -138,6 +144,9 @@ class RepositoryServiceProvider extends ServiceProvider
         AttendanceRepository::class              => EloquentAttendanceRepository::class,
         AnnouncementRepository::class            => EloquentAnnouncementRepository::class,
         ParentsContactRepository::class          => EloquentParentsContactRepository::class,
+        ParentCrmRepository::class               => EloquentParentCrmRepository::class,
+        AdmissionRepository::class               => EloquentAdmissionRepository::class,
+        EducationalSiteRepository::class         => EloquentEducationalSiteRepository::class,
     ];
 
     public function register(): void
