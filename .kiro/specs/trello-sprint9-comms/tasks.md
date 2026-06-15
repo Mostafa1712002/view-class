@@ -4,10 +4,10 @@ Run: agent-per-card · deploy live one-at-a-time · QA Arabic + assign creator.
 Order minimizes shared-file conflicts (sidebar/header/template serialized).
 
 ## Batch A — standalone fixes (bug-shaped, reproduce live first)
-- [ ] A1 #228 حذف العيادات — remove clinics module everywhere + sidebar  (rfqLmuuk)
+- [x] A1 #228 حذف العيادات — remove clinics module everywhere + sidebar  (rfqLmuuk)
 - [x] A2 #246 التقييم — evaluations/create Arabic key leak (evaluation.form.shared_*)  (bOWtNImi)
-- [ ] A3 #229 الخروج من تاب الاختبار — dynamic exit count + reopen locked exam  (LpycSPoN)
-- [ ] A4 #230 السايد بار — student/parent/teacher sidebar broken + link order  (fpk7TVBz)
+- [x] A3 #229 الخروج من تاب الاختبار — dynamic exit count + reopen locked exam  (LpycSPoN)
+- [x] A4 #230 السايد بار — student/parent/teacher sidebar broken + link order  (fpk7TVBz)
 
 ## Batch B — design reconcile (shared files: sidebar/header/template/design-system — SERIAL)
 - [ ] B1 #220 الأيقونات — replace ALL icons → Bootstrap Icons (page-content too, not just nav)  (bkSpK1UQ)
