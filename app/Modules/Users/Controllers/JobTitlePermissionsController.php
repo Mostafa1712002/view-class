@@ -39,7 +39,7 @@ class JobTitlePermissionsController extends Controller
         'teachers'        => ['label' => 'المعلمون',           'actions' => ['view','create','edit','delete','export','import','print','send_notifications']],
         'schools'         => ['label' => 'المدارس',            'actions' => ['view','create','edit','delete']],
         'subjects'        => ['label' => 'المواد',             'actions' => ['view','create','edit','delete']],
-        'question_banks'  => ['label' => 'بنك الأسئلة',       'actions' => ['view','create','edit','delete','import','export']],
+        'question_banks'  => ['label' => 'بنك الأسئلة',       'actions' => ['view','create','edit','delete','archive','import','export']],
         'exams'           => ['label' => 'الاختبارات',         'actions' => ['view','create','edit','delete']],
         'assignments'     => ['label' => 'الواجبات',           'actions' => ['view','create','edit','delete','approve']],
         'books'           => ['label' => 'الكتب',              'actions' => ['view','create','edit','delete','print']],

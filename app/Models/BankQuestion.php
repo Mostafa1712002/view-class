@@ -40,6 +40,15 @@ class BankQuestion extends Model
         'question_code',
         'question_content_type',
         'is_full_image_question',
+        // QB rebuild (#258) — new classification columns. Additive; legacy code
+        // never sets these, so mass-assignment behaviour is unchanged for it.
+        'question_category',
+        'subject_id',
+        'grade_id',
+        'class_id',
+        'semester_id',
+        'passage_id',
+        'archived_at',
         'lesson_id',
         'unit_id',
         'week_id',
@@ -77,6 +86,7 @@ class BankQuestion extends Model
         'is_full_image_question' => 'boolean',
         'reviewed_at' => 'datetime',
         'last_synced_at' => 'datetime',
+        'archived_at' => 'datetime',
     ];
 
     public function bank(): BelongsTo
@@ -92,6 +102,24 @@ class BankQuestion extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Skill taxonomy link (QB rebuild #248). Additive — legacy code ignores it.
+     */
+    public function skill(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\QuestionBankCore\Models\Skill::class, 'skill_id');
+    }
+
+    /**
+     * Normalized answers (QB rebuild #258). Kept in sync with the legacy
+     * answer_data JSON; legacy views still read answer_data.
+     */
+    public function answers(): HasMany
+    {
+        return $this->hasMany(\App\Modules\QuestionBankCore\Models\QuestionAnswer::class, 'question_id')
+            ->orderBy('sort_order');
     }
 
     /**

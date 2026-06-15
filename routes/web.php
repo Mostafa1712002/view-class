@@ -1213,3 +1213,6 @@ require __DIR__.'/../app/Modules/Announcements/Routes/web.php';
 require __DIR__.'/../app/Modules/Communications/Routes/web.php';
 require __DIR__.'/../app/Modules/Whatsapp/Routes/web.php';
 require __DIR__.'/../app/Modules/SmsServices/Routes/web.php';
+
+// === Question-Bank rebuild — CORE screens (#249/#250/#253) ===
+require __DIR__.'/../app/Modules/QuestionBankCore/Routes/web.php';
