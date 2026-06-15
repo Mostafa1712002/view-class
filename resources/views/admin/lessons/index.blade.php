@@ -159,22 +159,22 @@
 @endif
 
 <div class="ls-kpis">
-    <div class="ls-kpi"><div class="ico"><i class="la la-clock"></i></div>
+    <div class="ls-kpi"><div class="ico"><x-svg-icon name="clock-history" :size="20" /></div>
         <div><div class="num">{{ number_format($lessons->total()) }}</div><div class="lbl">@lang('lessons_admin.kpi.total')</div></div>
     </div>
-    <div class="ls-kpi"><div class="ico b"><i class="la la-chalkboard-teacher"></i></div>
+    <div class="ls-kpi"><div class="ico b"><x-svg-icon name="person-workspace" :size="20" /></div>
         <div><div class="num muted">{{ number_format($teachersCount) }}</div><div class="lbl">@lang('lessons_admin.kpi.teachers')</div></div>
     </div>
-    <div class="ls-kpi"><div class="ico v"><i class="la la-book"></i></div>
+    <div class="ls-kpi"><div class="ico v"><x-svg-icon name="journal-bookmark-fill" :size="20" /></div>
         <div><div class="num muted">{{ number_format($subjectsCount) }}</div><div class="lbl">@lang('lessons_admin.kpi.subjects')</div></div>
     </div>
-    <div class="ls-kpi"><div class="ico g"><i class="la la-school"></i></div>
+    <div class="ls-kpi"><div class="ico g"><x-svg-icon name="building-fill" :size="20" /></div>
         <div><div class="num muted">{{ number_format($classesCount) }}</div><div class="lbl">@lang('lessons_admin.kpi.classes')</div></div>
     </div>
 </div>
 
 <div class="ls-filter">
-    <div class="se-title"><i class="la la-filter"></i>@lang('lessons_admin.filter.title')</div>
+    <div class="se-title"><x-svg-icon name="funnel-fill" :size="16" class="ic-gold" />@lang('lessons_admin.filter.title')</div>
     <form method="GET" action="{{ route('admin.lessons.index') }}" class="ls-row" id="lessonsFilter">
         <select name="section_id" class="form-control">
             <option value="">@lang('lessons_admin.filter.section') — @lang('lessons_admin.filter.all')</option>
@@ -207,8 +207,8 @@
             @endforeach
         </select>
         <input type="text" name="search" class="form-control" placeholder="{{ __('lessons_admin.filter.search_placeholder') }}" value="{{ $filters['search'] ?? '' }}">
-        <button type="submit" class="btn-gold"><i class="la la-search"></i>@lang('lessons_admin.filter.apply')</button>
-        <a href="{{ route('admin.lessons.index') }}" class="btn-reset"><i class="la la-redo"></i>@lang('lessons_admin.filter.reset')</a>
+        <button type="submit" class="btn-gold"><x-svg-icon name="search" :size="16" />@lang('lessons_admin.filter.apply')</button>
+        <a href="{{ route('admin.lessons.index') }}" class="btn-reset"><x-svg-icon name="arrow-clockwise" :size="16" class="ic-muted" />@lang('lessons_admin.filter.reset')</a>
     </form>
 </div>
 
@@ -217,28 +217,28 @@
         <span class="count-pill">{{ number_format($lessons->total()) }} @lang('lessons_admin.kpi.total')</span>
     </div>
     <div class="ls-tools">
-        <a href="{{ route('admin.lessons.create') }}" class="btn-gold"><i class="la la-plus"></i>@lang('lessons_admin.actions.add')</a>
-        <a href="{{ route('admin.lessons.time-slots.index') }}" class="btn-tool"><i class="la la-clock"></i>@lang('lessons_admin.timeslots.title')</a>
-        <a href="{{ route('admin.lessons.advanced') }}" class="btn-tool"><i class="la la-th"></i>@lang('lessons_admin.advanced.title')</a>
-        <a href="{{ route('admin.school-schedule.pdf') }}" class="btn-tool" target="_blank"><i class="la la-file-pdf"></i>@lang('lessons_admin.toolbar.export')</a>
+        <a href="{{ route('admin.lessons.create') }}" class="btn-gold"><x-svg-icon name="plus-lg" :size="16" />@lang('lessons_admin.actions.add')</a>
+        <a href="{{ route('admin.lessons.time-slots.index') }}" class="btn-tool"><x-svg-icon name="clock-history" :size="16" class="ic-gold" />@lang('lessons_admin.timeslots.title')</a>
+        <a href="{{ route('admin.lessons.advanced') }}" class="btn-tool"><x-svg-icon name="grid-fill" :size="16" class="ic-gold" />@lang('lessons_admin.advanced.title')</a>
+        <a href="{{ route('admin.school-schedule.pdf') }}" class="btn-tool" target="_blank"><x-svg-icon name="file-earmark-pdf-fill" :size="16" class="ic-gold" />@lang('lessons_admin.toolbar.export')</a>
         <div class="dropdown d-inline-block">
-            <button type="button" class="btn-tool dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown"><i class="la la-cogs"></i>@lang('lessons_admin.services.menu')</button>
+            <button type="button" class="btn-tool dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown"><x-svg-icon name="gear-fill" :size="16" class="ic-gold" />@lang('lessons_admin.services.menu')</button>
             <div class="dropdown-menu dropdown-menu-end">
-                <a class="dropdown-item" href="{{ route('admin.lessons.export.course-students') }}"><i class="la la-file-csv"></i> @lang('lessons_admin.services.export_course_students')</a>
-                <a class="dropdown-item" href="{{ route('admin.lessons.conflicts') }}"><i class="la la-exclamation-triangle"></i> @lang('lessons_admin.services.conflicts')</a>
+                <a class="dropdown-item" href="{{ route('admin.lessons.export.course-students') }}"><x-svg-icon name="file-earmark-spreadsheet" :size="16" class="ic-success" /> @lang('lessons_admin.services.export_course_students')</a>
+                <a class="dropdown-item" href="{{ route('admin.lessons.conflicts') }}"><x-svg-icon name="exclamation-triangle-fill" :size="16" class="ic-warn" /> @lang('lessons_admin.services.conflicts')</a>
                 <form action="{{ route('admin.lessons.reassign-students') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('lessons_admin.services.confirm_reassign')')">
                     @csrf
-                    <button class="dropdown-item" type="submit"><i class="la la-user-friends"></i> @lang('lessons_admin.services.reassign')</button>
+                    <button class="dropdown-item" type="submit"><x-svg-icon name="people-fill" :size="16" class="ic-info" /> @lang('lessons_admin.services.reassign')</button>
                 </form>
-                <a class="dropdown-item" href="{{ route('admin.lessons.import.form') }}"><i class="la la-file-import"></i> @lang('lessons_admin.services.import')</a>
+                <a class="dropdown-item" href="{{ route('admin.lessons.import.form') }}"><x-svg-icon name="file-earmark-arrow-up" :size="16" class="ic-gold" /> @lang('lessons_admin.services.import')</a>
                 <div class="dropdown-divider"></div>
                 <form action="{{ route('admin.lessons.schedule.destroy') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('lessons_admin.services.confirm_delete_schedule')')">
                     @csrf @method('DELETE')
-                    <button class="dropdown-item text-danger" type="submit"><i class="la la-trash"></i> @lang('lessons_admin.services.delete_schedule')</button>
+                    <button class="dropdown-item text-danger" type="submit"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('lessons_admin.services.delete_schedule')</button>
                 </form>
                 <form action="{{ route('admin.lessons.time-slots.destroy-all') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('lessons_admin.services.confirm_delete_timeslots')')">
                     @csrf @method('DELETE')
-                    <button class="dropdown-item text-danger" type="submit"><i class="la la-trash"></i> @lang('lessons_admin.services.delete_timeslots')</button>
+                    <button class="dropdown-item text-danger" type="submit"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('lessons_admin.services.delete_timeslots')</button>
                 </form>
             </div>
         </div>
@@ -250,10 +250,10 @@
 <div class="ls-surface">
     @if($lessons->count() === 0)
         <div class="ls-empty">
-            <div class="ls-empty-ico"><i class="la la-clock"></i></div>
+            <div class="ls-empty-ico"><x-svg-icon name="clock-history" :size="28" /></div>
             <h4>@lang('lessons_admin.table.empty_title')</h4>
             <p>@lang('lessons_admin.table.empty_hint')</p>
-            <a href="{{ route('admin.lessons.create') }}" class="btn-gold" style="margin-top:.5rem"><i class="la la-plus"></i>@lang('lessons_admin.actions.add')</a>
+            <a href="{{ route('admin.lessons.create') }}" class="btn-gold" style="margin-top:.5rem"><x-svg-icon name="plus-lg" :size="16" />@lang('lessons_admin.actions.add')</a>
         </div>
     @else
         <div class="table-responsive">
@@ -300,12 +300,12 @@
                         <td><span class="ls-pill muted">{{ $lesson->students_count ?? 0 }}</span></td>
                         <td style="text-align:{{ $isRtl ? 'left' : 'right' }}">
                             <div class="ls-actions">
-                                <a href="{{ route('admin.lessons.students.index', $lesson->id) }}" class="ls-action-btn" title="@lang('lessons_admin.students.title')" style="background:#eef2ff;border:1px solid #e0e7ff;color:#4338ca"><i class="la la-users"></i></a>
-                                <a href="{{ route('admin.lessons.edit', $lesson->id) }}" class="ls-action-btn edit" title="@lang('lessons_admin.actions.edit')"><i class="la la-edit"></i></a>
+                                <a href="{{ route('admin.lessons.students.index', $lesson->id) }}" class="ls-action-btn" title="@lang('lessons_admin.students.title')" style="background:#eef2ff;border:1px solid #e0e7ff;color:#4338ca"><x-svg-icon name="people-fill" :size="16" /></a>
+                                <a href="{{ route('admin.lessons.edit', $lesson->id) }}" class="ls-action-btn edit" title="@lang('lessons_admin.actions.edit')"><x-svg-icon name="pencil-square" :size="16" class="ic-gold" /></a>
                                 <form action="{{ route('admin.lessons.destroy', $lesson->id) }}" method="POST" style="display:inline" onsubmit="return confirm('{{ __('lessons_admin.confirm_delete') }}');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="ls-action-btn del" title="@lang('lessons_admin.actions.delete')"><i class="la la-trash"></i></button>
+                                    <button type="submit" class="ls-action-btn del" title="@lang('lessons_admin.actions.delete')"><x-svg-icon name="trash3-fill" :size="16" /></button>
                                 </form>
                             </div>
                         </td>

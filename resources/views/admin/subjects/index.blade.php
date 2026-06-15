@@ -120,7 +120,7 @@
                         <div class="label">@lang('sprint4.subjects.card_total')</div>
                         <div class="value">{{ $stats['total'] ?? 0 }}</div>
                     </div>
-                    <span class="icon"><i class="la la-book"></i></span>
+                    <span class="icon"><x-svg-icon name="journal-bookmark-fill" :size="22" class="ic-gold" /></span>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@
                         <div class="label">@lang('sprint4.subjects.card_active')</div>
                         <div class="value">{{ $stats['active'] ?? 0 }}</div>
                     </div>
-                    <span class="icon"><i class="la la-check-circle"></i></span>
+                    <span class="icon"><x-svg-icon name="check-circle-fill" :size="22" class="ic-success" /></span>
                 </div>
             </div>
         </div>
@@ -142,7 +142,7 @@
                         <div class="label">@lang('sprint4.subjects.card_core')</div>
                         <div class="value">{{ $stats['core'] ?? 0 }}</div>
                     </div>
-                    <span class="icon"><i class="la la-star"></i></span>
+                    <span class="icon"><x-svg-icon name="star-fill" :size="22" class="ic-warn" /></span>
                 </div>
             </div>
         </div>
@@ -153,7 +153,7 @@
                         <div class="label">@lang('sprint4.subjects.card_templates')</div>
                         <div class="value">{{ $stats['templates'] ?? 0 }}</div>
                     </div>
-                    <span class="icon"><i class="la la-cloud-download-alt"></i></span>
+                    <span class="icon"><x-svg-icon name="collection-fill" :size="22" class="ic-teal" /></span>
                 </div>
             </div>
         </div>
@@ -164,25 +164,25 @@
             <div class="d-flex flex-wrap gap-1 align-items-center">
                 <div class="dropdown">
                     <button class="btn add-subject-btn dropdown-toggle" type="button" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="la la-plus"></i> @lang('sprint4.subjects.add')
+                        <x-svg-icon name="plus-lg" :size="16" /> @lang('sprint4.subjects.add')
                     </button>
                     <div class="dropdown-menu">
                         <a class="dropdown-item" href="{{ route('admin.subjects.create') }}">
-                            <i class="la la-pen"></i>
+                            <x-svg-icon name="pencil-square" :size="16" class="ic-gold" />
                             <span>
                                 @lang('sprint4.subjects.add_manual')
                                 <span class="desc">إضافة مادة جديدة يدوياً بكامل البيانات</span>
                             </span>
                         </a>
                         <a class="dropdown-item" href="#" data-toggle="modal" data-bs-toggle="modal" data-target="#excelImportModal" data-bs-target="#excelImportModal">
-                            <i class="la la-file-excel"></i>
+                            <x-svg-icon name="file-earmark-excel-fill" :size="16" class="ic-success" />
                             <span>
                                 @lang('sprint4.subjects.add_excel')
                                 <span class="desc">رفع ملف Excel بقالب المنصة</span>
                             </span>
                         </a>
                         <a class="dropdown-item" href="{{ route('admin.subjects.templates.index') }}">
-                            <i class="la la-cloud-download-alt"></i>
+                            <x-svg-icon name="collection-fill" :size="16" class="ic-teal" />
                             <span>
                                 @lang('sprint4.subjects.add_template')
                                 <span class="desc">إضافة مواد جاهزة من قوالب المنصة</span>
@@ -194,11 +194,11 @@
                     </div>
                 </div>
                 <a class="btn btn-soft ms-1" href="{{ route('admin.subjects.credit-hours') }}">
-                    <i class="la la-clock"></i> @lang('sprint4.subjects.set_credit_hours')
+                    <x-svg-icon name="clock-history" :size="16" class="ic-info" /> @lang('sprint4.subjects.set_credit_hours')
                 </a>
             </div>
             <form action="{{ route('admin.subjects.index') }}" method="GET" class="subjects-search mt-1 mt-md-0">
-                <i class="la la-search"></i>
+                <x-svg-icon name="search" :size="15" class="ic-muted" />
                 <input type="search" name="q" value="{{ request('q') }}" class="form-control" placeholder="@lang('sprint4.subjects.search_placeholder')" />
             </form>
         </div>
@@ -247,24 +247,24 @@
                             </td>
                             <td>
                                 @if($subject->is_active)
-                                    <span class="status-pill on"><i class="la la-check-circle"></i> @lang('sprint4.subjects.columns.is_active')</span>
+                                    <span class="status-pill on"><x-svg-icon name="check-circle-fill" :size="14" class="ic-success" /> @lang('sprint4.subjects.columns.is_active')</span>
                                 @else
-                                    <span class="status-pill off"><i class="la la-times-circle"></i> —</span>
+                                    <span class="status-pill off"><x-svg-icon name="x-circle-fill" :size="14" class="ic-muted" /> —</span>
                                 @endif
                             </td>
                             <td class="text-end row-actions">
                                 <div class="dropdown">
                                     <button type="button" class="btn-icon dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="la la-ellipsis-h"></i>
+                                        <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item" href="{{ route('admin.subjects.edit', $subject->id) }}"><i class="la la-pen"></i> @lang('sprint4.subjects.edit')</a>
-                                        <a class="dropdown-item" href="{{ route('admin.subjects.lesson-tree', $subject->id) }}"><i class="la la-stream"></i> @lang('sprint4.subjects.lesson_tree') ({{ $subject->units_count }})</a>
-                                        <a class="dropdown-item" href="{{ route('admin.subjects.domains', $subject->id) }}"><i class="la la-list"></i> @lang('sprint4.subjects.standards')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.subjects.edit', $subject->id) }}"><x-svg-icon name="pencil-square" :size="15" class="ic-gold" /> @lang('sprint4.subjects.edit')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.subjects.lesson-tree', $subject->id) }}"><x-svg-icon name="diagram-2-fill" :size="15" class="ic-info" /> @lang('sprint4.subjects.lesson_tree') ({{ $subject->units_count }})</a>
+                                        <a class="dropdown-item" href="{{ route('admin.subjects.domains', $subject->id) }}"><x-svg-icon name="list-ul" :size="15" class="ic-navy" /> @lang('sprint4.subjects.standards')</a>
                                         <div class="dropdown-divider"></div>
                                         <form action="{{ route('admin.subjects.destroy', $subject->id) }}" method="POST" onsubmit="return confirm('@lang('sprint4.subjects.delete') ?')">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('sprint4.subjects.delete')</button>
+                                            <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash3-fill" :size="15" class="ic-danger" /> @lang('sprint4.subjects.delete')</button>
                                         </form>
                                     </div>
                                 </div>
@@ -274,11 +274,11 @@
                         <tr>
                             <td colspan="9">
                                 <div class="empty-state">
-                                    <span class="icon-wrap"><i class="la la-book"></i></span>
+                                    <span class="icon-wrap"><x-svg-icon name="journal-bookmark-fill" :size="28" class="ic-muted" /></span>
                                     <h5 class="mb-1">@lang('common.no_results')</h5>
                                     <p class="text-muted mb-3">ابدأ بإضافة مادة جديدة من زر "إضافة مادة" أعلى الجدول.</p>
                                     <a href="{{ route('admin.subjects.create') }}" class="btn add-subject-btn">
-                                        <i class="la la-plus"></i> @lang('sprint4.subjects.add_manual')
+                                        <x-svg-icon name="plus-lg" :size="16" /> @lang('sprint4.subjects.add_manual')
                                     </a>
                                 </div>
                             </td>
@@ -300,13 +300,13 @@
             <form action="{{ route('admin.subjects.import.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header" style="border-bottom: 1px solid #f1f5f9;">
-                    <h5 class="modal-title"><i class="la la-file-excel" style="color: #047857;"></i> @lang('sprint4.subjects.import.title')</h5>
+                    <h5 class="modal-title"><x-svg-icon name="file-earmark-excel-fill" :size="18" class="ic-success" /> @lang('sprint4.subjects.import.title')</h5>
                     <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <p class="text-muted">@lang('sprint4.subjects.import.help')</p>
                     <a href="{{ route('admin.subjects.import.template') }}" class="btn btn-soft mb-3">
-                        <i class="la la-download"></i> @lang('sprint4.subjects.import.download_template')
+                        <x-svg-icon name="download" :size="16" class="ic-info" /> @lang('sprint4.subjects.import.download_template')
                     </a>
                     <div class="form-group mb-0">
                         <label class="form-label fw-semibold">@lang('sprint4.subjects.import.choose_file')</label>
@@ -315,7 +315,7 @@
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #f1f5f9;">
                     <button type="button" class="btn btn-soft" data-dismiss="modal" data-bs-dismiss="modal">@lang('sprint4.subjects.import.cancel')</button>
-                    <button type="submit" class="btn add-subject-btn"><i class="la la-upload"></i> @lang('sprint4.subjects.import.upload')</button>
+                    <button type="submit" class="btn add-subject-btn"><x-svg-icon name="upload" :size="16" /> @lang('sprint4.subjects.import.upload')</button>
                 </div>
             </form>
         </div>

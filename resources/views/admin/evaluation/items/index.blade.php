@@ -36,9 +36,9 @@
         </div>
     </div>
     <div class="content-header-right col-md-4 col-12 text-end">
-        <a href="{{ route('admin.evaluations.edit', $form->id) }}" class="btn btn-outline-secondary"><i class="la la-arrow-right"></i> @lang('evaluation_items.items.back_to_form')</a>
+        <a href="{{ route('admin.evaluations.edit', $form->id) }}" class="btn btn-outline-secondary"><x-svg-icon name="arrow-right" :size="16" /> @lang('evaluation_items.items.back_to_form')</a>
         @if ($form->isEditable())
-            <button type="button" class="btn ev-add-btn" id="ev-add-item"><i class="la la-plus"></i> @lang('evaluation_items.items.add')</button>
+            <button type="button" class="btn ev-add-btn" id="ev-add-item"><x-svg-icon name="plus-lg" :size="16" /> @lang('evaluation_items.items.add')</button>
         @endif
     </div>
 </div>
@@ -50,7 +50,7 @@
         <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
     @endif
     @if (!$form->isEditable())
-        <div class="alert alert-warning"><i class="la la-lock"></i> @lang('evaluation_items.messages.form_locked')</div>
+        <div class="alert alert-warning"><x-svg-icon name="lock-fill" :size="16" class="ic-warn me-1" /> @lang('evaluation_items.messages.form_locked')</div>
     @endif
 
     {{-- Weight total / remaining (weighted types only) --}}
@@ -89,8 +89,8 @@
                                 <td>
                                     @if ($form->isEditable())
                                         <div class="d-flex flex-column" style="gap:2px;">
-                                            <button type="button" class="btn btn-sm p-0 ev-move" data-dir="up" title="↑" style="line-height:1;"><i class="la la-angle-up"></i></button>
-                                            <button type="button" class="btn btn-sm p-0 ev-move" data-dir="down" title="↓" style="line-height:1;"><i class="la la-angle-down"></i></button>
+                                            <button type="button" class="btn btn-sm p-0 ev-move" data-dir="up" title="↑" style="line-height:1;"><x-svg-icon name="chevron-up" :size="16" class="ic-muted" /></button>
+                                            <button type="button" class="btn btn-sm p-0 ev-move" data-dir="down" title="↓" style="line-height:1;"><x-svg-icon name="chevron-down" :size="16" class="ic-muted" /></button>
                                         </div>
                                     @endif
                                 </td>
@@ -114,16 +114,16 @@
                                 </td>
                                 @if ($isWeighted)<td>{{ rtrim(rtrim(number_format((float)$item->weight, 2), '0'), '.') }}%</td>@endif
                                 <td>{{ rtrim(rtrim(number_format((float)$item->max_score, 2), '0'), '.') }}</td>
-                                <td>@if ($item->is_required)<i class="la la-check-circle text-success"></i>@else<i class="la la-minus text-muted"></i>@endif</td>
+                                <td>@if ($item->is_required)<x-svg-icon name="check-circle-fill" :size="16" class="ic-success" />@else<x-svg-icon name="dash" :size="16" class="ic-muted" />@endif</td>
                                 <td>
                                     <a href="{{ route('admin.evaluations.indicators.index', [$form->id, $item->id]) }}" class="btn btn-sm btn-outline-secondary">
-                                        <i class="la la-list"></i> {{ $item->indicators_count }}
+                                        <x-svg-icon name="list-ul" :size="16" /> {{ $item->indicators_count }}
                                     </a>
                                 </td>
                                 <td><span class="ev-pill {{ $item->status }}">@lang('evaluation_items.status.'.$item->status)</span></td>
                                 <td class="text-end">
                                     <div class="dropdown">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false"><i class="la la-ellipsis-h"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false"><x-svg-icon name="three-dots-vertical" :size="16" /></button>
                                         <div class="dropdown-menu dropdown-menu-end">
                                             @if ($form->isEditable())
                                                 <button type="button" class="dropdown-item ev-edit-item"
@@ -147,14 +147,14 @@
                                                     data-editable_after_approval="{{ $item->editable_after_approval ? 1 : 0 }}"
                                                     data-min_percentage="{{ $item->min_percentage }}"
                                                     data-internal_notes="{{ $item->internal_notes }}">
-                                                    <i class="la la-pen"></i> @lang('evaluation_items.actions.edit')
+                                                    <x-svg-icon name="pencil-square" :size="16" class="ic-gold me-1" /> @lang('evaluation_items.actions.edit')
                                                 </button>
                                             @endif
-                                            <a class="dropdown-item" href="{{ route('admin.evaluations.indicators.index', [$form->id, $item->id]) }}"><i class="la la-list"></i> @lang('evaluation_items.items.indicators')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.indicators.index', [$form->id, $item->id]) }}"><x-svg-icon name="list-ul" :size="16" class="ic-navy me-1" /> @lang('evaluation_items.items.indicators')</a>
                                             <form action="{{ route('admin.evaluations.items.toggle', [$form->id, $item->id]) }}" method="POST">
                                                 @csrf
                                                 <button type="submit" class="dropdown-item">
-                                                    <i class="la {{ $item->status === 'active' ? 'la-eye-slash' : 'la-eye' }}"></i>
+                                                    <x-svg-icon :name="$item->status === 'active' ? 'eye-slash' : 'eye-fill'" :size="16" class="{{ $item->status === 'active' ? 'ic-muted' : 'ic-info' }} me-1" />
                                                     {{ $item->status === 'active' ? __('evaluation_items.actions.disable') : __('evaluation_items.actions.enable') }}
                                                 </button>
                                             </form>
@@ -162,7 +162,7 @@
                                                 <div class="dropdown-divider"></div>
                                                 <form action="{{ route('admin.evaluations.items.destroy', [$form->id, $item->id]) }}" method="POST" onsubmit="return confirm('@lang('evaluation_items.messages.delete_confirm')')">
                                                     @csrf @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('evaluation_items.actions.delete')</button>
+                                                    <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger me-1" /> @lang('evaluation_items.actions.delete')</button>
                                                 </form>
                                             @endif
                                         </div>
@@ -175,7 +175,7 @@
             </div>
         @else
             <div class="ev-empty">
-                <span class="icon-wrap"><i class="la la-list-ol"></i></span>
+                <span class="icon-wrap"><x-svg-icon name="list-ol" :size="40" class="ic-eval" /></span>
                 <h5 class="mb-1">@lang('evaluation_items.items.none')</h5>
                 <p class="text-muted">@lang('evaluation_items.items.none_hint')</p>
             </div>
@@ -236,7 +236,7 @@
 
                     {{-- Phase A (v2) — Advanced config --}}
                     <hr class="my-3">
-                    <p class="text-muted small mb-2"><i class="la la-cog"></i> @lang('evaluation_items.items.advanced_config')</p>
+                    <p class="text-muted small mb-2"><x-svg-icon name="gear-fill" :size="16" class="ic-muted me-1" /> @lang('evaluation_items.items.advanced_config')</p>
                     <div class="row">
                         <div class="col-md-4 col-12 mb-3">
                             <label class="form-label">@lang('evaluation_items.items.fields.responsible_role')</label>
@@ -286,7 +286,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal">@lang('evaluation_items.actions.cancel')</button>
-                    <button type="submit" class="btn ev-add-btn"><i class="la la-save"></i> @lang('evaluation_items.actions.save')</button>
+                    <button type="submit" class="btn ev-add-btn"><x-svg-icon name="save" :size="16" /> @lang('evaluation_items.actions.save')</button>
                 </div>
             </form>
         </div>

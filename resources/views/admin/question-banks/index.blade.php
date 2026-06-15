@@ -275,41 +275,41 @@
     </div>
     <div class="content-header-right col-md-3 col-12 text-md-right d-flex align-items-start justify-content-md-end pt-1">
         <a class="btn-gold" href="{{ route('admin.question-banks.create') }}">
-            <i class="la la-plus"></i> @lang('question_banks.add')
+            <x-svg-icon name="plus-lg" :size="16" /> @lang('question_banks.add')
         </a>
     </div>
 </div>
 
 <div class="content-body">
     @if(session('success'))
-        <div class="qb-alert"><i class="la la-check-circle"></i><span>{{ session('success') }}</span></div>
+        <div class="qb-alert"><x-svg-icon name="check-circle-fill" :size="16" class="ic-success" /><span>{{ session('success') }}</span></div>
     @endif
 
     {{-- KPI strip --}}
     <div class="qb-kpis">
         <div class="qb-kpi">
-            <div class="ico"><i class="la la-database"></i></div>
+            <div class="ico"><x-svg-icon name="database-fill" :size="20" class="ic-gold" /></div>
             <div>
                 <div class="num">{{ $total }}</div>
                 <div class="lbl">@lang('question_banks.kpi_total')</div>
             </div>
         </div>
         <div class="qb-kpi">
-            <div class="ico ico-blue"><i class="la la-globe"></i></div>
+            <div class="ico ico-blue"><x-svg-icon name="globe" :size="20" class="ic-info" /></div>
             <div>
                 <div class="num muted">{{ $publicCount }}</div>
                 <div class="lbl">@lang('question_banks.kpi_public')</div>
             </div>
         </div>
         <div class="qb-kpi">
-            <div class="ico ico-violet"><i class="la la-lock"></i></div>
+            <div class="ico ico-violet"><x-svg-icon name="lock-fill" :size="20" class="ic-eval" /></div>
             <div>
                 <div class="num muted">{{ $privateCount }}</div>
                 <div class="lbl">@lang('question_banks.kpi_private')</div>
             </div>
         </div>
         <div class="qb-kpi">
-            <div class="ico ico-green"><i class="la la-check-circle"></i></div>
+            <div class="ico ico-green"><x-svg-icon name="check-circle-fill" :size="20" class="ic-success" /></div>
             <div>
                 <div class="num muted">{{ $activeCount }}</div>
                 <div class="lbl">@lang('question_banks.kpi_active')</div>
@@ -321,22 +321,22 @@
     <div class="qb-tabs">
         <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'all'])) }}"
            class="qb-tab {{ $activeTab==='all' ? 'active' : '' }}">
-            <i class="la la-list"></i> @lang('question_banks.tab_all')
+            <x-svg-icon name="list-ul" :size="16" class="ic-navy" /> @lang('question_banks.tab_all')
             <span class="badge">{{ $total }}</span>
         </a>
         <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'general'])) }}"
            class="qb-tab {{ $activeTab==='general' ? 'active' : '' }}">
-            <i class="la la-globe"></i> @lang('question_banks.tab_general')
+            <x-svg-icon name="globe" :size="16" class="ic-info" /> @lang('question_banks.tab_general')
             <span class="badge">{{ $publicCount }}</span>
         </a>
         <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'private'])) }}"
            class="qb-tab {{ $activeTab==='private' ? 'active' : '' }}">
-            <i class="la la-lock"></i> @lang('question_banks.tab_private')
+            <x-svg-icon name="lock-fill" :size="16" class="ic-eval" /> @lang('question_banks.tab_private')
             <span class="badge">{{ $privateCount }}</span>
         </a>
         <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'under_review'])) }}"
            class="qb-tab {{ $activeTab==='under_review' ? 'active' : '' }}">
-            <i class="la la-clock-o"></i> @lang('question_banks.tab_under_review')
+            <x-svg-icon name="clock-history" :size="16" class="ic-warn" /> @lang('question_banks.tab_under_review')
         </a>
     </div>
 
@@ -344,7 +344,7 @@
     <form action="{{ route('admin.question-banks.index') }}" method="GET" class="qb-filter-card">
     <input type="hidden" name="tab" value="{{ $activeTab }}">
         <div class="se-title">
-            <i class="la la-filter"></i>
+            <x-svg-icon name="funnel-fill" :size="16" class="ic-gold" />
             <span>@lang('question_banks.search_engine')</span>
         </div>
         <div class="qb-filter-row">
@@ -395,9 +395,9 @@
             <div></div>
         </div>
         <div class="qb-filter-actions">
-            <button class="btn-gold" type="submit"><i class="la la-search"></i> @lang('question_banks.search_engine')</button>
+            <button class="btn-gold" type="submit"><x-svg-icon name="search" :size="16" /> @lang('question_banks.search_engine')</button>
             @if($hasAnyFilter)
-                <a href="{{ route('admin.question-banks.index') }}" class="btn-reset"><i class="la la-times"></i> @lang('question_banks.reset')</a>
+                <a href="{{ route('admin.question-banks.index') }}" class="btn-reset"><x-svg-icon name="x-circle-fill" :size="16" class="ic-muted" /> @lang('question_banks.reset')</a>
             @endif
         </div>
     </form>
@@ -406,10 +406,10 @@
     <div class="qb-toolbar">
         <div class="left">
             <a class="btn-gold" href="{{ route('admin.question-banks.create') }}">
-                <i class="la la-plus"></i> @lang('question_banks.add')
+                <x-svg-icon name="plus-lg" :size="16" /> @lang('question_banks.add')
             </a>
             <a class="btn-ghost" href="{{ route('admin.question-banks.library') }}">
-                <i class="la la-book"></i> @lang('question_banks.open_library')
+                <x-svg-icon name="book-fill" :size="16" class="ic-teal" /> @lang('question_banks.open_library')
             </a>
         </div>
         <span class="count-pill">@lang('question_banks.count_pill'): {{ $banks->total() }}</span>
@@ -453,11 +453,11 @@
                         <td data-label="@lang('question_banks.col_visibility')">
                             @if($isGeneral)
                                 <span class="qb-scope-general">
-                                    <i class="la la-globe"></i> @lang('question_banks.scope_company')
+                                    <x-svg-icon name="globe" :size="14" class="ic-info" /> @lang('question_banks.scope_company')
                                 </span>
                             @else
                                 <span class="qb-scope-private">
-                                    <i class="la la-lock"></i> @lang('question_banks.scope_school')
+                                    <x-svg-icon name="lock-fill" :size="14" class="ic-eval" /> @lang('question_banks.scope_school')
                                 </span>
                             @endif
                         </td>
@@ -502,7 +502,7 @@
                         </td>
                         <td data-label="@lang('question_banks.col_linkable')">
                             @if($bank->is_ana_qudurat_linkable)
-                                <span class="qb-pill status-active"><i class="la la-link"></i></span>
+                                <span class="qb-pill status-active"><x-svg-icon name="link-45deg" :size="14" class="ic-success" /></span>
                             @else
                                 <span class="qb-secondary">—</span>
                             @endif
@@ -515,13 +515,13 @@
                                 <a href="{{ route('admin.question-banks.questions.index', $bank->id) }}"
                                    class="qb-action-btn view"
                                    title="@lang('question_banks.action_view_questions')">
-                                    <i class="la la-eye"></i>
+                                    <x-svg-icon name="eye-fill" :size="16" class="ic-info" />
                                 </a>
                                 @if($canEdit)
                                 <a href="{{ route('admin.question-banks.edit', $bank->id) }}"
                                    class="qb-action-btn edit"
                                    title="@lang('question_banks.action_edit')">
-                                    <i class="la la-edit"></i>
+                                    <x-svg-icon name="pencil-square" :size="16" class="ic-gold" />
                                 </a>
                                 @endif
                                 {{-- Dropdown for extra actions --}}
@@ -529,7 +529,7 @@
                                     <button class="qb-action-btn more" type="button"
                                             onclick="toggleQbDropdown(this)"
                                             title="@lang('question_banks.action_more')">
-                                        <i class="la la-ellipsis-v"></i>
+                                        <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
                                     </button>
                                     <div class="qb-dropdown-menu qb-dropdown-menu-end">
                                         {{-- Approve: show when under_review and user can manage general --}}
@@ -538,7 +538,7 @@
                                                   onsubmit="return confirm('@lang('question_banks.confirm_approve')')">
                                                 @csrf
                                                 <button type="submit" class="qb-dropdown-item">
-                                                    <i class="la la-check-circle"></i> @lang('question_banks.action_approve')
+                                                    <x-svg-icon name="check-circle-fill" :size="16" class="ic-success" /> @lang('question_banks.action_approve')
                                                 </button>
                                             </form>
                                         @endif
@@ -548,7 +548,7 @@
                                                   onsubmit="return confirm('@lang('question_banks.confirm_promote')')">
                                                 @csrf
                                                 <button type="submit" class="qb-dropdown-item">
-                                                    <i class="la la-arrow-up"></i> @lang('question_banks.action_promote')
+                                                    <x-svg-icon name="arrow-up" :size="16" class="ic-gold" /> @lang('question_banks.action_promote')
                                                 </button>
                                             </form>
                                         @endif
@@ -558,7 +558,7 @@
                                                   onsubmit="return confirm('@lang('question_banks.confirm_copy_to_school')')">
                                                 @csrf
                                                 <button type="submit" class="qb-dropdown-item">
-                                                    <i class="la la-copy"></i> @lang('question_banks.action_copy_to_school')
+                                                    <x-svg-icon name="files" :size="16" class="ic-info" /> @lang('question_banks.action_copy_to_school')
                                                 </button>
                                             </form>
                                         @endif
@@ -568,7 +568,7 @@
                                                   onsubmit="return confirm('@lang('question_banks.confirm_delete')');">
                                                 @csrf @method('DELETE')
                                                 <button class="qb-dropdown-item danger" type="submit">
-                                                    <i class="la la-trash"></i> @lang('question_banks.action_delete')
+                                                    <x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('question_banks.action_delete')
                                                 </button>
                                             </form>
                                         @endif
@@ -581,7 +581,7 @@
                     <tr>
                         <td colspan="11">
                             <div class="qb-empty">
-                                <i class="la la-database"></i>
+                                <x-svg-icon name="database-fill" :size="48" class="ic-muted" />
                                 <div class="lbl">
                                     @if($hasAnyFilter)
                                         @lang('question_banks.empty_filtered')

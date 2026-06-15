@@ -191,7 +191,7 @@
                     <div class="label">@lang('users.student_total')</div>
                     <div class="value">{{ $totalStudents }}</div>
                 </div>
-                <span class="icon"><i class="la la-user-graduate"></i></span>
+                <span class="icon"><x-svg-icon name="mortarboard-fill" :size="20" class="ic-eval" /></span>
             </div>
         </div>
         <div class="col-6 col-md-3">
@@ -200,7 +200,7 @@
                     <div class="label">@lang('users.student_active')</div>
                     <div class="value">{{ $students->getCollection()->where('is_active', true)->count() }}</div>
                 </div>
-                <span class="icon"><i class="la la-check-circle"></i></span>
+                <span class="icon"><x-svg-icon name="check-circle-fill" :size="20" class="ic-success" /></span>
             </div>
         </div>
         <div class="col-6 col-md-3">
@@ -209,7 +209,7 @@
                     <div class="label">@lang('users.student_with_class')</div>
                     <div class="value">{{ $students->getCollection()->whereNotNull('class_room_id')->count() }}</div>
                 </div>
-                <span class="icon"><i class="la la-chalkboard"></i></span>
+                <span class="icon"><x-svg-icon name="easel-fill" :size="20" class="ic-teal" /></span>
             </div>
         </div>
         <div class="col-6 col-md-3">
@@ -225,7 +225,7 @@
                         {{ $linkedParents }}
                     </div>
                 </div>
-                <span class="icon"><i class="la la-user-friends"></i></span>
+                <span class="icon"><x-svg-icon name="people-fill" :size="20" class="ic-info" /></span>
             </div>
         </div>
     </div>
@@ -235,52 +235,52 @@
             <div class="d-flex flex-wrap gap-1 align-items-center">
                 <div class="dropdown">
                     <button class="btn btn-sm add-student-btn dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown">
-                        <i class="la la-plus me-1"></i> @lang('users.add_student')
+                        <x-svg-icon name="plus-lg" :size="16" class="me-1" /> @lang('users.add_student')
                     </button>
                     <div class="dropdown-menu">
                         <a class="dropdown-item" href="{{ route('admin.users.students.create') }}">
-                            <i class="la la-user-plus"></i> @lang('users.add_student')
+                            <x-svg-icon name="person-plus-fill" :size="16" class="ic-gold" /> @lang('users.add_student')
                         </a>
                         <a class="dropdown-item" href="{{ route('admin.users.students.import.form') }}">
-                            <i class="la la-file-excel"></i> @lang('users.import_excel')
+                            <x-svg-icon name="file-earmark-excel-fill" :size="16" class="ic-success" /> @lang('users.import_excel')
                         </a>
                         <a class="dropdown-item" href="{{ route('admin.noor.form') }}">
-                            <i class="la la-cloud-download-alt"></i> @lang('users.import_noor')
+                            <x-svg-icon name="cloud-download-fill" :size="16" class="ic-info" /> @lang('users.import_noor')
                         </a> {{-- === Noor card 58 === --}}
                         <a class="dropdown-item" href="{{ route('admin.users.students.photos') }}">
-                            <i class="la la-images"></i> @lang('users.import_photos')
+                            <x-svg-icon name="images" :size="16" class="ic-info" /> @lang('users.import_photos')
                         </a>
                         <a class="dropdown-item" href="{{ route('admin.users.students.status') }}">
-                            <i class="la la-sync"></i> @lang('users.refresh_status')
+                            <x-svg-icon name="arrow-clockwise" :size="16" class="ic-info" /> @lang('users.refresh_status')
                         </a>
                     </div>
                 </div>
 
                 <div class="dropdown">
                     <button class="btn btn-sm btn-soft dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown">
-                        <i class="la la-th-list me-1"></i> @lang('users.other_options')
+                        <x-svg-icon name="layout-text-sidebar" :size="16" class="me-1" /> @lang('users.other_options')
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['filter' => 'graduates']) }}"><i class="la la-graduation-cap"></i> @lang('users.graduates')</a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['filter' => 'graduates']) }}"><x-svg-icon name="mortarboard-fill" :size="16" class="ic-eval" /> @lang('users.graduates')</a>
                         <form action="{{ route('admin.users.students.graduates.delete') }}" method="POST" class="m-0" onsubmit="return confirm('@lang('users.confirm_delete_graduates')');">
                             @csrf
-                            <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('users.delete_graduates')</button>
+                            <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('users.delete_graduates')</button>
                         </form>
-                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['advanced' => 1]) }}"><i class="la la-list"></i> @lang('users.advanced_list')</a>
-                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['view' => 'counts']) }}"><i class="la la-chart-bar"></i> @lang('users.counts')</a>
-                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['filter' => 'no_parents']) }}"><i class="la la-unlink"></i> @lang('users.unlinked_to_parents')</a>
-                        <a class="dropdown-item" href="{{ route('admin.users.students.global-search') }}"><i class="la la-search"></i> @lang('users.global_search')</a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['advanced' => 1]) }}"><x-svg-icon name="list-ul" :size="16" class="ic-navy" /> @lang('users.advanced_list')</a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['view' => 'counts']) }}"><x-svg-icon name="bar-chart-fill" :size="16" class="ic-eval" /> @lang('users.counts')</a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.index', ['filter' => 'no_parents']) }}"><x-svg-icon name="person-dash-fill" :size="16" class="ic-warn" /> @lang('users.unlinked_to_parents')</a>
+                        <a class="dropdown-item" href="{{ route('admin.users.students.global-search') }}"><x-svg-icon name="search" :size="16" class="ic-muted" /> @lang('users.global_search')</a>
                     </div>
                 </div>
 
                 <div class="dropdown">
                     <button class="btn btn-sm btn-soft dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown">
-                        <i class="la la-cogs me-1"></i> @lang('users.operations')
+                        <x-svg-icon name="gear-fill" :size="16" class="me-1" /> @lang('users.operations')
                     </button>
                     <div class="dropdown-menu">
                         @foreach(['hide_grades','show_grades','hide_report','show_report','license','unlicense','waiting'] as $op)
                             <button type="button" class="dropdown-item js-bulk" data-op="{{ $op }}">
-                                <i class="la la-tasks"></i> @lang('users.op_'.$op)
+                                <x-svg-icon name="list-check" :size="16" class="ic-muted" /> @lang('users.op_'.$op)
                             </button>
                         @endforeach
                     </div>
@@ -288,7 +288,7 @@
             </div>
 
             <form action="{{ route('admin.users.students.index') }}" method="GET" class="students-search">
-                <i class="la la-search"></i>
+                <x-svg-icon name="search" :size="16" class="ic-muted" />
                 <input type="search" name="q" value="{{ $q }}" placeholder="@lang('users.student_search_hint')" />
             </form>
         </div>
@@ -296,11 +296,11 @@
         @if(($filter ?? '') === 'graduates' || ($filter ?? '') === 'no_parents')
             <div class="px-3 pt-3">
                 <span class="badge badge-info" style="font-size:.85rem;padding:.5rem .8rem;">
-                    <i class="la la-filter"></i>
+                    <x-svg-icon name="funnel-fill" :size="16" class="ic-info" />
                     {{ $filter === 'graduates' ? __('users.filter_active_graduates') : __('users.filter_active_no_parents') }}
                 </span>
                 <a href="{{ route('admin.users.students.index') }}" class="btn btn-sm btn-link text-danger">
-                    <i class="la la-times"></i> @lang('users.clear_filter')
+                    <x-svg-icon name="x-circle-fill" :size="16" class="ic-danger" /> @lang('users.clear_filter')
                 </a>
             </div>
         @endif
@@ -345,7 +345,7 @@
                         </div>
                         <div class="col-md-2 col-12 mb-2">
                             <input type="hidden" name="advanced" value="1">
-                            <button type="submit" class="btn btn-sm btn-primary"><i class="la la-filter"></i> @lang('users.filter_apply')</button>
+                            <button type="submit" class="btn btn-sm btn-primary"><x-svg-icon name="funnel-fill" :size="16" /> @lang('users.filter_apply')</button>
                             <a href="{{ route('admin.users.students.index', ['advanced' => 1]) }}" class="btn btn-sm btn-soft">@lang('users.filter_reset')</a>
                         </div>
                     </div>
@@ -446,36 +446,36 @@
                         </td>
                         <td>
                             <span class="status-pill {{ $isActive ? 'on' : 'off' }}">
-                                <i class="la la-circle"></i>
+                                <x-svg-icon name="circle-fill" :size="8" />
                                 {{ $isActive ? __('users.student_status_active') : __('users.student_status_inactive') }}
                             </span>
                         </td>
                         <td><small class="text-muted">{{ $u->last_login_at ? $u->last_login_at->diffForHumans() : '—' }}</small></td>
                         <td style="text-align:end;">
                             <div class="row-actions">
-                                <a href="{{ route('admin.users.students.show', $u->id) }}" class="btn-icon" title="@lang('users.student_view')"><i class="la la-eye"></i></a>
-                                <a href="{{ route('admin.users.students.edit', $u->id) }}" class="btn-icon" title="@lang('users.student_edit')"><i class="la la-edit"></i></a>
+                                <a href="{{ route('admin.users.students.show', $u->id) }}" class="btn-icon" title="@lang('users.student_view')"><x-svg-icon name="eye-fill" :size="16" class="ic-info" /></a>
+                                <a href="{{ route('admin.users.students.edit', $u->id) }}" class="btn-icon" title="@lang('users.student_edit')"><x-svg-icon name="pencil-square" :size="16" class="ic-gold" /></a>
                                 <form action="{{ route('admin.users.students.destroy', $u->id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('@lang('users.delete') ؟');">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn-icon danger" title="@lang('users.student_delete')"><i class="la la-trash"></i></button>
+                                    <button type="submit" class="btn-icon danger" title="@lang('users.student_delete')"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /></button>
                                 </form>
                                 <div class="dropdown d-inline">
                                     <button class="btn-icon" data-toggle="dropdown" data-bs-toggle="dropdown" title="@lang('users.student_more_actions')">
-                                        <i class="la la-ellipsis-v"></i>
+                                        <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-end">
                                         @if(auth()->user()->isSuperAdmin())
                                         <form action="{{ route('admin.users.impersonate.start', $u->id) }}" method="POST" class="m-0">
                                             @csrf
-                                            <button class="dropdown-item" type="submit"><i class="la la-user-secret"></i> @lang('users.login_as')</button>
+                                            <button class="dropdown-item" type="submit"><x-svg-icon name="incognito" :size="16" class="ic-muted" /> @lang('users.login_as')</button>
                                         </form>
                                         @endif
-                                        <a class="dropdown-item" href="{{ route('admin.users.students.parents', $u->id) }}"><i class="la la-user-friends"></i> @lang('users.parents_link')</a>
-                                        <a class="dropdown-item" href="{{ route('admin.users.students.schedule', $u->id) }}"><i class="la la-calendar"></i> @lang('users.schedule_link')</a>
-                                        <a class="dropdown-item" href="{{ route('admin.users.students.lessons', $u->id) }}"><i class="la la-chalkboard"></i> @lang('users.classes_link')</a>
-                                        <a class="dropdown-item" href="{{ route('admin.users.students.attendance', $u->id) }}"><i class="la la-times-circle"></i> @lang('users.absences_link')</a>
-                                        <a class="dropdown-item" href="{{ route('admin.users.students.behavior', $u->id) }}"><i class="la la-balance-scale"></i> @lang('users.behavior_link')</a>
-                                        <a class="dropdown-item" href="{{ route('admin.users.students.medical', $u->id) }}"><i class="la la-notes-medical"></i> @lang('users.medical_link')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.users.students.parents', $u->id) }}"><x-svg-icon name="people-fill" :size="16" class="ic-info" /> @lang('users.parents_link')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.users.students.schedule', $u->id) }}"><x-svg-icon name="calendar-event-fill" :size="16" class="ic-info" /> @lang('users.schedule_link')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.users.students.lessons', $u->id) }}"><x-svg-icon name="easel-fill" :size="16" class="ic-teal" /> @lang('users.classes_link')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.users.students.attendance', $u->id) }}"><x-svg-icon name="x-circle-fill" :size="16" class="ic-danger" /> @lang('users.absences_link')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.users.students.behavior', $u->id) }}"><x-svg-icon name="clipboard-pulse" :size="16" class="ic-eval" /> @lang('users.behavior_link')</a>
+                                        <a class="dropdown-item" href="{{ route('admin.users.students.medical', $u->id) }}"><x-svg-icon name="file-earmark-medical-fill" :size="16" class="ic-teal" /> @lang('users.medical_link')</a>
                                     </div>
                                 </div>
                             </div>
@@ -485,7 +485,7 @@
                     <tr>
                         <td colspan="9">
                             <div class="empty-state">
-                                <div class="icon-wrap"><i class="la la-user-graduate"></i></div>
+                                <div class="icon-wrap"><x-svg-icon name="mortarboard-fill" :size="48" class="ic-eval" /></div>
                                 <h4>@lang('users.no_results')</h4>
                                 <p>@lang('users.student_search_hint')</p>
                             </div>
@@ -516,26 +516,26 @@
                         <span><strong>@lang('users.class'):</strong> {{ optional($u->classRoom)->name ?? '—' }}</span>
                     </div>
                     <div class="actions">
-                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.show', $u->id) }}"><i class="la la-eye"></i></a>
-                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.edit', $u->id) }}"><i class="la la-edit"></i></a>
-                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.parents', $u->id) }}"><i class="la la-user-friends"></i></a>
-                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.attendance', $u->id) }}"><i class="la la-times-circle"></i></a>
+                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.show', $u->id) }}"><x-svg-icon name="eye-fill" :size="16" class="ic-info" /></a>
+                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.edit', $u->id) }}"><x-svg-icon name="pencil-square" :size="16" class="ic-gold" /></a>
+                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.parents', $u->id) }}"><x-svg-icon name="people-fill" :size="16" class="ic-info" /></a>
+                        <a class="btn btn-sm btn-soft" href="{{ route('admin.users.students.attendance', $u->id) }}"><x-svg-icon name="x-circle-fill" :size="16" class="ic-danger" /></a>
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-soft dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown"><i class="la la-ellipsis-v"></i></button>
+                            <button class="btn btn-sm btn-soft dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown"><x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" /></button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 @if(auth()->user()->isSuperAdmin())
                                 <form action="{{ route('admin.users.impersonate.start', $u->id) }}" method="POST" class="m-0">
                                     @csrf
-                                    <button class="dropdown-item" type="submit"><i class="la la-user-secret"></i> @lang('users.login_as')</button>
+                                    <button class="dropdown-item" type="submit"><x-svg-icon name="incognito" :size="16" class="ic-muted" /> @lang('users.login_as')</button>
                                 </form>
                                 @endif
-                                <a class="dropdown-item" href="{{ route('admin.users.students.schedule', $u->id) }}"><i class="la la-calendar"></i> @lang('users.schedule_link')</a>
-                                <a class="dropdown-item" href="{{ route('admin.users.students.lessons', $u->id) }}"><i class="la la-chalkboard"></i> @lang('users.classes_link')</a>
-                                <a class="dropdown-item" href="{{ route('admin.users.students.behavior', $u->id) }}"><i class="la la-balance-scale"></i> @lang('users.behavior_link')</a>
-                                <a class="dropdown-item" href="{{ route('admin.users.students.medical', $u->id) }}"><i class="la la-notes-medical"></i> @lang('users.medical_link')</a>
+                                <a class="dropdown-item" href="{{ route('admin.users.students.schedule', $u->id) }}"><x-svg-icon name="calendar-event-fill" :size="16" class="ic-info" /> @lang('users.schedule_link')</a>
+                                <a class="dropdown-item" href="{{ route('admin.users.students.lessons', $u->id) }}"><x-svg-icon name="easel-fill" :size="16" class="ic-teal" /> @lang('users.classes_link')</a>
+                                <a class="dropdown-item" href="{{ route('admin.users.students.behavior', $u->id) }}"><x-svg-icon name="clipboard-pulse" :size="16" class="ic-eval" /> @lang('users.behavior_link')</a>
+                                <a class="dropdown-item" href="{{ route('admin.users.students.medical', $u->id) }}"><x-svg-icon name="file-earmark-medical-fill" :size="16" class="ic-teal" /> @lang('users.medical_link')</a>
                                 <form action="{{ route('admin.users.students.destroy', $u->id) }}" method="POST" class="m-0" onsubmit="return confirm('@lang('users.delete') ؟');">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('users.delete')</button>
+                                    <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('users.delete')</button>
                                 </form>
                             </div>
                         </div>
@@ -543,7 +543,7 @@
                 </div>
             @empty
                 <div class="empty-state">
-                    <div class="icon-wrap"><i class="la la-user-graduate"></i></div>
+                    <div class="icon-wrap"><x-svg-icon name="mortarboard-fill" :size="48" class="ic-eval" /></div>
                     <h4>@lang('users.no_results')</h4>
                     <p>@lang('users.student_search_hint')</p>
                 </div>

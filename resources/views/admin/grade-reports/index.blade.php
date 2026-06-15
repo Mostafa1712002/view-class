@@ -34,10 +34,10 @@
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
         <a href="{{ route('admin.grade-reports.monitor') }}" class="btn btn-outline-warning">
-            <i class="la la-chart-bar"></i> {{ trans('grades_admin.monitor_btn') }}
+            <x-svg-icon name="bar-chart-fill" :size="16" class="me-1" /> {{ trans('grades_admin.monitor_btn') }}
         </a>
         <a href="{{ route('admin.grade-reports.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> {{ trans('grades_admin.create_report') }}
+            <x-svg-icon name="plus-lg" :size="16" class="me-1" /> {{ trans('grades_admin.create_report') }}
         </a>
     </div>
 </div>
@@ -46,7 +46,7 @@
     @include('components.alerts')
 
     <div class="alert alert-info border-0">
-        <i class="la la-info-circle"></i>
+        <x-svg-icon name="info-circle-fill" :size="16" class="ic-info me-1" />
         {{ trans('grades_admin.reports_intro') }}
     </div>
 
@@ -71,7 +71,7 @@
     @if($reports->isEmpty())
         <div class="card">
             <div class="card-body text-center py-5">
-                <i class="la la-file-alt la-3x text-muted"></i>
+                <x-svg-icon name="file-earmark-text-fill" :size="40" class="ic-muted" />
                 <p class="mt-3 mb-0">{{ trans('grades_admin.no_reports') }}
                     <a href="{{ route('admin.grade-reports.create') }}">{{ trans('grades_admin.create_report') }}</a>
                 </p>
@@ -100,7 +100,7 @@
                                 <tr>
                                     <td>
                                         @if($r->is_locked)
-                                            <i class="la la-lock text-warning" title="{{ trans('grades_admin.locked') }}"></i>
+                                            <x-svg-icon name="lock-fill" :size="16" class="ic-warn me-1" title="{{ trans('grades_admin.locked') }}" />
                                         @endif
                                         <a href="{{ route('admin.grade-reports.show', $r->id) }}" class="font-weight-bold text-dark">
                                             {{ $r->title }}
@@ -129,17 +129,17 @@
                                             <a href="{{ route('admin.grade-reports.edit', $r->id) }}"
                                                class="btn btn-sm btn-outline-primary"
                                                title="{{ trans('grades_admin.control_settings') }}">
-                                                <i class="la la-cog"></i>
+                                                <x-svg-icon name="gear-fill" :size="16" />
                                             </a>
                                             <a href="{{ route('admin.grades.entry.index', ['report_id' => $r->id]) }}"
                                                class="btn btn-sm btn-outline-info"
                                                title="{{ trans('grades_admin.control_entry') }}">
-                                                <i class="la la-pencil-alt"></i>
+                                                <x-svg-icon name="pencil-square" :size="16" />
                                             </a>
                                             <a href="{{ route('admin.grade-reports.monitor', ['class_id' => $r->class_id, 'subject_id' => $r->subject_id]) }}"
                                                class="btn btn-sm btn-outline-warning"
                                                title="{{ trans('grades_admin.control_monitor') }}">
-                                                <i class="la la-chart-bar"></i>
+                                                <x-svg-icon name="bar-chart-fill" :size="16" />
                                             </a>
                                             <div class="btn-group">
                                                 <button type="button"
@@ -147,17 +147,17 @@
                                                         data-toggle="dropdown"
                                                         aria-haspopup="true"
                                                         aria-expanded="false">
-                                                    <i class="la la-ellipsis-v"></i>
+                                                    <x-svg-icon name="three-dots-vertical" :size="16" />
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-{{ $isRtl ? 'right' : 'right' }}">
                                                     <a class="dropdown-item" href="{{ route('admin.grade-reports.show', $r->id) }}">
-                                                        <i class="la la-eye"></i> {{ trans('common.show') }}
+                                                        <x-svg-icon name="eye-fill" :size="16" class="ic-info me-1" /> {{ trans('common.show') }}
                                                     </a>
                                                     <a class="dropdown-item" href="{{ route('admin.grade-reports.transcript', $r->id) }}">
-                                                        <i class="la la-table"></i> {{ trans('grades_admin.control_transcript') }}
+                                                        <x-svg-icon name="table" :size="16" class="ic-navy me-1" /> {{ trans('grades_admin.control_transcript') }}
                                                     </a>
                                                     <a class="dropdown-item" href="{{ route('admin.grade-reports.notification', $r->id) }}">
-                                                        <i class="la la-file-invoice"></i> {{ trans('grades_admin.control_notification') }}
+                                                        <x-svg-icon name="receipt-cutoff" :size="16" class="ic-eval me-1" /> {{ trans('grades_admin.control_notification') }}
                                                     </a>
                                                     <div class="dropdown-divider"></div>
                                                     {{-- Lock toggle --}}
@@ -167,9 +167,9 @@
                                                         @csrf
                                                         <button type="submit" class="dropdown-item">
                                                             @if($r->is_locked)
-                                                                <i class="la la-lock-open text-success"></i> {{ trans('grades_admin.control_unlock') }}
+                                                                <x-svg-icon name="unlock-fill" :size="16" class="ic-success me-1" /> {{ trans('grades_admin.control_unlock') }}
                                                             @else
-                                                                <i class="la la-lock text-warning"></i> {{ trans('grades_admin.control_lock') }}
+                                                                <x-svg-icon name="lock-fill" :size="16" class="ic-warn me-1" /> {{ trans('grades_admin.control_lock') }}
                                                             @endif
                                                         </button>
                                                     </form>
@@ -180,7 +180,7 @@
                                                           onsubmit="return confirm('{{ trans('grades_admin.delete_confirm') }}');">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="dropdown-item text-danger">
-                                                            <i class="la la-trash"></i> {{ trans('grades_admin.control_delete') }}
+                                                            <x-svg-icon name="trash3-fill" :size="16" class="me-1" /> {{ trans('grades_admin.control_delete') }}
                                                         </button>
                                                     </form>
                                                 </div>

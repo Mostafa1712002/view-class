@@ -65,7 +65,7 @@
     <!-- END Custom CSS-->
 
     <!-- BEGIN Design System — Golden Platform unified tokens & components -->
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/design-system.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/design-system.css') }}?v={{ @filemtime(public_path('css/design-system.css')) ?: '1' }}">
     <!-- END Design System -->
 
     <style>
@@ -667,7 +667,7 @@
 
             <!-- Alerts -->
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="alert alert-success alert-dismissible fade show ds-animate-in" role="alert">
                     {{ session('success') }}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -676,7 +676,7 @@
             @endif
 
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show ds-animate-in" role="alert">
                     {{ session('error') }}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -685,7 +685,7 @@
             @endif
 
             @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show ds-animate-in" role="alert">
                     <ul class="mb-0">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>

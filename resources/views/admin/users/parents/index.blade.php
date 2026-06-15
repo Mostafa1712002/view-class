@@ -272,40 +272,40 @@
 
 <div class="content-body">
     @if(session('status'))
-        <div class="pp-alert"><i class="la la-check-circle"></i><span>{{ session('status') }}</span></div>
+        <div class="pp-alert"><x-svg-icon name="check-circle-fill" :size="18" class="ic-success" /><span>{{ session('status') }}</span></div>
     @endif
     @if(session('error'))
-        <div class="pp-alert err"><i class="la la-exclamation-triangle"></i><span>{{ session('error') }}</span></div>
+        <div class="pp-alert err"><x-svg-icon name="exclamation-triangle-fill" :size="18" class="ic-warn" /><span>{{ session('error') }}</span></div>
     @endif
     @if($errors->any())
-        <div class="pp-alert err"><i class="la la-exclamation-triangle"></i><span>{{ $errors->first() }}</span></div>
+        <div class="pp-alert err"><x-svg-icon name="exclamation-triangle-fill" :size="18" class="ic-warn" /><span>{{ $errors->first() }}</span></div>
     @endif
 
     {{-- KPI strip --}}
     <div class="pp-kpis">
         <div class="pp-kpi">
-            <div class="ico"><i class="la la-user-friends"></i></div>
+            <div class="ico"><x-svg-icon name="people-fill" :size="20" class="ic-info" /></div>
             <div>
                 <div class="num">{{ $total }}</div>
                 <div class="lbl">@lang('users.parent_total')</div>
             </div>
         </div>
         <div class="pp-kpi">
-            <div class="ico ico-green"><i class="la la-link"></i></div>
+            <div class="ico ico-green"><x-svg-icon name="link-45deg" :size="20" class="ic-success" /></div>
             <div>
                 <div class="num muted">{{ $withChildren }}</div>
                 <div class="lbl">@lang('users.parent_with_children')</div>
             </div>
         </div>
         <div class="pp-kpi">
-            <div class="ico ico-rose"><i class="la la-unlink"></i></div>
+            <div class="ico ico-rose"><x-svg-icon name="person-x-fill" :size="20" class="ic-danger" /></div>
             <div>
                 <div class="num muted">{{ $withoutChildren }}</div>
                 <div class="lbl">@lang('users.parent_without_children')</div>
             </div>
         </div>
         <div class="pp-kpi">
-            <div class="ico ico-blue"><i class="la la-check-circle"></i></div>
+            <div class="ico ico-blue"><x-svg-icon name="check-circle-fill" :size="20" class="ic-success" /></div>
             <div>
                 <div class="num muted">{{ $activeCount }}</div>
                 <div class="lbl">@lang('users.parent_active')</div>
@@ -319,24 +319,24 @@
                 <div class="d-flex align-items-center gap-2">
                     <div class="pp-add-wrap">
                         <button type="button" class="btn-gold" id="pp-add-btn">
-                            <i class="la la-plus"></i> @lang('users.add')
+                            <x-svg-icon name="plus-lg" :size="16" /> @lang('users.add')
                             <span class="caret">▾</span>
                         </button>
                         <div class="pp-add-menu" id="pp-add-menu">
                             <a href="{{ route('admin.users.parents.create') }}">
-                                <i class="la la-user-plus"></i>
+                                <x-svg-icon name="person-plus-fill" :size="16" class="ic-gold" />
                                 <span>@lang('users.add_parent')</span>
                             </a>
                             <a href="{{ route('admin.users.parents.import') }}">
-                                <i class="la la-file-excel"></i>
+                                <x-svg-icon name="file-earmark-excel-fill" :size="16" class="ic-success" />
                                 <span>@lang('users.import_excel')</span>
                             </a>
                             <a href="#" class="js-excel-action" data-target="form-edit-excel">
-                                <i class="la la-file-upload"></i>
+                                <x-svg-icon name="upload" :size="16" class="ic-info" />
                                 <span>@lang('users.edit_excel')</span>
                             </a>
                             <a href="#" class="js-excel-action" data-target="form-link-numbers">
-                                <i class="la la-link"></i>
+                                <x-svg-icon name="link-45deg" :size="16" class="ic-info" />
                                 <span>@lang('users.update_by_student_numbers')</span>
                             </a>
                         </div>
@@ -345,7 +345,7 @@
                 </div>
                 <form action="{{ route('admin.users.parents.index') }}" method="GET" class="pp-search">
                     <input type="search" name="q" value="{{ $q }}" class="form-control" placeholder="@lang('users.search_placeholder')" />
-                    <button type="submit" class="btn-search" title="@lang('users.search')"><i class="la la-search"></i></button>
+                    <button type="submit" class="btn-search" title="@lang('users.search')"><x-svg-icon name="search" :size="16" class="ic-muted" /></button>
                 </form>
             </div>
             <div class="card-body p-0">
@@ -392,7 +392,7 @@
                                 <td data-label="@lang('users.children_count')" class="text-center">
                                     <a href="{{ route('admin.users.parents.students', $u->id) }}" class="text-decoration-none">
                                         <span class="pp-children-chip {{ $childrenCount === 0 ? 'is-zero' : '' }}">
-                                            <i class="la la-user-graduate"></i>{{ $childrenCount }}
+                                            <x-svg-icon name="mortarboard-fill" :size="14" class="ic-info" />{{ $childrenCount }}
                                         </span>
                                     </a>
                                 </td>
@@ -411,32 +411,32 @@
                                 <td data-label="@lang('users.actions')" class="actions-cell text-{{ $isRtl ? 'start' : 'end' }}">
                                     <div class="pp-actions">
                                         <a href="{{ route('admin.users.parents.show', $u->id) }}" class="pp-icon-btn" title="@lang('users.view')">
-                                            <i class="la la-eye"></i>
+                                            <x-svg-icon name="eye-fill" :size="16" class="ic-info" />
                                         </a>
                                         <a href="{{ route('admin.users.parents.edit', $u->id) }}" class="pp-icon-btn is-primary" title="@lang('users.edit')">
-                                            <i class="la la-edit"></i>
+                                            <x-svg-icon name="pencil-square" :size="16" />
                                         </a>
                                         <form action="{{ route('admin.users.parents.destroy', $u->id) }}" method="POST" class="d-inline" onsubmit="return confirm('@lang('users.delete')?');">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="pp-icon-btn is-danger" title="@lang('users.delete')"><i class="la la-trash"></i></button>
+                                            <button type="submit" class="pp-icon-btn is-danger" title="@lang('users.delete')"><x-svg-icon name="trash3-fill" :size="16" /></button>
                                         </form>
                                         <div class="pp-row-menu js-row-menu">
                                             <button type="button" class="pp-icon-btn js-row-menu-btn" title="@lang('users.parent_more_actions')">
-                                                <i class="la la-ellipsis-h"></i>
+                                                <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
                                             </button>
                                             <div class="menu">
                                                 <a href="{{ route('admin.users.parents.students', $u->id) }}">
-                                                    <i class="la la-user-graduate"></i>
+                                                    <x-svg-icon name="mortarboard-fill" :size="16" class="ic-info" />
                                                     <span>@lang('users.students_link')</span>
                                                 </a>
                                                 <a href="#" class="disabled" title="@lang('users.permissions_link')">
-                                                    <i class="la la-key"></i>
+                                                    <x-svg-icon name="key-fill" :size="16" class="ic-warn" />
                                                     <span>@lang('users.permissions_link')</span>
                                                 </a>
                                                 @if(auth()->user()->isSuperAdmin())
                                                 <form action="{{ route('admin.users.impersonate.start', $u->id) }}" method="POST" class="m-0">
                                                     @csrf
-                                                    <button type="submit"><i class="la la-user-secret"></i><span>@lang('users.login_as')</span></button>
+                                                    <button type="submit"><x-svg-icon name="incognito" :size="16" class="ic-muted" /><span>@lang('users.login_as')</span></button>
                                                 </form>
                                                 @endif
                                             </div>
@@ -448,7 +448,7 @@
                             <tr>
                                 <td colspan="7">
                                     <div class="pp-empty">
-                                        <i class="la la-user-friends"></i>
+                                        <x-svg-icon name="people-fill" :size="40" class="ic-muted" />
                                         <div class="lbl">@lang('users.no_results')</div>
                                     </div>
                                 </td>

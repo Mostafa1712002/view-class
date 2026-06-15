@@ -32,7 +32,7 @@
                             <p class="mb-0 text-muted">@lang('dashboard.welcome_subtitle')</p>
                         </div>
                         <div class="text-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}">
-                            <p class="mb-0 text-dark fw-bold"><i class="la la-calendar text-primary"></i> {{ now()->format('Y/m/d') }}</p>
+                            <p class="mb-0 text-dark fw-bold"><x-svg-icon name="calendar-event-fill" :size="16" class="ic-info" /> {{ now()->format('Y/m/d') }}</p>
                             <small class="text-muted">{{ now()->locale(app()->getLocale())->dayName }}</small>
                         </div>
                     </div>
@@ -45,12 +45,10 @@
     <!-- Super Admin Stats -->
     <div class="row">
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-primary p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-building la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-gold mb-1 mx-auto">
+                        <x-svg-icon name="building-fill" :size="24" class="ic-gold" />
                     </div>
                     <h2 class="fw-bolder">{{ $schools_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.schools_count')</p>
@@ -58,12 +56,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-success p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-sitemap la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-success mb-1 mx-auto">
+                        <x-svg-icon name="diagram-3-fill" :size="24" class="ic-success" />
                     </div>
                     <h2 class="fw-bolder">{{ $sections_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.sections_count')</p>
@@ -71,12 +67,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-warning p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-users la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-info mb-1 mx-auto">
+                        <x-svg-icon name="people-fill" :size="24" class="ic-info" />
                     </div>
                     <h2 class="fw-bolder">{{ $classes_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.classes_count')</p>
@@ -84,12 +78,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-info p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-chalkboard-teacher la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-teal mb-1 mx-auto">
+                        <x-svg-icon name="person-workspace" :size="24" class="ic-teal" />
                     </div>
                     <h2 class="fw-bolder">{{ $teachers_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.teachers_count')</p>
@@ -97,12 +89,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-danger p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-user-graduate la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-eval mb-1 mx-auto">
+                        <x-svg-icon name="mortarboard-fill" :size="24" class="ic-eval" />
                     </div>
                     <h2 class="fw-bolder">{{ $students_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.students_count')</p>
@@ -110,12 +100,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-secondary p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-book la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-gold mb-1 mx-auto">
+                        <x-svg-icon name="journal-bookmark-fill" :size="24" class="ic-gold" />
                     </div>
                     <h2 class="fw-bolder">{{ $subjects_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.subjects_count')</p>
@@ -170,12 +158,10 @@
     <!-- School Admin Stats -->
     <div class="row">
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-success p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-sitemap la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-success mb-1 mx-auto">
+                        <x-svg-icon name="diagram-3-fill" :size="24" class="ic-success" />
                     </div>
                     <h2 class="fw-bolder">{{ $sections_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.sections_count')</p>
@@ -183,12 +169,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-warning p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-users la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-info mb-1 mx-auto">
+                        <x-svg-icon name="people-fill" :size="24" class="ic-info" />
                     </div>
                     <h2 class="fw-bolder">{{ $classes_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.classes_count')</p>
@@ -196,12 +180,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-info p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-chalkboard-teacher la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-teal mb-1 mx-auto">
+                        <x-svg-icon name="person-workspace" :size="24" class="ic-teal" />
                     </div>
                     <h2 class="fw-bolder">{{ $teachers_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.teachers_count')</p>
@@ -209,12 +191,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-danger p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-user-graduate la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-eval mb-1 mx-auto">
+                        <x-svg-icon name="mortarboard-fill" :size="24" class="ic-eval" />
                     </div>
                     <h2 class="fw-bolder">{{ $students_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.students_count')</p>
@@ -222,12 +202,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-secondary p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-book la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-gold mb-1 mx-auto">
+                        <x-svg-icon name="journal-bookmark-fill" :size="24" class="ic-gold" />
                     </div>
                     <h2 class="fw-bolder">{{ $subjects_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.subjects_count')</p>
@@ -235,12 +213,10 @@
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-primary p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-tasks la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-warn mb-1 mx-auto" style="background:var(--status-warning-bg);color:var(--status-warning);">
+                        <x-svg-icon name="list-task" :size="24" class="ic-warn" />
                     </div>
                     <h2 class="fw-bolder">{{ $pending_assignments ?? 0 }}</h2>
                     <p class="card-text">واجبات نشطة</p>
@@ -304,15 +280,15 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
-                        <span><i class="la la-list-alt me-1"></i>الخطط الأسبوعية</span>
+                        <span><x-svg-icon name="calendar-check" :size="16" class="ic-info me-1" />الخطط الأسبوعية</span>
                         <span class="badge bg-info">{{ $weekly_plans_count ?? 0 }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
-                        <span><i class="la la-tasks me-1"></i>الواجبات النشطة</span>
+                        <span><x-svg-icon name="list-task" :size="16" class="ic-warn me-1" />الواجبات النشطة</span>
                         <span class="badge bg-warning">{{ $pending_assignments ?? 0 }}</span>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span><i class="la la-file-text me-1"></i>الاختبارات القادمة</span>
+                        <span><x-svg-icon name="file-earmark-text-fill" :size="16" class="ic-eval me-1" />الاختبارات القادمة</span>
                         <span class="badge bg-primary">{{ isset($upcoming_exams) ? $upcoming_exams->count() : 0 }}</span>
                     </div>
                 </div>
@@ -369,12 +345,10 @@
     <!-- Teacher Stats -->
     <div class="row">
         <div class="col-xl-3 col-md-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-primary p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-book la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-gold mb-1 mx-auto">
+                        <x-svg-icon name="journal-bookmark-fill" :size="24" class="ic-gold" />
                     </div>
                     <h2 class="fw-bolder">{{ $subjects_count ?? 0 }}</h2>
                     <p class="card-text">المواد التي أدرسها</p>
@@ -382,12 +356,10 @@
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-success p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-users la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-info mb-1 mx-auto">
+                        <x-svg-icon name="people-fill" :size="24" class="ic-info" />
                     </div>
                     <h2 class="fw-bolder">{{ $classes_count ?? 0 }}</h2>
                     <p class="card-text">@lang('dashboard.classes_count')</p>
@@ -395,12 +367,10 @@
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-warning p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-file-text la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-warn mb-1 mx-auto" style="background:var(--status-warning-bg);color:var(--status-warning);">
+                        <x-svg-icon name="file-earmark-text-fill" :size="24" class="ic-warn" />
                     </div>
                     <h2 class="fw-bolder">{{ isset($upcoming_exams) ? $upcoming_exams->count() : 0 }}</h2>
                     <p class="card-text">الاختبارات القادمة</p>
@@ -408,12 +378,10 @@
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card text-center">
+            <div class="card ds-stat text-center">
                 <div class="card-body">
-                    <div class="avatar bg-light-danger p-50 mb-1">
-                        <div class="avatar-content">
-                            <i class="la la-graduation-cap la-2x"></i>
-                        </div>
+                    <div class="ic-chip ic-chip-eval mb-1 mx-auto">
+                        <x-svg-icon name="bar-chart-fill" :size="24" class="ic-eval" />
                     </div>
                     <h2 class="fw-bolder">{{ $pending_grading ?? 0 }}</h2>
                     <p class="card-text">بانتظار التصحيح</p>
@@ -477,7 +445,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body text-center py-5">
-                    <i class="la la-calendar la-4x text-primary mb-2"></i>
+                    <x-svg-icon name="calendar-event-fill" :size="56" class="ic-info mb-2" />
                     <h4>سيتم إضافة المزيد من المعلومات قريباً</h4>
                     <p class="text-muted">يمكنك متابعة الجدول الدراسي والدرجات والحضور من هنا</p>
                 </div>

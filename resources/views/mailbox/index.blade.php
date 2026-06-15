@@ -7,14 +7,14 @@
     $isRtl = app()->getLocale() === 'ar';
 
     $folders = [
-        'inbox'     => ['label' => __('mailbox.inbox'),   'icon' => 'la-inbox',       'count' => $counts['unreadInbox'] ?? 0, 'badge' => 'badge-primary'],
-        'sent'      => ['label' => __('mailbox.sent'),    'icon' => 'la-paper-plane',  'count' => $counts['sent'] ?? 0,       'badge' => 'badge-info'],
-        'drafts'    => ['label' => __('mailbox.drafts'),  'icon' => 'la-file',         'count' => $counts['drafts'] ?? 0,     'badge' => 'badge-secondary'],
-        'starred'   => ['label' => __('mailbox.starred'), 'icon' => 'la-star',         'count' => $counts['starred'] ?? 0,    'badge' => 'badge-warning'],
-        'important' => ['label' => __('mailbox.important'),'icon' => 'la-exclamation-circle','count' => $counts['important'] ?? 0,'badge' => 'badge-danger'],
-        'task'      => ['label' => __('mailbox.task'),    'icon' => 'la-tasks',        'count' => $counts['task'] ?? 0,       'badge' => 'badge-success'],
-        'archive'   => ['label' => __('mailbox.archive'), 'icon' => 'la-archive',      'count' => $counts['archive'] ?? 0,    'badge' => 'badge-light'],
-        'trash'     => ['label' => __('mailbox.trash'),   'icon' => 'la-trash',        'count' => $counts['trash'] ?? 0,      'badge' => 'badge-danger'],
+        'inbox'     => ['label' => __('mailbox.inbox'),   'icon' => 'inbox-fill',            'count' => $counts['unreadInbox'] ?? 0, 'badge' => 'badge-primary'],
+        'sent'      => ['label' => __('mailbox.sent'),    'icon' => 'send-fill',             'count' => $counts['sent'] ?? 0,       'badge' => 'badge-info'],
+        'drafts'    => ['label' => __('mailbox.drafts'),  'icon' => 'file-earmark',          'count' => $counts['drafts'] ?? 0,     'badge' => 'badge-secondary'],
+        'starred'   => ['label' => __('mailbox.starred'), 'icon' => 'star-fill',             'count' => $counts['starred'] ?? 0,    'badge' => 'badge-warning'],
+        'important' => ['label' => __('mailbox.important'),'icon' => 'exclamation-circle-fill','count' => $counts['important'] ?? 0,'badge' => 'badge-danger'],
+        'task'      => ['label' => __('mailbox.task'),    'icon' => 'list-check',            'count' => $counts['task'] ?? 0,       'badge' => 'badge-success'],
+        'archive'   => ['label' => __('mailbox.archive'), 'icon' => 'archive-fill',          'count' => $counts['archive'] ?? 0,    'badge' => 'badge-light'],
+        'trash'     => ['label' => __('mailbox.trash'),   'icon' => 'trash3-fill',           'count' => $counts['trash'] ?? 0,      'badge' => 'badge-danger'],
     ];
 
     $isSentFolder   = $folder === 'sent';
@@ -37,7 +37,7 @@
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }}">
         <a href="{{ route('my.mailbox.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('mailbox.compose')
+            <x-svg-icon name="plus-lg" :size="16" /> @lang('mailbox.compose')
         </a>
     </div>
 </div>
@@ -51,7 +51,7 @@
                     @foreach($folders as $key => $meta)
                         <a href="{{ route('my.mailbox.folder', $key) }}"
                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ $folder === $key ? 'active' : '' }}">
-                            <span><i class="la {{ $meta['icon'] }} mr-1"></i> {{ $meta['label'] }}</span>
+                            <span><x-svg-icon :name="$meta['icon']" :size="16" class="ic-info me-1" /> {{ $meta['label'] }}</span>
                             @if($meta['count'] > 0)
                                 <span class="badge {{ $meta['badge'] }} badge-pill">{{ $meta['count'] }}</span>
                             @endif
@@ -87,12 +87,12 @@
                     @endif
 
                     <button type="submit" class="btn btn-sm btn-secondary">
-                        <i class="la la-filter"></i> @lang('mailbox.filter')
+                        <x-svg-icon name="funnel-fill" :size="16" /> @lang('mailbox.filter')
                     </button>
 
                     @if(! empty($filters))
                         <a href="{{ route('my.mailbox.folder', $folder) }}" class="btn btn-sm btn-light">
-                            <i class="la la-times"></i> @lang('mailbox.show_all')
+                            <x-svg-icon name="x-circle-fill" :size="16" class="ic-muted" /> @lang('mailbox.show_all')
                         </a>
                     @endif
                 </form>
@@ -151,7 +151,7 @@
                                             <span class="badge badge-primary badge-pill">&nbsp;</span>
                                         @endif
                                         @if($isTask)
-                                            <i class="la la-tasks text-success" title="@lang('mailbox.task')"></i>
+                                            <x-svg-icon name="list-check" :size="16" class="ic-success" title="@lang('mailbox.task')" />
                                         @endif
                                     </td>
 
@@ -165,7 +165,7 @@
                                         <a href="{{ route('my.mailbox.show', $mail->id) }}">
                                             {{ $mail->subject }}
                                             @if($mail->attachment_path)
-                                                <i class="la la-paperclip text-muted mx-1" title="@lang('mailbox.attachment')"></i>
+                                                <x-svg-icon name="paperclip" :size="16" class="ic-muted mx-1" />
                                             @endif
                                         </a>
                                     </td>
@@ -195,14 +195,14 @@
                                                 <form action="{{ route('my.mailbox.unstar', $mail->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-warning" title="@lang('mailbox.unstarred_action')">
-                                                        <i class="la la-star"></i>
+                                                        <x-svg-icon name="star-fill" :size="16" />
                                                     </button>
                                                 </form>
                                             @else
                                                 <form action="{{ route('my.mailbox.star', $mail->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-outline-warning" title="@lang('mailbox.starred_action')">
-                                                        <i class="la la-star"></i>
+                                                        <x-svg-icon name="star-fill" :size="16" />
                                                     </button>
                                                 </form>
                                             @endif
@@ -212,14 +212,14 @@
                                                 <form action="{{ route('my.mailbox.unarchive', $mail->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-secondary" title="@lang('mailbox.unarchived_action')">
-                                                        <i class="la la-box-open"></i>
+                                                        <x-svg-icon name="box-arrow-up" :size="16" />
                                                     </button>
                                                 </form>
                                             @else
                                                 <form action="{{ route('my.mailbox.archive', $mail->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-outline-secondary" title="@lang('mailbox.archived_action')">
-                                                        <i class="la la-archive"></i>
+                                                        <x-svg-icon name="archive-fill" :size="16" />
                                                     </button>
                                                 </form>
                                             @endif
@@ -235,7 +235,7 @@
                                                             } else {
                                                                 document.getElementById('trash-form-{{ $mail->id }}').submit();
                                                             }">
-                                                    <i class="la la-trash"></i>
+                                                    <x-svg-icon name="trash3-fill" :size="16" />
                                                 </button>
                                             </form>
                                         @endif
@@ -245,7 +245,7 @@
                                             <form action="{{ route('my.mailbox.restore', $mail->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-info" title="@lang('mailbox.restore')">
-                                                    <i class="la la-undo"></i>
+                                                    <x-svg-icon name="arrow-counterclockwise" :size="16" />
                                                 </button>
                                             </form>
                                             {{-- Permanently delete --}}
@@ -260,7 +260,7 @@
                                                             } else {
                                                                 document.getElementById('del-form-{{ $mail->id }}').submit();
                                                             }">
-                                                    <i class="la la-times-circle"></i>
+                                                    <x-svg-icon name="x-circle-fill" :size="16" />
                                                 </button>
                                             </form>
                                         @endif
@@ -269,7 +269,7 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center text-muted py-4">
-                                        <i class="la la-inbox" style="font-size:2rem;"></i>
+                                        <x-svg-icon name="inbox-fill" :size="40" class="ic-info" />
                                         <p class="mt-1">@lang('mailbox.no_messages')</p>
                                     </td>
                                 </tr>

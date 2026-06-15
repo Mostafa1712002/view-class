@@ -38,22 +38,27 @@
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
         <a href="{{ route('admin.grade-reports.edit', $report->id) }}" class="btn btn-outline-primary btn-sm" title="{{ trans('grades_admin.control_settings') }}">
-            <i class="la la-cog"></i>
+            <x-svg-icon name="gear-fill" :size="16" />
         </a>
         <a href="{{ route('admin.grades.entry.index', ['report_id' => $report->id]) }}" class="btn btn-outline-info btn-sm" title="{{ trans('grades_admin.control_entry') }}">
-            <i class="la la-pencil-alt"></i>
+            <x-svg-icon name="pencil-square" :size="16" />
         </a>
         <a href="{{ route('admin.grade-reports.transcript', $report->id) }}" class="btn btn-outline-secondary btn-sm" title="{{ trans('grades_admin.control_transcript') }}">
-            <i class="la la-table"></i>
+            <x-svg-icon name="table" :size="16" />
         </a>
         <a href="{{ route('admin.grade-reports.notification', $report->id) }}" class="btn btn-outline-secondary btn-sm" title="{{ trans('grades_admin.control_notification') }}">
-            <i class="la la-file-invoice"></i>
+            <x-svg-icon name="receipt-cutoff" :size="16" />
         </a>
         <a href="{{ route('admin.grade-reports.monitor', ['class_id' => $report->class_id, 'subject_id' => $report->subject_id]) }}" class="btn btn-outline-warning btn-sm" title="{{ trans('grades_admin.control_monitor') }}">
-            <i class="la la-chart-bar"></i>
+            <x-svg-icon name="bar-chart-fill" :size="16" />
         </a>
         <a href="{{ route('admin.grade-reports.index') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> {{ trans('grades_admin.back') }}
+            @if($isRtl)
+                <x-svg-icon name="arrow-right" :size="16" />
+            @else
+                <x-svg-icon name="arrow-left" :size="16" />
+            @endif
+            {{ trans('grades_admin.back') }}
         </a>
     </div>
 </div>
@@ -67,7 +72,7 @@
             <h4 class="card-title mb-0">
                 {{ trans('grades_admin.report_title') }}
                 @if($report->is_locked)
-                    <i class="la la-lock text-warning ml-1" title="{{ trans('grades_admin.locked') }}"></i>
+                    <x-svg-icon name="lock-fill" :size="16" class="ic-warn ms-1" title="{{ trans('grades_admin.locked') }}" />
                 @endif
                 @if($report->is_active)
                     <span class="badge badge-success ml-1">{{ trans('grades_admin.active') }}</span>
@@ -114,13 +119,13 @@
                 <div class="col-12 mt-2">
                     <strong>{{ trans('grades_admin.visibility_section') }}:</strong>
                     @if($report->visible_to_student)
-                        <span class="badge badge-success ml-1"><i class="la la-user"></i> {{ trans('grades_admin.visible_to_student') }}</span>
+                        <span class="badge badge-success ms-1"><x-svg-icon name="person-fill" :size="14" class="me-1" /> {{ trans('grades_admin.visible_to_student') }}</span>
                     @endif
                     @if($report->visible_to_parent)
-                        <span class="badge badge-success ml-1"><i class="la la-users"></i> {{ trans('grades_admin.visible_to_parent') }}</span>
+                        <span class="badge badge-success ms-1"><x-svg-icon name="people-fill" :size="14" class="me-1" /> {{ trans('grades_admin.visible_to_parent') }}</span>
                     @endif
                     @if($report->visible_to_teacher)
-                        <span class="badge badge-success ml-1"><i class="la la-chalkboard-teacher"></i> {{ trans('grades_admin.visible_to_teacher') }}</span>
+                        <span class="badge badge-success ms-1"><x-svg-icon name="person-video3" :size="14" class="me-1" /> {{ trans('grades_admin.visible_to_teacher') }}</span>
                     @endif
                 </div>
             </div>
@@ -138,7 +143,7 @@
         <div class="card-body p-0">
             @if($report->columns->isEmpty())
                 <div class="text-center py-4 text-muted">
-                    <i class="la la-columns la-2x d-block mb-2"></i>
+                    <x-svg-icon name="columns-gap" :size="24" class="ic-muted d-block mb-2" />
                     {{ trans('grades_admin.no_columns') }}
                 </div>
             @else
@@ -163,16 +168,16 @@
                                     <td class="text-center">{{ rtrim(rtrim(number_format($col->max_score, 2, '.', ''), '0'), '.') }}</td>
                                     <td class="text-center">
                                         @if($col->is_in_total)
-                                            <i class="la la-check text-success"></i>
+                                            <x-svg-icon name="check2" :size="16" class="ic-success" />
                                         @else
-                                            <i class="la la-times text-muted"></i>
+                                            <x-svg-icon name="x-lg" :size="16" class="ic-muted" />
                                         @endif
                                     </td>
                                     <td class="text-center">
                                         @if($col->is_visible)
-                                            <i class="la la-eye text-info"></i>
+                                            <x-svg-icon name="eye-fill" :size="16" class="ic-info" />
                                         @else
-                                            <i class="la la-eye-slash text-muted"></i>
+                                            <x-svg-icon name="eye-slash-fill" :size="16" class="ic-muted" />
                                         @endif
                                     </td>
                                 </tr>
@@ -184,7 +189,7 @@
         </div>
         <div class="card-footer text-{{ $isRtl ? 'right' : 'left' }}">
             <a href="{{ route('admin.grade-reports.edit', $report->id) }}" class="btn btn-outline-primary btn-sm">
-                <i class="la la-edit"></i> {{ trans('grades_admin.control_settings') }}
+                <x-svg-icon name="pencil-square" :size="16" class="me-1" /> {{ trans('grades_admin.control_settings') }}
             </a>
         </div>
     </div>

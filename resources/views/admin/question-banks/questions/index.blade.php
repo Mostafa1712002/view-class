@@ -133,14 +133,14 @@
                 <div class="bank-meta mt-2">
                     {{-- Visibility --}}
                     <span>
-                        <i class="la la-eye"></i>
+                        <x-svg-icon name="eye-fill" :size="16" class="ic-info" />
                         <span class="badge badge-vis-{{ $bank->visibility }}">
                             @if($bank->visibility === 'public') @lang('question_banks.visibility_public') @else @lang('question_banks.visibility_private') @endif
                         </span>
                     </span>
                     {{-- Status --}}
                     <span>
-                        <i class="la la-circle"></i>
+                        <x-svg-icon name="circle-fill" :size="10" class="ic-muted" />
                         <span class="badge badge-bank-status badge-status-{{ $bank->status }}">
                             @lang('question_banks.status_' . $bank->status)
                         </span>
@@ -148,20 +148,20 @@
                     {{-- Source --}}
                     @if($bank->source)
                     <span>
-                        <i class="la la-database"></i>
+                        <x-svg-icon name="database-fill" :size="16" class="ic-navy" />
                         @lang('question_banks.source_' . $bank->source)
                     </span>
                     @endif
                     {{-- Grade --}}
                     @if($bank->grade_level)
                     <span>
-                        <i class="la la-graduation-cap"></i>
+                        <x-svg-icon name="mortarboard-fill" :size="16" class="ic-info" />
                         @lang('question_banks.grades.' . $bank->grade_level)
                     </span>
                     @endif
                     {{-- Total questions --}}
                     <span>
-                        <i class="la la-question-circle"></i>
+                        <x-svg-icon name="question-circle-fill" :size="16" class="ic-eval" />
                         <strong>{{ $questions->total() }}</strong>&nbsp;@lang('questions.index_title')
                     </span>
                 </div>
@@ -178,7 +178,7 @@
                 {{-- Add question dropdown --}}
                 <div class="dropdown">
                     <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" type="button">
-                        <i class="la la-plus"></i> @lang('questions.add_btn')
+                        <x-svg-icon name="plus-lg" :size="16" /> @lang('questions.add_btn')
                     </button>
                     <ul class="dropdown-menu add-type-menu">
                         @foreach($typesList as $t)
@@ -193,17 +193,17 @@
                 {{-- Import Excel --}}
                 <a href="{{ route('admin.question-banks.questions.import.form', $bank->id) }}"
                    class="btn btn-success btn-sm">
-                    <i class="la la-file-excel"></i> @lang('question_import.page_title')
+                    <x-svg-icon name="file-earmark-excel-fill" :size="16" /> @lang('question_import.page_title')
                 </a>
                 {{-- Download template --}}
                 <a href="{{ route('admin.question-banks.questions.import.template', $bank->id) }}"
                    class="btn btn-outline-secondary btn-sm">
-                    <i class="la la-download"></i> @lang('question_import.download_template')
+                    <x-svg-icon name="download" :size="16" /> @lang('question_import.download_template')
                 </a>
                 {{-- Back to banks --}}
                 <a href="{{ route('admin.question-banks.index') }}"
                    class="btn btn-outline-secondary btn-sm">
-                    <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> @lang('questions.form.back')
+                    @if($isRtl)<x-svg-icon name="arrow-right" :size="16" />@else<x-svg-icon name="arrow-left" :size="16" />@endif @lang('questions.form.back')
                 </a>
             </div>
         </div>
@@ -294,8 +294,8 @@
                     </div>
                     {{-- Buttons --}}
                     <div class="col-md-2 col-12 d-flex gap-1">
-                        <button class="btn btn-primary btn-sm flex-fill"><i class="la la-filter"></i> @lang('questions.filters.title')</button>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('admin.question-banks.questions.index', $bank->id) }}" title="@lang('questions.filters.reset')"><i class="la la-times"></i></a>
+                        <button class="btn btn-primary btn-sm flex-fill"><x-svg-icon name="funnel-fill" :size="16" /> @lang('questions.filters.title')</button>
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('admin.question-banks.questions.index', $bank->id) }}" title="@lang('questions.filters.reset')"><x-svg-icon name="x-circle-fill" :size="16" /></a>
                     </div>
                 </div>
             </form>
@@ -374,13 +374,13 @@
                                                  alt=""
                                                  onclick="showImgLightbox(this.src)">
                                         @else
-                                            <span class="text-muted small"><i class="la la-image"></i> @lang('questions.no_image')</span>
+                                            <span class="text-muted small"><x-svg-icon name="image" :size="16" class="ic-muted" /> @lang('questions.no_image')</span>
                                         @endif
                                     @elseif($ctype === 'mixed')
                                         {{-- Mixed: text + image badge --}}
                                         {{ \Illuminate\Support\Str::limit(strip_tags($q->body_ar), 100) }}
                                         @if($q->attachment_path)
-                                            <span class="badge badge-info ms-1" style="font-size:10px;"><i class="la la-image"></i> @lang('questions.has_image')</span>
+                                            <span class="badge badge-info ms-1" style="font-size:10px;"><x-svg-icon name="image" :size="12" /> @lang('questions.has_image')</span>
                                         @endif
                                     @else
                                         {{-- Text: plain excerpt --}}
@@ -429,31 +429,31 @@
                                         data-toggle="modal" data-target="#previewModal"
                                         data-bs-toggle="modal" data-bs-target="#previewModal"
                                         data-url="{{ route('admin.question-banks.questions.preview', [$bank->id, $q->id]) }}">
-                                    <i class="la la-eye"></i>
+                                    <x-svg-icon name="eye-fill" :size="16" />
                                 </button>
                                 <a class="btn btn-sm btn-outline-secondary"
                                    href="{{ route('admin.question-banks.questions.edit', [$bank->id, $q->id]) }}"
                                    title="@lang('questions.view_actions.edit')">
-                                    <i class="la la-pen"></i>
+                                    <x-svg-icon name="pencil-square" :size="16" />
                                 </a>
                                 <form action="{{ route('admin.question-banks.questions.duplicate', [$bank->id, $q->id]) }}" method="POST" class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn btn-sm btn-outline-primary" title="@lang('questions.view_actions.duplicate')">
-                                        <i class="la la-copy"></i>
+                                        <x-svg-icon name="files" :size="16" />
                                     </button>
                                 </form>
                                 <form action="{{ route('admin.question-banks.questions.destroy', [$bank->id, $q->id]) }}" method="POST" class="d-inline js-delete-form">
                                     @csrf @method('DELETE')
                                     <button type="button" class="btn btn-sm btn-outline-danger js-delete-btn" title="@lang('questions.view_actions.delete')"
                                             data-confirm="@lang('questions.confirm.delete')">
-                                        <i class="la la-trash"></i>
+                                        <x-svg-icon name="trash3-fill" :size="16" />
                                     </button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr><td colspan="12" class="q-empty">
-                            <div class="icon"><i class="la la-question-circle"></i></div>
+                            <div class="icon"><x-svg-icon name="question-circle-fill" :size="48" class="ic-eval" /></div>
                             <div>@lang('questions.empty')</div>
                         </td></tr>
                     @endforelse
@@ -480,7 +480,7 @@
                 </button>
             </div>
             <div class="modal-body" id="previewBody">
-                <div class="text-center py-4 text-muted"><i class="la la-spinner la-spin la-2x"></i></div>
+                <div class="text-center py-4 text-muted"><x-svg-icon name="arrow-repeat" :size="24" class="ic-muted" /></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary btn-sm" data-dismiss="modal" data-bs-dismiss="modal">@lang('questions.preview.close')</button>
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function () {
         body.replaceChildren();
         var loader = document.createElement('div');
         loader.className = 'text-center py-4 text-muted';
-        loader.innerHTML = '<i class="la la-spinner la-spin la-2x"></i>';
+        loader.innerHTML = '<div class="spinner-border spinner-border-sm" role="status" style="width:1.5rem;height:1.5rem;"><span class="visually-hidden">Loading...</span></div>';
         body.appendChild(loader);
     }
 

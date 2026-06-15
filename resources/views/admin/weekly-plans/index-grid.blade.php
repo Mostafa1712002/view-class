@@ -198,10 +198,10 @@
     </div>
     <div class="content-header-right col-md-5 col-12 text-md-right">
         <a href="{{ route('manage.weekly-plans.create') }}" class="btn btn-primary btn-sm">
-            <i class="la la-plus"></i> @lang('weekly_plan.btn_add_plan')
+            <x-svg-icon name="plus-lg" :size="16" /> @lang('weekly_plan.btn_add_plan')
         </a>
         <a href="{{ route('manage.weekly-plan-notes.index') }}" class="btn btn-secondary btn-sm">
-            <i class="la la-sticky-note"></i> @lang('weekly_plan.btn_ready_notes')
+            <x-svg-icon name="sticky-fill" :size="16" /> @lang('weekly_plan.btn_ready_notes')
         </a>
     </div>
 </div>
@@ -213,28 +213,28 @@
     {{-- KPI strip --}}
     <div class="wp-kpis">
         <div class="wp-kpi">
-            <div class="ico ico-gold"><i class="la la-calendar-week"></i></div>
+            <div class="ico ico-gold"><x-svg-icon name="calendar-week" :size="20" class="ic-info" /></div>
             <div>
                 <div class="num">{{ number_format($kpis['total'] ?? 0) }}</div>
                 <div class="lbl">@lang('weekly_plan.kpi_total')</div>
             </div>
         </div>
         <div class="wp-kpi">
-            <div class="ico ico-green"><i class="la la-check-circle"></i></div>
+            <div class="ico ico-green"><x-svg-icon name="check-circle-fill" :size="20" class="ic-success" /></div>
             <div>
                 <div class="num">{{ number_format($kpis['prepared'] ?? 0) }}</div>
                 <div class="lbl">@lang('weekly_plan.kpi_prepared')</div>
             </div>
         </div>
         <div class="wp-kpi">
-            <div class="ico ico-amber"><i class="la la-clock"></i></div>
+            <div class="ico ico-amber"><x-svg-icon name="clock-history" :size="20" class="ic-warn" /></div>
             <div>
                 <div class="num">{{ number_format($kpis['not_prepared'] ?? 0) }}</div>
                 <div class="lbl">@lang('weekly_plan.kpi_not_prepared')</div>
             </div>
         </div>
         <div class="wp-kpi">
-            <div class="ico ico-red"><i class="la la-lock"></i></div>
+            <div class="ico ico-red"><x-svg-icon name="lock-fill" :size="20" class="ic-danger" /></div>
             <div>
                 <div class="num">{{ number_format($kpis['locked'] ?? 0) }}</div>
                 <div class="lbl">@lang('weekly_plan.kpi_locked')</div>
@@ -249,7 +249,7 @@
     @endphp
     <div class="wp-card">
         <div class="se-title">
-            <i class="la la-search"></i>
+            <x-svg-icon name="search" :size="18" class="ic-muted" />
             @lang('weekly_plan.filters_title')
             <label class="wp-auto-toggle ml-auto">
                 <input type="checkbox" id="wpAutoSearch" checked>
@@ -286,10 +286,10 @@
                 </div>
                 <div class="col-md-3 col-sm-6 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="la la-search"></i> @lang('weekly_plan.btn_search')
+                        <x-svg-icon name="search" :size="16" /> @lang('weekly_plan.btn_search')
                     </button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="wpAdvancedToggle">
-                        <i class="la la-sliders-h"></i> @lang('weekly_plan.btn_advanced')
+                        <x-svg-icon name="sliders2" :size="16" /> @lang('weekly_plan.btn_advanced')
                     </button>
                 </div>
             </div>
@@ -327,7 +327,7 @@
                 </div>
                 <div class="col-12 d-flex align-items-end gap-2">
                     <a href="{{ route('manage.weekly-plans.index', ['view' => 'grid', 'week_start' => $weekStart->toDateString()]) }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="la la-times"></i> @lang('weekly_plan.btn_reset')
+                        <x-svg-icon name="x-circle-fill" :size="16" class="ic-muted" /> @lang('weekly_plan.btn_reset')
                     </a>
                 </div>
             </div>
@@ -338,13 +338,13 @@
     <div class="wp-week-nav">
         <div class="nav-left">
             <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->subWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
-                <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> @lang('weekly_plan.week_prev')
+                @if($isRtl)<x-svg-icon name="arrow-right" :size="16" />@else<x-svg-icon name="arrow-left" :size="16" />@endif @lang('weekly_plan.week_prev')
             </a>
             <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => now()->startOfWeek(\Carbon\Carbon::SUNDAY)->toDateString()])) }}" class="btn btn-primary btn-sm">
-                <i class="la la-calendar-day"></i> @lang('weekly_plan.week_now')
+                <x-svg-icon name="calendar-day" :size="16" /> @lang('weekly_plan.week_now')
             </a>
             <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->addWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
-                @lang('weekly_plan.week_next') <i class="la la-arrow-{{ $isRtl ? 'left' : 'right' }}"></i>
+                @lang('weekly_plan.week_next') @if($isRtl)<x-svg-icon name="arrow-left" :size="16" />@else<x-svg-icon name="arrow-right" :size="16" />@endif
             </a>
         </div>
         <div class="nav-range">
@@ -355,14 +355,14 @@
         </div>
         <div class="nav-tools">
             <a href="{{ route('manage.weekly-plans.pdf', request()->query()) }}" target="_blank" class="btn btn-outline-danger btn-sm">
-                <i class="la la-file-pdf"></i> @lang('weekly_plan.btn_pdf')
+                <x-svg-icon name="file-earmark-pdf-fill" :size="16" /> @lang('weekly_plan.btn_pdf')
             </a>
             <a href="{{ route('manage.weekly-plans.excel', request()->query()) }}" class="btn btn-outline-success btn-sm">
-                <i class="la la-file-excel"></i> @lang('weekly_plan.btn_excel')
+                <x-svg-icon name="file-earmark-excel-fill" :size="16" /> @lang('weekly_plan.btn_excel')
             </a>
             <div class="wp-cols-dropdown">
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="wpColsToggle">
-                    <i class="la la-columns"></i> @lang('weekly_plan.btn_columns')
+                    <x-svg-icon name="columns-gap" :size="16" /> @lang('weekly_plan.btn_columns')
                 </button>
                 <div class="wp-cols-menu" id="wpColsMenu"></div>
             </div>
@@ -383,7 +383,7 @@
     {{-- Plans grouped by class --}}
     @if($weekPlans->isEmpty())
         <div class="wp-empty">
-            <i class="la la-calendar-times"></i>
+            <x-svg-icon name="calendar-x-fill" :size="48" class="ic-muted" />
             <h4>@lang('weekly_plan.empty_title')</h4>
             <div>@lang('weekly_plan.empty_hint')</div>
         </div>
@@ -409,7 +409,7 @@
                         @foreach($plansByClass as $className => $plans)
                             <tr class="wp-group-row">
                                 <td colspan="10">
-                                    <i class="la la-users"></i>
+                                    <x-svg-icon name="people-fill" :size="16" class="ic-info" />
                                     @lang('weekly_plan.th_class'): <strong>{{ $className }}</strong>
                                     <span class="text-muted small">({{ $plans->count() }})</span>
                                 </td>
@@ -419,11 +419,11 @@
                                 <tr>
                                     <td data-col="status">
                                         @if($plan->is_locked)
-                                            <span class="wp-badge wp-badge-locked"><i class="la la-lock"></i> @lang('weekly_plan.status_locked')</span>
+                                            <span class="wp-badge wp-badge-locked"><x-svg-icon name="lock-fill" :size="12" class="ic-danger" /> @lang('weekly_plan.status_locked')</span>
                                         @elseif($plan->is_prepared)
-                                            <span class="wp-badge wp-badge-prepared"><i class="la la-check"></i> @lang('weekly_plan.status_prepared')</span>
+                                            <span class="wp-badge wp-badge-prepared"><x-svg-icon name="check-lg" :size="12" class="ic-success" /> @lang('weekly_plan.status_prepared')</span>
                                         @else
-                                            <span class="wp-badge wp-badge-not-prepared"><i class="la la-clock"></i> @lang('weekly_plan.status_not_prepared')</span>
+                                            <span class="wp-badge wp-badge-not-prepared"><x-svg-icon name="clock-history" :size="12" class="ic-warn" /> @lang('weekly_plan.status_not_prepared')</span>
                                         @endif
                                     </td>
                                     <td data-col="teacher">{{ $plan->teacher?->name ?? '—' }}</td>
@@ -434,7 +434,7 @@
                                     <td class="col-narrow" data-col="exams"><div class="wp-clip">{{ $plan->exams ?: '—' }}</div></td>
                                     <td class="text-center" data-col="attachments">
                                         @if(count($attachments) > 0)
-                                            <span class="wp-badge wp-badge-prepared"><i class="la la-paperclip"></i> {{ count($attachments) }}</span>
+                                            <span class="wp-badge wp-badge-prepared"><x-svg-icon name="paperclip" :size="12" class="ic-info" /> {{ count($attachments) }}</span>
                                         @else
                                             <span class="text-muted small">—</span>
                                         @endif
@@ -445,11 +445,15 @@
                                             <form action="{{ route('manage.weekly-plans.mark-prepared', $plan) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 <button class="btn-icon {{ $plan->is_prepared ? 'warning' : 'success' }}" title="{{ $plan->is_prepared ? __('weekly_plan.status_not_prepared') : __('weekly_plan.status_prepared') }}">
-                                                    <i class="la la-{{ $plan->is_prepared ? 'undo' : 'check' }}"></i>
+                                                    @if($plan->is_prepared)
+                                                        <x-svg-icon name="arrow-counterclockwise" :size="16" />
+                                                    @else
+                                                        <x-svg-icon name="check-lg" :size="16" />
+                                                    @endif
                                                 </button>
                                             </form>
-                                            <a href="{{ route('manage.weekly-plans.show', $plan) }}" class="btn-icon" title="@lang('common.show')"><i class="la la-eye"></i></a>
-                                            <a href="{{ route('manage.weekly-plans.edit', $plan) }}" class="btn-icon" title="@lang('common.edit')"><i class="la la-edit"></i></a>
+                                            <a href="{{ route('manage.weekly-plans.show', $plan) }}" class="btn-icon" title="@lang('common.show')"><x-svg-icon name="eye-fill" :size="16" class="ic-info" /></a>
+                                            <a href="{{ route('manage.weekly-plans.edit', $plan) }}" class="btn-icon" title="@lang('common.edit')"><x-svg-icon name="pencil-square" :size="16" class="ic-gold" /></a>
                                         </div>
                                     </td>
                                 </tr>

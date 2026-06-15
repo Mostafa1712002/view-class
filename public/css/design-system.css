@@ -297,9 +297,11 @@ body.theme-light .card-title {
 }
 body.theme-light .card-subtitle { color: var(--text-secondary); }
 
-/* Stat tiles get a hover lift; data tables and filters stay stable */
+/* Stat tiles get a hover lift; data tables and filters stay stable.
+   !important is required because the theme runs a `themeLightFadeIn` intro
+   animation on .card that pins transform and otherwise swallows the lift. */
 body.theme-light .card.ds-stat:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px) !important;
     box-shadow: var(--shadow-md);
 }
 
@@ -916,6 +918,168 @@ body.theme-light .progress-bar.bg-info    { background: var(--status-info)    !i
 
 /* Ensure badge padding symmetry in RTL */
 [dir="rtl"] .badge { letter-spacing: 0; }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   22. ICON COLOURS — per-section semantic colouring (card #220, goal A)
+       Applied to <x-svg-icon> (.vc-ico) and legacy <i class="la …"> glyphs.
+       Use the .ic-* class on the icon element so colour is intentional per
+       section, never "all one colour".
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+    --ic-eval:   #7c3aed;   /* evaluations / indicators — purple   */
+    --ic-eval-2: #6d28d9;
+    --ic-teal:   #0d9488;   /* support / help-desk — teal          */
+    --ic-blue:   #2563eb;   /* mail / communication — blue         */
+}
+
+.ic-danger  { color: var(--status-danger)  !important; }  /* absence, delete, errors   */
+.ic-success { color: var(--status-success) !important; }  /* present, active, confirm   */
+.ic-warn    { color: var(--status-warning) !important; }  /* warnings, pending          */
+.ic-info    { color: var(--ic-blue)        !important; }  /* mail, links, info          */
+.ic-blue    { color: var(--ic-blue)        !important; }
+.ic-eval    { color: var(--ic-eval)        !important; }  /* evaluations, grades, charts*/
+.ic-teal    { color: var(--ic-teal)        !important; }  /* support, library           */
+.ic-gold    { color: var(--gold-500)       !important; }  /* subjects, brand, primary   */
+.ic-navy    { color: var(--navy)           !important; }  /* structural, neutral-strong */
+.ic-muted   { color: var(--text-tertiary)  !important; }  /* secondary glyphs           */
+
+/* Soft tinted icon "chips" — a coloured rounded square behind a stat icon. */
+.ic-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+.ic-chip-gold    { background: var(--gold-50);            color: var(--gold-500); }
+.ic-chip-danger  { background: var(--status-danger-bg);  color: var(--status-danger); }
+.ic-chip-success { background: var(--status-success-bg); color: var(--status-success); }
+.ic-chip-info    { background: #eff6ff;                  color: var(--ic-blue); }
+.ic-chip-eval    { background: #f5f3ff;                  color: var(--ic-eval); }
+.ic-chip-teal    { background: #f0fdfa;                  color: var(--ic-teal); }
+.ic-chip-navy    { background: var(--surface-subtle);    color: var(--navy); }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   23. MOTION & STATES — restrained, professional animations (card #220, goal B)
+       All non-essential motion is disabled under prefers-reduced-motion
+       (extended in section 20). Keep durations short to avoid jank.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Card hover: subtle lift + stronger shadow + icon nudge ───────────────── */
+.ds-hover-card {
+    transition: transform var(--transition-base),
+                box-shadow var(--transition-base),
+                border-color var(--transition-base);
+    will-change: transform;
+}
+.ds-hover-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: var(--shadow-md);
+}
+/* Stat cards (dashboard) — make the chip/icon nudge on card hover */
+body.theme-light .card.ds-stat,
+.ds-hover-card { cursor: default; }
+body.theme-light .card.ds-stat:hover .ic-chip,
+body.theme-light .card.ds-stat:hover .vc-ico,
+.ds-hover-card:hover .ic-chip { transform: scale(1.08); }
+
+/* Generic icon nudge inside any hovered actionable element */
+.ds-action-btn .vc-ico,
+.btn .vc-ico,
+.dropdown-item .vc-ico { transition: transform var(--transition-fast); }
+.ds-action-btn:hover .vc-ico,
+.btn:hover .vc-ico { transform: translateY(-1px) scale(1.05); }
+
+/* ── Button loading state ─────────────────────────────────────────────────── */
+.btn.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+.btn.btn-loading > * { visibility: hidden; }
+.btn.btn-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1.05em; height: 1.05em;
+    margin: -.525em 0 0 -.525em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: var(--radius-pill);
+    color: var(--text-inverse);
+    animation: ds-spin 650ms linear infinite;
+}
+.btn.btn-outline-secondary.btn-loading::after,
+.btn.btn-secondary.btn-loading::after { color: var(--gold-500); }
+
+/* Clear disabled state for all buttons */
+.btn:disabled,
+.btn.disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* ── Table row hover (reinforce) + skeleton table rows ────────────────────── */
+.ds-skeleton-row td { padding: var(--space-3) var(--space-4); }
+.ds-skeleton-cell {
+    height: 1em;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-50) 50%, var(--gray-100) 75%);
+    background-size: 400% 100%;
+    animation: ds-shimmer 1.4s ease-in-out infinite;
+}
+
+/* ── Subtle enter animations for modals, toasts, alerts ───────────────────── */
+@keyframes ds-fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ds-fade-scale {
+    from { opacity: 0; transform: scale(.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* Bootstrap modal: gently fade the dialog up on enter.
+   NOTE: only the *visible* (.show) state is forced — we deliberately do NOT
+   set opacity:0 on the base .modal-dialog, so if these rules ever fail to
+   apply the modal still shows (fail-open, no app-wide hidden modals). */
+.modal.fade .modal-dialog {
+    transition: transform var(--transition-base), opacity var(--transition-base);
+}
+.modal.fade.show .modal-dialog {
+    transform: none !important;
+    opacity: 1 !important;
+}
+.modal.fade.show.ds-anim-modal .modal-dialog {
+    animation: ds-fade-scale var(--transition-base) ease-out;
+}
+
+/* SweetAlert2 / generic toasts & flash alerts gently fade-up on appear */
+.swal2-toast.swal2-show { animation: ds-fade-up var(--transition-base) ease-out; }
+.alert.ds-animate-in    { animation: ds-fade-up var(--transition-base) ease-out; }
+
+/* ── Reduced-motion: neutralise the new motion explicitly ─────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .ds-hover-card:hover,
+    body.theme-light .card.ds-stat:hover { transform: none !important; }
+    body.theme-light .card.ds-stat:hover .ic-chip,
+    body.theme-light .card.ds-stat:hover .vc-ico,
+    .ds-hover-card:hover .ic-chip,
+    .ds-action-btn:hover .vc-ico,
+    .btn:hover .vc-ico { transform: none; }
+    .modal.fade .modal-dialog { transition: none; }
+    .modal.fade.show.ds-anim-modal .modal-dialog { animation: none; }
+    .btn.btn-loading::after { animation: none; }
+    .ds-skeleton-cell { animation: none; }
+    .swal2-toast.swal2-show,
+    .alert.ds-animate-in { animation: none; }
+}
 
 /* Pagination chevrons */
 [dir="rtl"] .page-item:first-child .page-link,

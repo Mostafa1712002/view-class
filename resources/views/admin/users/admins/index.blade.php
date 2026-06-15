@@ -308,37 +308,37 @@
 
 <div class="content-body">
     @if(session('status'))
-        <div class="ad-alert"><i class="la la-check-circle"></i><span>{{ session('status') }}</span></div>
+        <div class="ad-alert"><x-svg-icon name="check-circle-fill" :size="16" class="ic-success" /><span>{{ session('status') }}</span></div>
     @endif
     @if(session('error'))
-        <div class="ad-alert err"><i class="la la-exclamation-triangle"></i><span>{{ session('error') }}</span></div>
+        <div class="ad-alert err"><x-svg-icon name="exclamation-triangle-fill" :size="16" class="ic-danger" /><span>{{ session('error') }}</span></div>
     @endif
 
     {{-- KPI strip --}}
     <div class="ad-kpis">
         <div class="ad-kpi">
-            <div class="ico"><i class="la la-user-shield"></i></div>
+            <div class="ico"><x-svg-icon name="shield-lock-fill" :size="20" /></div>
             <div>
                 <div class="num">{{ $total }}</div>
                 <div class="lbl">@lang('users.admin_total')</div>
             </div>
         </div>
         <div class="ad-kpi">
-            <div class="ico ico-green"><i class="la la-check-circle"></i></div>
+            <div class="ico ico-green"><x-svg-icon name="check-circle-fill" :size="20" /></div>
             <div>
                 <div class="num muted">{{ $active }}</div>
                 <div class="lbl">@lang('users.admin_active')</div>
             </div>
         </div>
         <div class="ad-kpi">
-            <div class="ico ico-blue"><i class="la la-id-badge"></i></div>
+            <div class="ico ico-blue"><x-svg-icon name="person-badge-fill" :size="20" /></div>
             <div>
                 <div class="num muted">{{ $withJob }}</div>
                 <div class="lbl">@lang('users.admin_with_role')</div>
             </div>
         </div>
         <div class="ad-kpi">
-            <div class="ico ico-violet"><i class="la la-crown"></i></div>
+            <div class="ico ico-violet"><x-svg-icon name="gem" :size="20" /></div>
             <div>
                 <div class="num muted">{{ $super }}</div>
                 <div class="lbl">@lang('users.admin_super')</div>
@@ -349,7 +349,7 @@
     {{-- Search engine --}}
     <div class="ad-search-card">
         <div class="se-title">
-            <i class="la la-search"></i>
+            <x-svg-icon name="search" :size="16" class="ic-gold" />
             <span>@lang('users.admin_search_engine')</span>
             <span class="se-hint">@lang('users.admin_search_hint')</span>
         </div>
@@ -364,11 +364,11 @@
                 @endforeach
             </select>
             <button class="btn-gold" type="submit">
-                <i class="la la-search"></i> @lang('users.search')
+                <x-svg-icon name="search" :size="16" /> @lang('users.search')
             </button>
             @if($q || request('job_title_id'))
                 <a href="{{ route('admin.users.admins.index') }}" class="btn-reset">
-                    <i class="la la-times"></i> @lang('users.cancel')
+                    <x-svg-icon name="x-circle-fill" :size="16" class="ic-muted" /> @lang('users.cancel')
                 </a>
             @endif
         </form>
@@ -380,13 +380,13 @@
             <div class="dropdown">
                 <button class="btn-gold dropdown-toggle" type="button"
                         data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="la la-plus"></i> @lang('users.add_admin')
+                    <x-svg-icon name="plus-lg" :size="16" /> @lang('users.add_admin')
                 </button>
                 <div class="dropdown-menu ad-add-menu">
                     <div class="dropdown-header">@lang('users.admin_picker_title')</div>
                     @forelse($jobTitles as $jt)
                         <a class="ad-job-item" href="{{ route('admin.users.admins.create', ['job_title_id' => $jt->id]) }}">
-                            <span class="jt-ico"><i class="la la-tag"></i></span>
+                            <span class="jt-ico"><x-svg-icon name="tag-fill" :size="16" /></span>
                             <span class="jt-meta">
                                 <span>{{ $jt->localized_name }}</span>
                                 <span class="jt-slug">{{ $jt->slug }}</span>
@@ -394,18 +394,18 @@
                         </a>
                     @empty
                         <div class="ad-empty" style="padding:1rem .5rem;">
-                            <i class="la la-tag"></i>
+                            <x-svg-icon name="tag-fill" :size="40" class="ic-muted" />
                             <div class="lbl">@lang('users.no_results')</div>
                         </div>
                     @endforelse
                     <div class="dropdown-divider"></div>
                     <a class="ad-blank" href="{{ route('admin.users.admins.create') }}">
-                        <i class="la la-user-plus"></i> @lang('users.admin_picker_blank')
+                        <x-svg-icon name="person-plus-fill" :size="16" class="ic-gold" /> @lang('users.admin_picker_blank')
                     </a>
                 </div>
             </div>
             <a class="btn-ghost" href="{{ route('admin.users.job-titles.index') }}">
-                <i class="la la-cogs"></i> @lang('users.admin_manage_job_titles')
+                <x-svg-icon name="gear-fill" :size="16" class="ic-gold" /> @lang('users.admin_manage_job_titles')
             </a>
         </div>
         <span class="count-pill">{{ $admins->total() }} / {{ $total }}</span>
@@ -476,36 +476,36 @@
                                 <a href="{{ route('admin.users.admins.edit', $u->id) }}"
                                    class="ad-action-btn edit"
                                    title="@lang('users.edit')">
-                                    <i class="la la-edit"></i>
+                                    <x-svg-icon name="pencil-square" :size="16" class="ic-gold" />
                                 </a>
                                 <div class="dropdown">
                                     <button type="button"
                                             class="ad-action-btn more dropdown-toggle"
                                             data-toggle="dropdown" data-bs-toggle="dropdown"
                                             aria-expanded="false" title="@lang('users.admin_more_actions')">
-                                        <i class="la la-ellipsis-h"></i>
+                                        <x-svg-icon name="three-dots" :size="16" class="ic-muted" />
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-{{ $isRtl ? 'start' : 'end' }}">
                                         <a class="dropdown-item" href="{{ route('admin.users.admins.show', $u->id) }}">
-                                            <i class="la la-eye"></i> @lang('users.admin_view')
+                                            <x-svg-icon name="eye-fill" :size="16" class="ic-info" /> @lang('users.admin_view')
                                         </a>
                                         <a class="dropdown-item" href="{{ route('admin.users.admins.edit', $u->id) }}">
-                                            <i class="la la-edit"></i> @lang('users.edit')
+                                            <x-svg-icon name="pencil-square" :size="16" class="ic-gold" /> @lang('users.edit')
                                         </a>
                                         @if($u->jobTitle && in_array($u->jobTitle->slug, ['supervisor', 'counselor']))
                                             <a class="dropdown-item" href="{{ route('admin.users.admins.supervisees', $u->id) }}">
-                                                <i class="la la-users"></i> @lang('users.admin_supervisees')
+                                                <x-svg-icon name="people-fill" :size="16" class="ic-info" /> @lang('users.admin_supervisees')
                                             </a>
                                         @endif
                                         <a class="dropdown-item" href="{{ route('admin.users.job-titles.index') }}">
-                                            <i class="la la-cogs"></i> @lang('users.admin_manage_job_titles')
+                                            <x-svg-icon name="gear-fill" :size="16" class="ic-muted" /> @lang('users.admin_manage_job_titles')
                                         </a>
                                         @if(auth()->user()->isSuperAdmin())
                                             <div class="dropdown-divider"></div>
                                             <form action="{{ route('admin.users.impersonate.start', $u->id) }}" method="POST">
                                                 @csrf
                                                 <button class="dropdown-item" type="submit">
-                                                    <i class="la la-user-secret"></i> @lang('users.login_as')
+                                                    <x-svg-icon name="box-arrow-in-right" :size="16" class="ic-warn" /> @lang('users.login_as')
                                                 </button>
                                             </form>
                                         @endif
@@ -514,7 +514,7 @@
                                               onsubmit="return confirm('@lang('users.delete')?');">
                                             @csrf @method('DELETE')
                                             <button class="dropdown-item danger" type="submit">
-                                                <i class="la la-trash"></i> @lang('users.delete')
+                                                <x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('users.delete')
                                             </button>
                                         </form>
                                     </div>
@@ -526,7 +526,7 @@
                     <tr>
                         <td colspan="6">
                             <div class="ad-empty">
-                                <i class="la la-user-shield"></i>
+                                <x-svg-icon name="shield-lock-fill" :size="40" class="ic-muted" />
                                 <div class="lbl">
                                     @if($q || request('job_title_id'))
                                         @lang('users.admin_no_filter_results')

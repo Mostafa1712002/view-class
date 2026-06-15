@@ -115,7 +115,7 @@
     </div>
     <div class="content-header-right col-md-4 col-12 text-end">
         <a href="{{ route('admin.exams.create') }}" class="btn add-exam-btn">
-            <i class="la la-plus"></i> @lang('exams_admin.actions.add')
+            <x-svg-icon name="plus-lg" :size="16" class="me-1" /> @lang('exams_admin.actions.add')
         </a>
     </div>
 </div>
@@ -133,7 +133,7 @@
                         <div class="label">@lang('exams_admin.kpis.total')</div>
                         <div class="value">{{ $stats['total'] }}</div>
                     </div>
-                    <span class="icon"><i class="la la-file-alt"></i></span>
+                    <span class="icon"><x-svg-icon name="file-earmark-text-fill" :size="20" class="ic-eval" /></span>
                 </div>
             </div>
         </div>
@@ -144,7 +144,7 @@
                         <div class="label">@lang('exams_admin.kpis.published')</div>
                         <div class="value">{{ $stats['published'] }}</div>
                     </div>
-                    <span class="icon"><i class="la la-check-circle"></i></span>
+                    <span class="icon"><x-svg-icon name="check-circle-fill" :size="20" class="ic-success" /></span>
                 </div>
             </div>
         </div>
@@ -155,7 +155,7 @@
                         <div class="label">@lang('exams_admin.kpis.active')</div>
                         <div class="value">{{ $stats['active'] }}</div>
                     </div>
-                    <span class="icon"><i class="la la-bolt"></i></span>
+                    <span class="icon"><x-svg-icon name="lightning-fill" :size="20" class="ic-warn" /></span>
                 </div>
             </div>
         </div>
@@ -166,7 +166,7 @@
                         <div class="label">@lang('exams_admin.kpis.upcoming')</div>
                         <div class="value">{{ $stats['upcoming'] }}</div>
                     </div>
-                    <span class="icon"><i class="la la-clock"></i></span>
+                    <span class="icon"><x-svg-icon name="clock-history" :size="20" class="ic-info" /></span>
                 </div>
             </div>
         </div>
@@ -222,10 +222,10 @@
             </div>
             <div class="col-md-2 col-12 d-flex gap-1 align-items-end">
                 <button type="submit" class="btn add-exam-btn flex-grow-1">
-                    <i class="la la-search"></i> @lang('exams_admin.filters.show')
+                    <x-svg-icon name="search" :size="16" class="me-1" /> @lang('exams_admin.filters.show')
                 </button>
                 <a href="{{ route('admin.exams.index') }}" class="btn btn-soft" title="@lang('exams_admin.filters.reset')">
-                    <i class="la la-redo"></i>
+                    <x-svg-icon name="arrow-clockwise" :size="16" class="ic-muted" />
                 </a>
             </div>
         </div>
@@ -280,7 +280,7 @@
                                 </td>
                                 <td>
                                     @if ($exam->is_published)
-                                        <span class="pub-pill on"><i class="la la-check"></i> @lang('exams_admin.badges.published')</span>
+                                        <span class="pub-pill on"><x-svg-icon name="check2" :size="16" class="ic-success me-1" /> @lang('exams_admin.badges.published')</span>
                                     @else
                                         <span class="pub-pill off">@lang('exams_admin.badges.draft')</span>
                                     @endif
@@ -288,16 +288,16 @@
                                 <td class="text-end row-actions">
                                     <div class="dropdown">
                                         <button type="button" class="btn-icon dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="la la-ellipsis-h"></i>
+                                            <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="{{ route('admin.exams.show', $exam) }}"><i class="la la-eye"></i> @lang('exams_admin.actions.view')</a>
-                                            <a class="dropdown-item" href="{{ route('admin.exams.questions.index', $exam) }}"><i class="la la-list-ol"></i> @lang('exams_admin.actions.questions')</a>
-                                            <a class="dropdown-item" href="{{ route('admin.exams.edit', $exam) }}"><i class="la la-pen"></i> @lang('exams_admin.actions.edit')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.exams.show', $exam) }}"><x-svg-icon name="eye-fill" :size="16" class="ic-info me-1" /> @lang('exams_admin.actions.view')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.exams.questions.index', $exam) }}"><x-svg-icon name="list-ol" :size="16" class="ic-navy me-1" /> @lang('exams_admin.actions.questions')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.exams.edit', $exam) }}"><x-svg-icon name="pencil-square" :size="16" class="ic-gold me-1" /> @lang('exams_admin.actions.edit')</a>
                                             <div class="dropdown-divider"></div>
                                             <form action="{{ route('admin.exams.destroy', $exam) }}" method="POST" onsubmit="return confirm('@lang('exams_admin.actions.delete_confirm')')">
                                                 @csrf @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('exams_admin.actions.delete')</button>
+                                                <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash3-fill" :size="16" class="me-1" /> @lang('exams_admin.actions.delete')</button>
                                             </form>
                                         </div>
                                     </div>
@@ -312,11 +312,11 @@
             @endif
         @else
             <div class="empty-state">
-                <span class="icon-wrap"><i class="la la-calendar-times"></i></span>
+                <span class="icon-wrap"><x-svg-icon name="calendar-x-fill" :size="48" class="ic-warn" /></span>
                 <h5 class="mb-1">@lang('exams_admin.empty.title')</h5>
                 <p>@lang('exams_admin.empty.subtitle')</p>
                 <a href="{{ route('admin.exams.create') }}" class="btn add-exam-btn">
-                    <i class="la la-plus"></i> @lang('exams_admin.empty.cta')
+                    <x-svg-icon name="plus-lg" :size="16" class="me-1" /> @lang('exams_admin.empty.cta')
                 </a>
             </div>
         @endif
