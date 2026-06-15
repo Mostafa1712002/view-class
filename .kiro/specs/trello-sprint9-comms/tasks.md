@@ -18,7 +18,7 @@ Order minimizes shared-file conflicts (sidebar/header/template serialized).
 - [x] B6 #173 المكتبة العامة... (student account: libraries, files, virtual labs, appts, SpecialEd, policies)  (DLm2PbYp)
 
 ## Batch C — Sprint 9 communications (15 cards; new modules can build parallel, deploy serial)
-- [ ] C0 #231 Sprint 9 overview / عمليات التواصل  (oi6gWI7x)
+- [x] C0 #231 Sprint 9 overview / عمليات التواصل  (oi6gWI7x)
 - [ ] C1 #232 موديول الإعلانات  (gYAL0yss)
 - [ ] C2 #233 التقويم المدرسي وإدارة الأحداث  (CMbz5vRx)
 - [ ] C3 #234 الفصول الافتراضية وربطها بالحضور  (3DvY4q7Y)
