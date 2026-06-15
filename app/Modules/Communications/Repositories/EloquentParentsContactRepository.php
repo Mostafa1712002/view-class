@@ -45,6 +45,21 @@ class EloquentParentsContactRepository implements ParentsContactRepository
                 'notification_count' => DB::table('notifications')
                     ->selectRaw('count(*)')
                     ->whereColumn('notifications.user_id', 'users.id'),
+                // Parent-CRM counts (Sprint 10 #269) — school scope already
+                // applied to the parent rows above; the CRM rows belong to the
+                // same parent so no extra school filter is needed here.
+                'complaint_count' => DB::table('parent_complaints')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('parent_complaints.parent_id', 'users.id')
+                    ->whereNull('parent_complaints.deleted_at'),
+                'visit_count' => DB::table('parent_school_visits')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('parent_school_visits.parent_id', 'users.id')
+                    ->whereNull('parent_school_visits.deleted_at'),
+                'call_count' => DB::table('parent_scheduled_calls')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('parent_scheduled_calls.parent_id', 'users.id')
+                    ->whereNull('parent_scheduled_calls.deleted_at'),
             ])
             ->orderBy('users.name');
 

@@ -122,6 +122,9 @@
                         <th scope="col">الجنسية</th>
                         <th scope="col">رقم الجوال</th>
                         <th scope="col" class="text-center">عدد الأبناء</th>
+                        <th scope="col" class="text-center">الشكاوى</th>
+                        <th scope="col" class="text-center">الزيارات</th>
+                        <th scope="col" class="text-center">الاتصالات</th>
                         <th scope="col" class="text-center">رسائل بريد</th>
                         <th scope="col" class="text-center">رسائل واتساب</th>
                         <th scope="col" class="text-center">إشعارات</th>
@@ -135,6 +138,9 @@
                             $wa   = (int) ($p->whatsapp_count ?? 0);
                             $nt   = (int) ($p->notification_count ?? 0);
                             $kids = (int) ($p->children_count ?? 0);
+                            $cmp  = (int) ($p->complaint_count ?? 0);
+                            $vis  = (int) ($p->visit_count ?? 0);
+                            $cal  = (int) ($p->call_count ?? 0);
                         @endphp
                         <tr>
                             <td>
@@ -148,6 +154,9 @@
                             <td>{{ $p->nationality ?: '—' }}</td>
                             <td dir="ltr" style="text-align:start">{{ $p->phone ?: '—' }}</td>
                             <td class="text-center"><span class="pc-count-pill {{ $kids ? 'ds-badge-info' : 'muted' }}">{{ $kids }}</span></td>
+                            <td class="text-center"><span class="pc-count-pill {{ $cmp ? 'ds-badge-danger' : 'muted' }}">{{ $cmp }}</span></td>
+                            <td class="text-center"><span class="pc-count-pill {{ $vis ? 'ds-badge-navy' : 'muted' }}">{{ $vis }}</span></td>
+                            <td class="text-center"><span class="pc-count-pill {{ $cal ? 'ds-badge-success' : 'muted' }}">{{ $cal }}</span></td>
                             <td class="text-center"><span class="pc-count-pill {{ $mail ? 'ds-badge-warning' : 'muted' }}">{{ $mail }}</span></td>
                             <td class="text-center"><span class="pc-count-pill {{ $wa ? 'ds-badge-success' : 'muted' }}">{{ $wa }}</span></td>
                             <td class="text-center"><span class="pc-count-pill {{ $nt ? 'ds-badge-navy' : 'muted' }}">{{ $nt }}</span></td>
