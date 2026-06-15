@@ -50,10 +50,10 @@
             </div>
             <div class="d-flex gap-2">
                 <button type="button" class="btn add-subject-btn" data-toggle="modal" data-bs-toggle="modal" data-target="#addDomainModal" data-bs-target="#addDomainModal">
-                    <i class="la la-plus"></i> @lang('domains.add')
+                    <x-svg-icon name="plus" /> @lang('domains.add')
                 </button>
                 <button type="button" class="btn btn-soft" data-toggle="modal" data-bs-toggle="modal" data-target="#domainTreeModal" data-bs-target="#domainTreeModal">
-                    <i class="la la-sitemap"></i> @lang('domains.tree')
+                    <x-svg-icon name="diagram-3" /> @lang('domains.tree')
                 </button>
             </div>
         </div>
@@ -63,7 +63,7 @@
         <div class="card-body">
             <div class="input-group">
                 <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="la la-search"></i></span>
+                    <span class="input-group-text"><x-svg-icon name="search" /></span>
                 </div>
                 <input type="text" id="domain-search" class="form-control" placeholder="@lang('domains.search')">
             </div>
@@ -90,10 +90,10 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary edit-domain"
                                             data-id="{{ $domain->id }}" data-name="{{ $domain->name }}"
                                             data-toggle="modal" data-bs-toggle="modal" data-target="#editDomainModal" data-bs-target="#editDomainModal"
-                                            title="@lang('common.edit')"><i class="la la-edit"></i></button>
+                                            title="@lang('common.edit')"><x-svg-icon name="pencil-square" /></button>
                                     <form action="{{ route('admin.subjects.domains.destroy', [$subject->id, $domain->id]) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('domains.confirm_delete')))">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('common.delete')"><i class="la la-trash"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('common.delete')"><x-svg-icon name="trash" /></button>
                                     </form>
                                 </td>
                             </tr>
@@ -113,7 +113,7 @@
         <form action="{{ route('admin.subjects.domains.store', $subject->id) }}" method="POST" class="modal-content">
             @csrf
             <div class="modal-header">
-                <h5 class="modal-title"><i class="la la-plus-circle"></i> @lang('domains.add')</h5>
+                <h5 class="modal-title"><x-svg-icon name="plus-circle" /> @lang('domains.add')</h5>
                 <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
@@ -122,7 +122,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-soft" data-dismiss="modal" data-bs-dismiss="modal">@lang('common.close')</button>
-                <button type="submit" class="btn add-subject-btn"><i class="la la-save"></i> @lang('common.save')</button>
+                <button type="submit" class="btn add-subject-btn"><x-svg-icon name="save" /> @lang('common.save')</button>
             </div>
         </form>
     </div>
@@ -134,7 +134,7 @@
         <form id="edit-domain-form" method="POST" class="modal-content">
             @csrf @method('PUT')
             <div class="modal-header">
-                <h5 class="modal-title"><i class="la la-edit"></i> @lang('domains.edit')</h5>
+                <h5 class="modal-title"><x-svg-icon name="pencil-square" /> @lang('domains.edit')</h5>
                 <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
@@ -143,7 +143,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-soft" data-dismiss="modal" data-bs-dismiss="modal">@lang('common.close')</button>
-                <button type="submit" class="btn add-subject-btn"><i class="la la-save"></i> @lang('common.save')</button>
+                <button type="submit" class="btn add-subject-btn"><x-svg-icon name="save" /> @lang('common.save')</button>
             </div>
         </form>
     </div>
@@ -154,7 +154,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="la la-sitemap"></i> @lang('domains.tree')</h5>
+                <h5 class="modal-title"><x-svg-icon name="diagram-3" /> @lang('domains.tree')</h5>
                 <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body domain-tree">
@@ -163,7 +163,7 @@
                         @if($domains->count())
                             <ul>
                                 @foreach($domains as $domain)
-                                    <li><i class="la la-angle-left"></i> {{ $domain->name }}</li>
+                                    <li><x-svg-icon name="chevron-left" /> {{ $domain->name }}</li>
                                 @endforeach
                             </ul>
                         @else

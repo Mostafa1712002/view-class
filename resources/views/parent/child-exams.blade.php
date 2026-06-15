@@ -86,7 +86,7 @@
 
     {{-- Year selector --}}
     <form method="GET" class="ce-year-bar">
-        <label for="ce-year"><i class="la la-calendar"></i> العام الدراسي</label>
+        <label for="ce-year"><x-svg-icon name="calendar" /> العام الدراسي</label>
         <select name="academic_year_id" id="ce-year" onchange="this.form.submit()">
             @foreach($academicYears as $year)
                 <option value="{{ $year->id }}" {{ $academicYear?->id == $year->id ? 'selected' : '' }}>
@@ -98,75 +98,75 @@
 
     {{-- Upcoming exams --}}
     <div class="ce-section-title">
-        <i class="la la-clock"></i> الاختبارات القادمة
+        <x-svg-icon name="clock" /> الاختبارات القادمة
         <span class="ce-pill upcoming ms-1">{{ $upcomingExams->count() }}</span>
     </div>
 
     @if($upcomingExams->count() > 0)
         @foreach($upcomingExams as $exam)
             <div class="ce-card">
-                <div class="ce-ico upcoming"><i class="la la-file-alt"></i></div>
+                <div class="ce-ico upcoming"><x-svg-icon name="file-earmark-text" /></div>
                 <div class="ce-info">
                     <div class="ce-name">{{ $exam->title }}</div>
                     <div class="ce-meta">
                         @if($exam->subject)
-                            <span><i class="la la-book"></i> {{ $exam->subject->name }}</span>
+                            <span><x-svg-icon name="book" /> {{ $exam->subject->name }}</span>
                         @endif
-                        <span><i class="la la-calendar"></i> {{ $exam->start_time->format('Y/m/d') }}</span>
-                        <span><i class="la la-clock"></i> {{ $exam->start_time->format('H:i') }}</span>
+                        <span><x-svg-icon name="calendar" /> {{ $exam->start_time->format('Y/m/d') }}</span>
+                        <span><x-svg-icon name="clock" /> {{ $exam->start_time->format('H:i') }}</span>
                         @if($exam->duration_minutes)
-                            <span><i class="la la-hourglass-half"></i> {{ $exam->duration_minutes }} دقيقة</span>
+                            <span><x-svg-icon name="hourglass-split" /> {{ $exam->duration_minutes }} دقيقة</span>
                         @endif
                     </div>
                 </div>
                 <div class="text-end flex-shrink-0">
-                    <span class="ce-pill upcoming"><i class="la la-clock"></i> قادم</span>
+                    <span class="ce-pill upcoming"><x-svg-icon name="clock" /> قادم</span>
                     <div class="mt-1">
-                        <span class="ce-pill marks"><i class="la la-star"></i> {{ $exam->total_marks }} درجة</span>
+                        <span class="ce-pill marks"><x-svg-icon name="star" /> {{ $exam->total_marks }} درجة</span>
                     </div>
                 </div>
             </div>
         @endforeach
     @else
         <div class="ce-empty mb-4">
-            <i class="la la-calendar-times"></i>
+            <x-svg-icon name="calendar-x" />
             <p>لا توجد اختبارات قادمة</p>
         </div>
     @endif
 
     {{-- Completed exams --}}
     <div class="ce-section-title mt-3">
-        <i class="la la-check-circle"></i> الاختبارات المنتهية
+        <x-svg-icon name="check-circle" /> الاختبارات المنتهية
         <span class="ce-pill completed ms-1">{{ $completedExams->count() }}</span>
     </div>
 
     @if($completedExams->count() > 0)
         @foreach($completedExams as $exam)
             <div class="ce-card">
-                <div class="ce-ico completed"><i class="la la-check-circle"></i></div>
+                <div class="ce-ico completed"><x-svg-icon name="check-circle" /></div>
                 <div class="ce-info">
                     <div class="ce-name">{{ $exam->title }}</div>
                     <div class="ce-meta">
                         @if($exam->subject)
-                            <span><i class="la la-book"></i> {{ $exam->subject->name }}</span>
+                            <span><x-svg-icon name="book" /> {{ $exam->subject->name }}</span>
                         @endif
-                        <span><i class="la la-calendar"></i> {{ $exam->start_time->format('Y/m/d') }}</span>
+                        <span><x-svg-icon name="calendar" /> {{ $exam->start_time->format('Y/m/d') }}</span>
                         @if($exam->duration_minutes)
-                            <span><i class="la la-hourglass-half"></i> {{ $exam->duration_minutes }} دقيقة</span>
+                            <span><x-svg-icon name="hourglass-split" /> {{ $exam->duration_minutes }} دقيقة</span>
                         @endif
                     </div>
                 </div>
                 <div class="text-end flex-shrink-0">
-                    <span class="ce-pill completed"><i class="la la-check"></i> منتهي</span>
+                    <span class="ce-pill completed"><x-svg-icon name="check" /> منتهي</span>
                     <div class="mt-1">
-                        <span class="ce-pill marks"><i class="la la-star"></i> {{ $exam->total_marks }} درجة</span>
+                        <span class="ce-pill marks"><x-svg-icon name="star" /> {{ $exam->total_marks }} درجة</span>
                     </div>
                 </div>
             </div>
         @endforeach
     @else
         <div class="ce-empty">
-            <i class="la la-file-alt"></i>
+            <x-svg-icon name="file-earmark-text" />
             <p>لا توجد اختبارات منتهية</p>
         </div>
     @endif

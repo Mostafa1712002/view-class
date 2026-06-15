@@ -12,16 +12,16 @@
         <div class="col-lg-4 mb-4">
             <div class="card h-100">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="la la-user-graduate me-1"></i>تصدير الطلاب</h5>
+                    <h5 class="mb-0"><x-svg-icon name="mortarboard" class="me-1" />تصدير الطلاب</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted">تصدير قائمة جميع الطلاب مع بياناتهم الأساسية</p>
                     <div class="d-grid gap-2">
                         <a href="{{ route('admin.exports.students', ['format' => 'csv']) }}" class="btn btn-success">
-                            <i class="la la-file-csv me-1"></i>تصدير CSV
+                            <x-svg-icon name="filetype-csv" class="me-1" />تصدير CSV
                         </a>
                         <a href="{{ route('admin.exports.students', ['format' => 'pdf']) }}" class="btn btn-danger">
-                            <i class="la la-file-pdf me-1"></i>تصدير PDF
+                            <x-svg-icon name="file-earmark-pdf" class="me-1" />تصدير PDF
                         </a>
                     </div>
                 </div>
@@ -31,16 +31,16 @@
         <div class="col-lg-4 mb-4">
             <div class="card h-100">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="la la-chalkboard-teacher me-1"></i>تصدير المعلمين</h5>
+                    <h5 class="mb-0"><x-svg-icon name="easel" class="me-1" />تصدير المعلمين</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted">تصدير قائمة جميع المعلمين والمواد التي يدرسونها</p>
                     <div class="d-grid gap-2">
                         <a href="{{ route('admin.exports.teachers', ['format' => 'csv']) }}" class="btn btn-success">
-                            <i class="la la-file-csv me-1"></i>تصدير CSV
+                            <x-svg-icon name="filetype-csv" class="me-1" />تصدير CSV
                         </a>
                         <a href="{{ route('admin.exports.teachers', ['format' => 'pdf']) }}" class="btn btn-danger">
-                            <i class="la la-file-pdf me-1"></i>تصدير PDF
+                            <x-svg-icon name="file-earmark-pdf" class="me-1" />تصدير PDF
                         </a>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
         <div class="col-lg-4 mb-4">
             <div class="card h-100">
                 <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="la la-graduation-cap me-1"></i>تصدير الدرجات</h5>
+                    <h5 class="mb-0"><x-svg-icon name="mortarboard" class="me-1" />تصدير الدرجات</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted">تصدير سجل الدرجات للطلاب</p>
@@ -65,10 +65,10 @@
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" name="format" value="csv" class="btn btn-success">
-                                <i class="la la-file-csv me-1"></i>تصدير CSV
+                                <x-svg-icon name="filetype-csv" class="me-1" />تصدير CSV
                             </button>
                             <button type="submit" name="format" value="pdf" class="btn btn-danger">
-                                <i class="la la-file-pdf me-1"></i>تصدير PDF
+                                <x-svg-icon name="file-earmark-pdf" class="me-1" />تصدير PDF
                             </button>
                         </div>
                     </form>
@@ -79,7 +79,7 @@
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="la la-check-square me-1"></i>تصدير الحضور</h5>
+                    <h5 class="mb-0"><x-svg-icon name="check-square" class="me-1" />تصدير الحضور</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted">تصدير سجل الحضور والغياب</p>
@@ -105,10 +105,10 @@
                         </div>
                         <div class="d-flex gap-2">
                             <button type="submit" name="format" value="csv" class="btn btn-success">
-                                <i class="la la-file-csv me-1"></i>تصدير CSV
+                                <x-svg-icon name="filetype-csv" class="me-1" />تصدير CSV
                             </button>
                             <button type="submit" name="format" value="pdf" class="btn btn-danger">
-                                <i class="la la-file-pdf me-1"></i>تصدير PDF
+                                <x-svg-icon name="file-earmark-pdf" class="me-1" />تصدير PDF
                             </button>
                         </div>
                     </form>

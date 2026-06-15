@@ -34,7 +34,7 @@
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }}">
         <a href="{{ url()->previous() }}" class="btn btn-secondary">
-            <i class="la la-arrow-left"></i> @lang('mailbox.back')
+            <x-svg-icon name="arrow-left" /> @lang('mailbox.back')
         </a>
     </div>
 </div>
@@ -49,12 +49,12 @@
             {{-- Reply / Forward (gated on mailbox.send in the controller) --}}
             @if(Route::has('my.mailbox.reply'))
                 <a href="{{ route('my.mailbox.reply', $message->id) }}" class="btn btn-sm btn-primary">
-                    <i class="la la-reply"></i> @lang('mailbox.reply')
+                    <x-svg-icon name="reply" /> @lang('mailbox.reply')
                 </a>
             @endif
             @if(Route::has('my.mailbox.forward'))
                 <a href="{{ route('my.mailbox.forward', $message->id) }}" class="btn btn-sm btn-outline-primary">
-                    <i class="la la-share"></i> @lang('mailbox.forward')
+                    <x-svg-icon name="share" /> @lang('mailbox.forward')
                 </a>
             @endif
 
@@ -64,14 +64,14 @@
                     <form action="{{ route('my.mailbox.unstar', $message->id) }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-warning">
-                            <i class="la la-star"></i> @lang('mailbox.unstarred_action')
+                            <x-svg-icon name="star" /> @lang('mailbox.unstarred_action')
                         </button>
                     </form>
                 @else
                     <form action="{{ route('my.mailbox.star', $message->id) }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-outline-warning">
-                            <i class="la la-star"></i> @lang('mailbox.starred_action')
+                            <x-svg-icon name="star" /> @lang('mailbox.starred_action')
                         </button>
                     </form>
                 @endif
@@ -80,7 +80,7 @@
                 <form action="{{ route('my.mailbox.task', $message->id) }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-sm {{ $recipientRow->is_task ? 'btn-success' : 'btn-outline-success' }}">
-                        <i class="la la-tasks"></i>
+                        <x-svg-icon name="list-check" />
                         {{ $recipientRow->is_task ? __('mailbox.unmark_task') : __('mailbox.mark_task') }}
                     </button>
                 </form>
@@ -90,14 +90,14 @@
                     <form action="{{ route('my.mailbox.unarchive', $message->id) }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-secondary">
-                            <i class="la la-box-open"></i> @lang('mailbox.unarchived_action')
+                            <x-svg-icon name="box" /> @lang('mailbox.unarchived_action')
                         </button>
                     </form>
                 @else
                     <form action="{{ route('my.mailbox.archive', $message->id) }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-outline-secondary">
-                            <i class="la la-archive"></i> @lang('mailbox.archived_action')
+                            <x-svg-icon name="archive" /> @lang('mailbox.archived_action')
                         </button>
                     </form>
                 @endif
@@ -113,14 +113,14 @@
                                     } else {
                                         document.getElementById('trash-show-form').submit();
                                     }">
-                            <i class="la la-trash"></i> @lang('mailbox.move_to_trash')
+                            <x-svg-icon name="trash" /> @lang('mailbox.move_to_trash')
                         </button>
                     </form>
                 @else
                     <form action="{{ route('my.mailbox.restore', $message->id) }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-info">
-                            <i class="la la-undo"></i> @lang('mailbox.restore')
+                            <x-svg-icon name="arrow-counterclockwise" /> @lang('mailbox.restore')
                         </button>
                     </form>
                 @endif
@@ -165,10 +165,10 @@
             @if($message->attachment_path)
                 <hr>
                 <div class="mt-2">
-                    <i class="la la-paperclip text-muted"></i>
+                    <x-svg-icon name="paperclip" class="text-muted" />
                     <a href="{{ route('my.mailbox.attachment', $message->id) }}"
                        class="btn btn-sm btn-outline-primary ml-1">
-                        <i class="la la-download"></i> @lang('mailbox.download')
+                        <x-svg-icon name="download" /> @lang('mailbox.download')
                     </a>
                 </div>
             @endif

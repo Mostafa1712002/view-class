@@ -225,11 +225,11 @@
 
 <div class="content-body">
     @if(session('status'))
-        <div class="jt-alert"><i class="la la-check-circle"></i><span>{{ session('status') }}</span></div>
+        <div class="jt-alert"><x-svg-icon name="check-circle" /><span>{{ session('status') }}</span></div>
     @endif
     @if($errors->any())
         <div class="jt-alert err">
-            <i class="la la-exclamation-triangle"></i>
+            <x-svg-icon name="exclamation-triangle" />
             <div>
                 @foreach($errors->all() as $e)
                     <div>{{ $e }}</div>
@@ -241,28 +241,28 @@
     {{-- KPI strip --}}
     <div class="jt-kpis">
         <div class="jt-kpi">
-            <div class="ico"><i class="la la-tags"></i></div>
+            <div class="ico"><x-svg-icon name="tags" /></div>
             <div>
                 <div class="num">{{ $total }}</div>
                 <div class="lbl">@lang('users.job_titles')</div>
             </div>
         </div>
         <div class="jt-kpi">
-            <div class="ico ico-green"><i class="la la-check-circle"></i></div>
+            <div class="ico ico-green"><x-svg-icon name="check-circle" /></div>
             <div>
                 <div class="num muted">{{ $active }}</div>
                 <div class="lbl">@lang('users.jt_active')</div>
             </div>
         </div>
         <div class="jt-kpi">
-            <div class="ico ico-blue"><i class="la la-globe"></i></div>
+            <div class="ico ico-blue"><x-svg-icon name="globe" /></div>
             <div>
                 <div class="num muted">{{ $global }}</div>
                 <div class="lbl">@lang('users.jt_global')</div>
             </div>
         </div>
         <div class="jt-kpi">
-            <div class="ico ico-violet"><i class="la la-school"></i></div>
+            <div class="ico ico-violet"><x-svg-icon name="building" /></div>
             <div>
                 <div class="num muted">{{ $school }}</div>
                 <div class="lbl">@lang('users.jt_school')</div>
@@ -275,7 +275,7 @@
         <div class="col-lg-8 col-12 mb-3 mb-lg-0">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="la la-list-alt"></i> @lang('users.job_titles')</h5>
+                    <h5><x-svg-icon name="list-ul" /> @lang('users.job_titles')</h5>
                     <span class="count-pill">{{ $total }}</span>
                 </div>
                 <div class="card-body p-0">
@@ -335,15 +335,15 @@
                                         <a href="{{ route('admin.users.job-titles.permissions.index', $jt->id) }}"
                                            class="jt-action-btn" title="إدارة الصلاحيات"
                                            style="color:#C9A227;text-decoration:none;font-size:.82rem;">
-                                            <i class="la la-shield-alt"></i> الصلاحيات
+                                            <x-svg-icon name="shield-shaded" /> الصلاحيات
                                         </a>
                                         @if($jt->school_id !== null || auth()->user()->isSuperAdmin())
                                             <form action="{{ route('admin.users.job-titles.destroy', $jt->id) }}" method="POST" class="d-inline" onsubmit="return confirm('@lang('users.delete')?');">
                                                 @csrf @method('DELETE')
-                                                <button class="jt-action-btn" title="@lang('users.delete')"><i class="la la-trash"></i></button>
+                                                <button class="jt-action-btn" title="@lang('users.delete')"><x-svg-icon name="trash" /></button>
                                             </form>
                                         @else
-                                            <button class="jt-action-btn is-disabled" disabled title="@lang('users.jt_global')"><i class="la la-lock"></i></button>
+                                            <button class="jt-action-btn is-disabled" disabled title="@lang('users.jt_global')"><x-svg-icon name="lock" /></button>
                                         @endif
                                     </td>
                                 </tr>
@@ -351,7 +351,7 @@
                                 <tr>
                                     <td colspan="6">
                                         <div class="jt-empty">
-                                            <i class="la la-inbox"></i>
+                                            <x-svg-icon name="inbox" />
                                             <div class="lbl">@lang('users.no_results')</div>
                                         </div>
                                     </td>
@@ -368,7 +368,7 @@
         <div class="col-lg-4 col-12">
             <div class="card jt-form-card">
                 <div class="card-header">
-                    <h5><i class="la la-plus-circle"></i> @lang('users.jt_create_form')</h5>
+                    <h5><x-svg-icon name="plus-circle" /> @lang('users.jt_create_form')</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.users.job-titles.store') }}" method="POST">
@@ -425,7 +425,7 @@
                         </div>
 
                         <button class="btn-gold w-100" type="submit">
-                            <i class="la la-save"></i> @lang('users.save')
+                            <x-svg-icon name="save" /> @lang('users.save')
                         </button>
                     </form>
                 </div>

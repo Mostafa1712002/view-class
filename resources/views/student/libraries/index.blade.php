@@ -39,18 +39,18 @@
     <ul class="nav nav-tabs mb-3" id="libTabs" role="tablist">
         <li class="nav-item">
             <a class="nav-link {{ $activeTab === 'public' ? 'active' : '' }}" href="#tab-public" data-bs-toggle="tab" data-toggle="tab" role="tab">
-                <i class="la la-globe"></i> @lang('student.library.tab_public')
+                <x-svg-icon name="globe" /> @lang('student.library.tab_public')
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ $activeTab === 'private' ? 'active' : '' }}" href="#tab-private" data-bs-toggle="tab" data-toggle="tab" role="tab">
-                <i class="la la-lock"></i> @lang('student.library.tab_private')
+                <x-svg-icon name="lock" /> @lang('student.library.tab_private')
                 <span class="badge badge-light">{{ $privateLibraries->count() }}</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ $activeTab === 'files' ? 'active' : '' }}" href="#tab-files" data-bs-toggle="tab" data-toggle="tab" role="tab">
-                <i class="la la-folder-open"></i> @lang('student.library.tab_files')
+                <x-svg-icon name="folder2-open" /> @lang('student.library.tab_files')
                 <span class="badge badge-light">{{ $myFiles->count() }}</span>
             </a>
         </li>
@@ -62,7 +62,7 @@
         <div class="tab-pane fade {{ $activeTab === 'public' ? 'show active' : '' }}" id="tab-public" role="tabpanel">
 
             <div class="card lib-filter-card mb-3">
-                <div class="card-header"><i class="la la-filter"></i> @lang('student.library.filters')</div>
+                <div class="card-header"><x-svg-icon name="funnel" /> @lang('student.library.filters')</div>
                 <div class="card-body py-2">
                     <form method="GET" action="{{ route('student.libraries.index') }}">
                         <input type="hidden" name="tab" value="public" />
@@ -111,7 +111,7 @@
                                 </select>
                             </div>
                             <div class="col-md-1 col-6 lib-field mb-2">
-                                <button class="btn btn-primary w-100" type="submit"><i class="la la-filter"></i> @lang('student.library.filter_btn')</button>
+                                <button class="btn btn-primary w-100" type="submit"><x-svg-icon name="funnel" /> @lang('student.library.filter_btn')</button>
                             </div>
                         </div>
                     </form>
@@ -119,7 +119,7 @@
             </div>
 
             @if($publicItems->count() === 0)
-                <div class="card"><div class="lib-empty"><i class="la la-book-open"></i>@lang('student.library.no_public')</div></div>
+                <div class="card"><div class="lib-empty"><x-svg-icon name="book" />@lang('student.library.no_public')</div></div>
             @else
                 <div class="row">
                     @foreach($publicItems as $item)
@@ -144,18 +144,18 @@
                                 <div class="lib-card-body flex-grow-1">
                                     <div class="lib-card-title">{{ $item->title }}</div>
                                     <div class="lib-card-meta">
-                                        <i class="la la-book"></i>
+                                        <x-svg-icon name="book" />
                                         {{ $item->subject?->name ?? __('student.library.general_item') }}
                                     </div>
                                     @if($item->teacher)
-                                        <div class="lib-card-meta"><i class="la la-user"></i> {{ $item->teacher->name }}</div>
+                                        <div class="lib-card-meta"><x-svg-icon name="person" /> {{ $item->teacher->name }}</div>
                                     @endif
-                                    <div class="lib-card-meta"><i class="la la-calendar"></i> {{ $item->created_at?->format('Y-m-d') }}</div>
+                                    <div class="lib-card-meta"><x-svg-icon name="calendar" /> {{ $item->created_at?->format('Y-m-d') }}</div>
                                     <div class="lib-card-meta">
                                         <span style="color:#f59e0b;">★</span>
                                         {{ number_format((float) ($item->ratings_avg ?? 0), 1) }}
                                         <span class="text-muted">({{ $item->ratings_count ?? 0 }})</span>
-                                        <span class="text-muted ms-2"><i class="la la-comments"></i> {{ $item->comments_count ?? 0 }}</span>
+                                        <span class="text-muted ms-2"><x-svg-icon name="chat-dots" /> {{ $item->comments_count ?? 0 }}</span>
                                     </div>
                                     @if($item->description)
                                         <p class="lib-card-desc">{{ \Illuminate\Support\Str::limit($item->description, 80) }}</p>
@@ -163,11 +163,11 @@
                                 </div>
                                 <div class="lib-card-footer">
                                     @if($safeUrl)
-                                        <a href="{{ $safeUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary w-100"><i class="la la-external-link-alt"></i> @lang('student.library.open')</a>
+                                        <a href="{{ $safeUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary w-100"><x-svg-icon name="box-arrow-up-right" /> @lang('student.library.open')</a>
                                     @elseif($item->file_path)
-                                        <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="btn btn-sm btn-primary w-100"><i class="la la-eye"></i> @lang('student.library.view')</a>
+                                        <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="btn btn-sm btn-primary w-100"><x-svg-icon name="eye" /> @lang('student.library.view')</a>
                                     @else
-                                        <span class="btn btn-sm btn-outline-secondary disabled w-100"><i class="la la-eye-slash"></i> @lang('student.library.view')</span>
+                                        <span class="btn btn-sm btn-outline-secondary disabled w-100"><x-svg-icon name="eye-slash" /> @lang('student.library.view')</span>
                                     @endif
                                 </div>
                             </div>
@@ -181,12 +181,12 @@
         {{-- ============ TAB 2: Private libraries ============ --}}
         <div class="tab-pane fade {{ $activeTab === 'private' ? 'show active' : '' }}" id="tab-private" role="tabpanel">
             @if($privateLibraries->isEmpty())
-                <div class="card"><div class="lib-empty"><i class="la la-lock"></i>@lang('student.library.no_private')</div></div>
+                <div class="card"><div class="lib-empty"><x-svg-icon name="lock" />@lang('student.library.no_private')</div></div>
             @else
                 @foreach($privateLibraries as $library)
                     <div class="card mb-3">
                         <div class="card-header d-flex align-items-center">
-                            <i class="la la-folder me-2"></i>
+                            <x-svg-icon name="folder" class="me-2" />
                             <strong>{{ $library->title }}</strong>
                             <span class="badge badge-light ms-2">{{ $library->items_count }}</span>
                         </div>
@@ -213,9 +213,9 @@
                                             <td>{{ $it->created_at?->format('Y-m-d') }}</td>
                                             <td>
                                                 @if($itUrl)
-                                                    <a href="{{ $itUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary"><i class="la la-external-link-alt"></i> @lang('student.library.open')</a>
+                                                    <a href="{{ $itUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary"><x-svg-icon name="box-arrow-up-right" /> @lang('student.library.open')</a>
                                                 @elseif($it->file_path)
-                                                    <a href="{{ asset('storage/' . $it->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="la la-eye"></i> @lang('student.library.view')</a>
+                                                    <a href="{{ asset('storage/' . $it->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary"><x-svg-icon name="eye" /> @lang('student.library.view')</a>
                                                 @else
                                                     <span class="text-muted">—</span>
                                                 @endif
@@ -235,7 +235,7 @@
         {{-- ============ TAB 3: My Files ============ --}}
         <div class="tab-pane fade {{ $activeTab === 'files' ? 'show active' : '' }}" id="tab-files" role="tabpanel">
             @if($myFiles->isEmpty())
-                <div class="card"><div class="lib-empty"><i class="la la-folder-open"></i>@lang('student.library.no_files')</div></div>
+                <div class="card"><div class="lib-empty"><x-svg-icon name="folder2-open" />@lang('student.library.no_files')</div></div>
             @else
                 <div class="card">
                     <div class="table-responsive">
@@ -260,13 +260,13 @@
                                         <td>{{ $f['size'] ? \Illuminate\Support\Number::fileSize($f['size']) : '—' }}</td>
                                         <td class="d-flex gap-1">
                                             @if($f['view'])
-                                                <a href="{{ $f['view'] }}" target="_blank" class="btn btn-sm btn-outline-info" title="@lang('student.library.view')"><i class="la la-eye"></i></a>
+                                                <a href="{{ $f['view'] }}" target="_blank" class="btn btn-sm btn-outline-info" title="@lang('student.library.view')"><x-svg-icon name="eye" /></a>
                                             @endif
-                                            <a href="{{ $f['download'] }}" class="btn btn-sm btn-outline-primary" title="@lang('student.library.download')"><i class="la la-download"></i></a>
+                                            <a href="{{ $f['download'] }}" class="btn btn-sm btn-outline-primary" title="@lang('student.library.download')"><x-svg-icon name="download" /></a>
                                             @if($f['can_delete'])
                                                 <form method="POST" action="{{ route('student.libraries.files.destroy', ['source' => $f['source'], 'id' => $f['id']]) }}" onsubmit="return confirm('{{ __('student.library.delete_confirm') }}');" class="d-inline">
                                                     @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('student.library.delete')"><i class="la la-trash"></i></button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('student.library.delete')"><x-svg-icon name="trash" /></button>
                                                 </form>
                                             @endif
                                         </td>

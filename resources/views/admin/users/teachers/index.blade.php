@@ -25,7 +25,7 @@
     <div class="content-header-right col-md-4 col-12">
         <form action="{{ route('admin.users.teachers.index') }}" method="GET" class="d-flex">
             <input type="search" name="q" value="{{ $q }}" class="form-control form-control-sm me-1" placeholder="@lang('users.search_placeholder')" />
-            <button class="btn btn-outline-primary btn-sm" type="submit"><i class="la la-search"></i></button>
+            <button class="btn btn-outline-primary btn-sm" type="submit"><x-svg-icon name="search" /></button>
         </form>
     </div>
 </div>
@@ -38,17 +38,17 @@
         <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
             <div class="btn-group btn-group-sm" role="group">
                 <a href="{{ route('admin.users.teachers.create') }}" class="btn btn-primary">
-                    <i class="la la-user-plus"></i> @lang('users.add_teacher')
+                    <x-svg-icon name="person-plus" /> @lang('users.add_teacher')
                 </a>
                 <a href="{{ route('admin.users.teachers.import') }}" class="btn btn-outline-success">
-                    <i class="la la-file-excel"></i> @lang('users.import_excel')
+                    <x-svg-icon name="file-earmark-excel" /> @lang('users.import_excel')
                 </a>
                 <a href="{{ route('admin.users.teachers.workloads') }}" class="btn btn-outline-info">
-                    <i class="la la-chart-bar"></i> @lang('users.workloads_btn')
+                    <x-svg-icon name="bar-chart" /> @lang('users.workloads_btn')
                 </a>
             </div>
             <div class="text-muted small">
-                <i class="la la-users"></i>
+                <x-svg-icon name="people" />
                 {{ $teachers->total() }} @lang('users.teachers')
             </div>
         </div>
@@ -90,28 +90,28 @@
                         <td>{{ $u->last_login_at ? $u->last_login_at->diffForHumans() : '—' }}</td>
                         <td class="text-end">
                             <a href="{{ route('admin.users.teachers.show', $u->id) }}" class="btn btn-sm btn-outline-info" title="@lang('users.view')">
-                                <i class="la la-eye"></i>
+                                <x-svg-icon name="eye" />
                             </a>
                             <a href="{{ route('admin.users.teachers.edit', $u->id) }}" class="btn btn-sm btn-outline-primary" title="@lang('users.edit')">
-                                <i class="la la-edit"></i>
+                                <x-svg-icon name="pencil-square" />
                             </a>
                             <form action="{{ route('admin.users.teachers.destroy', $u->id) }}" method="POST" class="d-inline" onsubmit="return confirm('@lang('users.delete')?');">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger" title="@lang('users.delete')"><i class="la la-trash"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" title="@lang('users.delete')"><x-svg-icon name="trash" /></button>
                             </form>
                             <div class="dropdown d-inline">
                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown">
-                                    <i class="la la-ellipsis-h"></i>
+                                    <x-svg-icon name="three-dots" />
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     @if(auth()->user()->isSuperAdmin())
                                     <form action="{{ route('admin.users.impersonate.start', $u->id) }}" method="POST">
                                         @csrf
-                                        <button class="dropdown-item" type="submit"><i class="la la-user-secret"></i> @lang('users.login_as')</button>
+                                        <button class="dropdown-item" type="submit"><x-svg-icon name="person-bounding-box" /> @lang('users.login_as')</button>
                                     </form>
                                     @endif
-                                    <a class="dropdown-item" href="{{ route('admin.users.teachers.workloads') }}"><i class="la la-calendar"></i> @lang('users.schedule_link')</a>
-                                    <a class="dropdown-item" href="{{ route('admin.users.teachers.permissions', $u->id) }}"><i class="la la-shield-alt"></i> @lang('users.permissions_link')</a>
+                                    <a class="dropdown-item" href="{{ route('admin.users.teachers.workloads') }}"><x-svg-icon name="calendar" /> @lang('users.schedule_link')</a>
+                                    <a class="dropdown-item" href="{{ route('admin.users.teachers.permissions', $u->id) }}"><x-svg-icon name="shield-shaded" /> @lang('users.permissions_link')</a>
                                 </div>
                             </div>
                         </td>

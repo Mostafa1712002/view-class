@@ -37,7 +37,7 @@
     </div>
     <div class="content-header-right col-md-4 col-12 text-end">
         <a href="{{ route('admin.evaluations.create') }}" class="btn ev-add-btn">
-            <i class="la la-plus"></i> @lang('evaluation.forms.add')
+            <x-svg-icon name="plus" /> @lang('evaluation.forms.add')
         </a>
     </div>
 </div>
@@ -95,8 +95,8 @@
                 </select>
             </div>
             <div class="col-md-3 col-12 d-flex gap-1 align-items-end">
-                <button type="submit" class="btn ev-add-btn flex-grow-1"><i class="la la-search"></i> @lang('evaluation.forms.filters.show')</button>
-                <a href="{{ route('admin.evaluations.index') }}" class="btn btn-outline-secondary" title="@lang('evaluation.forms.filters.reset')"><i class="la la-redo"></i></a>
+                <button type="submit" class="btn ev-add-btn flex-grow-1"><x-svg-icon name="search" /> @lang('evaluation.forms.filters.show')</button>
+                <a href="{{ route('admin.evaluations.index') }}" class="btn btn-outline-secondary" title="@lang('evaluation.forms.filters.reset')"><x-svg-icon name="arrow-clockwise" /></a>
             </div>
         </div>
     </form>
@@ -134,32 +134,32 @@
                                 <td><span class="text-muted small">{{ $form->created_at?->format('Y-m-d') }}</span></td>
                                 <td class="text-end">
                                     <div class="dropdown">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false"><i class="la la-ellipsis-h"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false"><x-svg-icon name="three-dots" /></button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="{{ route('admin.evaluations.edit', $form->id) }}"><i class="la la-pen"></i> @lang('evaluation.form.actions.edit_basic')</a>
-                                            <a class="dropdown-item" href="{{ route('admin.evaluations.items.index', $form->id) }}"><i class="la la-list-ol"></i> @lang('evaluation_items.items.page_title')</a>
-                                            <a class="dropdown-item" href="{{ route('admin.evaluations.targets.index', $form->id) }}"><i class="la la-users"></i> @lang('evaluation.form.actions_menu.targets')</a>
-                                            <a class="dropdown-item" href="{{ route('admin.evaluations.evaluators.index', $form->id) }}"><i class="la la-user-check"></i> @lang('evaluation.form.actions_menu.evaluators')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.edit', $form->id) }}"><x-svg-icon name="pencil" /> @lang('evaluation.form.actions.edit_basic')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.items.index', $form->id) }}"><x-svg-icon name="list-ol" /> @lang('evaluation_items.items.page_title')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.targets.index', $form->id) }}"><x-svg-icon name="people" /> @lang('evaluation.form.actions_menu.targets')</a>
+                                            <a class="dropdown-item" href="{{ route('admin.evaluations.evaluators.index', $form->id) }}"><x-svg-icon name="person-check" /> @lang('evaluation.form.actions_menu.evaluators')</a>
                                             <div class="dropdown-divider"></div>
                                             @if (in_array($form->status?->value, ['draft','ready'], true))
-                                                <a class="dropdown-item text-success" href="{{ route('admin.evaluations.publish.confirm', $form->id) }}"><i class="la la-bullhorn"></i> @lang('evaluation.form.actions_menu.publish')</a>
+                                                <a class="dropdown-item text-success" href="{{ route('admin.evaluations.publish.confirm', $form->id) }}"><x-svg-icon name="megaphone" /> @lang('evaluation.form.actions_menu.publish')</a>
                                             @endif
                                             @if ($form->status?->value === 'published')
                                                 <form action="{{ route('admin.evaluations.close', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.publish.close_confirm')')">
                                                     @csrf
-                                                    <button type="submit" class="dropdown-item"><i class="la la-lock"></i> @lang('evaluation.form.actions_menu.close')</button>
+                                                    <button type="submit" class="dropdown-item"><x-svg-icon name="lock" /> @lang('evaluation.form.actions_menu.close')</button>
                                                 </form>
                                             @endif
                                             @if (in_array($form->status?->value, ['draft','ready','published','closed'], true))
                                                 <form action="{{ route('admin.evaluations.archive', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.publish.archive_confirm')')">
                                                     @csrf
-                                                    <button type="submit" class="dropdown-item"><i class="la la-archive"></i> @lang('evaluation.form.actions_menu.archive')</button>
+                                                    <button type="submit" class="dropdown-item"><x-svg-icon name="archive" /> @lang('evaluation.form.actions_menu.archive')</button>
                                                 </form>
                                             @endif
                                             <div class="dropdown-divider"></div>
                                             <form action="{{ route('admin.evaluations.destroy', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.form.delete_confirm')')">
                                                 @csrf @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('evaluation.form.actions.delete')</button>
+                                                <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash" /> @lang('evaluation.form.actions.delete')</button>
                                             </form>
                                         </div>
                                     </div>
@@ -174,7 +174,7 @@
             @endif
         @else
             <div class="ev-empty">
-                <span class="icon-wrap"><i class="la la-clipboard-list"></i></span>
+                <span class="icon-wrap"><x-svg-icon name="clipboard" /></span>
                 <h5 class="mb-1">@lang('evaluation.forms.empty.title')</h5>
                 <p class="text-muted">@lang('evaluation.forms.empty.subtitle')</p>
             </div>

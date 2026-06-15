@@ -11,9 +11,9 @@
         </ol>
     </div>
     <div class="content-header-right col-md-5 col-12 text-md-right">
-        <a href="{{ route('admin.canteen-orders.index') }}" class="btn btn-outline-primary btn-sm"><i class="la la-receipt"></i> @lang('canteen.orders.title')</a>
-        <a href="{{ route('admin.canteen-balances.index') }}" class="btn btn-outline-primary btn-sm"><i class="la la-wallet"></i> @lang('canteen.balances.title')</a>
-        <a href="{{ route('admin.canteens.create') }}" class="btn btn-primary btn-sm"><i class="la la-plus"></i> @lang('canteen.add')</a>
+        <a href="{{ route('admin.canteen-orders.index') }}" class="btn btn-outline-primary btn-sm"><x-svg-icon name="receipt" /> @lang('canteen.orders.title')</a>
+        <a href="{{ route('admin.canteen-balances.index') }}" class="btn btn-outline-primary btn-sm"><x-svg-icon name="wallet2" /> @lang('canteen.balances.title')</a>
+        <a href="{{ route('admin.canteens.create') }}" class="btn btn-primary btn-sm"><x-svg-icon name="plus" /> @lang('canteen.add')</a>
     </div>
 </div>
 
@@ -24,7 +24,7 @@
     <div class="card mb-3"><div class="card-body">
         <form method="GET" action="{{ route('admin.canteens.index') }}" class="form-row align-items-end">
             <div class="form-group col-md-5 mb-0"><input type="text" name="q" value="{{ $q ?? '' }}" class="form-control form-control-sm" placeholder="@lang('canteen.search')"></div>
-            <div class="form-group col-md-2 mb-0"><button type="submit" class="btn btn-primary btn-sm"><i class="la la-search"></i> @lang('canteen.search_btn')</button></div>
+            <div class="form-group col-md-2 mb-0"><button type="submit" class="btn btn-primary btn-sm"><x-svg-icon name="search" /> @lang('canteen.search_btn')</button></div>
         </form>
     </div></div>
 
@@ -57,21 +57,21 @@
                             @else<span class="badge badge-secondary">@lang('canteen.status.inactive')</span>@endif
                         </td>
                         <td class="text-right">
-                            <a href="{{ route('admin.canteens.edit', $c->id) }}" class="btn btn-sm btn-outline-primary" title="@lang('canteen.actions.edit')"><i class="la la-edit"></i></a>
-                            <a href="{{ route('admin.canteens.manager', $c->id) }}" class="btn btn-sm btn-outline-info" title="@lang('canteen.actions.assign_manager')"><i class="la la-user-tie"></i></a>
-                            <a href="{{ route('admin.canteens.categories.index', $c->id) }}" class="btn btn-sm btn-outline-secondary" title="@lang('canteen.categories.title')"><i class="la la-tags"></i></a>
-                            <a href="{{ route('admin.canteens.products.index', $c->id) }}" class="btn btn-sm btn-outline-secondary" title="@lang('canteen.products.title')"><i class="la la-box"></i></a>
+                            <a href="{{ route('admin.canteens.edit', $c->id) }}" class="btn btn-sm btn-outline-primary" title="@lang('canteen.actions.edit')"><x-svg-icon name="pencil-square" /></a>
+                            <a href="{{ route('admin.canteens.manager', $c->id) }}" class="btn btn-sm btn-outline-info" title="@lang('canteen.actions.assign_manager')"><x-svg-icon name="person-workspace" /></a>
+                            <a href="{{ route('admin.canteens.categories.index', $c->id) }}" class="btn btn-sm btn-outline-secondary" title="@lang('canteen.categories.title')"><x-svg-icon name="tags" /></a>
+                            <a href="{{ route('admin.canteens.products.index', $c->id) }}" class="btn btn-sm btn-outline-secondary" title="@lang('canteen.products.title')"><x-svg-icon name="box" /></a>
                             @if($c->is_active)
                                 <form method="POST" action="{{ route('admin.canteens.deactivate', $c->id) }}" class="d-inline">@csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="@lang('canteen.actions.deactivate')"><i class="la la-pause-circle"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="@lang('canteen.actions.deactivate')"><x-svg-icon name="pause-circle" /></button>
                                 </form>
                             @else
                                 <form method="POST" action="{{ route('admin.canteens.activate', $c->id) }}" class="d-inline">@csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-success" title="@lang('canteen.actions.activate')"><i class="la la-play-circle"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="@lang('canteen.actions.activate')"><x-svg-icon name="play-circle" /></button>
                                 </form>
                             @endif
                             <form method="POST" action="{{ route('admin.canteens.destroy', $c->id) }}" class="d-inline" onsubmit="return confirm('@lang('canteen.confirm_delete')');">@csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('canteen.actions.delete')"><i class="la la-trash"></i></button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="@lang('canteen.actions.delete')"><x-svg-icon name="trash" /></button>
                             </form>
                         </td>
                     </tr>

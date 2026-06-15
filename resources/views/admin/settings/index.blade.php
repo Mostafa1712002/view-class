@@ -23,7 +23,7 @@
             <div class="col-lg-8">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="la la-building me-2"></i>معلومات المدرسة</h5>
+                        <h5 class="mb-0"><x-svg-icon name="building" class="me-2" />معلومات المدرسة</h5>
                     </div>
                     <div class="card-body">
                         @foreach($defaults['general'] as $setting)
@@ -40,7 +40,7 @@
 
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="la la-graduation-cap me-2"></i>الإعدادات الأكاديمية</h5>
+                        <h5 class="mb-0"><x-svg-icon name="mortarboard" class="me-2" />الإعدادات الأكاديمية</h5>
                     </div>
                     <div class="card-body">
                         @foreach($defaults['academic'] as $setting)
@@ -63,7 +63,7 @@
 
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="la la-bell me-2"></i>إعدادات الإشعارات</h5>
+                        <h5 class="mb-0"><x-svg-icon name="bell" class="me-2" />إعدادات الإشعارات</h5>
                     </div>
                     <div class="card-body">
                         @foreach($defaults['notifications'] as $setting)
@@ -84,7 +84,7 @@
                 @if($isSuperAdmin)
                 <div class="card mb-4 border-warning">
                     <div class="card-header bg-warning bg-opacity-10">
-                        <h5 class="mb-0"><i class="la la-paint-brush me-2"></i>هوية المنصة (Golden Platform)</h5>
+                        <h5 class="mb-0"><x-svg-icon name="brush" class="me-2" />هوية المنصة (Golden Platform)</h5>
                         <small class="text-muted">هذه الإعدادات تؤثر على جميع شاشات المنصة — تظهر للمشرف العام فقط</small>
                     </div>
                     <div class="card-body">
@@ -121,7 +121,7 @@
             <div class="col-lg-4">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="la la-image me-2"></i>شعار المدرسة</h5>
+                        <h5 class="mb-0"><x-svg-icon name="image" class="me-2" />شعار المدرسة</h5>
                     </div>
                     <div class="card-body text-center">
                         @php
@@ -145,18 +145,18 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="la la-link me-2"></i>روابط سريعة</h5>
+                        <h5 class="mb-0"><x-svg-icon name="link-45deg" class="me-2" />روابط سريعة</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <a href="{{ route('admin.settings.profile') }}" class="btn btn-outline-primary">
-                                <i class="la la-user me-1"></i>الملف الشخصي
+                                <x-svg-icon name="person" class="me-1" />الملف الشخصي
                             </a>
                             <a href="{{ route('admin.settings.password') }}" class="btn btn-outline-warning">
-                                <i class="la la-lock me-1"></i>تغيير كلمة المرور
+                                <x-svg-icon name="lock" class="me-1" />تغيير كلمة المرور
                             </a>
                             <a href="{{ route('admin.settings.notifications') }}" class="btn btn-outline-info">
-                                <i class="la la-bell me-1"></i>تفضيلات الإشعارات
+                                <x-svg-icon name="bell" class="me-1" />تفضيلات الإشعارات
                             </a>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
 
         <div class="text-end mb-4">
             <button type="submit" class="btn btn-primary btn-lg">
-                <i class="la la-save me-1"></i>حفظ الإعدادات
+                <x-svg-icon name="save" class="me-1" />حفظ الإعدادات
             </button>
         </div>
     </form>

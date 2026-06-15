@@ -22,13 +22,13 @@
     <div class="content-header-right col-md-4 col-12">
         <div class="d-flex flex-wrap gap-1 justify-content-md-end">
             <a href="{{ route('admin.schools.create') }}" class="btn btn-primary btn-sm">
-                <i class="la la-plus"></i> @lang('schools.add_school')
+                <x-svg-icon name="plus" /> @lang('schools.add_school')
             </a>
             <a href="{{ route('admin.school-branches.index') }}" class="btn btn-outline-secondary btn-sm" title="@lang('schools.branches')">
-                <i class="la la-sitemap"></i> @lang('schools.branches')
+                <x-svg-icon name="diagram-3" /> @lang('schools.branches')
             </a>
             <a href="{{ route('admin.sms-services.index') }}" class="btn btn-outline-secondary btn-sm" title="@lang('schools.extra_services')">
-                <i class="la la-puzzle-piece"></i> @lang('schools.extra_services')
+                <x-svg-icon name="puzzle" /> @lang('schools.extra_services')
             </a>
         </div>
     </div>
@@ -81,21 +81,21 @@
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                        <i class="la la-cog"></i>
+                                        <x-svg-icon name="gear" />
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('admin.schools.settings.show', $school) }}"><i class="la la-cogs"></i> @lang('schools.general_settings')</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.schools.academic-years.index', $school) }}"><i class="la la-calendar"></i> @lang('schools.academic_years')</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.schools.grade-levels.index', $school) }}"><i class="la la-layer-group"></i> @lang('schools.grade_levels')</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.schools.permissions.index', $school) }}"><i class="la la-key"></i> @lang('schools.permissions')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.schools.settings.show', $school) }}"><x-svg-icon name="gear-wide-connected" /> @lang('schools.general_settings')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.schools.academic-years.index', $school) }}"><x-svg-icon name="calendar" /> @lang('schools.academic_years')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.schools.grade-levels.index', $school) }}"><x-svg-icon name="stack" /> @lang('schools.grade_levels')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.schools.permissions.index', $school) }}"><x-svg-icon name="key" /> @lang('schools.permissions')</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.schools.show', $school) }}"><i class="la la-eye"></i> @lang('common.view')</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.schools.edit', $school) }}"><i class="la la-pen"></i> @lang('common.edit')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.schools.show', $school) }}"><x-svg-icon name="eye" /> @lang('common.view')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.schools.edit', $school) }}"><x-svg-icon name="pencil" /> @lang('common.edit')</a></li>
                                         <li>
                                             <form action="{{ route('admin.schools.destroy', $school) }}" method="POST" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger"><i class="la la-trash"></i> @lang('common.delete')</button>
+                                                <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash" /> @lang('common.delete')</button>
                                             </form>
                                         </li>
                                     </ul>

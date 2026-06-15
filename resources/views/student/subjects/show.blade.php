@@ -129,7 +129,7 @@
         @if($subject->icon)
             <i class="la {{ $subject->icon }}"></i>
         @else
-            <i class="la la-book-open"></i>
+            <x-svg-icon name="book" />
         @endif
     </div>
     <div>
@@ -150,7 +150,7 @@
     <div class="sec-body">
         @forelse($videos as $v)
             <div class="content-item">
-                <div class="ci-icon video"><i class="la la-play-circle"></i></div>
+                <div class="ci-icon video"><x-svg-icon name="play-circle" /></div>
                 <div>
                     <div class="ci-title">{{ $v->title }}</div>
                     @if($v->description)
@@ -162,7 +162,7 @@
                     <div class="ci-action">
                         <a href="{{ $vUrl }}" target="_blank" rel="noopener noreferrer"
                            class="btn btn-sm btn-outline-primary">
-                            <i class="la la-external-link-alt"></i> مشاهدة
+                            <x-svg-icon name="box-arrow-up-right" /> مشاهدة
                         </a>
                     </div>
                 @endif
@@ -183,7 +183,7 @@
     <div class="sec-body">
         @forelse($attachments as $a)
             <div class="content-item">
-                <div class="ci-icon attachment"><i class="la la-file-alt"></i></div>
+                <div class="ci-icon attachment"><x-svg-icon name="file-earmark-text" /></div>
                 <div>
                     <div class="ci-title">{{ $a->title }}</div>
                     @if($a->description)
@@ -194,7 +194,7 @@
                     <div class="ci-action">
                         <a href="{{ route('manage.subject-contents.download', [$subject->id, $a->id]) }}"
                            class="btn btn-sm btn-outline-secondary">
-                            <i class="la la-download"></i> @lang('subjects_content.btn_download')
+                            <x-svg-icon name="download" /> @lang('subjects_content.btn_download')
                         </a>
                     </div>
                 @endif
@@ -215,7 +215,7 @@
     <div class="sec-body">
         @forelse($links as $lk)
             <div class="content-item">
-                <div class="ci-icon link"><i class="la la-link"></i></div>
+                <div class="ci-icon link"><x-svg-icon name="link-45deg" /></div>
                 <div>
                     <div class="ci-title">{{ $lk->title }}</div>
                     @if($lk->description)
@@ -227,7 +227,7 @@
                     <div class="ci-action">
                         <a href="{{ $lkUrl }}" target="_blank" rel="noopener noreferrer"
                            class="btn btn-sm btn-outline-success">
-                            <i class="la la-external-link-alt"></i> فتح الرابط
+                            <x-svg-icon name="box-arrow-up-right" /> فتح الرابط
                         </a>
                     </div>
                 @endif
@@ -303,7 +303,7 @@
                     @if($available)
                         <a href="{{ route('student.exams.show', $ex->id) }}"
                            class="btn btn-sm btn-primary">
-                            <i class="la la-play"></i> دخول
+                            <x-svg-icon name="play" /> دخول
                         </a>
                     @endif
                 </div>
@@ -339,7 +339,7 @@
                     @if($vc->isJoinable() && $vcUrl)
                         <a href="{{ $vcUrl }}" target="_blank" rel="noopener noreferrer"
                            class="btn btn-sm btn-success">
-                            <i class="la la-sign-in-alt"></i> انضمام
+                            <x-svg-icon name="box-arrow-in-right" /> انضمام
                         </a>
                     @endif
                 </div>
@@ -398,7 +398,7 @@
                     <div class="ae-action">
                         <a href="{{ route('student.books.read', $bk->id) }}"
                            class="btn btn-sm btn-outline-warning">
-                            <i class="la la-book-reader"></i> قراءة
+                            <x-svg-icon name="book-half" /> قراءة
                         </a>
                     </div>
                 @endif

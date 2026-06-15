@@ -137,7 +137,7 @@
     @endif
 
     <div class="uc-notice">
-        <span class="uc-notice-ico"><i class="la la-info"></i></span>
+        <span class="uc-notice-ico"><x-svg-icon name="info-circle" /></span>
         <div>
             <strong>@lang('user_cards.notice_title')</strong>
             @lang('user_cards.notice_body')
@@ -148,13 +148,13 @@
         @php $base = url()->current(); @endphp
         <a class="uc-tab {{ $tab === 'students' ? 'is-active' : '' }}"
            href="{{ $base }}?tab=students{{ $filters['school_id'] ? '&school_id='.$filters['school_id'] : '' }}">
-            <i class="la la-users"></i>
+            <x-svg-icon name="people" />
             @lang('user_cards.tab_students_parents')
             <span class="count">{{ number_format($totalStudents) }}</span>
         </a>
         <a class="uc-tab {{ $tab === 'staff' ? 'is-active' : '' }}"
            href="{{ $base }}?tab=staff{{ $filters['school_id'] ? '&school_id='.$filters['school_id'] : '' }}">
-            <i class="la la-id-badge"></i>
+            <x-svg-icon name="person-badge" />
             @lang('user_cards.tab_staff')
             <span class="count">{{ number_format($totalStaff) }}</span>
         </a>
@@ -221,8 +221,8 @@
         </div>
 
         <div class="d-flex" style="gap:.5rem;flex-wrap:wrap;">
-            <button type="submit" class="uc-btn uc-btn-primary"><i class="la la-search"></i> @lang('user_cards.apply_filters')</button>
-            <a href="{{ route('admin.users.cards.index', ['tab' => $tab]) }}" class="uc-btn uc-btn-ghost"><i class="la la-refresh"></i> @lang('user_cards.reset_filters')</a>
+            <button type="submit" class="uc-btn uc-btn-primary"><x-svg-icon name="search" /> @lang('user_cards.apply_filters')</button>
+            <a href="{{ route('admin.users.cards.index', ['tab' => $tab]) }}" class="uc-btn uc-btn-ghost"><x-svg-icon name="arrow-repeat" /> @lang('user_cards.reset_filters')</a>
         </div>
     </form>
 
@@ -240,24 +240,24 @@
                 <label class="m-0 d-flex align-items-center" style="gap:.4rem;cursor:pointer;">
                     <input type="checkbox" id="ucSelectAll"> <span>@lang('user_cards.list_select_all')</span>
                 </label>
-                <span class="count-pill"><i class="la la-list"></i> @lang('user_cards.showing_count', ['count' => $showingCount])</span>
+                <span class="count-pill"><x-svg-icon name="list" /> @lang('user_cards.showing_count', ['count' => $showingCount])</span>
                 <span class="selected-pill" id="ucSelectedPill" style="display:none;">
                     @lang('user_cards.list_selected_count', ['count' => '<span id="ucSelectedCount">0</span>'])
                 </span>
             </div>
             <div class="right">
                 <button type="submit" class="uc-btn uc-btn-dark" id="ucPrintSelectedBtn" disabled>
-                    <i class="la la-print"></i> @lang('user_cards.btn_print_selected')
+                    <x-svg-icon name="printer" /> @lang('user_cards.btn_print_selected')
                 </button>
                 <button type="submit" class="uc-btn uc-btn-primary" name="print_all" value="1" id="ucPrintAllBtn" @if($showingCount === 0) disabled @endif>
-                    <i class="la la-file-pdf-o"></i> @lang('user_cards.btn_print_all_filtered')
+                    <x-svg-icon name="file-earmark-pdf" /> @lang('user_cards.btn_print_all_filtered')
                 </button>
             </div>
         </div>
 
         @if($users->isEmpty())
             <div class="uc-empty">
-                <div class="uc-empty-ico"><i class="la la-search"></i></div>
+                <div class="uc-empty-ico"><x-svg-icon name="search" /></div>
                 @lang('user_cards.list_empty')
             </div>
         @else
@@ -300,14 +300,14 @@
                         @endif
                         <td data-label="@lang('user_cards.col_password_status')">
                             @if($u['password_ready'])
-                                <span class="uc-pwd-badge uc-pwd-ok"><i class="la la-check"></i> @lang('user_cards.pwd_available')</span>
+                                <span class="uc-pwd-badge uc-pwd-ok"><x-svg-icon name="check" /> @lang('user_cards.pwd_available')</span>
                             @else
-                                <span class="uc-pwd-badge uc-pwd-no"><i class="la la-times"></i> @lang('user_cards.pwd_unavailable')</span>
+                                <span class="uc-pwd-badge uc-pwd-no"><x-svg-icon name="x-lg" /> @lang('user_cards.pwd_unavailable')</span>
                             @endif
                         </td>
                         <td data-label="@lang('user_cards.col_actions')" class="text-{{ $isRtl ? 'left' : 'right' }}" style="white-space:nowrap;">
                             <button type="button" class="uc-btn uc-btn-ghost uc-print-one" data-id="{{ $u['id'] }}" {{ $u['password_ready'] ? '' : 'disabled' }} title="@lang('user_cards.btn_print_one')">
-                                <i class="la la-print"></i> @lang('user_cards.btn_print_one')
+                                <x-svg-icon name="printer" /> @lang('user_cards.btn_print_one')
                             </button>
                             @if(auth()->id() !== $u['id'])
                                 <button type="button"
@@ -315,7 +315,7 @@
                                         data-id="{{ $u['id'] }}"
                                         data-name="{{ $u['name'] }}"
                                         title="@lang('user_cards.pwd_regen_help')">
-                                    <i class="la la-refresh"></i> @lang('user_cards.btn_regenerate')
+                                    <x-svg-icon name="arrow-repeat" /> @lang('user_cards.btn_regenerate')
                                 </button>
                             @endif
                         </td>

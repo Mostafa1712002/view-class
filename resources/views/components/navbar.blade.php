@@ -81,6 +81,80 @@
     font-size: .82rem; font-weight: 600; color: var(--gold-500, #b5832a); text-decoration: none;
 }
 .vc-notif-foot:hover { background: #f7efdc; color: var(--gold-400, #cfa046); }
+
+/* ══════════════════════════════════════════════════════════════════
+   HEADER v3 — clean navy bar matched to the sidebar (QA #221)
+   Additive: overrides the muddy navy→gold gradient with a crisp navy
+   surface + gold hairline, tidies the utility cluster, and turns the
+   plain grey scope selects into translucent rounded controls.
+   ══════════════════════════════════════════════════════════════════ */
+.header-navbar.bg-info,
+.header-navbar.navbar-semi-light.bg-info {
+    background: linear-gradient(180deg, #16263f 0%, #0f1c30 100%) !important;
+    border-bottom: 1px solid rgba(216,178,74,.45) !important;
+    box-shadow: 0 2px 16px rgba(8,15,28,.22) !important;
+}
+
+/* Utility icon buttons → consistent square hit-areas with hover pill */
+.shell-nav-right .nav-link {
+    display: inline-flex !important; align-items: center; gap: .3rem;
+    padding: .42rem .55rem !important;
+    border-radius: 9px;
+    color: #e8edf4 !important;
+    transition: background .15s, color .15s;
+}
+.shell-nav-right .nav-link:hover { background: rgba(255,255,255,.10) !important; color: #fff !important; }
+.shell-nav-right .nav-link .vc-ico,
+.shell-nav-right .nav-link i { color: inherit !important; }
+.shell-nav-right .nav-link:hover .vc-ico { color: var(--gold-200, #e3c170) !important; }
+
+/* Clock chip */
+#shell-clock { font-size: .82rem; color: #cdd7e6 !important; font-variant-numeric: tabular-nums; }
+#shell-clock .text-bold-600 { color: #fff; }
+
+/* Account name + role chip */
+.shell-nav-right .user-name { color: #fff; font-size: .92rem; }
+.shell-acct-type {
+    background: linear-gradient(135deg, rgba(216,178,74,.95), rgba(199,154,50,.95)) !important;
+    color: #14233a !important; font-weight: 800 !important;
+    box-shadow: 0 2px 8px rgba(216,178,74,.3);
+}
+.dropdown-user-link .avatar img { border: 2px solid rgba(216,178,74,.55); }
+
+/* School/company meta block */
+.shell-school-meta strong { color: #fff !important; }
+.shell-school-meta small { color: rgba(255,255,255,.72) !important; }
+
+/* Desktop scope selectors — readable translucent controls on navy */
+.shell-nav-center .form-control,
+.shell-nav-center select.form-control {
+    height: 36px;
+    background: rgba(255,255,255,.10) !important;
+    border: 1px solid rgba(216,178,74,.35) !important;
+    color: #fff !important;
+    border-radius: 9px !important;
+    font-size: .86rem;
+    font-weight: 600;
+    transition: border-color .15s, background .15s;
+}
+.shell-nav-center .form-control:hover,
+.shell-nav-center select.form-control:hover { background: rgba(255,255,255,.16) !important; }
+.shell-nav-center .form-control:focus,
+.shell-nav-center select.form-control:focus {
+    background: rgba(255,255,255,.18) !important;
+    border-color: var(--gold-200, #e3c170) !important;
+    box-shadow: 0 0 0 .15rem rgba(216,178,74,.22) !important;
+}
+.shell-nav-center select.form-control option { color: #14233a; }
+
+/* Notification + mail icons sit slightly larger for clarity */
+.shell-nav-right .vc-notif-bell .vc-ico { width: 19px; height: 19px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .shell-nav-right .nav-link,
+    .shell-nav-center .form-control,
+    .shell-nav-center select.form-control { transition: none !important; }
+}
 </style>
 
 @php

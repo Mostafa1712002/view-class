@@ -96,7 +96,7 @@
                                      alt="{{ $subject->name }}"
                                      style="max-height:64px; border-radius:8px; object-fit:cover">
                             @else
-                                <i class="la la-book-open"></i>
+                                <x-svg-icon name="book" />
                             @endif
                         </div>
                         <div class="card-body">
@@ -114,7 +114,7 @@
                         <div class="card-footer d-flex justify-content-end">
                             <a href="{{ route('student.subjects.show', $subject->id) }}"
                                class="btn-open-subject">
-                                <i class="la la-folder-open"></i>
+                                <x-svg-icon name="folder2-open" />
                                 فتح المادة
                             </a>
                         </div>
