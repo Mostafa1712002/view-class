@@ -14,6 +14,8 @@ use App\Modules\QuestionBankCore\Services\QbScopeService;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -116,8 +118,16 @@ class ExamController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'delivery_type' => ['required', 'in:electronic,paper'],
-            'subject_id' => ['nullable', 'integer', 'exists:subjects,id'],
-            'semester_id' => ['nullable', 'integer', 'exists:academic_terms,id'],
+            'subject_id' => ['nullable', 'integer', Rule::exists('subjects', 'id')->where(
+                fn ($q) => $schoolId
+                    ? $q->where(fn ($w) => $w->where('school_id', $schoolId)->orWhereNull('school_id'))
+                    : $q
+            )],
+            'semester_id' => ['nullable', 'integer', Rule::exists('academic_terms', 'id')->where(
+                fn ($q) => $schoolId
+                    ? $q->whereIn('academic_year_id', DB::table('academic_years')->where('school_id', $schoolId)->select('id'))
+                    : $q
+            )],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
