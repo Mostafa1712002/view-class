@@ -20,12 +20,22 @@
             </ol>
         </div>
     </div>
-    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }}">
-        <a href="{{ route('admin.certificates.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('certificates.issue')
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-6 col-12 d-flex flex-wrap justify-content-{{ $isRtl ? 'start' : 'end' }} gap-1">
+        <a href="{{ route('admin.certificate-templates.index') }}" class="btn btn-secondary mr-1 mb-1">
+            <i class="la la-palette"></i> @lang('certificates.templates_btn')
+        </a>
+        <a href="{{ route('admin.certificates.issue.form') }}" class="btn btn-primary mr-1 mb-1">
+            <i class="la la-certificate"></i> @lang('certificates.issue_btn')
+        </a>
+        <a href="{{ route('admin.certificates.index') }}" class="btn btn-light mb-1">
+            <i class="la la-redo"></i> @lang('certificates.refresh')
         </a>
     </div>
 </div>
+
+@if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
 
 {{-- Filter bar --}}
 <div class="card mb-2">
@@ -73,6 +83,7 @@
                         <th>@lang('certificates.fields.type')</th>
                         <th>@lang('certificates.fields.recipient')</th>
                         <th>@lang('certificates.fields.issue_date')</th>
+                        <th>@lang('certificates.fields.progress')</th>
                         <th>@lang('certificates.fields.status')</th>
                         <th>@lang('certificates.fields.actions')</th>
                     </tr>
@@ -85,6 +96,15 @@
                             <td>{{ __('certificates.types.' . $cert->type) }}</td>
                             <td>{{ optional($cert->recipient)->name ?? '—' }}</td>
                             <td>{{ $cert->issue_date ? $cert->issue_date->format('Y-m-d') : '—' }}</td>
+                            <td style="min-width:90px">
+                                <div class="progress" style="height:14px">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         style="width: {{ (int) $cert->progress }}%"
+                                         aria-valuenow="{{ (int) $cert->progress }}" aria-valuemin="0" aria-valuemax="100">
+                                        {{ (int) $cert->progress }}%
+                                    </div>
+                                </div>
+                            </td>
                             <td>
                                 @if($cert->status === 'published')
                                     <span class="badge badge-success">@lang('certificates.status.published')</span>
@@ -107,6 +127,16 @@
                                             </button>
                                         </form>
                                     @endif
+
+                                    <a href="{{ route('admin.certificates.preview', $cert->id) }}"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="la la-eye"></i> @lang('certificates.preview_page.view')
+                                    </a>
+
+                                    <a href="{{ route('admin.certificates.send', $cert->id) }}"
+                                       class="btn btn-sm btn-success">
+                                        <i class="la la-paper-plane"></i> @lang('certificates.preview_page.send')
+                                    </a>
 
                                     <a href="{{ route('admin.certificates.edit', $cert->id) }}"
                                        class="btn btn-sm btn-info">
@@ -138,7 +168,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-3">
+                            <td colspan="8" class="text-center text-muted py-3">
                                 @lang('certificates.empty')
                             </td>
                         </tr>
