@@ -1171,12 +1171,14 @@ Route::middleware(['auth'])
 
 // === Discussion Rooms module ===
 require __DIR__.'/../app/Modules/Discussion/Routes/web.php';
+require __DIR__.'/../app/Modules/SchoolCalendar/Routes/web.php';
 
 // === Virtual Classrooms module ===
 require __DIR__.'/../app/Modules/VirtualClasses/Routes/web.php';
 
 // === Special Education module ===
 require __DIR__.'/../app/Modules/SpecialEducation/Routes/web.php';
+require __DIR__.'/../app/Modules/Mail/Routes/web.php';
 
 // === WhatsApp Settings & Logs (Admin) — Task 7 ===
 Route::middleware(['auth', 'role:super-admin,school-admin'])
@@ -1203,3 +1205,6 @@ Route::middleware(['auth', 'role:parent'])
     ->group(function () {
         Route::post('child/{child}/attendance/{attendance}/excuse', [\App\Modules\Attendance\Controllers\ExcuseController::class, 'store'])->name('attendance.excuse');
     });
+
+// === Announcements module (Sprint 9 — Task 2) ===
+require __DIR__.'/../app/Modules/Announcements/Routes/web.php';
