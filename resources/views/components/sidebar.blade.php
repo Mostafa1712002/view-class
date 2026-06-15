@@ -44,6 +44,17 @@
     $canViewReports       = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('reports');
     $canViewNoor          = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('noor');
     $canViewJobTitles     = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('job_titles');
+
+    // عمليات التواصل (Sprint 9) — same default-allow formula: non-staff (student/parent)
+    // are never hidden; configured staff see only modules they hold the .view permission for.
+    $canViewAnnouncements = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('announcements');
+    $canViewCalendar      = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('calendar');
+    $canViewVirtualClasses= !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('virtual_classes');
+    $canViewDiscussion    = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('discussion');
+    $canViewMailbox       = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('mailbox');
+    $canViewSms           = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('sms');
+    $canViewWhatsapp      = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('whatsapp');
+    $canViewParentsContact= !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('parents_contact');
 @endphp
 
 {{-- ===== GP Sidebar v2 — full redesign with mini mode, collapsible groups, gold active state ===== --}}
@@ -524,30 +535,54 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
             </div>
             <div class="gp-section-content" id="gp-sec-communication">
 
-                <li class="nav-item" data-section="communication" data-label="@lang('shell.nav_announcements')"><a href="#" data-label="@lang('shell.nav_announcements')"><x-svg-icon name="megaphone" class="vc-ico" /><span class="menu-title">@lang('shell.nav_announcements')</span></a></li>
-                <li class="nav-item" data-section="communication" data-label="@lang('shell.nav_classified_ads')"><a href="#" data-label="@lang('shell.nav_classified_ads')"><x-svg-icon name="grid" class="vc-ico" /><span class="menu-title">@lang('shell.nav_classified_ads')</span></a></li>
+                {{-- الإعلانات — gated; route not built yet (later card C1) so hidden for now --}}
+                @if($canViewAnnouncements && Route::has('admin.announcements.index'))
+                <li class="nav-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}" data-section="communication" data-label="@lang('shell.nav_announcements')"><a href="{{ route('admin.announcements.index') }}" data-label="@lang('shell.nav_announcements')"><x-svg-icon name="megaphone" class="vc-ico" /><span class="menu-title">@lang('shell.nav_announcements')</span></a></li>
+                @endif
+                {{-- الإعلانات المبوبة — route not built yet so hidden --}}
+                @if(Route::has('admin.classified-ads.index'))
+                <li class="nav-item {{ request()->routeIs('admin.classified-ads.*') ? 'active' : '' }}" data-section="communication" data-label="@lang('shell.nav_classified_ads')"><a href="{{ route('admin.classified-ads.index') }}" data-label="@lang('shell.nav_classified_ads')"><x-svg-icon name="grid" class="vc-ico" /><span class="menu-title">@lang('shell.nav_classified_ads')</span></a></li>
+                @endif
+
+                {{-- التقويم المدرسي --}}
+                @php
+                    $calIsStaff = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin() || $sidebarUser->isTeacher());
+                    $calRoute   = $calIsStaff
+                        ? (Route::has('manage.school-calendar.index') ? route('manage.school-calendar.index') : null)
+                        : (Route::has('my.calendar.index') ? route('my.calendar.index') : null);
+                    $calActive  = request()->routeIs('manage.school-calendar.*') || request()->routeIs('my.calendar.*');
+                @endphp
+                @if($canViewCalendar && $calRoute)
+                <li class="nav-item {{ $calActive ? 'active' : '' }}" data-section="communication">
+                    <a href="{{ $calRoute }}" data-label="@lang('shell.nav_calendar')"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-title">@lang('shell.nav_calendar')</span></a>
+                </li>
+                @endif
 
                 @php
                     $vcIsStaff  = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin() || $sidebarUser->isTeacher());
                     $vcRoute    = $vcIsStaff
-                        ? (Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : '#')
-                        : (Route::has('my.virtual-classes.index') ? route('my.virtual-classes.index') : '#');
+                        ? (Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : null)
+                        : (Route::has('my.virtual-classes.index') ? route('my.virtual-classes.index') : null);
                     $vcActive   = request()->routeIs('manage.virtual-classes.*') || request()->routeIs('my.virtual-classes.*');
                 @endphp
+                @if($canViewVirtualClasses && $vcRoute)
                 <li class="nav-item {{ $vcActive ? 'active' : '' }}" data-section="communication">
                     <a href="{{ $vcRoute }}" data-label="@lang('shell.nav_virtual_classrooms')"><x-svg-icon name="camera-video" class="vc-ico" /><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a>
                 </li>
+                @endif
 
                 @php
                     $discIsStaff   = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin() || $sidebarUser->isTeacher());
                     $discRoute     = $discIsStaff
-                        ? (Route::has('manage.discussion-rooms.index') ? route('manage.discussion-rooms.index') : '#')
-                        : (Route::has('discussion.index') ? route('discussion.index') : '#');
+                        ? (Route::has('manage.discussion-rooms.index') ? route('manage.discussion-rooms.index') : null)
+                        : (Route::has('discussion.index') ? route('discussion.index') : null);
                     $discActive    = request()->routeIs('manage.discussion-rooms.*') || request()->routeIs('discussion.*');
                 @endphp
+                @if($canViewDiscussion && $discRoute)
                 <li class="nav-item {{ $discActive ? 'active' : '' }}" data-section="communication">
                     <a href="{{ $discRoute }}" data-label="@lang('shell.nav_discussion_rooms')"><x-svg-icon name="chat-dots" class="vc-ico" /><span class="menu-title">@lang('shell.nav_discussion_rooms')</span></a>
                 </li>
+                @endif
 
                 {{-- سجلات السلوك — للمعلمين فقط (المشرفون يصلون عبر قسم النظام) --}}
                 @if($sidebarUser && $sidebarUser->isTeacher() && ! $sidebarUser->isSchoolAdmin() && ! $sidebarUser->isSuperAdmin())
@@ -557,6 +592,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @endif
 
                 {{-- صندوق الوارد --}}
+                @if($canViewMailbox && Route::has('my.mailbox.index'))
                 <li class="nav-item has-sub {{ request()->routeIs('my.mailbox.*') ? 'active open' : '' }}" data-section="communication">
                     <a href="{{ Route::has('my.mailbox.index') ? route('my.mailbox.index') : '#' }}" data-label="@lang('shell.nav_mailbox')"><x-svg-icon name="inbox" class="vc-ico" /><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
                     <ul class="menu-content">
@@ -580,29 +616,37 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         </li>
                     </ul>
                 </li>
+                @endif
 
-                {{-- الرسائل النصية --}}
-                <li class="nav-item has-sub" data-section="communication">
+                {{-- الرسائل النصية / واتساب — only parameterless routes are linked here.
+                     School-scoped sub-pages (messages/senders reports, sender-name, credit) need a
+                     {school} param and are wired by later cards (C8/C9/C12). --}}
+                @php
+                    $smsItems = [
+                        ['gate' => $canViewSms,      'route' => 'admin.sms-services.index', 'icon' => 'send',      'label' => __('shell.nav_sms_send'),  'active' => 'admin.sms-services.index'],
+                        ['gate' => $canViewWhatsapp, 'route' => 'admin.whatsapp.index',     'icon' => 'chat-dots', 'label' => __('shell.nav_whatsapp'),  'active' => 'admin.whatsapp.*'],
+                    ];
+                    $smsVisible = collect($smsItems)
+                        ->filter(fn($i) => $i['gate'] && Route::has($i['route']))
+                        ->unique(fn($i) => $i['route']);
+                @endphp
+                @if($smsVisible->isNotEmpty())
+                <li class="nav-item has-sub {{ request()->routeIs('admin.sms-services.*') || request()->routeIs('admin.whatsapp.*') ? 'active open' : '' }}" data-section="communication">
                     <a href="#" data-label="@lang('shell.nav_sms')"><x-svg-icon name="phone" class="vc-ico" /><span class="menu-title">@lang('shell.nav_sms')</span></a>
                     <ul class="menu-content">
-                        <li><a href="#"><x-svg-icon name="send" class="vc-ico" /><span class="menu-item">@lang('shell.nav_sms_send')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="chat-dots" class="vc-ico" /><span class="menu-item">@lang('shell.nav_whatsapp')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="file-earmark-spreadsheet" class="vc-ico" /><span class="menu-item">@lang('shell.nav_sms_excel')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="bar-chart" class="vc-ico" /><span class="menu-item">@lang('shell.nav_sms_reports')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="copy" class="vc-ico" /><span class="menu-item">@lang('shell.nav_sms_templates')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_sms_forms')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="gear" class="vc-ico" /><span class="menu-item">@lang('shell.nav_sms_settings')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="plus-circle" class="vc-ico" /><span class="menu-item">@lang('shell.nav_sms_extra')</span></a></li>
+                        @foreach($smsVisible as $i)
+                        <li class="{{ request()->routeIs($i['active']) ? 'active' : '' }}"><a href="{{ route($i['route']) }}"><x-svg-icon name="{{ $i['icon'] }}" class="vc-ico" /><span class="menu-item">{{ $i['label'] }}</span></a></li>
+                        @endforeach
                     </ul>
                 </li>
+                @endif
 
-                {{-- CRM --}}
-                <li class="nav-item has-sub" data-section="communication">
-                    <a href="#" data-label="@lang('shell.nav_crm')"><x-svg-icon name="hand-thumbs-up" class="vc-ico" /><span class="menu-title">@lang('shell.nav_crm')</span></a>
-                    <ul class="menu-content">
-                        <li><a href="#"><x-svg-icon name="people" class="vc-ico" /><span class="menu-item">@lang('shell.nav_parent_contact')</span></a></li>
-                    </ul>
+                {{-- أولياء الأمور كجهة تواصل (CRM) — route not built yet (later card C11) so hidden --}}
+                @if($canViewParentsContact && Route::has('admin.parents-contact.index'))
+                <li class="nav-item {{ request()->routeIs('admin.parents-contact.*') ? 'active' : '' }}" data-section="communication">
+                    <a href="{{ route('admin.parents-contact.index') }}" data-label="@lang('shell.nav_parent_contact')"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_parent_contact')</span></a>
                 </li>
+                @endif
 
             </div>{{-- /gp-sec-communication --}}
 

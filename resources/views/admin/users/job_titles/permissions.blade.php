@@ -146,6 +146,27 @@
                 'send_notifications' => 'إرسال إشعارات',
                 'send_whatsapp'      => 'إرسال واتساب',
                 'login_as_user'      => 'الدخول للإطلاع',
+                // ── عمليات التواصل (Sprint 9) ──
+                'publish'            => 'نشر',
+                'read_log'           => 'سجل القراءة',
+                'create_event'       => 'إضافة حدث',
+                'edit_event'         => 'تعديل حدث',
+                'delete_event'       => 'حذف حدث',
+                'start'              => 'بدء',
+                'join'               => 'انضمام',
+                'view_attendance'    => 'عرض الحضور',
+                'recalc_attendance'  => 'إعادة احتساب الحضور',
+                'clear_cache'        => 'مسح الذاكرة المؤقتة',
+                'toggle_comments'    => 'تفعيل/إيقاف التعليقات',
+                'send'               => 'إرسال',
+                'draft'              => 'مسودة',
+                'archive'            => 'أرشفة',
+                'send_excel'         => 'إرسال من Excel',
+                'templates'          => 'القوالب',
+                'reports'            => 'التقارير',
+                'sender_name'        => 'اسم المرسل',
+                'credit'             => 'الرصيد',
+                'manage'             => 'إدارة',
             ];
         @endphp
 

@@ -55,8 +55,18 @@ class JobTitlePermissionsController extends Controller
         'settings'        => ['label' => 'الإعدادات',          'actions' => ['view','edit','manage_permissions']],
         'pdf_export'      => ['label' => 'PDF / التصدير',     'actions' => ['view','print']],
         'noor'            => ['label' => 'نظام نور',           'actions' => ['view','import','export']],
-        'whatsapp'        => ['label' => 'واتساب',             'actions' => ['view','send_whatsapp']],
+        'whatsapp'        => ['label' => 'واتساب',             'actions' => ['view','send_whatsapp','send']],
         'job_titles'      => ['label' => 'المسميات الوظيفية', 'actions' => ['view','create','edit','delete','manage_permissions']],
+
+        // ── عمليات التواصل (Sprint 9) — see .kiro/specs/trello-sprint9-comms-foundation ──
+        'announcements'   => ['label' => 'الإعلانات',              'actions' => ['view','create','edit','delete','publish','read_log']],
+        'calendar'        => ['label' => 'التقويم المدرسي',       'actions' => ['view','create_event','edit_event','delete_event','print']],
+        'virtual_classes' => ['label' => 'الفصول الافتراضية',     'actions' => ['view','create','start','join','view_attendance','recalc_attendance','clear_cache']],
+        'discussion'      => ['label' => 'غرف النقاش',            'actions' => ['view','create','edit','delete','toggle_comments']],
+        'mailbox'         => ['label' => 'صندوق البريد الداخلي',  'actions' => ['view','send','draft','delete','archive']],
+        'sms'             => ['label' => 'الرسائل القصيرة SMS',   'actions' => ['view','send']],
+        'messages'        => ['label' => 'خدمات الرسائل',         'actions' => ['send_excel','templates','reports','sender_name','credit']],
+        'parents_contact' => ['label' => 'أولياء الأمور كجهة تواصل', 'actions' => ['view','manage']],
     ];
 
     private const SCOPE_LABELS = [
