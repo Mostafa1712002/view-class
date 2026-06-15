@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ResolvesStudentScope;
 use App\Models\AcademicYear;
 use App\Models\Attendance;
 use App\Models\Certificate;
@@ -13,13 +14,15 @@ use Illuminate\View\View;
 
 class StudentController extends Controller
 {
+    use ResolvesStudentScope;
+
     /**
      * Student dashboard
      */
     public function dashboard(): View
     {
         $student = auth()->user();
-        $academicYear = AcademicYear::where('is_current', true)->first();
+        $academicYear = $this->effectiveAcademicYear($student);
 
         // Get student's class
         $class = $student->enrolledClasses()->first();
@@ -98,9 +101,12 @@ class StudentController extends Controller
     {
         $student = auth()->user();
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
-        $selectedYear = $request->academic_year_id
-            ? AcademicYear::find($request->academic_year_id)
-            : AcademicYear::where('is_current', true)->first();
+        // Default to the scope's effective year (re-scoped by the navbar year
+        // selector); an explicit ?academic_year_id on the page filter still
+        // overrides when the student is permitted to view previous periods.
+        $selectedYear = ($request->academic_year_id && $this->studentMayViewPreviousPeriods($student))
+            ? AcademicYear::where('school_id', $student->school_id)->find($request->academic_year_id)
+            : $this->effectiveAcademicYear($student);
 
         $grades = collect();
         $subjects = collect();
@@ -134,9 +140,12 @@ class StudentController extends Controller
     {
         $student = auth()->user();
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
-        $selectedYear = $request->academic_year_id
-            ? AcademicYear::find($request->academic_year_id)
-            : AcademicYear::where('is_current', true)->first();
+        // Default to the scope's effective year (re-scoped by the navbar year
+        // selector); an explicit ?academic_year_id on the page filter still
+        // overrides when the student is permitted to view previous periods.
+        $selectedYear = ($request->academic_year_id && $this->studentMayViewPreviousPeriods($student))
+            ? AcademicYear::where('school_id', $student->school_id)->find($request->academic_year_id)
+            : $this->effectiveAcademicYear($student);
 
         $attendances = collect();
         $stats = null;
@@ -192,9 +201,12 @@ class StudentController extends Controller
     {
         $student = auth()->user();
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
-        $selectedYear = $request->academic_year_id
-            ? AcademicYear::find($request->academic_year_id)
-            : AcademicYear::where('is_current', true)->first();
+        // Default to the scope's effective year (re-scoped by the navbar year
+        // selector); an explicit ?academic_year_id on the page filter still
+        // overrides when the student is permitted to view previous periods.
+        $selectedYear = ($request->academic_year_id && $this->studentMayViewPreviousPeriods($student))
+            ? AcademicYear::where('school_id', $student->school_id)->find($request->academic_year_id)
+            : $this->effectiveAcademicYear($student);
 
         $upcomingExams = collect();
         $completedExams = collect();
@@ -254,7 +266,7 @@ class StudentController extends Controller
     {
         $student = auth()->user();
         $class = $student->enrolledClasses()->first();
-        $academicYear = AcademicYear::where('is_current', true)->first();
+        $academicYear = $this->effectiveAcademicYear($student);
 
         $schedule = null;
         $periods = collect();
@@ -464,14 +476,21 @@ class StudentController extends Controller
     {
         $student = auth()->user();
         $class = $student->enrolledClasses()->first();
-        $academicYear = AcademicYear::where('is_current', true)->first();
+        $academicYear = $this->effectiveAcademicYear($student);
+        $academicTerm = $this->effectiveAcademicTerm($student, $academicYear);
 
         $weeklyPlans = collect();
 
-        if ($class && $academicYear) {
+        if ($class) {
+            // weekly_plans has no academic_year_id/term_id column — it is scoped
+            // by the week date range. Honour the effective term's window when one
+            // is resolved (so term switching re-scopes plans), else the year's.
+            [$periodStart, $periodEnd] = $this->periodWindow($academicTerm, $academicYear);
+
             $query = $class->weeklyPlans()
-                ->where('academic_year_id', $academicYear->id)
                 ->where('is_locked', true)
+                ->when($periodStart, fn ($q) => $q->whereDate('week_start_date', '>=', $periodStart))
+                ->when($periodEnd, fn ($q) => $q->whereDate('week_start_date', '<=', $periodEnd))
                 ->with(['subject', 'teacher'])
                 ->orderBy('week_start_date', 'desc');
 
@@ -482,8 +501,49 @@ class StudentController extends Controller
             $weeklyPlans = $query->paginate(10);
         }
 
-        $subjects = $class ? $class->subjects : collect();
+        // Subjects for the filter come from the student's grade-resolved subjects
+        // (ClassRoom has no subjects() relation), school-scoped.
+        $subjects = $this->studentSubjectsForFilter($student);
 
         return view('student.weekly-plans', compact('student', 'class', 'weeklyPlans', 'subjects'));
+    }
+
+    /**
+     * Resolve the [start, end] date window for the effective period. Prefers the
+     * term window (when both dates are set), falling back to the academic year.
+     *
+     * @return array{0:?string,1:?string}
+     */
+    private function periodWindow(?\App\Models\AcademicTerm $term, ?AcademicYear $year): array
+    {
+        if ($term && $term->start_date && $term->end_date) {
+            return [$term->start_date->toDateString(), $term->end_date->toDateString()];
+        }
+        if ($year && $year->start_date && $year->end_date) {
+            return [$year->start_date->toDateString(), $year->end_date->toDateString()];
+        }
+
+        return [null, null];
+    }
+
+    /**
+     * Subjects available to the student (by grade level), school-scoped — used
+     * for page filters. ClassRoom has no subjects() relation, so resolve the same
+     * way StudentSubjectController does.
+     */
+    private function studentSubjectsForFilter($student)
+    {
+        $gradeLevel = optional($student->classRoom)->grade_level;
+
+        return \App\Models\Subject::where('school_id', $student->school_id)
+            ->where('is_active', true)
+            ->when($gradeLevel !== null, function ($q) use ($gradeLevel) {
+                $q->where(function ($w) use ($gradeLevel) {
+                    $w->whereJsonContains('grade_levels', (string) $gradeLevel)
+                        ->orWhereJsonContains('grade_levels', (int) $gradeLevel);
+                });
+            })
+            ->orderBy('name')
+            ->get();
     }
 }

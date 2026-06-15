@@ -1,6 +1,32 @@
 @php
     $sidebarUser = auth()->user();
     $isStaff = $sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin());
+
+    // ── Dynamic student subjects (Card #170) ─────────────────────────────────
+    // Subjects come from the subjects linked to the student's grade + class
+    // (NOT a fixed list), school-scoped, deduped by (name + track). Mirrors
+    // StudentSubjectController::studentSubjects().
+    $sidebarStudentSubjects = collect();
+    if ($sidebarUser && $sidebarUser->isStudent()) {
+        try {
+            $gradeLevel = optional($sidebarUser->classRoom)->grade_level;
+            $q = \App\Models\Subject::where('school_id', $sidebarUser->school_id)
+                ->where('is_active', true);
+            if ($gradeLevel !== null) {
+                $q->where(function ($w) use ($gradeLevel) {
+                    $w->whereJsonContains('grade_levels', (string) $gradeLevel)
+                        ->orWhereJsonContains('grade_levels', (int) $gradeLevel);
+                });
+            }
+            $sidebarStudentSubjects = $q->orderBy('certificate_order')->orderBy('name')->get()
+                // Collapse exact duplicates (same name + same code); keep genuinely
+                // distinct subjects (different code) as separate rows.
+                ->unique(fn ($s) => mb_strtolower(trim($s->name)).'|'.($s->code ?? ''))
+                ->values();
+        } catch (\Throwable $e) {
+            $sidebarStudentSubjects = collect();
+        }
+    }
 @endphp
 @php
     // Module visibility — respects canViewModule() default-allow-when-unconfigured rule.
@@ -699,7 +725,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
 
             {{-- ── Items visible to all authenticated users ── --}}
 
-            @if($sidebarUser && ($sidebarUser->isTeacher() || $sidebarUser->isStudent() || $sidebarUser->isParent()))
+            {{-- Students get "شهاداتي" inside their own تقارير group; show the
+                 standalone item only for teachers/parents to avoid duplication. --}}
+            @if($sidebarUser && ($sidebarUser->isTeacher() || $sidebarUser->isParent()))
             <li class="nav-item {{ request()->routeIs('my.certificates.*') ? 'active' : '' }}">
                 <a href="{{ Route::has('my.certificates.index') ? route('my.certificates.index') : '#' }}" data-label="@lang('certificates.my_title')">
                     <x-svg-icon name="award" class="vc-ico" />
@@ -781,27 +809,121 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
 
             {{-- ========== بوابة الطالب ========== --}}
             @if($sidebarUser && $sidebarUser->isStudent())
-            <div class="gp-section-header sec-student" data-section-toggle="student">
+
+            {{-- ── مواد الطالب — dynamic from grade + class (Card #170) ── --}}
+            <div class="gp-section-header sec-student" data-section-toggle="student-subjects">
                 <span class="gp-sec-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687z"/></svg>
                 </span>
-                <span class="gp-sec-label">@lang('shell.portal_student')</span>
+                <span class="gp-sec-label">@lang('shell.subjects_group')</span>
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
-            <div class="gp-section-content" id="gp-sec-student">
-                <li class="nav-item {{ request()->routeIs('student.schedule') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.schedule') }}" data-label="@lang('shell.portal_my_schedule_link')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.portal_my_schedule_link')</span></a></li>
+            <div class="gp-section-content" id="gp-sec-student-subjects">
+                <li class="nav-item {{ request()->routeIs('student.subjects.index') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ Route::has('student.subjects.index') ? route('student.subjects.index') : '#' }}" data-label="@lang('shell.subjects_group')"><x-svg-icon name="grid" class="vc-ico" /><span class="menu-title">@lang('shell.subjects_group')</span></a>
+                </li>
+                @forelse($sidebarStudentSubjects as $subj)
+                    @php($subjActive = request()->routeIs('student.subjects.show') && (int) request()->route('subject') === (int) $subj->id)
+                    <li class="nav-item {{ $subjActive ? 'active' : '' }}" data-section="student">
+                        <a href="{{ Route::has('student.subjects.show') ? route('student.subjects.show', $subj->id) : '#' }}" data-label="{{ $subj->name }}">
+                            <x-svg-icon name="{{ $subj->icon ?: 'book' }}" class="vc-ico" /><span class="menu-title">{{ $subj->name }}</span>
+                        </a>
+                    </li>
+                @empty
+                    <li class="nav-item" data-section="student"><a href="#" style="opacity:.6; pointer-events:none;" data-label="—"><x-svg-icon name="dash-circle" class="vc-ico" /><span class="menu-title" style="font-size:.8rem;">—</span></a></li>
+                @endforelse
+            </div>
+
+            {{-- ── عمليات تعليمية ── --}}
+            <div class="gp-section-header sec-student" data-section-toggle="student-educational">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5z"/><path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.group_educational')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-student-educational">
+                <li class="nav-item {{ request()->routeIs('student.weekly-plans') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.weekly-plans') ? route('student.weekly-plans') : '#' }}" data-label="@lang('shell.nav_weekly_plan')"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.books.*') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.books.index') ? route('student.books.index') : '#' }}" data-label="@lang('shell.nav_books')"><x-svg-icon name="book-half" class="vc-ico" /><span class="menu-title">@lang('shell.nav_books')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.schedule') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.schedule') }}" data-label="@lang('shell.nav_schedule')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_schedule')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.exams') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.exams') }}" data-label="@lang('shell.portal_exams')"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.portal_exams')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.grades') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.grades') }}" data-label="@lang('shell.portal_my_grades')"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.portal_my_grades')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.attendance') }}" data-label="@lang('shell.portal_my_attendance')"><x-svg-icon name="check-square" class="vc-ico" /><span class="menu-title">@lang('shell.portal_my_attendance')</span></a></li>
-                <li class="nav-item {{ request()->routeIs('student.books.*') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.books.index') ? route('student.books.index') : '#' }}" data-label="@lang('shell.nav_books')"><x-svg-icon name="book-half" class="vc-ico" /><span class="menu-title">@lang('shell.nav_books')</span></a></li>
-                <li class="nav-item {{ request()->routeIs('student.subjects.*') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.subjects.index') ? route('student.subjects.index') : '#' }}" data-label="موادي"><x-svg-icon name="grid" class="vc-ico" /><span class="menu-title">موادي</span></a></li>
+            </div>
+
+            {{-- ── تقارير ── --}}
+            <div class="gp-section-header sec-student" data-section-toggle="student-reports">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.group_reports')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-student-reports">
+                <li class="nav-item {{ request()->routeIs('student.reports.index') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.reports.index') }}" data-label="تقارير الغياب"><x-svg-icon name="pie-chart" class="vc-ico" /><span class="menu-title">تقارير الغياب</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.reports.exam-schedule') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.reports.exam-schedule') }}" data-label="جدول الاختبارات"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-title">جدول الاختبارات</span></a></li>
+                <li class="nav-item {{ request()->routeIs('student.portfolio') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.portfolio') }}" data-label="ملف الإنجاز"><x-svg-icon name="trophy" class="vc-ico" /><span class="menu-title">ملف الإنجاز</span></a></li>
+                <li class="nav-item {{ request()->routeIs('my.certificates.*') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('my.certificates.index') ? route('my.certificates.index') : '#' }}" data-label="@lang('certificates.my_title')"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('certificates.my_title')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.special-education') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.special-education') ? route('student.special-education') : '#' }}" data-label="@lang('student.special_ed.title')"><x-svg-icon name="heart" class="vc-ico" /><span class="menu-title">@lang('student.special_ed.title')</span></a></li>
+            </div>
+
+            {{-- ── مكتبات (#173 — قد تكون صفحة لاحقة) ── --}}
+            <div class="gp-section-header sec-student" data-section-toggle="student-libraries">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5V2z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.group_libraries')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-student-libraries">
+                <li class="nav-item {{ request()->routeIs('my.libraries.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ Route::has('my.libraries.index') ? route('my.libraries.index') : '#' }}" data-label="@lang('shell.nav_libraries')">
+                        <x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span>
+                        @unless(Route::has('my.libraries.index'))<small style="opacity:.6; margin-inline-start:auto; font-size:.65rem;">@lang('shell.coming_soon')</small>@endunless
+                    </a>
+                </li>
+            </div>
+
+            {{-- ── تواصل (Sprint 9 — قد تكون صفحة لاحقة) ── --}}
+            <div class="gp-section-header sec-student" data-section-toggle="student-communication">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793V2z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.group_communication')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-student-communication">
+                <li class="nav-item {{ request()->routeIs('my.mailbox.*') || request()->routeIs('messages.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ Route::has('my.mailbox.index') ? route('my.mailbox.index') : (Route::has('messages.index') ? route('messages.index') : '#') }}" data-label="@lang('shell.nav_mailbox')"><x-svg-icon name="inbox" class="vc-ico" /><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('discussion.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ Route::has('discussion.index') ? route('discussion.index') : '#' }}" data-label="@lang('shell.nav_discussion_rooms')">
+                        <x-svg-icon name="chat-dots" class="vc-ico" /><span class="menu-title">@lang('shell.nav_discussion_rooms')</span>
+                        @unless(Route::has('discussion.index'))<small style="opacity:.6; margin-inline-start:auto; font-size:.65rem;">@lang('shell.coming_soon')</small>@endunless
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('my.virtual-classes.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ Route::has('my.virtual-classes.index') ? route('my.virtual-classes.index') : '#' }}" data-label="@lang('shell.nav_virtual_classrooms')">
+                        <x-svg-icon name="camera-video" class="vc-ico" /><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span>
+                    </a>
+                </li>
                 <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="student">
                     <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}" data-label="@lang('shell.nav_my_appointments_booking')"><x-svg-icon name="calendar-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>
                 </li>
-                <li class="nav-item {{ request()->routeIs('student.reports.*') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.reports.index') }}" data-label="تقارير الغياب"><x-svg-icon name="pie-chart" class="vc-ico" /><span class="menu-title">تقارير الغياب</span></a></li>
-                <li class="nav-item {{ request()->routeIs('student.portfolio') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.portfolio') }}" data-label="ملف الإنجاز"><x-svg-icon name="trophy" class="vc-ico" /><span class="menu-title">ملف الإنجاز</span></a></li>
-                <li class="nav-item {{ request()->routeIs('student.reports.exam-schedule') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.reports.exam-schedule') }}" data-label="جدول الاختبارات"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-title">جدول الاختبارات</span></a></li>
+            </div>
+
+            {{-- ── الدعم ── --}}
+            <div class="gp-section-header sec-student" data-section-toggle="student-support">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.882 4.882a.5.5 0 0 1 .708 0L8 7.293l2.41-2.411a.5.5 0 1 1 .708.708L8.707 8l2.411 2.41a.5.5 0 0 1-.708.708L8 8.707l-2.41 2.411a.5.5 0 0 1-.708-.708L7.293 8 4.882 5.59a.5.5 0 0 1 0-.708z" opacity="0"/><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 11a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm.93-3.412c-.06.34-.4.412-.93.412-.55 0-.88-.08-.93-.42 0 0-.07-2.13.93-2.58.4-.18.7-.5.7-.95 0-.4-.3-.7-.7-.7-.4 0-.7.3-.7.7H5.6c0-1.04.86-1.9 1.9-1.9s1.9.86 1.9 1.9c0 .8-.5 1.4-1.17 1.7-.4.18-.4.6-.4 1.13z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.group_support')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-student-support">
+                <li class="nav-item {{ request()->routeIs('my.support.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ Route::has('my.support.index') ? route('my.support.index') : '#' }}" data-label="@lang('shell.nav_support')"><x-svg-icon name="life-preserver" class="vc-ico" /><span class="menu-title">@lang('shell.nav_support')</span></a>
+                </li>
             </div>
             @endif
 

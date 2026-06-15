@@ -97,16 +97,48 @@
         'company_id' => optional($shellSchool)->educational_company_id,
         'school_id' => $shellUser?->school_id,
         'academic_year_id' => $shellCurrentYear?->id,
+        'academic_term_id' => null,
     ]);
     $shellScopeCompanies = [];
     $shellScopeSchools = [];
     $shellScopeYears = [];
+    $shellScopeTerms = [];
+
+    // ── Student shell context (Card #170) ────────────────────────────────────
+    $shellIsStudent = $shellUser && $shellUser->isStudent();
+    // Whether this student may switch to a previous (non-current) period.
+    $shellAllowPrev = $shellIsStudent
+        ? (bool) \App\Models\Setting::get('allow_previous_periods', false, $shellUser->school_id)
+        : true;
+    // Account-type label for the header chip.
+    $shellAccountType = null;
+    if ($shellUser) {
+        $shellAccountType = match (true) {
+            $shellUser->isSuperAdmin()  => __('shell.role_super_admin'),
+            $shellUser->isSchoolAdmin() => __('shell.role_school_admin'),
+            $shellUser->isTeacher()     => __('shell.role_teacher'),
+            $shellUser->isStudent()     => __('shell.role_student'),
+            $shellUser->isParent()      => __('shell.role_parent'),
+            default => null,
+        };
+    }
+    // Resolve the student's grade / class for the header context line.
+    $shellStudentClass = null;
+    if ($shellIsStudent) {
+        $shellStudentClass = $shellUser->classRoom;
+    }
+
     if ($shellUser) {
         try {
             $scopeRepo = app(\App\Modules\Scope\Repositories\Contracts\ScopeRepository::class);
             $shellScopeCompanies = $scopeRepo->companiesFor($shellUser);
             $shellScopeSchools = $scopeRepo->schoolsFor($shellUser, $shellScopeSession['company_id'] ?? null);
             $shellScopeYears = $scopeRepo->yearsFor($shellUser, $shellScopeSession['school_id'] ?? null);
+            // Effective year for term-list resolution: scope year (when allowed) else current.
+            $shellEffectiveYearId = ($shellIsStudent && ! $shellAllowPrev)
+                ? $shellCurrentYear?->id
+                : ($shellScopeSession['academic_year_id'] ?? $shellCurrentYear?->id);
+            $shellScopeTerms = $scopeRepo->termsFor($shellUser, $shellEffectiveYearId);
         } catch (\Throwable $e) {
             // progressive enhancement — never break shell
         }
@@ -142,41 +174,83 @@
                 @endif
             </a>
             @if($shellSchoolName)
-                <div class="shell-school-meta d-none d-xxl-flex text-white ms-3" style="flex-direction:column; line-height:1.1; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                <div class="shell-school-meta d-none d-xxl-flex text-white ms-3" style="flex-direction:column; line-height:1.1; max-width:190px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                     <small class="text-white-50 text-truncate" style="font-size:.7rem;">{{ $shellCompanyName }}</small>
                     <strong class="text-truncate" style="font-size:.85rem;">{{ $shellSchoolName }}</strong>
+                    @if($shellIsStudent && $shellStudentClass)
+                        <small class="text-white-50 text-truncate" style="font-size:.68rem;">{{ $shellStudentClass->grade_level_label ?? $shellStudentClass->name }}@if($shellStudentClass->division) — {{ $shellStudentClass->division }}@endif</small>
+                    @endif
                 </div>
+            @endif
+            @if($shellAccountType)
+                <span class="shell-acct-type d-none d-lg-inline-flex align-items-center text-white ms-2 px-2 py-1"
+                      style="background:rgba(201,162,39,.85); border-radius:999px; font-size:.72rem; font-weight:700; line-height:1;"
+                      title="@lang('shell.account_type')">
+                    {{ $shellAccountType }}
+                </span>
             @endif
         </div>
 
         {{-- Centre: scope selectors (only when authed and wide enough) --}}
         @auth
-            <form id="shell-scope-form" method="POST" action="{{ route('scope.set') }}" class="shell-nav-center d-none d-xl-flex align-items-center m-0">
-                @csrf
-                <select name="company_id" class="form-control form-control-sm mx-1" style="min-width:140px; max-width:180px" onchange="this.form.submit()" aria-label="@lang('shell.scope_company')">
-                    @foreach($shellScopeCompanies as $c)
-                        <option value="{{ $c['id'] }}" @selected(($shellScopeSession['company_id'] ?? null) == $c['id'])>
-                            {{ $shellLocale === 'en' ? ($c['name_en'] ?: $c['name_ar']) : ($c['name_ar'] ?: $c['name_en']) }}
-                        </option>
-                    @endforeach
-                </select>
-                <select name="school_id" class="form-control form-control-sm mx-1" style="min-width:140px; max-width:180px" onchange="this.form.submit()" aria-label="@lang('shell.scope_school')">
-                    <option value="all">@lang('shell.scope_all_schools')</option>
-                    @foreach($shellScopeSchools as $s)
-                        <option value="{{ $s['id'] }}" @selected(($shellScopeSession['school_id'] ?? null) == $s['id'])>
-                            {{ $shellLocale === 'en' ? ($s['name_en'] ?: $s['name_ar']) : ($s['name_ar'] ?: $s['name_en']) }}
-                        </option>
-                    @endforeach
-                </select>
-                <select name="academic_year_id" class="form-control form-control-sm mx-1" style="min-width:120px; max-width:160px" onchange="this.form.submit()" aria-label="@lang('shell.scope_semester')">
-                    <option value="all">@lang('shell.scope_all_years')</option>
-                    @foreach($shellScopeYears as $y)
-                        <option value="{{ $y['id'] }}" @selected(($shellScopeSession['academic_year_id'] ?? null) == $y['id'])>
-                            {{ $y['name'] }}{{ !empty($y['is_current']) ? ' ★' : '' }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
+            @if($shellIsStudent)
+                {{-- Student scope: company/school are STATIC context (a student has exactly
+                     one), year + term are selectable only when the school permits viewing
+                     previous periods. The disabled state is cosmetic — SetScopeAction
+                     enforces the same gate server-side. --}}
+                <form id="shell-scope-form" method="POST" action="{{ route('scope.set') }}" class="shell-nav-center d-none d-xl-flex align-items-center m-0">
+                    @csrf
+                    <span class="d-inline-flex align-items-center text-white mx-1 px-2 py-1" style="background:rgba(255,255,255,.12); border-radius:7px; font-size:.8rem; max-width:200px;" title="{{ $shellSchoolName }}">
+                        <x-svg-icon name="building" size="14" class="me-1" />
+                        <span class="text-truncate">{{ $shellSchoolName }}</span>
+                    </span>
+                    <select name="academic_year_id" class="form-control form-control-sm mx-1" style="min-width:120px; max-width:160px" onchange="this.form.submit()" aria-label="@lang('shell.scope_year')" @disabled(! $shellAllowPrev)>
+                        @foreach($shellScopeYears as $y)
+                            <option value="{{ $y['id'] }}" @selected(($shellScopeSession['academic_year_id'] ?? null) == $y['id'] || (empty($shellScopeSession['academic_year_id']) && !empty($y['is_current'])))>
+                                {{ $y['name'] }}{{ !empty($y['is_current']) ? ' ★' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <select name="academic_term_id" class="form-control form-control-sm mx-1" style="min-width:120px; max-width:160px" onchange="this.form.submit()" aria-label="@lang('shell.scope_term')" @disabled(! $shellAllowPrev || empty($shellScopeTerms))>
+                        @if(empty($shellScopeTerms))
+                            <option value="">@lang('shell.scope_no_terms')</option>
+                        @else
+                            @foreach($shellScopeTerms as $t)
+                                <option value="{{ $t['id'] }}" @selected(($shellScopeSession['academic_term_id'] ?? null) == $t['id'] || (empty($shellScopeSession['academic_term_id']) && !empty($t['is_current'])))>
+                                    {{ $t['name'] }}{{ !empty($t['is_current']) ? ' ★' : '' }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                </form>
+            @else
+                <form id="shell-scope-form" method="POST" action="{{ route('scope.set') }}" class="shell-nav-center d-none d-xl-flex align-items-center m-0">
+                    @csrf
+                    <select name="company_id" class="form-control form-control-sm mx-1" style="min-width:140px; max-width:180px" onchange="this.form.submit()" aria-label="@lang('shell.scope_company')">
+                        @foreach($shellScopeCompanies as $c)
+                            <option value="{{ $c['id'] }}" @selected(($shellScopeSession['company_id'] ?? null) == $c['id'])>
+                                {{ $shellLocale === 'en' ? ($c['name_en'] ?: $c['name_ar']) : ($c['name_ar'] ?: $c['name_en']) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <select name="school_id" class="form-control form-control-sm mx-1" style="min-width:140px; max-width:180px" onchange="this.form.submit()" aria-label="@lang('shell.scope_school')">
+                        <option value="all">@lang('shell.scope_all_schools')</option>
+                        @foreach($shellScopeSchools as $s)
+                            <option value="{{ $s['id'] }}" @selected(($shellScopeSession['school_id'] ?? null) == $s['id'])>
+                                {{ $shellLocale === 'en' ? ($s['name_en'] ?: $s['name_ar']) : ($s['name_ar'] ?: $s['name_en']) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <select name="academic_year_id" class="form-control form-control-sm mx-1" style="min-width:120px; max-width:160px" onchange="this.form.submit()" aria-label="@lang('shell.scope_semester')">
+                        <option value="all">@lang('shell.scope_all_years')</option>
+                        @foreach($shellScopeYears as $y)
+                            <option value="{{ $y['id'] }}" @selected(($shellScopeSession['academic_year_id'] ?? null) == $y['id'])>
+                                {{ $y['name'] }}{{ !empty($y['is_current']) ? ' ★' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            @endif
         @endauth
 
         {{-- Right cluster: utility actions + profile --}}
@@ -328,32 +402,59 @@
     {{-- Mobile scope strip — visible below xl where the centre form is hidden --}}
     @auth
     <div id="shell-scope-mobile" class="d-flex d-xl-none" style="background:rgba(0,0,0,.12); padding:6px 16px; flex-wrap:wrap; gap:6px;">
-        <form method="POST" action="{{ route('scope.set') }}" class="d-flex flex-wrap align-items-center gap-1 m-0 w-100">
-            @csrf
-            <select name="company_id" class="form-control form-control-sm" style="flex:1 1 130px; max-width:200px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_company')">
-                @foreach($shellScopeCompanies as $c)
-                    <option value="{{ $c['id'] }}" style="color:#333;" @selected(($shellScopeSession['company_id'] ?? null) == $c['id'])>
-                        {{ $shellLocale === 'en' ? ($c['name_en'] ?: $c['name_ar']) : ($c['name_ar'] ?: $c['name_en']) }}
-                    </option>
-                @endforeach
-            </select>
-            <select name="school_id" class="form-control form-control-sm" style="flex:1 1 130px; max-width:200px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_school')">
-                <option value="all" style="color:#333;">@lang('shell.scope_all_schools')</option>
-                @foreach($shellScopeSchools as $s)
-                    <option value="{{ $s['id'] }}" style="color:#333;" @selected(($shellScopeSession['school_id'] ?? null) == $s['id'])>
-                        {{ $shellLocale === 'en' ? ($s['name_en'] ?: $s['name_ar']) : ($s['name_ar'] ?: $s['name_en']) }}
-                    </option>
-                @endforeach
-            </select>
-            <select name="academic_year_id" class="form-control form-control-sm" style="flex:1 1 110px; max-width:180px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_semester')">
-                <option value="all" style="color:#333;">@lang('shell.scope_all_years')</option>
-                @foreach($shellScopeYears as $y)
-                    <option value="{{ $y['id'] }}" style="color:#333;" @selected(($shellScopeSession['academic_year_id'] ?? null) == $y['id'])>
-                        {{ $y['name'] }}{{ !empty($y['is_current']) ? ' ★' : '' }}
-                    </option>
-                @endforeach
-            </select>
-        </form>
+        @if($shellIsStudent)
+            <form method="POST" action="{{ route('scope.set') }}" class="d-flex flex-wrap align-items-center gap-1 m-0 w-100">
+                @csrf
+                <span class="d-inline-flex align-items-center text-white px-2" style="flex:1 1 130px; max-width:200px; height:30px; background:rgba(255,255,255,.12); border-radius:6px; font-size:.78rem;">
+                    <span class="text-truncate">{{ $shellSchoolName }}</span>
+                </span>
+                <select name="academic_year_id" class="form-control form-control-sm" style="flex:1 1 110px; max-width:180px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_year')" @disabled(! $shellAllowPrev)>
+                    @foreach($shellScopeYears as $y)
+                        <option value="{{ $y['id'] }}" style="color:#333;" @selected(($shellScopeSession['academic_year_id'] ?? null) == $y['id'] || (empty($shellScopeSession['academic_year_id']) && !empty($y['is_current'])))>
+                            {{ $y['name'] }}{{ !empty($y['is_current']) ? ' ★' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                <select name="academic_term_id" class="form-control form-control-sm" style="flex:1 1 110px; max-width:180px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_term')" @disabled(! $shellAllowPrev || empty($shellScopeTerms))>
+                    @if(empty($shellScopeTerms))
+                        <option value="" style="color:#333;">@lang('shell.scope_no_terms')</option>
+                    @else
+                        @foreach($shellScopeTerms as $t)
+                            <option value="{{ $t['id'] }}" style="color:#333;" @selected(($shellScopeSession['academic_term_id'] ?? null) == $t['id'] || (empty($shellScopeSession['academic_term_id']) && !empty($t['is_current'])))>
+                                {{ $t['name'] }}{{ !empty($t['is_current']) ? ' ★' : '' }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </form>
+        @else
+            <form method="POST" action="{{ route('scope.set') }}" class="d-flex flex-wrap align-items-center gap-1 m-0 w-100">
+                @csrf
+                <select name="company_id" class="form-control form-control-sm" style="flex:1 1 130px; max-width:200px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_company')">
+                    @foreach($shellScopeCompanies as $c)
+                        <option value="{{ $c['id'] }}" style="color:#333;" @selected(($shellScopeSession['company_id'] ?? null) == $c['id'])>
+                            {{ $shellLocale === 'en' ? ($c['name_en'] ?: $c['name_ar']) : ($c['name_ar'] ?: $c['name_en']) }}
+                        </option>
+                    @endforeach
+                </select>
+                <select name="school_id" class="form-control form-control-sm" style="flex:1 1 130px; max-width:200px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_school')">
+                    <option value="all" style="color:#333;">@lang('shell.scope_all_schools')</option>
+                    @foreach($shellScopeSchools as $s)
+                        <option value="{{ $s['id'] }}" style="color:#333;" @selected(($shellScopeSession['school_id'] ?? null) == $s['id'])>
+                            {{ $shellLocale === 'en' ? ($s['name_en'] ?: $s['name_ar']) : ($s['name_ar'] ?: $s['name_en']) }}
+                        </option>
+                    @endforeach
+                </select>
+                <select name="academic_year_id" class="form-control form-control-sm" style="flex:1 1 110px; max-width:180px; height:30px; font-size:.82rem; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; border-radius:6px;" onchange="this.form.submit()" aria-label="@lang('shell.scope_semester')">
+                    <option value="all" style="color:#333;">@lang('shell.scope_all_years')</option>
+                    @foreach($shellScopeYears as $y)
+                        <option value="{{ $y['id'] }}" style="color:#333;" @selected(($shellScopeSession['academic_year_id'] ?? null) == $y['id'])>
+                            {{ $y['name'] }}{{ !empty($y['is_current']) ? ' ★' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+        @endif
     </div>
     @endauth
 

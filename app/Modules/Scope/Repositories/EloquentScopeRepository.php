@@ -2,6 +2,7 @@
 
 namespace App\Modules\Scope\Repositories;
 
+use App\Models\AcademicTerm;
 use App\Models\AcademicYear;
 use App\Models\EducationalCompany;
 use App\Models\School;
@@ -62,6 +63,29 @@ final class EloquentScopeRepository implements ScopeRepository
             ->toArray();
     }
 
+    public function termsFor(User $user, ?int $yearId): array
+    {
+        if (! $yearId) {
+            return [];
+        }
+
+        // Term ownership rides on the year's school ownership: only return terms
+        // for a year the user is allowed to see.
+        $yearQuery = AcademicYear::whereKey($yearId);
+        if (! $user->isSuperAdmin()) {
+            $yearQuery->where('school_id', $user->school_id);
+        }
+        if (! $yearQuery->exists()) {
+            return [];
+        }
+
+        return AcademicTerm::query()
+            ->where('academic_year_id', $yearId)
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'is_current', 'academic_year_id'])
+            ->toArray();
+    }
+
     public function companyExistsFor(User $user, int $companyId): bool
     {
         if ($user->isSuperAdmin()) {
@@ -85,6 +109,16 @@ final class EloquentScopeRepository implements ScopeRepository
         $query = AcademicYear::whereKey($yearId);
         if (! $user->isSuperAdmin()) {
             $query->where('school_id', $user->school_id);
+        }
+
+        return $query->exists();
+    }
+
+    public function termExistsFor(User $user, int $termId): bool
+    {
+        $query = AcademicTerm::whereKey($termId);
+        if (! $user->isSuperAdmin()) {
+            $query->whereHas('academicYear', fn ($q) => $q->where('school_id', $user->school_id));
         }
 
         return $query->exists();
