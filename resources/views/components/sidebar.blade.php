@@ -97,8 +97,14 @@
     opacity: 0;
 }
 
-/* ── Nav items ── */
-.main-menu .navigation > li > a {
+/* ── Nav items ──
+   NOTE: items live either as direct children of .navigation (top-level)
+   or nested one level inside a .gp-section-content wrapper div
+   (the role/section groups). Both carry .nav-item, so we target
+   `li.nav-item` (NOT the `> li` direct-child combinator) so section
+   items get the full styling too. Submenu rows use plain <li> inside
+   ul.menu-content and are deliberately excluded. */
+.main-menu .navigation li.nav-item > a {
     display: flex; align-items: center; gap: 10px;
     padding: .52rem .85rem; border-radius: 9px;
     margin: 1px 8px;
@@ -108,26 +114,26 @@
     transition: background .15s, color .15s, box-shadow .15s;
     text-decoration: none;
 }
-.main-menu .navigation > li > a:hover {
+.main-menu .navigation li.nav-item > a:hover {
     background: #fdf8ec;
     color: #C9A227;
 }
-.main-menu .navigation > li > a:hover .vc-ico {
+.main-menu .navigation li.nav-item > a:hover .vc-ico {
     color: #C9A227;
     transform: scale(1.12);
 }
 
 /* Active item — gold bar + tinted bg */
-.main-menu .navigation > li.active > a {
+.main-menu .navigation li.nav-item.active > a {
     background: linear-gradient(105deg, #fdf3d4 0%, #fef9ec 100%) !important;
     color: #9a6e00 !important;
     font-weight: 700 !important;
     box-shadow: inset 3px 0 0 #C9A227, 0 2px 10px rgba(201,162,39,.15) !important;
 }
-html[dir="rtl"] .main-menu .navigation > li.active > a {
+html[dir="rtl"] .main-menu .navigation li.nav-item.active > a {
     box-shadow: inset -3px 0 0 #C9A227, 0 2px 10px rgba(201,162,39,.15) !important;
 }
-.main-menu .navigation > li.active > a .vc-ico {
+.main-menu .navigation li.nav-item.active > a .vc-ico {
     color: #C9A227 !important;
 }
 
@@ -179,7 +185,7 @@ html[dir="ltr"] .main-menu .navigation li.has-sub > a::after { content: "\f105" 
 .main-menu .navigation li.has-sub.open > a::after { transform: translateY(-50%) rotate(-90deg); opacity: .75; }
 
 /* ── menu-title should not truncate ── */
-.main-menu .navigation > li > a .menu-title,
+.main-menu .navigation li.nav-item > a .menu-title,
 .main-menu .navigation li ul.menu-content li a .menu-item {
     white-space: normal !important; overflow: visible !important; text-overflow: unset !important;
     line-height: 1.3;
@@ -191,9 +197,9 @@ html[dir="ltr"] .main-menu .navigation li.has-sub > a::after { content: "\f105" 
    ══════════════════════════════════════════ */
 body.sidebar-mini .main-menu { width: 64px !important; overflow: visible !important; }
 body.sidebar-mini .main-menu-content { overflow: visible !important; }
-body.sidebar-mini .main-menu .navigation > li > a { padding: .55rem 0 !important; justify-content: center; margin: 2px 6px; gap: 0; }
-body.sidebar-mini .main-menu .navigation > li > a .menu-title { display: none !important; }
-body.sidebar-mini .main-menu .navigation > li > a::after { display: none !important; }
+body.sidebar-mini .main-menu .navigation li.nav-item > a { padding: .55rem 0 !important; justify-content: center; margin: 2px 6px; gap: 0; }
+body.sidebar-mini .main-menu .navigation li.nav-item > a .menu-title { display: none !important; }
+body.sidebar-mini .main-menu .navigation li.nav-item > a::after { display: none !important; }
 body.sidebar-mini .gp-section-header { padding: 6px; justify-content: center; }
 body.sidebar-mini .gp-section-header .gp-sec-label,
 body.sidebar-mini .gp-section-header .gp-sec-chevron { display: none !important; }
@@ -203,8 +209,8 @@ body.sidebar-mini .main-menu .navigation li ul.menu-content { display: none !imp
 body.sidebar-mini .app-content { margin-inline-start: 64px !important; }
 
 /* Tooltip in mini mode */
-body.sidebar-mini .main-menu .navigation > li { position: relative; }
-body.sidebar-mini .main-menu .navigation > li > a::before {
+body.sidebar-mini .main-menu .navigation li.nav-item { position: relative; }
+body.sidebar-mini .main-menu .navigation li.nav-item > a::before {
     content: attr(data-label);
     position: absolute;
     inset-inline-end: calc(100% + 10px);
@@ -218,10 +224,10 @@ body.sidebar-mini .main-menu .navigation > li > a::before {
     transition: opacity .18s;
     z-index: 2000;
 }
-html[dir="ltr"] body.sidebar-mini .main-menu .navigation > li > a::before {
+html[dir="ltr"] body.sidebar-mini .main-menu .navigation li.nav-item > a::before {
     inset-inline-end: auto; inset-inline-start: calc(100% + 10px);
 }
-body.sidebar-mini .main-menu .navigation > li:hover > a::before { opacity: 1; }
+body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity: 1; }
 
 /* ══════════════════════════════════════════
    MOBILE DRAWER  (body.gp-drawer-open)
@@ -280,10 +286,24 @@ body.sidebar-mini .main-menu .navigation > li:hover > a::before { opacity: 1; }
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
 
-            {{-- Dashboard --}}
-            <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+            {{-- Dashboard — role-aware target so the active state matches the page
+                 students/parents actually land on (they never see /dashboard; it
+                 redirects). Avoids a dead/duplicate dashboard entry per role. --}}
+            @php
+                if ($sidebarUser && $sidebarUser->isStudent() && Route::has('student.dashboard')) {
+                    $dashHref = route('student.dashboard');
+                    $dashActive = request()->routeIs('student.dashboard');
+                } elseif ($sidebarUser && $sidebarUser->isParent() && Route::has('parent.dashboard')) {
+                    $dashHref = route('parent.dashboard');
+                    $dashActive = request()->routeIs('parent.dashboard');
+                } else {
+                    $dashHref = route('dashboard');
+                    $dashActive = request()->routeIs('dashboard');
+                }
+            @endphp
+            <li class="nav-item {{ $dashActive ? 'active' : '' }}"
                 data-label="@lang('shell.nav_dashboard')">
-                <a href="{{ route('dashboard') }}" data-label="@lang('shell.nav_dashboard')">
+                <a href="{{ $dashHref }}" data-label="@lang('shell.nav_dashboard')">
                     <x-svg-icon name="house" class="vc-ico" />
                     <span class="menu-title">@lang('shell.nav_dashboard')</span>
                 </a>
@@ -716,7 +736,7 @@ body.sidebar-mini .main-menu .navigation > li:hover > a::before { opacity: 1; }
                 <span class="gp-sec-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1H0V4z"/><path d="M0 6v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6H0zm5 4h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1zm0-2h3a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1z"/></svg>
                 </span>
-                <span class="gp-sec-label">@lang('shell.portal_my_schedule')</span>
+                <span class="gp-sec-label">@lang('shell.portal_teacher')</span>
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-teacher">
@@ -769,7 +789,6 @@ body.sidebar-mini .main-menu .navigation > li:hover > a::before { opacity: 1; }
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-student">
-                <li class="nav-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.dashboard') }}" data-label="@lang('shell.portal_dashboard')"><x-svg-icon name="house" class="vc-ico" /><span class="menu-title">@lang('shell.portal_dashboard')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.schedule') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.schedule') }}" data-label="@lang('shell.portal_my_schedule_link')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.portal_my_schedule_link')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.exams') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.exams') }}" data-label="@lang('shell.portal_exams')"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.portal_exams')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.grades') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.grades') }}" data-label="@lang('shell.portal_my_grades')"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.portal_my_grades')</span></a></li>
@@ -796,7 +815,6 @@ body.sidebar-mini .main-menu .navigation > li:hover > a::before { opacity: 1; }
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-parent">
-                <li class="nav-item {{ request()->routeIs('parent.dashboard') ? 'active' : '' }}" data-section="parent"><a href="{{ route('parent.dashboard') }}" data-label="@lang('shell.portal_dashboard')"><x-svg-icon name="house" class="vc-ico" /><span class="menu-title">@lang('shell.portal_dashboard')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('parent.contact-teacher') ? 'active' : '' }}" data-section="parent"><a href="{{ route('parent.contact-teacher') }}" data-label="@lang('shell.portal_contact_teacher')"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-title">@lang('shell.portal_contact_teacher')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}" data-label="@lang('shell.nav_my_appointments_booking')"><x-svg-icon name="calendar-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>

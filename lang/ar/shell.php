@@ -161,6 +161,7 @@ return [
     'portal_my_schedule' => 'جدولي',
     'portal_student' => 'بوابة الطالب',
     'portal_parent' => 'بوابة ولي الأمر',
+    'portal_teacher' => 'بوابة المعلم',
     'portal_tests_grades' => 'الاختبارات والدرجات',
     'portal_attendance' => 'الحضور والغياب',
     'portal_my_schedule_link' => 'جدولي',

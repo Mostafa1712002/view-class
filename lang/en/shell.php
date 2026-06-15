@@ -160,6 +160,7 @@ return [
     'portal_my_schedule' => 'My schedule',
     'portal_student' => 'Student portal',
     'portal_parent' => 'Parent portal',
+    'portal_teacher' => 'Teacher portal',
     'portal_tests_grades' => 'Tests & grades',
     'portal_attendance' => 'Attendance',
     'portal_my_schedule_link' => 'My schedule',
