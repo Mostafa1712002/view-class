@@ -41,7 +41,7 @@ class VirtualClassController extends Controller
     public function index(Request $request): View
     {
         $user     = auth()->user();
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->scopedSchoolId();
         $isAdmin  = $user->isSuperAdmin() || $user->isSchoolAdmin();
 
         $tab = in_array($request->get('tab'), ['today', 'recorded', 'old', 'all'], true)
@@ -336,7 +336,7 @@ class VirtualClassController extends Controller
     private function resolveOwned(int $id)
     {
         $user     = auth()->user();
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->scopedSchoolId();
 
         $vc = $this->repo->find($id, $schoolId);
         abort_if(! $vc, 404);

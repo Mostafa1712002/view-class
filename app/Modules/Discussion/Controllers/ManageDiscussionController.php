@@ -25,7 +25,7 @@ class ManageDiscussionController extends Controller
     public function index(Request $request): View
     {
         $filters = ['status' => $request->get('status')];
-        $rooms   = $this->repo->roomsForSchool($this->activeSchoolId(), $filters);
+        $rooms   = $this->repo->roomsForSchool($this->scopedSchoolId(), $filters);
 
         return view('discussion.manage.index', compact('rooms', 'filters'));
     }
@@ -262,6 +262,6 @@ class ManageDiscussionController extends Controller
         if ($user->isSuperAdmin()) {
             return;
         }
-        abort_if($this->activeSchoolId() !== null && $resourceSchoolId !== $this->activeSchoolId(), 403);
+        abort_if($this->activeSchoolId() === null || $resourceSchoolId !== $this->activeSchoolId(), 403);
     }
 }

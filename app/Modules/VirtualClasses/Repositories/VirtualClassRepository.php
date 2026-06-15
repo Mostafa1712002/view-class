@@ -14,7 +14,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
     public function forStaff(int $userId, ?int $schoolId, bool $roleIsAdmin, string $tab = 'all', int $perPage = 20): LengthAwarePaginator
     {
         $query = VirtualClass::query()
-            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->with(['teacher:id,name,name_ar', 'creator:id,name,name_ar', 'classRoom:id,name', 'subject:id,name']);
 
         if (! $roleIsAdmin) {
@@ -69,7 +69,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
             ->all();
 
         return VirtualClass::query()
-            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->whereIn('status', ['scheduled', 'live'])
             ->where(function ($q) {
                 $q->whereJsonContains('audience', 'all')
@@ -95,7 +95,7 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
             'classRoom:id,name',
             'subject:id,name',
         ])
-            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->find($id);
     }
 

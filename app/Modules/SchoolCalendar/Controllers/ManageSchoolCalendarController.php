@@ -29,7 +29,7 @@ class ManageSchoolCalendarController extends Controller
     public function index(): View
     {
         $this->authorizeCalendar('calendar.view');
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->scopedSchoolId();
         $upcoming = $this->repo->forRange(
             $schoolId,
             now()->toDateString(),
@@ -110,7 +110,7 @@ class ManageSchoolCalendarController extends Controller
     public function eventsJson(Request $request): JsonResponse
     {
         $this->authorizeCalendar('calendar.view');
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->scopedSchoolId();
         $from     = $request->get('start', now()->startOfMonth()->toDateString());
         $to       = $request->get('end', now()->endOfMonth()->toDateString());
 
@@ -160,7 +160,7 @@ class ManageSchoolCalendarController extends Controller
             default => [$anchor->copy()->startOfMonth(), $anchor->copy()->endOfMonth(), $anchor->translatedFormat('F Y')],
         };
 
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->scopedSchoolId();
         $events   = $this->repo->forRange($schoolId, $from->toDateString(), $to->toDateString());
 
         $schoolName = $schoolId
@@ -215,10 +215,12 @@ class ManageSchoolCalendarController extends Controller
     private function resolveOwned(int $id)
     {
         $event    = $this->repo->findById($id);
-        $schoolId = $this->activeSchoolId();
+        abort_if(! $event, 404);
 
-        if (! $event || $event->school_id !== $schoolId) {
-            abort(403, __('school_calendar.access_denied'));
+        $me = auth()->user();
+        if (! ($me?->isSuperAdmin() ?? false)) {
+            $schoolId = $this->scopedSchoolId();
+            abort_if($schoolId === null || $event->school_id !== $schoolId, 403, __('school_calendar.access_denied'));
         }
 
         return $event;

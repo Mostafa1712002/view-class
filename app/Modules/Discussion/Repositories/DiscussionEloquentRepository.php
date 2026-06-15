@@ -16,7 +16,7 @@ class DiscussionEloquentRepository implements DiscussionRepository
     public function roomsForSchool(?int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
         $query = DiscussionRoom::query()
-            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->with(['creator:id,name,name_ar']);
 
         if (! empty($filters['status'])) {
@@ -79,7 +79,7 @@ class DiscussionEloquentRepository implements DiscussionRepository
     {
         return DiscussionTopic::query()
             ->where('room_id', $roomId)
-            ->when($schoolId !== null, fn ($q) => $q->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId)))
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->when(! $includeHidden, fn ($q) => $q->where('is_hidden', false))
             ->with(['creator:id,name,name_ar'])
             ->orderByDesc('is_pinned')

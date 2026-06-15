@@ -24,6 +24,19 @@ trait HasSchoolScope
     }
 
     /**
+     * Active school id for data scoping, fail-closed: a null scope (see-all)
+     * is only permitted for super-admins. Any non-super-admin that resolves to
+     * a null school is denied rather than silently shown every tenant's data.
+     */
+    protected function scopedSchoolId(): ?int
+    {
+        $id = $this->activeSchoolId();
+        abort_if($id === null && ! (auth()->user()?->isSuperAdmin() ?? false), 403);
+
+        return $id;
+    }
+
+    /**
      * Drop null entries so columns with NOT NULL + default can fall back
      * to the legacy schema's default value.
      */
