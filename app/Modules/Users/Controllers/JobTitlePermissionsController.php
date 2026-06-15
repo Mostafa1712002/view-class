@@ -46,11 +46,11 @@ class JobTitlePermissionsController extends Controller
         'libraries'       => ['label' => 'المكتبات',           'actions' => ['view','create','edit','delete']],
         'evaluations'     => ['label' => 'التقييمات',          'actions' => ['view','create','edit','delete','approve','reject','export']],
         'job_performance' => ['label' => 'تقييم الأداء',       'actions' => ['view','create','edit','delete','export']],
-        'attendance'      => ['label' => 'الغياب',             'actions' => ['view','create','edit','delete','export']],
+        // NOTE: `attendance` is defined in the Sprint-10 block below (extended action set).
         'behavior'        => ['label' => 'السلوك',             'actions' => ['view','create','edit','delete','export']],
         'appointments'    => ['label' => 'المواعيد',           'actions' => ['view','create','edit','delete','approve']],
         'mail'            => ['label' => 'البريد الداخلي',     'actions' => ['view','create','delete','send_notifications']],
-        'support'         => ['label' => 'الدعم الفني',        'actions' => ['view','create','edit','delete']],
+        // NOTE: `support` is defined in the Sprint-10 block below (extended action set).
         'reports'         => ['label' => 'التقارير',           'actions' => ['view','export','print']],
         'settings'        => ['label' => 'الإعدادات',          'actions' => ['view','edit','manage_permissions']],
         'pdf_export'      => ['label' => 'PDF / التصدير',     'actions' => ['view','print']],
@@ -73,6 +73,19 @@ class JobTitlePermissionsController extends Controller
         'skills'          => ['label' => 'المهارات',             'actions' => ['view','create','edit','delete','import','export']],
         'weeks'           => ['label' => 'الأسابيع الدراسية',    'actions' => ['view','create','edit','delete']],
         'standards'       => ['label' => 'المعايير',             'actions' => ['view','create','edit','delete']],
+
+        // ── الدورة التشغيلية (Sprint 10, #260) — see .kiro/specs/trello-sprint10-foundation ──
+        // `attendance` (student) is EXTENDED on top of the legacy view/create/edit/delete/export.
+        // `create` kept for backward-compat (legacy permission_role grants exist) — pure EXTEND.
+        'attendance'         => ['label' => 'حضور الطلاب',          'actions' => ['view','create','record_present','record_absent','record_late','record_excuse','edit','delete','add_excuse','add_note','bulk_present','bulk_absent','bulk_late','notify_parent','view_reports','export','print']],
+        'teacher_attendance' => ['label' => 'حضور المعلمين',        'actions' => ['view','record_present','record_absent','record_late','record_excuse','record_period','edit','export','send_message']],
+        'qr'                 => ['label' => 'خدمات QR للحضور',      'actions' => ['view','create_card','print_card','export_cards','scan','view_log','close_day','group_create','group_edit','group_delete','link_students','link_devices']],
+        'certificates'       => ['label' => 'الشهادات',             'actions' => ['view','template_create','template_edit','template_delete','create','edit','delete','issue','upload_file','preview','send','copy_link']],
+        // `support` is EXTENDED on top of the legacy view/create/edit/delete.
+        // `edit` kept for backward-compat with the pre-Sprint-10 support group — pure EXTEND.
+        'support'            => ['label' => 'الدعم الفني',          'actions' => ['view','create','edit','reply','assign','change_status','close','delete','view_attachments']],
+        'admissions'         => ['label' => 'القبول والتسجيل',      'actions' => ['view','edit','delete','change_status','schedule','export','copy_link','copy_company_link','edit_school_settings','edit_settings','edit_info','convert_to_student']],
+        'educational_sites'  => ['label' => 'المواقع التعليمية',    'actions' => ['view','create','edit','delete','reorder','toggle_active']],
     ];
 
     private const SCOPE_LABELS = [
