@@ -67,6 +67,12 @@ class JobTitlePermissionsController extends Controller
         'sms'             => ['label' => 'الرسائل القصيرة SMS',   'actions' => ['view','send']],
         'messages'        => ['label' => 'خدمات الرسائل',         'actions' => ['send_excel','templates','reports','sender_name','credit']],
         'parents_contact' => ['label' => 'أولياء الأمور كجهة تواصل', 'actions' => ['view','manage']],
+
+        // ── طبقة التصنيفات التعليمية لإعادة بناء بنك الأسئلة (#248) — see .kiro/specs/qb-rebuild-foundation ──
+        'compounds'       => ['label' => 'المجمعات',              'actions' => ['view','create','edit','delete']],
+        'skills'          => ['label' => 'المهارات',             'actions' => ['view','create','edit','delete','import','export']],
+        'weeks'           => ['label' => 'الأسابيع الدراسية',    'actions' => ['view','create','edit','delete']],
+        'standards'       => ['label' => 'المعايير',             'actions' => ['view','create','edit','delete']],
     ];
 
     private const SCOPE_LABELS = [

@@ -17,6 +17,12 @@ use App\Modules\Scope\Repositories\Contracts\ScopeRepository;
 use App\Modules\Scope\Repositories\EloquentScopeRepository;
 use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
 use App\Modules\QuestionBanks\Repositories\EloquentQuestionBankRepository;
+use App\Modules\QuestionBankCore\Repositories\Contracts\CompoundRepository;
+use App\Modules\QuestionBankCore\Repositories\Contracts\SkillRepository;
+use App\Modules\QuestionBankCore\Repositories\Contracts\StandardRepository;
+use App\Modules\QuestionBankCore\Repositories\EloquentCompoundRepository;
+use App\Modules\QuestionBankCore\Repositories\EloquentSkillRepository;
+use App\Modules\QuestionBankCore\Repositories\EloquentStandardRepository;
 use App\Modules\GradeReports\Repositories\Contracts\GradeReportRepository;
 use App\Modules\GradeReports\Repositories\EloquentGradeReportRepository;
 use App\Modules\Lessons\Repositories\Contracts\LessonRepository;
@@ -92,6 +98,10 @@ class RepositoryServiceProvider extends ServiceProvider
         SubjectRepository::class => EloquentSubjectRepository::class,
         BookRepository::class => EloquentBookRepository::class,
         QuestionBankRepository::class => EloquentQuestionBankRepository::class,
+        // QB rebuild taxonomy (#248) — see .kiro/specs/qb-rebuild-foundation
+        CompoundRepository::class => EloquentCompoundRepository::class,
+        SkillRepository::class => EloquentSkillRepository::class,
+        StandardRepository::class => EloquentStandardRepository::class,
         GradeReportRepository::class => EloquentGradeReportRepository::class,
         LessonRepository::class => EloquentLessonRepository::class,
         LibraryRepository::class => EloquentLibraryRepository::class,
