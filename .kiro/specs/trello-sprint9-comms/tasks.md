@@ -10,11 +10,11 @@ Order minimizes shared-file conflicts (sidebar/header/template serialized).
 - [x] A4 #230 السايد بار — student/parent/teacher sidebar broken + link order  (fpk7TVBz)
 
 ## Batch B — design reconcile (shared files: sidebar/header/template/design-system — SERIAL)
-- [ ] B1 #220 الأيقونات — replace ALL icons → Bootstrap Icons (page-content too, not just nav)  (bkSpK1UQ)
-- [ ] B2 #221 القائمة الجانبية والهيدر — redesign sidebar+header all roles  (soc4avfb)
-- [ ] B3 #219 تيمبلت موحد — unified template + visual identity all roles  (VOeHxydN)
+- [x] B1 #220 الأيقونات — replace ALL icons → Bootstrap Icons (page-content too, not just nav)  (bkSpK1UQ)
+- [x] B2 #221 القائمة الجانبية والهيدر — redesign sidebar+header all roles  (soc4avfb)
+- [x] B3 #219 تيمبلت موحد — unified template + visual identity all roles  (VOeHxydN)
 - [ ] B4 #170 هيكل حساب الطالب — student account shell/header/sidebar/dashboard  (nKHlmgKv)
-- [ ] B5 #162 بطاقات المستخدمين — user cards fixes/gaps  (xTKbhPVi)
+- [x] B5 #162 بطاقات المستخدمين — user cards fixes/gaps  (xTKbhPVi)
 - [ ] B6 #173 المكتبة العامة... (student account: libraries, files, virtual labs, appts, SpecialEd, policies)  (DLm2PbYp)
 
 ## Batch C — Sprint 9 communications (15 cards; new modules can build parallel, deploy serial)
