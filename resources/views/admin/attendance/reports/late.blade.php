@@ -14,6 +14,7 @@
         <div class="col-md-2 mb-2"><label>نوع التأخير</label><select name="late_type" class="form-control"><option value="">الكل</option><option value="late_day" {{ request('late_type')==='late_day'?'selected':'' }}>تأخير يوم</option><option value="late_period" {{ request('late_type')==='late_period'?'selected':'' }}>تأخير حصة</option></select></div>
         <div class="col-md-2 mb-2"><button class="btn btn-primary"><i class="la la-eye"></i> عرض</button></div>
     </form></div></div>
+    @if(!$rows->isEmpty()) @include('admin.attendance.reports._export-buttons', ['report' => 'late']) @endif
     <div class="card"><div class="card-body table-responsive">
         @if($rows->isEmpty())<div class="text-center text-muted py-5"><i class="la la-hourglass-half la-3x d-block mb-2"></i> اختر فترة لعرض البيانات.</div>
         @else

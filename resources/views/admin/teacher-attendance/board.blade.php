@@ -34,6 +34,16 @@
         <div class="col-md-1 mb-2"><button class="btn btn-primary"><i class="la la-search"></i></button></div>
     </form></div></div>
 
+    @if($rows->isNotEmpty() && auth()->user()?->canDo('pdf_export'))
+    @php $tparams = array_merge(request()->except(['page','format']), ['date' => $date] + ($mode==='period' ? ['period' => $period] : [])); @endphp
+    <div class="btn-group btn-group-sm mb-2" role="group" aria-label="تصدير حضور المعلمين">
+        <a class="btn btn-outline-danger" target="_blank" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'pdf'])) }}"><i class="la la-file-pdf-o"></i> PDF</a>
+        <a class="btn btn-outline-success" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'excel'])) }}"><i class="la la-file-excel-o"></i> Excel</a>
+        <a class="btn btn-outline-secondary" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'csv'])) }}"><i class="la la-file-text-o"></i> CSV</a>
+        <button type="button" class="btn btn-outline-info" onclick="window.print()"><i class="la la-print"></i> طباعة</button>
+    </div>
+    @endif
+
     <form method="POST" action="{{ route('admin.teacher-attendance.store') }}">
         @csrf
         <input type="hidden" name="date" value="{{ $date }}">

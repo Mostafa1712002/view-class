@@ -14,6 +14,7 @@
         <div class="col-md-3 mb-2"><label>الحالة</label><select name="status" class="form-control"><option value="">— الكل —</option>@foreach($labels as $k=>$v)<option value="{{ $k }}" {{ request('status')===$k?'selected':'' }}>{{ $v }}</option>@endforeach</select></div>
         <div class="col-md-3 mb-2"><button class="btn btn-primary"><i class="la la-eye"></i> عرض التقرير</button></div>
     </form></div></div>
+    @if(!$rows->isEmpty()) @include('admin.attendance.reports._export-buttons', ['report' => 'status']) @endif
     <div class="card"><div class="card-body table-responsive">
         @if($rows->isEmpty())<div class="text-center text-muted py-5"><i class="la la-file-alt la-3x d-block mb-2"></i> اختر فلتراً لعرض البيانات.</div>
         @else

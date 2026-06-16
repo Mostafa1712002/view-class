@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Attendance\Controllers\FollowUpController;
+use App\Modules\Attendance\Controllers\ReportExportController;
 use App\Modules\Attendance\Controllers\ReportsController;
 use App\Modules\Attendance\Controllers\StudentAttendanceController;
 use Illuminate\Support\Facades\Route;
@@ -57,4 +58,8 @@ Route::middleware(['auth', 'role:super-admin,school-admin', 'permission:attendan
         Route::get('late', [ReportsController::class, 'late'])->name('late');
         Route::get('aggregate', [ReportsController::class, 'aggregate'])->name('aggregate');
         Route::get('behavior', [ReportsController::class, 'behavior'])->name('behavior');
+
+        // #273 — export / print / PDF (pdf|excel|csv) for each report.
+        // Gated by pdf_export inside the controller (fail-closed for non-admins).
+        Route::get('export/{report}', [ReportExportController::class, 'export'])->name('export');
     });

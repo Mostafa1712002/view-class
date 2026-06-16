@@ -54,12 +54,14 @@
                             <option value="whatsapp">واتساب</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>قالب الرسالة</label>
-                        <select class="form-control" id="tpl">
-                            <option value="">— مخصص —</option>
-                            <option value="نود إعلامكم بغياب ابنكم/ابنتكم اليوم.">إشعار غياب</option>
-                            <option value="نود إعلامكم بتأخر ابنكم/ابنتكم اليوم.">إشعار تأخير</option>
+                    <div class="form-group"><label>قالب الرسالة (نماذج الرسائل)</label>
+                        <select class="form-control" id="tpl" name="template_id">
+                            <option value="" data-body="">— مخصص —</option>
+                            @foreach(($templates ?? collect()) as $t)
+                                <option value="{{ $t->id }}" data-body="{{ e($t->body) }}">{{ $t->title }}</option>
+                            @endforeach
                         </select>
+                        <small class="text-muted">عند اختيار قالب يُعتمد نصه النهائي بعد استبدال المتغيرات.</small>
                     </div>
                     <div class="form-group"><label>نص الرسالة (معاينة)</label><textarea name="message" id="msg" rows="4" class="form-control" required></textarea></div>
                     <button type="submit" class="btn btn-primary btn-block"><i class="la la-paper-plane"></i> إرسال</button>
@@ -78,7 +80,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var ca = document.getElementById('checkAll');
     if (ca) ca.addEventListener('change', function () { document.querySelectorAll('.rowCheck').forEach(function (c){c.checked=ca.checked;}); });
     var tpl = document.getElementById('tpl');
-    if (tpl) tpl.addEventListener('change', function () { if (tpl.value) document.getElementById('msg').value = tpl.value; });
+    if (tpl) tpl.addEventListener('change', function () {
+        var body = tpl.options[tpl.selectedIndex].getAttribute('data-body') || '';
+        if (body) document.getElementById('msg').value = body;
+    });
 });
 </script>
 @endpush

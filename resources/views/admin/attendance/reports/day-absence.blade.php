@@ -13,6 +13,7 @@
         <div class="col-md-3 mb-2"><label>الفصل</label><select name="class_id" class="form-control"><option value="">— الكل —</option>@foreach($classes as $c)<option value="{{ $c->id }}" {{ (string)request('class_id')===(string)$c->id?'selected':'' }}>{{ $c->name }}</option>@endforeach</select></div>
         <div class="col-md-3 mb-2"><button class="btn btn-primary"><i class="la la-eye"></i> عرض التقرير</button></div>
     </form></div></div>
+    @if(!$rows->isEmpty()) @include('admin.attendance.reports._export-buttons', ['report' => 'day-absence']) @endif
     <div class="card"><div class="card-body table-responsive">
         @if($rows->isEmpty())<div class="text-center text-muted py-5"><i class="la la-calendar-times la-3x d-block mb-2"></i> اختر فترة لعرض البيانات.</div>
         @else

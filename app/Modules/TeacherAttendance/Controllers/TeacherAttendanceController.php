@@ -9,6 +9,8 @@ use App\Models\Notification;
 use App\Models\Subject;
 use App\Models\User;
 use App\Models\ActivityLog;
+use App\Models\School;
+use App\Modules\Attendance\Controllers\Concerns\ExportsReports;
 use App\Modules\TeacherAttendance\Models\TeacherAttendance;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,6 +26,7 @@ use Illuminate\View\View;
 class TeacherAttendanceController extends Controller
 {
     use HasSchoolScope;
+    use ExportsReports;
 
     /** Daily teacher attendance (tab 1). */
     public function daily(Request $request): View
@@ -37,6 +40,62 @@ class TeacherAttendanceController extends Controller
         $period = $request->filled('period') ? (int) $request->period : null;
 
         return $this->board($request, 'period', $period);
+    }
+
+    /**
+     * #273 — export teacher-attendance for a date (pdf|excel|csv), school-scoped
+     * + filtered the same way the board renders. Gated by pdf_export.
+     */
+    public function export(Request $request)
+    {
+        abort_unless(auth()->user()?->canDo('pdf_export'), 403);
+
+        $schoolId = $this->scopedSchoolId();
+        $date     = $request->date ?: now()->format('Y-m-d');
+        $period   = $request->filled('period') ? (int) $request->period : null;
+        $format   = in_array($request->get('format'), ['pdf', 'excel', 'csv'], true)
+            ? $request->get('format') : 'pdf';
+
+        $records = TeacherAttendance::query()
+            ->with('teacher:id,name,national_id')
+            ->whereDate('date', $date)
+            ->when($schoolId !== null, fn (Builder $q) => $q->where('school_id', $schoolId))
+            ->when($period !== null, fn ($q) => $q->where('period', $period), fn ($q) => $q->whereNull('period'))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->orderByDesc('date')
+            ->limit(5000)
+            ->get();
+
+        $labels  = ['present' => 'حاضر', 'absent' => 'غائب', 'late' => 'متأخر', 'excused' => 'بعذر'];
+        $headers = ['#', 'المعلم', 'رقم الهوية', 'التاريخ', 'الحالة', 'الحصة', 'ملاحظات'];
+        $rows = $records->values()->map(fn ($r, $i) => [
+            $i + 1,
+            optional($r->teacher)->name ?? '—',
+            optional($r->teacher)->national_id ?? '—',
+            optional($r->date)->format('Y-m-d') ?? $date,
+            $labels[$r->status] ?? $r->status,
+            $r->period ?? '—',
+            $r->notes ?? '',
+        ])->all();
+
+        $filename = 'teacher-attendance-' . $date;
+
+        if ($format === 'csv') {
+            return $this->exportCsv($headers, $rows, $filename . '.csv');
+        }
+        if ($format === 'excel') {
+            return $this->exportExcel($headers, $rows, $filename . '.xlsx');
+        }
+
+        $school = $schoolId ? School::find($schoolId) : null;
+
+        return $this->exportPdf('admin.attendance.reports.pdf.table', [
+            'pdf_title'  => 'تقرير حضور المعلمين',
+            'pdf_school' => $school?->name ?? 'كل المدارس',
+            'pdf_date'   => 'التاريخ: ' . $date . ' — ' . now()->format('Y-m-d H:i'),
+            'headers'    => $headers,
+            'rows'       => $rows,
+        ], $filename . '.pdf');
     }
 
     private function board(Request $request, string $mode, ?int $period): View

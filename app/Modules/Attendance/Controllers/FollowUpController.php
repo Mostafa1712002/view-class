@@ -5,8 +5,9 @@ namespace App\Modules\Attendance\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
-use App\Models\Notification;
+use App\Modules\Attendance\Actions\SendAttendanceMessageAction;
 use App\Modules\Attendance\Services\AttendanceQueryService;
+use App\Modules\SmsServices\Models\SmsTemplate;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -80,19 +81,21 @@ class FollowUpController extends Controller
     }
 
     /**
-     * Send a follow-up message to the parent (in-app notification — the real
-     * SMS/WhatsApp send reuses the existing channel services; this records the
-     * canonical in-app notification + the contact flag).
+     * Send a follow-up message to the parent. #271 — sms/whatsapp now route
+     * through the real messaging layer (SmsServices / Whatsapp) via
+     * SendAttendanceMessageAction; in_app records the canonical Notification.
+     * A chosen SMS template (template_id) supplies the body when picked.
      */
-    public function notify(Request $request, Attendance $attendance): RedirectResponse
+    public function notify(Request $request, Attendance $attendance, SendAttendanceMessageAction $sender): RedirectResponse
     {
         $schoolId = $this->scopedSchoolId();
         $student  = $attendance->student;
         abort_if($schoolId !== null && (int) optional($student)->school_id !== $schoolId, 403, 'خارج نطاق صلاحيتك.');
 
         $request->validate([
-            'channel' => ['required', 'in:in_app,sms,whatsapp'],
-            'message' => ['required', 'string', 'min:3', 'max:1000'],
+            'channel'     => ['required', 'in:in_app,sms,whatsapp'],
+            'message'     => ['required', 'string', 'min:3', 'max:1000'],
+            'template_id' => ['nullable', 'integer'],
         ]);
 
         if (! $student) {
@@ -109,24 +112,24 @@ class FollowUpController extends Controller
             }
         }
 
-        $sent = 0;
-        foreach ($parents as $parent) {
-            Notification::create([
-                'user_id'     => $parent->id,
-                'type'        => 'attendance_alert',
-                'title'       => 'إشعار حضور وغياب',
-                'body'        => $request->message,
-                'icon'        => 'bi-bell',
-                'color'       => 'warning',
-                'data'        => ['attendance_id' => $attendance->id, 'channel' => $request->channel],
-            ]);
-            $sent++;
-        }
+        $statusMap = ['present' => 'حاضر', 'absent' => 'غائب', 'late' => 'متأخر', 'excused' => 'بعذر'];
+        $result = $sender->execute(
+            schoolId: (int) ($student->school_id ?? $schoolId ?? 0),
+            students: [$student],
+            channel: $request->channel,
+            templateId: $request->filled('template_id') ? (int) $request->template_id : null,
+            bodyTemplate: $request->message,
+            senderUserId: auth()->id(),
+            extraVars: [
+                'date'             => optional($attendance->date)->format('Y-m-d') ?? now()->format('Y-m-d'),
+                'attendance_state' => $statusMap[$attendance->status] ?? $attendance->status,
+            ],
+        );
 
         $attendance->update(['notified_parent' => true]);
         ActivityLog::log('attendance.notify', "إرسال رسالة غياب لولي الأمر ({$request->channel}) — الطالب {$student->name}", $attendance);
 
-        return back()->with('success', $sent > 0 ? "تم إرسال الرسالة إلى {$sent} ولي أمر." : 'لا يوجد أولياء أمور مرتبطون.');
+        return back()->with('success', $this->resultMessage($result, $request->channel));
     }
 
     /** "تقارير المستخدمين" — multi-select message composer screen. */
@@ -140,13 +143,20 @@ class FollowUpController extends Controller
             $students = $this->query->studentsForClass((int) $request->class_id, $schoolId);
         }
 
-        return view('admin.attendance.follow-up.user-reports', compact('classes', 'students') + [
+        // #271 — message templates picker (school-scoped, active only).
+        $templates = SmsTemplate::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->where('is_active', true)
+            ->orderBy('title')
+            ->get(['id', 'title', 'body']);
+
+        return view('admin.attendance.follow-up.user-reports', compact('classes', 'students', 'templates') + [
             'selectedClass' => $request->class_id,
         ]);
     }
 
-    /** Send composed message to selected students' parents (records result). */
-    public function sendUserReports(Request $request): RedirectResponse
+    /** Send composed message to selected students' parents (#271 — real layer). */
+    public function sendUserReports(Request $request, SendAttendanceMessageAction $sender): RedirectResponse
     {
         $schoolId = $this->scopedSchoolId();
 
@@ -155,6 +165,7 @@ class FollowUpController extends Controller
             'student_ids.*'=> ['integer', 'exists:users,id'],
             'channel'      => ['required', 'in:in_app,sms,whatsapp'],
             'message'      => ['required', 'string', 'min:3', 'max:1000'],
+            'template_id'  => ['nullable', 'integer'],
         ]);
 
         $students = \App\Models\User::whereIn('id', $data['student_ids'])
@@ -162,32 +173,47 @@ class FollowUpController extends Controller
             ->with('parents')
             ->get();
 
-        $sent = 0; $skipped = 0;
-        foreach ($students as $student) {
-            $parents = $student->parents()->wherePivot('can_receive_notifications', true)->get();
-            if ($data['channel'] !== 'in_app' && ! $parents->contains(fn ($p) => ! empty($p->phone))) {
-                $skipped++;
-                continue;
-            }
-            foreach ($parents as $parent) {
-                Notification::create([
-                    'user_id' => $parent->id,
-                    'type'    => 'attendance_alert',
-                    'title'   => 'رسالة من المدرسة',
-                    'body'    => $data['message'],
-                    'icon'    => 'bi-envelope',
-                    'color'   => 'info',
-                    'data'    => ['channel' => $data['channel'], 'student_id' => $student->id],
-                ]);
-            }
-            $sent++;
+        if ($students->isEmpty()) {
+            return back()->with('error', 'لا يوجد طلاب ضمن نطاق صلاحيتك.');
         }
 
-        ActivityLog::log('attendance.user_reports', "إرسال تقرير للمستخدمين ({$data['channel']}) — {$sent} طالب");
+        // group by school so each batch is correctly scoped (super-admin null).
+        $result = ['students' => 0, 'parents' => 0, 'queued' => 0, 'sent' => 0, 'failed' => 0, 'skipped' => 0];
+        foreach ($students->groupBy('school_id') as $sid => $group) {
+            $r = $sender->execute(
+                schoolId: (int) $sid,
+                students: $group,
+                channel: $data['channel'],
+                templateId: $data['template_id'] ?? null,
+                bodyTemplate: $data['message'],
+                senderUserId: auth()->id(),
+            );
+            foreach ($result as $k => $_) {
+                $result[$k] += $r[$k];
+            }
+        }
 
-        $msg = "تم الإرسال إلى أولياء أمور {$sent} طالب.";
-        if ($skipped) $msg .= " تم تخطي {$skipped} لعدم وجود رقم جوال.";
+        ActivityLog::log('attendance.user_reports', "إرسال تقرير للمستخدمين ({$data['channel']}) — {$result['students']} طالب");
 
-        return back()->with('success', $msg);
+        return back()->with('success', $this->resultMessage($result, $data['channel']));
+    }
+
+    /** Build a human Arabic summary of a send result. */
+    private function resultMessage(array $r, string $channel): string
+    {
+        if ($channel === 'in_app') {
+            return "تم إرسال الرسالة إلى {$r['parents']} ولي أمر داخل المنصة.";
+        }
+
+        $parts = [];
+        if ($r['sent'])    $parts[] = "{$r['sent']} مُرسلة";
+        if ($r['queued'])  $parts[] = "{$r['queued']} بانتظار الإرسال";
+        if ($r['failed'])  $parts[] = "{$r['failed']} فشلت";
+        if ($r['skipped']) $parts[] = "{$r['skipped']} متخطّاة";
+
+        $label = $channel === 'sms' ? 'SMS' : 'واتساب';
+        $summary = $parts ? implode(' · ', $parts) : 'لا يوجد مستلمون';
+
+        return "رسائل {$label}: {$summary}.";
     }
 }

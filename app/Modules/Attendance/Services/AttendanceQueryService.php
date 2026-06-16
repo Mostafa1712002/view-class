@@ -140,4 +140,57 @@ class AttendanceQueryService
 
         return (int) optional($class->section)->school_id === $schoolId;
     }
+
+    /**
+     * Scope-aware base attendance query (school via class->section). A null
+     * $schoolId = see-all (super-admin only; callers fail-close others).
+     */
+    public function scopedAttendance(?int $schoolId): Builder
+    {
+        return Attendance::query()
+            ->when($schoolId !== null, fn (Builder $q) => $q->whereHas(
+                'classRoom.section',
+                fn (Builder $s) => $s->where('school_id', $schoolId)
+            ));
+    }
+
+    /**
+     * Build the exact filtered attendance query a report screen renders, so the
+     * matching export honours the same filters + scope (Trello #273). Mirrors
+     * ReportsController's per-report when() chains.
+     *
+     * @param  array<string,mixed>  $f  request filters
+     */
+    public function reportQuery(string $report, ?int $schoolId, array $f): Builder
+    {
+        $q = $this->scopedAttendance($schoolId)->with(['student', 'classRoom', 'subject']);
+
+        $applyCommon = function (Builder $q) use ($f) {
+            return $q
+                ->when(! empty($f['date']), fn ($q) => $q->whereDate('date', $f['date']))
+                ->when(! empty($f['from']), fn ($q) => $q->whereDate('date', '>=', $f['from']))
+                ->when(! empty($f['to']), fn ($q) => $q->whereDate('date', '<=', $f['to']))
+                ->when(! empty($f['class_id']), fn ($q) => $q->where('class_id', (int) $f['class_id']))
+                ->when(! empty($f['subject_id']), fn ($q) => $q->where('subject_id', (int) $f['subject_id']));
+        };
+
+        switch ($report) {
+            case 'status':
+                $q->when(! empty($f['status']), fn ($q) => $q->where('status', $f['status']));
+                break;
+            case 'day-absence':
+                $q->whereNull('period')->where('status', 'absent');
+                break;
+            case 'period-absence':
+                $q->whereNotNull('period')->where('status', 'absent');
+                break;
+            case 'late':
+                $q->where('status', 'late')
+                    ->when(($f['late_type'] ?? null) === 'late_day', fn ($q) => $q->whereNull('period'))
+                    ->when(($f['late_type'] ?? null) === 'late_period', fn ($q) => $q->whereNotNull('period'));
+                break;
+        }
+
+        return $applyCommon($q)->orderByDesc('date');
+    }
 }

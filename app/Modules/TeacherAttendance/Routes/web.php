@@ -16,6 +16,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
             ->middleware('permission:teacher_attendance.view')->name('daily');
         Route::get('period', [TeacherAttendanceController::class, 'period'])
             ->middleware('permission:teacher_attendance.view')->name('period');
+        // #273 — export teacher attendance (pdf|excel|csv); gated by pdf_export in the controller.
+        Route::get('export', [TeacherAttendanceController::class, 'export'])
+            ->middleware('permission:teacher_attendance.view')->name('export');
         Route::post('store', [TeacherAttendanceController::class, 'store'])
             ->middleware('permission:teacher_attendance.record_present')->name('store');
         Route::post('message/{teacher}', [TeacherAttendanceController::class, 'message'])

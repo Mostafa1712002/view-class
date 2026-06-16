@@ -14,6 +14,7 @@
         <div class="col-md-3 mb-2"><label>اسم الطالب</label><input type="text" name="name" value="{{ request('name') }}" class="form-control"></div>
         <div class="col-md-3 mb-2"><button class="btn btn-primary"><i class="la la-eye"></i> عرض التقرير</button></div>
     </form></div></div>
+    @if(!$rows->isEmpty()) @include('admin.attendance.reports._export-buttons', ['report' => 'behavior']) @endif
     <div class="card"><div class="card-body table-responsive">
         @if($rows->isEmpty())<div class="text-center text-muted py-5"><i class="la la-star la-3x d-block mb-2"></i> اختر فلتراً لعرض سجلات السلوك.</div>
         @else
