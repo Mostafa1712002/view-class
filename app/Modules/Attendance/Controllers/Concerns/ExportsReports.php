@@ -108,10 +108,18 @@ trait ExportsReports
      */
     protected function exportCsv(array $headers, iterable $rows, string $filename): Response
     {
+        // Neutralise CSV formula injection: prefix cells starting with a formula trigger.
+        $cell = function ($c): string {
+            $s = (string) $c;
+            if ($s !== '' && in_array($s[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                $s = "'" . $s;
+            }
+            return '"' . str_replace('"', '""', $s) . '"';
+        };
         $out = "\xEF\xBB\xBF";
-        $out .= implode(',', array_map(fn ($h) => '"' . str_replace('"', '""', $h) . '"', $headers)) . "\n";
+        $out .= implode(',', array_map($cell, $headers)) . "\n";
         foreach ($rows as $row) {
-            $out .= implode(',', array_map(fn ($c) => '"' . str_replace('"', '""', (string) $c) . '"', array_values($row))) . "\n";
+            $out .= implode(',', array_map($cell, array_values($row))) . "\n";
         }
 
         return response($out, 200, [
