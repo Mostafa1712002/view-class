@@ -59,7 +59,7 @@
                                     <a href="{{ asset('storage/' . $cert->file_path) }}"
                                        target="_blank"
                                        class="btn btn-sm btn-secondary">
-                                        <i class="la la-download"></i> @lang('certificates.actions.download')
+                                        <x-svg-icon name="download" /> @lang('certificates.actions.download')
                                     </a>
                                 @else
                                     <span class="text-muted">—</span>

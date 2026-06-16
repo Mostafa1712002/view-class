@@ -94,7 +94,7 @@
                 <div class="mb-1 d-flex flex-wrap gap-1" id="ct-vars">
                     @foreach(\App\Models\CertificateTemplate::PLACEHOLDERS as $ph)
                         <button type="button" class="btn btn-sm btn-outline-primary mr-1 mb-1" data-token="{{ '{' . $ph . '}' }}">
-                            <i class="la la-plus"></i> @lang('certificates.tpl.placeholders.' . $ph)
+                            <x-svg-icon name="plus-lg" /> @lang('certificates.tpl.placeholders.' . $ph)
                         </button>
                     @endforeach
                 </div>
@@ -107,8 +107,8 @@
         </div>
 
         <div class="mt-2 d-flex gap-1">
-            <button type="submit" class="btn btn-primary"><i class="la la-save"></i> @lang('certificates.actions.save')</button>
-            <a href="{{ route('admin.certificate-templates.index') }}" class="btn btn-secondary ml-1"><i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> @lang('certificates.tpl.back')</a>
+            <button type="submit" class="btn btn-primary"><x-svg-icon name="save" /> @lang('certificates.actions.save')</button>
+            <a href="{{ route('admin.certificate-templates.index') }}" class="btn btn-secondary ml-1"><x-svg-icon :name="$isRtl ? 'arrow-right' : 'arrow-left'" /> @lang('certificates.tpl.back')</a>
         </div>
     </form>
 </div></div></div>

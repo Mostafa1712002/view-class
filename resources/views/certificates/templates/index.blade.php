@@ -21,10 +21,10 @@
     </div>
     <div class="content-header-right col-md-4 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} align-items-center">
         <a href="{{ route('admin.certificates.index') }}" class="btn btn-secondary mr-1">
-            <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> @lang('certificates.tpl.back')
+            <x-svg-icon :name="$isRtl ? 'arrow-right' : 'arrow-left'" /> @lang('certificates.tpl.back')
         </a>
         <a href="{{ route('admin.certificate-templates.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('certificates.tpl.add')
+            <x-svg-icon name="plus-lg" /> @lang('certificates.tpl.add')
         </a>
     </div>
 </div>
@@ -53,8 +53,8 @@
                 <input type="text" name="q" class="form-control form-control-sm" value="{{ $filters['q'] ?? '' }}">
             </div>
             <div class="col-md-4 col-sm-12 mb-1 d-flex gap-1">
-                <button type="submit" class="btn btn-sm btn-primary"><i class="la la-search"></i> @lang('certificates.filter_apply')</button>
-                <a href="{{ route('admin.certificate-templates.index') }}" class="btn btn-sm btn-secondary ml-1"><i class="la la-redo"></i> @lang('certificates.filter_reset')</a>
+                <button type="submit" class="btn btn-sm btn-primary"><x-svg-icon name="search" /> @lang('certificates.filter_apply')</button>
+                <a href="{{ route('admin.certificate-templates.index') }}" class="btn btn-sm btn-secondary ml-1"><x-svg-icon name="arrow-clockwise" /> @lang('certificates.filter_reset')</a>
             </div>
         </form>
     </div></div>
@@ -93,13 +93,13 @@
                             <td>
                                 <div class="d-flex flex-wrap gap-1">
                                     <a href="{{ route('admin.certificate-templates.edit', $tpl->id) }}" class="btn btn-sm btn-info">
-                                        <i class="la la-edit"></i> @lang('certificates.actions.edit')
+                                        <x-svg-icon name="pencil-square" /> @lang('certificates.actions.edit')
                                     </a>
                                     <form method="POST" action="{{ route('admin.certificate-templates.destroy', $tpl->id) }}" id="tpl-del-{{ $tpl->id }}" style="display:inline">
                                         @csrf @method('DELETE')
                                         <button type="button" class="btn btn-sm btn-danger"
                                             onclick="vcConfirm({title: @json(__('certificates.confirm_delete')), icon:'error'}).then(function(r){ if(r.isConfirmed) document.getElementById('tpl-del-{{ $tpl->id }}').submit(); })">
-                                            <i class="la la-trash"></i> @lang('certificates.actions.delete')
+                                            <x-svg-icon name="trash" /> @lang('certificates.actions.delete')
                                         </button>
                                     </form>
                                 </div>

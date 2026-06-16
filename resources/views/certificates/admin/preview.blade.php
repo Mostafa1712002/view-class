@@ -38,7 +38,7 @@
                     <input type="text" id="cert-link" class="form-control" value="{{ $shareUrl }}" readonly>
                     <div class="input-group-append">
                         <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('cert-link').value)">
-                            <i class="la la-copy"></i> @lang('certificates.preview_page.copy')
+                            <x-svg-icon name="files" /> @lang('certificates.preview_page.copy')
                         </button>
                     </div>
                 </div>
@@ -46,10 +46,10 @@
 
             <div class="mt-2 d-flex gap-1">
                 <a href="{{ route('admin.certificates.pdf', $certificate->id) }}" target="_blank" class="btn btn-primary">
-                    <i class="la la-file-pdf"></i> @lang('certificates.preview_page.view')
+                    <x-svg-icon name="file-earmark-pdf" /> @lang('certificates.preview_page.view')
                 </a>
                 <a href="{{ route('admin.certificates.send', $certificate->id) }}" class="btn btn-success ml-1">
-                    <i class="la la-paper-plane"></i> @lang('certificates.preview_page.send')
+                    <x-svg-icon name="send" /> @lang('certificates.preview_page.send')
                 </a>
             </div>
         </div></div></div>

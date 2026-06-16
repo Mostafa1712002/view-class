@@ -142,10 +142,10 @@
 
                 <div class="mt-2 d-flex gap-1">
                     <button type="submit" class="btn btn-primary">
-                        <i class="la la-save"></i> @lang('certificates.actions.save')
+                        <x-svg-icon name="save" /> @lang('certificates.actions.save')
                     </button>
                     <a href="{{ route('admin.certificates.index') }}" class="btn btn-secondary ml-1">
-                        <i class="la la-arrow-left"></i> @lang('certificates.actions.cancel')
+                        <x-svg-icon name="arrow-left" /> @lang('certificates.actions.cancel')
                     </a>
                 </div>
             </form>

@@ -12,11 +12,11 @@
         <div class="col-md-3 mb-2"><label>التاريخ</label><input type="date" name="date" value="{{ request('date') }}" class="form-control"></div>
         <div class="col-md-3 mb-2"><label>الفصل</label><select name="class_id" class="form-control"><option value="">— الكل —</option>@foreach($classes as $c)<option value="{{ $c->id }}" {{ (string)request('class_id')===(string)$c->id?'selected':'' }}>{{ $c->name }}</option>@endforeach</select></div>
         <div class="col-md-3 mb-2"><label>الحالة</label><select name="status" class="form-control"><option value="">— الكل —</option>@foreach($labels as $k=>$v)<option value="{{ $k }}" {{ request('status')===$k?'selected':'' }}>{{ $v }}</option>@endforeach</select></div>
-        <div class="col-md-3 mb-2"><button class="btn btn-primary"><i class="la la-eye"></i> عرض التقرير</button></div>
+        <div class="col-md-3 mb-2"><button class="btn btn-primary"><x-svg-icon name="eye" /> عرض التقرير</button></div>
     </form></div></div>
     @if(!$rows->isEmpty()) @include('admin.attendance.reports._export-buttons', ['report' => 'status']) @endif
     <div class="card"><div class="card-body table-responsive">
-        @if($rows->isEmpty())<div class="text-center text-muted py-5"><i class="la la-file-alt la-3x d-block mb-2"></i> اختر فلتراً لعرض البيانات.</div>
+        @if($rows->isEmpty())<div class="ds-empty"><div class="ds-empty-icon"><x-svg-icon name="file-earmark-text" :size="32" /></div><div class="ds-empty-title">لا توجد بيانات</div><div class="ds-empty-desc">اختر فلتراً لعرض البيانات.</div></div>
         @else
         <table class="table table-hover align-middle"><thead><tr><th>الطالب</th><th>رقم الهوية</th><th>الفصل</th><th>الحالة</th><th>وقت الحضور</th><th>التاريخ</th><th>الملاحظات</th></tr></thead>
         <tbody>@foreach($rows as $r)<tr>

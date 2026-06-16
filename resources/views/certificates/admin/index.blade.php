@@ -22,13 +22,13 @@
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-6 col-12 d-flex flex-wrap justify-content-{{ $isRtl ? 'start' : 'end' }} gap-1">
         <a href="{{ route('admin.certificate-templates.index') }}" class="btn btn-secondary mr-1 mb-1">
-            <i class="la la-palette"></i> @lang('certificates.templates_btn')
+            <x-svg-icon name="palette" /> @lang('certificates.templates_btn')
         </a>
         <a href="{{ route('admin.certificates.issue.form') }}" class="btn btn-primary mr-1 mb-1">
-            <i class="la la-certificate"></i> @lang('certificates.issue_btn')
+            <x-svg-icon name="award" /> @lang('certificates.issue_btn')
         </a>
         <a href="{{ route('admin.certificates.index') }}" class="btn btn-light mb-1">
-            <i class="la la-redo"></i> @lang('certificates.refresh')
+            <x-svg-icon name="arrow-clockwise" /> @lang('certificates.refresh')
         </a>
     </div>
 </div>
@@ -61,10 +61,10 @@
                 </div>
                 <div class="col-md-4 col-sm-12 mb-1 d-flex gap-1">
                     <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="la la-search"></i> @lang('certificates.filter_apply')
+                        <x-svg-icon name="search" /> @lang('certificates.filter_apply')
                     </button>
                     <a href="{{ route('admin.certificates.index') }}" class="btn btn-sm btn-secondary ml-1">
-                        <i class="la la-redo"></i> @lang('certificates.filter_reset')
+                        <x-svg-icon name="arrow-clockwise" /> @lang('certificates.filter_reset')
                     </a>
                 </div>
             </form>
@@ -123,31 +123,31 @@
                                             @csrf
                                             <button type="button" class="btn btn-sm btn-success"
                                                     onclick="vcConfirm({title: @json(__('certificates.confirm_publish'))}).then(function(r){ if(r.isConfirmed) document.getElementById('publish-form-{{ $cert->id }}').submit(); })">
-                                                <i class="la la-check-circle"></i> @lang('certificates.actions.publish')
+                                                <x-svg-icon name="check-circle" /> @lang('certificates.actions.publish')
                                             </button>
                                         </form>
                                     @endif
 
                                     <a href="{{ route('admin.certificates.preview', $cert->id) }}"
                                        class="btn btn-sm btn-primary">
-                                        <i class="la la-eye"></i> @lang('certificates.preview_page.view')
+                                        <x-svg-icon name="eye" /> @lang('certificates.preview_page.view')
                                     </a>
 
                                     <a href="{{ route('admin.certificates.send', $cert->id) }}"
                                        class="btn btn-sm btn-success">
-                                        <i class="la la-paper-plane"></i> @lang('certificates.preview_page.send')
+                                        <x-svg-icon name="send" /> @lang('certificates.preview_page.send')
                                     </a>
 
                                     <a href="{{ route('admin.certificates.edit', $cert->id) }}"
                                        class="btn btn-sm btn-info">
-                                        <i class="la la-edit"></i> @lang('certificates.actions.edit')
+                                        <x-svg-icon name="pencil-square" /> @lang('certificates.actions.edit')
                                     </a>
 
                                     @if($cert->file_path)
                                         <a href="{{ asset('storage/' . $cert->file_path) }}"
                                            target="_blank"
                                            class="btn btn-sm btn-secondary">
-                                            <i class="la la-download"></i> @lang('certificates.actions.download')
+                                            <x-svg-icon name="download" /> @lang('certificates.actions.download')
                                         </a>
                                     @endif
 
@@ -160,7 +160,7 @@
                                         @method('DELETE')
                                         <button type="button" class="btn btn-sm btn-danger"
                                                 onclick="vcConfirm({title: @json(__('certificates.confirm_delete')), icon: 'error'}).then(function(r){ if(r.isConfirmed) document.getElementById('delete-form-{{ $cert->id }}').submit(); })">
-                                            <i class="la la-trash"></i> @lang('certificates.actions.delete')
+                                            <x-svg-icon name="trash" /> @lang('certificates.actions.delete')
                                         </button>
                                     </form>
                                 </div>

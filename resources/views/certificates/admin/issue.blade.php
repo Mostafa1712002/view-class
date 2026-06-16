@@ -81,7 +81,7 @@
         </div>
 
         <div class="mt-2 d-flex gap-1">
-            <button type="submit" class="btn btn-primary"><i class="la la-certificate"></i> @lang('certificates.issue_page.submit')</button>
+            <button type="submit" class="btn btn-primary"><x-svg-icon name="award" /> @lang('certificates.issue_page.submit')</button>
             <a href="{{ route('admin.certificates.index') }}" class="btn btn-secondary ml-1">@lang('certificates.actions.cancel')</a>
         </div>
     </form>

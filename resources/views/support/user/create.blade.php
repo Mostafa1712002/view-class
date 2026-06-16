@@ -139,7 +139,7 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="la la-paper-plane"></i> @lang('support.btn_submit_ticket')
+                        <x-svg-icon name="send" /> @lang('support.btn_submit_ticket')
                     </button>
                     <a href="{{ route('my.support.index') }}" class="btn btn-secondary mx-1">
                         @lang('support.btn_cancel')

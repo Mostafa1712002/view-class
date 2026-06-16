@@ -24,7 +24,7 @@
                     @foreach($classes as $c)<option value="{{ $c->id }}" {{ (string)$selectedClass===(string)$c->id?'selected':'' }}>{{ $c->name }}</option>@endforeach
                 </select>
             </div>
-            <div class="col-md-2 mb-2"><button class="btn btn-primary"><i class="la la-search"></i> عرض</button></div>
+            <div class="col-md-2 mb-2"><button class="btn btn-primary"><x-svg-icon name="search" /> عرض</button></div>
         </form>
     </div></div>
 
@@ -64,13 +64,13 @@
                         <small class="text-muted">عند اختيار قالب يُعتمد نصه النهائي بعد استبدال المتغيرات.</small>
                     </div>
                     <div class="form-group"><label>نص الرسالة (معاينة)</label><textarea name="message" id="msg" rows="4" class="form-control" required></textarea></div>
-                    <button type="submit" class="btn btn-primary btn-block"><i class="la la-paper-plane"></i> إرسال</button>
+                    <button type="submit" class="btn btn-primary btn-block"><x-svg-icon name="send" /> إرسال</button>
                 </div></div>
             </div>
         </div>
     </form>
     @else
-        <div class="card"><div class="card-body text-center text-muted py-5"><i class="la la-users la-3x d-block mb-2"></i> اختر فصلاً لعرض الطلاب.</div></div>
+        <div class="card"><div class="card-body text-center text-muted py-5"><x-svg-icon name="people" :size="40" class="d-block mb-2" /> اختر فصلاً لعرض الطلاب.</div></div>
     @endif
 </div>
 

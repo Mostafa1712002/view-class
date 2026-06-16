@@ -40,7 +40,7 @@
             <div class="form-group form-check"><input type="checkbox" name="is_active" value="1" id="isActive" class="form-check-input" {{ old('is_active',$group->exists?$group->is_active:true)?'checked':'' }}><label for="isActive" class="form-check-label">مفعّل</label></div>
         </div>
         <div class="card-footer text-left">
-            <button type="submit" class="btn btn-primary"><i class="la la-save"></i> حفظ</button>
+            <button type="submit" class="btn btn-primary"><x-svg-icon name="save" /> حفظ</button>
             <a href="{{ route('admin.qr.groups.index') }}" class="btn btn-secondary">إلغاء</a>
         </div></div>
     </form>

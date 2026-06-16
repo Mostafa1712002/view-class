@@ -17,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
     // === Certificate design templates ===
     Route::prefix('admin/certificate-templates')
         ->name('admin.certificate-templates.')
+        ->middleware('role:super-admin,school-admin')
         ->group(function () {
             Route::get('/', [CertificateTemplateController::class, 'index'])
                 ->middleware('permission:certificates.view')->name('index');
@@ -35,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     // === Certificates (admin) ===
     Route::prefix('admin/certificates')
         ->name('admin.certificates.')
+        ->middleware('role:super-admin,school-admin')
         ->group(function () {
             Route::get('/', [AdminCertificateController::class, 'index'])
                 ->middleware('permission:certificates.view')->name('index');

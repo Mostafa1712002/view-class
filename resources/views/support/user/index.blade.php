@@ -22,7 +22,7 @@
     </div>
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }}">
         <a href="{{ route('my.support.create') }}" class="btn btn-primary">
-            <i class="la la-plus"></i> @lang('support.btn_new_ticket')
+            <x-svg-icon name="plus-lg" /> @lang('support.btn_new_ticket')
         </a>
     </div>
 </div>
@@ -30,7 +30,7 @@
 {{-- #186: status counters --}}
 @isset($counts)
 <div class="row mb-2">
-    @foreach([['all','la-list','secondary'],['open','la-folder-open','info'],['in_progress','la-spinner','warning'],['resolved','la-check','success'],['closed','la-lock','dark']] as [$key,$icon,$color])
+    @foreach([['all','list-ul','secondary'],['open','folder2-open','info'],['in_progress','arrow-repeat','warning'],['resolved','check-lg','success'],['closed','lock','dark']] as [$key,$icon,$color])
         <div class="col-6 col-md mb-2">
             <div class="card mb-0">
                 <div class="card-body py-2 d-flex align-items-center justify-content-between">
@@ -38,7 +38,7 @@
                         <div class="text-muted small">@lang('support.count_'.$key)</div>
                         <div class="h4 mb-0">{{ $counts[$key] }}</div>
                     </div>
-                    <i class="la {{ $icon }} text-{{ $color }}" style="font-size:1.6rem;"></i>
+                    <x-svg-icon :name="$icon" :size="26" class="text-{{ $color }}" />
                 </div>
             </div>
         </div>
@@ -83,7 +83,7 @@
                             <td>{{ $ticket->created_at->format('Y-m-d H:i') }}</td>
                             <td>
                                 <a href="{{ route('my.support.show', $ticket->id) }}" class="btn btn-sm btn-info">
-                                    <i class="la la-eye"></i> @lang('support.btn_view')
+                                    <x-svg-icon name="eye" /> @lang('support.btn_view')
                                 </a>
                             </td>
                         </tr>

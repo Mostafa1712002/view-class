@@ -42,7 +42,7 @@
 
     <div class="mt-2">
         <a href="{{ route('admin.certificates.preview', $certificate->id) }}" class="btn btn-secondary">
-            <i class="la la-arrow-{{ $isRtl ? 'right' : 'left' }}"></i> @lang('certificates.tpl.back')
+            <x-svg-icon :name="$isRtl ? 'arrow-right' : 'arrow-left'" /> @lang('certificates.tpl.back')
         </a>
     </div>
 </div></div></div>

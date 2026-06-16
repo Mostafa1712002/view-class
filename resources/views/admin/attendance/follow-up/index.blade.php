@@ -15,7 +15,7 @@
         </ol>
     </div>
     <div class="content-header-right col-md-5 col-12 text-md-right">
-        <a href="{{ route('admin.student-attendance.user-reports') }}" class="btn btn-primary btn-sm"><i class="la la-paper-plane"></i> تقارير المستخدمين</a>
+        <a href="{{ route('admin.student-attendance.user-reports') }}" class="btn btn-primary btn-sm"><x-svg-icon name="send" /> تقارير المستخدمين</a>
     </div>
 </div>
 
@@ -55,13 +55,13 @@
                 </select>
             </div>
             <div class="col-md-2 mb-2"><label>اسم الطالب</label><input type="text" name="name" value="{{ request('name') }}" class="form-control"></div>
-            <div class="col-md-2 mb-2"><button class="btn btn-primary"><i class="la la-search"></i> بحث</button></div>
+            <div class="col-md-2 mb-2"><button class="btn btn-primary"><x-svg-icon name="search" /> بحث</button></div>
         </form>
     </div></div>
 
     <div class="card"><div class="card-body table-responsive">
         @if($rows->isEmpty())
-            <div class="text-center text-muted py-5"><i class="la la-clipboard-list la-3x d-block mb-2"></i> اختر تاريخ أو فلتر لعرض سجلات المتابعة.</div>
+            <div class="ds-empty"><div class="ds-empty-icon"><x-svg-icon name="clipboard-data" :size="32" /></div><div class="ds-empty-title">لا توجد سجلات متابعة</div><div class="ds-empty-desc">اختر تاريخ أو فلتر لعرض سجلات المتابعة.</div></div>
         @else
         <table class="table table-hover align-middle">
             <thead><tr>
@@ -80,8 +80,8 @@
                     <td>@if($r->notified_parent)<span class="badge badge-success">نعم</span>@else<span class="badge badge-light">لا</span>@endif</td>
                     <td class="small text-muted">{{ \Illuminate\Support\Str::limit($r->notes, 25) ?: '—' }}</td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-outline-primary js-notify" data-id="{{ $r->id }}" data-name="{{ optional($r->student)->name }}"><i class="la la-paper-plane"></i> رسالة</button>
-                        <a href="{{ route('admin.users.students.attendance', optional($r->student)->id) }}" class="btn btn-sm btn-link"><i class="la la-history"></i></a>
+                        <button type="button" class="btn btn-sm btn-outline-primary js-notify" data-id="{{ $r->id }}" data-name="{{ optional($r->student)->name }}"><x-svg-icon name="send" /> رسالة</button>
+                        <a href="{{ route('admin.users.students.attendance', optional($r->student)->id) }}" class="btn btn-sm btn-link"><x-svg-icon name="clock-history" /></a>
                     </td>
                 </tr>
                 @endforeach

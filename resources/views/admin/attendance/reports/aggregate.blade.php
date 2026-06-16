@@ -9,7 +9,7 @@
 <div class="content-body">
     <div class="card mb-3"><div class="card-body"><form method="GET" class="form-row align-items-end">
         <div class="col-md-3 mb-2"><label>التاريخ</label><input type="date" name="date" value="{{ $date }}" class="form-control"></div>
-        <div class="col-md-3 mb-2"><button class="btn btn-primary"><i class="la la-eye"></i> عرض</button></div>
+        <div class="col-md-3 mb-2"><button class="btn btn-primary"><x-svg-icon name="eye" /> عرض</button></div>
     </form></div></div>
 
     <div class="row mb-3">

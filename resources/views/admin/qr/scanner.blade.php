@@ -14,13 +14,13 @@
                 <div class="form-group"><label>اسم الجهاز (اختياري)</label><input type="text" id="deviceName" class="form-control" placeholder="جهاز البوابة"></div>
                 <div class="form-group form-check"><input type="checkbox" class="form-check-input" id="manualTime"><label class="form-check-label" for="manualTime">استخدام وقت يدوي للمسح</label></div>
                 <div class="form-group d-none" id="manualTimeWrap"><input type="datetime-local" id="scanTime" class="form-control"></div>
-                <button class="btn btn-primary mb-2" id="startCam"><i class="la la-camera"></i> تشغيل الكاميرا</button>
+                <button class="btn btn-primary mb-2" id="startCam"><x-svg-icon name="camera" /> تشغيل الكاميرا</button>
                 <div id="reader" style="width:100%"></div>
                 <hr>
                 <h6>إدخال الرمز يدوياً</h6>
                 <div class="input-group">
                     <input type="text" id="manualToken" class="form-control" placeholder="الصق رمز البطاقة">
-                    <div class="input-group-append"><button class="btn btn-success" id="sendManual"><i class="la la-paper-plane"></i> إرسال</button></div>
+                    <div class="input-group-append"><button class="btn btn-success" id="sendManual"><x-svg-icon name="send" /> إرسال</button></div>
                 </div>
                 <div id="scanResult" class="mt-3"></div>
             </div></div>

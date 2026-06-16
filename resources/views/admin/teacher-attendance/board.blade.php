@@ -12,8 +12,8 @@
     @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
     <ul class="nav nav-tabs mb-3">
-        <li class="nav-item"><a class="nav-link {{ $mode==='daily'?'active':'' }}" href="{{ route('admin.teacher-attendance.daily') }}"><i class="la la-calendar-day"></i> إدارة حضور وغياب يومي</a></li>
-        <li class="nav-item"><a class="nav-link {{ $mode==='period'?'active':'' }}" href="{{ route('admin.teacher-attendance.period') }}"><i class="la la-clock"></i> إدارة حضور وغياب حصة</a></li>
+        <li class="nav-item"><a class="nav-link {{ $mode==='daily'?'active':'' }}" href="{{ route('admin.teacher-attendance.daily') }}"><x-svg-icon name="calendar-day" /> إدارة حضور وغياب يومي</a></li>
+        <li class="nav-item"><a class="nav-link {{ $mode==='period'?'active':'' }}" href="{{ route('admin.teacher-attendance.period') }}"><x-svg-icon name="clock" /> إدارة حضور وغياب حصة</a></li>
     </ul>
 
     <div class="row mb-3">
@@ -31,16 +31,16 @@
         @endif
         <div class="col-md-2 mb-2"><label>اسم المعلم</label><input type="text" name="name" value="{{ request('name') }}" class="form-control"></div>
         <div class="col-md-2 mb-2"><label>رقم الهوية</label><input type="text" name="national_id" value="{{ request('national_id') }}" class="form-control"></div>
-        <div class="col-md-1 mb-2"><button class="btn btn-primary"><i class="la la-search"></i></button></div>
+        <div class="col-md-1 mb-2"><button class="btn btn-primary"><x-svg-icon name="search" /></button></div>
     </form></div></div>
 
     @if($rows->isNotEmpty() && auth()->user()?->canDo('pdf_export'))
     @php $tparams = array_merge(request()->except(['page','format']), ['date' => $date] + ($mode==='period' ? ['period' => $period] : [])); @endphp
     <div class="btn-group btn-group-sm mb-2" role="group" aria-label="تصدير حضور المعلمين">
-        <a class="btn btn-outline-danger" target="_blank" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'pdf'])) }}"><i class="la la-file-pdf-o"></i> PDF</a>
-        <a class="btn btn-outline-success" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'excel'])) }}"><i class="la la-file-excel-o"></i> Excel</a>
-        <a class="btn btn-outline-secondary" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'csv'])) }}"><i class="la la-file-text-o"></i> CSV</a>
-        <button type="button" class="btn btn-outline-info" onclick="window.print()"><i class="la la-print"></i> طباعة</button>
+        <a class="btn btn-outline-danger" target="_blank" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'pdf'])) }}"><x-svg-icon name="file-earmark-pdf" /> PDF</a>
+        <a class="btn btn-outline-success" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'excel'])) }}"><x-svg-icon name="file-earmark-excel" /> Excel</a>
+        <a class="btn btn-outline-secondary" href="{{ route('admin.teacher-attendance.export', array_merge($tparams, ['format'=>'csv'])) }}"><x-svg-icon name="file-earmark-text" /> CSV</a>
+        <button type="button" class="btn btn-outline-info" onclick="window.print()"><x-svg-icon name="printer" /> طباعة</button>
     </div>
     @endif
 
@@ -49,13 +49,13 @@
         <input type="hidden" name="date" value="{{ $date }}">
         @if($mode==='period')<input type="hidden" name="period" value="{{ $period }}"><input type="hidden" name="class_id" value="{{ request('class_id') }}"><input type="hidden" name="subject_id" value="{{ request('subject_id') }}">@endif
         <div class="card"><div class="card-body table-responsive">
-            @if($rows->isEmpty())<div class="text-center text-muted py-5"><i class="la la-chalkboard-teacher la-3x d-block mb-2"></i> لا يوجد معلمون مطابقون.</div>
+            @if($rows->isEmpty())<div class="ds-empty"><div class="ds-empty-icon"><x-svg-icon name="easel" :size="32" /></div><div class="ds-empty-title">لا يوجد معلمون</div><div class="ds-empty-desc">لا يوجد معلمون مطابقون لمعايير البحث الحالية.</div></div>
             @else
             <table class="table table-hover align-middle"><thead><tr><th>#</th><th>الصورة</th><th>المعلم</th><th>أيام الحضور</th><th>الحالة</th><th>ملاحظات</th><th>التحكم</th></tr></thead>
             <tbody>@foreach($rows as $i=>$row)@php $t=$row['teacher']; @endphp
             <tr>
                 <td>{{ $i+1 }}</td>
-                <td>@if($t->avatar)<img src="{{ asset('storage/'.$t->avatar) }}" class="rounded-circle" width="36" height="36">@else<span class="badge badge-light rounded-circle p-2"><i class="la la-user"></i></span>@endif</td>
+                <td>@if($t->avatar)<img src="{{ asset('storage/'.$t->avatar) }}" class="rounded-circle" width="36" height="36">@else<span class="badge badge-light rounded-circle p-2"><x-svg-icon name="person" /></span>@endif</td>
                 <td>{{ $t->name }}</td>
                 <td><span class="badge badge-light">{{ $row['present_days'] }}</span></td>
                 <td>
@@ -63,20 +63,20 @@
                     <span class="status-badge badge badge-{{ $colors[$row['status']]??'secondary' }}">{{ $labels[$row['status']]??'غير محدد' }}</span>
                     <input type="hidden" class="status-input" name="rows[{{ $i }}][status]" value="{{ $row['status']??'present' }}">
                     <div class="btn-group btn-group-sm mt-1">
-                        @foreach(['present'=>['حاضر','success','la-check'],'absent'=>['غائب','danger','la-times'],'late'=>['متأخر','warning','la-clock'],'excused'=>['مستأذن','info','la-user-check']] as $k=>[$lbl,$col,$ic])
-                        <button type="button" class="btn btn-outline-{{ $col }} js-status" data-status="{{ $k }}" title="{{ $lbl }}"><i class="la {{ $ic }}"></i></button>
+                        @foreach(['present'=>['حاضر','success','check-lg'],'absent'=>['غائب','danger','x-lg'],'late'=>['متأخر','warning','clock'],'excused'=>['مستأذن','info','person-check']] as $k=>[$lbl,$col,$ic])
+                        <button type="button" class="btn btn-outline-{{ $col }} js-status" data-status="{{ $k }}" title="{{ $lbl }}"><x-svg-icon :name="$ic" :size="16" /></button>
                         @endforeach
                     </div>
                 </td>
                 <td class="small text-muted">{{ \Illuminate\Support\Str::limit($row['notes'],25)?:'—' }}</td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-outline-primary js-msg" data-id="{{ $t->id }}" data-name="{{ $t->name }}"><i class="la la-paper-plane"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-primary js-msg" data-id="{{ $t->id }}" data-name="{{ $t->name }}"><x-svg-icon name="send" /></button>
                 </td>
             </tr>
             @endforeach</tbody></table>
             @endif
         </div>
-        @if($rows->isNotEmpty())<div class="card-footer text-left"><button type="submit" class="btn btn-primary"><i class="la la-save"></i> حفظ الحضور</button></div>@endif
+        @if($rows->isNotEmpty())<div class="card-footer text-left"><button type="submit" class="btn btn-primary"><x-svg-icon name="save" /> حفظ الحضور</button></div>@endif
         </div>
     </form>
 </div>

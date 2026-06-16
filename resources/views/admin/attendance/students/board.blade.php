@@ -16,7 +16,7 @@
     </div>
     <div class="content-header-right col-md-5 col-12 text-md-right">
         <a href="{{ route('admin.student-attendance.follow-up') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="la la-bell"></i> تقارير المستخدمين
+            <x-svg-icon name="bell" /> تقارير المستخدمين
         </a>
     </div>
 </div>
@@ -29,25 +29,25 @@
     <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
             <a class="nav-link {{ $mode === 'daily' ? 'active' : '' }}" href="{{ route('admin.student-attendance.daily') }}">
-                <i class="la la-calendar-day"></i> إدارة حضور وغياب يومي
+                <x-svg-icon name="calendar-day" /> إدارة حضور وغياب يومي
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ $mode === 'period' ? 'active' : '' }}" href="{{ route('admin.student-attendance.period') }}">
-                <i class="la la-clock"></i> إدارة حضور وغياب حصة
+                <x-svg-icon name="clock" /> إدارة حضور وغياب حصة
             </a>
         </li>
     </ul>
 
     {{-- Stat cards --}}
     <div class="row mb-3">
-        @php $cards = [['حضور','present','success','la-check'],['غياب','absent','danger','la-times'],['تأخير','late','warning','la-clock'],['استئذان','excused','info','la-user-check']]; @endphp
+        @php $cards = [['حضور','present','success','check-circle'],['غياب','absent','danger','x-circle'],['تأخير','late','warning','clock'],['استئذان','excused','info','person-check']]; @endphp
         @foreach($cards as [$lbl,$key,$col,$ic])
         <div class="col-md-3 col-6 mb-2">
             <div class="card border-{{ $col }}">
                 <div class="card-body d-flex align-items-center justify-content-between py-2">
                     <div><div class="text-muted small">إجمالي ال{{ $lbl }}</div><h3 class="mb-0 text-{{ $col }}" data-stat="{{ $key }}">{{ $counts[$key] }}</h3></div>
-                    <i class="la {{ $ic }} la-2x text-{{ $col }}"></i>
+                    <x-svg-icon :name="$ic" :size="28" class="text-{{ $col }}" />
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@
                     <input type="text" name="national_id" value="{{ request('national_id') }}" class="form-control" placeholder="رقم الهوية">
                 </div>
                 <div class="col-md-2 mb-2">
-                    <button class="btn btn-primary"><i class="la la-search"></i> بحث</button>
+                    <button class="btn btn-primary"><x-svg-icon name="search" /> بحث</button>
                 </div>
             </form>
         </div>
@@ -122,9 +122,10 @@
         <div class="card">
             <div class="card-body table-responsive">
                 @if($rows->isEmpty())
-                    <div class="text-center text-muted py-5">
-                        <i class="la la-user-slash la-3x d-block mb-2"></i>
-                        لا يوجد طلاب في هذا الفصل أو لا تتطابق نتائج البحث.
+                    <div class="ds-empty">
+                        <div class="ds-empty-icon"><x-svg-icon name="person-slash" :size="32" /></div>
+                        <div class="ds-empty-title">لا يوجد طلاب</div>
+                        <div class="ds-empty-desc">لا يوجد طلاب في هذا الفصل أو لا تتطابق نتائج البحث.</div>
                     </div>
                 @else
                 <table class="table table-hover align-middle">
@@ -153,7 +154,7 @@
                                 @if($st->avatar)
                                     <img src="{{ asset('storage/'.$st->avatar) }}" class="rounded-circle" width="36" height="36" alt="">
                                 @else
-                                    <span class="badge badge-light rounded-circle p-2"><i class="la la-user"></i></span>
+                                    <span class="badge badge-light rounded-circle p-2"><x-svg-icon name="person" /></span>
                                 @endif
                             </td>
                             <td>{{ $st->name }}</td>
@@ -167,8 +168,8 @@
                                 </span>
                                 <input type="hidden" class="status-input" name="rows[{{ $i }}][status]" value="{{ $row['status'] ?? 'present' }}">
                                 <div class="btn-group btn-group-sm mt-1" role="group">
-                                    @foreach(['present'=>['حاضر','success','la-check'],'absent'=>['غائب','danger','la-times'],'late'=>['متأخر','warning','la-clock'],'excused'=>['مستأذن','info','la-user-check']] as $k=>[$lbl,$col,$ic])
-                                        <button type="button" class="btn btn-outline-{{ $col }} js-status" data-status="{{ $k }}" title="{{ $lbl }}"><i class="la {{ $ic }}"></i></button>
+                                    @foreach(['present'=>['حاضر','success','check-lg'],'absent'=>['غائب','danger','x-lg'],'late'=>['متأخر','warning','clock'],'excused'=>['مستأذن','info','person-check']] as $k=>[$lbl,$col,$ic])
+                                        <button type="button" class="btn btn-outline-{{ $col }} js-status" data-status="{{ $k }}" title="{{ $lbl }}"><x-svg-icon :name="$ic" :size="16" /></button>
                                     @endforeach
                                 </div>
                             </td>
@@ -180,7 +181,7 @@
                             <td class="small text-muted">{{ \Illuminate\Support\Str::limit($row['notes'], 30) ?: '—' }}</td>
                             <td>
                                 @if($row['attendance_id'])
-                                <a href="{{ route('admin.users.students.attendance', $st->id) }}" class="btn btn-sm btn-link" title="سجل الحضور"><i class="la la-history"></i></a>
+                                <a href="{{ route('admin.users.students.attendance', $st->id) }}" class="btn btn-sm btn-link" title="سجل الحضور"><x-svg-icon name="clock-history" /></a>
                                 @endif
                             </td>
                         </tr>
@@ -191,7 +192,7 @@
             </div>
             @if($rows->isNotEmpty())
             <div class="card-footer text-left">
-                <button type="submit" class="btn btn-primary"><i class="la la-save"></i> حفظ الحضور</button>
+                <button type="submit" class="btn btn-primary"><x-svg-icon name="save" /> حفظ الحضور</button>
             </div>
             @endif
         </div>
@@ -207,9 +208,12 @@
         <div id="bulkIds"></div>
     </form>
     @else
-        <div class="card"><div class="card-body text-center text-muted py-5">
-            <i class="la la-search la-3x d-block mb-2"></i>
-            اختر الفصل والتاريخ ثم اضغط "بحث" لعرض الطلاب.
+        <div class="card"><div class="card-body">
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="search" :size="32" /></div>
+                <div class="ds-empty-title">ابدأ بتحديد الفصل</div>
+                <div class="ds-empty-desc">اختر الفصل والتاريخ ثم اضغط "بحث" لعرض الطلاب.</div>
+            </div>
         </div></div>
     @endif
 </div>

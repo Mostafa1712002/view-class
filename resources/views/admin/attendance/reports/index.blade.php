@@ -15,19 +15,19 @@
     <div class="row">
         @php
         $cards = [
-            ['حالة الحضور','admin.attendance.reports.status','la-clipboard-check','primary'],
-            ['غياب أيام','admin.attendance.reports.day-absence','la-calendar-times','danger'],
-            ['غياب حصص','admin.attendance.reports.period-absence','la-clock','warning'],
-            ['التأخير','admin.attendance.reports.late','la-hourglass-half','info'],
-            ['الغياب المجمع','admin.attendance.reports.aggregate','la-chart-bar','success'],
-            ['السلوك','admin.attendance.reports.behavior','la-star','secondary'],
+            ['حالة الحضور','admin.attendance.reports.status','clipboard-check','primary'],
+            ['غياب أيام','admin.attendance.reports.day-absence','calendar-x','danger'],
+            ['غياب حصص','admin.attendance.reports.period-absence','clock','warning'],
+            ['التأخير','admin.attendance.reports.late','hourglass-split','info'],
+            ['الغياب المجمع','admin.attendance.reports.aggregate','bar-chart','success'],
+            ['السلوك','admin.attendance.reports.behavior','star','secondary'],
         ];
         @endphp
         @foreach($cards as [$lbl,$route,$ic,$col])
         <div class="col-md-3 col-6 mb-3">
             <a href="{{ route($route) }}" class="text-decoration-none">
                 <div class="card border-{{ $col }} h-100"><div class="card-body text-center py-4">
-                    <i class="la {{ $ic }} la-3x text-{{ $col }} mb-2 d-block"></i>
+                    <x-svg-icon :name="$ic" :size="40" class="text-{{ $col }} mb-2 d-block" />
                     <h5 class="mb-0">{{ $lbl }}</h5>
                 </div></div>
             </a>

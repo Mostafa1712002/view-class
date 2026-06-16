@@ -12,11 +12,11 @@
         <div class="col-md-3 mb-2"><label>من تاريخ</label><input type="date" name="from" value="{{ request('from') }}" class="form-control"></div>
         <div class="col-md-3 mb-2"><label>إلى تاريخ</label><input type="date" name="to" value="{{ request('to') }}" class="form-control"></div>
         <div class="col-md-3 mb-2"><label>اسم الطالب</label><input type="text" name="name" value="{{ request('name') }}" class="form-control"></div>
-        <div class="col-md-3 mb-2"><button class="btn btn-primary"><i class="la la-eye"></i> عرض التقرير</button></div>
+        <div class="col-md-3 mb-2"><button class="btn btn-primary"><x-svg-icon name="eye" /> عرض التقرير</button></div>
     </form></div></div>
     @if(!$rows->isEmpty()) @include('admin.attendance.reports._export-buttons', ['report' => 'behavior']) @endif
     <div class="card"><div class="card-body table-responsive">
-        @if($rows->isEmpty())<div class="text-center text-muted py-5"><i class="la la-star la-3x d-block mb-2"></i> اختر فلتراً لعرض سجلات السلوك.</div>
+        @if($rows->isEmpty())<div class="ds-empty"><div class="ds-empty-icon"><x-svg-icon name="star" :size="32" /></div><div class="ds-empty-title">لا توجد سجلات سلوك</div><div class="ds-empty-desc">اختر فلتراً لعرض سجلات السلوك.</div></div>
         @else
         <table class="table table-hover align-middle"><thead><tr><th>الطالب</th><th>السلوك</th><th>الإجراء</th><th>النقاط</th><th>الملاحظة</th><th>سجّله</th><th>التاريخ</th></tr></thead>
         <tbody>@foreach($rows as $r)<tr>
