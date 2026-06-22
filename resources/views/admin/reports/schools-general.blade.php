@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'تقرير المدارس العام')
+@section('body_class', 'theme-light')
 
 @section('content')
 @include('components.alerts')
@@ -9,6 +10,7 @@
     <h2 class="content-header-title">تقرير المدارس العام</h2>
     <div class="breadcrumb-wrapper">
         <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.reports.administrative') }}">التقارير الإدارية</a></li>
             <li class="breadcrumb-item active">تقرير المدارس العام</li>
         </ol>
@@ -18,35 +20,41 @@
 <div class="content-body">
     @include('admin.reports._tabs', ['currentTab' => 'administrative'])
 
-    <div class="card">
-        <div class="card-header">
-            <h4 class="card-title">إحصائية المدارس ({{ $rows->count() }})</h4>
+    <div class="ds-card card">
+        <div class="ds-card-header card-header">
+            <h5 class="ds-card-title mb-0">إحصائية المدارس</h5>
+            <span class="ds-badge-navy">{{ $rows->count() }}</span>
         </div>
-        <div class="card-body p-0">
-            @if($rows->isEmpty())
-                <div class="text-center text-muted py-4">لا توجد مدارس في النطاق</div>
-            @else
-                <table class="table table-hover mb-0">
+
+        @if($rows->isEmpty())
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="building" :size="30" /></div>
+                <div class="ds-empty-title">لا توجد مدارس في النطاق</div>
+                <div class="ds-empty-desc">لم يتم العثور على مدارس ضمن صلاحياتك.</div>
+            </div>
+        @else
+            <div class="table-responsive">
+                <table class="table table-hover ds-table-tight mb-0">
                     <thead>
                         <tr>
-                            <th>المدرسة</th>
-                            <th class="text-center">عدد الطلاب</th>
-                            <th class="text-center">عدد المعلمين</th>
-                            <th class="text-center">عدد الفصول</th>
+                            <th scope="col">المدرسة</th>
+                            <th scope="col" class="text-center">عدد الطلاب</th>
+                            <th scope="col" class="text-center">عدد المعلمين</th>
+                            <th scope="col" class="text-center">عدد الفصول</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($rows as $row)
                             <tr>
-                                <td><strong>{{ $row->school->name_ar ?? $row->school->name }}</strong></td>
-                                <td class="text-center">{{ $row->students }}</td>
-                                <td class="text-center">{{ $row->teachers }}</td>
-                                <td class="text-center">{{ $row->classes }}</td>
+                                <td style="font-weight:700;color:#0f172a">{{ $row->school->name_ar ?? $row->school->name }}</td>
+                                <td class="text-center"><span class="ds-badge-info">{{ $row->students }}</span></td>
+                                <td class="text-center"><span class="ds-badge-navy">{{ $row->teachers }}</span></td>
+                                <td class="text-center"><span class="ds-badge-success">{{ $row->classes }}</span></td>
                             </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
-                        <tr>
+                        <tr style="font-weight:700;background:var(--gray-50)">
                             <th>الإجمالي</th>
                             <th class="text-center">{{ $rows->sum('students') }}</th>
                             <th class="text-center">{{ $rows->sum('teachers') }}</th>
@@ -54,8 +62,8 @@
                         </tr>
                     </tfoot>
                 </table>
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

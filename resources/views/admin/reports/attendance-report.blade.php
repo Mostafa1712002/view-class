@@ -1,29 +1,38 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('title', 'تقرير الحضور الشهري')
+@section('body_class', 'theme-light')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-secondary btn-sm mb-2">
-                <i class="la la-arrow-right me-1"></i>العودة
-            </a>
-            <h1 class="h3 mb-0">تقرير الحضور الشهري</h1>
-            <small class="text-muted">{{ $class->name }} - {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y') }}</small>
-        </div>
-        <form action="{{ route('admin.reports.attendance-report-pdf') }}" method="GET" class="d-inline">
-            <input type="hidden" name="class_id" value="{{ $class->id }}">
-            <input type="hidden" name="month" value="{{ $month }}">
-            <button type="submit" class="btn btn-danger">
-                <i class="la la-file-pdf me-1"></i>تصدير PDF
-            </button>
-        </form>
-    </div>
+@include('components.alerts')
 
+<div class="content-header">
+    <h2 class="content-header-title">تقرير الحضور الشهري</h2>
+    <div class="breadcrumb-wrapper d-flex align-items-center justify-content-between flex-wrap" style="gap:.5rem">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.reports.index') }}">التقارير</a></li>
+            <li class="breadcrumb-item active">{{ $class->name }} - {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y') }}</li>
+        </ol>
+        <div class="d-flex align-items-center" style="gap:.4rem">
+            <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-secondary btn-sm">
+                <x-svg-icon name="arrow-right" :size="14" class="me-1" /> العودة
+            </a>
+            <form action="{{ route('admin.reports.attendance-report-pdf') }}" method="GET" class="d-inline">
+                <input type="hidden" name="class_id" value="{{ $class->id }}">
+                <input type="hidden" name="month" value="{{ $month }}">
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <x-svg-icon name="file-earmark-pdf" :size="14" class="me-1" /> تصدير PDF
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="content-body">
     {{-- فلتر --}}
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="ds-card card mb-4">
+        <div class="ds-card-body card-body">
             <form method="GET" class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">الصف</label>
@@ -50,98 +59,80 @@
         $totalLate = $attendanceData->sum('late');
         $totalExcused = $attendanceData->sum('excused');
         $averageRate = $attendanceData->avg('rate');
+        $stats = [
+            ['v' => $totalPresent, 'l' => 'إجمالي الحضور', 'icon' => 'check-circle', 'tone' => 'success'],
+            ['v' => $totalAbsent, 'l' => 'إجمالي الغياب', 'icon' => 'x-circle', 'tone' => 'danger'],
+            ['v' => $totalLate, 'l' => 'إجمالي التأخر', 'icon' => 'clock-history', 'tone' => 'warning'],
+            ['v' => $totalExcused, 'l' => 'بعذر', 'icon' => 'shield-check', 'tone' => 'info'],
+            ['v' => round($averageRate, 1) . '%', 'l' => 'متوسط نسبة الحضور', 'icon' => 'graph-up', 'tone' => 'navy'],
+        ];
     @endphp
     <div class="row mb-4">
-        <div class="col-md-2">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ $totalPresent }}</h3>
-                    <small>إجمالي الحضور</small>
+        @foreach($stats as $s)
+            <div class="col-md col-6 mb-3">
+                <div class="ds-card card ds-stat h-100">
+                    <div class="ds-card-body card-body d-flex align-items-center" style="gap:.7rem">
+                        <span class="ds-badge-{{ $s['tone'] }}" style="width:42px;height:42px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">
+                            <x-svg-icon name="{{ $s['icon'] }}" :size="20" />
+                        </span>
+                        <div>
+                            <div style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1">{{ $s['v'] }}</div>
+                            <div class="text-muted" style="font-size:.74rem">{{ $s['l'] }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-danger text-white">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ $totalAbsent }}</h3>
-                    <small>إجمالي الغياب</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-warning text-dark">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ $totalLate }}</h3>
-                    <small>إجمالي التأخر</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ $totalExcused }}</h3>
-                    <small>بعذر</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ round($averageRate, 1) }}%</h3>
-                    <small>متوسط نسبة الحضور</small>
-                </div>
-            </div>
-        </div>
+        @endforeach
     </div>
 
     {{-- جدول الحضور --}}
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">تفاصيل حضور الطلاب</h5>
+    <div class="ds-card card">
+        <div class="ds-card-header card-header">
+            <h5 class="ds-card-title mb-0">تفاصيل حضور الطلاب</h5>
+            <span class="ds-badge-navy">{{ $attendanceData->count() }}</span>
         </div>
-        <div class="card-body">
-            @if($attendanceData->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+        @if($attendanceData->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-hover ds-table-tight mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم الطالب</th>
+                            <th class="text-center">@lang('common.present')</th>
+                            <th class="text-center">@lang('common.absent')</th>
+                            <th class="text-center">متأخر</th>
+                            <th class="text-center">بعذر</th>
+                            <th class="text-center">الإجمالي</th>
+                            <th class="text-center">النسبة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($attendanceData as $index => $data)
                             <tr>
-                                <th>#</th>
-                                <th>اسم الطالب</th>
-                                <th class="text-center bg-success text-white">@lang('common.present')</th>
-                                <th class="text-center bg-danger text-white">@lang('common.absent')</th>
-                                <th class="text-center bg-warning">متأخر</th>
-                                <th class="text-center bg-info text-white">بعذر</th>
-                                <th class="text-center">الإجمالي</th>
-                                <th class="text-center">النسبة</th>
+                                <td>{{ $index + 1 }}</td>
+                                <td style="font-weight:600">{{ $data['student']->name }}</td>
+                                <td class="text-center">{{ $data['present'] }}</td>
+                                <td class="text-center">{{ $data['absent'] }}</td>
+                                <td class="text-center">{{ $data['late'] }}</td>
+                                <td class="text-center">{{ $data['excused'] }}</td>
+                                <td class="text-center">{{ $data['total'] }}</td>
+                                <td class="text-center">
+                                    <span class="ds-badge-{{ $data['rate'] >= 90 ? 'success' : ($data['rate'] >= 75 ? 'info' : ($data['rate'] >= 60 ? 'warning' : 'danger')) }}">
+                                        {{ $data['rate'] }}%
+                                    </span>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($attendanceData as $index => $data)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $data['student']->name }}</td>
-                                    <td class="text-center">{{ $data['present'] }}</td>
-                                    <td class="text-center">{{ $data['absent'] }}</td>
-                                    <td class="text-center">{{ $data['late'] }}</td>
-                                    <td class="text-center">{{ $data['excused'] }}</td>
-                                    <td class="text-center">{{ $data['total'] }}</td>
-                                    <td class="text-center">
-                                        <span class="badge bg-{{ $data['rate'] >= 90 ? 'success' : ($data['rate'] >= 75 ? 'info' : ($data['rate'] >= 60 ? 'warning' : 'danger')) }}">
-                                            {{ $data['rate'] }}%
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-4">
-                    <i class="la la-calendar-times display-4 text-muted"></i>
-                    <p class="text-muted mt-2">لا توجد سجلات حضور لهذا الشهر</p>
-                </div>
-            @endif
-        </div>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="ds-empty">
+                <div class="ds-empty-icon"><x-svg-icon name="calendar-x" :size="30" /></div>
+                <div class="ds-empty-title">لا توجد سجلات حضور لهذا الشهر</div>
+                <div class="ds-empty-desc">جرّب اختيار صف أو شهر آخر.</div>
+            </div>
+        @endif
     </div>
 </div>
 @endsection
