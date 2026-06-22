@@ -55,6 +55,14 @@
     $canViewSms           = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('sms');
     $canViewWhatsapp      = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('whatsapp');
     $canViewParentsContact= !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('parents_contact');
+
+    // غياب الطلاب (Card #275) — same default-allow formula. The whole attendance
+    // dropdown is gated by attendance.view; the three siblings below it (teacher
+    // absence / certificates / educational sites) each gate by their own module.
+    $canViewAttendance        = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('attendance');
+    $canViewTeacherAttendance = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('teacher_attendance');
+    $canViewCertificates      = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('certificates');
+    $canViewEducationalSites  = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('educational_sites');
 @endphp
 
 {{-- ===== GP Sidebar v3 — navy brand surface, gold active, unified section system ===== --}}
@@ -612,27 +620,36 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
 
-                {{-- الحضور والغياب --}}
-                <li class="nav-item has-sub" data-section="educational">
+                {{-- الحضور والغياب (Card #275) — every child wired to its real Sprint-10
+                     route via Route::has guards; dropdown gated by attendance.view --}}
+                @if($canViewAttendance)
+                <li class="nav-item has-sub {{ (request()->routeIs('admin.attendance.*') || request()->routeIs('admin.student-attendance.*')) ? 'active open' : '' }}" data-section="educational">
                     <a href="#" data-label="@lang('shell.nav_attendance_management')"><x-svg-icon name="person-x" class="vc-ico" /><span class="menu-title">@lang('shell.nav_attendance_management')</span></a>
                     <ul class="menu-content">
-                        <li><a href="#"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_report')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="stack" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_aggregate')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="list" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_list')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="hourglass-split" class="vc-ico" /><span class="menu-item">@lang('shell.nav_late_report')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_report')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="speedometer2" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_dashboard')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.index') ? route('admin.attendance.index') : '#' }}"><x-svg-icon name="check-square" class="vc-ico" /><span class="menu-item">@lang('shell.nav_daily_attendance')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="stopwatch" class="vc-ico" /><span class="menu-item">@lang('shell.nav_period_attendance')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="binoculars" class="vc-ico" /><span class="menu-item">@lang('shell.nav_follow_late_absence')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="calendar-day" class="vc-ico" /><span class="menu-item">@lang('shell.nav_days_absence_report')</span></a></li>
-                        <li><a href="#"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('shell.nav_subjects_absence_summary')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.status') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.status') ? route('admin.attendance.reports.status') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.aggregate') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.aggregate') ? route('admin.attendance.reports.aggregate') : '#' }}"><x-svg-icon name="stack" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_aggregate')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.index') ? route('admin.attendance.reports.index') : '#' }}"><x-svg-icon name="list" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_list')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.late') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.late') ? route('admin.attendance.reports.late') : '#' }}"><x-svg-icon name="hourglass-split" class="vc-ico" /><span class="menu-item">@lang('shell.nav_late_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.behavior') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.behavior') ? route('admin.attendance.reports.behavior') : '#' }}"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.index') ? route('admin.attendance.index') : '#' }}"><x-svg-icon name="speedometer2" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_dashboard')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.student-attendance.daily') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.daily') ? route('admin.student-attendance.daily') : '#' }}"><x-svg-icon name="check-square" class="vc-ico" /><span class="menu-item">@lang('shell.nav_daily_attendance')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.student-attendance.period') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.period') ? route('admin.student-attendance.period') : '#' }}"><x-svg-icon name="stopwatch" class="vc-ico" /><span class="menu-item">@lang('shell.nav_period_attendance')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.student-attendance.follow-up') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.follow-up') ? route('admin.student-attendance.follow-up') : '#' }}"><x-svg-icon name="binoculars" class="vc-ico" /><span class="menu-item">@lang('shell.nav_follow_late_absence')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.day-absence') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.day-absence') ? route('admin.attendance.reports.day-absence') : '#' }}"><x-svg-icon name="calendar-day" class="vc-ico" /><span class="menu-item">@lang('shell.nav_days_absence_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.period-absence') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.period-absence') ? route('admin.attendance.reports.period-absence') : '#' }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('shell.nav_subjects_absence_summary')</span></a></li>
                     </ul>
                 </li>
+                @endif
 
-                <li class="nav-item" data-section="educational" data-label="@lang('shell.nav_teacher_absence')"><a href="#" data-label="@lang('shell.nav_teacher_absence')"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_teacher_absence')</span></a></li>
-                <li class="nav-item" data-section="educational" data-label="@lang('shell.nav_certificates')"><a href="#" data-label="@lang('shell.nav_certificates')"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('shell.nav_certificates')</span></a></li>
-                <li class="nav-item" data-section="educational" data-label="@lang('shell.nav_edu_sites')"><a href="#" data-label="@lang('shell.nav_edu_sites')"><x-svg-icon name="box-arrow-up-right" class="vc-ico" /><span class="menu-title">@lang('shell.nav_edu_sites')</span></a></li>
+                @if($canViewTeacherAttendance)
+                <li class="nav-item {{ request()->routeIs('admin.teacher-attendance.*') ? 'active' : '' }}" data-section="educational" data-label="@lang('shell.nav_teacher_absence')"><a href="{{ Route::has('admin.teacher-attendance.daily') ? route('admin.teacher-attendance.daily') : '#' }}" data-label="@lang('shell.nav_teacher_absence')"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_teacher_absence')</span></a></li>
+                @endif
+                @if($canViewCertificates)
+                <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="educational" data-label="@lang('shell.nav_certificates')"><a href="{{ Route::has('admin.certificates.index') ? route('admin.certificates.index') : '#' }}" data-label="@lang('shell.nav_certificates')"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('shell.nav_certificates')</span></a></li>
+                @endif
+                @if($canViewEducationalSites)
+                <li class="nav-item {{ request()->routeIs('admin.educational-sites.*') ? 'active' : '' }}" data-section="educational" data-label="@lang('shell.nav_edu_sites')"><a href="{{ Route::has('admin.educational-sites.index') ? route('admin.educational-sites.index') : '#' }}" data-label="@lang('shell.nav_edu_sites')"><x-svg-icon name="box-arrow-up-right" class="vc-ico" /><span class="menu-title">@lang('shell.nav_edu_sites')</span></a></li>
+                @endif
 
             </div>{{-- /gp-sec-educational --}}
 
