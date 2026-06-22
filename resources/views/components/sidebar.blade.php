@@ -204,6 +204,12 @@
     background: var(--vc-sb-hover);
     color: #ffffff;
 }
+/* Keyboard focus ring (a11y) — only on keyboard nav, not mouse clicks */
+.main-menu .navigation li.nav-item > a:focus-visible,
+.main-menu .navigation li ul.menu-content li a:focus-visible {
+    outline: 2px solid var(--vc-gold-soft);
+    outline-offset: -2px;
+}
 .main-menu .navigation li.nav-item > a:hover .vc-ico {
     color: var(--vc-gold-soft);
     transform: scale(1.1);
@@ -225,26 +231,55 @@
 }
 .main-menu .navigation li.nav-item.has-sub.open:not(.active) > a .vc-ico { color: var(--vc-gold-soft); }
 
-/* ── Submenu ── */
-.main-menu .navigation li ul.menu-content {
+/* ── Submenu (collapsible dropdown — QA #230) ──
+   Children are hidden by default; the parent .has-sub item is a real
+   click-to-toggle dropdown. JS animates exact heights; these rules give the
+   correct first-paint state (collapsed unless server marks the parent .open)
+   so there's no flash before the script runs. */
+.main-menu .navigation li.has-sub > ul.menu-content {
     overflow: hidden;
-    margin: 2px 12px 4px;
-    padding: 4px 0;
+    margin: 0 12px;
+    padding: 0;
     border-radius: 10px;
-    background: rgba(0,0,0,.18);
-    transition: max-height .25s cubic-bezier(.16,1,.3,1);
+    background: rgba(0,0,0,.22);
+    max-height: 0;
+    opacity: 0;
+    transition: max-height .26s cubic-bezier(.16,1,.3,1), opacity .2s ease, margin .22s ease, padding .22s ease;
+}
+/* Open state — server-rendered (.open) shows immediately; JS keeps it in sync */
+.main-menu .navigation li.has-sub.open > ul.menu-content {
+    max-height: 1200px;
+    opacity: 1;
+    margin: 3px 12px 6px;
+    padding: 5px 0;
 }
 .main-menu .navigation li ul.menu-content li a {
     display: flex; align-items: center; gap: 9px;
-    padding: .46rem .8rem .46rem 2.2rem;
-    font-size: .92rem; border-radius: 8px;
-    margin: 1px 6px;
+    padding: .44rem .85rem .44rem 2.35rem;
+    font-size: .9rem; border-radius: 8px;
+    margin: 1px 8px;
     color: var(--vc-sb-dim);
-    transition: background .14s, color .14s;
+    position: relative;
+    transition: background .14s, color .14s, padding .14s;
 }
 html[dir="rtl"] .main-menu .navigation li ul.menu-content li a {
-    padding: .46rem 2.2rem .46rem .8rem;
+    padding: .44rem 2.35rem .44rem .85rem;
 }
+/* nesting guide dot — makes child rows read as a clear third level */
+.main-menu .navigation li ul.menu-content li a::before {
+    content: "";
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    inset-inline-start: 1.25rem;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor; opacity: .35;
+    transition: opacity .14s, transform .14s;
+}
+html[dir="ltr"] .main-menu .navigation li ul.menu-content li a::before {
+    inset-inline-start: auto; inset-inline-end: 1.25rem;
+}
+.main-menu .navigation li ul.menu-content li a:hover::before { opacity: .7; transform: translateY(-50%) scale(1.25); }
+.main-menu .navigation li ul.menu-content li.active > a::before { opacity: 1; background: var(--vc-gold-soft); transform: translateY(-50%) scale(1.3); }
 .main-menu .navigation li ul.menu-content li a .vc-ico { color: var(--vc-sb-dim); width: 16px; height: 16px; }
 .main-menu .navigation li ul.menu-content li a:hover { background: rgba(255,255,255,.06); color: #fff; }
 .main-menu .navigation li ul.menu-content li a:hover .vc-ico { color: var(--vc-gold-soft); }
@@ -254,25 +289,35 @@ html[dir="rtl"] .main-menu .navigation li ul.menu-content li a {
 }
 .main-menu .navigation li ul.menu-content li.active > a .vc-ico { color: var(--vc-gold-soft); }
 
-/* has-sub chevron (SVG-free — bordered triangle) */
+/* has-sub parent — reads as a group toggle. The bold weight plus a faint
+   persistent tint and the trailing chevron make "this expands" obvious at a
+   glance (vs plain links). Active/open backgrounds come from the !important
+   rules above and win over the resting tint. */
+.main-menu .navigation li.nav-item.has-sub > a { font-weight: 600; }
+.main-menu .navigation li.nav-item.has-sub:not(.active):not(.open) > a {
+    background: rgba(255,255,255,.03);
+}
+
+/* has-sub chevron (SVG-free — bordered caret at the trailing edge).
+   Points "down" when closed, rotates 180° to point "up" when open. */
 .main-menu .navigation li.has-sub > a::after {
     content: "";
-    width: 7px; height: 7px;
+    width: 8px; height: 8px;
     border-inline-end: 2px solid currentColor;
     border-block-end: 2px solid currentColor;
-    opacity: .5;
+    opacity: .55;
     position: absolute;
     top: 50%;
-    inset-inline-start: 14px;
-    transform: translateY(-65%) rotate(45deg);
-    transition: transform .2s, opacity .2s;
+    inset-inline-start: 14px;          /* RTL: trailing edge is the left */
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform .22s cubic-bezier(.16,1,.3,1), opacity .2s;
 }
 html[dir="ltr"] .main-menu .navigation li.has-sub > a::after {
     inset-inline-start: auto; inset-inline-end: 14px;
-    transform: translateY(-65%) rotate(-45deg);
+    transform: translateY(-70%) rotate(45deg);
 }
-.main-menu .navigation li.has-sub.open > a::after { transform: translateY(-35%) rotate(225deg); opacity: .85; }
-html[dir="ltr"] .main-menu .navigation li.has-sub.open > a::after { transform: translateY(-35%) rotate(135deg); opacity: .85; }
+.main-menu .navigation li.has-sub.open > a::after { transform: translateY(-30%) rotate(225deg); opacity: .9; }
+html[dir="ltr"] .main-menu .navigation li.has-sub.open > a::after { transform: translateY(-30%) rotate(225deg); opacity: .9; }
 
 /* ── menu-title should not truncate ── */
 .main-menu .navigation li.nav-item > a .menu-title,
@@ -1172,6 +1217,82 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
         });
     });
 
+    // ── Has-sub dropdowns (collapsible submenus — QA #230) ──────────────
+    // Every parent nav-item that owns a <ul.menu-content> becomes a real
+    // click-to-toggle dropdown. Children are collapsed by default; the parent
+    // of the active page auto-opens; an accordion keeps only one open per
+    // section. This is the authoritative source of truth (the server-rendered
+    // `.open` class is only a first-paint hint).
+    function setSubOpen(li, open, animate) {
+        var uc = li.querySelector(':scope > ul.menu-content');
+        if (!uc) return;
+        li.classList.toggle('open', !!open);
+        var trigger = li.querySelector(':scope > a');
+        if (trigger) trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (!animate) {
+            // Let CSS handle the static state (max-height via .open rule).
+            uc.style.maxHeight = '';
+            uc.style.opacity   = '';
+            return;
+        }
+        if (open) {
+            uc.style.opacity = '1';
+            uc.style.maxHeight = uc.scrollHeight + 'px';
+            uc.addEventListener('transitionend', function once(ev) {
+                if (ev.propertyName !== 'max-height') return;
+                if (li.classList.contains('open')) uc.style.maxHeight = '1200px';
+                uc.removeEventListener('transitionend', once);
+            });
+        } else {
+            // From auto/large height → fixed px → 0 so the transition fires.
+            uc.style.maxHeight = uc.scrollHeight + 'px';
+            uc.offsetHeight; // reflow
+            uc.style.maxHeight = '0';
+            uc.style.opacity   = '0';
+        }
+    }
+
+    var subParents = document.querySelectorAll('.main-menu .navigation li.nav-item.has-sub');
+    subParents.forEach(function (li) {
+        // Initial state: open only if this parent (or a child) is active.
+        var active = li.classList.contains('active') ||
+                     li.classList.contains('open') ||
+                     !!li.querySelector(':scope > ul.menu-content li.active');
+        setSubOpen(li, active, false);
+
+        var link = li.querySelector(':scope > a');
+        if (!link) return;
+        // Mark the toggle as an expandable control for assistive tech.
+        link.setAttribute('role', 'button');
+        link.setAttribute('aria-expanded', active ? 'true' : 'false');
+        var subUl = li.querySelector(':scope > ul.menu-content');
+        if (subUl) {
+            if (!subUl.id) subUl.id = 'gp-sub-' + Math.random().toString(36).slice(2, 8);
+            link.setAttribute('aria-controls', subUl.id);
+        }
+        // Capture phase + stopImmediatePropagation so we are the single source
+        // of truth and the theme's delegated `click.app.menu` (app-menu.js) does
+        // not also toggle `.open` / run its jQuery slide — which otherwise fights
+        // us in overlay/mobile mode.
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var willOpen = !li.classList.contains('open');
+            if (willOpen) {
+                // Accordion: close sibling dropdowns within the same container.
+                var container = li.parentElement;
+                container.querySelectorAll(':scope > li.nav-item.has-sub.open').forEach(function (sib) {
+                    if (sib !== li) setSubOpen(sib, false, true);
+                });
+            }
+            setSubOpen(li, willOpen, true);
+        }, true /* capture */);
+        // Space activates a role=button (Enter already fires click on an <a>).
+        link.addEventListener('keydown', function (e) {
+            if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); link.click(); }
+        });
+    });
+
     // ── Mobile drawer — works WITH the theme's overlay mechanism ──
     // The theme uses body.menu-open (+ body.vertical-overlay-menu) to show the sidebar
     // as an overlay on small screens. We piggyback on that rather than fighting it.
@@ -1193,9 +1314,12 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
         overlayEl.addEventListener('click', gpCloseMobileDrawer);
     }
 
-    // Close drawer when a nav link is clicked on mobile
+    // Close drawer when a real nav link is clicked on mobile.
+    // Skip .has-sub parent toggles — tapping them should expand the submenu
+    // (handled above), not dismiss the whole drawer.
     document.querySelectorAll('.main-menu .navigation a').forEach(function (a) {
         a.addEventListener('click', function () {
+            if (a.parentElement && a.parentElement.classList.contains('has-sub')) return;
             if (window.innerWidth < 768) gpCloseMobileDrawer();
         });
     });
