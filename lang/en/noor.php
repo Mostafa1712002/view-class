@@ -100,7 +100,7 @@ return [
     ],
 
     'template_download'    => 'Download sample template',
-    'template_hint'        => 'Download a sample CSV file (2 rows) to use as a format reference.',
+    'template_hint'        => 'Download a sample Excel file (2 rows) to use as a format reference.',
 
     'settings' => [
         'page_title'             => 'Noor Connection Settings',

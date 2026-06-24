@@ -12,7 +12,7 @@
     </div>
     <div class="content-header-right text-md-end col-md-4 col-12 d-md-block d-none">
         <a href="{{ route('admin.noor.template') }}" class="btn btn-sm btn-outline-success">
-            <i class="la la-file-csv"></i> @lang('noor.template_download')
+            <i class="la la-file-excel"></i> @lang('noor.template_download')
         </a>
         <a href="{{ route('admin.noor.settings') }}" class="btn btn-sm btn-outline-secondary mr-1">
             <i class="la la-cog"></i> @lang('noor.settings.page_title')

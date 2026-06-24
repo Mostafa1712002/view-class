@@ -51,35 +51,119 @@ class NoorImportController extends Controller
     }
 
     /**
-     * Download the sample CSV template (UTF-8 BOM so Excel opens Arabic correctly).
+     * Download the sample template as a real .xlsx workbook.
+     *
+     * A comma-separated CSV opens as a single column in Arabic-locale Excel
+     * (its list separator is «;», not «,»), which is what QA reported as
+     * «العناوين مش متوزعة على الخلايا». Emitting a genuine spreadsheet places
+     * each header in its own cell regardless of locale and matches the format
+     * real Noor exports use. Falls back to a CSV only if PhpSpreadsheet is
+     * unavailable.
      */
-    public function downloadTemplate(Request $request): SymfonyStreamedResponse
+    public function downloadTemplate(Request $request): SymfonyStreamedResponse|BinaryFileResponse
     {
-        return response()->streamDownload(function () {
+        $headers = [
+            'م',
+            'رقم الطالب',
+            'اسم الطالب',
+            'الجنس',
+            'الجنسية',
+            'تاريخ الميلاد',
+            'الصف',
+            'الفصل',
+            'حالة الطالب',
+            'اسم ولي الأمر',
+            'هوية ولي الأمر',
+            'جوال ولي الأمر',
+            'البريد الإلكتروني',
+        ];
+        $samples = [
+            [1, '1099000001', 'محمد عبدالله الأحمد', 'ذكر', 'سعودي', '2005/01/15', 'الأول الثانوي', 'أ', 'مقيد', 'عبدالله الأحمد', '1050000001', '0501234567', 'student1@noor.local'],
+            [2, '1099000002', 'عبدالرحمن علي السالم', 'ذكر', 'سعودي', '2005/03/20', 'الأول الثانوي', 'أ', 'مقيد', 'علي السالم', '1050000002', '0507654321', 'student2@noor.local'],
+        ];
+
+        if (class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            return $this->xlsxTemplate($headers, $samples);
+        }
+
+        // Fallback: CSV (kept for environments without PhpSpreadsheet).
+        return response()->streamDownload(function () use ($headers, $samples) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF"); // BOM for Excel Arabic
-            fputcsv($out, [
-                'م',
-                'رقم الطالب',
-                'اسم الطالب',
-                'الجنس',
-                'الجنسية',
-                'تاريخ الميلاد',
-                'الصف',
-                'الفصل',
-                'حالة الطالب',
-                'اسم ولي الأمر',
-                'هوية ولي الأمر',
-                'جوال ولي الأمر',
-                'البريد الإلكتروني',
-            ]);
-            // Two sample rows
-            fputcsv($out, [1, '1099000001', 'محمد عبدالله الأحمد', 'ذكر', 'سعودي', '2005/01/15', 'الأول الثانوي', 'أ', 'مقيد', 'عبدالله الأحمد', '1050000001', '0501234567', 'student1@noor.local']);
-            fputcsv($out, [2, '1099000002', 'عبدالرحمن علي السالم', 'ذكر', 'سعودي', '2005/03/20', 'الأول الثانوي', 'أ', 'مقيد', 'علي السالم', '1050000002', '0507654321', 'student2@noor.local']);
+            fputcsv($out, $headers);
+            foreach ($samples as $row) {
+                fputcsv($out, $row);
+            }
             fclose($out);
         }, 'noor-template-students.csv', [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * Build the .xlsx template: header row in bold on a coloured band, two
+     * sample rows below it, RTL sheet, text-formatted id columns (so long
+     * national-id numbers are not mangled into scientific notation).
+     *
+     * @param  array<int, string>            $headers
+     * @param  array<int, array<int, mixed>> $samples
+     */
+    private function xlsxTemplate(array $headers, array $samples): BinaryFileResponse
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Students');
+        $sheet->setRightToLeft(true);
+
+        $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers));
+
+        // Header row.
+        foreach ($headers as $i => $title) {
+            $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+            $sheet->setCellValue($col . '1', $title);
+        }
+        $sheet->getStyle('A1:' . $lastCol . '1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:' . $lastCol . '1')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('14233A');
+        $sheet->getStyle('A1:' . $lastCol . '1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        // Keep id-bearing columns as text so big numbers survive intact.
+        $textCols = ['B', 'K', 'L']; // رقم الطالب, هوية ولي الأمر, جوال ولي الأمر
+        foreach ($textCols as $tc) {
+            $sheet->getStyle($tc . '2:' . $tc . (count($samples) + 1))
+                ->getNumberFormat()
+                ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+        }
+
+        // Sample rows.
+        $r = 2;
+        foreach ($samples as $row) {
+            foreach ($row as $i => $val) {
+                $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+                $cell = $sheet->getCell($col . $r);
+                if (in_array($col, $textCols, true)) {
+                    $cell->setValueExplicit((string) $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                } else {
+                    $cell->setValue($val);
+                }
+            }
+            $r++;
+        }
+
+        foreach (range(1, count($headers)) as $i) {
+            $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i);
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'noor_tpl_') . '.xlsx';
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($tmp);
+        $spreadsheet->disconnectWorksheets();
+
+        return response()->download($tmp, 'noor-template-students.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
     }
 
     /**
