@@ -36,16 +36,12 @@ class MyCalendarController extends Controller
         $from     = $request->get('start', now()->startOfMonth()->toDateString());
         $to       = $request->get('end', now()->endOfMonth()->toDateString());
 
-        // Map user role → audience key used in events
-        $audienceKey = match (true) {
-            $user && $user->isStudent()    => 'students',
-            $user && $user->isParent()     => 'parents',
-            $user && $user->isTeacher()    => 'teachers',
-            // school-admin and super-admin see all events
-            default                        => null,
-        };
-
-        $events = $this->repo->forRange($schoolId, $from, $to, $audienceKey);
+        // Targeting (whole-school audience role, or specific grade/class/user
+        // lists) is enforced per-event via the model so non-targeted users never
+        // see an event that isn't theirs.
+        $events = $this->repo->forRange($schoolId, $from, $to)
+            ->filter(fn ($e) => $e->isVisibleTo($user))
+            ->values();
 
         $out = $events->map(fn ($e) => [
             'id'    => $e->id,

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SchoolEvent extends Model
@@ -20,6 +21,10 @@ class SchoolEvent extends Model
         'activity', 'admin', 'virtual_class', 'alert', 'occasion',
     ];
 
+    /** Targeting modes (card #233). */
+    public const TARGET_SCHOOL   = 'school';   // whole school, narrowed by audience roles
+    public const TARGET_SPECIFIC = 'specific'; // chosen grades / classes / users
+
     protected $fillable = [
         'school_id',
         'title',
@@ -32,15 +37,27 @@ class SchoolEvent extends Model
         'end_time',
         'color',
         'audience',
+        'target_type',
+        'grade_levels',
+        'class_ids',
+        'notify',
+        'remind_before',
+        'remind_minutes',
+        'reminded_at',
         'location',
         'created_by',
     ];
 
     protected $casts = [
-        'audience'   => 'array',
-        'all_day'    => 'boolean',
-        'start_date' => 'date',
-        'end_date'   => 'date',
+        'audience'      => 'array',
+        'grade_levels'  => 'array',
+        'class_ids'     => 'array',
+        'all_day'       => 'boolean',
+        'notify'        => 'boolean',
+        'remind_before' => 'boolean',
+        'start_date'    => 'date',
+        'end_date'      => 'date',
+        'reminded_at'   => 'datetime',
     ];
 
     // ─── Relations ────────────────────────────────────────────────────────────
@@ -48,6 +65,67 @@ class SchoolEvent extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function targets(): HasMany
+    {
+        return $this->hasMany(SchoolEventTarget::class, 'school_event_id');
+    }
+
+    // ─── Visibility ───────────────────────────────────────────────────────────
+
+    /**
+     * Whether this event should appear on a given user's personal calendar.
+     * School-admins / super-admins see every event in their scope; for everyone
+     * else the targeting (audience role for whole-school events, or the explicit
+     * grade / class / user lists for specific events) is enforced.
+     */
+    public function isVisibleTo(User $user): bool
+    {
+        // Staff with management reach see all events in the school.
+        if ($user->isSuperAdmin() || $user->canDo('calendar.create_event')) {
+            return true;
+        }
+
+        if (($this->target_type ?? self::TARGET_SCHOOL) === self::TARGET_SPECIFIC) {
+            // Explicit user target
+            $userTargetIds = $this->relationLoaded('targets')
+                ? $this->targets->where('kind', 'user')->pluck('target_id')->all()
+                : $this->targets()->where('kind', 'user')->pluck('target_id')->all();
+            if (in_array($user->id, array_map('intval', $userTargetIds), true)) {
+                return true;
+            }
+
+            // Grade / class targeting (students)
+            $grades  = $this->grade_levels ?: [];
+            $classes = array_map('intval', $this->class_ids ?: []);
+            if (! empty($classes) && array_intersect($classes, $user->enrolledClassIds())) {
+                return true;
+            }
+            if (! empty($grades)) {
+                $userGrade = optional($user->classRoom)->grade_level;
+                if ($userGrade !== null && in_array((string) $userGrade, array_map('strval', $grades), true)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Whole-school event: narrow by audience role keys.
+        $audience = $this->audience ?: ['all'];
+        if (in_array('all', $audience, true)) {
+            return true;
+        }
+
+        $roleKey = match (true) {
+            $user->isStudent() => 'students',
+            $user->isParent()  => 'parents',
+            $user->isTeacher() => 'teachers',
+            default            => 'staff',
+        };
+
+        return in_array($roleKey, $audience, true);
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────

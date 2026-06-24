@@ -11,6 +11,12 @@
     #school-calendar { max-width: 100%; background: #fff; padding: 1rem; border-radius: .5rem; }
     .fc-event { cursor: pointer; }
     .fc-event-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 5px; }
+    /* #233: the theme clips .content-header.row with overflow:hidden, which hid
+       the print dropdown. Let it overflow on this page and float above the card. */
+    .content-header.row,
+    .content-header.row .content-header-right { overflow: visible !important; }
+    .content-header .btn-group { position: relative; }
+    .content-header .btn-group .dropdown-menu { z-index: 1051; }
 </style>
 @endpush
 

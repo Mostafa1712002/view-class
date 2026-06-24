@@ -1,10 +1,24 @@
 @php
     $isRtl       = app()->getLocale() === 'ar';
+    $isSuper     = auth()->user()->isSuperAdmin();
     $eventTypes  = collect(\App\Models\SchoolEvent::TYPES)->mapWithKeys(fn ($t) => [$t => __('school_calendar.type_' . $t)])->all();
     $audienceOpts = ['all' => __('school_calendar.audience_all'), 'students' => __('school_calendar.audience_students'), 'parents' => __('school_calendar.audience_parents'), 'teachers' => __('school_calendar.audience_teachers'), 'staff' => __('school_calendar.audience_staff')];
     $colors = ['#e74c3c' => __('school_calendar.color_red'), '#e67e22' => __('school_calendar.color_orange'), '#f1c40f' => __('school_calendar.color_yellow'), '#2ecc71' => __('school_calendar.color_green'), '#3498db' => __('school_calendar.color_blue'), '#9b59b6' => __('school_calendar.color_purple'), '#95a5a6' => __('school_calendar.color_gray')];
+
+    $isAllDay        = old('all_day', $event ? $event->all_day : true);
+    $targetType      = old('target_type', $event->target_type ?? 'school');
     $selectedAudience = old('audience', $event ? ($event->audience ?? ['all']) : ['all']);
-    $isAllDay = old('all_day', $event ? $event->all_day : true);
+    $selectedGrades  = old('grade_levels', $event ? ($event->grade_levels ?? []) : []);
+    $selectedClasses = old('class_ids', $event ? ($event->class_ids ?? []) : []);
+    $selectedUsers   = old('user_target_ids', $event ? $event->targets->where('kind', 'user')->pluck('target_id')->all() : []);
+    $notify          = old('notify', $event->notify ?? false);
+    $remindBefore    = old('remind_before', $event->remind_before ?? false);
+    $remindMinutes   = old('remind_minutes', $event->remind_minutes ?? 60);
+
+    $schools     = $schools ?? collect();
+    $classes     = $classes ?? collect();
+    $users       = $users ?? collect();
+    $gradeLevels = $gradeLevels ?? range(1, 12);
 @endphp
 
 <div class="row">
@@ -90,9 +104,29 @@
                value="{{ old('location', $event?->location) }}" maxlength="160">
         @error('location') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
+</div>
 
-    {{-- Audience --}}
+{{-- ── Targeting ─────────────────────────────────────────────────────────── --}}
+<hr>
+<h6 class="mb-2"><x-svg-icon name="people" :size="15" /> @lang('school_calendar.target_heading')</h6>
+
+<div class="row">
     <div class="col-12 form-group">
+        <div class="custom-control custom-radio custom-control-inline">
+            <input type="radio" class="custom-control-input cal-target-mode" id="tt_school"
+                   name="target_type" value="school" {{ $targetType !== 'specific' ? 'checked' : '' }}>
+            <label class="custom-control-label" for="tt_school">@lang('school_calendar.target_school')</label>
+        </div>
+        <div class="custom-control custom-radio custom-control-inline">
+            <input type="radio" class="custom-control-input cal-target-mode" id="tt_specific"
+                   name="target_type" value="specific" {{ $targetType === 'specific' ? 'checked' : '' }}>
+            <label class="custom-control-label" for="tt_specific">@lang('school_calendar.target_specific')</label>
+        </div>
+        @error('user_target_ids') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+    </div>
+
+    {{-- Whole-school: audience role groups --}}
+    <div class="col-12 form-group cal-scope-school" style="{{ $targetType === 'specific' ? 'display:none' : '' }}">
         <label class="required">@lang('school_calendar.field_audience')</label>
         <div class="d-flex flex-wrap gap-2">
             @foreach($audienceOpts as $val => $label)
@@ -107,7 +141,91 @@
         @error('audience') <div class="text-danger small">{{ $message }}</div> @enderror
     </div>
 
-    {{-- Description --}}
+    {{-- Specific targeting: school / grades / classes / users --}}
+    <div class="col-12 cal-scope-specific" style="{{ $targetType === 'specific' ? '' : 'display:none' }}">
+        <div class="row">
+            @if($isSuper && $schools->count())
+            <div class="col-12 col-md-4 form-group">
+                <label>@lang('school_calendar.field_school')</label>
+                <select name="school_id" id="cal-school" class="form-control">
+                    @foreach($schools as $s)
+                    <option value="{{ $s->id }}" {{ (int) old('school_id', $event?->school_id) === $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+                    @endforeach
+                </select>
+                <small class="text-muted">@lang('school_calendar.school_hint')</small>
+            </div>
+            @endif
+
+            <div class="col-12 col-md-4 form-group">
+                <label>@lang('school_calendar.field_grades')</label>
+                <select name="grade_levels[]" class="form-control" multiple size="5">
+                    @foreach($gradeLevels as $g)
+                    <option value="{{ $g }}" {{ in_array($g, (array) $selectedGrades) ? 'selected' : '' }}>@lang('school_calendar.grade') {{ $g }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-12 col-md-4 form-group">
+                <label>@lang('school_calendar.field_classes')</label>
+                <select name="class_ids[]" id="cal-classes" class="form-control" multiple size="5">
+                    @foreach($classes as $c)
+                    <option value="{{ $c->id }}" data-school="{{ $c->school_id }}"
+                            {{ in_array($c->id, (array) $selectedClasses) ? 'selected' : '' }}>{{ $c->name }} (@lang('school_calendar.grade') {{ $c->grade_level }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-12 form-group">
+                <label>@lang('school_calendar.field_users')</label>
+                <select name="user_target_ids[]" class="form-control" multiple size="6">
+                    @foreach($users as $u)
+                    <option value="{{ $u->id }}" data-school="{{ $u->school_id }}"
+                            {{ in_array($u->id, (array) $selectedUsers) ? 'selected' : '' }}>{{ $u->name }}</option>
+                    @endforeach
+                </select>
+                <small class="text-muted">@lang('school_calendar.users_hint')</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ── Notifications ─────────────────────────────────────────────────────── --}}
+<hr>
+<h6 class="mb-2"><x-svg-icon name="bell" :size="15" /> @lang('school_calendar.notif_heading')</h6>
+
+<div class="row">
+    <div class="col-12 col-md-4 form-group">
+        <div class="custom-control custom-checkbox">
+            <input type="hidden" name="notify" value="0">
+            <input type="checkbox" class="custom-control-input" id="notify" name="notify" value="1" {{ $notify ? 'checked' : '' }}>
+            <label class="custom-control-label" for="notify">@lang('school_calendar.field_notify')</label>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4 form-group">
+        <div class="custom-control custom-checkbox">
+            <input type="hidden" name="remind_before" value="0">
+            <input type="checkbox" class="custom-control-input" id="remind_before" name="remind_before" value="1" {{ $remindBefore ? 'checked' : '' }}>
+            <label class="custom-control-label" for="remind_before">@lang('school_calendar.field_remind')</label>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4 form-group" id="remind-minutes-wrap" style="{{ $remindBefore ? '' : 'display:none' }}">
+        <label>@lang('school_calendar.field_remind_when')</label>
+        <select name="remind_minutes" class="form-control">
+            @foreach([15 => 15, 30 => 30, 60 => 60, 120 => 120, 1440 => 1440] as $min => $lbl)
+            <option value="{{ $min }}" {{ (int) $remindMinutes === $min ? 'selected' : '' }}>
+                @if($min < 60) {{ $min }} @lang('school_calendar.minutes')
+                @elseif($min < 1440) {{ intdiv($min, 60) }} @lang('school_calendar.hours')
+                @else @lang('school_calendar.one_day') @endif
+            </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
+{{-- Description --}}
+<div class="row">
     <div class="col-12 form-group">
         <label>@lang('school_calendar.field_description')</label>
         <textarea name="description" rows="3" class="form-control @error('description') is-invalid @enderror">{{ old('description', $event?->description) }}</textarea>
@@ -118,25 +236,43 @@
 @push('scripts')
 <script>
 $(document).ready(function () {
+    // All-day hides the time pickers
     $('#all_day').on('change', function () {
-        if ($(this).is(':checked')) {
-            $('#start-time-wrap, #end-time-wrap').hide();
-        } else {
-            $('#start-time-wrap, #end-time-wrap').show();
-        }
+        $('#start-time-wrap, #end-time-wrap').toggle(!$(this).is(':checked'));
     });
 
-    // If "all" audience is checked, uncheck others; if any other is checked, uncheck "all"
+    // Audience: "all" is mutually exclusive with the role groups
     $(document).on('change', '#aud_all', function () {
-        if ($(this).is(':checked')) {
-            $('.audience-cb').not(this).prop('checked', false);
-        }
+        if ($(this).is(':checked')) { $('.audience-cb').not(this).prop('checked', false); }
     });
     $(document).on('change', '.audience-cb:not(#aud_all)', function () {
-        if ($(this).is(':checked')) {
-            $('#aud_all').prop('checked', false);
-        }
+        if ($(this).is(':checked')) { $('#aud_all').prop('checked', false); }
     });
+
+    // Target mode switches the scope blocks
+    $(document).on('change', '.cal-target-mode', function () {
+        var specific = $('#tt_specific').is(':checked');
+        $('.cal-scope-specific').toggle(specific);
+        $('.cal-scope-school').toggle(!specific);
+    });
+
+    // Reminder window appears only when reminder is on
+    $('#remind_before').on('change', function () {
+        $('#remind-minutes-wrap').toggle($(this).is(':checked'));
+    });
+
+    // Filter the class/user lists by the chosen school (super-admin)
+    function filterBySchool() {
+        var sid = $('#cal-school').val();
+        if (!sid) { return; }
+        $('#cal-classes option, select[name="user_target_ids[]"] option').each(function () {
+            var os = $(this).data('school');
+            var match = !os || String(os) === String(sid);
+            $(this).prop('hidden', !match);
+            if (!match) { $(this).prop('selected', false); }
+        });
+    }
+    if ($('#cal-school').length) { $('#cal-school').on('change', filterBySchool); filterBySchool(); }
 });
 </script>
 @endpush

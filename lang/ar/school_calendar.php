@@ -80,6 +80,33 @@ return [
     'err_end_before_start'      => 'لا يمكن أن يكون تاريخ النهاية قبل تاريخ البداية.',
     'err_end_time_before_start' => 'لا يمكن أن يكون وقت النهاية قبل وقت البداية في نفس اليوم.',
 
+    // Targeting
+    'target_heading'   => 'الجمهور المستهدف',
+    'target_school'    => 'لكل المدرسة',
+    'target_specific'  => 'تعيين مستخدمين',
+    'field_school'     => 'المدرسة',
+    'school_hint'      => 'اختيار المدرسة يحدّد الفصول والمستخدمين المتاحين.',
+    'field_grades'     => 'الصفوف',
+    'field_classes'    => 'الفصول',
+    'field_users'      => 'المستخدمون المحددون',
+    'users_hint'       => 'اضغط Ctrl لاختيار أكثر من مستخدم.',
+    'grade'            => 'الصف',
+
+    // Notifications
+    'notif_heading'    => 'الإشعارات والتذكير',
+    'field_notify'     => 'إرسال إشعار عند الإضافة؟',
+    'field_remind'     => 'إرسال تذكير قبل الحدث؟',
+    'field_remind_when' => 'وقت التذكير قبل الحدث',
+    'minutes'          => 'دقيقة',
+    'hours'            => 'ساعة',
+    'one_day'          => 'يوم واحد',
+    'notif_new_title'    => 'حدث جديد في التقويم',
+    'notif_reminder_title' => 'تذكير بحدث قادم',
+    'notif_action'     => 'عرض التقويم',
+
+    // Validation
+    'err_specific_required' => 'يجب اختيار صفوف أو فصول أو مستخدمين عند تعيين مستخدمين محددين.',
+
     // Misc
     'upcoming_events'   => 'الأحداث القادمة (3 أشهر)',
     'no_events'         => 'لا توجد أحداث قادمة.',

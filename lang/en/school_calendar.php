@@ -80,6 +80,33 @@ return [
     'err_end_before_start'      => 'End date cannot be before the start date.',
     'err_end_time_before_start' => 'End time cannot be before the start time on the same day.',
 
+    // Targeting
+    'target_heading'   => 'Target Audience',
+    'target_school'    => 'Whole School',
+    'target_specific'  => 'Specific Users',
+    'field_school'     => 'School',
+    'school_hint'      => 'Choosing a school filters the available classes and users.',
+    'field_grades'     => 'Grades',
+    'field_classes'    => 'Classes',
+    'field_users'      => 'Specific Users',
+    'users_hint'       => 'Hold Ctrl to select multiple users.',
+    'grade'            => 'Grade',
+
+    // Notifications
+    'notif_heading'    => 'Notifications & Reminder',
+    'field_notify'     => 'Send a notification on creation?',
+    'field_remind'     => 'Send a reminder before the event?',
+    'field_remind_when' => 'Reminder lead time',
+    'minutes'          => 'minutes',
+    'hours'            => 'hours',
+    'one_day'          => 'One day',
+    'notif_new_title'    => 'New calendar event',
+    'notif_reminder_title' => 'Upcoming event reminder',
+    'notif_action'     => 'View Calendar',
+
+    // Validation
+    'err_specific_required' => 'Select grades, classes or users when targeting specific users.',
+
     // Misc
     'upcoming_events'   => 'Upcoming Events (3 months)',
     'no_events'         => 'No upcoming events.',
