@@ -13,6 +13,7 @@
     $targetType = old('target_type', $editing ? $announcement->target_type : 'all');
     $selectedUserTargets = old('user_target_ids', $editing ? $announcement->targets->where('kind','user')->pluck('target_id')->all() : []);
     $selectedRoleTargets = old('role_target_ids', $editing ? $announcement->targets->where('kind','role')->pluck('target_id')->all() : []);
+    $selectedJobTitles = old('job_title_ids', $editing ? $announcement->targets->where('kind','job_title')->pluck('target_id')->all() : []);
     $selectedGrades  = old('grade_levels', $editing ? ($announcement->grade_levels ?? []) : []);
     $selectedClasses = old('class_ids', $editing ? ($announcement->class_ids ?? []) : []);
     $selectedSubjects = old('subject_ids', $editing ? ($announcement->subject_ids ?? []) : []);
@@ -77,11 +78,12 @@
                 @if($isSuper)
                     <div class="form-group">
                         <label class="form-label">المدرسة</label>
-                        <select name="school_id" class="form-control">
+                        <select name="school_id" id="annSchool" class="form-control">
                             @foreach($schools as $s)
                                 <option value="{{ $s->id }}" @selected((int)old('school_id', $editing ? $announcement->school_id : 0) === $s->id)>{{ $s->name }}</option>
                             @endforeach
                         </select>
+                        <small class="text-muted">اختيار المدرسة يحدّد الفصول المتاحة للإعلان.</small>
                     </div>
                 @endif
 
@@ -112,9 +114,26 @@
                         <option value="teachers"       @selected($targetType==='teachers')>المعلمون</option>
                         <option value="parents"        @selected($targetType==='parents')>أولياء الأمور</option>
                         <option value="admins"         @selected($targetType==='admins')>الإداريون</option>
+                        <option value="job_titles"     @selected($targetType==='job_titles')>مسميات وظيفية محددة</option>
                         <option value="specific_users" @selected($targetType==='specific_users')>مستخدمون محددون</option>
                         <option value="specific_roles" @selected($targetType==='specific_roles')>أدوار محددة</option>
                     </select>
+                </div>
+
+                <div class="form-group ann-cond" data-show="job_titles">
+                    <label class="form-label">اختر المسميات الوظيفية</label>
+                    <div class="ann-jobtitles-grid">
+                        @foreach($jobTitles as $jt)
+                            <label class="ann-jt-item">
+                                <input type="checkbox" name="job_title_ids[]" value="{{ $jt->id }}"
+                                    @checked(in_array($jt->id, $selectedJobTitles))>
+                                <span>{{ $jt->name_ar }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @if($jobTitles->isEmpty())
+                        <p class="text-muted" style="margin:.4rem 0 0">لا توجد مسميات وظيفية متاحة.</p>
+                    @endif
                 </div>
 
                 <div class="form-group ann-cond" data-show="specific_users">
@@ -146,9 +165,10 @@
 
                 <div class="form-group ann-cond" data-show="students">
                     <label class="form-label">الفصول</label>
-                    <select name="class_ids[]" class="form-control" multiple size="5">
+                    <select name="class_ids[]" id="annClasses" class="form-control" multiple size="5">
                         @foreach($classes as $c)
-                            <option value="{{ $c->id }}" @selected(in_array($c->id, $selectedClasses))>{{ $c->name }} (صف {{ $c->grade_level }})</option>
+                            <option value="{{ $c->id }}" data-school="{{ $c->school_id }}"
+                                @selected(in_array($c->id, $selectedClasses))>{{ $c->name }} (صف {{ $c->grade_level }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -226,7 +246,7 @@
 <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin" onerror="window.__noTiny=true"></script>
 <script>
 (function () {
-    // Conditional target fields
+    // ── Conditional target fields ─────────────────────────────────────────
     var tt = document.getElementById('annTargetType');
     function syncCond() {
         var v = tt.value;
@@ -236,23 +256,77 @@
     }
     if (tt) { tt.addEventListener('change', syncCond); syncCond(); }
 
-    // Progressive rich-text enhancement (textarea stays the source of truth)
+    // ── Filter the class list by the chosen school (super-admin) ───────────
+    var schoolSel = document.getElementById('annSchool');
+    var classSel  = document.getElementById('annClasses');
+    function filterClassesBySchool() {
+        if (!schoolSel || !classSel) { return; }
+        var sid = schoolSel.value;
+        Array.prototype.forEach.call(classSel.options, function (opt) {
+            var os = opt.getAttribute('data-school');
+            var match = !os || os === sid;
+            opt.hidden = !match;
+            if (!match) { opt.selected = false; }
+        });
+    }
+    if (schoolSel && classSel) {
+        schoolSel.addEventListener('change', filterClassesBySchool);
+        filterClassesBySchool();
+    }
+
+    // ── TinyMCE full classic toolbar (textarea stays source of truth) ──────
     if (window.tinymce && !window.__noTiny) {
         tinymce.init({
             selector: '#annBody',
             directionality: 'rtl',
-            menubar: false,
-            height: 280,
-            plugins: 'lists link',
-            toolbar: 'undo redo | bold italic underline | bullist numlist | link',
+            language: 'ar',
+            language_url: 'https://cdn.jsdelivr.net/npm/tinymce-i18n@24/langs6/ar.js',
+            menubar: 'file edit view insert format tools table help',
+            height: 420,
+            branding: true,
+            promotion: false,
+            plugins: 'advlist autolink lists link image charmap preview anchor '
+                + 'searchreplace visualblocks code fullscreen insertdatetime '
+                + 'media table help wordcount directionality',
+            toolbar1: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | '
+                + 'forecolor backcolor | alignleft aligncenter alignright alignjustify',
+            toolbar2: 'ltr rtl | bullist numlist outdent indent | link image media table | '
+                + 'charmap | code preview fullscreen | print',
+            font_family_formats:
+                'Helvetica=helvetica,arial,sans-serif; Arial=arial,helvetica,sans-serif; '
+                + 'Tahoma=tahoma,arial,sans-serif; Times New Roman=times new roman,times,serif; '
+                + 'Courier New=courier new,courier,monospace',
+            font_size_formats: '10px 12px 14px 16px 18px 24px 36px',
+            content_style: 'body{font-family:helvetica,arial,sans-serif;font-size:14px;direction:rtl}',
             setup: function (ed) {
-                ed.on('change', function () { ed.save(); });
+                ed.on('change keyup', function () { ed.save(); });
             }
         });
         document.getElementById('announcementForm').addEventListener('submit', function () {
-            if (window.tinymce) tinymce.triggerSave();
+            if (window.tinymce) { tinymce.triggerSave(); }
         });
     }
 })();
 </script>
+<style>
+.ann-jobtitles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: .35rem .9rem;
+    border: 1px solid var(--gray-200, #e5e7eb);
+    border-radius: .5rem;
+    padding: .75rem;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.ann-jt-item {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0;
+}
+.ann-jt-item input { flex: 0 0 auto; }
+</style>
 @endpush

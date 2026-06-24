@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Announcement;
 use App\Models\ClassRoom;
+use App\Models\JobTitle;
 use App\Models\Role;
 use App\Models\School;
 use App\Models\Subject;
@@ -213,13 +214,14 @@ class AnnouncementController extends Controller
         $user = auth()->user();
         $schoolId = $this->schoolId();
 
-        $classesQuery = ClassRoom::query();
+        $classesQuery = ClassRoom::query()
+            ->leftJoin('sections', 'sections.id', '=', 'classes.section_id');
         $subjectsQuery = Subject::query();
         $usersQuery = User::query();
         $schools = collect();
 
         if ($schoolId !== null) {
-            $classesQuery->whereHas('section', fn ($q) => $q->where('school_id', $schoolId));
+            $classesQuery->where('sections.school_id', $schoolId);
             $subjectsQuery->where('school_id', $schoolId);
             $usersQuery->where('school_id', $schoolId);
         } else {
@@ -227,9 +229,19 @@ class AnnouncementController extends Controller
         }
 
         return [
-            'classes'  => $classesQuery->orderBy('grade_level')->orderBy('name')->get(['id', 'name', 'grade_level']),
+            // school_id carried so the form can filter classes by the chosen school.
+            'classes'  => $classesQuery
+                ->orderBy('classes.grade_level')
+                ->orderBy('classes.name')
+                ->get(['classes.id', 'classes.name', 'classes.grade_level', 'sections.school_id as school_id']),
             'subjects' => $subjectsQuery->orderBy('name')->get(['id', 'name']),
             'roles'    => Role::orderBy('name')->get(['id', 'name', 'slug']),
+            'jobTitles' => JobTitle::query()
+                ->active()
+                ->forSchool($schoolId)
+                ->orderBy('sort_order')
+                ->orderBy('name_ar')
+                ->get(['id', 'name_ar', 'school_id']),
             'users'    => $usersQuery->orderBy('name')->limit(500)->get(['id', 'name', 'school_id']),
             'schools'  => $schools,
             'gradeLevels' => range(1, 12),

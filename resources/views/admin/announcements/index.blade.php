@@ -19,6 +19,7 @@
         'all' => 'كل المستخدمين', 'students' => 'الطلاب', 'teachers' => 'المعلمون',
         'parents' => 'أولياء الأمور', 'admins' => 'الإداريون',
         'specific_users' => 'مستخدمون محددون', 'specific_roles' => 'أدوار محددة',
+        'job_titles' => 'مسميات وظيفية محددة',
     ];
     $typeLabels = ['normal' => 'عادي', 'important' => 'مهم', 'popup' => 'منبثق'];
 
@@ -40,6 +41,7 @@
         'admins'         => 'ds-badge-navy',
         'specific_users' => 'ds-badge-info',
         'specific_roles' => 'ds-badge-warning',
+        'job_titles'     => 'ds-badge-gold',
     ];
 @endphp
 

@@ -9,7 +9,7 @@ class AnnouncementTarget extends Model
 {
     protected $fillable = [
         'announcement_id',
-        'kind',       // user | role
+        'kind',       // user | role | job_title
         'target_id',
     ];
 

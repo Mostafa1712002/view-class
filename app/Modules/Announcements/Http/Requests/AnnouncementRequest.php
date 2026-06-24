@@ -20,7 +20,8 @@ class AnnouncementRequest extends FormRequest
             'body'            => ['nullable', 'string'],
             'type'            => ['required', Rule::in(['normal', 'important', 'popup'])],
             'target_type'     => ['required', Rule::in([
-                'all', 'students', 'teachers', 'parents', 'admins', 'specific_users', 'specific_roles',
+                'all', 'students', 'teachers', 'parents', 'admins',
+                'specific_users', 'specific_roles', 'job_titles',
             ])],
 
             'grade_levels'    => ['nullable', 'array'],
@@ -34,6 +35,8 @@ class AnnouncementRequest extends FormRequest
             'user_target_ids.*' => ['integer'],
             'role_target_ids'   => ['nullable', 'array'],
             'role_target_ids.*' => ['integer'],
+            'job_title_ids'     => ['nullable', 'array'],
+            'job_title_ids.*'   => ['integer'],
 
             'starts_at'       => ['nullable', 'date'],
             'ends_at'         => ['nullable', 'date', 'after_or_equal:starts_at'],
@@ -61,6 +64,10 @@ class AnnouncementRequest extends FormRequest
             if ($this->input('target_type') === 'specific_roles'
                 && empty($this->input('role_target_ids'))) {
                 $validator->errors()->add('role_target_ids', 'يجب اختيار دور واحد على الأقل.');
+            }
+            if ($this->input('target_type') === 'job_titles'
+                && empty($this->input('job_title_ids'))) {
+                $validator->errors()->add('job_title_ids', 'يجب اختيار مسمى وظيفي واحد على الأقل.');
             }
         });
     }

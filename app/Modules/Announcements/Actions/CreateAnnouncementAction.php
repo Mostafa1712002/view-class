@@ -24,7 +24,7 @@ final class CreateAnnouncementAction
             $data['published_at'] = now();
         }
 
-        $announcement = $this->announcements->create($data, $dto->userTargetIds, $dto->roleTargetIds);
+        $announcement = $this->announcements->create($data, $dto->userTargetIds, $dto->roleTargetIds, $dto->jobTitleIds);
 
         $verb = $dto->status === 'published' ? 'نشر' : 'إنشاء مسودة';
         ActivityLog::logCreate($announcement, "{$verb} إعلان: {$announcement->title}");

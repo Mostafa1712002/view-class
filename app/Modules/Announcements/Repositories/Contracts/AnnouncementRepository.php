@@ -24,10 +24,10 @@ interface AnnouncementRepository
     public function find(int $id, ?int $schoolId): ?Announcement;
 
     /** Persist a new announcement + its targets (inside a transaction). */
-    public function create(array $data, array $userTargetIds = [], array $roleTargetIds = []): Announcement;
+    public function create(array $data, array $userTargetIds = [], array $roleTargetIds = [], array $jobTitleIds = []): Announcement;
 
     /** Update an announcement + replace its targets. */
-    public function update(Announcement $announcement, array $data, array $userTargetIds = [], array $roleTargetIds = []): Announcement;
+    public function update(Announcement $announcement, array $data, array $userTargetIds = [], array $roleTargetIds = [], array $jobTitleIds = []): Announcement;
 
     /** Set base status (draft|published|stopped) and stamp published_at on first publish. */
     public function setStatus(Announcement $announcement, string $status): Announcement;

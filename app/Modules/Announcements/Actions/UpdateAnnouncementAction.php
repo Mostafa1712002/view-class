@@ -28,7 +28,7 @@ final class UpdateAnnouncementAction
             $data['published_at'] = now();
         }
 
-        $announcement = $this->announcements->update($announcement, $data, $dto->userTargetIds, $dto->roleTargetIds);
+        $announcement = $this->announcements->update($announcement, $data, $dto->userTargetIds, $dto->roleTargetIds, $dto->jobTitleIds);
 
         ActivityLog::logUpdate($announcement, "تعديل إعلان: {$announcement->title}", $old);
 

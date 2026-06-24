@@ -9,10 +9,10 @@
         'draft'=>['مسودة','ds-badge-warning'],'scheduled'=>['مجدول','ds-badge-info'],'active'=>['نشط','ds-badge-success'],
         'expired'=>['منتهي','ds-badge-danger'],'stopped'=>['متوقف','ds-badge-danger'],'deleted'=>['محذوف','ds-badge-danger'],
     ];
-    $targetLabels = ['all'=>'كل المستخدمين','students'=>'الطلاب','teachers'=>'المعلمون','parents'=>'أولياء الأمور','admins'=>'الإداريون','specific_users'=>'مستخدمون محددون','specific_roles'=>'أدوار محددة'];
+    $targetLabels = ['all'=>'كل المستخدمين','students'=>'الطلاب','teachers'=>'المعلمون','parents'=>'أولياء الأمور','admins'=>'الإداريون','specific_users'=>'مستخدمون محددون','specific_roles'=>'أدوار محددة','job_titles'=>'مسميات وظيفية محددة'];
     $targetBadgeClass = [
         'all'=>'ds-badge-navy','students'=>'ds-badge-info','teachers'=>'ds-badge-gold',
-        'parents'=>'ds-badge-gold','admins'=>'ds-badge-navy','specific_users'=>'ds-badge-info','specific_roles'=>'ds-badge-warning',
+        'parents'=>'ds-badge-gold','admins'=>'ds-badge-navy','specific_users'=>'ds-badge-info','specific_roles'=>'ds-badge-warning','job_titles'=>'ds-badge-gold',
     ];
     $typeLabels = ['normal'=>'عادي','important'=>'مهم','popup'=>'منبثق'];
     $eff = $announcement->effectiveStatus();

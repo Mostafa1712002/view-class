@@ -54,21 +54,21 @@ class EloquentAnnouncementRepository implements AnnouncementRepository
         return $query->find($id);
     }
 
-    public function create(array $data, array $userTargetIds = [], array $roleTargetIds = []): Announcement
+    public function create(array $data, array $userTargetIds = [], array $roleTargetIds = [], array $jobTitleIds = []): Announcement
     {
-        return DB::transaction(function () use ($data, $userTargetIds, $roleTargetIds) {
+        return DB::transaction(function () use ($data, $userTargetIds, $roleTargetIds, $jobTitleIds) {
             $announcement = Announcement::create($data);
-            $this->syncTargets($announcement, $userTargetIds, $roleTargetIds);
+            $this->syncTargets($announcement, $userTargetIds, $roleTargetIds, $jobTitleIds);
 
             return $announcement->fresh(['targets']);
         });
     }
 
-    public function update(Announcement $announcement, array $data, array $userTargetIds = [], array $roleTargetIds = []): Announcement
+    public function update(Announcement $announcement, array $data, array $userTargetIds = [], array $roleTargetIds = [], array $jobTitleIds = []): Announcement
     {
-        return DB::transaction(function () use ($announcement, $data, $userTargetIds, $roleTargetIds) {
+        return DB::transaction(function () use ($announcement, $data, $userTargetIds, $roleTargetIds, $jobTitleIds) {
             $announcement->update($data);
-            $this->syncTargets($announcement, $userTargetIds, $roleTargetIds);
+            $this->syncTargets($announcement, $userTargetIds, $roleTargetIds, $jobTitleIds);
 
             return $announcement->fresh(['targets']);
         });
@@ -170,6 +170,11 @@ class EloquentAnnouncementRepository implements AnnouncementRepository
             case 'specific_users':
                 $userIds = $announcement->targets->where('kind', 'user')->pluck('target_id')->all();
                 $query->whereIn('users.id', $userIds ?: [0]);
+                break;
+
+            case 'job_titles':
+                $jobTitleIds = $announcement->targets->where('kind', 'job_title')->pluck('target_id')->all();
+                $query->whereIn('users.job_title_id', $jobTitleIds ?: [0]);
                 break;
         }
 
@@ -301,7 +306,7 @@ class EloquentAnnouncementRepository implements AnnouncementRepository
         }
     }
 
-    protected function syncTargets(Announcement $announcement, array $userTargetIds, array $roleTargetIds): void
+    protected function syncTargets(Announcement $announcement, array $userTargetIds, array $roleTargetIds, array $jobTitleIds = []): void
     {
         $announcement->targets()->delete();
 
@@ -311,6 +316,9 @@ class EloquentAnnouncementRepository implements AnnouncementRepository
         }
         foreach (array_unique(array_filter($roleTargetIds)) as $rid) {
             $rows[] = ['kind' => 'role', 'target_id' => (int) $rid];
+        }
+        foreach (array_unique(array_filter($jobTitleIds)) as $jid) {
+            $rows[] = ['kind' => 'job_title', 'target_id' => (int) $jid];
         }
 
         foreach ($rows as $row) {

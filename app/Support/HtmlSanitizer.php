@@ -24,7 +24,12 @@ class HtmlSanitizer
         'blockquote' => [], 'pre' => [], 'code' => [], 'hr' => [],
         'a' => ['href', 'title', 'target', 'rel'],
         'img' => ['src', 'alt', 'title', 'width', 'height'],
-        'table' => [], 'thead' => [], 'tbody' => [], 'tr' => [], 'th' => ['colspan', 'rowspan'], 'td' => ['colspan', 'rowspan'],
+        'table' => ['style', 'border', 'cellpadding', 'cellspacing', 'width'],
+        'thead' => [], 'tbody' => [], 'tfoot' => [],
+        'tr' => ['style'],
+        'th' => ['colspan', 'rowspan', 'style', 'scope'],
+        'td' => ['colspan', 'rowspan', 'style'],
+        'caption' => [], 'figure' => [], 'figcaption' => [],
     ];
 
     /** Attributes holding URLs that must be scheme-checked. */
@@ -34,6 +39,8 @@ class HtmlSanitizer
     private const ALLOWED_STYLE_PROPS = [
         'color', 'background-color', 'text-align', 'font-weight', 'font-style',
         'text-decoration', 'direction', 'margin', 'padding', 'font-size',
+        'font-family', 'text-indent', 'line-height', 'width', 'height',
+        'border', 'border-collapse', 'vertical-align',
     ];
 
     public static function clean(?string $html): string

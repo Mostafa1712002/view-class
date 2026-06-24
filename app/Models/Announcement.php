@@ -49,7 +49,8 @@ class Announcement extends Model
     public const TYPES = ['normal', 'important', 'popup'];
 
     public const TARGET_TYPES = [
-        'all', 'students', 'teachers', 'parents', 'admins', 'specific_users', 'specific_roles',
+        'all', 'students', 'teachers', 'parents', 'admins',
+        'specific_users', 'specific_roles', 'job_titles',
     ];
 
     // ── Relationships ───────────────────────────────────────────────────────
