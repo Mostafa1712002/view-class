@@ -84,6 +84,25 @@
     --vc-sb-icon:   #c8d4e4;   /* resting icon — bright on navy */
     --vc-gold:      #d8b24a;   /* accent on dark (lifted for contrast) */
     --vc-gold-soft: #f0d589;
+    /* Clear, Arabic-capable font for the whole sidebar (QA #276). The theme's
+       components.css forces "Quicksand" on .menu-title — a Latin-only face, so
+       Arabic fell back to a serif (Times) and read blurry. Use the same system
+       sans stack the page body already uses, which renders Arabic crisply. */
+    --vc-sb-font: "Segoe UI", "Cairo", "Tajawal", "Noto Sans Arabic", system-ui,
+                  -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+/* Apply the clear font across every text surface inside the sidebar, beating
+   the theme's Quicksand→serif rule (same specificity, declared later = wins). */
+.main-menu,
+.main-menu .navigation li.nav-item > a,
+.main-menu .navigation li.nav-item > a .menu-title,
+.main-menu .navigation li ul.menu-content li a,
+.main-menu .navigation li ul.menu-content li a .menu-item,
+.main-menu .gp-section-header,
+.main-menu .gp-section-header .gp-sec-label,
+.main-menu .brand-text,
+.main-menu [class*="brand"] {
+    font-family: var(--vc-sb-font) !important;
 }
 
 /* ── Icon baseline ── */
@@ -197,15 +216,17 @@
    ══════════════════════════════════════════ */
 .main-menu .navigation li.nav-item > a {
     display: flex; align-items: center; gap: 12px;
-    padding: .62rem .9rem; border-radius: 10px;
+    padding: .64rem .9rem; border-radius: 10px;
     margin: 2px 12px;
-    font-size: 1rem; font-weight: 500;            /* larger, readable (QA #221) */
+    font-size: 1.08rem; font-weight: 600;         /* larger, clearer (QA #276) */
     color: var(--vc-sb-text);
     position: relative;
     transition: background .16s, color .16s, box-shadow .16s, transform .16s;
     text-decoration: none;
 }
-.main-menu .navigation li.nav-item > a .menu-title { letter-spacing: .1px; }
+/* Let the label grow so a trailing dropdown chevron parks at the edge and can
+   never sit on top of the text (QA #276). */
+.main-menu .navigation li.nav-item > a .menu-title { letter-spacing: .1px; flex: 1 1 auto; min-width: 0; }
 .main-menu .navigation li.nav-item > a .vc-ico { color: var(--vc-sb-icon); width: 20px; height: 20px; }
 
 .main-menu .navigation li.nav-item > a:hover {
@@ -263,8 +284,8 @@
 }
 .main-menu .navigation li ul.menu-content li a {
     display: flex; align-items: center; gap: 9px;
-    padding: .44rem .85rem .44rem 2.35rem;
-    font-size: .9rem; border-radius: 8px;
+    padding: .46rem .85rem .46rem 2.35rem;
+    font-size: .96rem; border-radius: 8px;
     margin: 1px 8px;
     color: var(--vc-sb-dim);
     position: relative;
@@ -306,26 +327,24 @@ html[dir="ltr"] .main-menu .navigation li ul.menu-content li a::before {
     background: rgba(255,255,255,.03);
 }
 
-/* has-sub chevron (SVG-free — bordered caret at the trailing edge).
-   Points "down" when closed, rotates 180° to point "up" when open. */
-.main-menu .navigation li.has-sub > a::after {
-    content: "";
-    width: 8px; height: 8px;
-    border-inline-end: 2px solid currentColor;
-    border-block-end: 2px solid currentColor;
-    opacity: .55;
-    position: absolute;
-    top: 50%;
-    inset-inline-start: 14px;          /* RTL: trailing edge is the left */
-    transform: translateY(-70%) rotate(45deg);
+/* has-sub dropdown chevron (QA #276) — a real SVG icon injected as a flex
+   child (.vc-sub-caret) at the trailing edge, NOT an absolute ::after. Because
+   it's a sibling of the (flex:1) label, it parks at the edge and can never sit
+   on top of the text. Replaces the old bordered ::after caret. */
+.main-menu .navigation li.has-sub > a .vc-sub-caret {
+    margin-inline-start: auto;          /* push to the trailing edge */
+    flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px;
+    color: var(--vc-gold-soft);
+    opacity: .7;
     transition: transform .22s cubic-bezier(.16,1,.3,1), opacity .2s;
 }
-html[dir="ltr"] .main-menu .navigation li.has-sub > a::after {
-    inset-inline-start: auto; inset-inline-end: 14px;
-    transform: translateY(-70%) rotate(45deg);
-}
-.main-menu .navigation li.has-sub.open > a::after { transform: translateY(-30%) rotate(225deg); opacity: .9; }
-html[dir="ltr"] .main-menu .navigation li.has-sub.open > a::after { transform: translateY(-30%) rotate(225deg); opacity: .9; }
+.main-menu .navigation li.has-sub > a .vc-sub-caret svg { width: 13px; height: 13px; display: block; }
+.main-menu .navigation li.has-sub > a:hover .vc-sub-caret { opacity: 1; }
+.main-menu .navigation li.has-sub.open > a .vc-sub-caret { transform: rotate(180deg); opacity: 1; }
+/* active (gold pill) parent — keep the caret legible on gold */
+.main-menu .navigation li.has-sub.active > a .vc-sub-caret { color: #14233a; opacity: .85; }
 
 /* ── menu-title should not truncate ── */
 .main-menu .navigation li.nav-item > a .menu-title,
@@ -335,20 +354,38 @@ html[dir="ltr"] .main-menu .navigation li.has-sub.open > a::after { transform: t
 }
 
 /* ══════════════════════════════════════════
-   MINI MODE  (body.sidebar-mini)
+   COLLAPSED / MINI RAIL
+   Two collapse paths share this look:
+   • body.sidebar-mini   — our own mini toggle
+   • body.menu-collapsed — the theme's app-menu.js desktop collapse
+   Both must hide labels/chevrons and centre the icons; otherwise the
+   full-size labels overflow the 72px rail and sit cramped on top of the
+   icons (QA #276 — "حسن السايدبر"). The icon-only rail width itself comes
+   from the theme rule for .menu-collapsed; we only fix the contents here.
    ══════════════════════════════════════════ */
 body.sidebar-mini .main-menu { width: 72px !important; overflow: visible !important; }
-body.sidebar-mini .main-menu-content { overflow: visible !important; }
-body.sidebar-mini .main-menu .navigation li.nav-item > a { padding: .6rem 0 !important; justify-content: center; margin: 3px 8px; gap: 0; }
-body.sidebar-mini .main-menu .navigation li.nav-item > a .menu-title { display: none !important; }
-body.sidebar-mini .main-menu .navigation li.nav-item > a::after { display: none !important; }
-body.sidebar-mini .main-menu .navigation li.nav-item > a .vc-ico { width: 22px; height: 22px; }
-body.sidebar-mini .gp-section-header { padding: 8px 6px; justify-content: center; margin: 10px 12px 2px; }
-body.sidebar-mini .gp-section-header::before { inset-inline: 12px; top: -5px; }
+body.sidebar-mini .main-menu-content,
+body.menu-collapsed .main-menu-content { overflow: visible !important; }
+body.sidebar-mini .main-menu .navigation li.nav-item > a,
+body.menu-collapsed .main-menu .navigation li.nav-item > a { padding: .6rem 0 !important; justify-content: center; margin: 3px 8px; gap: 0; }
+body.sidebar-mini .main-menu .navigation li.nav-item > a .menu-title,
+body.menu-collapsed .main-menu .navigation li.nav-item > a .menu-title { display: none !important; }
+body.sidebar-mini .main-menu .navigation li.has-sub > a .vc-sub-caret,
+body.menu-collapsed .main-menu .navigation li.has-sub > a .vc-sub-caret { display: none !important; }
+body.sidebar-mini .main-menu .navigation li.nav-item > a .vc-ico,
+body.menu-collapsed .main-menu .navigation li.nav-item > a .vc-ico { width: 22px; height: 22px; }
+body.sidebar-mini .gp-section-header,
+body.menu-collapsed .gp-section-header { padding: 8px 6px; justify-content: center; margin: 10px 12px 2px; }
+body.sidebar-mini .gp-section-header::before,
+body.menu-collapsed .gp-section-header::before { inset-inline: 12px; top: -5px; }
 body.sidebar-mini .gp-section-header .gp-sec-label,
-body.sidebar-mini .gp-section-header .gp-sec-chevron { display: none !important; }
-body.sidebar-mini .gp-section-header .gp-sec-icon { margin: 0 auto; }
-body.sidebar-mini .main-menu .navigation li ul.menu-content { display: none !important; }
+body.sidebar-mini .gp-section-header .gp-sec-chevron,
+body.menu-collapsed .gp-section-header .gp-sec-label,
+body.menu-collapsed .gp-section-header .gp-sec-chevron { display: none !important; }
+body.sidebar-mini .gp-section-header .gp-sec-icon,
+body.menu-collapsed .gp-section-header .gp-sec-icon { margin: 0 auto; }
+body.sidebar-mini .main-menu .navigation li ul.menu-content,
+body.menu-collapsed .main-menu .navigation li ul.menu-content { display: none !important; }
 body.sidebar-mini .app-content { margin-inline-start: 72px !important; }
 
 /* Tooltip in mini mode */
@@ -412,7 +449,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
     .main-menu .navigation li.nav-item > a,
     .main-menu .navigation li.nav-item > a .vc-ico,
     .gp-section-header .gp-sec-chevron,
-    .main-menu .navigation li.has-sub > a::after {
+    .main-menu .navigation li.has-sub > a .vc-sub-caret {
         transition: none !important;
     }
     .main-menu .navigation li.nav-item > a:hover .vc-ico { transform: none !important; }
@@ -1279,6 +1316,16 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
 
         var link = li.querySelector(':scope > a');
         if (!link) return;
+        // Inject the dropdown chevron icon (QA #276) as a flex child at the
+        // trailing edge — replaces the old absolute ::after caret that overlapped
+        // the label. One place covers every role's sidebar. .open rotates it 180°.
+        if (!link.querySelector('.vc-sub-caret')) {
+            var caret = document.createElement('span');
+            caret.className = 'vc-sub-caret';
+            caret.setAttribute('aria-hidden', 'true');
+            caret.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>';
+            link.appendChild(caret);
+        }
         // Mark the toggle as an expandable control for assistive tech.
         link.setAttribute('role', 'button');
         link.setAttribute('aria-expanded', active ? 'true' : 'false');
