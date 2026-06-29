@@ -327,6 +327,11 @@ html[dir="ltr"] .main-menu .navigation li ul.menu-content li a::before {
     background: rgba(255,255,255,.03);
 }
 
+/* Kill the theme's LineAwesome ::after glyph (QA #276) — the theme injects
+   a  character via position:absolute on li.has-sub > a::after which
+   overlaps the link text. Our SVG .vc-sub-caret replaces it. */
+.main-menu .navigation li.has-sub > a::after { content: none !important; }
+
 /* has-sub dropdown chevron (QA #276) — a real SVG icon injected as a flex
    child (.vc-sub-caret) at the trailing edge, NOT an absolute ::after. Because
    it's a sibling of the (flex:1) label, it parks at the edge and can never sit
