@@ -205,7 +205,8 @@ class StudentAttendanceController extends Controller
     public function addNote(Request $request, Attendance $attendance): RedirectResponse
     {
         $this->authorizeRow($attendance);
-        $request->validate(['notes' => ['required', 'string', 'max:1000']]);
+        // nullable so clearing a note inline matches the board-save path (store uses nullable).
+        $request->validate(['notes' => ['nullable', 'string', 'max:1000']]);
         $old = $attendance->only('notes');
         $attendance->update(['notes' => $request->notes]);
         ActivityLog::logUpdate($attendance, 'إضافة ملاحظة على سجل حضور', $old);
