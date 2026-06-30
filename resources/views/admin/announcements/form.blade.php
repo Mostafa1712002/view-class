@@ -245,6 +245,19 @@
         document.getElementById('announcementForm').addEventListener('submit', function () {
             if (window.tinymce) { tinymce.triggerSave(); }
         });
+        // Watchdog: if the editor fails to render (a CDN skin/plugin/language
+        // sub-resource didn't load), TinyMCE may have already hidden the
+        // textarea — restore it so the «تفاصيل الرسالة» field is never missing (#232).
+        setTimeout(function () {
+            if (!document.querySelector('.tox-tinymce')) {
+                var ta = document.getElementById('annBody');
+                if (ta) { ta.style.display = ''; }
+            }
+        }, 5000);
+    } else {
+        // TinyMCE itself failed to load — guarantee the raw field is usable.
+        var taFallback = document.getElementById('annBody');
+        if (taFallback) { taFallback.style.display = ''; }
     }
 })();
 </script>
