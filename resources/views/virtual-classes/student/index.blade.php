@@ -67,6 +67,8 @@
                                     <x-svg-icon name="camera-video" :size="14" /> @lang('virtual_classes.btn_join')
                                 </button>
                             </form>
+                        @elseif($vc->hasEnded())
+                            <span class="text-muted small">@lang('virtual_classes.join_ended')</span>
                         @else
                             <span class="text-muted small" title="@lang('virtual_classes.join_window_hint')">
                                 @lang('virtual_classes.join_not_yet')

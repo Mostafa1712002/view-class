@@ -825,15 +825,22 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                      {school} param and are wired by later cards (C8/C9/C12). --}}
                 @php
                     $smsItems = [
-                        ['gate' => $canViewSms,      'route' => 'admin.sms-services.index', 'icon' => 'send',      'label' => __('shell.nav_sms_send'),  'active' => 'admin.sms-services.index'],
-                        ['gate' => $canViewWhatsapp, 'route' => 'admin.whatsapp.index',     'icon' => 'chat-dots', 'label' => __('shell.nav_whatsapp'),  'active' => 'admin.whatsapp.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.send',                'icon' => 'send',      'label' => 'إرسال رسالة قصيرة',          'active' => 'admin.sms.send'],
+                        ['gate' => $canViewWhatsapp, 'route' => 'admin.whatsapp.send',           'icon' => 'chat-dots', 'label' => 'رسائل الواتساب',            'active' => 'admin.whatsapp.send'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.excel.create',        'icon' => 'file',      'label' => 'إرسال رسالة قصيرة من Excel', 'active' => 'admin.sms.excel.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.reports.index',       'icon' => 'list',      'label' => 'تقارير الرسائل',            'active' => 'admin.sms.reports.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.templates.index',     'icon' => 'file',      'label' => 'قوالب الرسائل القصيرة',      'active' => 'admin.sms.templates.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.auto-messages.index', 'icon' => 'chat-dots', 'label' => 'نماذج الرسائل',             'active' => 'admin.sms.auto-messages.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms-services.index',      'icon' => 'send',      'label' => 'إعدادات رسائل',             'active' => 'admin.sms-services.*'],
+                        ['gate' => $canViewWhatsapp, 'route' => 'admin.whatsapp.index',          'icon' => 'chat-dots', 'label' => 'إعدادات واتساب',            'active' => 'admin.whatsapp.index'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.sender-name.index',   'icon' => 'people',    'label' => 'خدمات إضافية',              'active' => 'admin.sms.sender-name.*'],
                     ];
                     $smsVisible = collect($smsItems)
                         ->filter(fn($i) => $i['gate'] && Route::has($i['route']))
                         ->unique(fn($i) => $i['route']);
                 @endphp
                 @if($smsVisible->isNotEmpty())
-                <li class="nav-item has-sub {{ request()->routeIs('admin.sms-services.*') || request()->routeIs('admin.whatsapp.*') ? 'active open' : '' }}" data-section="communication">
+                <li class="nav-item has-sub {{ request()->routeIs('admin.sms-services.*') || request()->routeIs('admin.sms.*') || request()->routeIs('admin.whatsapp.*') ? 'active open' : '' }}" data-section="communication">
                     <a href="#" data-label="@lang('shell.nav_sms')"><x-svg-icon name="phone" class="vc-ico" /><span class="menu-title">@lang('shell.nav_sms')</span></a>
                     <ul class="menu-content">
                         @foreach($smsVisible as $i)

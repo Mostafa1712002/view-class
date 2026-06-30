@@ -91,6 +91,7 @@ return [
 
     // Student view
     'join_not_yet' => 'لم يحن وقت الانضمام بعد',
+    'join_ended' => 'تم الإنتهاء',
 
     // Tabs (card #234)
     'tab_today'    => 'فصول اليوم',

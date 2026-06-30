@@ -91,6 +91,7 @@ return [
 
     // Student view
     'join_not_yet' => 'Not yet joinable',
+    'join_ended' => 'Ended',
 
     // Tabs (card #234)
     'tab_today'    => "Today's Classes",

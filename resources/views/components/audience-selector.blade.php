@@ -97,6 +97,7 @@
                 'text'    => $c->name . ' (صف ' . $c->grade_level . ')',
                 'checked' => in_array($c->id, $selectedClasses),
                 'school'  => $c->school_id ?? null,
+                'grade'   => $c->grade_level,
             ]),
         ],
         'subjects' => [
@@ -137,6 +138,7 @@
                                 <input type="checkbox" name="{{ $g['field'] }}[]"
                                        value="{{ $item['value'] }}"
                                        @if(!is_null($item['school'])) data-school="{{ $item['school'] }}" @endif
+                                       @if(isset($item['grade'])) data-grade="{{ $item['grade'] }}" @endif
                                        @checked($item['checked'])>
                                 <span>{{ $item['text'] }}</span>
                             </label>
@@ -200,6 +202,35 @@
             });
         }
         sel.addEventListener('change', apply);
+        apply();
+    });
+
+    // Grade→class cascade (QA #279): a class is hidden until its grade is picked.
+    // Class shows only when a grade is selected AND the class belongs to it
+    // (and still passes the school filter when one is active).
+    document.querySelectorAll('.aud-selector').forEach(function (root) {
+        var classInputs = Array.prototype.slice.call(root.querySelectorAll('.aud-item input[name="class_ids[]"]'));
+        if (!classInputs.length) { return; }
+        var gradeInputs = Array.prototype.slice.call(root.querySelectorAll('.aud-item input[name="grade_levels[]"]'));
+        var gradeGrid = gradeInputs.length ? gradeInputs[0].closest('.aud-grid') : null;
+        var classGrid = classInputs[0].closest('.aud-grid');
+        var schoolSel = root.dataset.schoolSelect ? document.getElementById(root.dataset.schoolSelect) : null;
+        function apply() {
+            var grades = gradeInputs.filter(function (g) { return g.checked; }).map(function (g) { return g.value; });
+            var sid = schoolSel ? schoolSel.value : null;
+            classInputs.forEach(function (inp) {
+                var item = inp.closest('.aud-item');
+                var os = inp.getAttribute('data-school');
+                var schoolOk = !sid || !os || os === sid;
+                var gradeOk = grades.length > 0 && grades.indexOf(inp.getAttribute('data-grade')) !== -1;
+                var show = schoolOk && gradeOk;
+                item.hidden = !show;
+                if (!show) { inp.checked = false; }
+            });
+            if (classGrid && classGrid.__audRefresh) { classGrid.__audRefresh(); }
+        }
+        if (gradeGrid) { gradeGrid.addEventListener('change', apply); }
+        if (schoolSel) { schoolSel.addEventListener('change', apply); }
         apply();
     });
 })();

@@ -234,6 +234,19 @@ class VirtualClass extends Model
         return now()->between($openFrom, $closeAt);
     }
 
+    /** The session is over — explicitly ended, or its time window has passed. */
+    public function hasEnded(): bool
+    {
+        if ($this->status === 'ended') {
+            return true;
+        }
+        if ($this->status === 'cancelled') {
+            return false;
+        }
+
+        return now()->greaterThan($this->scheduled_at->copy()->addMinutes($this->duration_minutes));
+    }
+
     public function platformLabel(): string
     {
         return match ($this->platform) {
