@@ -9,6 +9,7 @@ use App\Models\ClassRoom;
 use App\Modules\Attendance\Repositories\Contracts\AttendanceRepository;
 use App\Modules\Attendance\Services\AttendanceQueryService;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -101,7 +102,7 @@ class StudentAttendanceController extends Controller
      * Persist one student's status (individual quick action) or the whole
      * board. Gated by the matching granular write permission.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $schoolId = $this->scopedSchoolId();
 
@@ -202,7 +203,7 @@ class StudentAttendanceController extends Controller
     }
 
     /** Add / edit a note on an existing attendance row. */
-    public function addNote(Request $request, Attendance $attendance): RedirectResponse
+    public function addNote(Request $request, Attendance $attendance): RedirectResponse|JsonResponse
     {
         $this->authorizeRow($attendance);
         // nullable so clearing a note inline matches the board-save path (store uses nullable).
@@ -219,7 +220,7 @@ class StudentAttendanceController extends Controller
     }
 
     /** Attach an excuse to an absence/late row (staff side). */
-    public function addExcuse(Request $request, Attendance $attendance): RedirectResponse
+    public function addExcuse(Request $request, Attendance $attendance): RedirectResponse|JsonResponse
     {
         $this->authorizeRow($attendance);
         $request->validate(['excuse_text' => ['required', 'string', 'min:3', 'max:1000']]);
