@@ -7,19 +7,6 @@
 @php $user = auth()->user(); @endphp
 
 @section('content')
-<div class="content-header row">
-    <div class="content-header-left col-12 mb-2">
-        <h2 class="content-header-title mb-0">اسم المرسل</h2>
-        <div class="breadcrumb-wrapper">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
-                <li class="breadcrumb-item">الرسائل القصيرة</li>
-                <li class="breadcrumb-item active">اسم المرسل</li>
-            </ol>
-        </div>
-    </div>
-</div>
-
 <div class="content-body">
     @include('components.alerts')
 

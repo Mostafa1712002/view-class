@@ -472,6 +472,20 @@ document.addEventListener('DOMContentLoaded', function () {
         .finally(function () { resolveSpin.classList.remove('is-on'); resolveBtn.disabled = false; });
     });
 
+    // Auto-resolve recipients once the audience selection is complete, so the
+    // user doesn't have to discover the «عرض المستلمين» step before the send
+    // button enables (QA #238). specific_users still needs a manual pick.
+    function maybeAutoResolve() {
+        var a = audienceSel.value;
+        if (!a || a === 'specific_users') { return; }
+        if (a.indexOf('grade_') === 0 && (!gradeSel || !gradeSel.value)) { return; }
+        if (a.indexOf('class_') === 0 && (!classSel || !classSel.value)) { return; }
+        resolveBtn.click();
+    }
+    audienceSel.addEventListener('change', maybeAutoResolve);
+    gradeSel && gradeSel.addEventListener('change', maybeAutoResolve);
+    classSel && classSel.addEventListener('change', maybeAutoResolve);
+
     function renderRecipients(list) {
         recipBody.innerHTML = '';
         idsHolder.innerHTML = '';

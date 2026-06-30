@@ -3,9 +3,20 @@
 @section('title', 'إعدادات واتساب')
 
 @section('content')
+<div class="content-header row">
+    <div class="content-header-left col-12 mb-2">
+        <h2 class="content-header-title mb-0">إعدادات إشعارات واتساب</h2>
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
+                <li class="breadcrumb-item">رسائل الجوال</li>
+                <li class="breadcrumb-item active">إعدادات واتساب</li>
+            </ol>
+        </div>
+    </div>
+</div>
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">إعدادات إشعارات واتساب</h1>
+    <div class="d-flex justify-content-end align-items-center mb-4">
         <a href="{{ route('admin.whatsapp.logs') }}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-journal-text me-1"></i>سجل الرسائل
         </a>
