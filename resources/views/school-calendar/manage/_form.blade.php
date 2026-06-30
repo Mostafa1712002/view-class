@@ -141,51 +141,31 @@
         @error('audience') <div class="text-danger small">{{ $message }}</div> @enderror
     </div>
 
-    {{-- Specific targeting: school / grades / classes / users --}}
+    {{-- Specific targeting: school / grades / classes / users (checkbox grids + select-all) --}}
     <div class="col-12 cal-scope-specific" style="{{ $targetType === 'specific' ? '' : 'display:none' }}">
-        <div class="row">
-            @if($isSuper && $schools->count())
-            <div class="col-12 col-md-4 form-group">
-                <label>@lang('school_calendar.field_school')</label>
-                <select name="school_id" id="cal-school" class="form-control">
-                    @foreach($schools as $s)
-                    <option value="{{ $s->id }}" {{ (int) old('school_id', $event?->school_id) === $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
-                    @endforeach
-                </select>
-                <small class="text-muted">@lang('school_calendar.school_hint')</small>
-            </div>
-            @endif
-
-            <div class="col-12 col-md-4 form-group">
-                <label>@lang('school_calendar.field_grades')</label>
-                <select name="grade_levels[]" class="form-control" multiple size="5">
-                    @foreach($gradeLevels as $g)
-                    <option value="{{ $g }}" {{ in_array($g, (array) $selectedGrades) ? 'selected' : '' }}>@lang('school_calendar.grade') {{ $g }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-12 col-md-4 form-group">
-                <label>@lang('school_calendar.field_classes')</label>
-                <select name="class_ids[]" id="cal-classes" class="form-control" multiple size="5">
-                    @foreach($classes as $c)
-                    <option value="{{ $c->id }}" data-school="{{ $c->school_id }}"
-                            {{ in_array($c->id, (array) $selectedClasses) ? 'selected' : '' }}>{{ $c->name }} (@lang('school_calendar.grade') {{ $c->grade_level }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-12 form-group">
-                <label>@lang('school_calendar.field_users')</label>
-                <select name="user_target_ids[]" class="form-control" multiple size="6">
-                    @foreach($users as $u)
-                    <option value="{{ $u->id }}" data-school="{{ $u->school_id }}"
-                            {{ in_array($u->id, (array) $selectedUsers) ? 'selected' : '' }}>{{ $u->name }}</option>
-                    @endforeach
-                </select>
-                <small class="text-muted">@lang('school_calendar.users_hint')</small>
-            </div>
+        @if($isSuper && $schools->count())
+        <div class="form-group" style="max-width:360px">
+            <label>@lang('school_calendar.field_school')</label>
+            <select name="school_id" id="cal-school" class="form-control">
+                @foreach($schools as $s)
+                <option value="{{ $s->id }}" {{ (int) old('school_id', $event?->school_id) === $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+                @endforeach
+            </select>
+            <small class="text-muted">@lang('school_calendar.school_hint')</small>
         </div>
+        @endif
+
+        <x-audience-selector
+            :grids="['grades', 'classes', 'users']"
+            :conditional="false"
+            :school-select="($isSuper && $schools->count()) ? 'cal-school' : null"
+            :grade-levels="$gradeLevels"
+            :classes="$classes"
+            :users="$users"
+            :selected-grades="$selectedGrades"
+            :selected-classes="$selectedClasses"
+            :selected-users="$selectedUsers"
+        />
     </div>
 </div>
 
@@ -261,18 +241,7 @@ $(document).ready(function () {
         $('#remind-minutes-wrap').toggle($(this).is(':checked'));
     });
 
-    // Filter the class/user lists by the chosen school (super-admin)
-    function filterBySchool() {
-        var sid = $('#cal-school').val();
-        if (!sid) { return; }
-        $('#cal-classes option, select[name="user_target_ids[]"] option').each(function () {
-            var os = $(this).data('school');
-            var match = !os || String(os) === String(sid);
-            $(this).prop('hidden', !match);
-            if (!match) { $(this).prop('selected', false); }
-        });
-    }
-    if ($('#cal-school').length) { $('#cal-school').on('change', filterBySchool); filterBySchool(); }
+    // School-based class/user filtering is handled inside the audience-selector component.
 });
 </script>
 @endpush

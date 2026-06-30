@@ -11,12 +11,10 @@
     #school-calendar { max-width: 100%; background: #fff; padding: 1rem; border-radius: .5rem; }
     .fc-event { cursor: pointer; }
     .fc-event-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 5px; }
-    /* #233: the theme clips .content-header.row with overflow:hidden, which hid
-       the print dropdown. Let it overflow on this page and float above the card. */
-    .content-header.row,
-    .content-header.row .content-header-right { overflow: visible !important; }
-    .content-header .btn-group { position: relative; }
-    .content-header .btn-group .dropdown-menu { z-index: 1051; }
+    /* #233: the theme clips `html body .content.app-content { overflow:hidden }`,
+       so a BS4/Popper absolute dropdown gets cut off under the card. The print
+       menu below is positioned `fixed` by JS, which escapes the ancestor clip. */
+    #cal-print-menu.show { display: block; }
 </style>
 @endpush
 
@@ -36,10 +34,11 @@
     <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
         @if(auth()->user()->canDo('calendar.print'))
         <div class="btn-group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <button type="button" id="cal-print-btn" class="btn btn-outline-secondary dropdown-toggle"
+                    aria-haspopup="true" aria-expanded="false">
                 <x-svg-icon name="printer" :size="16" /> @lang('school_calendar.btn_print')
             </button>
-            <div class="dropdown-menu">
+            <div class="dropdown-menu" id="cal-print-menu">
                 <a class="dropdown-item" href="{{ route('manage.school-calendar.print', ['view' => 'day']) }}" target="_blank">@lang('school_calendar.print_day')</a>
                 <a class="dropdown-item" href="{{ route('manage.school-calendar.print', ['view' => 'week']) }}" target="_blank">@lang('school_calendar.print_week')</a>
                 <a class="dropdown-item" href="{{ route('manage.school-calendar.print', ['view' => 'month']) }}" target="_blank">@lang('school_calendar.print_month')</a>
@@ -145,6 +144,39 @@
 <script>
 $(document).ready(function () {
     var isRtl = {{ $isRtl ? 'true' : 'false' }};
+
+    // #233: the print menu was both clipped by the theme's
+    // `.content.app-content{overflow:hidden}` AND buried under the calendar card's
+    // stacking context. Relocate it to <body> on open and pin it under the button
+    // with fixed positioning (same approach as the global .tw-floating-menu helper),
+    // which escapes the clip and the stacking context in one move.
+    // ponytail: doesn't track scroll; closes on outside click — fine for 3 links.
+    var $printBtn = $('#cal-print-btn'), $printMenu = $('#cal-print-menu');
+    if ($printBtn.length) {
+        $printBtn.on('click', function (e) {
+            e.stopPropagation();
+            var show = !$printMenu.hasClass('show');
+            if (show) {
+                document.body.appendChild($printMenu[0]);
+                $printMenu.addClass('show');
+                // width:max-content so the fixed menu hugs its content (auto stretches
+                // to ~viewport when it's a body child), then right-align under the button.
+                // right:auto — otherwise BS4's RTL .dropdown-menu keeps a `right` value
+                // that wins over `left` (both set + fixed width → RTL honors `right`).
+                $printMenu.css({ position: 'fixed', 'z-index': 1060, width: 'max-content', maxWidth: '90vw', right: 'auto' });
+                var r = this.getBoundingClientRect();
+                $printMenu.css({ top: r.bottom + 'px', left: Math.max(8, r.right - $printMenu.outerWidth()) + 'px' });
+            } else {
+                $printMenu.removeClass('show');
+            }
+            $printBtn.attr('aria-expanded', show ? 'true' : 'false');
+        });
+        $(document).on('click', function () {
+            $printMenu.removeClass('show');
+            $printBtn.attr('aria-expanded', 'false');
+        });
+        $printMenu.on('click', function (e) { e.stopPropagation(); });
+    }
 
     $('#school-calendar').fullCalendar({
         header: {
