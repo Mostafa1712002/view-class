@@ -1,7 +1,9 @@
 <?php
 
 use App\Modules\Qr\Controllers\QrCardController;
+use App\Modules\Qr\Controllers\QrDeviceController;
 use App\Modules\Qr\Controllers\QrGroupController;
+use App\Modules\Qr\Controllers\QrLinkController;
 use App\Modules\Qr\Controllers\QrScannerController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,4 +51,22 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
             ->middleware('permission:qr.group_edit')->whereNumber('group')->name('groups.update');
         Route::delete('groups/{group}', [QrGroupController::class, 'destroy'])
             ->middleware('permission:qr.group_delete')->whereNumber('group')->name('groups.destroy');
+
+        // Link students to attendance groups / issue cards
+        Route::get('link', [QrLinkController::class, 'index'])
+            ->middleware('permission:qr.link_students')->name('link.index');
+        Route::post('link', [QrLinkController::class, 'assign'])
+            ->middleware('permission:qr.link_students')->name('link.assign');
+
+        // IoT scanner devices registry
+        Route::get('devices', [QrDeviceController::class, 'index'])
+            ->middleware('permission:qr.link_devices')->name('devices.index');
+        Route::post('devices', [QrDeviceController::class, 'store'])
+            ->middleware('permission:qr.link_devices')->name('devices.store');
+        Route::post('devices/{device}/toggle', [QrDeviceController::class, 'toggle'])
+            ->middleware('permission:qr.link_devices')->whereNumber('device')->name('devices.toggle');
+        Route::post('devices/{device}/regenerate', [QrDeviceController::class, 'regenerate'])
+            ->middleware('permission:qr.link_devices')->whereNumber('device')->name('devices.regenerate');
+        Route::delete('devices/{device}', [QrDeviceController::class, 'destroy'])
+            ->middleware('permission:qr.link_devices')->whereNumber('device')->name('devices.destroy');
     });

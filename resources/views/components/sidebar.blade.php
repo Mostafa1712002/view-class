@@ -683,6 +683,38 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </li>
                 @endif
 
+                {{-- خدمات حضور QR (Card #265) — has-sub group; parent gated by qr.view,
+                     each child by its own qr.* permission via canDo(). Caret is JS-injected
+                     (#276) so the <a> carries no caret span. --}}
+                @if(!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('qr'))
+                <li class="nav-item has-sub {{ request()->routeIs('admin.qr.*') ? 'active open' : '' }}" data-section="educational">
+                    <a href="#" data-label="خدمات حضور QR"><x-svg-icon name="qr-code-scan" class="vc-ico" /><span class="menu-title">خدمات حضور QR</span></a>
+                    <ul class="menu-content">
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        <li class="{{ request()->routeIs('admin.qr.cards.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.index') ? route('admin.qr.cards.index') : '#' }}"><x-svg-icon name="person-vcard" class="vc-ico" /><span class="menu-item">بطاقات QR</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.scan'))
+                        <li class="{{ request()->routeIs('admin.qr.scanner') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.scanner') ? route('admin.qr.scanner') : '#' }}"><x-svg-icon name="qr-code-scan" class="vc-ico" /><span class="menu-item">ماسح QR</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view_log'))
+                        <li class="{{ request()->routeIs('admin.qr.log') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.log') ? route('admin.qr.log') : '#' }}"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-item">سجل المسحات</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        <li class="{{ request()->routeIs('admin.qr.groups.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.groups.index') ? route('admin.qr.groups.index') : '#' }}"><x-svg-icon name="collection" class="vc-ico" /><span class="menu-item">المجموعات</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_students'))
+                        <li class="{{ request()->routeIs('admin.qr.link.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.link.index') ? route('admin.qr.link.index') : '#' }}"><x-svg-icon name="link-45deg" class="vc-ico" /><span class="menu-item">ربط الطلاب</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_devices'))
+                        <li class="{{ request()->routeIs('admin.qr.devices.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.devices.index') ? route('admin.qr.devices.index') : '#' }}"><x-svg-icon name="cpu" class="vc-ico" /><span class="menu-item">أجهزة IoT</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.print_card'))
+                        <li class="{{ request()->routeIs('admin.qr.cards.print') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.print') ? route('admin.qr.cards.print') : '#' }}"><x-svg-icon name="printer" class="vc-ico" /><span class="menu-item">طباعة بطاقات QR</span></a></li>
+                        @endif
+                    </ul>
+                </li>
+                @endif
+
                 @if($canViewTeacherAttendance)
                 <li class="nav-item {{ request()->routeIs('admin.teacher-attendance.*') ? 'active' : '' }}" data-section="educational" data-label="@lang('shell.nav_teacher_absence')"><a href="{{ Route::has('admin.teacher-attendance.daily') ? route('admin.teacher-attendance.daily') : '#' }}" data-label="@lang('shell.nav_teacher_absence')"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_teacher_absence')</span></a></li>
                 @endif
