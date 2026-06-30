@@ -21,7 +21,7 @@ final class GenerateQuestionImportTemplate
         $spreadsheet = new Spreadsheet;
         $spreadsheet->getProperties()
             ->setTitle('Question Import Template')
-            ->setDescription('ViewClass — Question Bank Import Template');
+            ->setDescription('المنصة الذهبية — قالب استيراد بنك الأسئلة');
 
         $this->buildQuestionsSheet($spreadsheet, $bank);
         $this->buildInstructionsSheet($spreadsheet);

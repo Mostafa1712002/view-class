@@ -129,7 +129,7 @@
     </table>
 
     <div class="report-footer">
-        تم إنشاء هذا التقرير تلقائيًا — {{ config('app.name', 'ViewClass') }}
+        تم إنشاء هذا التقرير تلقائيًا — {{ config('app.name', 'المنصة الذهبية') }}
     </div>
 </body>
 </html>
