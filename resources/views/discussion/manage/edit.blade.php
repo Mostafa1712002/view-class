@@ -60,6 +60,8 @@
                     @enderror
                 </div>
 
+                @include('discussion.manage._targeting', ['room' => $room])
+
                 <div class="form-group">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="allow_topics" name="allow_topics" value="1" {{ old('allow_topics', $room->allow_topics) ? 'checked' : '' }}>

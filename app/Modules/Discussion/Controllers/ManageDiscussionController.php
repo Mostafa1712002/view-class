@@ -3,11 +3,19 @@
 namespace App\Modules\Discussion\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
 use App\Models\ActivityLog;
+use App\Models\ClassRoom;
+use App\Models\DiscussionRoom;
+use App\Models\JobTitle;
+use App\Models\Role;
+use App\Models\Subject;
+use App\Models\User;
 use App\Modules\Discussion\Repositories\Contracts\DiscussionRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -32,32 +40,25 @@ class ManageDiscussionController extends Controller
 
     public function create(): View
     {
-        return view('discussion.manage.create');
+        return view('discussion.manage.create', array_merge(['room' => null], $this->formOptions()));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'title'        => ['required', 'string', 'max:160'],
-            'description'  => ['nullable', 'string'],
-            'instructions' => ['nullable', 'string'],
-            'scope_type'   => ['nullable', 'string', 'max:20'],
-            'audience'     => ['nullable', 'array'],
-        ]);
+        $schoolId = $this->activeSchoolId();
+        $data     = $this->validateRoom($request, $schoolId);
+        $targets  = $this->extractTargeting($data);
 
-        $room = $this->repo->createRoom([
-            'title'             => $data['title'],
-            'description'       => $data['description'] ?? null,
-            'instructions'      => $data['instructions'] ?? null,
-            'school_id'         => $this->activeSchoolId(),
+        $room = $this->repo->createRoom(array_merge($data, [
+            'school_id'         => $schoolId,
             'created_by'        => auth()->id(),
-            'scope_type'        => $data['scope_type'] ?? 'school',
-            'audience'          => $data['audience'] ?? ['all'],
+            'scope_type'        => 'school',
+            'audience'          => ['all'],
             'allow_topics'      => $request->boolean('allow_topics', true),
             'allow_comments'    => $request->boolean('allow_comments', true),
             'requires_approval' => $request->boolean('requires_approval', false),
             'status'            => 'active',
-        ]);
+        ]), $targets);
 
         ActivityLog::logCreate($room, 'إنشاء غرفة نقاش: '.$room->title);
 
@@ -72,7 +73,7 @@ class ManageDiscussionController extends Controller
         abort_if(! $room, 404);
         $this->assertSchool($room->school_id);
 
-        return view('discussion.manage.edit', compact('room'));
+        return view('discussion.manage.edit', array_merge(['room' => $room], $this->formOptions()));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -81,19 +82,16 @@ class ManageDiscussionController extends Controller
         abort_if(! $room, 404);
         $this->assertSchool($room->school_id);
 
-        $data = $request->validate([
-            'title'        => ['required', 'string', 'max:160'],
-            'description'  => ['nullable', 'string'],
-            'instructions' => ['nullable', 'string'],
-        ]);
+        $data    = $this->validateRoom($request, $room->school_id);
+        $targets = $this->extractTargeting($data);
 
-        $old = $room->only(['title', 'description', 'instructions', 'allow_topics', 'allow_comments', 'requires_approval']);
+        $old = $room->only(['title', 'description', 'instructions', 'category', 'subject_id', 'target_type', 'allow_topics', 'allow_comments', 'requires_approval']);
 
         $this->repo->updateRoom($id, array_merge($data, [
             'allow_topics'      => $request->boolean('allow_topics', $room->allow_topics),
             'allow_comments'    => $request->boolean('allow_comments', $room->allow_comments),
             'requires_approval' => $request->boolean('requires_approval', false),
-        ]));
+        ]), $targets);
 
         ActivityLog::logUpdate($room->fresh(), 'تعديل غرفة نقاش: '.$room->title, $old);
 
@@ -156,6 +154,20 @@ class ManageDiscussionController extends Controller
         return back()->with('success', $room->allow_comments
             ? __('discussion.flash_comments_enabled')
             : __('discussion.flash_comments_disabled'));
+    }
+
+    public function toggleRoomTopics(int $id): RedirectResponse
+    {
+        $room = $this->repo->findRoom($id);
+        abort_if(! $room, 404);
+        $this->assertSchool($room->school_id);
+
+        $room = $this->repo->toggleRoomTopics($id);
+        ActivityLog::logUpdate($room, ($room->allow_topics ? 'تفعيل' : 'إيقاف').' الموضوعات الجديدة في غرفة: '.$room->title, ['allow_topics' => ! $room->allow_topics]);
+
+        return back()->with('success', $room->allow_topics
+            ? __('discussion.flash_topics_enabled')
+            : __('discussion.flash_topics_disabled'));
     }
 
     public function report(int $id): View
@@ -252,6 +264,131 @@ class ManageDiscussionController extends Controller
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Validate the room create/update payload (shared by store + update).
+     * Targeting rules mirror virtual-classes (#234).
+     *
+     * @return array<string,mixed>
+     */
+    private function validateRoom(Request $request, ?int $schoolId): array
+    {
+        $validated = $request->validate([
+            'title'        => ['required', 'string', 'max:160'],
+            'description'  => ['nullable', 'string'],
+            'instructions' => ['nullable', 'string'],
+            'category'     => ['nullable', 'string', 'max:100'],
+            'subject_id'   => ['nullable', 'integer', Rule::exists('subjects', 'id')->where(fn ($q) => $schoolId ? $q->where('school_id', $schoolId) : $q)],
+
+            // Targeting (mirrors announcements / virtual-classes).
+            'target_type'       => ['required', Rule::in(DiscussionRoom::TARGET_TYPES)],
+            'grade_levels'      => ['nullable', 'array'],
+            'grade_levels.*'    => ['integer'],
+            'class_ids'         => ['nullable', 'array'],
+            'class_ids.*'       => ['integer'],
+            'user_target_ids'   => ['nullable', 'array'],
+            'user_target_ids.*' => ['integer'],
+            'role_target_ids'   => ['nullable', 'array'],
+            'role_target_ids.*' => ['integer'],
+            'job_title_ids'     => ['nullable', 'array'],
+            'job_title_ids.*'   => ['integer'],
+        ]);
+
+        // A "specific" audience with no picks would target nobody — reject it so
+        // the room can't silently vanish from every account.
+        $requireOne = [
+            'specific_users' => 'user_target_ids',
+            'specific_roles' => 'role_target_ids',
+            'job_titles'     => 'job_title_ids',
+        ];
+        $tt = $validated['target_type'] ?? 'all';
+        if (isset($requireOne[$tt]) && empty($validated[$requireOne[$tt]])) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                $requireOne[$tt] => __('discussion.target_pick_required'),
+            ]);
+        }
+
+        return $validated;
+    }
+
+    /**
+     * Split the targeting fields off the model attributes:
+     *  - normalises grade/class narrowing (only meaningful for `students`),
+     *  - returns the user/role/job_title pivot arrays for the repository.
+     *
+     * Casts grade/class values to int — checkbox values arrive as strings and
+     * JSON_CONTAINS (used by scopeVisibleTo) is type-strict, so "7" never matches
+     * the int 7.
+     *
+     * @return array{user:array<int>,role:array<int>,job_title:array<int>}
+     */
+    private function extractTargeting(array &$data): array
+    {
+        $tt = $data['target_type'] ?? 'all';
+
+        $userIds = $data['user_target_ids'] ?? [];
+        $roleIds = $data['role_target_ids'] ?? [];
+        $jobIds  = $data['job_title_ids']   ?? [];
+        unset($data['user_target_ids'], $data['role_target_ids'], $data['job_title_ids']);
+
+        if ($tt === 'students') {
+            $data['grade_levels'] = ! empty($data['grade_levels']) ? array_map('intval', array_values($data['grade_levels'])) : null;
+            $data['class_ids']    = ! empty($data['class_ids']) ? array_map('intval', array_values($data['class_ids'])) : null;
+        } else {
+            $data['grade_levels'] = null;
+            $data['class_ids']    = null;
+        }
+
+        return [
+            'user'      => $tt === 'specific_users' ? $userIds : [],
+            'role'      => $tt === 'specific_roles' ? $roleIds : [],
+            'job_title' => $tt === 'job_titles'     ? $jobIds  : [],
+        ];
+    }
+
+    /**
+     * Option lists for the create/edit form (subject + audience-selector data),
+     * scoped to the active school. Mirrors VirtualClassController::formOptions.
+     *
+     * @return array<string,mixed>
+     */
+    private function formOptions(): array
+    {
+        $schoolId = $this->activeSchoolId();
+
+        $classes = ClassRoom::query()
+            ->when($schoolId, function ($q) use ($schoolId) {
+                $yearIds = AcademicYear::where('school_id', $schoolId)->pluck('id');
+                $q->whereIn('academic_year_id', $yearIds);
+            })
+            ->orderBy('grade_level')
+            ->orderBy('name')
+            ->get(['id', 'name', 'grade_level']);
+
+        $subjects = Subject::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->orderBy('name')
+            ->get(['id', 'name', 'school_id']);
+
+        $roles = Role::orderBy('name')->get(['id', 'name', 'slug']);
+
+        $jobTitles = JobTitle::query()
+            ->active()
+            ->forSchool($schoolId)
+            ->orderBy('sort_order')
+            ->orderBy('name_ar')
+            ->get(['id', 'name_ar', 'school_id']);
+
+        $users = User::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->orderBy('name')
+            ->limit(500)
+            ->get(['id', 'name', 'school_id']);
+
+        $gradeLevels = range(1, 12);
+
+        return compact('classes', 'subjects', 'roles', 'jobTitles', 'users', 'gradeLevels');
+    }
 
     /**
      * Abort with 403 if the resource does not belong to the active school.

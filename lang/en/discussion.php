@@ -113,4 +113,29 @@ return [
     'filter_status'         => 'Status',
     'filter_apply'          => 'Filter',
     'filter_reset'          => 'Reset',
+
+    // Subject / category / targeting (#235)
+    'field_subject'         => 'Subject',
+    'select_subject'        => 'Select subject',
+    'field_category'        => 'Category / Prep',
+    'placeholder_category'  => 'e.g. revision, homework, lesson prep',
+    'field_audience'        => 'Target audience',
+    'target_all'            => 'Everyone',
+    'target_students'       => 'Students',
+    'target_teachers'       => 'Teachers',
+    'target_parents'        => 'Parents',
+    'target_admins'         => 'Admins',
+    'target_job_titles'     => 'Specific job titles',
+    'target_specific_users' => 'Specific users',
+    'target_specific_roles' => 'Specific roles',
+    'target_pick_required'  => 'Select at least one target.',
+
+    // Room-view header + controls
+    'field_creator'         => 'Creator',
+    'btn_stop_topics'       => 'Stop new topics',
+    'btn_enable_topics'     => 'Allow new topics',
+    'btn_room_report'       => 'Room report',
+    'topics_stopped_notice' => 'New topics are stopped in this room.',
+    'flash_topics_enabled'  => 'New topics enabled for this room.',
+    'flash_topics_disabled' => 'New topics stopped for this room.',
 ];

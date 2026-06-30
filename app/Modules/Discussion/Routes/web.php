@@ -40,6 +40,8 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])
             ->middleware('permission:discussion.edit')->name('reopen');
         Route::post('{id}/toggle-comments', [ManageDiscussionController::class, 'toggleRoomComments'])
             ->middleware('permission:discussion.toggle_comments')->name('toggle-comments');
+        Route::post('{id}/toggle-topics', [ManageDiscussionController::class, 'toggleRoomTopics'])
+            ->middleware('permission:discussion.edit')->name('toggle-topics');
         Route::get('{id}/report', [ManageDiscussionController::class, 'report'])
             ->middleware('permission:discussion.view')->name('report');
 

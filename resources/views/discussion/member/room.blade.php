@@ -4,9 +4,11 @@
 @section('body_class', 'theme-light')
 
 @php
-    $isRtl   = app()->getLocale() === 'ar';
-    $user    = auth()->user();
-    $isStaff = $user && ($user->isSuperAdmin() || $user->isSchoolAdmin() || $user->isTeacher());
+    $isRtl     = app()->getLocale() === 'ar';
+    $user      = auth()->user();
+    $isStaff   = $user && ($user->isSuperAdmin() || $user->isSchoolAdmin() || $user->isTeacher());
+    $canEdit   = $isStaff && $user->canDo('discussion.edit');
+    $canReport = $isStaff && $user->canDo('discussion.view');
 @endphp
 
 @section('content')
@@ -33,9 +35,76 @@
 </div>
 
 
+{{-- Room info + staff controls --}}
+<div class="ds-card mb-2">
+    <div class="ds-card-body">
+        @if($room->description)
+            <p class="mb-2">{{ $room->description }}</p>
+        @endif
+        @if($room->instructions)
+            <div class="alert alert-info py-2 mb-2">
+                <x-svg-icon name="info-circle" :size="15" /> {{ $room->instructions }}
+            </div>
+        @endif
+
+        <div class="d-flex flex-wrap align-items-center" style="gap:.35rem 1.25rem">
+            <span class="text-muted">
+                <x-svg-icon name="person" :size="14" /> @lang('discussion.field_creator'):
+                <strong>{{ $isRtl && optional($room->creator)->name_ar ? $room->creator->name_ar : optional($room->creator)->name }}</strong>
+            </span>
+            <span class="text-muted">
+                <x-svg-icon name="clock" :size="14" /> @lang('discussion.field_created_at'):
+                <strong>{{ $room->created_at->format('Y-m-d H:i') }}</strong>
+            </span>
+            <span class="text-muted">
+                <x-svg-icon name="list-ul" :size="14" /> @lang('discussion.field_topics_count'):
+                <strong>{{ $room->topics_count }}</strong>
+            </span>
+            @if(optional($room->subject)->name)
+                <span class="text-muted">
+                    <x-svg-icon name="book" :size="14" /> @lang('discussion.field_subject'):
+                    <strong>{{ $room->subject->name }}</strong>
+                </span>
+            @endif
+            @if($room->category)
+                <span class="text-muted">
+                    <x-svg-icon name="tag" :size="14" /> @lang('discussion.field_category'):
+                    <strong>{{ $room->category }}</strong>
+                </span>
+            @endif
+        </div>
+
+        @if(!$room->allow_topics)
+            <div class="alert alert-secondary py-2 mt-2 mb-0">
+                <x-svg-icon name="slash-circle" :size="15" /> @lang('discussion.topics_stopped_notice')
+            </div>
+        @endif
+
+        @if($canEdit || $canReport)
+            <div class="mt-2 d-flex flex-wrap" style="gap:.5rem">
+                @if($canEdit)
+                    {{-- Stop / allow new topics (toggle allow_topics) --}}
+                    <form method="POST" action="{{ route('manage.discussion-rooms.toggle-topics', $room->id) }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-sm {{ $room->allow_topics ? 'btn-outline-warning' : 'btn-outline-success' }}">
+                            <x-svg-icon name="{{ $room->allow_topics ? 'slash-circle' : 'plus-lg' }}" :size="14" />
+                            {{ $room->allow_topics ? __('discussion.btn_stop_topics') : __('discussion.btn_enable_topics') }}
+                        </button>
+                    </form>
+                @endif
+                @if($canReport)
+                    <a href="{{ route('manage.discussion-rooms.report', $room->id) }}" class="btn btn-sm btn-outline-secondary">
+                        <x-svg-icon name="bar-chart" :size="14" /> @lang('discussion.btn_room_report')
+                    </a>
+                @endif
+            </div>
+        @endif
+    </div>
+</div>
+
 <div class="ds-card">
     <div class="ds-card-header">
-        <span class="ds-card-title"><x-svg-icon name="chat-square-dots" :size="16" /> {{ $room->title }}</span>
+        <span class="ds-card-title"><x-svg-icon name="chat-square-dots" :size="16" /> @lang('discussion.field_topics_count')</span>
     </div>
     <div class="ds-card-body p-0">
         @forelse($topics as $topic)
@@ -60,6 +129,9 @@
                         <br>
                         <small class="text-muted">
                             {{ optional($topic->creator)->name }}
+                            @if(optional($topic->creator)->role_name)
+                                <span class="badge badge-light border">{{ $topic->creator->role_name }}</span>
+                            @endif
                             &mdash;
                             {{ $topic->created_at->diffForHumans() }}
                         </small>

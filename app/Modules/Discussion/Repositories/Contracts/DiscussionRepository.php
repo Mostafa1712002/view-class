@@ -5,6 +5,7 @@ namespace App\Modules\Discussion\Repositories\Contracts;
 use App\Models\DiscussionComment;
 use App\Models\DiscussionRoom;
 use App\Models\DiscussionTopic;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface DiscussionRepository
@@ -12,17 +13,35 @@ interface DiscussionRepository
     // ── Rooms ────────────────────────────────────────────────────────────────
 
     /**
-     * Paginated list of rooms for a school with optional filters.
+     * Paginated list of rooms for a school with optional filters. Used by the
+     * STAFF management screen — returns every room regardless of targeting.
      *
      * @param array $filters  Optional: status
      */
     public function roomsForSchool(?int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator;
 
+    /**
+     * Paginated list of rooms a given user is allowed to see (member side).
+     * Applies the same targeting rule as the room-view gate.
+     */
+    public function roomsVisibleTo(User $user, ?int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator;
+
+    /**
+     * Whether the targeting rule lets this user see the room (member room view).
+     */
+    public function isRoomVisibleTo(DiscussionRoom $room, User $user): bool;
+
     public function findRoom(int $id): ?DiscussionRoom;
 
-    public function createRoom(array $data): DiscussionRoom;
+    /**
+     * @param array{user?:array<int>,role?:array<int>,job_title?:array<int>} $targets
+     */
+    public function createRoom(array $data, array $targets = []): DiscussionRoom;
 
-    public function updateRoom(int $id, array $data): DiscussionRoom;
+    /**
+     * @param array{user?:array<int>,role?:array<int>,job_title?:array<int>}|null $targets
+     */
+    public function updateRoom(int $id, array $data, ?array $targets = null): DiscussionRoom;
 
     /**
      * Set status to 'closed'.
@@ -38,6 +57,11 @@ interface DiscussionRepository
      * Toggle the room-level allow_comments flag.
      */
     public function toggleRoomComments(int $id): DiscussionRoom;
+
+    /**
+     * Toggle the room-level allow_topics flag (إيقاف الموضوعات الجديدة).
+     */
+    public function toggleRoomTopics(int $id): DiscussionRoom;
 
     public function deleteRoom(int $id): void;
 

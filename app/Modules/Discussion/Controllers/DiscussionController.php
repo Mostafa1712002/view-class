@@ -24,7 +24,13 @@ class DiscussionController extends Controller
      */
     public function index(): View
     {
-        $rooms = $this->repo->roomsForSchool(
+        $user = auth()->user();
+
+        // Members see only rooms whose targeting includes them. Staff are users
+        // too — a teacher/admin sees rooms targeted at their role/bucket — which
+        // is exactly what roomsVisibleTo() returns.
+        $rooms = $this->repo->roomsVisibleTo(
+            $user,
             $this->activeSchoolId(),
             ['status' => 'active']
         );
@@ -41,6 +47,11 @@ class DiscussionController extends Controller
         abort_if(! $room, 404);
         $this->assertSchool($room->school_id);
         abort_if($room->status !== 'active', 403);
+
+        // Targeting gate: a member may only open a room that targets them. Staff
+        // (super-admin/school-admin/teacher) manage every room, so they bypass —
+        // same lockstep rule that drives the member listing.
+        abort_if(! $this->isStaff() && ! $this->repo->isRoomVisibleTo($room, auth()->user()), 403);
 
         // Staff see hidden topics; members do not.
         $topics = $this->repo->topicsForRoom($roomId, $this->activeSchoolId(), 20, $this->isStaff());

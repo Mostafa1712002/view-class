@@ -113,4 +113,29 @@ return [
     'filter_status'         => 'الحالة',
     'filter_apply'          => 'تصفية',
     'filter_reset'          => 'إعادة ضبط',
+
+    // Subject / category / targeting (#235)
+    'field_subject'         => 'المادة',
+    'select_subject'        => 'اختر المادة',
+    'field_category'        => 'التصنيف / التحضير',
+    'placeholder_category'  => 'مثال: مراجعة، واجب، تحضير الدرس',
+    'field_audience'        => 'الفئة المستهدفة',
+    'target_all'            => 'الجميع',
+    'target_students'       => 'الطلاب',
+    'target_teachers'       => 'المعلمون',
+    'target_parents'        => 'أولياء الأمور',
+    'target_admins'         => 'المشرفون',
+    'target_job_titles'     => 'مسميات وظيفية محددة',
+    'target_specific_users' => 'مستخدمون محددون',
+    'target_specific_roles' => 'أدوار محددة',
+    'target_pick_required'  => 'يجب اختيار جهة مستهدفة واحدة على الأقل.',
+
+    // Room-view header + controls
+    'field_creator'         => 'المنشئ',
+    'btn_stop_topics'       => 'إيقاف الموضوعات الجديدة',
+    'btn_enable_topics'     => 'تفعيل الموضوعات الجديدة',
+    'btn_room_report'       => 'عرض تقرير الغرفة',
+    'topics_stopped_notice' => 'إضافة موضوعات جديدة موقوفة في هذه الغرفة.',
+    'flash_topics_enabled'  => 'تم تفعيل إضافة الموضوعات في الغرفة.',
+    'flash_topics_disabled' => 'تم إيقاف إضافة الموضوعات الجديدة في الغرفة.',
 ];

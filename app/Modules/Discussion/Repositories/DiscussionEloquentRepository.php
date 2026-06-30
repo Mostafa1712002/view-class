@@ -5,9 +5,12 @@ namespace App\Modules\Discussion\Repositories;
 use App\Models\DiscussionComment;
 use App\Models\DiscussionRoom;
 use App\Models\DiscussionTopic;
+use App\Models\User;
+use App\Modules\Discussion\Models\DiscussionRoomTarget;
 use App\Modules\Discussion\Repositories\Contracts\DiscussionRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class DiscussionEloquentRepository implements DiscussionRepository
 {
@@ -26,22 +29,83 @@ class DiscussionEloquentRepository implements DiscussionRepository
         return $query->latest('id')->paginate($perPage)->withQueryString();
     }
 
+    public function roomsVisibleTo(User $user, ?int $schoolId, array $filters = [], int $perPage = 20): LengthAwarePaginator
+    {
+        $query = DiscussionRoom::query()
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
+            ->visibleTo($user)
+            ->with(['creator:id,name,name_ar', 'subject:id,name']);
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->latest('id')->paginate($perPage)->withQueryString();
+    }
+
+    public function isRoomVisibleTo(DiscussionRoom $room, User $user): bool
+    {
+        return DiscussionRoom::query()
+            ->whereKey($room->id)
+            ->visibleTo($user)
+            ->exists();
+    }
+
     public function findRoom(int $id): ?DiscussionRoom
     {
-        return DiscussionRoom::with(['creator:id,name,name_ar'])->find($id);
+        return DiscussionRoom::with(['creator:id,name,name_ar', 'subject:id,name', 'targets'])->find($id);
     }
 
-    public function createRoom(array $data): DiscussionRoom
+    public function createRoom(array $data, array $targets = []): DiscussionRoom
     {
-        return DiscussionRoom::create($data);
+        return DB::transaction(function () use ($data, $targets) {
+            $room = DiscussionRoom::create($data);
+            $this->syncTargets($room, $targets);
+
+            return $room->fresh(['targets']);
+        });
     }
 
-    public function updateRoom(int $id, array $data): DiscussionRoom
+    public function updateRoom(int $id, array $data, ?array $targets = null): DiscussionRoom
     {
-        $room = DiscussionRoom::findOrFail($id);
-        $room->update($data);
+        return DB::transaction(function () use ($id, $data, $targets) {
+            $room = DiscussionRoom::findOrFail($id);
+            $room->update($data);
 
-        return $room->fresh();
+            if ($targets !== null) {
+                $this->syncTargets($room, $targets);
+            }
+
+            return $room->fresh(['targets']);
+        });
+    }
+
+    /**
+     * Replace the user/role/job_title target rows for a room.
+     *
+     * @param array{user?:array<int>,role?:array<int>,job_title?:array<int>} $targets
+     */
+    private function syncTargets(DiscussionRoom $room, array $targets): void
+    {
+        $room->targets()->delete();
+
+        $now  = now();
+        $rows = [];
+        foreach (['user', 'role', 'job_title'] as $kind) {
+            foreach (array_unique(array_filter((array) ($targets[$kind] ?? []))) as $targetId) {
+                $rows[] = [
+                    'discussion_room_id' => $room->id,
+                    'kind'               => $kind,
+                    'target_id'          => (int) $targetId,
+                    'created_at'         => $now,
+                    'updated_at'         => $now,
+                ];
+            }
+        }
+
+        if ($rows !== []) {
+            DiscussionRoomTarget::insert($rows);
+        }
     }
 
     public function closeRoom(int $id): DiscussionRoom
@@ -68,6 +132,14 @@ class DiscussionEloquentRepository implements DiscussionRepository
         return $room->fresh();
     }
 
+    public function toggleRoomTopics(int $id): DiscussionRoom
+    {
+        $room = DiscussionRoom::findOrFail($id);
+        $room->update(['allow_topics' => ! $room->allow_topics]);
+
+        return $room->fresh();
+    }
+
     public function deleteRoom(int $id): void
     {
         DiscussionRoom::findOrFail($id)->delete();
@@ -81,7 +153,7 @@ class DiscussionEloquentRepository implements DiscussionRepository
             ->where('room_id', $roomId)
             ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->when(! $includeHidden, fn ($q) => $q->where('is_hidden', false))
-            ->with(['creator:id,name,name_ar'])
+            ->with(['creator:id,name,name_ar', 'creator.roles:id,slug'])
             ->orderByDesc('is_pinned')
             ->orderByDesc('last_activity_at')
             ->paginate($perPage)
