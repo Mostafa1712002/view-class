@@ -25,17 +25,21 @@
 @section('content')
 
 {{-- Page header + breadcrumb --}}
-<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
-    <div>
-        <h2 style="margin:0;font-size:1.45rem;font-weight:800;color:var(--gray-900)">@lang('mailbox.title')</h2>
-        <nav><ol class="breadcrumb" style="margin:0;padding:0;background:transparent">
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@lang('mailbox.breadcrumb_mailbox')</li>
-        </ol></nav>
+<div class="content-header row">
+    <div class="content-header-left col-md-9 col-12 mb-2">
+        <h2 class="content-header-title float-{{ $isRtl ? 'right' : 'left' }} mb-0">@lang('mailbox.title')</h2>
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
+                <li class="breadcrumb-item active">@lang('mailbox.breadcrumb_mailbox')</li>
+            </ol>
+        </div>
     </div>
-    <a href="{{ route('my.mailbox.create') }}" class="btn btn-primary">
-        <x-svg-icon name="plus-lg" :size="16" /> @lang('mailbox.compose')
-    </a>
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
+        <a href="{{ route('my.mailbox.create') }}" class="btn btn-primary">
+            <x-svg-icon name="plus-lg" :size="16" /> @lang('mailbox.compose')
+        </a>
+    </div>
 </div>
 
 <div class="row">

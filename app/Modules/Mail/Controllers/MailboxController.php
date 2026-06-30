@@ -4,12 +4,15 @@ namespace App\Modules\Mail\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\ClassRoom;
 use App\Models\InternalMail;
 use App\Models\InternalMailRecipient;
+use App\Models\JobTitle;
 use App\Models\User;
 use App\Modules\Mail\Http\Requests\StoreMailRequest;
 use App\Modules\Mail\Repositories\Contracts\MailboxRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -48,6 +51,44 @@ class MailboxController extends Controller
         $this->gate('mailbox.send');
 
         return view('mailbox.compose', $this->composeData());
+    }
+
+    /**
+     * AJAX: paginated recipients matching the compose-form group + grade/class +
+     * job-title filters, school-scoped. Feeds the searchable results table (#236).
+     */
+    public function recipientsSearch(Request $request): JsonResponse
+    {
+        // Anyone who may send or draft a mail may browse candidate recipients.
+        $user = auth()->user();
+        abort_unless($user && ($user->canDo('mailbox.send') || $user->canDo('mailbox.draft')), 403);
+
+        $filters = [
+            'school_id'       => $this->activeSchoolId(),
+            'exclude_user_id' => $user->id,
+            'group'           => (string) $request->get('group', 'all'),
+            'grades'          => $this->intList($request->get('grade_levels', [])),
+            'classes'         => $this->intList($request->get('class_ids', [])),
+            'job_title_ids'   => $this->intList($request->get('job_title_ids', [])),
+            'search'          => $request->get('search') ? trim((string) $request->get('search')) : null,
+        ];
+
+        $recipients = $this->mailbox->searchRecipients($filters, 15);
+
+        return response()->json([
+            'html'  => view('mailbox.partials.recipients-table', compact('recipients'))->render(),
+            'all'   => $this->mailbox->matchingRecipients($filters),
+            'total' => $recipients->total(),
+        ]);
+    }
+
+    /** Normalise a request array into a list of positive ints. */
+    private function intList(mixed $raw): array
+    {
+        return array_values(array_filter(
+            array_map('intval', (array) $raw),
+            fn ($v) => $v > 0
+        ));
     }
 
     public function store(StoreMailRequest $request): RedirectResponse
@@ -356,10 +397,10 @@ class MailboxController extends Controller
         $user     = auth()->user();
         $schoolId = $this->activeSchoolId();
 
-        // School-scoped, role-narrowed candidate recipients. A non-super-admin
-        // can only address users inside their own school.
+        // School-scoped candidate pool — used ONLY to resolve display names for
+        // already-selected recipients (edit draft / reply). The live recipient
+        // picker is the AJAX results table; this is not rendered as a list.
         $candidates = User::query()
-            ->with('roles:id,slug,name')
             ->when($schoolId && ! $user->isSuperAdmin(), fn ($q) => $q->where('school_id', $schoolId))
             ->whereNull('deleted_at')
             ->where('id', '!=', $user->id)
@@ -367,37 +408,36 @@ class MailboxController extends Controller
             ->limit(2000)
             ->get(['id', 'name', 'school_id']);
 
-        // Group candidates by primary role so the compose form can offer the
-        // card's "اختيار مجموعة" buckets (students / teachers / parents / admins).
-        $roleGroups = [
-            'student'      => ['label' => __('mailbox.group_students'), 'ids' => []],
-            'teacher'      => ['label' => __('mailbox.group_teachers'), 'ids' => []],
-            'parent'       => ['label' => __('mailbox.group_parents'),  'ids' => []],
-            'school-admin' => ['label' => __('mailbox.group_admins'),   'ids' => []],
-        ];
-
-        foreach ($candidates as $candidate) {
-            foreach ($candidate->roles as $role) {
-                if (isset($roleGroups[$role->slug])) {
-                    $roleGroups[$role->slug]['ids'][] = $candidate->id;
-                }
-            }
-        }
-
-        // Drop empty buckets so the UI only shows groups that have members.
-        $roleGroups = array_filter($roleGroups, fn ($g) => ! empty($g['ids']));
-
         $children = $user->isParent()
             ? $user->children()->get(['users.id', 'users.name'])
             : collect();
 
+        // Filter inputs for the shared <x-audience-selector> (job titles + the
+        // grade/class grids shown when targeting students/parents), scoped to
+        // the same school the recipient search uses.
+        $classes = ClassRoom::query()
+            ->leftJoin('sections', 'sections.id', '=', 'classes.section_id')
+            ->when($schoolId, fn ($q) => $q->where('sections.school_id', $schoolId))
+            ->orderBy('classes.grade_level')
+            ->orderBy('classes.name')
+            ->get(['classes.id', 'classes.name', 'classes.grade_level', 'sections.school_id as school_id']);
+
+        $jobTitles = JobTitle::query()
+            ->active()
+            ->forSchool($schoolId)
+            ->orderBy('sort_order')
+            ->orderBy('name_ar')
+            ->get(['id', 'name_ar', 'school_id']);
+
         return [
             'recipients'         => $candidates,
-            'roleGroups'         => $roleGroups,
             'children'           => $children,
             'draft'              => $draft,
             'selectedRecipients' => $selectedRecipients,
             'prefill'            => $prefill,
+            'jobTitles'          => $jobTitles,
+            'classes'            => $classes,
+            'gradeLevels'        => range(1, 12),
         ];
     }
 

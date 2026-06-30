@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth'])->prefix('my/mailbox')->name('my.mailbox.')->group(function () {
+    // AJAX recipient search for the compose form (group + grade/class + job-title
+    // filters → searchable, paginated results table). Non-numeric path, so it
+    // never collides with the base group's GET /{mail} (whereNumber) route.
+    Route::get('/recipients/search', [MailboxController::class, 'recipientsSearch'])->name('recipients.search');
+
     // Draft editing
     Route::get('/{mail}/edit', [MailboxController::class, 'edit'])->whereNumber('mail')->name('edit');
     Route::put('/{mail}', [MailboxController::class, 'update'])->whereNumber('mail')->name('update');

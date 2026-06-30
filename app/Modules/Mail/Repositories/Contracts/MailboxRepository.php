@@ -25,4 +25,21 @@ interface MailboxRepository
      * Mark a recipient row as read (noop if already read).
      */
     public function markRead(int $mailId, int $userId): void;
+
+    /**
+     * Paginated candidate recipients matching the compose-form filters.
+     *
+     * Filter keys: school_id (?int), exclude_user_id (int), group (string:
+     * all|students|teachers|parents|admins|job_titles), grades (int[]),
+     * classes (int[]), job_title_ids (int[]), search (?string).
+     */
+    public function searchRecipients(array $filters, int $perPage = 15): LengthAwarePaginator;
+
+    /**
+     * All recipients (id + name) matching the same filters, capped, for the
+     * "select all results" action. Same filter keys as searchRecipients().
+     *
+     * @return array<int, array{id:int, name:string}>
+     */
+    public function matchingRecipients(array $filters, int $cap = 1000): array;
 }

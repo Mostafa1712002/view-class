@@ -21,20 +21,24 @@
 @section('content')
 
 {{-- Page header + breadcrumb --}}
-<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
-    <div>
-        <h2 style="margin:0;font-size:1.35rem;font-weight:800;color:var(--gray-900)">
+<div class="content-header row">
+    <div class="content-header-left col-md-9 col-12 mb-2">
+        <h2 class="content-header-title float-{{ $isRtl ? 'right' : 'left' }} mb-0">
             {{ \Illuminate\Support\Str::limit($message->subject, 60) }}
         </h2>
-        <nav><ol class="breadcrumb" style="margin:.1rem 0 0;padding:0;background:transparent">
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('my.mailbox.index') }}">@lang('mailbox.breadcrumb_mailbox')</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ \Illuminate\Support\Str::limit($message->subject, 40) }}</li>
-        </ol></nav>
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('my.mailbox.index') }}">@lang('mailbox.breadcrumb_mailbox')</a></li>
+                <li class="breadcrumb-item active">{{ \Illuminate\Support\Str::limit($message->subject, 40) }}</li>
+            </ol>
+        </div>
     </div>
-    <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-sm">
-        <x-svg-icon name="arrow-left" :size="15" /> @lang('mailbox.back')
-    </a>
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
+        <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
+            <x-svg-icon name="arrow-left" :size="15" /> @lang('mailbox.back')
+        </a>
+    </div>
 </div>
 
 <div class="ds-card card">

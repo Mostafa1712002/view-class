@@ -24,20 +24,24 @@
 @section('content')
 
 {{-- Page header + breadcrumb --}}
-<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
-    <div>
-        <h2 style="margin:0;font-size:1.45rem;font-weight:800;color:var(--gray-900)">
+<div class="content-header row">
+    <div class="content-header-left col-md-9 col-12 mb-2">
+        <h2 class="content-header-title float-{{ $isRtl ? 'right' : 'left' }} mb-0">
             {{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}
         </h2>
-        <nav><ol class="breadcrumb" style="margin:0;padding:0;background:transparent">
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('my.mailbox.index') }}">@lang('mailbox.breadcrumb_mailbox')</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}</li>
-        </ol></nav>
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('mailbox.breadcrumb_home')</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('my.mailbox.index') }}">@lang('mailbox.breadcrumb_mailbox')</a></li>
+                <li class="breadcrumb-item active">{{ $isEdit ? __('mailbox.edit_draft') : __('mailbox.compose') }}</li>
+            </ol>
+        </div>
     </div>
-    <a href="{{ route('my.mailbox.index') }}" class="btn btn-outline-secondary btn-sm">
-        <x-svg-icon name="arrow-right" :size="15" /> @lang('mailbox.back')
-    </a>
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
+        <a href="{{ route('my.mailbox.index') }}" class="btn btn-outline-secondary">
+            <x-svg-icon name="arrow-right" :size="15" /> @lang('mailbox.back')
+        </a>
+    </div>
 </div>
 
 <div class="ds-card card">
@@ -84,39 +88,68 @@
                     </div>
                 </div>
 
-                {{-- Recipient group quick-select (card: اختيار مجموعة) --}}
-                @if(! empty($roleGroups))
-                    <div class="form-group">
-                        <label class="d-block">@lang('mailbox.send_to_group')</label>
-                        <div class="d-flex flex-wrap" style="gap:6px;">
-                            @foreach($roleGroups as $slug => $group)
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-info js-recipient-group"
-                                        data-ids="{{ implode(',', $group['ids']) }}">
-                                    <x-svg-icon name="people-fill" :size="14" /> {{ $group['label'] }}
-                                    <span class="badge badge-light">{{ count($group['ids']) }}</span>
-                                </button>
-                            @endforeach
-                            <button type="button" class="btn btn-sm btn-outline-secondary js-recipient-clear">
-                                <x-svg-icon name="x-circle-fill" :size="14" /> @lang('mailbox.clear_selection')
-                            </button>
-                        </div>
-                        <small class="text-muted">@lang('mailbox.group_hint')</small>
-                    </div>
-                @endif
+                {{-- Recipients (#236): group + grade/class/job-title filters → searchable table --}}
+                @php
+                    // Seed the selection set from old()/draft/reply values, resolving
+                    // display names from the school-scoped candidate pool.
+                    $recipientNames = $recipients->pluck('name', 'id');
+                    $initialSelected = collect($valTo)
+                        ->map(fn ($id) => ['id' => (int) $id, 'name' => $recipientNames[$id] ?? ('#' . $id)])
+                        ->values();
+                @endphp
 
-                {{-- Recipients (مستخدمون محددون) --}}
                 <div class="form-group">
-                    <label for="to">@lang('mailbox.recipients') <span class="text-danger">*</span></label>
-                    <select name="to[]" id="to" multiple
-                            class="form-control select2-recipients @error('to') is-invalid @enderror @error('to.*') is-invalid @enderror">
-                        @foreach($recipients as $recipient)
-                            <option value="{{ $recipient->id }}"
-                                @if(in_array((int) $recipient->id, $valTo, true)) selected @endif>
-                                {{ $recipient->name }}
-                            </option>
-                        @endforeach
+                    <label class="form-label" for="recipientGroup">@lang('mailbox.send_to_group') <span class="text-danger">*</span></label>
+                    <select id="recipientGroup" class="form-control">
+                        <option value="all">@lang('mailbox.group_all')</option>
+                        <option value="students">@lang('mailbox.group_students')</option>
+                        <option value="teachers">@lang('mailbox.group_teachers')</option>
+                        <option value="parents">@lang('mailbox.group_parents')</option>
+                        <option value="admins">@lang('mailbox.group_admins')</option>
+                        <option value="job_titles">@lang('mailbox.group_job_titles')</option>
                     </select>
+                    <small class="text-muted">@lang('mailbox.recipient_picker_hint')</small>
+                </div>
+
+                {{-- Grade/class grids (students & parents) + job-title grid (job_titles).
+                     Rendered always; JS shows the grids relevant to the chosen group. --}}
+                <x-audience-selector
+                    :grids="['job_titles', 'grades', 'classes']"
+                    :conditional="false"
+                    :job-titles="$jobTitles"
+                    :grade-levels="$gradeLevels"
+                    :classes="$classes"
+                />
+
+                {{-- Search + select-all --}}
+                <div class="form-group" style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end">
+                    <div style="flex:1;min-width:220px">
+                        <label class="form-label" for="recipientSearch">@lang('mailbox.search_recipients')</label>
+                        <input type="search" id="recipientSearch" class="form-control"
+                               placeholder="@lang('mailbox.search_recipients_placeholder')" autocomplete="off">
+                    </div>
+                    <button type="button" id="recipientSelectAll" class="btn btn-outline-primary">
+                        <x-svg-icon name="check2-all" :size="15" /> @lang('mailbox.select_all_results')
+                    </button>
+                </div>
+
+                {{-- Results table (AJAX) --}}
+                <div class="form-group">
+                    <div id="recipientsResults" class="ds-card card" style="padding:.4rem .6rem">
+                        <p class="text-muted mb-0">@lang('mailbox.loading')</p>
+                    </div>
+                </div>
+
+                {{-- Selected recipients (chips + the hidden to[] inputs that actually submit) --}}
+                <div class="form-group">
+                    <label class="form-label">
+                        @lang('mailbox.selected_recipients')
+                        <span id="selectedCount" class="badge ds-badge-navy">0</span>
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div id="selectedChips" class="d-flex flex-wrap"
+                         style="gap:.4rem;min-height:34px;padding:.3rem;border:1px dashed var(--gray-200,#e5e7eb);border-radius:.5rem"></div>
+                    <div id="selectedInputs"></div>
                     @error('to')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -192,42 +225,191 @@
 
 @push('scripts')
 <script>
+window.__mailboxInitial = @json($initialSelected);
+window.__recipientsSearchUrl = "{{ route('my.mailbox.recipients.search') }}";
+</script>
+<script>
 document.addEventListener('DOMContentLoaded', function () {
-    var $to = window.$ ? $('#to') : null;
+    var url         = window.__recipientsSearchUrl;
+    var groupSel    = document.getElementById('recipientGroup');
+    var searchInp   = document.getElementById('recipientSearch');
+    var resultsBox  = document.getElementById('recipientsResults');
+    var chipsBox    = document.getElementById('selectedChips');
+    var inputsBox   = document.getElementById('selectedInputs');
+    var countBadge  = document.getElementById('selectedCount');
+    var selectAllBtn = document.getElementById('recipientSelectAll');
+    if (!groupSel || !resultsBox) { return; }
 
-    if (window.$ && $.fn.select2) {
-        $to.select2({
-            placeholder: '{{ __('mailbox.select_recipients') }}',
-            allowClear: true,
-            dir: '{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}'
+    // selected id(string) -> name. Survives pagination + search + group change.
+    var selected = new Map();
+    (window.__mailboxInitial || []).forEach(function (r) { selected.set(String(r.id), r.name); });
+
+    // Last "select all results" payload (id+name) for the current filter set.
+    var lastAll = [];
+
+    function gridWrap(field) {
+        var el = document.querySelector('input[name="' + field + '[]"]');
+        return el ? el.closest('.form-group') : null;
+    }
+    var gradesWrap  = gridWrap('grade_levels');
+    var classesWrap = gridWrap('class_ids');
+    var jobsWrap    = gridWrap('job_title_ids');
+
+    function checkedVals(field) {
+        return Array.prototype.slice
+            .call(document.querySelectorAll('input[name="' + field + '[]"]:checked'))
+            .map(function (c) { return c.value; });
+    }
+
+    function syncGridVisibility() {
+        var g = groupSel.value;
+        var showGradeClass = (g === 'students' || g === 'parents');
+        if (gradesWrap)  { gradesWrap.style.display  = showGradeClass ? '' : 'none'; }
+        if (classesWrap) { classesWrap.style.display = showGradeClass ? '' : 'none'; }
+        if (jobsWrap)    { jobsWrap.style.display    = (g === 'job_titles') ? '' : 'none'; }
+    }
+
+    function buildQuery(page) {
+        var p = new URLSearchParams();
+        p.set('group', groupSel.value);
+        var s = searchInp.value.trim();
+        if (s) { p.set('search', s); }
+        checkedVals('grade_levels').forEach(function (v) { p.append('grade_levels[]', v); });
+        checkedVals('class_ids').forEach(function (v) { p.append('class_ids[]', v); });
+        checkedVals('job_title_ids').forEach(function (v) { p.append('job_title_ids[]', v); });
+        if (page && page > 1) { p.set('page', page); }
+        return p.toString();
+    }
+
+    function renderSelected() {
+        countBadge.textContent = selected.size;
+        chipsBox.innerHTML = '';
+        inputsBox.innerHTML = '';
+        selected.forEach(function (name, id) {
+            var chip = document.createElement('span');
+            chip.className = 'badge badge-light';
+            chip.style.cssText = 'display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .55rem;font-size:.8rem';
+            chip.appendChild(document.createTextNode(name));
+
+            var x = document.createElement('button');
+            x.type = 'button';
+            x.setAttribute('aria-label', 'remove');
+            x.textContent = '×';
+            x.style.cssText = 'border:0;background:transparent;cursor:pointer;font-size:1rem;line-height:1;color:var(--status-danger,#dc3545)';
+            x.addEventListener('click', function () {
+                selected.delete(id);
+                renderSelected();
+                syncRowChecks();
+            });
+            chip.appendChild(x);
+            chipsBox.appendChild(chip);
+
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'to[]';
+            inp.value = id;
+            inputsBox.appendChild(inp);
         });
     }
 
-    function setSelection(ids, append) {
-        var el = document.getElementById('to');
-        if (!el) return;
-        var current = append
-            ? Array.from(el.selectedOptions).map(function (o) { return o.value; })
-            : [];
-        var next = current.concat(ids.map(String));
-        Array.prototype.forEach.call(el.options, function (opt) {
-            opt.selected = next.indexOf(opt.value) !== -1;
-        });
-        if ($to && $to.trigger) { $to.trigger('change'); }
+    function syncRowChecks() {
+        var boxes = resultsBox.querySelectorAll('.recipient-check');
+        boxes.forEach(function (cb) { cb.checked = selected.has(cb.value); });
+        var pageAll = resultsBox.querySelector('#recipientPageAll');
+        if (pageAll) {
+            var on = resultsBox.querySelectorAll('.recipient-check:checked');
+            pageAll.checked = boxes.length > 0 && on.length === boxes.length;
+        }
     }
 
-    // Group buttons add that role's users to the current selection.
-    document.querySelectorAll('.js-recipient-group').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var raw = (btn.getAttribute('data-ids') || '').split(',').filter(Boolean);
-            setSelection(raw, true);
+    function bindRows() {
+        resultsBox.querySelectorAll('.recipient-check').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                if (cb.checked) { selected.set(cb.value, cb.getAttribute('data-name')); }
+                else { selected.delete(cb.value); }
+                renderSelected();
+                syncRowChecks();
+            });
         });
+
+        var pageAll = resultsBox.querySelector('#recipientPageAll');
+        if (pageAll) {
+            pageAll.addEventListener('change', function () {
+                resultsBox.querySelectorAll('.recipient-check').forEach(function (cb) {
+                    cb.checked = pageAll.checked;
+                    if (pageAll.checked) { selected.set(cb.value, cb.getAttribute('data-name')); }
+                    else { selected.delete(cb.value); }
+                });
+                renderSelected();
+            });
+        }
+
+        // Intercept pagination links (works for Bootstrap or Tailwind markup).
+        var pager = resultsBox.querySelector('#recipientPagination');
+        if (pager) {
+            pager.querySelectorAll('a[href]').forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var page = 1;
+                    try { page = new URL(a.href).searchParams.get('page') || 1; } catch (err) {}
+                    load(page);
+                });
+            });
+        }
+    }
+
+    function load(page) {
+        resultsBox.innerHTML = '<p class="text-muted mb-0">@lang('mailbox.loading')</p>';
+        fetch(url + '?' + buildQuery(page), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                resultsBox.innerHTML = d.html;
+                lastAll = d.all || [];
+                bindRows();
+                syncRowChecks();
+            })
+            .catch(function () {
+                resultsBox.innerHTML = '<p class="text-danger mb-0">@lang('mailbox.load_error')</p>';
+            });
+    }
+
+    var debounce;
+    function debouncedLoad() {
+        clearTimeout(debounce);
+        debounce = setTimeout(function () { load(1); }, 300);
+    }
+
+    groupSel.addEventListener('change', function () { syncGridVisibility(); load(1); });
+    searchInp.addEventListener('input', debouncedLoad);
+
+    // Any grade/class/job-title checkbox change re-runs the search.
+    document.querySelectorAll(
+        'input[name="grade_levels[]"], input[name="class_ids[]"], input[name="job_title_ids[]"]'
+    ).forEach(function (cb) {
+        cb.addEventListener('change', function () { load(1); });
     });
 
-    var clearBtn = document.querySelector('.js-recipient-clear');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function () { setSelection([], false); });
+    selectAllBtn.addEventListener('click', function () {
+        lastAll.forEach(function (r) { selected.set(String(r.id), r.name); });
+        renderSelected();
+        syncRowChecks();
+    });
+
+    // Block submit with no recipients (mirror server-side `to` required rule).
+    var form = document.getElementById('composeForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            var sending = e.submitter && e.submitter.value === 'send';
+            if (sending && selected.size === 0) {
+                e.preventDefault();
+                window.alert('@lang('mailbox.to_required_js')');
+            }
+        });
     }
+
+    syncGridVisibility();
+    renderSelected();
+    load(1);
 });
 </script>
 @endpush
