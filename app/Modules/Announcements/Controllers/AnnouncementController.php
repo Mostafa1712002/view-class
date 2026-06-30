@@ -234,7 +234,7 @@ class AnnouncementController extends Controller
                 ->orderBy('classes.grade_level')
                 ->orderBy('classes.name')
                 ->get(['classes.id', 'classes.name', 'classes.grade_level', 'sections.school_id as school_id']),
-            'subjects' => $subjectsQuery->orderBy('name')->get(['id', 'name']),
+            'subjects' => $subjectsQuery->orderBy('name')->get(['id', 'name', 'school_id']),
             'roles'    => Role::orderBy('name')->get(['id', 'name', 'slug']),
             'jobTitles' => JobTitle::query()
                 ->active()

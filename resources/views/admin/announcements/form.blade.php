@@ -120,67 +120,23 @@
                     </select>
                 </div>
 
-                <div class="form-group ann-cond" data-show="job_titles">
-                    <label class="form-label">اختر المسميات الوظيفية</label>
-                    <div class="ann-jobtitles-grid">
-                        @foreach($jobTitles as $jt)
-                            <label class="ann-jt-item">
-                                <input type="checkbox" name="job_title_ids[]" value="{{ $jt->id }}"
-                                    @checked(in_array($jt->id, $selectedJobTitles))>
-                                <span>{{ $jt->name_ar }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @if($jobTitles->isEmpty())
-                        <p class="text-muted" style="margin:.4rem 0 0">لا توجد مسميات وظيفية متاحة.</p>
-                    @endif
-                </div>
-
-                <div class="form-group ann-cond" data-show="specific_users">
-                    <label class="form-label">اختر المستخدمين</label>
-                    <select name="user_target_ids[]" class="form-control" multiple size="6">
-                        @foreach($users as $u)
-                            <option value="{{ $u->id }}" @selected(in_array($u->id, $selectedUserTargets))>{{ $u->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group ann-cond" data-show="specific_roles">
-                    <label class="form-label">اختر الأدوار</label>
-                    <select name="role_target_ids[]" class="form-control" multiple size="5">
-                        @foreach($roles as $r)
-                            <option value="{{ $r->id }}" @selected(in_array($r->id, $selectedRoleTargets))>{{ $r->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group ann-cond" data-show="students">
-                    <label class="form-label">الصفوف</label>
-                    <select name="grade_levels[]" class="form-control" multiple size="5">
-                        @foreach($gradeLevels as $g)
-                            <option value="{{ $g }}" @selected(in_array($g, $selectedGrades))>الصف {{ $g }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group ann-cond" data-show="students">
-                    <label class="form-label">الفصول</label>
-                    <select name="class_ids[]" id="annClasses" class="form-control" multiple size="5">
-                        @foreach($classes as $c)
-                            <option value="{{ $c->id }}" data-school="{{ $c->school_id }}"
-                                @selected(in_array($c->id, $selectedClasses))>{{ $c->name }} (صف {{ $c->grade_level }})</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">المواد (اختياري)</label>
-                    <select name="subject_ids[]" class="form-control" multiple size="4">
-                        @foreach($subjects as $sub)
-                            <option value="{{ $sub->id }}" @selected(in_array($sub->id, $selectedSubjects))>{{ $sub->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-audience-selector
+                    :grids="['job_titles', 'users', 'roles', 'grades', 'classes', 'subjects']"
+                    :conditional="true"
+                    :school-select="$isSuper ? 'annSchool' : null"
+                    :job-titles="$jobTitles"
+                    :users="$users"
+                    :roles="$roles"
+                    :grade-levels="$gradeLevels"
+                    :classes="$classes"
+                    :subjects="$subjects"
+                    :selected-job-titles="$selectedJobTitles"
+                    :selected-users="$selectedUserTargets"
+                    :selected-roles="$selectedRoleTargets"
+                    :selected-grades="$selectedGrades"
+                    :selected-classes="$selectedClasses"
+                    :selected-subjects="$selectedSubjects"
+                />
             </div>
         </div>
 
@@ -256,23 +212,7 @@
     }
     if (tt) { tt.addEventListener('change', syncCond); syncCond(); }
 
-    // ── Filter the class list by the chosen school (super-admin) ───────────
-    var schoolSel = document.getElementById('annSchool');
-    var classSel  = document.getElementById('annClasses');
-    function filterClassesBySchool() {
-        if (!schoolSel || !classSel) { return; }
-        var sid = schoolSel.value;
-        Array.prototype.forEach.call(classSel.options, function (opt) {
-            var os = opt.getAttribute('data-school');
-            var match = !os || os === sid;
-            opt.hidden = !match;
-            if (!match) { opt.selected = false; }
-        });
-    }
-    if (schoolSel && classSel) {
-        schoolSel.addEventListener('change', filterClassesBySchool);
-        filterClassesBySchool();
-    }
+    // School-based class/grade filtering is handled inside the audience-selector component.
 
     // ── TinyMCE full classic toolbar (textarea stays source of truth) ──────
     if (window.tinymce && !window.__noTiny) {
@@ -308,25 +248,4 @@
     }
 })();
 </script>
-<style>
-.ann-jobtitles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: .35rem .9rem;
-    border: 1px solid var(--gray-200, #e5e7eb);
-    border-radius: .5rem;
-    padding: .75rem;
-    max-height: 320px;
-    overflow-y: auto;
-}
-.ann-jt-item {
-    display: flex;
-    align-items: center;
-    gap: .45rem;
-    font-weight: 500;
-    cursor: pointer;
-    margin: 0;
-}
-.ann-jt-item input { flex: 0 0 auto; }
-</style>
 @endpush
