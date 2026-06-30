@@ -80,7 +80,7 @@
                     <td>@if($r->notified_parent)<span class="badge badge-success">نعم</span>@else<span class="badge badge-light">لا</span>@endif</td>
                     <td class="small text-muted">{{ \Illuminate\Support\Str::limit($r->notes, 25) ?: '—' }}</td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-outline-primary js-notify" data-id="{{ $r->id }}" data-name="{{ optional($r->student)->name }}"><x-svg-icon name="send" /> رسالة</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary js-notify" data-id="{{ $r->id }}" data-name="{{ optional($r->student)->name }}" data-status="{{ $statusLabels[$r->status] ?? $r->status }}" data-date="{{ $r->date?->format('Y-m-d') }}"><x-svg-icon name="send" /> رسالة</button>
                         <a href="{{ route('admin.users.students.attendance', optional($r->student)->id) }}" class="btn btn-sm btn-link"><x-svg-icon name="clock-history" /></a>
                     </td>
                 </tr>
@@ -119,8 +119,12 @@
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.js-notify').forEach(function (b) {
         b.addEventListener('click', function () {
-            document.getElementById('notifyName').textContent = b.dataset.name || '';
+            var name = b.dataset.name || '';
+            document.getElementById('notifyName').textContent = name;
             document.getElementById('notifyForm').action = '{{ url('admin/attendance/follow-up') }}/' + b.dataset.id + '/notify';
+            var msg = document.querySelector('#notifyForm [name="message"]');
+            if (msg) msg.value = 'ولي أمر الطالب ' + name + '، نفيدكم بأن الطالب سُجِّل ' +
+                (b.dataset.status || '') + ' بتاريخ ' + (b.dataset.date || '') + '. برجاء المتابعة.';
             if (window.jQuery) jQuery('#notifyModal').modal('show'); else document.getElementById('notifyModal').style.display='block';
         });
     });

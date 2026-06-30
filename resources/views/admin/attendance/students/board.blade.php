@@ -5,6 +5,8 @@
 @php
     $statusLabels = ['present'=>'حاضر','absent'=>'غائب','late'=>'متأخر','excused'=>'مستأذن'];
     $statusColors = ['present'=>'success','absent'=>'danger','late'=>'warning','excused'=>'info'];
+    $canNote   = auth()->user()?->canDo('attendance.add_note');
+    $canExcuse = auth()->user()?->canDo('attendance.add_excuse');
 @endphp
 <div class="content-header row">
     <div class="content-header-left col-md-7 col-12 mb-2">
@@ -147,7 +149,7 @@
                     <tbody>
                         @foreach($rows as $i => $row)
                         @php $st = $row['student']; @endphp
-                        <tr data-student="{{ $st->id }}">
+                        <tr data-student="{{ $st->id }}" data-attendance-id="{{ $row['attendance_id'] }}">
                             <td><input type="checkbox" class="rowCheck" value="{{ $st->id }}"></td>
                             <td>{{ $i + 1 }}</td>
                             <td>
@@ -173,12 +175,22 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td>
-                                @if($row['excuse_status'])
+                            <td style="min-width:170px">
+                                @if($canExcuse)
+                                    <input type="text" class="form-control form-control-sm js-excuse" value="{{ $row['excuse_text'] }}" data-orig="{{ $row['excuse_text'] }}" placeholder="اكتب العذر…" title="يحدّد الحالة كمستأذن عند الحفظ">
+                                    <span class="inline-save small"></span>
+                                @elseif($row['excuse_status'])
                                     <span class="badge badge-{{ $row['excuse_status']==='accepted'?'success':($row['excuse_status']==='rejected'?'danger':'warning') }}">{{ ['pending'=>'قيد المراجعة','accepted'=>'مقبول','rejected'=>'مرفوض'][$row['excuse_status']] }}</span>
                                 @else — @endif
                             </td>
-                            <td class="small text-muted">{{ \Illuminate\Support\Str::limit($row['notes'], 30) ?: '—' }}</td>
+                            <td style="min-width:170px">
+                                @if($canNote)
+                                    <input type="text" class="form-control form-control-sm js-note" name="rows[{{ $i }}][notes]" value="{{ $row['notes'] }}" data-orig="{{ $row['notes'] }}" placeholder="ملاحظة…">
+                                    <span class="inline-save small"></span>
+                                @else
+                                    <span class="small text-muted">{{ \Illuminate\Support\Str::limit($row['notes'], 30) ?: '—' }}</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($row['attendance_id'])
                                 <a href="{{ route('admin.users.students.attendance', $st->id) }}" class="btn btn-sm btn-link" title="سجل الحضور"><x-svg-icon name="clock-history" /></a>
@@ -252,6 +264,75 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('bulkForm').submit();
         });
     });
+
+    // Inline excuse/notes auto-save (#261)
+    var form = document.getElementById('attendanceForm');
+    if (form) {
+        var token = form.querySelector('[name="_token"]').value;
+        var base  = '{{ url('admin/attendance/students') }}';
+
+        function flash(input, ok, msg) {
+            var fb = input.parentElement.querySelector('.inline-save');
+            input.classList.remove('is-valid', 'is-invalid');
+            input.classList.add(ok ? 'is-valid' : 'is-invalid');
+            if (fb) { fb.textContent = msg || (ok ? '✓ تم الحفظ' : '✗ تعذّر الحفظ'); fb.className = 'inline-save small ' + (ok ? 'text-success' : 'text-danger'); }
+            if (ok) setTimeout(function () { input.classList.remove('is-valid'); if (fb) fb.textContent = ''; }, 2500);
+        }
+        function post(url, params) {
+            return fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': token },
+                body: params.toString()
+            });
+        }
+        // Create a row via store when none exists yet; resolves to the new attendance id.
+        function ensureRow(tr, status) {
+            if (tr.dataset.attendanceId) return Promise.resolve(tr.dataset.attendanceId);
+            var sid = tr.dataset.student;
+            var p = new URLSearchParams();
+            p.append('_token', token);
+            p.append('class_id', form.querySelector('[name="class_id"]').value);
+            p.append('date', form.querySelector('[name="date"]').value);
+            var per = form.querySelector('[name="period"]'); if (per) p.append('period', per.value);
+            var subj = form.querySelector('[name="subject_id"]'); if (subj) p.append('subject_id', subj.value);
+            p.append('rows[0][student_id]', sid);
+            p.append('rows[0][status]', status);
+            return post(base + '/store', p).then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (d) { var id = d && d.ids ? d.ids[sid] : null; if (id) tr.dataset.attendanceId = id; return id; });
+        }
+        function saveNote(inp) {
+            if (inp.value === inp.dataset.orig) return;
+            var tr = inp.closest('tr');
+            if (!tr.dataset.attendanceId) { flash(inp, true, 'سيُحفظ مع الحضور'); inp.dataset.orig = inp.value; return; }
+            var p = new URLSearchParams(); p.append('_token', token); p.append('notes', inp.value);
+            post(base + '/' + tr.dataset.attendanceId + '/note', p)
+                .then(function (r) { if (r.ok) { flash(inp, true); inp.dataset.orig = inp.value; } else flash(inp, false); })
+                .catch(function () { flash(inp, false); });
+        }
+        function saveExcuse(inp) {
+            if (inp.value === inp.dataset.orig) return;
+            if (inp.value.trim().length < 3) { flash(inp, false, 'العذر 3 أحرف على الأقل'); return; }
+            var tr = inp.closest('tr');
+            ensureRow(tr, 'excused').then(function (id) {
+                if (!id) { flash(inp, false); return; }
+                var p = new URLSearchParams(); p.append('_token', token); p.append('excuse_text', inp.value);
+                return post(base + '/' + id + '/excuse', p).then(function (r) {
+                    if (!r.ok) { flash(inp, false); return; }
+                    flash(inp, true); inp.dataset.orig = inp.value;
+                    var si = tr.querySelector('.status-input'); if (si) si.value = 'excused';
+                    var badge = tr.querySelector('.status-badge'); if (badge) { badge.textContent = labels.excused; badge.className = 'status-badge badge badge-' + colors.excused; }
+                });
+            }).catch(function () { flash(inp, false); });
+        }
+        function wire(sel, fn) {
+            document.querySelectorAll(sel).forEach(function (inp) {
+                inp.addEventListener('blur', function () { fn(inp); });
+                inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); inp.blur(); } });
+            });
+        }
+        wire('.js-note', saveNote);
+        wire('.js-excuse', saveExcuse);
+    }
 });
 </script>
 @endpush

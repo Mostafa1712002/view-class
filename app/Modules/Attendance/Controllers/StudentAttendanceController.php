@@ -75,6 +75,7 @@ class StudentAttendanceController extends Controller
                         'attendance_id' => $att->id ?? null,
                         'notes'         => $att->notes ?? null,
                         'excuse_status' => $att->excuse_status ?? null,
+                        'excuse_text'   => $att->excuse_text ?? null,
                         'present_days'  => $this->query->presentDaysCount($student->id),
                     ];
                 });
@@ -128,9 +129,10 @@ class StudentAttendanceController extends Controller
         $yearId = $this->query->currentAcademicYearId();
         $recorder = $request->user();
         $saved = 0;
+        $ids = []; // student_id => attendance_id, for inline AJAX (no-row excuse case)
 
         foreach ($data['rows'] as $row) {
-            $this->repo->saveWithNotify([
+            $attendance = $this->repo->saveWithNotify([
                 'student_id'       => $row['student_id'],
                 'class_id'         => $data['class_id'],
                 'subject_id'       => $data['subject_id'] ?? null,
@@ -141,10 +143,15 @@ class StudentAttendanceController extends Controller
                 'arrival_time'     => $row['arrival_time'] ?? null,
                 'notes'            => $row['notes'] ?? null,
             ], $recorder);
+            $ids[(int) $row['student_id']] = $attendance->id;
             $saved++;
         }
 
         ActivityLog::log('attendance.record', "تسجيل حضور {$saved} طالب — فصل {$class->name} بتاريخ {$data['date']}");
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'ids' => $ids, 'message' => "تم حفظ الحضور لـ {$saved} طالب."]);
+        }
 
         return back()->with('success', "تم حفظ الحضور لـ {$saved} طالب بنجاح.");
     }
@@ -203,6 +210,10 @@ class StudentAttendanceController extends Controller
         $attendance->update(['notes' => $request->notes]);
         ActivityLog::logUpdate($attendance, 'إضافة ملاحظة على سجل حضور', $old);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'تم حفظ الملاحظة.']);
+        }
+
         return back()->with('success', 'تم حفظ الملاحظة.');
     }
 
@@ -220,6 +231,10 @@ class StudentAttendanceController extends Controller
             'excuse_reviewed_by'  => $request->user()->id,
         ]);
         ActivityLog::log('attendance.excuse', 'إضافة عذر مقبول لسجل حضور', $attendance);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'تم إضافة العذر وتعيين الحالة كمستأذن.']);
+        }
 
         return back()->with('success', 'تم إضافة العذر وتعيين الحالة كمستأذن.');
     }
