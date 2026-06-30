@@ -186,7 +186,7 @@ class AttendanceController extends Controller
      */
     public function studentReport(Request $request)
     {
-        $students = User::role('student')->orderBy('name')->get();
+        $students = User::whereHas('roles', fn ($q) => $q->where('slug', 'student'))->orderBy('name')->get();
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
 
         $report = null;

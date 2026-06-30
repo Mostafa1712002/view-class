@@ -35,6 +35,12 @@ abstract class BaseUserListRepository implements UserListRepository
 
     public function findScoped(int $id, ?int $schoolId): ?User
     {
+        // The active-school scope is a list filter, not an authorization boundary:
+        // a super-admin can open any record regardless of the school they're scoped to.
+        if (auth()->check() && auth()->user()->isSuperAdmin()) {
+            $schoolId = null;
+        }
+
         return $this->base($schoolId)->where('users.id', $id)->first();
     }
 
