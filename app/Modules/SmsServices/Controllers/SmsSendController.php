@@ -229,6 +229,18 @@ class SmsSendController extends Controller
 
     private function sendersFor(?int $schoolId)
     {
+        // Ensure the school always has at least one usable sender so the send
+        // form's «اسم المرسل» dropdown is never empty (QA #238). The sandbox
+        // sends via the Log driver, so a default sender suffices end-to-end;
+        // real sender names added through the request/approval flow (#243)
+        // simply join this list.
+        if ($schoolId) {
+            SmsSender::firstOrCreate(
+                ['school_id' => $schoolId, 'name_en' => 'Platform'],
+                ['name_ar' => 'المنصة', 'kind' => 'alerts', 'status' => 'active'],
+            );
+        }
+
         return SmsSender::query()
             ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
             ->whereIn('status', ['accepted', 'active', 'approved'])
