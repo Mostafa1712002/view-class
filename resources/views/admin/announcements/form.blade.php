@@ -199,7 +199,7 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin" onerror="window.__noTiny=true"></script>
+<script src="{{ asset('vendor/tinymce/tinymce.min.js') }}" referrerpolicy="origin" onerror="window.__noTiny=true"></script>
 <script>
 (function () {
     // ── Conditional target fields ─────────────────────────────────────────
@@ -220,7 +220,7 @@
             selector: '#annBody',
             directionality: 'rtl',
             language: 'ar',
-            language_url: 'https://cdn.jsdelivr.net/npm/tinymce-i18n@24/langs6/ar.js',
+            language_url: '{{ asset('vendor/tinymce/langs/ar.js') }}',
             menubar: 'file edit view insert format tools table help',
             height: 420,
             branding: true,
@@ -249,15 +249,18 @@
         // sub-resource didn't load), TinyMCE may have already hidden the
         // textarea — restore it so the «تفاصيل الرسالة» field is never missing (#232).
         setTimeout(function () {
-            if (!document.querySelector('.tox-tinymce')) {
+            var ed = document.querySelector('.tox-tinymce');
+            var ok = ed && getComputedStyle(ed).visibility !== 'hidden' && ed.offsetHeight > 50;
+            if (!ok) {
+                if (ed) { ed.parentNode.removeChild(ed); }
                 var ta = document.getElementById('annBody');
-                if (ta) { ta.style.display = ''; }
+                if (ta) { ta.style.display = ''; ta.style.visibility = 'visible'; }
             }
         }, 5000);
     } else {
         // TinyMCE itself failed to load — guarantee the raw field is usable.
         var taFallback = document.getElementById('annBody');
-        if (taFallback) { taFallback.style.display = ''; }
+        if (taFallback) { taFallback.style.display = ''; taFallback.style.visibility = 'visible'; }
     }
 })();
 </script>
