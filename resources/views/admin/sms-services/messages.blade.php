@@ -98,13 +98,19 @@
                         <td>
                             @switch($msg->status)
                                 @case('sent')
-                                    <span class="ds-badge-success">@lang('sms_services.msg_status_sent')</span>
+                                @case('delivered')
+                                @case('read')
+                                    <span class="ds-badge-success">{{ $msg->statusLabel() }}</span>
                                     @break
                                 @case('failed')
-                                    <span class="ds-badge-danger">@lang('sms_services.msg_status_failed')</span>
+                                @case('no_credit')
+                                @case('rejected')
+                                @case('invalid_number')
+                                @case('no_number')
+                                    <span class="ds-badge-danger">{{ $msg->statusLabel() }}</span>
                                     @break
                                 @default
-                                    <span class="ds-badge-warning">@lang('sms_services.msg_status_queued')</span>
+                                    <span class="ds-badge-warning">{{ $msg->statusLabel() }}</span>
                             @endswitch
                         </td>
                         <td class="text-nowrap small">{{ $msg->sent_at ? $msg->sent_at->format('Y-m-d H:i') : '—' }}</td>

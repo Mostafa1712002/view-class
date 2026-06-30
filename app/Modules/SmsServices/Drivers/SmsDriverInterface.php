@@ -14,7 +14,9 @@ interface SmsDriverInterface
      * return 'sent'.
      *
      * @return array{status:string, provider_response:?string, failure_reason:?string}
-     *         status ∈ queued|sent|failed
+     *         status ∈ queued|sent|delivered|failed
+     *         ('delivered' is returned by SandboxDriver, which simulates a fully
+     *          delivered message synchronously without contacting a real gateway.)
      */
     public function send(string $to, string $message): array;
 }

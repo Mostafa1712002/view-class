@@ -4,6 +4,7 @@ namespace App\Modules\SmsServices\Services;
 
 use App\Modules\SmsServices\Drivers\HttpProviderDriver;
 use App\Modules\SmsServices\Drivers\PendingDriver;
+use App\Modules\SmsServices\Drivers\SandboxDriver;
 use App\Modules\SmsServices\Drivers\SmsDriverInterface;
 use App\Modules\SmsServices\Models\SchoolSmsSetting;
 
@@ -12,9 +13,11 @@ use App\Modules\SmsServices\Models\SchoolSmsSetting;
  *
  * Selection rule (the core "real vs stubbed" boundary):
  *  - settings have BOTH api_key and api_secret → HttpProviderDriver (real send)
- *  - otherwise → PendingDriver (persists + parks the message as 'queued')
+ *  - else, service active + sandbox on        → SandboxDriver (sent→delivered, no network)
+ *  - otherwise                                → PendingDriver (parks the message as 'queued')
  *
- * No code path fabricates a 'sent' status without a real gateway acceptance.
+ * Only a real gateway acceptance yields 'sent'; the sandbox is explicit and
+ * opt-in (school must be activated), and self-identifies via provider 'sandbox'.
  */
 final class SmsService
 {
@@ -25,6 +28,18 @@ final class SmsService
         return $this->setting
             && ! empty($this->setting->api_key)
             && ! empty($this->setting->api_secret);
+    }
+
+    /**
+     * Sandbox is used when there is no real gateway, the school's service is
+     * active, and the global sandbox switch is on. This makes the SMS index
+     * power-toggle (is_active) the real activation control.
+     */
+    public function usingSandbox(): bool
+    {
+        return ! $this->hasGateway()
+            && (bool) ($this->setting?->is_active)
+            && (bool) config('messaging.sms.sandbox', true);
     }
 
     public function resolveDriver(): SmsDriverInterface
@@ -38,11 +53,19 @@ final class SmsService
             );
         }
 
+        if ($this->usingSandbox()) {
+            return new SandboxDriver();
+        }
+
         return new PendingDriver();
     }
 
     public function provider(): string
     {
+        if ($this->usingSandbox()) {
+            return 'sandbox';
+        }
+
         return $this->setting->provider ?? 'pending';
     }
 }

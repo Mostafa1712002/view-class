@@ -17,9 +17,11 @@ use App\Modules\Whatsapp\Support\PhoneNormalizer;
  * statuses, deducts credit per actual segment count, and drives the configured
  * SMS driver (Trello #239).
  *
- * Honesty contract: when no real gateway is configured the driver returns
- * 'queued' (not 'sent'). Credit is still reserved at queue time; delivery
- * reconciliation/refund is deferred until a real gateway is wired.
+ * Status contract: the driver decides the outcome. A real gateway returns
+ * 'sent'/'failed'; the sandbox (active school, no real gateway) returns
+ * 'delivered'; with no gateway and no sandbox the driver parks it as 'queued'.
+ * Credit is reserved per segment on every non-failed outcome; a hard 'failed'
+ * is refunded (it never reached the carrier).
  */
 final class SendSmsBatchAction
 {
@@ -108,9 +110,10 @@ final class SendSmsBatchAction
                 continue;
             }
 
-            // --- drive the actual send (queued when no real gateway) ---
+            // --- drive the actual send (delivered in sandbox, queued when no gateway) ---
             $result = $driver->send($normalized, $finalBody);
-            $status = $result['status']; // queued | sent | failed
+            $status = $result['status']; // queued | sent | delivered | failed
+            $succeeded = in_array($status, ['sent', 'delivered'], true);
 
             // refund if the gateway hard-failed (it never reached the carrier)
             if ($status === 'failed') {
@@ -125,15 +128,17 @@ final class SendSmsBatchAction
                 $batch, $schoolId, $templateId, $sender, $r, $normalized, $finalBody,
                 $status, $charged, $segments, $senderUserId, $provider,
                 $result['failure_reason'] ?? null,
-                $status === 'sent'
+                $succeeded
             );
 
             $totalSegments += $segments;
-            match ($status) {
-                'sent'   => $sent++,
-                'failed' => $failed++,
-                default  => $queued++,
-            };
+            if ($status === 'failed') {
+                $failed++;
+            } elseif ($status === 'queued') {
+                $queued++;
+            } else { // sent | delivered
+                $sent++;
+            }
         }
 
         $batch->update([
