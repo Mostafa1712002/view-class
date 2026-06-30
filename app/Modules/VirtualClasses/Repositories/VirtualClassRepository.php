@@ -2,8 +2,10 @@
 
 namespace App\Modules\VirtualClasses\Repositories;
 
+use App\Models\User;
 use App\Models\VirtualClass;
 use App\Modules\VirtualClasses\Models\VirtualClassAttendee;
+use App\Modules\VirtualClasses\Models\VirtualClassTarget;
 use App\Modules\VirtualClasses\Repositories\Contracts\VirtualClassRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -61,30 +63,24 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
         }
     }
 
-    public function forStudent(int $userId, ?int $schoolId, int $perPage = 20): LengthAwarePaginator
+    public function forStudent(User $user, ?int $schoolId, int $perPage = 20): LengthAwarePaginator
     {
-        $classIds = DB::table('class_student')
-            ->where('student_id', $userId)
-            ->pluck('class_id')
-            ->all();
-
         return VirtualClass::query()
             ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
             ->whereIn('status', ['scheduled', 'live'])
-            ->where(function ($q) {
-                $q->whereJsonContains('audience', 'all')
-                  ->orWhereJsonContains('audience', 'students');
-            })
-            ->where(function ($q) use ($classIds) {
-                $q->whereNull('class_id');
-                if (! empty($classIds)) {
-                    $q->orWhereIn('class_id', $classIds);
-                }
-            })
+            ->visibleTo($user)
             ->with(['teacher:id,name,name_ar', 'subject:id,name'])
             ->orderBy('scheduled_at')
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+    public function isVisibleTo(VirtualClass $vc, User $user): bool
+    {
+        return VirtualClass::query()
+            ->whereKey($vc->id)
+            ->visibleTo($user)
+            ->exists();
     }
 
     public function find(int $id, ?int $schoolId): ?VirtualClass
@@ -99,17 +95,56 @@ class VirtualClassRepository implements VirtualClassRepositoryInterface
             ->find($id);
     }
 
-    public function create(array $data): VirtualClass
+    public function create(array $data, array $targets = []): VirtualClass
     {
-        return VirtualClass::create($data);
+        return DB::transaction(function () use ($data, $targets) {
+            $vc = VirtualClass::create($data);
+            $this->syncTargets($vc, $targets);
+
+            return $vc->fresh(['targets']);
+        });
     }
 
-    public function update(int $id, array $data): VirtualClass
+    public function update(int $id, array $data, ?array $targets = null): VirtualClass
     {
-        $vc = VirtualClass::findOrFail($id);
-        $vc->update($data);
+        return DB::transaction(function () use ($id, $data, $targets) {
+            $vc = VirtualClass::findOrFail($id);
+            $vc->update($data);
 
-        return $vc->fresh();
+            if ($targets !== null) {
+                $this->syncTargets($vc, $targets);
+            }
+
+            return $vc->fresh(['targets']);
+        });
+    }
+
+    /**
+     * Replace the user/role/job_title target rows for a session.
+     *
+     * @param array{user?:array<int>,role?:array<int>,job_title?:array<int>} $targets
+     */
+    private function syncTargets(VirtualClass $vc, array $targets): void
+    {
+        $vc->targets()->delete();
+
+        $now  = now();
+        $rows = [];
+        foreach (['user', 'role', 'job_title'] as $kind) {
+            foreach (array_unique(array_filter((array) ($targets[$kind] ?? []))) as $targetId) {
+                $rows[] = [
+                    'virtual_class_id' => $vc->id,
+                    'kind'             => $kind,
+                    'target_id'        => (int) $targetId,
+                    'created_at'       => $now,
+                    'updated_at'       => $now,
+                ];
+            }
+        }
+
+        if ($rows !== []) {
+            VirtualClassTarget::insert($rows);
+        }
     }
 
     public function updateStatus(int $id, string $status): VirtualClass

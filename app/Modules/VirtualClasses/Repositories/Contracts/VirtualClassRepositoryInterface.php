@@ -2,6 +2,7 @@
 
 namespace App\Modules\VirtualClasses\Repositories\Contracts;
 
+use App\Models\User;
 use App\Models\VirtualClass;
 use App\Modules\VirtualClasses\Models\VirtualClassAttendee;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -18,18 +19,30 @@ interface VirtualClassRepositoryInterface
     public function forStaff(int $userId, ?int $schoolId, bool $roleIsAdmin, string $tab = 'all', int $perPage = 20): LengthAwarePaginator;
 
     /**
-     * Paginated list for students (upcoming + live classes for the school).
+     * Paginated list of upcoming/live sessions that target the given user
+     * (by audience type, grade/class, or explicit user/role/job-title pick).
      */
-    public function forStudent(int $userId, ?int $schoolId, int $perPage = 20): LengthAwarePaginator;
+    public function forStudent(User $user, ?int $schoolId, int $perPage = 20): LengthAwarePaginator;
+
+    /**
+     * Whether a session is visible to the given user (drives the join gate).
+     */
+    public function isVisibleTo(VirtualClass $vc, User $user): bool;
 
     /**
      * Find a single virtual class, school-scoped.
      */
     public function find(int $id, ?int $schoolId): ?VirtualClass;
 
-    public function create(array $data): VirtualClass;
+    /**
+     * @param array{user:array<int>,role:array<int>,job_title:array<int>} $targets
+     */
+    public function create(array $data, array $targets = []): VirtualClass;
 
-    public function update(int $id, array $data): VirtualClass;
+    /**
+     * @param array{user:array<int>,role:array<int>,job_title:array<int>} $targets
+     */
+    public function update(int $id, array $data, ?array $targets = null): VirtualClass;
 
     public function updateStatus(int $id, string $status): VirtualClass;
 

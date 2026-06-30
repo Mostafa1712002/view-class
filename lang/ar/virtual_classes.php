@@ -49,6 +49,18 @@ return [
     'audience_teachers' => 'المعلمون',
     'audience_staff'    => 'الكادر',
 
+    // Target audience (mirrors announcements / school-calendar)
+    'target_all'            => 'كل المستخدمين',
+    'target_students'       => 'الطلاب',
+    'target_teachers'       => 'المعلمون',
+    'target_parents'        => 'أولياء الأمور',
+    'target_admins'         => 'الإداريون',
+    'target_job_titles'     => 'مسميات وظيفية محددة',
+    'target_specific_users' => 'مستخدمون محددون',
+    'target_specific_roles' => 'أدوار محددة',
+    'target_pick_required'  => 'يجب اختيار جهة مستهدفة واحدة على الأقل.',
+    'class_attendance_hint' => 'الفصل المستخدم في كشف الحضور (يُملأ تلقائيًا عند اختيار فصل واحد للطلاب).',
+
     // Zoom
     'zoom_linked'     => 'مرتبطة',
     'zoom_none'       => 'غير مرتبطة',

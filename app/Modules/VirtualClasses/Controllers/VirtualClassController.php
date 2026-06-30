@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
 use App\Models\ActivityLog;
 use App\Models\ClassRoom;
+use App\Models\JobTitle;
+use App\Models\Role;
 use App\Models\Subject;
+use App\Models\User;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use App\Modules\VirtualClasses\Actions\RecalcAttendanceAction;
 use App\Modules\VirtualClasses\Actions\StartVirtualClassAction;
@@ -68,6 +71,7 @@ class VirtualClassController extends Controller
 
         $schoolId = $this->activeSchoolId();
         $data     = $this->validateSession($request, $schoolId);
+        $targets  = $this->extractTargeting($data);
 
         $zoomData = null;
 
@@ -90,12 +94,11 @@ class VirtualClassController extends Controller
             'school_id'       => $schoolId,
             'created_by'      => auth()->id(),
             'status'          => 'scheduled',
-            'audience'        => $data['audience'] ?? ['all'],
             'zoom_meeting_id' => $zoomData['id']        ?? null,
             'join_url'        => $zoomData['join_url']   ?? null,
             'start_url'       => $zoomData['start_url']  ?? null,
             'passcode'        => $zoomData['passcode']   ?? null,
-        ]));
+        ]), $targets);
 
         ActivityLog::logCreate($vc, "إنشاء فصل افتراضي: {$vc->title}");
 
@@ -136,8 +139,8 @@ class VirtualClassController extends Controller
         $schoolId = $this->activeSchoolId();
         $old      = $vc->toArray();
 
-        $data = $this->validateSession($request, $schoolId, ['after:now' => false]);
-        $data['audience'] = $data['audience'] ?? ['all'];
+        $data    = $this->validateSession($request, $schoolId, ['after:now' => false]);
+        $targets = $this->extractTargeting($data);
 
         // Only admins may reassign the session to another teacher.
         $actor = auth()->user();
@@ -145,7 +148,7 @@ class VirtualClassController extends Controller
             $data['teacher_id'] = $vc->teacher_id;
         }
 
-        $this->repo->update($vc->id, $data);
+        $this->repo->update($vc->id, $data, $targets);
         ActivityLog::logUpdate($vc->fresh(), "تعديل فصل افتراضي: {$vc->title}", $old);
 
         return redirect()
@@ -296,7 +299,7 @@ class VirtualClassController extends Controller
             $scheduledRules[] = 'after:now';
         }
 
-        return $request->validate([
+        $validated = $request->validate([
             'title'            => ['required', 'string', 'max:160'],
             'description'      => ['nullable', 'string'],
             'teacher_id'       => ['required', 'integer', Rule::exists('users', 'id')->where(fn ($q) => $schoolId ? $q->where('school_id', $schoolId) : $q)],
@@ -306,12 +309,83 @@ class VirtualClassController extends Controller
             'duration_minutes' => ['required', 'integer', 'min:10', 'max:480'],
             'platform'         => ['required', Rule::in(['zoom', 'teams', 'external', 'internal'])],
             'external_url'     => ['nullable', 'url', 'max:1000', 'required_if:platform,external', 'required_if:platform,teams'],
-            'audience'         => ['nullable', 'array'],
+
+            // Targeting (mirrors announcements / school-calendar).
+            'target_type'       => ['required', Rule::in(\App\Models\VirtualClass::TARGET_TYPES)],
+            'grade_levels'      => ['nullable', 'array'],
+            'grade_levels.*'    => ['integer'],
+            'class_ids'         => ['nullable', 'array'],
+            'class_ids.*'       => ['integer'],
+            'user_target_ids'   => ['nullable', 'array'],
+            'user_target_ids.*' => ['integer'],
+            'role_target_ids'   => ['nullable', 'array'],
+            'role_target_ids.*' => ['integer'],
+            'job_title_ids'     => ['nullable', 'array'],
+            'job_title_ids.*'   => ['integer'],
         ]);
+
+        // A "specific" audience with no picks would target nobody — reject it so
+        // the session can't silently vanish from every account.
+        $requireOne = [
+            'specific_users' => 'user_target_ids',
+            'specific_roles' => 'role_target_ids',
+            'job_titles'     => 'job_title_ids',
+        ];
+        $tt = $validated['target_type'] ?? 'all';
+        if (isset($requireOne[$tt]) && empty($validated[$requireOne[$tt]])) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                $requireOne[$tt] => __('virtual_classes.target_pick_required'),
+            ]);
+        }
+
+        return $validated;
     }
 
     /**
-     * Class + subject option lists scoped to the active school.
+     * Split the validated payload's targeting fields off the model attributes:
+     *  - normalises grade/class narrowing (only meaningful for `students`),
+     *  - auto-fills `class_id` (attendance roster) from a single targeted class,
+     *  - returns the user/role/job_title pivot arrays for the repository.
+     *
+     * @return array{user:array<int>,role:array<int>,job_title:array<int>}
+     */
+    private function extractTargeting(array &$data): array
+    {
+        $tt = $data['target_type'] ?? 'all';
+
+        $userIds = $data['user_target_ids'] ?? [];
+        $roleIds = $data['role_target_ids'] ?? [];
+        $jobIds  = $data['job_title_ids']   ?? [];
+        unset($data['user_target_ids'], $data['role_target_ids'], $data['job_title_ids']);
+
+        // Grade/class narrowing only applies to the students audience; store NULL
+        // when empty so the visibility scope's "no narrowing = all" check holds.
+        // Cast to int: checkbox values arrive as strings and JSON_CONTAINS (used
+        // by scopeVisibleTo) is type-strict, so "7" would never match the int 7.
+        if ($tt === 'students') {
+            $data['grade_levels'] = ! empty($data['grade_levels']) ? array_map('intval', array_values($data['grade_levels'])) : null;
+            $data['class_ids']    = ! empty($data['class_ids']) ? array_map('intval', array_values($data['class_ids'])) : null;
+        } else {
+            $data['grade_levels'] = null;
+            $data['class_ids']    = null;
+        }
+
+        // Attendance roster keys off the single class_id; if the admin targeted
+        // exactly one class and left it blank, mirror it across so recalc works.
+        if (empty($data['class_id']) && $tt === 'students' && is_array($data['class_ids']) && count($data['class_ids']) === 1) {
+            $data['class_id'] = (int) $data['class_ids'][0];
+        }
+
+        return [
+            'user'      => $tt === 'specific_users' ? $userIds : [],
+            'role'      => $tt === 'specific_roles' ? $roleIds : [],
+            'job_title' => $tt === 'job_titles'     ? $jobIds  : [],
+        ];
+    }
+
+    /**
+     * Option lists (class/subject + audience-selector data) scoped to the
+     * active school.
      */
     private function formOptions(): array
     {
@@ -322,15 +396,33 @@ class VirtualClassController extends Controller
                 $yearIds = AcademicYear::where('school_id', $schoolId)->pluck('id');
                 $q->whereIn('academic_year_id', $yearIds);
             })
+            ->orderBy('grade_level')
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'grade_level']);
 
         $subjects = Subject::query()
             ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return compact('classes', 'subjects');
+        $roles = Role::orderBy('name')->get(['id', 'name', 'slug']);
+
+        $jobTitles = JobTitle::query()
+            ->active()
+            ->forSchool($schoolId)
+            ->orderBy('sort_order')
+            ->orderBy('name_ar')
+            ->get(['id', 'name_ar', 'school_id']);
+
+        $users = User::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->orderBy('name')
+            ->limit(500)
+            ->get(['id', 'name', 'school_id']);
+
+        $gradeLevels = range(1, 12);
+
+        return compact('classes', 'subjects', 'roles', 'jobTitles', 'users', 'gradeLevels');
     }
 
     private function resolveOwned(int $id)

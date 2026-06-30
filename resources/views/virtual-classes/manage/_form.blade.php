@@ -1,13 +1,15 @@
 @php
-    $isRtl        = app()->getLocale() === 'ar';
-    $audienceOpts = [
-        'all'      => __('virtual_classes.audience_all'),
-        'students' => __('virtual_classes.audience_students'),
-        'parents'  => __('virtual_classes.audience_parents'),
-        'teachers' => __('virtual_classes.audience_teachers'),
-        'staff'    => __('virtual_classes.audience_staff'),
-    ];
-    $selectedAudience = old('audience', $vc ? ($vc->audience ?? ['all']) : ['all']);
+    $isRtl = app()->getLocale() === 'ar';
+
+    // Targeting (mirrors announcements / school-calendar). The grids inside
+    // <x-audience-selector> are toggled by the target_type select below.
+    $targetType        = old('target_type', $vc?->target_type ?? 'all');
+    $vcTargets         = $vc ? $vc->targets : collect();
+    $selectedUsers     = old('user_target_ids', $vc ? $vcTargets->where('kind', 'user')->pluck('target_id')->all() : []);
+    $selectedRoles     = old('role_target_ids', $vc ? $vcTargets->where('kind', 'role')->pluck('target_id')->all() : []);
+    $selectedJobTitles = old('job_title_ids', $vc ? $vcTargets->where('kind', 'job_title')->pluck('target_id')->all() : []);
+    $selectedGrades    = old('grade_levels', $vc ? ($vc->grade_levels ?? []) : []);
+    $selectedClasses   = old('class_ids', $vc ? ($vc->class_ids ?? []) : []);
 
     // Teacher list = real teachers/school-admins of the ACTIVE school, matching the
     // store/update validation (which scopes teacher_id to the active school). Do NOT
@@ -92,7 +94,7 @@
             @endforeach
         </select>
         @error('class_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-        <small class="text-muted">@lang('virtual_classes.select_class')</small>
+        <small class="text-muted">@lang('virtual_classes.class_attendance_hint')</small>
     </div>
 
     {{-- Subject --}}
@@ -115,20 +117,40 @@
         @error('external_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
-    {{-- Audience --}}
+    {{-- Target audience --}}
     <div class="col-12 form-group">
-        <label>@lang('virtual_classes.field_audience')</label>
-        <div class="d-flex flex-wrap gap-2">
-            @foreach($audienceOpts as $val => $label)
-            <div class="custom-control custom-checkbox {{ $isRtl ? 'mr-2' : 'ml-0 mr-3' }}">
-                <input type="checkbox" class="custom-control-input audience-cb" id="vcAud_{{ $val }}"
-                       name="audience[]" value="{{ $val }}"
-                       {{ in_array($val, (array) $selectedAudience) ? 'checked' : '' }}>
-                <label class="custom-control-label" for="vcAud_{{ $val }}">{{ $label }}</label>
-            </div>
-            @endforeach
+        <label class="required">@lang('virtual_classes.field_audience')</label>
+        <select name="target_type" id="vcTargetType" class="form-control @error('target_type') is-invalid @enderror">
+            <option value="all"            {{ $targetType === 'all' ? 'selected' : '' }}>@lang('virtual_classes.target_all')</option>
+            <option value="students"       {{ $targetType === 'students' ? 'selected' : '' }}>@lang('virtual_classes.target_students')</option>
+            <option value="teachers"       {{ $targetType === 'teachers' ? 'selected' : '' }}>@lang('virtual_classes.target_teachers')</option>
+            <option value="parents"        {{ $targetType === 'parents' ? 'selected' : '' }}>@lang('virtual_classes.target_parents')</option>
+            <option value="admins"         {{ $targetType === 'admins' ? 'selected' : '' }}>@lang('virtual_classes.target_admins')</option>
+            <option value="job_titles"     {{ $targetType === 'job_titles' ? 'selected' : '' }}>@lang('virtual_classes.target_job_titles')</option>
+            <option value="specific_users" {{ $targetType === 'specific_users' ? 'selected' : '' }}>@lang('virtual_classes.target_specific_users')</option>
+            <option value="specific_roles" {{ $targetType === 'specific_roles' ? 'selected' : '' }}>@lang('virtual_classes.target_specific_roles')</option>
+        </select>
+        @error('target_type') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+        @error('user_target_ids') <div class="text-danger small">{{ $message }}</div> @enderror
+        @error('role_target_ids') <div class="text-danger small">{{ $message }}</div> @enderror
+        @error('job_title_ids') <div class="text-danger small">{{ $message }}</div> @enderror
+
+        <div class="mt-2">
+            <x-audience-selector
+                :grids="['job_titles', 'users', 'roles', 'grades', 'classes']"
+                :conditional="true"
+                :job-titles="$jobTitles ?? []"
+                :users="$users ?? []"
+                :roles="$roles ?? []"
+                :grade-levels="$gradeLevels ?? []"
+                :classes="$classes ?? []"
+                :selected-job-titles="$selectedJobTitles"
+                :selected-users="$selectedUsers"
+                :selected-roles="$selectedRoles"
+                :selected-grades="$selectedGrades"
+                :selected-classes="$selectedClasses"
+            />
         </div>
-        @error('audience') <div class="text-danger small">{{ $message }}</div> @enderror
     </div>
 
     {{-- Description --}}
@@ -143,16 +165,17 @@
 @push('scripts')
 <script>
 $(document).ready(function () {
-    $(document).on('change', '#vcAud_all', function () {
-        if ($(this).is(':checked')) {
-            $('.audience-cb').not(this).prop('checked', false);
-        }
-    });
-    $(document).on('change', '.audience-cb:not(#vcAud_all)', function () {
-        if ($(this).is(':checked')) {
-            $('#vcAud_all').prop('checked', false);
-        }
-    });
+    // Show only the audience grids that match the chosen target type. The grids
+    // carry data-show (job_titles | specific_users | specific_roles | students).
+    var tt = document.getElementById('vcTargetType');
+    function syncTarget() {
+        var v = tt.value;
+        document.querySelectorAll('.ann-cond').forEach(function (el) {
+            el.style.display = (el.dataset.show === v) ? '' : 'none';
+        });
+    }
+    if (tt) { tt.addEventListener('change', syncTarget); syncTarget(); }
+
     // Show the external-URL field only for Teams / external-link platforms.
     $(document).on('change', '#vcPlatform', function () {
         var needsUrl = ['teams', 'external'].indexOf($(this).val()) !== -1;

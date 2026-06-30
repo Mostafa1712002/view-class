@@ -49,6 +49,18 @@ return [
     'audience_teachers' => 'Teachers',
     'audience_staff'    => 'Staff',
 
+    // Target audience (mirrors announcements / school-calendar)
+    'target_all'            => 'All users',
+    'target_students'       => 'Students',
+    'target_teachers'       => 'Teachers',
+    'target_parents'        => 'Parents',
+    'target_admins'         => 'Admins',
+    'target_job_titles'     => 'Specific job titles',
+    'target_specific_users' => 'Specific users',
+    'target_specific_roles' => 'Specific roles',
+    'target_pick_required'  => 'Select at least one target.',
+    'class_attendance_hint' => 'Class used for the attendance roster (auto-filled when a single class is targeted for students).',
+
     // Zoom
     'zoom_linked'     => 'Linked',
     'zoom_none'       => 'Not linked',
