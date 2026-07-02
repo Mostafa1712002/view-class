@@ -3,8 +3,17 @@
 return [
     // Titles
     'title'         => 'School Calendar',
+    'teacher_title' => 'Teacher Calendar',
     'create_title'  => 'Add Event',
     'edit_title'    => 'Edit Event',
+
+    // Teacher calendar legend
+    'legend_lesson'        => 'Lesson',
+    'legend_exam'          => 'Exam',
+    'legend_assignment'    => 'Assignment',
+    'legend_virtual_class' => 'Virtual Class',
+    'legend_appointment'   => 'Appointment',
+    'legend_school_event'  => 'School Event',
 
     // Breadcrumbs
     'breadcrumb_home' => 'Home',

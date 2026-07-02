@@ -794,6 +794,11 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('te
     // Teacher Schedule
     Route::get('schedule', [\App\Http\Controllers\Admin\ScheduleController::class, 'teacherSchedule'])->name('schedule');
 
+    // Interactive teacher calendar (aggregates lessons/exams/assignments/
+    // virtual-classes/appointments/school-events for the authenticated teacher)
+    Route::get('calendar', [\App\Modules\SchoolCalendar\Controllers\TeacherCalendarController::class, 'index'])->name('calendar.index');
+    Route::get('calendar/events', [\App\Modules\SchoolCalendar\Controllers\TeacherCalendarController::class, 'events'])->name('calendar.events');
+
     // Weekly Plans for Teachers
     Route::resource('weekly-plans', \App\Http\Controllers\Admin\WeeklyPlanController::class);
     Route::get('weekly-plans/{weekly_plan}/duplicate', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'duplicate'])->name('weekly-plans.duplicate');
