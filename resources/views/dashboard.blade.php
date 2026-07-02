@@ -342,52 +342,39 @@
     @endif
 
     @if(Auth::user()->isTeacher())
-    <!-- Teacher Stats -->
+    {{-- Card #294 — رئيسية المعلم: summary grid, each card = count + quick link. --}}
+    @php
+        $teacherCards = [
+            ['label' => 'مواد المعلم', 'sub' => 'مادة أدرّسها', 'value' => $subjects_count ?? 0, 'icon' => 'journal-bookmark-fill', 'chip' => 'gold', 'route' => 'admin.subjects.index'],
+            ['label' => 'المكتبات', 'sub' => 'عنصر بالمكتبة', 'value' => $library_items_count ?? 0, 'icon' => 'collection-fill', 'chip' => 'teal', 'route' => 'admin.libraries.public.index'],
+            ['label' => 'صندوق البريد', 'sub' => 'رسالة غير مقروءة', 'value' => $mailbox_unread_count ?? 0, 'icon' => 'envelope-fill', 'chip' => 'info', 'route' => 'my.mailbox.index'],
+            ['label' => 'الفصول الافتراضية', 'sub' => 'جلسة قادمة', 'value' => $virtual_classes_upcoming_count ?? 0, 'icon' => 'camera-video-fill', 'chip' => 'navy', 'route' => 'manage.virtual-classes.index'],
+            ['label' => 'غرف النقاش', 'sub' => 'غرفة نشطة', 'value' => $discussion_rooms_count ?? 0, 'icon' => 'chat-square-text-fill', 'chip' => 'eval', 'route' => 'manage.discussion-rooms.index'],
+            ['label' => 'تسليمات تحتاج للتصحيح', 'sub' => 'بانتظار التصحيح', 'value' => $submissions_to_grade_count ?? 0, 'icon' => 'pencil-square', 'chip' => 'danger', 'route' => 'admin.assignments.index'],
+            ['label' => 'الواجبات', 'sub' => 'واجب منشور', 'value' => $assignments_published_count ?? 0, 'icon' => 'list-check', 'chip' => 'success', 'route' => 'admin.assignments.index'],
+            ['label' => 'الاختبارات', 'sub' => 'اختبار قادم', 'value' => isset($upcoming_exams) ? $upcoming_exams->count() : 0, 'icon' => 'file-earmark-text-fill', 'chip' => 'gold', 'route' => 'teacher.exams.index'],
+            ['label' => 'الخطة الأسبوعية', 'sub' => 'خطة قادمة', 'value' => isset($weekly_plans) ? $weekly_plans->count() : 0, 'icon' => 'calendar-week', 'chip' => 'info', 'route' => 'teacher.weekly-plans.index'],
+            ['label' => 'الجدول المدرسي', 'sub' => 'حصة اليوم', 'value' => isset($today_schedules) ? $today_schedules->count() : 0, 'icon' => 'calendar3', 'chip' => 'navy', 'route' => 'teacher.schedule'],
+            ['label' => 'الدعم الفني', 'sub' => 'تذكرة مفتوحة', 'value' => $support_tickets_open_count ?? 0, 'icon' => 'life-preserver', 'chip' => 'teal', 'route' => 'my.support.index'],
+        ];
+    @endphp
     <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card ds-stat text-center">
-                <div class="card-body">
-                    <div class="ic-chip ic-chip-gold mb-1 mx-auto">
-                        <x-svg-icon name="journal-bookmark-fill" :size="24" class="ic-gold" />
+        @foreach($teacherCards as $card)
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-2">
+            <a href="{{ route($card['route']) }}" class="text-decoration-none">
+                <div class="card ds-stat ds-hover-card text-center h-100 mb-0">
+                    <div class="card-body">
+                        <div class="ic-chip ic-chip-{{ $card['chip'] }} mb-1 mx-auto">
+                            <x-svg-icon :name="$card['icon']" :size="24" :class="'ic-'.$card['chip']" />
+                        </div>
+                        <h2 class="fw-bolder text-dark">{{ $card['value'] }}</h2>
+                        <p class="card-text mb-0 text-dark">{{ $card['label'] }}</p>
+                        <small class="text-muted">{{ $card['sub'] }}</small>
                     </div>
-                    <h2 class="fw-bolder">{{ $subjects_count ?? 0 }}</h2>
-                    <p class="card-text">المواد التي أدرسها</p>
                 </div>
-            </div>
+            </a>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card ds-stat text-center">
-                <div class="card-body">
-                    <div class="ic-chip ic-chip-info mb-1 mx-auto">
-                        <x-svg-icon name="people-fill" :size="24" class="ic-info" />
-                    </div>
-                    <h2 class="fw-bolder">{{ $classes_count ?? 0 }}</h2>
-                    <p class="card-text">@lang('dashboard.classes_count')</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card ds-stat text-center">
-                <div class="card-body">
-                    <div class="ic-chip ic-chip-warn mb-1 mx-auto" style="background:var(--status-warning-bg);color:var(--status-warning);">
-                        <x-svg-icon name="file-earmark-text-fill" :size="24" class="ic-warn" />
-                    </div>
-                    <h2 class="fw-bolder">{{ isset($upcoming_exams) ? $upcoming_exams->count() : 0 }}</h2>
-                    <p class="card-text">الاختبارات القادمة</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card ds-stat text-center">
-                <div class="card-body">
-                    <div class="ic-chip ic-chip-eval mb-1 mx-auto">
-                        <x-svg-icon name="bar-chart-fill" :size="24" class="ic-eval" />
-                    </div>
-                    <h2 class="fw-bolder">{{ $pending_grading ?? 0 }}</h2>
-                    <p class="card-text">بانتظار التصحيح</p>
-                </div>
-            </div>
-        </div>
+        @endforeach
     </div>
 
     <!-- Teacher's Schedule Today -->
