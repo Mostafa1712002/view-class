@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
+use App\Models\Attendance;
 use App\Models\BehaviorRecord;
 use App\Models\Certificate;
 use App\Models\Grade;
@@ -60,7 +61,23 @@ class TeacherStudentController extends Controller
             ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
             ->first();
 
-        return view('teacher.students.index', compact('students', 'academicYear'));
+        // Attendance % per student, current page only — one grouped query,
+        // same present+late/total formula as show(). No record → '—' in the view.
+        $studentIds = $students->pluck('id')->all();
+        $attendanceRates = Attendance::selectRaw('student_id, status, COUNT(*) as cnt')
+            ->whereIn('student_id', $studentIds)
+            ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
+            ->groupBy('student_id', 'status')
+            ->get()
+            ->groupBy('student_id')
+            ->map(function ($rows) {
+                $total = $rows->sum('cnt');
+                $presentLate = $rows->whereIn('status', ['present', 'late'])->sum('cnt');
+
+                return $total > 0 ? round(($presentLate / $total) * 100, 1) : null;
+            });
+
+        return view('teacher.students.index', compact('students', 'academicYear', 'attendanceRates'));
     }
 
     // ── Show ─────────────────────────────────────────────────────────────────
