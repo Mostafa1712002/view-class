@@ -839,6 +839,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('te
     // returning any data; show() aborts 403 if the student is not in that set.
     Route::get('students', [\App\Http\Controllers\TeacherStudentController::class, 'index'])->name('students.index');
     Route::get('students/{student}', [\App\Http\Controllers\TeacherStudentController::class, 'show'])->whereNumber('student')->name('students.show');
+
+    // مواد المعلم — card #284: subject cards derived from the teacher's
+    // real teaching assignments (never a hardcoded list).
+    Route::get('subjects', [\App\Modules\Subjects\Controllers\TeacherSubjectController::class, 'index'])->name('subjects.index');
 });
 
 // Student Routes

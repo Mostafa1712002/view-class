@@ -35,4 +35,13 @@ interface SubjectRepository
 
     /** @return iterable<Subject>  ViewClass platform templates (school_id NULL) */
     public function platformTemplates(): iterable;
+
+    /**
+     * Active subjects this teacher actually teaches, derived from their real
+     * teaching assignments — union of the timetable (schedule_periods) and
+     * direct section assignment (subject_teacher pivot). Never hardcoded.
+     *
+     * @return iterable<Subject>
+     */
+    public function teacherSubjects(int $teacherId, ?int $schoolId): iterable;
 }

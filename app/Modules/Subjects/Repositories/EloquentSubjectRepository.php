@@ -2,9 +2,11 @@
 
 namespace App\Modules\Subjects\Repositories;
 
+use App\Models\SchedulePeriod;
 use App\Models\Subject;
 use App\Modules\Subjects\Repositories\Contracts\SubjectRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class EloquentSubjectRepository implements SubjectRepository
 {
@@ -129,6 +131,36 @@ class EloquentSubjectRepository implements SubjectRepository
         }
 
         return $count;
+    }
+
+    public function teacherSubjects(int $teacherId, ?int $schoolId): iterable
+    {
+        // Source 1: the timetable — periods this teacher is scheduled to teach
+        // on an active schedule (mirrors ScheduleController::teacherSchedule()).
+        $viaSchedule = SchedulePeriod::query()
+            ->where('teacher_id', $teacherId)
+            ->whereHas('schedule', fn ($q) => $q->active())
+            ->pluck('subject_id');
+
+        // Source 2: direct teacher↔subject assignment (subject_teacher pivot;
+        // column is `user_id`, not `teacher_id` — see ResolvesTeacherStudents).
+        $viaAssignment = DB::table('subject_teacher')
+            ->where('user_id', $teacherId)
+            ->pluck('subject_id');
+
+        $subjectIds = $viaSchedule->merge($viaAssignment)->filter()->unique()->values();
+
+        if ($subjectIds->isEmpty()) {
+            return collect();
+        }
+
+        $query = Subject::query()->whereIn('id', $subjectIds)->where('is_active', true);
+
+        if ($schoolId !== null) {
+            $query->where('school_id', $schoolId);
+        }
+
+        return $query->orderBy('certificate_order')->orderBy('name')->get();
     }
 
     private function withoutNulls(array $payload): array
