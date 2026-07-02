@@ -60,8 +60,14 @@
                         <thead class="table-light">
                             <tr>
                                 <th>@lang('teacher_students.col_name')</th>
+                                <th>@lang('teacher_students.col_academic_no')</th>
+                                <th>@lang('teacher_students.col_grade')</th>
                                 <th>@lang('teacher_students.col_class')</th>
                                 <th>@lang('teacher_students.col_section')</th>
+                                <th>@lang('teacher_students.col_gender')</th>
+                                <th>@lang('teacher_students.col_last_activity')</th>
+                                <th>@lang('teacher_students.col_status')</th>
+                                <th>@lang('teacher_students.att_rate')</th>
                                 <th class="text-center">@lang('teacher_students.col_actions')</th>
                             </tr>
                         </thead>
@@ -93,8 +99,28 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <td>{{ $student->national_id ?? '-' }}</td>
+                                    <td>{{ $student->classRoom?->grade_level ? $student->classRoom->grade_level_label : '-' }}</td>
                                     <td>{{ $student->classRoom?->name ?? '-' }}</td>
                                     <td>{{ $student->classRoom?->section?->name ?? '-' }}</td>
+                                    <td>
+                                        @if($student->gender === 'male')
+                                            @lang('teacher_students.gender_male')
+                                        @elseif($student->gender === 'female')
+                                            @lang('teacher_students.gender_female')
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>{{ $student->last_login_at?->diffForHumans() ?? '-' }}</td>
+                                    <td>
+                                        @if($student->is_active)
+                                            <span class="badge badge-success">@lang('teacher_students.status_active')</span>
+                                        @else
+                                            <span class="badge badge-secondary">@lang('teacher_students.status_inactive')</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ isset($attendanceRates[$student->id]) ? $attendanceRates[$student->id] . '%' : '-' }}</td>
                                     <td class="text-center">
                                         <a
                                             href="{{ route('teacher.students.show', $student->id) }}"
