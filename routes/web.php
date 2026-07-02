@@ -796,6 +796,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ad
 Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('teacher')->name('teacher.')->group(function () {
     // Teacher Schedule
     Route::get('schedule', [\App\Http\Controllers\Admin\ScheduleController::class, 'teacherSchedule'])->name('schedule');
+    Route::get('schedule/pdf', [\App\Http\Controllers\Admin\ScheduleController::class, 'teacherSchedulePdf'])->name('schedule.pdf');
 
     // Interactive teacher calendar (aggregates lessons/exams/assignments/
     // virtual-classes/appointments/school-events for the authenticated teacher)

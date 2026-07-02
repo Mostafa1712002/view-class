@@ -41,8 +41,11 @@
     @endif
 
     <div class="card">
-        <div class="card-header">
-            <h4 class="card-title">الجدول الأسبوعي</h4>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">الجدول الأسبوعي</h4>
+            <a href="{{ route('teacher.schedule.pdf', $teachers ? ['teacher_id' => $teacher->id] : []) }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                <i class="la la-file-pdf-o"></i> تحميل PDF
+            </a>
         </div>
         <div class="card-body">
             <div class="table-responsive">

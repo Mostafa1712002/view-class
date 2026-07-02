@@ -440,6 +440,68 @@ class ScheduleController extends Controller
         return view('admin.schedules.teacher-schedule', compact('teacher', 'timetable', 'days', 'periodsCount', 'teachers'));
     }
 
+    public function teacherSchedulePdf(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->isTeacher() && !$user->isSuperAdmin() && !$user->isSchoolAdmin()) {
+            abort(403);
+        }
+
+        $teacherId = $request->get('teacher_id', $user->id);
+
+        if (!$user->isSuperAdmin() && !$user->isSchoolAdmin() && $teacherId != $user->id) {
+            abort(403);
+        }
+
+        $teacher = User::findOrFail($teacherId);
+
+        $periods = SchedulePeriod::with(['schedule.classRoom.section', 'subject'])
+            ->where('teacher_id', $teacherId)
+            ->whereHas('schedule', fn ($q) => $q->active())
+            ->get();
+
+        $timetable = $this->emptyGrid();
+        foreach ($periods as $p) {
+            $timetable[$p->day_of_week][$p->period_number][] = $p;
+        }
+
+        $days = $this->activeDaysLabels();
+        $periodsCount = self::PERIODS_PER_DAY;
+
+        $html = view('admin.schedules.teacher-schedule-pdf', compact('teacher', 'timetable', 'days', 'periodsCount'))->render();
+
+        $tmp = storage_path('app/mpdf');
+        if (!is_dir($tmp)) {
+            @mkdir($tmp, 0775, true);
+        }
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'             => 'utf-8',
+            'format'           => 'A4',
+            'orientation'      => 'L',
+            'default_font'     => 'xbriyaz',
+            'autoScriptToLang' => true,
+            'autoLangToFont'   => true,
+            'tempDir'          => $tmp,
+            'margin_top'       => 12,
+            'margin_bottom'    => 12,
+            'margin_left'      => 10,
+            'margin_right'     => 10,
+        ]);
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->WriteHTML($html);
+
+        return response(
+            $mpdf->Output('teacher-schedule.pdf', \Mpdf\Output\Destination::STRING_RETURN),
+            200,
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="teacher-schedule.pdf"',
+            ]
+        );
+    }
+
     // ---------- helpers ----------
 
     private function emptyGrid(): array
