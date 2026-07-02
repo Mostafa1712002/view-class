@@ -11,7 +11,7 @@
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('manage.weekly-plans.index') }}">الخطط الأسبوعية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الخطط الأسبوعية</a></li>
                         <li class="breadcrumb-item active">إضافة</li>
                     </ol>
                 </div>
@@ -26,7 +26,7 @@
     <div class="card">
         <div class="card-header"><h4 class="card-title">بيانات الخطة</h4></div>
         <div class="card-body">
-            <form action="{{ route('manage.weekly-plans.store') }}" method="POST">
+            <form action="{{ route($routePrefix . '.store') }}" method="POST">
                 @csrf
                 <div class="row">
                     <div class="col-md-3 mb-1">
@@ -137,7 +137,7 @@
 
                 <div class="mt-2">
                     <button type="submit" class="btn btn-primary">حفظ الخطة</button>
-                    <a href="{{ route('manage.weekly-plans.index') }}" class="btn btn-secondary">@lang('common.cancel')</a>
+                    <a href="{{ route($routePrefix . '.index') }}" class="btn btn-secondary">@lang('common.cancel')</a>
                 </div>
             </form>
         </div>

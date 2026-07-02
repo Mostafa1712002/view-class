@@ -11,7 +11,7 @@
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('manage.weekly-plans.index') }}">الخطط الأسبوعية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الخطط الأسبوعية</a></li>
                         <li class="breadcrumb-item active">عرض</li>
                     </ol>
                 </div>
@@ -20,10 +20,10 @@
     </div>
     <div class="content-header-right text-md-left col-md-3 col-12">
         @if($weeklyPlan->canEdit(auth()->user()))
-        <a href="{{ route('manage.weekly-plans.edit', $weeklyPlan) }}" class="btn btn-warning"><i data-feather="edit"></i> تعديل</a>
+        <a href="{{ route($routePrefix . '.edit', $weeklyPlan) }}" class="btn btn-warning"><i data-feather="edit"></i> تعديل</a>
         @endif
-        <a href="{{ route('manage.weekly-plans.duplicate', $weeklyPlan) }}" class="btn btn-secondary"><i data-feather="copy"></i> نسخ</a>
-        <a href="{{ route('manage.weekly-plans.index') }}" class="btn btn-outline-secondary"><i data-feather="arrow-right"></i> رجوع</a>
+        <a href="{{ route($routePrefix . '.duplicate', $weeklyPlan) }}" class="btn btn-secondary"><i data-feather="copy"></i> نسخ</a>
+        <a href="{{ route($routePrefix . '.index') }}" class="btn btn-outline-secondary"><i data-feather="arrow-right"></i> رجوع</a>
     </div>
 </div>
 
@@ -83,7 +83,7 @@
                         <button type="submit" class="btn btn-danger btn-block w-100 mb-1"><i data-feather="lock"></i> قفل الخطة</button>
                     </form>
                     @endif
-                    <form action="{{ route('manage.weekly-plans.destroy', $weeklyPlan) }}" method="POST" onsubmit="return confirm(@json(__('common.confirm_delete')))">
+                    <form action="{{ route($routePrefix . '.destroy', $weeklyPlan) }}" method="POST" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-outline-danger btn-block w-100"><i data-feather="trash-2"></i> حذف</button>

@@ -114,7 +114,7 @@
         </div>
     </div>
     <div class="content-header-right col-md-4 col-12 text-end">
-        <a href="{{ route('admin.exams.create') }}" class="btn add-exam-btn">
+        <a href="{{ route($routePrefix . '.create') }}" class="btn add-exam-btn">
             <x-svg-icon name="plus-lg" :size="16" class="me-1" /> @lang('exams_admin.actions.add')
         </a>
     </div>
@@ -173,7 +173,7 @@
     </div>
 
     {{-- Filters --}}
-    <form action="{{ route('admin.exams.index') }}" method="GET" class="card filters-card p-3 mb-3">
+    <form action="{{ route($routePrefix . '.index') }}" method="GET" class="card filters-card p-3 mb-3">
         <div class="row g-2 align-items-end">
             <div class="col-md-2 col-6">
                 <label class="form-label">@lang('exams_admin.filters.grade_level')</label>
@@ -224,7 +224,7 @@
                 <button type="submit" class="btn add-exam-btn flex-grow-1">
                     <x-svg-icon name="search" :size="16" class="me-1" /> @lang('exams_admin.filters.show')
                 </button>
-                <a href="{{ route('admin.exams.index') }}" class="btn btn-soft" title="@lang('exams_admin.filters.reset')">
+                <a href="{{ route($routePrefix . '.index') }}" class="btn btn-soft" title="@lang('exams_admin.filters.reset')">
                     <x-svg-icon name="arrow-clockwise" :size="16" class="ic-muted" />
                 </a>
             </div>
@@ -255,7 +255,7 @@
                         @foreach ($exams as $exam)
                             <tr>
                                 <td>
-                                    <a href="{{ route('admin.exams.show', $exam) }}" class="text-decoration-none">
+                                    <a href="{{ route($routePrefix . '.show', $exam) }}" class="text-decoration-none">
                                         <span class="exam-title">{{ $exam->title }}</span>
                                     </a>
                                 </td>
@@ -291,11 +291,11 @@
                                             <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="{{ route('admin.exams.show', $exam) }}"><x-svg-icon name="eye-fill" :size="16" class="ic-info me-1" /> @lang('exams_admin.actions.view')</a>
-                                            <a class="dropdown-item" href="{{ route('admin.exams.questions.index', $exam) }}"><x-svg-icon name="list-ol" :size="16" class="ic-navy me-1" /> @lang('exams_admin.actions.questions')</a>
-                                            <a class="dropdown-item" href="{{ route('admin.exams.edit', $exam) }}"><x-svg-icon name="pencil-square" :size="16" class="ic-gold me-1" /> @lang('exams_admin.actions.edit')</a>
+                                            <a class="dropdown-item" href="{{ route($routePrefix . '.show', $exam) }}"><x-svg-icon name="eye-fill" :size="16" class="ic-info me-1" /> @lang('exams_admin.actions.view')</a>
+                                            <a class="dropdown-item" href="{{ route($routePrefix . '.questions.index', $exam) }}"><x-svg-icon name="list-ol" :size="16" class="ic-navy me-1" /> @lang('exams_admin.actions.questions')</a>
+                                            <a class="dropdown-item" href="{{ route($routePrefix . '.edit', $exam) }}"><x-svg-icon name="pencil-square" :size="16" class="ic-gold me-1" /> @lang('exams_admin.actions.edit')</a>
                                             <div class="dropdown-divider"></div>
-                                            <form action="{{ route('admin.exams.destroy', $exam) }}" method="POST" onsubmit="return confirm('@lang('exams_admin.actions.delete_confirm')')">
+                                            <form action="{{ route($routePrefix . '.destroy', $exam) }}" method="POST" onsubmit="return confirm('@lang('exams_admin.actions.delete_confirm')')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash3-fill" :size="16" class="me-1" /> @lang('exams_admin.actions.delete')</button>
                                             </form>
@@ -315,7 +315,7 @@
                 <span class="icon-wrap"><x-svg-icon name="calendar-x-fill" :size="48" class="ic-warn" /></span>
                 <h5 class="mb-1">@lang('exams_admin.empty.title')</h5>
                 <p>@lang('exams_admin.empty.subtitle')</p>
-                <a href="{{ route('admin.exams.create') }}" class="btn add-exam-btn">
+                <a href="{{ route($routePrefix . '.create') }}" class="btn add-exam-btn">
                     <x-svg-icon name="plus-lg" :size="16" class="me-1" /> @lang('exams_admin.empty.cta')
                 </a>
             </div>

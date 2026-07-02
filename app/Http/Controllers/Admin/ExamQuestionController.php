@@ -18,14 +18,25 @@ class ExamQuestionController extends Controller
     public function __construct(private QuestionBankRepository $banks) {}
 
     /**
+     * Route-name prefix for links/redirects — teacher.exams when reached under
+     * /teacher, admin.exams otherwise. Lets the shared exam views work from both
+     * route groups without the teacher hitting the admin-only CheckRole gate.
+     */
+    private function routePrefix(): string
+    {
+        return request()->routeIs('teacher.exams.*') ? 'teacher.exams' : 'admin.exams';
+    }
+
+    /**
      * Display questions for an exam.
      */
     public function index(Exam $exam)
     {
         $questions = $exam->questions()->orderBy('order')->get();
         $totalMarks = $questions->sum('marks');
+        $routePrefix = $this->routePrefix();
 
-        return view('admin.exams.questions.index', compact('exam', 'questions', 'totalMarks'));
+        return view('admin.exams.questions.index', compact('exam', 'questions', 'totalMarks', 'routePrefix'));
     }
 
     /**
@@ -34,8 +45,9 @@ class ExamQuestionController extends Controller
     public function create(Exam $exam)
     {
         $nextOrder = $exam->questions()->max('order') + 1;
+        $routePrefix = $this->routePrefix();
 
-        return view('admin.exams.questions.create', compact('exam', 'nextOrder'));
+        return view('admin.exams.questions.create', compact('exam', 'nextOrder', 'routePrefix'));
     }
 
     /**
@@ -66,11 +78,11 @@ class ExamQuestionController extends Controller
         $this->updateExamTotalMarks($exam);
 
         if ($request->has('add_another')) {
-            return redirect()->route('admin.exams.questions.create', $exam)
+            return redirect()->route($this->routePrefix() . '.questions.create', $exam)
                 ->with('success', 'تم إضافة السؤال بنجاح. أضف سؤالاً آخر.');
         }
 
-        return redirect()->route('admin.exams.questions.index', $exam)
+        return redirect()->route($this->routePrefix() . '.questions.index', $exam)
             ->with('success', 'تم إضافة السؤال بنجاح.');
     }
 
@@ -79,7 +91,9 @@ class ExamQuestionController extends Controller
      */
     public function edit(Exam $exam, ExamQuestion $question)
     {
-        return view('admin.exams.questions.edit', compact('exam', 'question'));
+        $routePrefix = $this->routePrefix();
+
+        return view('admin.exams.questions.edit', compact('exam', 'question', 'routePrefix'));
     }
 
     /**
@@ -109,7 +123,7 @@ class ExamQuestionController extends Controller
         // Update exam total marks
         $this->updateExamTotalMarks($exam);
 
-        return redirect()->route('admin.exams.questions.index', $exam)
+        return redirect()->route($this->routePrefix() . '.questions.index', $exam)
             ->with('success', 'تم تحديث السؤال بنجاح.');
     }
 
@@ -128,7 +142,7 @@ class ExamQuestionController extends Controller
         // Update exam total marks
         $this->updateExamTotalMarks($exam);
 
-        return redirect()->route('admin.exams.questions.index', $exam)
+        return redirect()->route($this->routePrefix() . '.questions.index', $exam)
             ->with('success', 'تم حذف السؤال بنجاح.');
     }
 
@@ -161,7 +175,7 @@ class ExamQuestionController extends Controller
         // Update exam total marks
         $this->updateExamTotalMarks($exam);
 
-        return redirect()->route('admin.exams.questions.index', $exam)
+        return redirect()->route($this->routePrefix() . '.questions.index', $exam)
             ->with('success', 'تم نسخ السؤال بنجاح.');
     }
 
@@ -205,7 +219,9 @@ class ExamQuestionController extends Controller
             ->orderBy('name_ar')
             ->get(['id', 'name_ar', 'name_en']);
 
-        return view('admin.exams.questions.bank-picker', compact('exam', 'bankQuestions', 'banks'));
+        $routePrefix = $this->routePrefix();
+
+        return view('admin.exams.questions.bank-picker', compact('exam', 'bankQuestions', 'banks', 'routePrefix'));
     }
 
     /**
@@ -241,7 +257,7 @@ class ExamQuestionController extends Controller
             ->get();
 
         if ($bankQuestions->isEmpty()) {
-            return redirect()->route('admin.exams.questions.bank-picker', $exam)
+            return redirect()->route($this->routePrefix() . '.questions.bank-picker', $exam)
                 ->with('error', 'لم يتم العثور على أسئلة معتمدة تعود لمدرستك.');
         }
 
@@ -277,7 +293,7 @@ class ExamQuestionController extends Controller
             $msg .= ' تم تخطي ' . count($skipped) . ' سؤال (نوع لا يمكن ربطه تلقائياً).';
         }
 
-        return redirect()->route('admin.exams.questions.index', $exam)->with('success', $msg);
+        return redirect()->route($this->routePrefix() . '.questions.index', $exam)->with('success', $msg);
     }
 
     /**

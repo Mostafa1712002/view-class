@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">إنشاء اختبار جديد</h1>
-        <a href="{{ route('admin.exams.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ route($routePrefix . '.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-right me-1"></i>
             العودة للقائمة
         </a>
@@ -14,7 +14,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('admin.exams.store') }}" method="POST">
+            <form action="{{ route($routePrefix . '.store') }}" method="POST">
                 @csrf
 
                 <div class="row">
@@ -205,7 +205,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.exams.index') }}" class="btn btn-light">@lang('common.cancel')</a>
+                    <a href="{{ route($routePrefix . '.index') }}" class="btn btn-light">@lang('common.cancel')</a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg me-1"></i>
                         إنشاء الاختبار

@@ -9,13 +9,13 @@
             <h1 class="h3 mb-1">نتائج الاختبار: {{ $exam->title }}</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.index') }}">الاختبارات</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.show', $exam) }}">{{ $exam->title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الاختبارات</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.show', $exam) }}">{{ $exam->title }}</a></li>
                     <li class="breadcrumb-item active">النتائج</li>
                 </ol>
             </nav>
         </div>
-        <a href="{{ route('admin.exams.show', $exam) }}" class="btn btn-outline-secondary">
+        <a href="{{ route($routePrefix . '.show', $exam) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-right me-1"></i>
             العودة للاختبار
         </a>
@@ -137,7 +137,7 @@
                                                  Re-open control: only for attempts auto-locked by the
                                                  tab-exit limit, and only for users allowed to edit exams. --}}
                                             @if($studentExam->auto_ended && auth()->user()->canDo('exams.edit'))
-                                                <form method="POST" action="{{ route('admin.exams.attempts.reopen', [$exam, $studentExam]) }}"
+                                                <form method="POST" action="{{ route($routePrefix . '.attempts.reopen', [$exam, $studentExam]) }}"
                                                       onsubmit="return confirm('سيتم إعادة فتح الاختبار لهذا الطالب وتصفير عدّاد محاولات الخروج. هل تريد المتابعة؟');">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-warning">

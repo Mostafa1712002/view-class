@@ -17,6 +17,16 @@ use Illuminate\Support\Facades\DB;
 class ExamController extends Controller
 {
     /**
+     * Route-name prefix for links/redirects — teacher.exams when reached under
+     * /teacher, admin.exams otherwise. Lets the shared exam views work from both
+     * route groups without the teacher hitting the admin-only CheckRole gate.
+     */
+    private function routePrefix(): string
+    {
+        return request()->routeIs('teacher.exams.*') ? 'teacher.exams' : 'admin.exams';
+    }
+
+    /**
      * Display a listing of exams.
      */
     public function index(Request $request)
@@ -77,8 +87,10 @@ class ExamController extends Controller
         $teachers = User::whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))
             ->orderBy('name')->get(['id', 'name']);
 
+        $routePrefix = $this->routePrefix();
+
         return view('admin.exams.index', compact(
-            'exams', 'subjects', 'classes', 'teachers', 'filters', 'stats'
+            'exams', 'subjects', 'classes', 'teachers', 'filters', 'stats', 'routePrefix'
         ));
     }
 
@@ -90,8 +102,9 @@ class ExamController extends Controller
         $subjects = Subject::orderBy('name')->get();
         $classes = ClassRoom::orderBy('name')->get();
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
+        $routePrefix = $this->routePrefix();
 
-        return view('admin.exams.create', compact('subjects', 'classes', 'academicYears'));
+        return view('admin.exams.create', compact('subjects', 'classes', 'academicYears', 'routePrefix'));
     }
 
     /**
@@ -125,7 +138,7 @@ class ExamController extends Controller
 
         $exam = Exam::create($validated);
 
-        return redirect()->route('admin.exams.questions.index', $exam)
+        return redirect()->route($this->routePrefix() . '.questions.index', $exam)
             ->with('success', 'تم إنشاء الاختبار بنجاح. أضف الأسئلة الآن.');
     }
 
@@ -149,7 +162,9 @@ class ExamController extends Controller
                 : null,
         ];
 
-        return view('admin.exams.show', compact('exam', 'statistics'));
+        $routePrefix = $this->routePrefix();
+
+        return view('admin.exams.show', compact('exam', 'statistics', 'routePrefix'));
     }
 
     /**
@@ -160,8 +175,9 @@ class ExamController extends Controller
         $subjects = Subject::orderBy('name')->get();
         $classes = ClassRoom::orderBy('name')->get();
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
+        $routePrefix = $this->routePrefix();
 
-        return view('admin.exams.edit', compact('exam', 'subjects', 'classes', 'academicYears'));
+        return view('admin.exams.edit', compact('exam', 'subjects', 'classes', 'academicYears', 'routePrefix'));
     }
 
     /**
@@ -194,7 +210,7 @@ class ExamController extends Controller
 
         $exam->update($validated);
 
-        return redirect()->route('admin.exams.show', $exam)
+        return redirect()->route($this->routePrefix() . '.show', $exam)
             ->with('success', 'تم تحديث الاختبار بنجاح.');
     }
 
@@ -205,7 +221,7 @@ class ExamController extends Controller
     {
         $exam->delete();
 
-        return redirect()->route('admin.exams.index')
+        return redirect()->route($this->routePrefix() . '.index')
             ->with('success', 'تم حذف الاختبار بنجاح.');
     }
 
@@ -270,7 +286,9 @@ class ExamController extends Controller
             }])->orderBy('score', 'desc');
         }]);
 
-        return view('admin.exams.results', compact('exam'));
+        $routePrefix = $this->routePrefix();
+
+        return view('admin.exams.results', compact('exam', 'routePrefix'));
     }
 
     /**

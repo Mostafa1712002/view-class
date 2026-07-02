@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">تعديل الاختبار: {{ $exam->title }}</h1>
-        <a href="{{ route('admin.exams.show', $exam) }}" class="btn btn-outline-secondary">
+        <a href="{{ route($routePrefix . '.show', $exam) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-right me-1"></i>
             العودة للاختبار
         </a>
@@ -14,7 +14,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('admin.exams.update', $exam) }}" method="POST">
+            <form action="{{ route($routePrefix . '.update', $exam) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -213,7 +213,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.exams.show', $exam) }}" class="btn btn-light">@lang('common.cancel')</a>
+                    <a href="{{ route($routePrefix . '.show', $exam) }}" class="btn btn-light">@lang('common.cancel')</a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg me-1"></i>
                         حفظ التغييرات

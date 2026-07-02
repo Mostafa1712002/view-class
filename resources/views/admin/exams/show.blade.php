@@ -9,17 +9,17 @@
             <h1 class="h3 mb-1">{{ $exam->title }}</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.index') }}">الاختبارات</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الاختبارات</a></li>
                     <li class="breadcrumb-item active">{{ $exam->title }}</li>
                 </ol>
             </nav>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-info">
+            <a href="{{ route($routePrefix . '.questions.index', $exam) }}" class="btn btn-info">
                 <i class="bi bi-list-ol me-1"></i>
                 إدارة الأسئلة
             </a>
-            <a href="{{ route('admin.exams.edit', $exam) }}" class="btn btn-warning">
+            <a href="{{ route($routePrefix . '.edit', $exam) }}" class="btn btn-warning">
                 <i class="bi bi-pencil me-1"></i>
                 تعديل
             </a>
@@ -118,7 +118,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">الأسئلة ({{ $exam->questions->count() }})</h5>
-                    <a href="{{ route('admin.exams.questions.create', $exam) }}" class="btn btn-sm btn-primary">
+                    <a href="{{ route($routePrefix . '.questions.create', $exam) }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus-lg me-1"></i>
                         إضافة سؤال
                     </a>
@@ -155,7 +155,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-muted">الدرجة: {{ number_format($question->marks, 1) }}</span>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('admin.exams.questions.edit', [$exam, $question]) }}" class="btn btn-outline-warning">
+                                    <a href="{{ route($routePrefix . '.questions.edit', [$exam, $question]) }}" class="btn btn-outline-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                 </div>
@@ -165,7 +165,7 @@
                         <div class="text-center py-4">
                             <i class="bi bi-question-circle display-4 text-muted"></i>
                             <p class="mt-2 text-muted">لا توجد أسئلة بعد</p>
-                            <a href="{{ route('admin.exams.questions.create', $exam) }}" class="btn btn-primary">
+                            <a href="{{ route($routePrefix . '.questions.create', $exam) }}" class="btn btn-primary">
                                 <i class="bi bi-plus-lg me-1"></i>
                                 إضافة أول سؤال
                             </a>
@@ -179,7 +179,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">نتائج الطلاب</h5>
-                        <a href="{{ route('admin.exams.results', $exam) }}" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ route($routePrefix . '.results', $exam) }}" class="btn btn-sm btn-outline-primary">
                             عرض التفاصيل
                         </a>
                     </div>
@@ -223,7 +223,7 @@
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         @if(!$exam->is_published)
-                            <form action="{{ route('admin.exams.publish', $exam) }}" method="POST">
+                            <form action="{{ route($routePrefix . '.publish', $exam) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-success w-100" {{ $exam->questions->count() === 0 ? 'disabled' : '' }}>
                                     <i class="bi bi-send me-1"></i>
@@ -231,7 +231,7 @@
                                 </button>
                             </form>
                         @else
-                            <form action="{{ route('admin.exams.unpublish', $exam) }}" method="POST">
+                            <form action="{{ route($routePrefix . '.unpublish', $exam) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-secondary w-100">
                                     <i class="bi bi-eye-slash me-1"></i>
@@ -241,7 +241,7 @@
                         @endif
 
                         @if($exam->status === 'scheduled')
-                            <form action="{{ route('admin.exams.activate', $exam) }}" method="POST">
+                            <form action="{{ route($routePrefix . '.activate', $exam) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="bi bi-play-fill me-1"></i>
@@ -249,7 +249,7 @@
                                 </button>
                             </form>
                         @elseif($exam->status === 'active')
-                            <form action="{{ route('admin.exams.complete', $exam) }}" method="POST">
+                            <form action="{{ route($routePrefix . '.complete', $exam) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-warning w-100">
                                     <i class="bi bi-stop-fill me-1"></i>
@@ -258,7 +258,7 @@
                             </form>
                         @endif
 
-                        <a href="{{ route('admin.exams.results', $exam) }}" class="btn btn-info">
+                        <a href="{{ route($routePrefix . '.results', $exam) }}" class="btn btn-info">
                             <i class="bi bi-bar-chart me-1"></i>
                             عرض النتائج
                         </a>

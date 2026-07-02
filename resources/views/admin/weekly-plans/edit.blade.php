@@ -11,7 +11,7 @@
                 <div class="breadcrumb-wrapper">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('manage.weekly-plans.index') }}">الخطط الأسبوعية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الخطط الأسبوعية</a></li>
                         <li class="breadcrumb-item active">تعديل</li>
                     </ol>
                 </div>
@@ -28,7 +28,7 @@
             <h4 class="card-title">الخطة: {{ $weeklyPlan->teacher->name }} - {{ $weeklyPlan->subject->name }} ({{ $weeklyPlan->week_label }})</h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('manage.weekly-plans.update', $weeklyPlan) }}" method="POST">
+            <form action="{{ route($routePrefix . '.update', $weeklyPlan) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -113,7 +113,7 @@
 
                 <div class="mt-2">
                     <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
-                    <a href="{{ route('manage.weekly-plans.show', $weeklyPlan) }}" class="btn btn-secondary">@lang('common.cancel')</a>
+                    <a href="{{ route($routePrefix . '.show', $weeklyPlan) }}" class="btn btn-secondary">@lang('common.cancel')</a>
                 </div>
             </form>
         </div>

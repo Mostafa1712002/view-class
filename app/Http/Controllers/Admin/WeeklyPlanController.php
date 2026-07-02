@@ -19,6 +19,18 @@ class WeeklyPlanController extends Controller
         return $user->isSuperAdmin() ? null : $user->school_id;
     }
 
+    /**
+     * Route-name prefix for links/redirects — teacher.weekly-plans when reached
+     * under /teacher, manage.weekly-plans otherwise. Lets the shared views work
+     * from both groups without the teacher hitting the admin-only CheckRole gate.
+     * Admin-only actions (lock/unlock/bulk-lock/pdf/excel/mark-prepared) have no
+     * teacher route and stay guarded in the views.
+     */
+    protected function routePrefix(): string
+    {
+        return request()->routeIs('teacher.weekly-plans.*') ? 'teacher.weekly-plans' : 'manage.weekly-plans';
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -126,10 +138,12 @@ class WeeklyPlanController extends Controller
             }
             $noteTemplates = $noteTemplatesQuery->latest()->limit(50)->get();
 
+            $routePrefix = $this->routePrefix();
+
             return view('admin.weekly-plans.index-grid', compact(
                 'weekPlans', 'weekStart', 'weekEnd',
                 'teachers', 'subjects', 'classes', 'gradeLevels',
-                'kpis', 'noteTemplates'
+                'kpis', 'noteTemplates', 'routePrefix'
             ));
         }
 
@@ -138,8 +152,9 @@ class WeeklyPlanController extends Controller
             $query->where('week_start_date', $request->week_start_date);
         }
         $plans = $query->latest('week_start_date')->paginate(15);
+        $routePrefix = $this->routePrefix();
 
-        return view('admin.weekly-plans.index', compact('plans', 'teachers', 'subjects', 'classes', 'gradeLevels'));
+        return view('admin.weekly-plans.index', compact('plans', 'teachers', 'subjects', 'classes', 'gradeLevels', 'routePrefix'));
     }
 
     /**
@@ -318,7 +333,12 @@ class WeeklyPlanController extends Controller
 
         if ($user->isTeacher() && !$user->isSuperAdmin() && !$user->isSchoolAdmin()) {
             $teachers = collect([$user]);
-            $subjectsQuery->whereHas('teachers', fn($q) => $q->where('users.id', $user->id));
+            // Subjects assigned to this teacher via the subject_teacher pivot.
+            // NB: query the pivot's real `user_id` column directly — the Subject::teachers()
+            // relation is mis-declared with a non-existent `teacher_id` key (see SubjectController).
+            $subjectsQuery->whereIn('id', function ($q) use ($user) {
+                $q->select('subject_id')->from('subject_teacher')->where('user_id', $user->id);
+            });
         } else {
             if ($schoolId) {
                 $teachersQuery->where('school_id', $schoolId);
@@ -335,7 +355,9 @@ class WeeklyPlanController extends Controller
         $currentWeekStart = Carbon::now()->startOfWeek(Carbon::SUNDAY);
         $nextWeekStart = $currentWeekStart->copy()->addWeek();
 
-        return view('admin.weekly-plans.create', compact('teachers', 'subjects', 'classes', 'currentWeekStart', 'nextWeekStart'));
+        $routePrefix = $this->routePrefix();
+
+        return view('admin.weekly-plans.create', compact('teachers', 'subjects', 'classes', 'currentWeekStart', 'nextWeekStart', 'routePrefix'));
     }
 
     public function store(Request $request)
@@ -387,7 +409,7 @@ class WeeklyPlanController extends Controller
 
         $plan = WeeklyPlan::create($validated);
 
-        return redirect()->route('manage.weekly-plans.show', $plan)
+        return redirect()->route($this->routePrefix() . '.show', $plan)
             ->with('success', 'تم إنشاء الخطة الأسبوعية بنجاح');
     }
 
@@ -401,7 +423,9 @@ class WeeklyPlanController extends Controller
 
         $weeklyPlan->load(['teacher', 'subject', 'classRoom.section', 'lockedByUser']);
 
-        return view('admin.weekly-plans.show', compact('weeklyPlan'));
+        $routePrefix = $this->routePrefix();
+
+        return view('admin.weekly-plans.show', compact('weeklyPlan', 'routePrefix'));
     }
 
     public function edit(WeeklyPlan $weeklyPlan)
@@ -409,7 +433,7 @@ class WeeklyPlanController extends Controller
         $user = auth()->user();
 
         if (!$weeklyPlan->canEdit($user)) {
-            return redirect()->route('manage.weekly-plans.show', $weeklyPlan)
+            return redirect()->route($this->routePrefix() . '.show', $weeklyPlan)
                 ->with('error', 'لا يمكن تعديل هذه الخطة - إما أنها مقفلة أو ليست لك');
         }
 
@@ -419,7 +443,12 @@ class WeeklyPlanController extends Controller
         $classesQuery = ClassRoom::with('section')->active();
 
         if ($user->isTeacher() && !$user->isSuperAdmin() && !$user->isSchoolAdmin()) {
-            $subjectsQuery->whereHas('teachers', fn($q) => $q->where('users.id', $user->id));
+            // Subjects assigned to this teacher via the subject_teacher pivot.
+            // NB: query the pivot's real `user_id` column directly — the Subject::teachers()
+            // relation is mis-declared with a non-existent `teacher_id` key (see SubjectController).
+            $subjectsQuery->whereIn('id', function ($q) use ($user) {
+                $q->select('subject_id')->from('subject_teacher')->where('user_id', $user->id);
+            });
         } elseif ($schoolId) {
             $subjectsQuery->where('school_id', $schoolId);
             $classesQuery->whereHas('section', fn($q) => $q->where('school_id', $schoolId));
@@ -428,7 +457,9 @@ class WeeklyPlanController extends Controller
         $subjects = $subjectsQuery->get();
         $classes = $classesQuery->get();
 
-        return view('admin.weekly-plans.edit', compact('weeklyPlan', 'subjects', 'classes'));
+        $routePrefix = $this->routePrefix();
+
+        return view('admin.weekly-plans.edit', compact('weeklyPlan', 'subjects', 'classes', 'routePrefix'));
     }
 
     public function update(Request $request, WeeklyPlan $weeklyPlan)
@@ -436,7 +467,7 @@ class WeeklyPlanController extends Controller
         $user = auth()->user();
 
         if (!$weeklyPlan->canEdit($user)) {
-            return redirect()->route('manage.weekly-plans.show', $weeklyPlan)
+            return redirect()->route($this->routePrefix() . '.show', $weeklyPlan)
                 ->with('error', 'لا يمكن تعديل هذه الخطة');
         }
 
@@ -459,7 +490,7 @@ class WeeklyPlanController extends Controller
 
         $weeklyPlan->update($validated);
 
-        return redirect()->route('manage.weekly-plans.show', $weeklyPlan)
+        return redirect()->route($this->routePrefix() . '.show', $weeklyPlan)
             ->with('success', 'تم تحديث الخطة الأسبوعية بنجاح');
     }
 
@@ -476,7 +507,7 @@ class WeeklyPlanController extends Controller
 
         $weeklyPlan->delete();
 
-        return redirect()->route('manage.weekly-plans.index')
+        return redirect()->route($this->routePrefix() . '.index')
             ->with('success', 'تم حذف الخطة الأسبوعية بنجاح');
     }
 
@@ -572,7 +603,7 @@ class WeeklyPlanController extends Controller
         $newPlan->locked_by = null;
         $newPlan->save();
 
-        return redirect()->route('manage.weekly-plans.edit', $newPlan)
+        return redirect()->route($this->routePrefix() . '.edit', $newPlan)
             ->with('success', 'تم نسخ الخطة للأسبوع القادم بنجاح');
     }
 

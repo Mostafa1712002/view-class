@@ -25,13 +25,16 @@
 @endpush
 
 <nav class="schedule-tabs mb-3" aria-label="@lang('exams_admin.page_title')">
+    {{-- Class-schedule tab is admin-only (no teacher school-schedule route) — hide for teachers. --}}
+    @unless(request()->routeIs('teacher.*'))
     <a href="{{ route('admin.school-schedule.index') }}"
        class="{{ $active === 'class' ? 'active' : '' }}"
        aria-current="{{ $active === 'class' ? 'page' : 'false' }}">
         <i class="la la-calendar"></i>
         @lang('exams_admin.tabs.class_schedule')
     </a>
-    <a href="{{ route('admin.exams.index') }}"
+    @endunless
+    <a href="{{ route(($routePrefix ?? 'admin.exams') . '.index') }}"
        class="{{ $active === 'exam' ? 'active' : '' }}"
        aria-current="{{ $active === 'exam' ? 'page' : 'false' }}">
         <i class="la la-file-alt"></i>
