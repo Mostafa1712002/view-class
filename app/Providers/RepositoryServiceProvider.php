@@ -43,6 +43,8 @@ use App\Modules\SmsServices\Repositories\Contracts\SmsSettingsRepository;
 use App\Modules\SmsServices\Repositories\EloquentSmsSettingsRepository;
 use App\Modules\Subjects\Repositories\Contracts\SubjectRepository;
 use App\Modules\Subjects\Repositories\EloquentSubjectRepository;
+use App\Modules\TeacherMaterials\Repositories\Contracts\TeacherMaterialRepository;
+use App\Modules\TeacherMaterials\Repositories\EloquentTeacherMaterialRepository;
 use App\Modules\Users\Repositories\Contracts\AdminRepository;
 use App\Modules\Users\Repositories\Contracts\ParentRepository;
 use App\Modules\Users\Repositories\Contracts\StudentRepository;
@@ -110,6 +112,7 @@ class RepositoryServiceProvider extends ServiceProvider
         TeacherRepository::class => EloquentTeacherListRepository::class,
         AdminRepository::class => EloquentAdminListRepository::class,
         SubjectRepository::class => EloquentSubjectRepository::class,
+        TeacherMaterialRepository::class => EloquentTeacherMaterialRepository::class,
         BookRepository::class => EloquentBookRepository::class,
         QuestionBankRepository::class => EloquentQuestionBankRepository::class,
         // QB rebuild taxonomy (#248) — see .kiro/specs/qb-rebuild-foundation
