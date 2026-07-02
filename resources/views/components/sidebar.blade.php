@@ -1054,6 +1054,15 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}" data-label="@lang('shell.nav_subjects')"><x-svg-icon name="book-half" class="vc-ico" /><span class="menu-title">@lang('shell.nav_subjects')</span></a>
                 </li>
+                <li class="nav-item {{ request()->routeIs('teacher.subjects.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('teacher.subjects.index') ? route('teacher.subjects.index') : '#' }}" data-label="@lang('shell.nav_my_subjects')"><x-svg-icon name="collection" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_subjects')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('teacher.materials.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('teacher.materials.index') ? route('teacher.materials.index') : '#' }}" data-label="@lang('shell.nav_materials_mgmt')"><x-svg-icon name="folder" class="vc-ico" /><span class="menu-title">@lang('shell.nav_materials_mgmt')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('teacher.calendar.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('teacher.calendar.index') ? route('teacher.calendar.index') : '#' }}" data-label="@lang('shell.nav_teacher_calendar')"><x-svg-icon name="calendar3" class="vc-ico" /><span class="menu-title">@lang('shell.nav_teacher_calendar')</span></a>
+                </li>
                 <li class="nav-item {{ request()->routeIs('teacher.students.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ route('teacher.students.index') }}" data-label="@lang('teacher_students.sidebar_link')"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('teacher_students.sidebar_link')</span></a>
                 </li>
