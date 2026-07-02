@@ -1201,3 +1201,6 @@ require __DIR__.'/../app/Modules/EducationalSites/Routes/web.php';
 
 // === Sprint 10 — Admissions / Registration (#268) — NET-NEW ===
 require __DIR__.'/../app/Modules/Admissions/Routes/web.php';
+
+// Teacher materials hub — Trello #287
+require __DIR__.'/../app/Modules/TeacherMaterials/Routes/web.php';
