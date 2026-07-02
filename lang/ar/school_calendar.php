@@ -3,8 +3,17 @@
 return [
     // Titles
     'title'         => 'التقويم المدرسي',
+    'teacher_title' => 'تقويم المعلم',
     'create_title'  => 'إضافة حدث',
     'edit_title'    => 'تعديل الحدث',
+
+    // Teacher calendar legend
+    'legend_lesson'        => 'حصة',
+    'legend_exam'          => 'اختبار',
+    'legend_assignment'    => 'واجب',
+    'legend_virtual_class' => 'فصل افتراضي',
+    'legend_appointment'   => 'موعد',
+    'legend_school_event'  => 'حدث مدرسي',
 
     // Breadcrumbs
     'breadcrumb_home' => 'الرئيسية',
