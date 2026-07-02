@@ -19,7 +19,10 @@
         </div>
     </div>
     <div class="content-header-right col-md-4 col-12 text-md-end">
+        {{-- Lab management is admin-only; teachers browse/view only (card #290). --}}
+        @if(auth()->user()->isSuperAdmin() || auth()->user()->isSchoolAdmin())
         <a href="{{ route('admin.libraries.labs.manage') }}" class="btn btn-outline-primary btn-sm"><i class="la la-cog"></i> @lang('libraries.labs.manage_title')</a>
+        @endif
     </div>
 </div>
 

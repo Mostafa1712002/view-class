@@ -9,14 +9,14 @@
             <h1 class="h3 mb-1">إضافة سؤال جديد</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.index') }}">الاختبارات</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.show', $exam) }}">{{ $exam->title }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.questions.index', $exam) }}">الأسئلة</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الاختبارات</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.show', $exam) }}">{{ $exam->title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.questions.index', $exam) }}">الأسئلة</a></li>
                     <li class="breadcrumb-item active">إضافة</li>
                 </ol>
             </nav>
         </div>
-        <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-outline-secondary">
+        <a href="{{ route($routePrefix . '.questions.index', $exam) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-right me-1"></i>
             العودة للأسئلة
         </a>
@@ -24,7 +24,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('admin.exams.questions.store', $exam) }}" method="POST" id="questionForm">
+            <form action="{{ route($routePrefix . '.questions.store', $exam) }}" method="POST" id="questionForm">
                 @csrf
 
                 <div class="row">
@@ -156,7 +156,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-light">@lang('common.cancel')</a>
+                    <a href="{{ route($routePrefix . '.questions.index', $exam) }}" class="btn btn-light">@lang('common.cancel')</a>
                     <button type="submit" name="add_another" value="1" class="btn btn-outline-primary">
                         <i class="bi bi-plus-lg me-1"></i>
                         حفظ وإضافة آخر

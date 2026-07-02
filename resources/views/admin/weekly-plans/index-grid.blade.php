@@ -197,7 +197,7 @@
         </ol>
     </div>
     <div class="content-header-right col-md-5 col-12 text-md-right">
-        <a href="{{ route('manage.weekly-plans.create') }}" class="btn btn-primary btn-sm">
+        <a href="{{ route($routePrefix . '.create') }}" class="btn btn-primary btn-sm">
             <x-svg-icon name="plus-lg" :size="16" /> @lang('weekly_plan.btn_add_plan')
         </a>
         <a href="{{ route('manage.weekly-plan-notes.index') }}" class="btn btn-secondary btn-sm">
@@ -256,7 +256,7 @@
                 <span>@lang('weekly_plan.auto_search_label')</span>
             </label>
         </div>
-        <form method="GET" action="{{ route('manage.weekly-plans.index') }}" class="wp-form" id="wpFilterForm">
+        <form method="GET" action="{{ route($routePrefix . '.index') }}" class="wp-form" id="wpFilterForm">
             <input type="hidden" name="view" value="grid">
             <input type="hidden" name="week_start" value="{{ $weekStart->toDateString() }}">
             {{-- Primary (always visible) --}}
@@ -326,7 +326,7 @@
                     <input type="date" name="date" value="{{ request('date') }}" class="form-control wp-auto">
                 </div>
                 <div class="col-12 d-flex align-items-end gap-2">
-                    <a href="{{ route('manage.weekly-plans.index', ['view' => 'grid', 'week_start' => $weekStart->toDateString()]) }}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{{ route($routePrefix . '.index', ['view' => 'grid', 'week_start' => $weekStart->toDateString()]) }}" class="btn btn-outline-secondary btn-sm">
                         <x-svg-icon name="x-circle-fill" :size="16" class="ic-muted" /> @lang('weekly_plan.btn_reset')
                     </a>
                 </div>
@@ -337,13 +337,13 @@
     {{-- Week navigator --}}
     <div class="wp-week-nav">
         <div class="nav-left">
-            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->subWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
+            <a href="{{ route($routePrefix . '.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->subWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
                 @if($isRtl)<x-svg-icon name="arrow-right" :size="16" />@else<x-svg-icon name="arrow-left" :size="16" />@endif @lang('weekly_plan.week_prev')
             </a>
-            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => now()->startOfWeek(\Carbon\Carbon::SUNDAY)->toDateString()])) }}" class="btn btn-primary btn-sm">
+            <a href="{{ route($routePrefix . '.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => now()->startOfWeek(\Carbon\Carbon::SUNDAY)->toDateString()])) }}" class="btn btn-primary btn-sm">
                 <x-svg-icon name="calendar-day" :size="16" /> @lang('weekly_plan.week_now')
             </a>
-            <a href="{{ route('manage.weekly-plans.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->addWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
+            <a href="{{ route($routePrefix . '.index', array_merge(request()->query(), ['view' => 'grid', 'week_start' => $weekStart->copy()->addWeek()->toDateString()])) }}" class="btn btn-outline-secondary btn-sm">
                 @lang('weekly_plan.week_next') @if($isRtl)<x-svg-icon name="arrow-left" :size="16" />@else<x-svg-icon name="arrow-right" :size="16" />@endif
             </a>
         </div>
@@ -354,12 +354,15 @@
             {{ $weekEnd->format('Y-m-d') }}
         </div>
         <div class="nav-tools">
+            {{-- PDF/Excel export is admin-only (no teacher route; export scopes by school, not teacher). --}}
+            @unless(request()->routeIs('teacher.weekly-plans.*'))
             <a href="{{ route('manage.weekly-plans.pdf', request()->query()) }}" target="_blank" class="btn btn-outline-danger btn-sm">
                 <x-svg-icon name="file-earmark-pdf-fill" :size="16" /> @lang('weekly_plan.btn_pdf')
             </a>
             <a href="{{ route('manage.weekly-plans.excel', request()->query()) }}" class="btn btn-outline-success btn-sm">
                 <x-svg-icon name="file-earmark-excel-fill" :size="16" /> @lang('weekly_plan.btn_excel')
             </a>
+            @endunless
             <div class="wp-cols-dropdown">
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="wpColsToggle">
                     <x-svg-icon name="columns-gap" :size="16" /> @lang('weekly_plan.btn_columns')
@@ -442,6 +445,8 @@
                                     <td class="col-narrow" data-col="notes"><div class="wp-clip">{{ $plan->notes ?: '—' }}</div></td>
                                     <td class="text-center" data-col="actions">
                                         <div class="wp-actions">
+                                            {{-- Mark-prepared is admin-only (no teacher route). --}}
+                                            @unless(request()->routeIs('teacher.weekly-plans.*'))
                                             <form action="{{ route('manage.weekly-plans.mark-prepared', $plan) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 <button class="btn-icon {{ $plan->is_prepared ? 'warning' : 'success' }}" title="{{ $plan->is_prepared ? __('weekly_plan.status_not_prepared') : __('weekly_plan.status_prepared') }}">
@@ -452,8 +457,9 @@
                                                     @endif
                                                 </button>
                                             </form>
-                                            <a href="{{ route('manage.weekly-plans.show', $plan) }}" class="btn-icon" title="@lang('common.show')"><x-svg-icon name="eye-fill" :size="16" class="ic-info" /></a>
-                                            <a href="{{ route('manage.weekly-plans.edit', $plan) }}" class="btn-icon" title="@lang('common.edit')"><x-svg-icon name="pencil-square" :size="16" class="ic-gold" /></a>
+                                            @endunless
+                                            <a href="{{ route($routePrefix . '.show', $plan) }}" class="btn-icon" title="@lang('common.show')"><x-svg-icon name="eye-fill" :size="16" class="ic-info" /></a>
+                                            <a href="{{ route($routePrefix . '.edit', $plan) }}" class="btn-icon" title="@lang('common.edit')"><x-svg-icon name="pencil-square" :size="16" class="ic-gold" /></a>
                                         </div>
                                     </td>
                                 </tr>

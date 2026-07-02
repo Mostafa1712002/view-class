@@ -494,12 +494,11 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::post('private/{id}/items', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'storeItem'])->name('private.items.store');
         Route::delete('private/{id}/items/{itemId}', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'destroyItem'])->name('private.items.destroy');
 
-        // Virtual labs — not school-scoped, so index/show remain admin-only as well
-        Route::get('labs', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'index'])->name('labs.index');
+        // Virtual labs — WRITE/manage stay admin-only; browse (index/show) is
+        // teacher-inclusive in the read group below (card #290).
         Route::get('labs/manage', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'manage'])->name('labs.manage');
         Route::get('labs/create', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'create'])->name('labs.create');
         Route::post('labs', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'store'])->name('labs.store');
-        Route::get('labs/{id}', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'show'])->name('labs.show');
         Route::get('labs/{id}/edit', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'edit'])->name('labs.edit');
         Route::put('labs/{id}', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'update'])->name('labs.update');
         Route::delete('labs/{id}', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'destroy'])->name('labs.destroy');
@@ -775,9 +774,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ad
     Route::get('subjects/{id}/domains', [\App\Modules\Subjects\Controllers\SubjectController::class, 'domains'])->name('subjects.domains');
 });
 
-// Libraries (public + private) — read (index, show, items)
-// NOTE: VirtualLabController has no school scoping — labs.index / labs.show are DEFERRED
-// and remain admin-only in the group above.
+// Libraries (public + private + virtual labs) — read (index, show, items)
+// Virtual labs are platform-wide (no school_id), so browse/view is safe for
+// teachers; only lab CRUD stays admin-only in the group above (card #290).
 Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin/libraries')->name('admin.libraries.')->group(function () {
     // PublicLibraryController::index — school-scoped: activeSchoolId() line 24
     Route::get('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'index'])->name('public.index');
@@ -787,6 +786,10 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ad
     Route::get('private', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'index'])->name('private.index');
     // PrivateLibraryController::items — school-scoped: findScoped() line 92
     Route::get('private/{id}/items', [\App\Modules\Libraries\Controllers\PrivateLibraryController::class, 'items'])->name('private.items');
+    // Virtual labs — browse + view (read-only). whereNumber keeps {id} from
+    // shadowing labs/manage|create above.
+    Route::get('labs', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'index'])->name('labs.index');
+    Route::get('labs/{id}', [\App\Modules\Libraries\Controllers\VirtualLabController::class, 'show'])->whereNumber('id')->name('labs.show');
 });
 
 // Teacher Routes
@@ -821,6 +824,9 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('te
     Route::put('exams/{exam}/questions/{question}', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'update'])->name('exams.questions.update');
     Route::delete('exams/{exam}/questions/{question}', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::post('exams/{exam}/questions/{question}/duplicate', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'duplicate'])->name('exams.questions.duplicate');
+    // #217 — Add questions from bank (teachers manage their own exams' questions)
+    Route::get('exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'bankPicker'])->name('exams.questions.bank-picker');
+    Route::post('exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'addFromBank'])->name('exams.questions.add-from-bank');
 
     // Grades for Teachers
     Route::get('grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');

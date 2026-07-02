@@ -12,14 +12,14 @@
             <p class="text-muted mb-0">{{ $exam->title }}</p>
             <nav aria-label="breadcrumb" class="mt-1">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.index') }}">الاختبارات</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.show', $exam) }}">{{ $exam->title }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.questions.index', $exam) }}">الأسئلة</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الاختبارات</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.show', $exam) }}">{{ $exam->title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.questions.index', $exam) }}">الأسئلة</a></li>
                     <li class="breadcrumb-item active">{{ __('exam_bank.picker_title') }}</li>
                 </ol>
             </nav>
         </div>
-        <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-outline-secondary">
+        <a href="{{ route($routePrefix . '.questions.index', $exam) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-right me-1"></i>
             العودة للأسئلة
         </a>
@@ -28,7 +28,7 @@
     {{-- Filter bar --}}
     <div class="card mb-4">
         <div class="card-body">
-            <form method="GET" action="{{ route('admin.exams.questions.bank-picker', $exam) }}" class="row g-3 align-items-end">
+            <form method="GET" action="{{ route($routePrefix . '.questions.bank-picker', $exam) }}" class="row g-3 align-items-end">
                 {{-- Bank selector --}}
                 <div class="col-md-3">
                     <label class="form-label">{{ __('exam_bank.picker_bank_label') }}</label>
@@ -65,7 +65,7 @@
                         <i class="bi bi-search me-1"></i>
                         {{ __('exam_bank.picker_filter_btn') }}
                     </button>
-                    <a href="{{ route('admin.exams.questions.bank-picker', $exam) }}" class="btn btn-outline-secondary">
+                    <a href="{{ route($routePrefix . '.questions.bank-picker', $exam) }}" class="btn btn-outline-secondary">
                         {{ __('exam_bank.picker_reset_btn') }}
                     </a>
                 </div>
@@ -74,7 +74,7 @@
     </div>
 
     {{-- Picker form --}}
-    <form method="POST" action="{{ route('admin.exams.questions.add-from-bank', $exam) }}" id="picker-form">
+    <form method="POST" action="{{ route($routePrefix . '.questions.add-from-bank', $exam) }}" id="picker-form">
         @csrf
 
         <div class="card">

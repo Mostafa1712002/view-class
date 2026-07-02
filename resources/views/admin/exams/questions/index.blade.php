@@ -9,22 +9,22 @@
             <h1 class="h3 mb-1">أسئلة الاختبار: {{ $exam->title }}</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.index') }}">الاختبارات</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.show', $exam) }}">{{ $exam->title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الاختبارات</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.show', $exam) }}">{{ $exam->title }}</a></li>
                     <li class="breadcrumb-item active">الأسئلة</li>
                 </ol>
             </nav>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.exams.questions.create', $exam) }}" class="btn btn-primary">
+            <a href="{{ route($routePrefix . '.questions.create', $exam) }}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-1"></i>
                 إضافة سؤال
             </a>
-            <a href="{{ route('admin.exams.questions.bank-picker', $exam) }}" class="btn btn-outline-primary">
+            <a href="{{ route($routePrefix . '.questions.bank-picker', $exam) }}" class="btn btn-outline-primary">
                 <i class="bi bi-bank me-1"></i>
                 إضافة من بنك الأسئلة
             </a>
-            <a href="{{ route('admin.exams.show', $exam) }}" class="btn btn-outline-secondary">
+            <a href="{{ route($routePrefix . '.show', $exam) }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-right me-1"></i>
                 العودة للاختبار
             </a>
@@ -85,16 +85,16 @@
                                     @endif
                                 </div>
                                 <div class="btn-group btn-group-sm">
-                                    <form action="{{ route('admin.exams.questions.duplicate', [$exam, $question]) }}" method="POST" class="d-inline">
+                                    <form action="{{ route($routePrefix . '.questions.duplicate', [$exam, $question]) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-outline-secondary" title="نسخ">
                                             <i class="bi bi-copy"></i>
                                         </button>
                                     </form>
-                                    <a href="{{ route('admin.exams.questions.edit', [$exam, $question]) }}" class="btn btn-outline-warning" title="تعديل">
+                                    <a href="{{ route($routePrefix . '.questions.edit', [$exam, $question]) }}" class="btn btn-outline-warning" title="تعديل">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="{{ route('admin.exams.questions.destroy', [$exam, $question]) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا السؤال؟')">
+                                    <form action="{{ route($routePrefix . '.questions.destroy', [$exam, $question]) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا السؤال؟')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline-danger" title="حذف">
@@ -164,7 +164,7 @@
                 <div class="text-center py-5">
                     <i class="bi bi-question-circle display-1 text-muted"></i>
                     <p class="mt-3 text-muted">لا توجد أسئلة بعد</p>
-                    <a href="{{ route('admin.exams.questions.create', $exam) }}" class="btn btn-primary">
+                    <a href="{{ route($routePrefix . '.questions.create', $exam) }}" class="btn btn-primary">
                         <i class="bi bi-plus-lg me-1"></i>
                         إضافة أول سؤال
                     </a>

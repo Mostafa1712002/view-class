@@ -9,14 +9,14 @@
             <h1 class="h3 mb-1">تعديل السؤال</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.index') }}">الاختبارات</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.show', $exam) }}">{{ $exam->title }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.exams.questions.index', $exam) }}">الأسئلة</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.index') }}">الاختبارات</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.show', $exam) }}">{{ $exam->title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.questions.index', $exam) }}">الأسئلة</a></li>
                     <li class="breadcrumb-item active">تعديل</li>
                 </ol>
             </nav>
         </div>
-        <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-outline-secondary">
+        <a href="{{ route($routePrefix . '.questions.index', $exam) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-right me-1"></i>
             العودة للأسئلة
         </a>
@@ -24,7 +24,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('admin.exams.questions.update', [$exam, $question]) }}" method="POST" id="questionForm">
+            <form action="{{ route($routePrefix . '.questions.update', [$exam, $question]) }}" method="POST" id="questionForm">
                 @csrf
                 @method('PUT')
 
@@ -170,7 +170,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.exams.questions.index', $exam) }}" class="btn btn-light">@lang('common.cancel')</a>
+                    <a href="{{ route($routePrefix . '.questions.index', $exam) }}" class="btn btn-light">@lang('common.cancel')</a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg me-1"></i>
                         حفظ التغييرات

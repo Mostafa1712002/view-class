@@ -12,7 +12,7 @@
         </ol>
     </div>
     <div class="content-header-right col-md-5 col-12 text-md-right">
-        <a href="{{ route('manage.weekly-plans.create') }}" class="btn btn-primary btn-sm">
+        <a href="{{ route($routePrefix . '.create') }}" class="btn btn-primary btn-sm">
             <i class="la la-plus"></i> @lang('weekly_plan.btn_add_plan')
         </a>
     </div>
@@ -76,7 +76,7 @@
                 </div>
                 <div class="col-md-2 mb-1 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary btn-sm ml-1"><i class="la la-search"></i> بحث</button>
-                    <a href="{{ route('manage.weekly-plans.index') }}" class="btn btn-outline-secondary btn-sm"><i class="la la-times"></i> إعادة</a>
+                    <a href="{{ route($routePrefix . '.index') }}" class="btn btn-outline-secondary btn-sm"><i class="la la-times"></i> إعادة</a>
                 </div>
             </form>
         </div>
@@ -132,11 +132,11 @@
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('manage.weekly-plans.show', $plan) }}" class="btn btn-sm btn-outline-primary" title="عرض"><i class="la la-eye"></i></a>
+                            <a href="{{ route($routePrefix . '.show', $plan) }}" class="btn btn-sm btn-outline-primary" title="عرض"><i class="la la-eye"></i></a>
                             @if($plan->canEdit(auth()->user()))
-                            <a href="{{ route('manage.weekly-plans.edit', $plan) }}" class="btn btn-sm btn-outline-secondary" title="تعديل"><i class="la la-edit"></i></a>
+                            <a href="{{ route($routePrefix . '.edit', $plan) }}" class="btn btn-sm btn-outline-secondary" title="تعديل"><i class="la la-edit"></i></a>
                             @endif
-                            <a href="{{ route('manage.weekly-plans.duplicate', $plan) }}" class="btn btn-sm btn-outline-secondary" title="نسخ للأسبوع القادم"><i class="la la-copy"></i></a>
+                            <a href="{{ route($routePrefix . '.duplicate', $plan) }}" class="btn btn-sm btn-outline-secondary" title="نسخ للأسبوع القادم"><i class="la la-copy"></i></a>
                             @if(auth()->user()->isSuperAdmin() || auth()->user()->isSchoolAdmin())
                                 @if($plan->is_locked)
                                 <form action="{{ route('manage.weekly-plans.unlock', $plan) }}" method="POST" class="d-inline">
