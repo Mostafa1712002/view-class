@@ -2,26 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assignment;
+use App\Models\AssignmentSubmission;
 use App\Models\Attendance;
 use App\Models\ClassRoom;
+use App\Models\DiscussionRoom;
 use App\Models\Exam;
 use App\Models\Grade;
+use App\Models\LibraryItem;
 use App\Models\Notification;
-use App\Models\School;
 use App\Models\Schedule;
+use App\Models\School;
 use App\Models\Section;
 use App\Models\Subject;
+use App\Models\SupportTicket;
 use App\Models\User;
+use App\Models\VirtualClass;
 use App\Models\WeeklyPlan;
-use App\Models\Assignment;
 use App\Modules\Dashboard\Actions\GetContentStatsAction;
 use App\Modules\Dashboard\Actions\GetInteractionRatesAction;
 use App\Modules\Dashboard\Actions\GetMostActiveAction;
 use App\Modules\Dashboard\Actions\GetWeeklyActivityAction;
 use App\Modules\Dashboard\Repositories\Contracts\DashboardStatsRepository;
+use App\Modules\Mail\Repositories\Contracts\MailboxRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -31,6 +36,7 @@ class DashboardController extends Controller
         GetMostActiveAction $mostActive,
         GetWeeklyActivityAction $weeklyActivity,
         DashboardStatsRepository $statsRepo,
+        MailboxRepository $mailbox,
     ) {
         $user = Auth::user();
         $data = [];
@@ -44,7 +50,7 @@ class DashboardController extends Controller
         } elseif ($user->isSchoolAdmin()) {
             $data = $this->getSchoolAdminStats($user);
         } elseif ($user->isTeacher()) {
-            $data = $this->getTeacherStats($user);
+            $data = $this->getTeacherStats($user, $mailbox);
         }
 
         // Sprint 1 QA round 2 — sections 2-7 are rendered from the same repository the API uses.
@@ -71,9 +77,9 @@ class DashboardController extends Controller
             'schools_count' => School::count(),
             'sections_count' => Section::count(),
             'classes_count' => ClassRoom::count(),
-            'teachers_count' => User::whereHas('roles', fn($q) => $q->where('slug', 'teacher'))->count(),
-            'students_count' => User::whereHas('roles', fn($q) => $q->where('slug', 'student'))->count(),
-            'parents_count' => User::whereHas('roles', fn($q) => $q->where('slug', 'parent'))->count(),
+            'teachers_count' => User::whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))->count(),
+            'students_count' => User::whereHas('roles', fn ($q) => $q->where('slug', 'student'))->count(),
+            'parents_count' => User::whereHas('roles', fn ($q) => $q->where('slug', 'parent'))->count(),
             'subjects_count' => Subject::count(),
             'recent_schools' => School::latest()->take(5)->get(),
             'new_users_this_month' => User::where('created_at', '>=', $thisMonth)->count(),
@@ -90,23 +96,23 @@ class DashboardController extends Controller
         $thisMonth = Carbon::now()->startOfMonth();
 
         $studentsCount = User::where('school_id', $schoolId)
-            ->whereHas('roles', fn($q) => $q->where('slug', 'student'))->count();
+            ->whereHas('roles', fn ($q) => $q->where('slug', 'student'))->count();
 
-        $todayAttendance = Attendance::whereHas('student', fn($q) => $q->where('school_id', $schoolId))
+        $todayAttendance = Attendance::whereHas('student', fn ($q) => $q->where('school_id', $schoolId))
             ->whereDate('date', $today)
             ->get();
 
         $presentToday = $todayAttendance->where('status', 'present')->count();
         $absentToday = $todayAttendance->where('status', 'absent')->count();
 
-        $upcomingExams = Exam::whereHas('classRoom.section', fn($q) => $q->where('school_id', $schoolId))
+        $upcomingExams = Exam::whereHas('classRoom.section', fn ($q) => $q->where('school_id', $schoolId))
             ->where('start_time', '>=', $today)
             ->where('is_published', true)
             ->orderBy('start_time')
             ->take(5)
             ->get();
 
-        $recentGrades = Grade::whereHas('student', fn($q) => $q->where('school_id', $schoolId))
+        $recentGrades = Grade::whereHas('student', fn ($q) => $q->where('school_id', $schoolId))
             ->with(['student', 'subject', 'exam'])
             ->latest()
             ->take(10)
@@ -117,13 +123,13 @@ class DashboardController extends Controller
             ->where('status', 'published')
             ->count();
 
-        $weeklyPlansThisWeek = WeeklyPlan::whereHas('teacher', fn($q) => $q->where('school_id', $schoolId))
+        $weeklyPlansThisWeek = WeeklyPlan::whereHas('teacher', fn ($q) => $q->where('school_id', $schoolId))
             ->where('week_start_date', '>=', $thisWeek)
             ->count();
 
         $attendanceStats = $this->getAttendanceStats($schoolId, $thisMonth);
 
-        $gradeDistribution = Grade::whereHas('student', fn($q) => $q->where('school_id', $schoolId))
+        $gradeDistribution = Grade::whereHas('student', fn ($q) => $q->where('school_id', $schoolId))
             ->whereNotNull('total')
             ->selectRaw('
                 CASE
@@ -141,9 +147,9 @@ class DashboardController extends Controller
 
         return [
             'sections_count' => Section::where('school_id', $schoolId)->count(),
-            'classes_count' => ClassRoom::whereHas('section', fn($q) => $q->where('school_id', $schoolId))->count(),
+            'classes_count' => ClassRoom::whereHas('section', fn ($q) => $q->where('school_id', $schoolId))->count(),
             'teachers_count' => User::where('school_id', $schoolId)
-                ->whereHas('roles', fn($q) => $q->where('slug', 'teacher'))->count(),
+                ->whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))->count(),
             'students_count' => $studentsCount,
             'subjects_count' => Subject::where('school_id', $schoolId)->count(),
             'present_today' => $presentToday,
@@ -155,38 +161,34 @@ class DashboardController extends Controller
             'weekly_plans_count' => $weeklyPlansThisWeek,
             'attendance_stats' => $attendanceStats,
             'grade_distribution' => $gradeDistribution,
-            'recent_notifications' => Notification::whereHas('user', fn($q) => $q->where('school_id', $schoolId))
+            'recent_notifications' => Notification::whereHas('user', fn ($q) => $q->where('school_id', $schoolId))
                 ->latest()
                 ->take(5)
                 ->get(),
         ];
     }
 
-    private function getTeacherStats(User $user): array
+    private function getTeacherStats(User $user, MailboxRepository $mailbox): array
     {
         $today = Carbon::today();
         $thisWeek = Carbon::now()->startOfWeek();
+        $schoolId = $user->school_id;
 
         // schedules has no teacher_id; teacher lives on schedule_periods. Resolve
         // a teacher's class schedules for today via the pivot.
-        $todaySchedules = Schedule::whereHas('periods', fn($q) => $q
-                ->where('teacher_id', $user->id)
-                ->where('day_of_week', $today->dayOfWeek))
-            ->with(['classRoom', 'periods' => fn($q) => $q->where('teacher_id', $user->id)])
+        $todaySchedules = Schedule::whereHas('periods', fn ($q) => $q
+            ->where('teacher_id', $user->id)
+            ->where('day_of_week', $today->dayOfWeek))
+            ->with(['classRoom', 'periods' => fn ($q) => $q->where('teacher_id', $user->id)])
             ->get();
 
         $mySubjects = $user->subjects()->get();
-        $myClassIds = $todaySchedules->pluck('class_id')->unique();
 
         $upcomingExams = Exam::where('teacher_id', $user->id)
             ->where('start_time', '>=', $today)
             ->orderBy('start_time')
             ->take(5)
             ->get();
-
-        $pendingGrading = Grade::where('teacher_id', $user->id)
-            ->whereNull('total')
-            ->count();
 
         $myWeeklyPlans = WeeklyPlan::where('teacher_id', $user->id)
             ->where('week_start_date', '>=', $thisWeek)
@@ -200,15 +202,49 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Card #294 — "رئيسية المعلم" summary grid.
+        $submissionsToGrade = AssignmentSubmission::where('status', 'submitted')
+            ->whereHas('assignment', fn ($q) => $q->where('teacher_id', $user->id))
+            ->count();
+
+        $assignmentsPublishedCount = Assignment::where('teacher_id', $user->id)
+            ->where('status', 'published')
+            ->count();
+
+        $libraryItemsCount = LibraryItem::where('school_id', $schoolId)
+            ->where('is_public', true)
+            ->count();
+
+        $mailboxUnreadCount = $mailbox->getFolderCounts($user->id)['unreadInbox'] ?? 0;
+
+        $virtualClassesUpcomingCount = VirtualClass::where('teacher_id', $user->id)
+            ->whereIn('status', ['scheduled', 'live'])
+            ->where('scheduled_at', '>=', $today)
+            ->count();
+
+        $discussionRoomsCount = DiscussionRoom::forSchool($schoolId)
+            ->where('status', 'active')
+            ->count();
+
+        $supportTicketsOpenCount = SupportTicket::where('school_id', $schoolId)
+            ->where('created_by', $user->id)
+            ->whereIn('status', ['open', 'in_progress'])
+            ->count();
+
         return [
             'subjects_count' => $mySubjects->count(),
-            'classes_count' => $myClassIds->count(),
             'today_schedules' => $todaySchedules,
             'upcoming_exams' => $upcomingExams,
-            'pending_grading' => $pendingGrading,
             'weekly_plans' => $myWeeklyPlans,
             'assignments' => $myAssignments,
             'my_subjects' => $mySubjects,
+            'submissions_to_grade_count' => $submissionsToGrade,
+            'assignments_published_count' => $assignmentsPublishedCount,
+            'library_items_count' => $libraryItemsCount,
+            'mailbox_unread_count' => $mailboxUnreadCount,
+            'virtual_classes_upcoming_count' => $virtualClassesUpcomingCount,
+            'discussion_rooms_count' => $discussionRoomsCount,
+            'support_tickets_open_count' => $supportTicketsOpenCount,
         ];
     }
 
@@ -218,9 +254,11 @@ class DashboardController extends Controller
         $endDate = Carbon::now();
 
         for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
-            if ($date->isWeekend()) continue;
+            if ($date->isWeekend()) {
+                continue;
+            }
 
-            $dayAttendance = Attendance::whereHas('student', fn($q) => $q->where('school_id', $schoolId))
+            $dayAttendance = Attendance::whereHas('student', fn ($q) => $q->where('school_id', $schoolId))
                 ->whereDate('date', $date)
                 ->get();
 
