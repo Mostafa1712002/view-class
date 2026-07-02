@@ -93,9 +93,9 @@ class Assignment extends Model
 
     public function getSubmissionStatsAttribute(): array
     {
-        $total = User::whereHas('classEnrollments', function ($q) {
-            $q->where('class_id', $this->class_id)
-                ->where('academic_year_id', $this->academic_year_id);
+        $total = User::whereHas('enrolledClasses', function ($q) {
+            $q->where('class_student.class_id', $this->class_id)
+                ->where('classes.academic_year_id', $this->academic_year_id);
         })->count();
 
         $submitted = $this->submissions()->whereIn('status', ['submitted', 'graded'])->count();

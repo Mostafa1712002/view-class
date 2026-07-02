@@ -117,9 +117,9 @@ class AssignmentController extends Controller
 
         $assignment->load(['teacher', 'subject', 'classRoom', 'academicYear']);
 
-        $students = User::whereHas('classEnrollments', function ($q) use ($assignment) {
-            $q->where('class_id', $assignment->class_id)
-                ->where('academic_year_id', $assignment->academic_year_id);
+        $students = User::whereHas('enrolledClasses', function ($q) use ($assignment) {
+            $q->where('class_student.class_id', $assignment->class_id)
+                ->where('classes.academic_year_id', $assignment->academic_year_id);
         })->get();
 
         $submissions = $assignment->submissions()

@@ -27,7 +27,7 @@ class MyCertificateController extends Controller
             $certificates = $this->certificates->publishedForRecipient($schoolId, (int) $user->id);
         } elseif ($user->isParent()) {
             // Parent sees published certificates for all their children
-            $childIds = $user->children()->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $childIds = $user->children()->pluck('users.id')->map(fn ($id) => (int) $id)->all();
             $certificates = $this->certificates->publishedForRecipients($schoolId, $childIds);
         }
 

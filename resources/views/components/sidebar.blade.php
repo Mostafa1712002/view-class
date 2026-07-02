@@ -1057,6 +1057,21 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('teacher.students.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ route('teacher.students.index') }}" data-label="@lang('teacher_students.sidebar_link')"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('teacher_students.sidebar_link')</span></a>
                 </li>
+                <li class="nav-item {{ request()->routeIs('admin.behavior.records.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('admin.behavior.records.index') ? route('admin.behavior.records.index') : '#' }}" data-label="@lang('shell.nav_behavior')"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_behavior')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('manage.virtual-classes.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : '#' }}" data-label="@lang('shell.nav_virtual_classrooms')"><x-svg-icon name="camera-video" class="vc-ico" /><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('manage.discussion-rooms.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('manage.discussion-rooms.index') ? route('manage.discussion-rooms.index') : '#' }}" data-label="@lang('shell.nav_discussion_rooms')"><x-svg-icon name="chat-dots" class="vc-ico" /><span class="menu-title">@lang('shell.nav_discussion_rooms')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('manage.appointment-schedules.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('manage.appointment-schedules.index') ? route('manage.appointment-schedules.index') : '#' }}" data-label="@lang('shell.nav_appointments')"><x-svg-icon name="calendar-event" class="vc-ico" /><span class="menu-title">@lang('shell.nav_appointments')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('my.mailbox.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('my.mailbox.index') ? route('my.mailbox.index') : '#' }}" data-label="@lang('shell.nav_mailbox')"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
+                </li>
             </div>
             @endif
 
@@ -1211,6 +1226,12 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </li>
                 <li class="nav-item {{ request()->routeIs('my.libraries.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.libraries.index') ? route('my.libraries.index') : '#' }}" data-label="@lang('shell.nav_libraries')"><x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('my.surveys.*') ? 'active' : '' }}" data-section="parent">
+                    <a href="{{ Route::has('my.surveys.index') ? route('my.surveys.index') : '#' }}" data-label="@lang('shell.nav_surveys')"><x-svg-icon name="ui-checks" class="vc-ico" /><span class="menu-title">@lang('shell.nav_surveys')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('my.support.*') ? 'active' : '' }}" data-section="parent">
+                    <a href="{{ Route::has('my.support.index') ? route('my.support.index') : '#' }}" data-label="@lang('shell.nav_support')"><x-svg-icon name="life-preserver" class="vc-ico" /><span class="menu-title">@lang('shell.nav_support')</span></a>
                 </li>
             </div>
             @endif
