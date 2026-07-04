@@ -13,10 +13,14 @@ return [
 
     // Types
     'types' => [
+        'thanks'        => 'Thanks',
+        'appreciation'  => 'Appreciation',
+        'general'       => 'General',
+        'grades'        => 'Grades Notice',
+        // Legacy type values kept so old certificates still display.
         'student'       => 'Student',
         'teacher'       => 'Teacher',
         'training'      => 'Training',
-        'appreciation'  => 'Appreciation',
     ],
 
     // Statuses
@@ -48,6 +52,31 @@ return [
         'template'         => 'Template',
         'progress'         => 'Progress',
         'students'         => 'Students',
+        'signer_name'      => 'Signer Name',
+    ],
+
+    // Design / signature block
+    'design' => [
+        'signature'           => 'Signature & Design',
+        'signature_type'      => 'Signature Type',
+        'signature_manual'    => 'Manual',
+        'signature_file'      => 'From File',
+        'signature_clear'     => 'Clear',
+        'signature_draw_hint' => 'Draw the signature in the box below.',
+        'logo'                => 'Logo',
+        'stamp'               => 'Stamp',
+        'image_hint'          => 'Formats: jpg, jpeg, png, webp — under 1.5 MB — preferred background size 3508×2479.',
+        'body'                => 'Certificate Body (free text)',
+        'bold'                => 'Bold',
+        'italic'              => 'Italic',
+        'underline'           => 'Underline',
+    ],
+
+    // Grades table (appreciation / grades certificates)
+    'grades_table' => [
+        'subject' => 'Subject',
+        'score'   => 'Score',
+        'label'   => 'Grade',
     ],
 
     // Actions
@@ -101,9 +130,11 @@ return [
         'no_background' => 'No background',
         'dimension_warning' => 'Notice: preferred size is :w×:h px, but the uploaded image is :aw×:ah — saved anyway.',
         'types' => [
+            'thanks'       => 'Thanks',
             'appreciation' => 'Appreciation',
             'recognition'  => 'Recognition',
             'general'      => 'General',
+            'grades'       => 'Grades Notice',
             'grades_notice'=> 'Grades Notice',
         ],
         'orientations' => [

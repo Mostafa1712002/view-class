@@ -20,11 +20,11 @@ final class RenderCertificatePdfAction
 
         $orientation = $template && $template->orientation === 'portrait' ? 'P' : 'L';
 
-        $html = view('certificates.pdf.certificate', [
+        $html = view('certificates.pdf.certificate', array_merge([
             'certificate' => $certificate,
             'template'    => $template,
             'fields'      => $this->resolveFields($certificate),
-        ])->render();
+        ], $this->resolveDesign($certificate)))->render();
 
         $tmp = storage_path('app/mpdf');
         if (! is_dir($tmp)) {
@@ -73,5 +73,75 @@ final class RenderCertificatePdfAction
             'grade'        => $grade ?? '',
             'date'         => optional($certificate->issue_date)->format('Y-m-d') ?? now()->format('Y-m-d'),
         ];
+    }
+
+    /**
+     * Resolve the design/decoration data for the PDF view: local image paths
+     * (mPDF needs a filesystem path, not a URL), the free-text body, and the
+     * recipient's published grades for grade-bearing certificate types.
+     *
+     * @return array<string,mixed>
+     */
+    private function resolveDesign(Certificate $certificate): array
+    {
+        return [
+            'signer_name'   => $certificate->signer_name,
+            'signature_url' => $this->localPath($certificate->signature_path),
+            'logo_url'      => $this->localPath($certificate->logo_path),
+            'stamp_url'     => $this->localPath($certificate->stamp_path),
+            'body_html'     => $certificate->body_html,
+            'grades'        => $this->resolveGrades($certificate),
+        ];
+    }
+
+    /** Absolute filesystem path for a public-disk file, or null if unset/missing. */
+    private function localPath(?string $path): ?string
+    {
+        if ($path && \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->path($path);
+        }
+
+        return null;
+    }
+
+    /**
+     * Published grades for the recipient in the school's current academic year,
+     * for 'appreciation' and 'grades' certificate types. Empty array otherwise.
+     *
+     * @return array<int,array{subject:string,score:string,label:string}>
+     */
+    private function resolveGrades(Certificate $certificate): array
+    {
+        if (! in_array($certificate->type, ['appreciation', 'grades'], true)) {
+            return [];
+        }
+
+        $recipient = $certificate->recipient;
+        if (! $recipient) {
+            return [];
+        }
+
+        $query = \App\Models\Grade::forStudent($recipient->id)
+            ->published()
+            ->with('subject');
+
+        if ($certificate->school_id) {
+            $currentYear = \App\Models\AcademicYear::forSchool($certificate->school_id)
+                ->current()
+                ->first();
+            if ($currentYear) {
+                $query->forAcademicYear($currentYear->id);
+            }
+        }
+
+        return $query->get()->map(function ($grade) {
+            $total = $grade->total;
+
+            return [
+                'subject' => optional($grade->subject)->display_name ?? (optional($grade->subject)->name ?? ''),
+                'score'   => $total !== null ? rtrim(rtrim((string) $total, '0'), '.') : '',
+                'label'   => $grade->letter_grade_label,
+            ];
+        })->all();
     }
 }

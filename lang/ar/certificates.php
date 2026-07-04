@@ -13,10 +13,14 @@ return [
 
     // Types
     'types' => [
+        'thanks'        => 'شكر',
+        'appreciation'  => 'تقدير',
+        'general'       => 'عام',
+        'grades'        => 'إشعار درجات',
+        // Legacy type values kept so old certificates still display.
         'student'       => 'طالب',
         'teacher'       => 'معلم',
         'training'      => 'تدريب',
-        'appreciation'  => 'تقدير',
     ],
 
     // Statuses
@@ -48,6 +52,31 @@ return [
         'template'         => 'التصميم',
         'progress'         => 'نسبة التنفيذ',
         'students'         => 'الطلاب',
+        'signer_name'      => 'اسم الموقّع',
+    ],
+
+    // Design / signature block
+    'design' => [
+        'signature'           => 'التوقيع والتصميم',
+        'signature_type'      => 'نوع التوقيع',
+        'signature_manual'    => 'يدوي',
+        'signature_file'      => 'من ملف',
+        'signature_clear'     => 'مسح',
+        'signature_draw_hint' => 'ارسم التوقيع في المربع أدناه.',
+        'logo'                => 'الشعار',
+        'stamp'               => 'الختم',
+        'image_hint'          => 'الصيغ: jpg, jpeg, png, webp — أقل من 1.5 ميجا — الأبعاد المفضلة للخلفية 3508×2479.',
+        'body'                => 'محتوى الشهادة (نص حر)',
+        'bold'                => 'عريض',
+        'italic'              => 'مائل',
+        'underline'           => 'تسطير',
+    ],
+
+    // Grades table (appreciation / grades certificates)
+    'grades_table' => [
+        'subject' => 'المادة',
+        'score'   => 'الدرجة',
+        'label'   => 'التقدير',
     ],
 
     // Actions
@@ -101,9 +130,11 @@ return [
         'no_background' => 'بدون خلفية',
         'dimension_warning' => 'تنبيه: الأبعاد المفضلة هي :w×:h بكسل، بينما الصورة المرفوعة :aw×:ah — تم الحفظ مع ذلك.',
         'types' => [
+            'thanks'       => 'شكر',
             'appreciation' => 'شكر',
             'recognition'  => 'تقدير',
             'general'      => 'عام',
+            'grades'       => 'إشعار درجات',
             'grades_notice'=> 'إشعار درجات',
         ],
         'orientations' => [
