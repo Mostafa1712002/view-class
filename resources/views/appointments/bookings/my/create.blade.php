@@ -18,9 +18,6 @@
 @endpush
 
 @section('content')
-<div class="app-content content">
-<div class="content-overlay"></div>
-<div class="content-wrapper">
 
     <div class="content-header row">
         <div class="content-header-left col-12 mb-2">
@@ -165,8 +162,6 @@
         </div>
     </div>
 
-</div>
-</div>
 @endsection
 
 @push('scripts')

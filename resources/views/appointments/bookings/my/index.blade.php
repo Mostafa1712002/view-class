@@ -42,9 +42,6 @@
 @endpush
 
 @section('content')
-<div class="app-content content">
-<div class="content-overlay"></div>
-<div class="content-wrapper">
 
     {{-- Breadcrumb --}}
     <div class="content-header row">
@@ -153,6 +150,4 @@
         @endif
     </div>
 
-</div>
-</div>
 @endsection
