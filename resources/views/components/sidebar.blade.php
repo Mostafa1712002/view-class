@@ -1236,6 +1236,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('my.libraries.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.libraries.index') ? route('my.libraries.index') : '#' }}" data-label="@lang('shell.nav_libraries')"><x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span></a>
                 </li>
+                <li class="nav-item {{ request()->routeIs('admin.my-evaluations.*') || request()->routeIs('admin.evaluations.subjects') || request()->routeIs('admin.evaluations.execute.*') ? 'active' : '' }}" data-section="parent">
+                    <a href="{{ Route::has('admin.my-evaluations.index') ? route('admin.my-evaluations.index') : '#' }}" data-label="@lang('shell.nav_evaluations')"><x-svg-icon name="star" class="vc-ico" /><span class="menu-title">@lang('shell.nav_evaluations')</span></a>
+                </li>
                 <li class="nav-item {{ request()->routeIs('my.surveys.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.surveys.index') ? route('my.surveys.index') : '#' }}" data-label="@lang('shell.nav_surveys')"><x-svg-icon name="ui-checks" class="vc-ico" /><span class="menu-title">@lang('shell.nav_surveys')</span></a>
                 </li>

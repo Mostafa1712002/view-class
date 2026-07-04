@@ -673,21 +673,23 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('attendance/calendar', [\App\Http\Controllers\Admin\AttendanceController::class, 'calendar'])->name('attendance.calendar');
 });
 
-// Evaluation — evaluator/subject-facing routes (Sprint 8 Tasks 9-12). Teacher-inclusive so a
-// teacher can execute evaluations assigned to them and view their own results. Same prefix/name
-// (admin.) as the authoring group — only the role is broadened. Controllers enforce per-user
-// ownership (evaluator_id / subject_id == auth id), so this exposes only the user's own data.
-Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin')->name('admin.')->group(function () {
+// Evaluation — evaluator/subject-facing routes (Sprint 8 Tasks 9-12). Parent-inclusive (#293) so a
+// parent can execute evaluations assigned to them and view their own results, alongside teachers.
+// Same prefix/name (admin.) as the authoring group — only the role is broadened. Controllers enforce
+// per-user ownership (evaluator_id / subject_id == auth id), so this exposes only the user's own data.
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher,parent'])->prefix('admin')->name('admin.')->group(function () {
     // My Evaluations landing (Task 9 — التقييمات: required of me / my results)
     Route::get('my-evaluations', [\App\Modules\Evaluation\Controllers\MyEvaluationsController::class, 'index'])->name('my-evaluations.index');
 
-    // Behaviour records — view + log (#192). Teacher-inclusive; the controller is
+    // Behaviour records — view + log (#192). Teacher-only (parents excluded); the controller is
     // school-scoped (activeSchoolId). Behaviour CONFIG (groups/behaviours/actions) and
     // record DELETE stay admin-only in the group above.
-    Route::get('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'index'])->name('behavior.records.index');
-    Route::get('behavior/records/create', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'create'])->name('behavior.records.create');
-    Route::get('behavior/records/actions', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'actions'])->name('behavior.records.actions');
-    Route::post('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'store'])->name('behavior.records.store');
+    Route::middleware('role:super-admin,school-admin,teacher')->group(function () {
+        Route::get('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'index'])->name('behavior.records.index');
+        Route::get('behavior/records/create', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'create'])->name('behavior.records.create');
+        Route::get('behavior/records/actions', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'actions'])->name('behavior.records.actions');
+        Route::post('behavior/records', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'store'])->name('behavior.records.store');
+    });
     // Subject picker (Task 10)
     Route::get('evaluations/{form}/subjects', [\App\Modules\Evaluation\Controllers\EvaluationExecutionController::class, 'subjects'])->name('evaluations.subjects');
     // Execution screen (Task 11)
