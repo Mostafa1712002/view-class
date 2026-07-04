@@ -12,6 +12,15 @@
     // Gold accent used for the frame + flourishes.
     $gold = '#c9a227';
 
+    // Design fields (all optional; a plain certificate has none of these).
+    $logoUrl      = $logo_url ?? null;
+    $signatureUrl = $signature_url ?? null;
+    $stampUrl     = $stamp_url ?? null;
+    $signerName   = $signer_name ?? null;
+    $bodyHtml     = $body_html ?? null;
+    $gradeRows    = $grades ?? [];
+    $isGeneral    = $certificate->type === 'general';
+
     $render = function ($line) use ($fields) {
         return strtr($line, [
             '{student_name}' => $fields['student_name'],
@@ -126,12 +135,31 @@
         }
         .sig-line { border-top: 1px solid {{ $textColor }}; width: 150px; margin: 0 auto 4px; }
         .meta { font-size: 11pt; color: {{ $textColor }}; }
+
+        .logo { margin-bottom: 8px; }
+        .logo img { max-height: 70px; }
+        .signer { font-size: 11pt; color: {{ $textColor }}; margin-top: 2px; }
+        .body-html { font-size: 14pt; color: {{ $textColor }}; line-height: 1.75; margin: 6px 0; }
+
+        /* Grades table for appreciation / grades certificates. */
+        .grades { margin: 12px auto 6px; border-collapse: collapse; width: 70%; }
+        .grades th, .grades td {
+            border: 1px solid {{ $gold }};
+            padding: 5px 8px;
+            font-size: 12pt;
+            color: {{ $textColor }};
+            text-align: center;
+        }
+        .grades th { color: {{ $nameColor }}; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="sheet">
         <div class="frame-outer">
             <div class="frame-inner">
+                @if($logoUrl)
+                    <div class="logo"><img src="{{ $logoUrl }}" alt=""></div>
+                @endif
                 <div class="brand">{{ $brand }}</div>
                 <div class="flourish">&#10086; &#9670; &#10087;</div>
 
@@ -143,22 +171,54 @@
                 <div class="student">{{ $fields['student_name'] }}</div>
                 <div class="name-rule"></div>
 
-                @forelse($lines as $line)
-                    <div class="line">{{ $render($line) }}</div>
-                @empty
-                    @if($certificate->note)
-                        <div class="line">{{ $certificate->note }}</div>
-                    @endif
-                @endforelse
+                @if($isGeneral && $bodyHtml)
+                    {{-- Free-text body replaces the template body lines. --}}
+                    <div class="body-html">{!! $bodyHtml !!}</div>
+                @else
+                    @forelse($lines as $line)
+                        <div class="line">{{ $render($line) }}</div>
+                    @empty
+                        @if($certificate->note)
+                            <div class="line">{{ $certificate->note }}</div>
+                        @endif
+                    @endforelse
+                @endif
+
+                @if(! empty($gradeRows))
+                    <table class="grades">
+                        <tr>
+                            <th>@lang('certificates.grades_table.subject')</th>
+                            <th>@lang('certificates.grades_table.score')</th>
+                            <th>@lang('certificates.grades_table.label')</th>
+                        </tr>
+                        @foreach($gradeRows as $row)
+                            <tr>
+                                <td>{{ $row['subject'] }}</td>
+                                <td>{{ $row['score'] }}</td>
+                                <td>{{ $row['label'] }}</td>
+                            </tr>
+                        @endforeach
+                    </table>
+                @endif
 
                 <table class="footer">
                     <tr>
                         <td width="30%" style="text-align:center;">
+                            @if($signatureUrl)
+                                <img src="{{ $signatureUrl }}" alt="" style="max-height:50px; margin-bottom:4px;">
+                            @endif
                             <div class="sig-line"></div>
                             @lang('certificates.pdf.signature')
+                            @if($signerName)
+                                <div class="signer">{{ $signerName }}</div>
+                            @endif
                         </td>
                         <td width="40%" style="text-align:center;">
-                            <div class="seal"><div class="seal-in">@lang('certificates.pdf.seal')</div></div>
+                            @if($stampUrl)
+                                <img src="{{ $stampUrl }}" alt="" style="max-height:80px;">
+                            @else
+                                <div class="seal"><div class="seal-in">@lang('certificates.pdf.seal')</div></div>
+                            @endif
                         </td>
                         <td width="30%" style="text-align:center;">
                             <div class="meta">

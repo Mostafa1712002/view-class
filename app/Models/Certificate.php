@@ -10,7 +10,7 @@ class Certificate extends Model
 {
     use SoftDeletes;
 
-    public const TYPES = ['student', 'teacher', 'training', 'appreciation'];
+    public const TYPES = ['thanks', 'appreciation', 'general', 'grades'];
     public const STATUSES = ['draft', 'published'];
 
     protected $fillable = [
@@ -23,6 +23,12 @@ class Certificate extends Model
         'issue_date',
         'status',
         'note',
+        'signer_name',
+        'signature_type',
+        'signature_path',
+        'logo_path',
+        'stamp_path',
+        'body_html',
         'file_path',
         'share_token',
         'progress',

@@ -54,6 +54,17 @@ class IssueCertificateRequest extends FormRequest
                 }),
             ],
             'note' => ['nullable', 'string', 'max:2000'],
+
+            // Design fields (signer, signature, logo, stamp, free-text body).
+            'signer_name'    => ['nullable', 'string', 'max:255'],
+            'signature_type' => ['nullable', Rule::in(['manual', 'file'])],
+            'signature_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1536'],
+            // data:image/png;base64,... produced by the canvas signature pad.
+            'signature_data' => ['nullable', 'string'],
+            'logo'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1536'],
+            'stamp' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1536'],
+            // Rich body — required only for the free-text 'general' certificate.
+            'body_html' => ['nullable', 'string', 'max:20000', 'required_if:type,general'],
         ];
     }
 }

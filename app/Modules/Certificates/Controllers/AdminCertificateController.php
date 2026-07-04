@@ -81,7 +81,33 @@ class AdminCertificateController extends Controller
             'note'        => $data['note'] ?? null,
             'issued_by'   => auth()->id(),
             'status'      => 'published',
+            'signer_name'    => $data['signer_name'] ?? null,
+            'signature_type' => $data['signature_type'] ?? null,
+            // body_html only carries meaning for the free-text 'general' type.
+            'body_html'      => $data['type'] === 'general' ? ($data['body_html'] ?? null) : null,
         ];
+
+        if ($request->hasFile('logo')) {
+            $attrs['logo_path'] = $request->file('logo')->store('certificates/logos', 'public');
+        }
+
+        if ($request->hasFile('stamp')) {
+            $attrs['stamp_path'] = $request->file('stamp')->store('certificates/stamps', 'public');
+        }
+
+        // Signature: an uploaded file, or a canvas-drawn PNG data URL.
+        if (($data['signature_type'] ?? null) === 'file' && $request->hasFile('signature_file')) {
+            $attrs['signature_path'] = $request->file('signature_file')->store('certificates/signatures', 'public');
+        } elseif (($data['signature_type'] ?? null) === 'manual' && ! empty($data['signature_data'])) {
+            if (preg_match('/^data:image\/png;base64,(.+)$/', $data['signature_data'], $m)) {
+                $decoded = base64_decode($m[1], true);
+                if ($decoded !== false) {
+                    $signaturePath = 'certificates/signatures/' . uniqid('sig_', true) . '.png';
+                    Storage::disk('public')->put($signaturePath, $decoded);
+                    $attrs['signature_path'] = $signaturePath;
+                }
+            }
+        }
 
         $created = $action->execute($attrs, $data['recipient_ids']);
 
