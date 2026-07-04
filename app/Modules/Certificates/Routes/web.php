@@ -68,6 +68,10 @@ Route::middleware(['auth'])->group(function () {
                 ->middleware('permission:certificates.preview')->name('pdf');
             Route::get('/{certificate}/send', [AdminCertificateController::class, 'sendForm'])
                 ->middleware('permission:certificates.send')->name('send');
+            Route::post('/{certificate}/send', [AdminCertificateController::class, 'sendStore'])
+                ->middleware('permission:certificates.send')->name('send.store');
+            Route::get('/{certificate}/progress', [AdminCertificateController::class, 'progress'])
+                ->middleware('permission:certificates.view')->name('progress');
         });
 
     // === Teacher / student / parent: read-only certificates view ===

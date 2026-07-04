@@ -68,6 +68,7 @@
                 <input type="file" name="background" class="form-control" accept=".jpg,.jpeg,.png,.webp"
                        onchange="ctPreview(this)">
                 <small class="text-muted d-block">@lang('certificates.tpl.background_hint')</small>
+                <small id="ct-dim-warn" class="text-warning d-block" style="display:none;"></small>
             </div>
 
             <div class="col-md-3 mb-1">
@@ -115,11 +116,25 @@
 
 @push('scripts')
 <script>
+    var CT_PREF_W = 3508, CT_PREF_H = 2479;
+    var ctDimWarnTpl = @json(__('certificates.tpl.dimension_warning_client'));
     function ctPreview(input) {
         var img = document.getElementById('ct-preview');
+        var warn = document.getElementById('ct-dim-warn');
         if (input.files && input.files[0]) {
             var r = new FileReader();
-            r.onload = function (e) { img.src = e.target.result; img.style.display = 'inline-block'; };
+            r.onload = function (e) {
+                img.onload = function () {
+                    if (!warn) return;
+                    if (img.naturalWidth !== CT_PREF_W || img.naturalHeight !== CT_PREF_H) {
+                        warn.textContent = ctDimWarnTpl.replace(':dims', img.naturalWidth + '×' + img.naturalHeight);
+                        warn.style.display = 'block';
+                    } else {
+                        warn.style.display = 'none';
+                    }
+                };
+                img.src = e.target.result; img.style.display = 'inline-block';
+            };
             r.readAsDataURL(input.files[0]);
         }
     }

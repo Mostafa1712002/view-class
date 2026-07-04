@@ -129,6 +129,7 @@ return [
         'preview_image' => 'Image Preview',
         'no_background' => 'No background',
         'dimension_warning' => 'Notice: preferred size is :w×:h px, but the uploaded image is :aw×:ah — saved anyway.',
+        'dimension_warning_client' => 'Notice: preferred background size is 3508×2479 px, but the selected image is :dims — you can still proceed.',
         'types' => [
             'thanks'       => 'Thanks',
             'appreciation' => 'Appreciation',
@@ -184,6 +185,10 @@ return [
         'whatsapp'     => 'WhatsApp',
         'default_message' => 'Dear parent of :student, you can view the student certificate via: :link',
         'note'         => 'Send channels rely on existing messaging modules (SMS/WhatsApp/Email) and will be wired in a later card.',
+        'message'      => 'Message',
+        'submit'       => 'Send',
+        'copy_link'    => 'Copy Link',
+        'sent_summary' => 'Sent via: :channels',
     ],
 
     // Buttons on index
