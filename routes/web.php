@@ -891,6 +891,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     // student's grade-level subject list before showing content.
     Route::get('subjects', [\App\Http\Controllers\StudentSubjectController::class, 'index'])->name('subjects.index');
     Route::get('subjects/{subject}', [\App\Http\Controllers\StudentSubjectController::class, 'show'])->whereNumber('subject')->name('subjects.show');
+    // Assignment detail + submission (card #302) — opened from the subject hub.
+    Route::get('assignments/{assignment}', [\App\Http\Controllers\StudentAssignmentController::class, 'show'])->whereNumber('assignment')->name('assignments.show');
+    Route::post('assignments/{assignment}/submit', [\App\Http\Controllers\StudentAssignmentController::class, 'submit'])->whereNumber('assignment')->name('assignments.submit');
 
     // === Student library hub (general/private/my-files tabs) — card #173 ===
     Route::get('libraries', [\App\Modules\Libraries\Controllers\StudentLibraryController::class, 'index'])->name('libraries.index');

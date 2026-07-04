@@ -259,10 +259,13 @@
                 @php
                     $isOverdue = $as->is_overdue;
                 @endphp
-                <div class="ae-action">
+                <div class="ae-action d-flex align-items-center gap-2">
                     <span class="status-chip {{ $isOverdue ? 'expired' : 'active' }}">
                         {{ $isOverdue ? 'منتهي' : 'مفتوح' }}
                     </span>
+                    <a href="{{ route('student.assignments.show', $as->id) }}" class="btn btn-sm btn-primary">
+                        <i class="la la-eye"></i> @lang('subjects_content.assignment_open')
+                    </a>
                 </div>
             </div>
         @empty
@@ -366,8 +369,11 @@
                         <div class="ae-meta">{{ Str::limit($dr->description, 80) }}</div>
                     @endif
                 </div>
-                <div class="ae-action">
+                <div class="ae-action d-flex align-items-center gap-2">
                     <span class="status-chip active">نشط</span>
+                    <a href="{{ route('discussion.room', $dr->id) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="la la-sign-in-alt"></i> @lang('subjects_content.discussion_open')
+                    </a>
                 </div>
             </div>
         @empty
