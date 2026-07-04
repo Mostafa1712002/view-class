@@ -62,7 +62,10 @@ class UserSupportController extends Controller
         $user = auth()->user();
 
         $ticket = $this->tickets->create([
-            'school_id'          => $this->activeSchoolId(),
+            // activeSchoolId() is null for a super-admin (no single school); fall
+            // back to the user's own school so a normal schoolless edge still
+            // resolves, and leave null only for a true super-admin ticket.
+            'school_id'          => $this->activeSchoolId() ?? $user->school_id,
             'created_by'         => $user->id,
             'related_student_id' => $request->validated('related_student_id'),
             'creator_role'       => $user->roles->first()?->slug ?? 'user',
