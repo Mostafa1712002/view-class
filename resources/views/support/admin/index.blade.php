@@ -31,6 +31,11 @@
             </ol>
         </div>
     </div>
+    <div class="content-header-right col-md-3 col-12 d-flex align-items-center justify-content-{{ $isRtl ? 'start' : 'end' }} mb-2">
+        <a href="{{ route('my.support.create') }}" class="btn btn-primary">
+            <x-svg-icon name="plus-lg" /> @lang('support.btn_new_ticket')
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
