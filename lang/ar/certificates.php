@@ -25,6 +25,13 @@ return [
         'published' => 'منشورة',
     ],
 
+    // Rendered PDF labels
+    'pdf' => [
+        'presented_to' => 'تُمنح هذه الشهادة إلى',
+        'signature'    => 'التوقيع',
+        'seal'         => 'شهادة',
+    ],
+
     // Fields
     'fields' => [
         'type'             => 'نوع الشهادة',

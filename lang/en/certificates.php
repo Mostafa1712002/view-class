@@ -25,6 +25,13 @@ return [
         'published' => 'Published',
     ],
 
+    // Rendered PDF labels
+    'pdf' => [
+        'presented_to' => 'This certificate is presented to',
+        'signature'    => 'Signature',
+        'seal'         => 'Certificate',
+    ],
+
     // Fields
     'fields' => [
         'type'             => 'Certificate Type',

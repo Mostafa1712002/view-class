@@ -1,14 +1,17 @@
 @php
     use Illuminate\Support\Facades\Storage;
-    $textColor = $template?->text_color ?? '#222222';
+    $textColor = $template?->text_color ?? '#3a3320';
     $nameColor = $template?->name_color ?? '#1a3c6e';
     $bgPath = $template && $template->background_path && Storage::disk('public')->exists($template->background_path)
         ? Storage::disk('public')->path($template->background_path)
         : null;
     $lines = $template?->body['lines'] ?? [];
     $brand = config('app.name', 'المنصة الذهبية');
+    $portrait = $template && $template->orientation === 'portrait';
 
-    // Replace placeholders in a body line with resolved field values.
+    // Gold accent used for the frame + flourishes.
+    $gold = '#c9a227';
+
     $render = function ($line) use ($fields) {
         return strtr($line, [
             '{student_name}' => $fields['student_name'],
@@ -25,45 +28,146 @@
     <style>
         @page { margin: 0; }
         body { margin: 0; padding: 0; font-family: xbriyaz, sans-serif; }
+
+        /* Full-bleed sheet: uploaded background if present, else an elegant
+           cream-to-white base so an empty template never looks bare. */
         .sheet {
-            position: relative;
             width: 100%;
-            text-align: center;
+            box-sizing: border-box;
+            padding: 14px;
             @if($bgPath)
             background-image: url('{{ $bgPath }}');
             background-size: cover;
             background-repeat: no-repeat;
+            @else
+            background-color: #fbf9f2;
             @endif
         }
-        .frame { padding: 60px 50px; }
-        .brand { font-size: 14pt; color: {{ $nameColor }}; margin-bottom: 8px; }
-        .title { font-size: 26pt; font-weight: bold; color: {{ $nameColor }}; margin: 6px 0 18px; }
-        .student { font-size: 22pt; font-weight: bold; color: {{ $nameColor }}; margin: 14px 0; }
-        .line { font-size: 14pt; color: {{ $textColor }}; margin: 6px 0; line-height: 1.7; }
-        .meta { font-size: 12pt; color: {{ $textColor }}; margin-top: 26px; }
+
+        /* Double gold frame. When a background image is set we keep the frame
+           subtle so it doesn't fight the artwork. */
+        .frame-outer {
+            border: 3px solid {{ $gold }};
+            padding: 5px;
+            @if($bgPath) background-color: transparent; @endif
+        }
+        .frame-inner {
+            border: 1px solid {{ $gold }};
+            padding: {{ $portrait ? '46px 40px' : '40px 60px' }};
+            text-align: center;
+            @if(!$bgPath) background-color: #ffffff; @endif
+        }
+
+        .brand {
+            font-size: 13pt;
+            color: {{ $nameColor }};
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        .flourish {
+            font-size: 15pt;
+            color: {{ $gold }};
+            margin: 4px 0 10px;
+            letter-spacing: 6px;
+        }
+        .title {
+            font-size: 27pt;
+            font-weight: bold;
+            color: {{ $nameColor }};
+            margin: 2px 0 4px;
+        }
+        .title-underline {
+            width: 180px;
+            border-bottom: 2px solid {{ $gold }};
+            margin: 0 auto 20px;
+        }
+        .presented {
+            font-size: 12pt;
+            color: {{ $textColor }};
+            margin-bottom: 6px;
+        }
+        .student {
+            font-size: 30pt;
+            font-weight: bold;
+            color: {{ $nameColor }};
+            margin: 4px 0 6px;
+        }
+        .name-rule {
+            width: 320px;
+            border-bottom: 1px solid {{ $gold }};
+            margin: 0 auto 18px;
+        }
+        .line {
+            font-size: 14pt;
+            color: {{ $textColor }};
+            margin: 5px 0;
+            line-height: 1.75;
+        }
+
+        /* Bottom band: seal on one side, signature line on the other, meta centered. */
+        .footer { margin-top: 30px; width: 100%; }
+        .footer td { vertical-align: bottom; font-size: 11pt; color: {{ $textColor }}; }
+        .seal {
+            width: 88px; height: 88px;
+            border: 2px solid {{ $gold }};
+            border-radius: 44px;
+            color: {{ $nameColor }};
+            text-align: center;
+            margin: 0 auto;
+        }
+        .seal .seal-in {
+            border: 1px solid {{ $gold }};
+            border-radius: 40px;
+            margin: 5px;
+            padding-top: 22px;
+            height: 66px;
+            font-size: 10pt;
+            font-weight: bold;
+        }
+        .sig-line { border-top: 1px solid {{ $textColor }}; width: 150px; margin: 0 auto 4px; }
+        .meta { font-size: 11pt; color: {{ $textColor }}; }
     </style>
 </head>
 <body>
     <div class="sheet">
-        <div class="frame">
-            <div class="brand">{{ $brand }}</div>
-            <div class="title">{{ $certificate->title }}</div>
+        <div class="frame-outer">
+            <div class="frame-inner">
+                <div class="brand">{{ $brand }}</div>
+                <div class="flourish">&#10086; &#9670; &#10087;</div>
 
-            {{-- Recipient name is always rendered as real text (extractable). --}}
-            <div class="student">{{ $fields['student_name'] }}</div>
+                <div class="title">{{ $certificate->title }}</div>
+                <div class="title-underline"></div>
 
-            @forelse($lines as $line)
-                <div class="line">{{ $render($line) }}</div>
-            @empty
-                @if($certificate->note)
-                    <div class="line">{{ $certificate->note }}</div>
-                @endif
-            @endforelse
+                <div class="presented">@lang('certificates.pdf.presented_to')</div>
+                {{-- Recipient name is real text (extractable, high-res). --}}
+                <div class="student">{{ $fields['student_name'] }}</div>
+                <div class="name-rule"></div>
 
-            <div class="meta">
-                @lang('certificates.fields.school'): {{ $fields['school'] }}
-                @if($fields['grade']) &nbsp;|&nbsp; @lang('certificates.fields.grade'): {{ $fields['grade'] }} @endif
-                &nbsp;|&nbsp; @lang('certificates.fields.issue_date'): {{ $fields['date'] }}
+                @forelse($lines as $line)
+                    <div class="line">{{ $render($line) }}</div>
+                @empty
+                    @if($certificate->note)
+                        <div class="line">{{ $certificate->note }}</div>
+                    @endif
+                @endforelse
+
+                <table class="footer">
+                    <tr>
+                        <td width="30%" style="text-align:center;">
+                            <div class="sig-line"></div>
+                            @lang('certificates.pdf.signature')
+                        </td>
+                        <td width="40%" style="text-align:center;">
+                            <div class="seal"><div class="seal-in">@lang('certificates.pdf.seal')</div></div>
+                        </td>
+                        <td width="30%" style="text-align:center;">
+                            <div class="meta">
+                                {{ $fields['school'] }}<br>
+                                @if($fields['grade']){{ $fields['grade'] }} &middot; @endif{{ $fields['date'] }}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
