@@ -53,25 +53,37 @@ class AppointmentBookingController extends Controller
 
     // ─── Create Booking Form ─────────────────────────────────────────────────
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $user     = auth()->user();
         $asParent = $user?->isParent();
 
         // If parent: load their children
         $children = collect();
+        $selectedChildId = null;
         if ($asParent) {
             $children = $user->children()->select('users.id', 'users.name', 'users.school_id')->get();
         }
 
-        // Determine school scope for loading bookable roles
-        // For student: their own school; for parent: populated via JS after child selection
-        $schoolId  = $asParent ? null : $this->activeSchoolId();
+        // Determine school scope for loading bookable roles.
+        // Student: their own school. Parent: the school of the selected child —
+        // the child-select reloads this page with ?child=<id> (see create view JS),
+        // so honour that param (verified against the parent's own children) and
+        // load the child's school bookable roles instead of leaving the list empty.
+        if ($asParent) {
+            $childId = (int) $request->query('child');
+            $child   = $childId ? $children->firstWhere('id', $childId) : null;
+            $selectedChildId = $child?->id;
+            $schoolId = $child?->school_id;
+        } else {
+            $schoolId = $this->activeSchoolId();
+        }
+
         $bookableRoles = $schoolId
             ? AppointmentBookableRole::forSchool($schoolId)->active()->ordered()->get()
             : collect();
 
-        return view('appointments.bookings.my.create', compact('user', 'asParent', 'children', 'bookableRoles', 'schoolId'));
+        return view('appointments.bookings.my.create', compact('user', 'asParent', 'children', 'selectedChildId', 'bookableRoles', 'schoolId'));
     }
 
     // ─── Store Booking ───────────────────────────────────────────────────────

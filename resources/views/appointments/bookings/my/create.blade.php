@@ -52,7 +52,7 @@
                             <select id="student_id" name="student_id" class="form-control custom-select @error('student_id') is-invalid @enderror" required>
                                 <option value="">— @lang('appointments.placeholder_select_child') —</option>
                                 @foreach($children as $child)
-                                <option value="{{ $child->id }}" data-school="{{ $child->school_id }}" {{ old('student_id') == $child->id ? 'selected' : '' }}>
+                                <option value="{{ $child->id }}" data-school="{{ $child->school_id }}" {{ (old('student_id') ?? ($selectedChildId ?? '')) == $child->id ? 'selected' : '' }}>
                                     {{ $child->name }}
                                 </option>
                                 @endforeach
