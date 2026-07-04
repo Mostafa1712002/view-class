@@ -1051,9 +1051,6 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('admin.libraries.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ Route::has('admin.libraries.public.index') ? route('admin.libraries.public.index') : '#' }}" data-label="@lang('shell.nav_libraries')"><x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span></a>
                 </li>
-                <li class="nav-item {{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}" data-section="teacher">
-                    <a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}" data-label="@lang('shell.nav_subjects')"><x-svg-icon name="book-half" class="vc-ico" /><span class="menu-title">@lang('shell.nav_subjects')</span></a>
-                </li>
                 <li class="nav-item {{ request()->routeIs('teacher.subjects.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ Route::has('teacher.subjects.index') ? route('teacher.subjects.index') : '#' }}" data-label="@lang('shell.nav_my_subjects')"><x-svg-icon name="collection" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_subjects')</span></a>
                 </li>

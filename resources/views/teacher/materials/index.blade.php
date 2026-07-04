@@ -142,6 +142,12 @@ jQuery(function ($) {
     $grade.on('change', function () { loadClasses(); loadResults(); });
     $class.on('change', loadResults);
     $type.on('change', loadResults);
+
+    // Preselect a subject when arriving from a subject card (?subject=ID).
+    var preselect = new URLSearchParams(window.location.search).get('subject');
+    if (preselect && $subject.find('option[value="' + preselect + '"]').length) {
+        $subject.val(preselect).trigger('change');
+    }
 });
 </script>
 @endpush

@@ -33,7 +33,10 @@
         background: #fff; color: var(--gold-500, #cfa046); font-size: 1.4rem;
         box-shadow: inset 0 0 0 1px rgba(207,160,70,.18);
     }
-    body.theme-light .subject-card .card-body { padding: 1rem 1.1rem; flex: 1; }
+    .subject-card-anchor { display:block; height:100%; text-decoration:none; color:inherit; }
+    .subject-card-anchor:hover { text-decoration:none; color:inherit; }
+    body.theme-light .subject-card .manage-cta { margin-top:.85rem; text-align:center; font-weight:600; font-size:.85rem; color:#fff; background:linear-gradient(135deg,var(--gold-300,#e0c37a),var(--gold-500,#cfa046)); border-radius:9px; padding:.5rem .75rem; display:flex; align-items:center; justify-content:center; gap:.4rem; }
+    body.theme-light .subject-card .card-body { padding: 1rem 1.1rem; flex: 1; display:flex; flex-direction:column; }
     body.theme-light .subject-card h6 { font-weight: 700; color: #0f172a; font-size: 1.02rem; margin-bottom: .35rem; }
     body.theme-light .grade-chip {
         display: inline-block;
@@ -99,6 +102,7 @@
                 @php($subject = $card['subject'])
                 @php($counts = $card['counts'])
                 <div class="col-12 col-md-6 col-xl-4">
+                    <a href="{{ route('teacher.materials.index', ['subject' => $subject->id]) }}" class="subject-card-anchor">
                     <div class="subject-card">
                         <div class="subject-icon-wrap">
                             <span class="ic">
@@ -157,8 +161,13 @@
                                     <span><span class="n">{{ $counts['virtual_classes'] }}</span> <span class="l d-block">الفصول الافتراضية</span></span>
                                 </div>
                             </div>
+
+                            <div class="manage-cta">
+                                <x-svg-icon name="folder2-open" :size="14" /> إدارة محتوى المادة
+                            </div>
                         </div>
                     </div>
+                    </a>
                 </div>
             @endforeach
         </div>
