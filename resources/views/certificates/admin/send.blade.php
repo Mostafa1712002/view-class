@@ -7,6 +7,7 @@
         'student' => optional($certificate->recipient)->name ?? '',
         'link'    => $shareUrl,
     ]);
+    $channelKeys = ['in_platform', 'email', 'sms', 'whatsapp'];
 @endphp
 
 @section('title', __('certificates.send_page.title'))
@@ -29,21 +30,58 @@
 <div class="card"><div class="card-content"><div class="card-body">
     <div class="alert alert-info">{{ __('certificates.send_page.note') }}</div>
 
-    <label>@lang('certificates.send_page.channels')</label>
-    <div class="d-flex flex-wrap gap-1 mb-2">
-        <span class="badge badge-secondary mr-1 p-1">@lang('certificates.send_page.sms')</span>
-        <span class="badge badge-secondary mr-1 p-1">@lang('certificates.send_page.in_platform')</span>
-        <span class="badge badge-secondary mr-1 p-1">@lang('certificates.send_page.email')</span>
-        <span class="badge badge-secondary mr-1 p-1">@lang('certificates.send_page.whatsapp')</span>
-    </div>
+    <form method="POST" action="{{ route('admin.certificates.send.store', $certificate->id) }}">
+        @csrf
 
-    <label>@lang('certificates.fields.note')</label>
-    <textarea class="form-control" rows="3" readonly>{{ $msg }}</textarea>
+        <div class="form-group">
+            <label class="d-block">@lang('certificates.send_page.channels')</label>
+            @foreach($channelKeys as $ch)
+                <div class="custom-control custom-checkbox custom-control-inline mb-1">
+                    <input type="checkbox" class="custom-control-input" id="ch_{{ $ch }}"
+                           name="channels[]" value="{{ $ch }}" {{ $ch === 'in_platform' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="ch_{{ $ch }}">@lang('certificates.send_page.' . $ch)</label>
+                </div>
+            @endforeach
+        </div>
 
-    <div class="mt-2">
-        <a href="{{ route('admin.certificates.preview', $certificate->id) }}" class="btn btn-secondary">
-            <x-svg-icon :name="$isRtl ? 'arrow-right' : 'arrow-left'" /> @lang('certificates.tpl.back')
-        </a>
-    </div>
+        <div class="form-group">
+            <label>@lang('certificates.send_page.message')</label>
+            <textarea class="form-control" name="message" rows="4" required>{{ old('message', $msg) }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>@lang('certificates.preview_page.link')</label>
+            <div class="input-group">
+                <input type="text" id="cert-share-link" class="form-control" value="{{ $shareUrl }}" readonly>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" onclick="ctCopyLink()">
+                        @lang('certificates.send_page.copy_link')
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary">@lang('certificates.send_page.submit')</button>
+            <a href="{{ route('admin.certificates.preview', $certificate->id) }}" class="btn btn-secondary ml-1">
+                <x-svg-icon :name="$isRtl ? 'arrow-right' : 'arrow-left'" /> @lang('certificates.tpl.back')
+            </a>
+        </div>
+    </form>
 </div></div></div>
 @endsection
+
+@push('scripts')
+<script>
+    function ctCopyLink() {
+        var el = document.getElementById('cert-share-link');
+        if (!el || !el.value) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(el.value);
+        } else {
+            el.select();
+            try { document.execCommand('copy'); } catch (e) {}
+        }
+    }
+</script>
+@endpush
