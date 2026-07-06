@@ -312,9 +312,9 @@
                                 <tr>
                                     <th>الطالب</th>
                                     <th>المادة</th>
-                                    <th>الاختبار</th>
+                                    <th>الفصل الدراسي</th>
                                     <th>الدرجة</th>
-                                    <th>النسبة</th>
+                                    <th>التقدير</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -322,12 +322,16 @@
                                 <tr>
                                     <td>{{ $grade->student->name ?? '-' }}</td>
                                     <td>{{ $grade->subject->name ?? '-' }}</td>
-                                    <td>{{ $grade->exam->title ?? '-' }}</td>
-                                    <td>{{ $grade->score }}/{{ $grade->max_score }}</td>
+                                    <td>{{ $grade->semester ?? '-' }}</td>
+                                    <td>{{ $grade->total !== null ? number_format($grade->total, 1) : '-' }}</td>
                                     <td>
-                                        <span class="badge bg-{{ $grade->percentage >= 60 ? 'success' : 'danger' }}">
-                                            {{ number_format($grade->percentage, 1) }}%
+                                        @if($grade->total !== null)
+                                        <span class="badge bg-{{ $grade->total >= 60 ? 'success' : 'danger' }}">
+                                            {{ $grade->letter_grade ?? number_format($grade->total, 1) . '%' }}
                                         </span>
+                                        @else
+                                        -
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach

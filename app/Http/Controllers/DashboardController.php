@@ -113,7 +113,7 @@ class DashboardController extends Controller
             ->get();
 
         $recentGrades = Grade::whereHas('student', fn ($q) => $q->where('school_id', $schoolId))
-            ->with(['student', 'subject', 'exam'])
+            ->with(['student', 'subject'])
             ->latest()
             ->take(10)
             ->get();
