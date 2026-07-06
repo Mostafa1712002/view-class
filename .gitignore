@@ -25,3 +25,4 @@ Thumbs.db
 .playwright-mcp/
 *-live.png
 slice*-dashboard.png
+docs/video-scripts/screens/
