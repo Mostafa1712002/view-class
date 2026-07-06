@@ -15,7 +15,12 @@ const ACCOUNTS = {
   'student':      'test_student_001@viewclass.local',
   'parent':       'test_parent_001@viewclass.local',
 };
-const flows = require('./flows.cjs');
+// Merge Track-0 flows.cjs with any per-track flows-N.cjs that exist.
+let flows = require('./flows.cjs');
+for (let n = 1; n <= 5; n++) {
+  const fp = path.join(__dirname, `flows-${n}.cjs`);
+  if (fs.existsSync(fp)) flows = flows.concat(require(fp));
+}
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
