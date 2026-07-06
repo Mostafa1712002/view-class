@@ -62,7 +62,11 @@
                             <div class="video-thumb">
                                 <span class="vid-id">{{ $v['id'] }}</span>
                                 @if(!empty($v['video_url']))
-                                    <iframe src="{{ $v['video_url'] }}" allowfullscreen loading="lazy" title="{{ $v['title'] }}"></iframe>
+                                    @if(\Illuminate\Support\Str::endsWith($v['video_url'], ['.webm', '.mp4', '.ogg']))
+                                        <video src="{{ $v['video_url'] }}" controls preload="metadata" title="{{ $v['title'] }}"></video>
+                                    @else
+                                        <iframe src="{{ $v['video_url'] }}" allowfullscreen loading="lazy" title="{{ $v['title'] }}"></iframe>
+                                    @endif
                                 @else
                                     <div class="soon"><i class="la la-video"></i> قريبًا</div>
                                 @endif
