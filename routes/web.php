@@ -32,6 +32,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // دليل الاستخدام — in-app tutorial video center (Docs)
+    Route::get('/docs', [\App\Http\Controllers\DocsController::class, 'index'])->name('docs.index');
+
     // Scope (header company/school/semester selectors)
     Route::get('/scope/options', [ScopeController::class, 'options'])->name('scope.options');
     Route::post('/scope', [ScopeController::class, 'set'])->name('scope.set');
