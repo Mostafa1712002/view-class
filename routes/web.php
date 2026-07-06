@@ -128,6 +128,19 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
     });
 });
 
+// Weekly Plans (teacher-accessible) — teachers author/view their own plans; the
+// controller scopes every action to the authenticated teacher and blocks editing
+// locked plans + unlocking (spec §2.4). Admins/school-admins share these routes;
+// admin-exclusive unlock/bulk-lock stay in the school-admin group below.
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('manage')->name('manage.')->group(function () {
+    Route::get('weekly-plans/pdf', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'pdf'])->name('weekly-plans.pdf');
+    Route::get('weekly-plans/excel', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'excel'])->name('weekly-plans.excel');
+    Route::resource('weekly-plans', \App\Http\Controllers\Admin\WeeklyPlanController::class);
+    Route::post('weekly-plans/{weekly_plan}/lock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'lock'])->name('weekly-plans.lock');
+    Route::post('weekly-plans/{weekly_plan}/mark-prepared', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'markPrepared'])->name('weekly-plans.mark-prepared');
+    Route::get('weekly-plans/{weekly_plan}/duplicate', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'duplicate'])->name('weekly-plans.duplicate');
+});
+
 // School Admin Routes
 Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->name('manage.')->group(function () {
     // Sections Management
@@ -153,15 +166,12 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('manage')->
     Route::post('schedules/{schedule}/periods', [\App\Http\Controllers\Admin\ScheduleController::class, 'storePeriod'])->name('schedules.store-period');
     Route::delete('schedules/{schedule}/periods/{period}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroyPeriod'])->name('schedules.destroy-period');
 
-    // Weekly Plans Management
-    Route::get('weekly-plans/pdf', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'pdf'])->name('weekly-plans.pdf');
-    Route::get('weekly-plans/excel', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'excel'])->name('weekly-plans.excel');
-    Route::resource('weekly-plans', \App\Http\Controllers\Admin\WeeklyPlanController::class);
-    Route::post('weekly-plans/{weekly_plan}/lock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'lock'])->name('weekly-plans.lock');
+    // Weekly Plans — admin-exclusive actions (unlock / bulk-lock).
+    // Teacher-accessible weekly-plan routes live in the role-incl-teacher group
+    // above (§ "Weekly Plans (teacher-accessible)"); the controller self-guards
+    // ownership + lock state, so teachers only ever touch their own unlocked plans.
     Route::post('weekly-plans/{weekly_plan}/unlock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'unlock'])->name('weekly-plans.unlock');
-    Route::post('weekly-plans/{weekly_plan}/mark-prepared', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'markPrepared'])->name('weekly-plans.mark-prepared');
     Route::post('weekly-plans/bulk-lock', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'bulkLock'])->name('weekly-plans.bulk-lock');
-    Route::get('weekly-plans/{weekly_plan}/duplicate', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'duplicate'])->name('weekly-plans.duplicate');
 
     // Card 66 — الملاحظات الجاهزة (Weekly Plan Note Templates)
     Route::get('weekly-plan-notes', [\App\Http\Controllers\Admin\WeeklyPlanNoteTemplateController::class, 'index'])->name('weekly-plan-notes.index');
