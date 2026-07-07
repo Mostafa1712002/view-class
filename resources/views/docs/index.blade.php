@@ -63,7 +63,7 @@
                                 <span class="vid-id">{{ $v['id'] }}</span>
                                 @if(!empty($v['video_url']))
                                     @if(\Illuminate\Support\Str::endsWith($v['video_url'], ['.webm', '.mp4', '.ogg']))
-                                        <video src="{{ $v['video_url'] }}" controls preload="metadata" title="{{ $v['title'] }}"></video>
+                                        <video src="{{ $v['video_url'] }}" controls preload="metadata" title="{{ $v['title'] }}" class="tut-video" playsinline></video>
                                     @else
                                         <iframe src="{{ $v['video_url'] }}" allowfullscreen loading="lazy" title="{{ $v['title'] }}"></iframe>
                                     @endif
@@ -86,4 +86,17 @@
         </div>
     @endforeach
 </div>
+
+{{-- Show a real content frame as each card's thumbnail: the first ~half-second of
+     every clip is a blank load frame, so seek a little in once metadata loads. --}}
+<script>
+document.querySelectorAll('video.tut-video').forEach(function (v) {
+    v.addEventListener('loadedmetadata', function () {
+        try {
+            var t = Math.min(2.2, (isFinite(v.duration) ? v.duration : 6) * 0.35);
+            if (v.currentTime < 0.1) v.currentTime = t;
+        } catch (e) {}
+    }, { once: true });
+});
+</script>
 @endsection

@@ -62,17 +62,39 @@ async function login(page, role) {
   await sleep(1200);
 }
 
+// Log in once per role in a throwaway (unrecorded) context and cache the
+// authenticated storageState. Recorded contexts reuse it so each video starts
+// already logged in — no white login screen at the head of every clip.
+const authStates = {};
+async function authState(browser, role) {
+  if (!role) return undefined;
+  if (authStates[role]) return authStates[role];
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, locale: 'ar' });
+  const page = await ctx.newPage();
+  await login(page, role);
+  authStates[role] = await ctx.storageState();
+  await ctx.close();
+  return authStates[role];
+}
+
 async function recordFlow(browser, flow) {
   const ctx = await browser.newContext({
     viewport: { width: 1280, height: 720 },
     recordVideo: { dir: OUT, size: { width: 1280, height: 720 } },
     locale: 'ar',
+    storageState: await authState(browser, flow.role),
   });
   const page = await ctx.newPage();
   try {
-    if (flow.role) await login(page, flow.role);
-    for (const step of flow.steps) {
-      if (step.goto) await page.goto(BASE + step.goto, { waitUntil: 'networkidle' }).catch(() => {});
+    // First paint: land on the flow's opening screen before anything is timed,
+    // so the video never opens on a blank about:blank frame.
+    if (flow.steps[0]?.goto) {
+      await page.goto(BASE + flow.steps[0].goto, { waitUntil: 'networkidle' }).catch(() => {});
+    }
+    for (let i = 0; i < flow.steps.length; i++) {
+      const step = flow.steps[i];
+      // Step 0's page is already loaded by the first-paint goto above.
+      if (step.goto && i > 0) await page.goto(BASE + step.goto, { waitUntil: 'networkidle' }).catch(() => {});
       if (step.scroll) await page.evaluate(y => window.scrollTo({ top: y, behavior: 'smooth' }), step.scroll).catch(() => {});
       await overlay(page, { id: flow.id, title: flow.title, caption: step.caption });
       await sleep(step.dwell || 4000);
