@@ -147,6 +147,21 @@
 }
 .shell-nav-center select.form-control option { color: #14233a; }
 
+/* Select2 replaces these scope selects with its own pill; fully hide the native
+   <select> (our .form-control styling above otherwise leaves its dropdown arrow
+   bleeding out under the pill). Value still submits — only `disabled` blocks that. */
+.shell-nav-center select.select2-hidden-accessible {
+    position: absolute !important;
+    height: 1px !important;
+    width: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    background: transparent !important;
+}
+
 /* Notification + mail icons sit slightly larger for clarity */
 .shell-nav-right .vc-notif-bell .vc-ico { width: 19px; height: 19px; }
 
