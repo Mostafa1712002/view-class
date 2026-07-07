@@ -1085,6 +1085,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('my.mailbox.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ Route::has('my.mailbox.index') ? route('my.mailbox.index') : '#' }}" data-label="@lang('shell.nav_mailbox')"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
                 </li>
+                <li class="nav-item {{ request()->routeIs('my.support.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('my.support.index') ? route('my.support.index') : '#' }}" data-label="@lang('shell.nav_support')"><x-svg-icon name="life-preserver" class="vc-ico" /><span class="menu-title">@lang('shell.nav_support')</span></a>
+                </li>
             </div>
             @endif
 
