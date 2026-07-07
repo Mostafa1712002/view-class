@@ -45,6 +45,15 @@ final class RenderCertificatePdfAction
             'margin_right'     => 0,
         ]);
         $mpdf->SetDirectionality('rtl');
+
+        // Spec: the school logo appears as a watermark across the whole sheet.
+        // mPDF renders it centered, behind the content, at a faint alpha.
+        $watermark = $this->watermarkPath($certificate);
+        if ($watermark) {
+            $mpdf->showWatermarkImage = true;
+            $mpdf->SetWatermarkImage($watermark, 0.08, 'P', 'P');
+        }
+
         $mpdf->WriteHTML($html);
 
         return $mpdf->Output('certificate.pdf', \Mpdf\Output\Destination::STRING_RETURN);
@@ -92,6 +101,14 @@ final class RenderCertificatePdfAction
             'body_html'     => $certificate->body_html,
             'grades'        => $this->resolveGrades($certificate),
         ];
+    }
+
+    /** Watermark image: the school's logo, falling back to the certificate's own logo. */
+    private function watermarkPath(Certificate $certificate): ?string
+    {
+        $school = $certificate->school_id ? \App\Models\School::find($certificate->school_id) : null;
+
+        return $this->localPath($school?->logo) ?? $this->localPath($certificate->logo_path);
     }
 
     /** Absolute filesystem path for a public-disk file, or null if unset/missing. */

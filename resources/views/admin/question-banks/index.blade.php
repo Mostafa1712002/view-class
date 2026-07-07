@@ -274,9 +274,11 @@
         </ol>
     </div>
     <div class="content-header-right col-md-3 col-12 text-md-right d-flex align-items-start justify-content-md-end pt-1">
+        @unless(auth()->user()?->isTeacher())
         <a class="btn-gold" href="{{ route('admin.question-banks.create') }}">
             <x-svg-icon name="plus-lg" :size="16" /> @lang('question_banks.add')
         </a>
+        @endunless
     </div>
 </div>
 
@@ -405,9 +407,11 @@
     {{-- Toolbar --}}
     <div class="qb-toolbar">
         <div class="left">
+            @unless(auth()->user()?->isTeacher())
             <a class="btn-gold" href="{{ route('admin.question-banks.create') }}">
                 <x-svg-icon name="plus-lg" :size="16" /> @lang('question_banks.add')
             </a>
+            @endunless
             <a class="btn-ghost" href="{{ route('admin.question-banks.library') }}">
                 <x-svg-icon name="book-fill" :size="16" class="ic-teal" /> @lang('question_banks.open_library')
             </a>

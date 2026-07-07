@@ -184,6 +184,7 @@ return [
             'entry_deleted' => 'Schedule entry deleted',
             'conflict_teacher_busy' => 'Cannot schedule — the teacher is already assigned at this time.',
             'conflict_classroom_busy' => 'Cannot schedule — the classroom is already taken at this time.',
+            'quota_exceeded' => 'Cannot add the period — the teacher would exceed the maximum load (35 periods per week).',
         ],
     ],
     'question_banks' => [

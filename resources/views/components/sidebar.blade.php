@@ -968,7 +968,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ $sidebarSupportActive ? 'active' : '' }}" data-section="system">
                     <a href="{{ $sidebarSupportRoute }}" data-label="@lang('shell.nav_support')"><x-svg-icon name="life-preserver" class="vc-ico" /><span class="menu-title">@lang('shell.nav_support')</span></a>
                 </li>
-                <li class="nav-item" data-section="system" data-label="@lang('shell.nav_admissions')"><a href="#" data-label="@lang('shell.nav_admissions')"><x-svg-icon name="person-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admissions.*') ? 'active' : '' }}" data-section="system" data-label="@lang('shell.nav_admissions')"><a href="{{ Route::has('admissions.index') ? route('admissions.index') : '#' }}" data-label="@lang('shell.nav_admissions')"><x-svg-icon name="person-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
 
                 @if($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
                 <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="system">
@@ -1081,6 +1081,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </li>
                 <li class="nav-item {{ request()->routeIs('manage.appointment-schedules.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ Route::has('manage.appointment-schedules.index') ? route('manage.appointment-schedules.index') : '#' }}" data-label="@lang('shell.nav_appointments')"><x-svg-icon name="calendar-event" class="vc-ico" /><span class="menu-title">@lang('shell.nav_appointments')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('manage.appointments.*') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ Route::has('manage.appointments.index') ? route('manage.appointments.index') : '#' }}" data-label="@lang('shell.nav_appointments_bookings')"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.nav_appointments_bookings')</span></a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('my.mailbox.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ Route::has('my.mailbox.index') ? route('my.mailbox.index') : '#' }}" data-label="@lang('shell.nav_mailbox')"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-title">@lang('shell.nav_mailbox')</span></a>
