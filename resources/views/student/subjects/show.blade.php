@@ -157,7 +157,11 @@
                         <div class="ci-desc">{{ Str::limit($v->description, 80) }}</div>
                     @endif
                 </div>
-                @php $vUrl = preg_match('#^https?://#i', (string) $v->url) ? $v->url : null; @endphp
+                @php
+                    $vUrl = preg_match('#^https?://#i', (string) $v->url)
+                        ? $v->url
+                        : ($v->url ? \Illuminate\Support\Facades\Storage::disk('public')->url($v->url) : null);
+                @endphp
                 @if($vUrl)
                     <div class="ci-action">
                         <a href="{{ $vUrl }}" target="_blank" rel="noopener noreferrer"
@@ -308,6 +312,16 @@
                            class="btn btn-sm btn-primary">
                             <x-svg-icon name="play" /> دخول
                         </a>
+                    @elseif($ex->start_time && $ex->start_time->isFuture())
+                        <a href="{{ route('student.exams.show', $ex->id) }}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="la la-eye"></i> عرض التفاصيل
+                        </a>
+                    @else
+                        <a href="{{ route('student.exams.result', $ex->id) }}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="la la-eye"></i> عرض النتيجة
+                        </a>
                     @endif
                 </div>
             </div>
@@ -343,6 +357,11 @@
                         <a href="{{ $vcUrl }}" target="_blank" rel="noopener noreferrer"
                            class="btn btn-sm btn-success">
                             <x-svg-icon name="box-arrow-in-right" /> انضمام
+                        </a>
+                    @else
+                        <a href="{{ route('my.virtual-classes.index') }}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="la la-eye"></i> التفاصيل
                         </a>
                     @endif
                 </div>
@@ -400,14 +419,12 @@
                         @endif
                     </div>
                 </div>
-                @if($bk->read_url)
-                    <div class="ae-action">
-                        <a href="{{ route('student.books.read', $bk->id) }}"
-                           class="btn btn-sm btn-outline-warning">
-                            <x-svg-icon name="book-half" /> قراءة
-                        </a>
-                    </div>
-                @endif
+                <div class="ae-action">
+                    <a href="{{ route('student.books.read', $bk->id) }}"
+                       class="btn btn-sm btn-outline-warning">
+                        <x-svg-icon name="book-half" /> قراءة
+                    </a>
+                </div>
             </div>
         @empty
             <div class="empty-sec"><i class="la la-book la-2x d-block mb-1"></i>لا توجد كتب مرتبطة بهذه المادة حتى الآن.</div>
