@@ -67,14 +67,12 @@
             {{-- Review actions for authorized roles --}}
             @if ($isReviewer && $evStatus !== \App\Modules\Evaluation\Enums\EvidenceStatus::Approved)
                 <div class="ev-review-actions mt-1 ps-2 d-flex gap-1 flex-wrap">
-                    {{-- Approve --}}
-                    <form method="POST" action="{{ route('evidence.approve', $ev->id) }}" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-xs btn-success"
-                                onclick="return vcConfirm(event, '@lang('evaluation.evidence_approve')')">
-                            <i class="la la-check"></i> @lang('evaluation.evidence_approve')
-                        </button>
-                    </form>
+                    {{-- Approve (JS-built form; must not nest a <form> inside #ex-form) --}}
+                    <button type="button" class="btn btn-xs btn-success ev-approve-btn"
+                            data-approve-url="{{ route('evidence.approve', $ev->id) }}"
+                            data-confirm="@lang('evaluation.evidence_approve')">
+                        <i class="la la-check"></i> @lang('evaluation.evidence_approve')
+                    </button>
 
                     {{-- Reject (uses SweetAlert input prompt for reason) --}}
                     <button type="button" class="btn btn-xs btn-danger ev-reject-btn"
@@ -112,15 +110,11 @@
     @endunless
 </div>
 
-{{-- Inline reject / request-edit form helpers (hidden forms, submitted via JS) --}}
-<form id="ev-reject-form-{{ $nodeKey }}" method="POST" style="display:none">
-    @csrf
-    <input type="hidden" name="note" class="ev-reject-note">
-</form>
-<form id="ev-request-edit-form-{{ $nodeKey }}" method="POST" style="display:none">
-    @csrf
-    <input type="hidden" name="note" class="ev-edit-note">
-</form>
+{{-- NOTE: this partial renders INSIDE #ex-form. It must never emit a <form>
+     element — nested forms are invalid HTML and cause the browser to close
+     #ex-form early, orphaning the submit buttons (evaluation would not save).
+     All evidence actions (approve / reject / request-edit) are therefore
+     submitted via JS-built forms appended to <body>. --}}
 
 @once
     @push('scripts')
@@ -180,6 +174,19 @@
                         form.submit();
                     }
                 });
+            });
+        });
+
+        // Approve buttons: confirm then POST via a body-level form (never nested in #ex-form)
+        document.querySelectorAll('.ev-approve-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (!confirm(btn.dataset.confirm || 'OK')) return;
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = btn.dataset.approveUrl;
+                form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}">';
+                document.body.appendChild(form);
+                form.submit();
             });
         });
     });
