@@ -176,6 +176,22 @@
     background: transparent !important;
 }
 
+/* Select2's own caret sits at the bottom edge of our taller pill and reads as an
+   arrow hanging below it. Span the arrow box to full height and centre the tick. */
+.shell-nav-center .select2-container .select2-selection__arrow {
+    top: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.shell-nav-center .select2-container .select2-selection__arrow b {
+    position: static !important;
+    margin: 0 !important;
+    top: auto !important;
+    left: auto !important;
+}
+
 /* Notification + mail icons sit slightly larger for clarity */
 .shell-nav-right .vc-notif-bell .vc-ico { width: 19px; height: 19px; }
 
