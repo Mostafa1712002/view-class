@@ -501,12 +501,6 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </a>
             </li>
 
-            <li class="nav-item {{ request()->routeIs('docs.*') ? 'active' : '' }}" data-label="دليل الاستخدام">
-                <a href="{{ route('docs.index') }}" data-label="دليل الاستخدام">
-                    <x-svg-icon name="camera-video-fill" class="vc-ico" />
-                    <span class="menu-title">دليل الاستخدام</span>
-                </a>
-            </li>
 
             @if($isStaff)
 
