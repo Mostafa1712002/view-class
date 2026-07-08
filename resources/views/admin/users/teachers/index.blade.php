@@ -95,10 +95,8 @@
                             <a href="{{ route('admin.users.teachers.edit', $u->id) }}" class="btn btn-sm btn-outline-primary" title="@lang('users.edit')">
                                 <x-svg-icon name="pencil-square" />
                             </a>
-                            <form action="{{ route('admin.users.teachers.destroy', $u->id) }}" method="POST" class="d-inline" onsubmit="return confirm('@lang('users.delete')?');">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger" title="@lang('users.delete')"><x-svg-icon name="trash" /></button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger js-user-delete" title="@lang('users.delete')"
+                                    data-url="{{ route('admin.users.teachers.destroy', $u->id) }}" data-name="{{ $u->name }}"><x-svg-icon name="trash" /></button>
                             <div class="dropdown d-inline">
                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown">
                                     <x-svg-icon name="three-dots" />
@@ -126,6 +124,7 @@
     </div>
 </div>
 
+@include('admin.users.partials.delete-modal')
 @endsection
 @push('scripts')
 <script>

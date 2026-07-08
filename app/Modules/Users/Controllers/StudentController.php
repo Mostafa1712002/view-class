@@ -261,8 +261,13 @@ class StudentController extends Controller
             ->with('status', __('users.student_updated', ['name' => $student->name]));
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Request $request, int $id): RedirectResponse
     {
+        if (! Hash::check((string) $request->input('confirm_password'), (string) auth()->user()->password)) {
+            return redirect()->route('admin.users.students.index')
+                ->with('error', __('users.delete_password_wrong'));
+        }
+
         $student = $this->students->findScoped($id, $this->activeSchoolId());
         if ($student) {
             $student->delete();

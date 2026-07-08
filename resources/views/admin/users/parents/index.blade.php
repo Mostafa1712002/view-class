@@ -416,10 +416,8 @@
                                         <a href="{{ route('admin.users.parents.edit', $u->id) }}" class="pp-icon-btn is-primary" title="@lang('users.edit')">
                                             <x-svg-icon name="pencil-square" :size="16" />
                                         </a>
-                                        <form action="{{ route('admin.users.parents.destroy', $u->id) }}" method="POST" class="d-inline" onsubmit="return confirm('@lang('users.delete')?');">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="pp-icon-btn is-danger" title="@lang('users.delete')"><x-svg-icon name="trash3-fill" :size="16" /></button>
-                                        </form>
+                                        <button type="button" class="pp-icon-btn is-danger js-user-delete" title="@lang('users.delete')"
+                                                data-url="{{ route('admin.users.parents.destroy', $u->id) }}" data-name="{{ $u->name }}"><x-svg-icon name="trash3-fill" :size="16" /></button>
                                         <div class="pp-row-menu js-row-menu">
                                             <button type="button" class="pp-icon-btn js-row-menu-btn" title="@lang('users.parent_more_actions')">
                                                 <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
@@ -541,4 +539,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+@include('admin.users.partials.delete-modal')
 @endsection

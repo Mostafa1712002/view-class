@@ -142,8 +142,13 @@ class TeacherController extends Controller
         return view('admin.users.teachers.show', compact('teacher'));
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Request $request, int $id): RedirectResponse
     {
+        if (! Hash::check((string) $request->input('confirm_password'), (string) auth()->user()->password)) {
+            return redirect()->route('admin.users.teachers.index')
+                ->with('error', __('users.delete_password_wrong'));
+        }
+
         $teacher = $this->teachers->findScoped($id, $this->activeSchoolId());
         if ($teacher) {
             $teacher->delete();

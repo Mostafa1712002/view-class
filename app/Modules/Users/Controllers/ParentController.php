@@ -102,8 +102,13 @@ class ParentController extends Controller
             ->with('status', __('users.parent_updated'));
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Request $request, int $id): RedirectResponse
     {
+        if (! Hash::check((string) $request->input('confirm_password'), (string) auth()->user()->password)) {
+            return redirect()->route('admin.users.parents.index')
+                ->with('error', __('users.delete_password_wrong'));
+        }
+
         $parent = $this->parents->findScoped($id, $this->activeSchoolId());
         if ($parent) {
             $parent->delete();

@@ -455,10 +455,8 @@
                             <div class="row-actions">
                                 <a href="{{ route('admin.users.students.show', $u->id) }}" class="btn-icon" title="@lang('users.student_view')"><x-svg-icon name="eye-fill" :size="16" class="ic-info" /></a>
                                 <a href="{{ route('admin.users.students.edit', $u->id) }}" class="btn-icon" title="@lang('users.student_edit')"><x-svg-icon name="pencil-square" :size="16" class="ic-gold" /></a>
-                                <form action="{{ route('admin.users.students.destroy', $u->id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('@lang('users.delete') ؟');">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn-icon danger" title="@lang('users.student_delete')"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /></button>
-                                </form>
+                                <button type="button" class="btn-icon danger js-user-delete" title="@lang('users.student_delete')"
+                                        data-url="{{ route('admin.users.students.destroy', $u->id) }}" data-name="{{ $u->name }}"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /></button>
                                 <div class="dropdown d-inline">
                                     <button class="btn-icon" data-toggle="dropdown" data-bs-toggle="dropdown" title="@lang('users.student_more_actions')">
                                         <x-svg-icon name="three-dots-vertical" :size="16" class="ic-muted" />
@@ -533,10 +531,8 @@
                                 <a class="dropdown-item" href="{{ route('admin.users.students.lessons', $u->id) }}"><x-svg-icon name="easel-fill" :size="16" class="ic-teal" /> @lang('users.classes_link')</a>
                                 <a class="dropdown-item" href="{{ route('admin.users.students.behavior', $u->id) }}"><x-svg-icon name="clipboard-pulse" :size="16" class="ic-eval" /> @lang('users.behavior_link')</a>
                                 <a class="dropdown-item" href="{{ route('admin.users.students.medical', $u->id) }}"><x-svg-icon name="file-earmark-medical-fill" :size="16" class="ic-teal" /> @lang('users.medical_link')</a>
-                                <form action="{{ route('admin.users.students.destroy', $u->id) }}" method="POST" class="m-0" onsubmit="return confirm('@lang('users.delete') ؟');">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="dropdown-item text-danger"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('users.delete')</button>
-                                </form>
+                                <button type="button" class="dropdown-item text-danger js-user-delete"
+                                        data-url="{{ route('admin.users.students.destroy', $u->id) }}" data-name="{{ $u->name }}"><x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('users.delete')</button>
                             </div>
                         </div>
                     </div>
@@ -596,4 +592,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+@include('admin.users.partials.delete-modal')
 @endsection
