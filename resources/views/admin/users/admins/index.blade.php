@@ -510,13 +510,11 @@
                                             </form>
                                         @endif
                                         <div class="dropdown-divider"></div>
-                                        <form action="{{ route('admin.users.admins.destroy', $u->id) }}" method="POST"
-                                              onsubmit="return confirm('@lang('users.delete')?');">
-                                            @csrf @method('DELETE')
-                                            <button class="dropdown-item danger" type="submit">
-                                                <x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('users.delete')
-                                            </button>
-                                        </form>
+                                        <button type="button" class="dropdown-item danger js-admin-delete"
+                                                data-url="{{ route('admin.users.admins.destroy', $u->id) }}"
+                                                data-name="{{ $u->name }}">
+                                            <x-svg-icon name="trash3-fill" :size="16" class="ic-danger" /> @lang('users.delete')
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -579,6 +577,52 @@ document.addEventListener('DOMContentLoaded', function () {
             jQuery(this).find('.dropdown-menu').removeClass('is-floating').css({ top: '', left: '', right: '' });
         });
 });
+</script>
+@endpush
+
+{{-- Password-confirm delete modal — the acting admin must re-enter their own
+     password to delete an admin (guards against accidental deletion). --}}
+<div class="modal fade" id="adminDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form id="adminDeleteForm" method="POST" action="">
+                @csrf
+                @method('DELETE')
+                <div class="modal-header">
+                    <h5 class="modal-title mb-0">
+                        <x-svg-icon name="exclamation-triangle-fill" :size="18" class="ic-danger" /> @lang('users.delete_confirm_title')
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p id="adminDeleteBody" class="mb-3"></p>
+                    <label class="font-weight-bold" for="adminDeletePassword">@lang('users.delete_password_label')</label>
+                    <input type="password" name="confirm_password" id="adminDeletePassword" class="form-control" autocomplete="current-password" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('users.delete_cancel')</button>
+                    <button type="submit" class="btn btn-danger">
+                        <x-svg-icon name="trash3-fill" :size="16" /> @lang('users.delete_confirm_btn')
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+(function () {
+    var bodyTpl = @json(__('users.delete_confirm_body', ['name' => '__NAME__']));
+    document.querySelectorAll('.js-admin-delete').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.getElementById('adminDeleteForm').setAttribute('action', btn.dataset.url);
+            document.getElementById('adminDeleteBody').textContent = bodyTpl.replace('__NAME__', btn.dataset.name || '');
+            document.getElementById('adminDeletePassword').value = '';
+            if (window.jQuery) jQuery('#adminDeleteModal').modal('show');
+        });
+    });
+})();
 </script>
 @endpush
 @endsection

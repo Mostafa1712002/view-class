@@ -203,8 +203,15 @@ class AdminController extends Controller
             ->with('status', __('users.admin_updated'));
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Request $request, int $id): RedirectResponse
     {
+        // Guard against accidental deletion: the acting admin must re-enter their
+        // own password to confirm (see the delete modal in admins/index).
+        if (! Hash::check((string) $request->input('confirm_password'), (string) auth()->user()->password)) {
+            return redirect()->route('admin.users.admins.index')
+                ->with('error', __('users.delete_password_wrong'));
+        }
+
         $admin = $this->admins->findScoped($id, $this->activeSchoolId());
         if ($admin) {
             $admin->delete();
