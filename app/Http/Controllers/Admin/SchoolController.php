@@ -184,7 +184,7 @@ class SchoolController extends Controller
         do {
             $code = $base . '-' . str_pad((string) $i, 3, '0', STR_PAD_LEFT);
             $i++;
-        } while (School::where('code', $code)->exists());
+        } while (School::withTrashed()->where('code', $code)->exists());
         return $code;
     }
 }
