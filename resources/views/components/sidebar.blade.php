@@ -44,6 +44,19 @@
     $canViewReports       = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('reports');
     $canViewNoor          = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('noor');
     $canViewJobTitles     = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('job_titles');
+    // Additional staff modules that previously rendered unconditionally. Same
+    // default-allow formula: non-staff (student/parent) never hidden; configured
+    // staff see only modules they hold the .view permission for.
+    $canViewUsers         = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('users');
+    $canViewSchools       = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('schools');
+    $canViewWeeklyPlans   = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('weekly-plans');
+    $canViewGrades        = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('grades');
+    $canViewSchedules     = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('schedules');
+    $canViewAppointments  = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('appointments');
+    $canViewAcademicYears = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('academic-years');
+    $canViewBehavior      = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('behavior');
+    $canViewSupport       = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('support');
+    $canViewAdmissions    = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('admissions');
 
     // عمليات التواصل (Sprint 9) — same default-allow formula: non-staff (student/parent)
     // are never hidden; configured staff see only modules they hold the .view permission for.
@@ -549,8 +562,8 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item has-sub {{ (request()->routeIs('admin.subjects.*') || request()->routeIs('admin.subject-tracks.*') || request()->routeIs('admin.question-banks.*') || request()->routeIs('admin.exams.*') || request()->routeIs('admin.lessons.*') || request()->routeIs('manage.books.*')) ? 'active open' : '' }}" data-section="educational">
                     <a href="#" data-label="@lang('shell.nav_exams_management')"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams_management')</span></a>
                     <ul class="menu-content">
-                        <li class="{{ request()->routeIs('admin.subjects.index') || request()->routeIs('admin.subjects.create') || request()->routeIs('admin.subjects.edit') ? 'active' : '' }}"><a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}"><x-svg-icon name="book" class="vc-ico" /><span class="menu-item">@lang('shell.nav_subjects')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.subject-tracks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subject-tracks.index') ? route('admin.subject-tracks.index') : '#' }}"><x-svg-icon name="layout-text-sidebar" class="vc-ico" /><span class="menu-item">@lang('subject_tracks.page_title')</span></a></li>
+                        @if($canViewSubjects)<li class="{{ request()->routeIs('admin.subjects.index') || request()->routeIs('admin.subjects.create') || request()->routeIs('admin.subjects.edit') ? 'active' : '' }}"><a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}"><x-svg-icon name="book" class="vc-ico" /><span class="menu-item">@lang('shell.nav_subjects')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.subject-tracks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subject-tracks.index') ? route('admin.subject-tracks.index') : '#' }}"><x-svg-icon name="layout-text-sidebar" class="vc-ico" /><span class="menu-item">@lang('subject_tracks.page_title')</span></a></li>@endif
                         @if($canViewQuestionBanks)<li class="{{ request()->routeIs('admin.question-banks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.question-banks.index') ? route('admin.question-banks.index') : '#' }}"><x-svg-icon name="question-circle" class="vc-ico" /><span class="menu-item">@lang('shell.nav_questions_bank')</span></a></li>@endif
                         {{-- #248 طبقة التصنيفات التعليمية — gated by Route::has + canViewModule --}}
                         @if(Route::has('admin.qb.skills.index') && (!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('skills')))<li class="{{ request()->routeIs('admin.qb.skills.*') ? 'active' : '' }}"><a href="{{ route('admin.qb.skills.index') }}"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-item">المهارات</span></a></li>@endif
@@ -564,11 +577,14 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
 
+                @if($canViewWeeklyPlans)
                 <li class="nav-item {{ request()->routeIs('manage.weekly-plans.*') ? 'active' : '' }}" data-section="educational">
                     <a href="{{ Route::has('manage.weekly-plans.index') ? route('manage.weekly-plans.index') : '#' }}" data-label="@lang('shell.nav_weekly_plan')"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a>
                 </li>
+                @endif
 
                 {{-- الدرجات --}}
+                @if($canViewGrades)
                 <li class="nav-item has-sub {{ (request()->routeIs('admin.grades.*') || request()->routeIs('admin.grade-reports.*') || request()->routeIs('admin.grades.entry.*')) ? 'active open' : '' }}" data-section="educational">
                     <a href="#" data-label="@lang('shell.nav_grades')"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.nav_grades')</span></a>
                     <ul class="menu-content">
@@ -583,12 +599,16 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         </li>
                     </ul>
                 </li>
+                @endif
 
+                @if($canViewSchedules)
                 <li class="nav-item {{ request()->routeIs('manage.schedules.*') ? 'active' : '' }}" data-section="educational">
                     <a href="{{ Route::has('manage.schedules.index') ? route('manage.schedules.index') : '#' }}" data-label="@lang('shell.nav_schedule')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_schedule')</span></a>
                 </li>
+                @endif
 
                 {{-- المكتبات --}}
+                @if($canViewLibraries)
                 <li class="nav-item has-sub {{ request()->routeIs('admin.libraries.*') ? 'active open' : '' }}" data-section="educational">
                     <a href="#" data-label="@lang('shell.nav_libraries')"><x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span></a>
                     <ul class="menu-content">
@@ -597,6 +617,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         <li class="{{ request()->routeIs('admin.libraries.labs.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.libraries.labs.index') ? route('admin.libraries.labs.index') : '#' }}"><x-svg-icon name="eyedropper" class="vc-ico" /><span class="menu-item">@lang('shell.nav_labs')</span></a></li>
                     </ul>
                 </li>
+                @endif
 
                 <li class="nav-item" data-section="educational" data-label="@lang('shell.nav_counseling')"><a href="#" data-label="@lang('shell.nav_counseling')"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
 
@@ -624,6 +645,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @endif
 
                 {{-- المواعيد --}}
+                @if($canViewAppointments)
                 <li class="nav-item has-sub {{ (request()->routeIs('manage.appointment-schedules.*') || request()->routeIs('admin.appointment-settings.*') || request()->routeIs('manage.appointments.*')) ? 'active open' : '' }}" data-section="educational">
                     <a href="#" data-label="@lang('shell.nav_appointments')"><x-svg-icon name="calendar" class="vc-ico" /><span class="menu-title">@lang('shell.nav_appointments')</span></a>
                     <ul class="menu-content">
@@ -646,6 +668,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         @endif
                     </ul>
                 </li>
+                @endif
 
                 @if($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
                 <li class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}" data-section="educational">
@@ -887,22 +910,27 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
             </div>
             <div class="gp-section-content" id="gp-sec-system">
 
+                @if($canViewSchools)
                 <li class="nav-item {{ request()->routeIs('admin.schools.*') ? 'active' : '' }}" data-section="system">
                     <a href="{{ Route::has('admin.schools.index') ? route('admin.schools.index') : '#' }}" data-label="@lang('shell.nav_schools')"><x-svg-icon name="building" class="vc-ico" /><span class="menu-title">@lang('shell.nav_schools')</span></a>
                 </li>
+                @endif
                 <li class="nav-item {{ request()->routeIs('admin.policies.*') ? 'active' : '' }}" data-section="system">
                     <a href="{{ Route::has('admin.policies.index') ? route('admin.policies.index') : '#' }}" data-label="@lang('shell.nav_policies')"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-title">@lang('shell.nav_policies')</span></a>
                 </li>
 
-                {{-- المستخدمون --}}
+                {{-- المستخدمون — parent hides only if every child is denied --}}
+                @if($canViewUsers || $canViewStudents || $canViewParents || $canViewTeachers || $canViewJobTitles || $canViewNoor)
                 <li class="nav-item has-sub {{ request()->routeIs('admin.users.*') ? 'open' : '' }}" data-section="system">
                     <a href="#" data-label="@lang('shell.nav_users')"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users')</span></a>
                     <ul class="menu-content">
+                        @if($canViewStudents)
                         <li class="{{ request()->routeIs('admin.users.students.*') && !request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.students.index') ? route('admin.users.students.index') : '#' }}">
                                 <x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-item">@lang('users.students')</span>
                             </a>
                         </li>
+                        @endif
                         @if(auth()->check() && auth()->user()->isSuperAdmin())
                         <li class="{{ request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.students.global-search') ? route('admin.users.students.global-search') : '#' }}">
@@ -910,31 +938,39 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                             </a>
                         </li>
                         @endif
+                        @if($canViewParents)
                         <li class="{{ request()->routeIs('admin.users.parents.*') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.parents.index') ? route('admin.users.parents.index') : '#' }}">
                                 <x-svg-icon name="people" class="vc-ico" /><span class="menu-item">@lang('users.parents')</span>
                             </a>
                         </li>
+                        @endif
+                        @if($canViewTeachers)
                         <li class="{{ request()->routeIs('admin.users.teachers.*') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.teachers.index') ? route('admin.users.teachers.index') : '#' }}">
                                 <x-svg-icon name="easel" class="vc-ico" /><span class="menu-item">@lang('users.teachers')</span>
                             </a>
                         </li>
+                        @endif
+                        @if($canViewUsers)
                         <li class="{{ request()->routeIs('admin.users.admins.*') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.admins.index') ? route('admin.users.admins.index') : '#' }}">
                                 <x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('users.admins')</span>
                             </a>
                         </li>
+                        @endif
                         <li class="{{ request()->routeIs('admin.users.cards.*') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.cards.index') ? route('admin.users.cards.index') : '#' }}">
                                 <x-svg-icon name="person-vcard" class="vc-ico" /><span class="menu-item">@lang('users.cards')</span>
                             </a>
                         </li>
+                        @if($canViewJobTitles)
                         <li class="{{ request()->routeIs('admin.users.job-titles.*') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.job-titles.index') ? route('admin.users.job-titles.index') : '#' }}">
                                 <x-svg-icon name="tag" class="vc-ico" /><span class="menu-item">@lang('users.job_titles')</span>
                             </a>
                         </li>
+                        @endif
                         @if($canViewNoor)
                         <li class="{{ request()->routeIs('admin.noor.*') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.noor.form') ? route('admin.noor.form') : '#' }}">
@@ -944,6 +980,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         @endif
                     </ul>
                 </li>
+                @endif
 
                 <li class="nav-item {{ request()->routeIs('admin.school-schedule.*') ? 'active' : '' }}" data-section="system">
                     <a href="{{ Route::has('admin.school-schedule.index') ? route('admin.school-schedule.index') : '#' }}" data-label="@lang('shell.nav_school_schedule')">
@@ -951,15 +988,18 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </a>
                 </li>
 
+                @if($canViewAcademicYears)
                 <li class="nav-item {{ request()->routeIs('manage.academic-years.*') ? 'active' : '' }}" data-section="system">
                     <a href="{{ Route::has('manage.academic-years.index') ? route('manage.academic-years.index') : '#' }}" data-label="@lang('shell.nav_academic_years')"><x-svg-icon name="calendar" class="vc-ico" /><span class="menu-title">@lang('shell.nav_academic_years')</span></a>
                 </li>
+                @endif
 
                 <li class="nav-item {{ request()->routeIs('admin.canteens.*') ? 'active' : '' }}" data-section="system">
                     <a href="{{ route('admin.canteens.index') }}" data-label="@lang('shell.nav_cafeteria')"><x-svg-icon name="cup-hot" class="vc-ico" /><span class="menu-title">@lang('shell.nav_cafeteria')</span></a>
                 </li>
 
                 {{-- السلوك --}}
+                @if($canViewBehavior)
                 <li class="nav-item has-sub {{ request()->routeIs('admin.behavior.*') ? 'active open' : '' }}" data-section="system">
                     <a href="#" data-label="@lang('shell.nav_behavior')"><x-svg-icon name="shield-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_behavior')</span></a>
                     <ul class="menu-content">
@@ -969,6 +1009,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         <li class="{{ request()->routeIs('admin.behavior.records.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.records.index') }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('behavior.records.title')</span></a></li>
                     </ul>
                 </li>
+                @endif
 
                 @php
                     $sidebarSupportRoute = ($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
@@ -976,12 +1017,16 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         : (Route::has('my.support.index') ? route('my.support.index') : '#');
                     $sidebarSupportActive = request()->routeIs('admin.support.*') || request()->routeIs('my.support.*');
                 @endphp
+                @if($canViewSupport)
                 <li class="nav-item {{ $sidebarSupportActive ? 'active' : '' }}" data-section="system">
                     <a href="{{ $sidebarSupportRoute }}" data-label="@lang('shell.nav_support')"><x-svg-icon name="life-preserver" class="vc-ico" /><span class="menu-title">@lang('shell.nav_support')</span></a>
                 </li>
+                @endif
+                @if($canViewAdmissions)
                 <li class="nav-item {{ request()->routeIs('admissions.*') ? 'active' : '' }}" data-section="system" data-label="@lang('shell.nav_admissions')"><a href="{{ Route::has('admissions.index') ? route('admissions.index') : '#' }}" data-label="@lang('shell.nav_admissions')"><x-svg-icon name="person-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
+                @endif
 
-                @if($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
+                @if($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()) && $canViewCertificates)
                 <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="system">
                     <a href="{{ Route::has('admin.certificates.index') ? route('admin.certificates.index') : '#' }}" data-label="@lang('certificates.title')">
                         <x-svg-icon name="award" class="vc-ico" />
