@@ -216,9 +216,16 @@
             overflow: visible !important;
             text-overflow: unset !important;
         }
-        /* Ensure the theme body class 2-columns / menu-expanded still work */
-        body.vertical-layout.vertical-menu.menu-expanded .main-menu { width: 260px; }
-        body.vertical-layout.vertical-menu.menu-expanded .app-content { margin-inline-start: 260px; }
+        /* Never let a single wide element break the whole page on mobile. The
+           .table-responsive boxes keep their own inner horizontal scroll. */
+        html, body { max-width: 100%; overflow-x: hidden; }
+        /* Ensure the theme body class 2-columns / menu-expanded still work.
+           Desktop only — on mobile the sidebar is an off-canvas drawer
+           (see sidebar.blade.php) and must NOT reserve a 260px content gutter. */
+        @media (min-width: 992px) {
+            body.vertical-layout.vertical-menu.menu-expanded .main-menu { width: 260px; }
+            body.vertical-layout.vertical-menu.menu-expanded .app-content { margin-inline-start: 260px; }
+        }
 
         /* ============ Table improvements for sub-pages ============ */
         .table thead th {
@@ -568,8 +575,9 @@
         .card > .card-body > .table:not(.table-responsive) { width: 100%; }
         .card .table { width: 100%; }
         @media (max-width: 991.98px) {
-            .card .card-body > .table,
-            .card .card-body > table.table {
+            /* Catch tables anywhere inside a card body (not only direct children),
+               so nested/unwrapped tables scroll instead of breaking the page. */
+            .card .card-body table.table {
                 display: block;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;

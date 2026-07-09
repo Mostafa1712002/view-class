@@ -419,17 +419,25 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
    MOBILE DRAWER  (body.gp-drawer-open)
    ══════════════════════════════════════════ */
 @media (max-width: 767.98px) {
+    /* Physical `right` + transform:none defeat the theme's vertical-overlay-menu
+       translate (which otherwise parks the drawer half off-screen to the LEFT
+       and clips RTL labels). The drawer slides in from the right. */
     .main-menu {
         position: fixed !important;
-        inset-block: 0;
-        inset-inline-start: -284px;
-        width: 284px !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        right: calc(-1 * min(86vw, 300px)) !important;
+        left: auto !important;
+        width: min(86vw, 300px) !important;
+        transform: none !important;
         z-index: 1050;
-        transition: inset-inline-start .27s cubic-bezier(.16,1,.3,1), width .27s;
+        transition: right .27s cubic-bezier(.16,1,.3,1);
     }
-    body.gp-drawer-open .main-menu {
-        inset-inline-start: 0 !important;
-        box-shadow: 4px 0 40px rgba(8,15,28,.5);
+    body.gp-drawer-open .main-menu,
+    body.menu-open .main-menu {
+        right: 0 !important;
+        transform: none !important;
+        box-shadow: -4px 0 40px rgba(8,15,28,.5);
     }
     .gp-drawer-overlay {
         display: none; position: fixed; inset: 0; background: rgba(8,15,28,.55);
@@ -439,6 +447,15 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
     body.gp-drawer-open { overflow: hidden; }
     .app-content { margin-inline-start: 0 !important; }
     body.sidebar-mini .app-content { margin-inline-start: 0 !important; }
+    /* Long menu labels must wrap *inside* the 284px drawer, not spill past the
+       screen edge (was clipping labels like «العمليات التعليمية»). Lay each row
+       out as icon + flexible title. */
+    .main-menu .navigation li > a { display: flex; align-items: center; gap: .5rem; }
+    .main-menu .navigation li > a .menu-title,
+    .main-menu .navigation li ul.menu-content li a .menu-item {
+        flex: 1 1 auto; min-width: 0;
+        white-space: normal; word-break: break-word;
+    }
 }
 @media (min-width: 768px) {
     .gp-drawer-overlay { display: none !important; }
