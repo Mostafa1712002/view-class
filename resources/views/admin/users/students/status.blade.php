@@ -42,7 +42,7 @@
     @endif
 
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center" style="gap:.5rem;">
             <h4 class="mb-0"><i class="la la-file-excel"></i> @lang('users.update_card_title')</h4>
             <a href="{{ route('admin.users.students.import.template') }}" class="btn btn-light btn-sm">
                 <i class="la la-download"></i> @lang('users.update_download_template')

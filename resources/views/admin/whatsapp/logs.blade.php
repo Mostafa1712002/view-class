@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">سجل رسائل واتساب</h1>
         <a href="{{ route('admin.whatsapp.index') }}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-gear me-1"></i>الإعدادات

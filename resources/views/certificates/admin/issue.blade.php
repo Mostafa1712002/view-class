@@ -68,7 +68,7 @@
             </div>
 
             <div class="col-12 mb-1">
-                <label class="d-flex justify-content-between align-items-center">
+                <label class="d-flex flex-wrap gap-1 justify-content-between align-items-center">
                     <span>@lang('certificates.issue_page.select_students') <span class="text-danger">*</span></span>
                     <button type="button" class="btn btn-sm btn-outline-secondary" id="cert-select-all">@lang('certificates.issue_page.select_all')</button>
                 </label>

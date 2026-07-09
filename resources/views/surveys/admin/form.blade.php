@@ -123,7 +123,7 @@
 <script type="text/template" id="question-template">
 <div class="question-block card border mb-2" data-index="__IDX__">
     <div class="card-body py-2">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+        <div class="d-flex flex-wrap gap-1 justify-content-between align-items-center mb-1">
             <strong>@lang('surveys.fields.question_text') #<span class="q-num">__NUM__</span></strong>
             <button type="button" class="btn btn-sm btn-link text-danger remove-question-btn">
                 @lang('surveys.remove_question')

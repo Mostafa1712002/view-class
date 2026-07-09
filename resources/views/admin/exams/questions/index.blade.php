@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
             <h1 class="h3 mb-1">أسئلة الاختبار: {{ $exam->title }}</h1>
             <nav aria-label="breadcrumb">
@@ -15,7 +15,7 @@
                 </ol>
             </nav>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route($routePrefix . '.questions.create', $exam) }}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-1"></i>
                 إضافة سؤال

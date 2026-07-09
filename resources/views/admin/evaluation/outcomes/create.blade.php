@@ -77,7 +77,7 @@
 
                 {{-- Students table --}}
                 <div class="card mb-3">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap:.5rem;">
                         <h5 class="mb-0">@lang('evaluation_outcomes.fields.students')</h5>
                         <button type="button" class="btn btn-sm btn-outline-secondary ev-add-row" id="add-student-row">
                             <i class="la la-plus"></i> إضافة طالب

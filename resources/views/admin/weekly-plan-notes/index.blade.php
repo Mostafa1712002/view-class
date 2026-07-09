@@ -31,6 +31,10 @@
         border: 1px solid #e2e8f0; border-radius: 10px; padding: .5rem .8rem;
         min-width: 240px; height: auto;
     }
+    @media (max-width: 575.98px) {
+        .wpn-toolbar form { flex-wrap: wrap; width: 100%; }
+        .wpn-toolbar .form-control { min-width: 0; flex: 1 1 auto; }
+    }
     .wpn-toolbar .form-control:focus {
         border-color: #fbbf24; box-shadow: 0 0 0 .2rem rgba(207,160,70,.16); outline: none;
     }

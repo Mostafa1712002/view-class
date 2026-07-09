@@ -21,6 +21,7 @@
 
         <form method="POST" action="{{ route('admissions.settings.schools.save') }}">
             @csrf
+            <div class="table-responsive">
             <table class="table table-hover">
                 <thead><tr>
                     <th width="60"><input type="checkbox" id="checkAll"></th>
@@ -40,6 +41,7 @@
                 @endforelse
                 </tbody>
             </table>
+            </div>
             <button class="btn btn-primary"><x-svg-icon name="check2" :size="16" /> حفظ الإعدادات</button>
         </form>
     </div></div>

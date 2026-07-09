@@ -35,8 +35,8 @@
     </ul>
 
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <form method="GET" action="{{ route('admin.libraries.private.index') }}" class="d-flex">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap:.5rem;">
+            <form method="GET" action="{{ route('admin.libraries.private.index') }}" class="d-flex flex-wrap" style="gap:.25rem;">
                 <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm mr-1" placeholder="@lang('libraries.public.search_placeholder')" />
                 <button class="btn btn-outline-primary btn-sm" type="submit"><i class="la la-search"></i></button>
             </form>

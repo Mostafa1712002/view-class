@@ -26,7 +26,7 @@
 
     {{-- Passage body --}}
     <div class="card mb-3"><div class="card-body">
-        <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
             <div>
                 <span class="badge bg-secondary">{{ optional($passage->subject)->name ?? 'بدون مادة' }}</span>
                 <span class="badge bg-info">{{ $stLabels[$passage->status] ?? $passage->status }}</span>

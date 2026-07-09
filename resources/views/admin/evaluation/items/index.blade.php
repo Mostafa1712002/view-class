@@ -57,7 +57,7 @@
     @if ($isWeighted)
         @php $remaining = round(100 - $weightTotal, 2); $over = $weightTotal > 100; @endphp
         <div class="card p-3 mb-3">
-            <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
                 <span class="ev-meta">@lang('evaluation_items.items.weight_total'): <b id="ev-weight-total">{{ $weightTotal }}</b>% <span class="text-muted">@lang('evaluation_items.items.of_100')</span></span>
                 <span class="ev-meta">@lang('evaluation_items.items.weight_remaining'): <b id="ev-weight-remaining">{{ max(0, $remaining) }}</b>%</span>
             </div>

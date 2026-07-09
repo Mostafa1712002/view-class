@@ -3,6 +3,7 @@
     $genderLabel = ['boys'=>'بنين','girls'=>'بنات','mixed'=>'مشترك'];
 @endphp
 
+<div class="table-responsive">
 <table class="table table-sm mb-0">
     <tbody>
         <tr>
@@ -31,3 +32,4 @@
         </tr>
     </tbody>
 </table>
+</div>

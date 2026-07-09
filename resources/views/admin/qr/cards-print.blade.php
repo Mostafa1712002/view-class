@@ -6,7 +6,7 @@
 <style>
     body { font-family: 'Cairo', Tahoma, sans-serif; background:#fff; }
     .cards { display:flex; flex-wrap:wrap; gap:12px; }
-    .qr-card { width:300px; border:2px solid #c9a227; border-radius:10px; padding:14px; text-align:center; page-break-inside:avoid; }
+    .qr-card { width:300px; max-width:100%; box-sizing:border-box; border:2px solid #c9a227; border-radius:10px; padding:14px; text-align:center; page-break-inside:avoid; }
     .qr-card h4 { margin:4px 0; color:#1a2942; }
     .qr-card .meta { font-size:13px; color:#555; }
     .qr-box { margin:10px auto; width:160px; height:160px; }

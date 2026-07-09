@@ -6,9 +6,9 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <h1 class="h3 mb-0">إدخال الدرجات</h1>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('admin.grades.entry.index') }}" class="btn btn-primary">
                 <i class="bi bi-grid me-1"></i>
                 إدخال درجات حسب التقرير

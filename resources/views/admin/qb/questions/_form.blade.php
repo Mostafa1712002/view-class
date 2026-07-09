@@ -22,10 +22,10 @@
     .qbf .section-title { font-size:15px; font-weight:700; color:#0f172a; padding:12px 0 8px; border-bottom:1px solid #e2e8f0; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
     .qbf .form-label { font-weight:600; color:#0f172a; font-size:13px; }
     .qbf .helper { font-size:12px; color:#64748b; margin-top:3px; }
-    .qbf .opt-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .qbf .opt-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
     .qbf .opt-letter { width:32px;height:32px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0; }
     .qbf .opt-row .form-control { flex:1; }
-    .qbf .pair-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .qbf .pair-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
     .qbf .pair-row .form-control { flex:1; }
     .qbf .pair-row .arrow { color:#94a3b8; }
     .qbf .ans-img-btn { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; color:#7a5d12; cursor:pointer; flex-shrink:0; margin:0; }

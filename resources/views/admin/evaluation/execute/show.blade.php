@@ -118,6 +118,7 @@
                 @if (!empty($evaluation->score_breakdown['breakdown']))
                     <hr>
                     <h6>@lang('evaluation.execute.result.breakdown')</h6>
+                    <div class="table-responsive">
                     <table class="table table-sm">
                         <thead><tr><th>@lang('evaluation.execute.result.item')</th><th class="text-center">@lang('evaluation.execute.result.earned')</th><th class="text-center">@lang('evaluation.execute.result.max')</th></tr></thead>
                         <tbody>
@@ -126,6 +127,7 @@
                         @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
                 @if ($evaluation->general_notes)
                     <hr><strong>@lang('evaluation.execute.fields.general_notes'):</strong>
@@ -266,12 +268,12 @@
                             @include('admin.evaluation.execute._evidence', ['nodeType'=>'item','nodeId'=>$iid,'nodeKey'=>$nodeKey])
                         @elseif ($type === 'percentage')
                             @php $chosen = $responses['items'][$iid] ?? null; @endphp
-                            <div class="d-flex align-items-center gap-2" style="max-width:420px;">
+                            <div class="d-flex align-items-center flex-wrap gap-2" style="max-width:420px;">
                                 <input type="number" name="items[{{ $iid }}]" class="form-control form-control-sm ex-pct"
                                        min="0" max="100" step="0.01" data-weight="{{ $item['weight'] }}"
                                        value="{{ $chosen !== null ? rtrim(rtrim(number_format((float) $chosen, 2), '0'), '.') : '' }}"
                                        placeholder="0 - 100">
-                                <span class="text-muted small text-nowrap">
+                                <span class="text-muted small">
                                     @lang('evaluation.execute.fields.of_100')
                                     · @lang('evaluation.execute.fields.weight'): {{ $item['weight'] }}%
                                     · @lang('evaluation.execute.fields.calculated'): <span class="ex-pct-calc fw-bold">{{ $chosen !== null ? round((float) $chosen * (float) $item['weight'] / 100, 2) : 0 }}</span>%

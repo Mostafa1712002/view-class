@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h1 class="h3 mb-0">تسجيل الحضور</h1>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('admin.attendance.daily-report') }}" class="btn btn-outline-info">
                 <i class="bi bi-calendar-day me-1"></i>
                 التقرير اليومي
@@ -84,7 +84,7 @@
     {{-- Attendance Entry --}}
     @if($attendances->count() > 0)
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
                     <h5 class="mb-0">حضور {{ $selectedClass->name }}</h5>
                     <small class="text-muted">{{ \Carbon\Carbon::parse($selectedDate)->format('Y-m-d') }} {{ $selectedPeriod ? '- الحصة ' . $selectedPeriod : '' }}</small>

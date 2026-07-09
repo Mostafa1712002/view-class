@@ -70,7 +70,7 @@
 <form method="POST" action="{{ route('admin.qb.exams.add-from-bank', $exam->id) }}">
     @csrf
     <div class="card"><div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
             <h6 class="mb-0">الأسئلة المعتمدة المتاحة</h6>
             <button type="submit" class="btn btn-warning btn-sm"><x-svg-icon name="plus-circle-fill" :size="15" /> إضافة المحدد إلى الاختبار</button>
         </div>

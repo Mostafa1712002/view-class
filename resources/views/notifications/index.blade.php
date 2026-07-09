@@ -67,6 +67,12 @@
 .vc-notif-page .vc-notif-actions .btn { border-radius: 8px; }
 .vc-notif-pageactions .btn#markAllRead { background: linear-gradient(135deg, var(--gold-200), var(--gold-500)); color:#fff; border:none; }
 .vc-notif-pageactions .btn#markAllRead[disabled] { opacity:.5; }
+@media (max-width: 480px) {
+    /* Long notification text + action buttons don't fit one row on narrow phones; stack them. */
+    .vc-notif-page .vc-notif-item { flex-wrap: wrap; }
+    .vc-notif-page .vc-notif-body { flex-basis: 100%; }
+    .vc-notif-page .vc-notif-actions { flex-basis: 100%; justify-content: flex-end; margin-top: .4rem; }
+}
 </style>
 @endpush
 

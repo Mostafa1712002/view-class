@@ -27,7 +27,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h1 class="h3 mb-0">التقرير اليومي للحضور</h1>
         <a href="{{ route('admin.attendance.index') }}" class="btn btn-outline-primary">
             <i class="bi bi-pencil-square me-1"></i>
@@ -103,7 +103,7 @@
 
         {{-- Details --}}
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
                     <h5 class="mb-0">{{ $report['class']->name }}</h5>
                     <small class="text-muted">{{ \Carbon\Carbon::parse($report['date'])->format('Y-m-d') }}</small>

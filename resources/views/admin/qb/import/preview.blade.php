@@ -37,9 +37,9 @@
 </div>
 
 <div class="pv-card">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h6 class="mb-0">جدول المعاينة</h6>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             @if ($counts['valid'] > 0)
                 <form method="POST" action="{{ route('admin.qb.import.confirm', $batch->id) }}">
                     @csrf

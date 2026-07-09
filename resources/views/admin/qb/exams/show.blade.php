@@ -39,7 +39,7 @@
         <div class="col-md-3 mt-2"><small class="text-muted">النهاية</small><div>{{ $exam->ends_at?->format('Y-m-d H:i') ?? '—' }}</div></div>
     </div>
     @if ($canEdit)
-        <div class="mt-3 d-flex gap-2">
+        <div class="mt-3 d-flex flex-wrap gap-2">
             <a href="{{ route('admin.qb.exams.picker', $exam->id) }}" class="btn btn-warning btn-sm"><x-svg-icon name="plus-circle" :size="15" /> إضافة أسئلة من البنك</a>
             <a href="{{ route('admin.qb.exams.results', $exam->id) }}" class="btn btn-outline-secondary btn-sm"><x-svg-icon name="bar-chart" :size="15" /> النتائج</a>
         </div>

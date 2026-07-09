@@ -43,7 +43,7 @@
                 </div>
                 <div class="col-md-4">
                     {{-- Class picker --}}
-                    <form method="GET" action="{{ route('admin.grade-reports.transcript', $report->id) }}" class="d-flex gap-2">
+                    <form method="GET" action="{{ route('admin.grade-reports.transcript', $report->id) }}" class="d-flex gap-2 flex-wrap">
                         <select name="class_id" class="form-control form-control-sm">
                             <option value="">@lang('grades_admin.pick_class')</option>
                             @foreach($classes as $c)

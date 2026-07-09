@@ -28,6 +28,7 @@
                     <h5 class="mb-0">بيانات الطلب</h5>
                     <span class="badge badge-{{ $application->statusColor() }} p-2">{{ $application->statusLabel() }}</span>
                 </div>
+                <div class="table-responsive">
                 <table class="table table-sm">
                     <tr><th width="35%">اسم الطالب</th><td>{{ $application->student_name ?: '—' }}</td></tr>
                     <tr><th>اسم ولي الأمر</th><td>{{ $application->guardian_name ?: '—' }}</td></tr>
@@ -45,14 +46,17 @@
                     <tr><th>ملاحظة الحالة</th><td>{{ $application->status_note }}</td></tr>
                     @endif
                 </table>
+                </div>
 
                 @if(!empty($application->data))
                 <h6 class="mt-3">حقول إضافية</h6>
+                <div class="table-responsive">
                 <table class="table table-sm">
                     @foreach($application->data as $k => $v)
                         <tr><th width="35%">{{ $k }}</th><td>{{ is_array($v) ? implode(', ', $v) : ($v ?: '—') }}</td></tr>
                     @endforeach
                 </table>
+                </div>
                 @endif
 
                 <div class="mt-3 d-flex gap-2">

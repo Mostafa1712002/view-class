@@ -73,7 +73,7 @@
         <form method="GET" action="{{ route('admin.parents-contact.index') }}" role="search">
             <div style="display:flex;gap:.5rem;flex-wrap:wrap">
                 <input type="text" name="q" value="{{ $q }}" class="form-control"
-                       style="flex:1;min-width:220px" aria-label="ابحث عن ولي أمر"
+                       style="flex:1;min-width:0;max-width:100%" aria-label="ابحث عن ولي أمر"
                        placeholder="ابحث بالاسم أو رقم الجوال أو الجنسية أو الهوية…">
                 <button type="submit" class="btn btn-light">بحث</button>
                 @if($q)

@@ -75,6 +75,7 @@
         </div>
         @if (!empty($evaluation->score_breakdown['breakdown']))
             <hr><h6>@lang('eval_approval.detail.breakdown')</h6>
+            <div class="table-responsive">
             <table class="table table-sm">
                 <thead><tr><th>@lang('eval_approval.detail.item')</th><th class="text-center">@lang('eval_approval.detail.earned')</th><th class="text-center">@lang('eval_approval.detail.max')</th></tr></thead>
                 <tbody>
@@ -83,6 +84,7 @@
                 @endforeach
                 </tbody>
             </table>
+            </div>
         @endif
         @if ($evaluation->general_notes)
             <hr><strong>@lang('eval_approval.detail.general_notes'):</strong>

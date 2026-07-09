@@ -19,7 +19,7 @@
             </ol>
         </div>
     </div>
-    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2">
+    <div class="content-header-right text-md-{{ $isRtl ? 'left' : 'right' }} col-md-3 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} gap-2 flex-wrap">
         <a href="{{ route('admin.grade-reports.transcript', $report->id) }}" class="btn btn-outline-info btn-sm" title="{{ trans('grades_admin.control_transcript') }}">
             <i class="la la-table"></i>
         </a>

@@ -60,7 +60,7 @@
             <img src="{{ asset('storage/' . $item->thumbnail_path) }}" alt="" class="mt-2" style="max-height:60px" />
         @endif
     </div>
-    <div class="col-md-6 col-12 lib-field d-flex align-items-center" style="gap:1.5rem;">
+    <div class="col-md-6 col-12 lib-field d-flex flex-wrap align-items-center" style="gap:.75rem 1.5rem;">
         <div class="form-check">
             <input type="hidden" name="is_public" value="0" />
             <input type="checkbox" name="is_public" value="1" id="lib-publish" class="form-check-input" @checked(old('is_public', $item->is_public ?? true)) />

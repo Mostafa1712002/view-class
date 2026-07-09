@@ -23,6 +23,7 @@
 
             <input type="text" id="fieldSearch" class="form-control mb-3" placeholder="البحث في الحقول...">
 
+            <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead><tr>
                     <th>حقل التسجيل</th>
@@ -50,6 +51,7 @@
                 @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
         <div class="card-footer">
             <button class="btn btn-primary"><x-svg-icon name="check2" :size="16" /> حفظ</button>

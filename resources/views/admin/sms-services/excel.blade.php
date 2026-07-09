@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
                     <h4 class="card-title mb-0"><x-svg-icon name="file-earmark-excel" :size="18" class="me-1" /> رفع ملف الأرقام</h4>
                     <a href="{{ route('admin.sms.excel.template') }}" class="btn btn-sm btn-outline-secondary">
                         <x-svg-icon name="download" :size="14" class="me-1" /> تحميل نموذج Excel

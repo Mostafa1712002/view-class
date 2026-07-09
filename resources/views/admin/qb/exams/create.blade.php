@@ -117,7 +117,7 @@
     </div></div>
     @endif
 
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
         <button type="submit" class="btn btn-warning"><x-svg-icon name="check-circle-fill" :size="15" /> حفظ ومتابعة لاختيار الأسئلة</button>
         <a href="{{ route('admin.qb.exams.index') }}" class="btn btn-outline-secondary">إلغاء</a>
     </div>

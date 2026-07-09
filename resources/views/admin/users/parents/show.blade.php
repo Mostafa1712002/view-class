@@ -183,6 +183,7 @@
                             </a>
                         </div>
                     @else
+                        <div class="table-responsive">
                         <table class="ps-table">
                             <thead>
                                 <tr>
@@ -218,6 +219,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     @endif
                 </div>
             </div>

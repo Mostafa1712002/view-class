@@ -88,7 +88,7 @@
 <div class="card mb-3">
     <div class="card-body py-3">
         @if ($canCreate)
-            <div class="d-flex gap-2 mb-3">
+            <div class="d-flex flex-wrap gap-2 mb-3">
                 <a href="{{ route('admin.qb.exams.create', ['delivery_type' => 'electronic']) }}" class="btn btn-warning btn-sm">
                     <x-svg-icon name="pc-display" :size="15" /> إضافة اختبار إلكتروني
                 </a>

@@ -9,6 +9,12 @@
         position: fixed; z-index: 1080;
         box-shadow: 0 8px 24px rgba(15,23,42,.12), 0 2px 6px rgba(15,23,42,.06);
     }
+    /* On phones there's no room to let the table overflow visibly (body clips
+       horizontal overflow) — restore scrolling so every column stays reachable.
+       The dropdown still floats via position:fixed from the JS below. */
+    @media (max-width: 575.98px) {
+        body.theme-light .table-responsive { overflow-x: auto; }
+    }
 </style>
 @endpush
 @section('content')

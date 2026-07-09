@@ -7,10 +7,13 @@
 <style>
     .bk-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:1.5rem; box-shadow:0 1px 2px rgba(15,23,42,.04); margin-bottom:1rem; }
     .bk-card .section-title { font-size:.8rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.6px; margin-bottom:.85rem; padding-bottom:.5rem; border-bottom:1px solid #f1f5f9; }
-    .bk-detail-row { display:flex; gap:.5rem; padding:.5rem 0; border-bottom:1px solid #f8fafc; }
+    .bk-detail-row { display:flex; flex-wrap:wrap; gap:.5rem; padding:.5rem 0; border-bottom:1px solid #f8fafc; }
     .bk-detail-row:last-child { border-bottom:0; }
     .bk-detail-label { min-width:160px; font-size:.85rem; font-weight:600; color:#64748b; }
     .bk-detail-value { font-size:.9rem; color:#0f172a; }
+    @media (max-width:420px) {
+        .bk-detail-label { min-width:100%; }
+    }
 
     .bk-pill { display:inline-flex; align-items:center; gap:.3rem; padding:.2rem .6rem; border-radius:999px; font-size:.72rem; font-weight:600; border:1px solid transparent; }
     .bk-pill.requested { background:#fffbeb; color:#92400e; border-color:#fde68a; }

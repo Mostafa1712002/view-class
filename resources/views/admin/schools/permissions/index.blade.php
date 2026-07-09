@@ -22,11 +22,11 @@
     @include('components.alerts')
 
     <div class="card mb-3">
-        <div class="card-body d-flex justify-content-between align-items-center">
+        <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
             <small class="text-muted">@lang('schools.permissions_autosave_hint')</small>
-            <form action="{{ route('admin.schools.permissions.copy', $school) }}" method="POST" class="d-flex gap-2 align-items-center" onsubmit="return confirm(@json(__('schools.confirm_copy_permissions')))">
+            <form action="{{ route('admin.schools.permissions.copy', $school) }}" method="POST" class="d-flex flex-wrap gap-2 align-items-center" onsubmit="return confirm(@json(__('schools.confirm_copy_permissions')))">
                 @csrf
-                <select name="source_school_id" class="form-control form-control-sm" required style="min-width:240px;">
+                <select name="source_school_id" class="form-control form-control-sm" required style="width:240px; max-width:100%;">
                     <option value="">@lang('schools.copy_source_school')...</option>
                     @foreach($otherSchools as $os)
                         <option value="{{ $os->id }}">{{ $os->name_ar ?: $os->name }}</option>

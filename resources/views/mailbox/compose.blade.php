@@ -123,7 +123,7 @@
 
                 {{-- Search + select-all --}}
                 <div class="form-group" style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end">
-                    <div style="flex:1;min-width:220px">
+                    <div style="flex:1;min-width:0;max-width:100%">
                         <label class="form-label" for="recipientSearch">@lang('mailbox.search_recipients')</label>
                         <input type="search" id="recipientSearch" class="form-control"
                                placeholder="@lang('mailbox.search_recipients_placeholder')" autocomplete="off">

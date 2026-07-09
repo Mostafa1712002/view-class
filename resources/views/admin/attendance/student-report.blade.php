@@ -27,7 +27,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h1 class="h3 mb-0">تقرير حضور الطالب</h1>
         <a href="{{ route('admin.attendance.index') }}" class="btn btn-outline-primary">
             <i class="bi bi-pencil-square me-1"></i>
@@ -173,7 +173,7 @@
             {{-- Attendance Details --}}
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <div>
                             <h5 class="mb-0">سجل الحضور: {{ $report['student']->name }}</h5>
                             <small class="text-muted">{{ $report['academic_year']->name }}</small>

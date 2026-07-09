@@ -19,7 +19,7 @@
             </ol>
         </div>
     </div>
-    <div class="content-header-right col-md-4 col-12 d-flex justify-content-{{ $isRtl ? 'start' : 'end' }} align-items-center">
+    <div class="content-header-right col-md-4 col-12 d-flex flex-wrap gap-1 justify-content-{{ $isRtl ? 'start' : 'end' }} align-items-center">
         <a href="{{ route('admin.certificates.index') }}" class="btn btn-secondary mr-1">
             <x-svg-icon :name="$isRtl ? 'arrow-right' : 'arrow-left'" /> @lang('certificates.tpl.back')
         </a>

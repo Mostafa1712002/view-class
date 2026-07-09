@@ -9,6 +9,9 @@
 <link rel="stylesheet" href="{{ asset('app-assets/vendors/css/calendars/fullcalendar.min.css') }}">
 <style>
     #school-calendar-view { max-width: 100%; background: #fff; padding: 1rem; border-radius: .5rem; }
+    /* Only let the calendar grid scroll horizontally on phones; on desktop keep
+       overflow visible so FullCalendar's "+more" popover isn't clipped. */
+    @media (max-width: 767.98px) { #school-calendar-view { overflow-x: auto; } }
     .fc-event { cursor: default; }
     .event-detail-popup { display: none; position: absolute; z-index: 9999; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; max-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
 </style>

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
             <h1 class="h3 mb-1">نتائج الاختبار: {{ $exam->title }}</h1>
             <nav aria-label="breadcrumb">

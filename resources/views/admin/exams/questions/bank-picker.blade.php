@@ -6,7 +6,7 @@
 <div class="container-fluid">
 
     {{-- Header --}}
-    <div class="content-header-row d-flex justify-content-between align-items-center mb-4">
+    <div class="content-header-row d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
             <h1 class="h3 mb-1">{{ __('exam_bank.picker_title') }}</h1>
             <p class="text-muted mb-0">{{ $exam->title }}</p>

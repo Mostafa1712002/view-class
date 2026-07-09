@@ -27,9 +27,9 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <h1 class="h3 mb-0">تقرير الصف</h1>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('admin.grades.index') }}" class="btn btn-outline-primary">
                 <i class="bi bi-pencil-square me-1"></i>
                 إدخال الدرجات

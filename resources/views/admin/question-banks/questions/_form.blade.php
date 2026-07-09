@@ -23,7 +23,7 @@
         background:#fef3c7; color:#92400e; font-size:11px; padding:3px 8px; border-radius:999px; font-weight:700;
     }
     .q-form .helper { font-size:12px; color:#64748b; margin-top:4px; }
-    .q-form .answer-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .q-form .answer-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
     .q-form .answer-row .opt-letter {
         width:34px; height:34px; border-radius:50%; background:#f1f5f9; color:#0f172a;
         display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;
@@ -35,7 +35,7 @@
     }
     .q-form .answer-row .correct-wrap input { margin:0; }
     .q-form .answer-row .btn-rm { flex-shrink:0; }
-    .q-form .pair-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .q-form .pair-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
     .q-form .pair-row input { flex:1; }
     .q-form .pair-row .arrow { color:#94a3b8; font-size:20px; }
     .q-form .actions-bar {

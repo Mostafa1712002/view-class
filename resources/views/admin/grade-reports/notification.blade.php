@@ -57,7 +57,7 @@
     {{-- Class + student pickers --}}
     <div class="card mb-3">
         <div class="card-body">
-            <form method="GET" action="{{ route('admin.grade-reports.notification', $report->id) }}" class="row g-3 align-items-end">
+            <form method="GET" action="{{ route('admin.grade-reports.notification', $report->id) }}" class="row g-3 align-items-end flex-wrap">
                 <div class="col-md-4">
                     <label class="form-label small">{{ trans('grades_admin.class') }}</label>
                     <select name="class_id" class="form-control form-control-sm" onchange="this.form.submit()">
