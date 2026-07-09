@@ -22,13 +22,20 @@ final class EloquentScopeRepository implements ScopeRepository
                 ->toArray();
         }
 
-        $schoolCompanyId = optional($user->school)->educational_company_id;
-        if (! $schoolCompanyId) {
+        // Companies of every school the admin is linked to (card #307).
+        $companyIds = School::query()
+            ->whereIn('id', $user->managedSchoolIds())
+            ->pluck('educational_company_id')
+            ->filter()
+            ->unique()
+            ->all();
+        if (empty($companyIds)) {
             return [];
         }
 
         return EducationalCompany::query()
-            ->whereKey($schoolCompanyId)
+            ->whereIn('id', $companyIds)
+            ->orderBy('name_ar')
             ->get(['id', 'name_ar', 'name_en'])
             ->toArray();
     }
@@ -42,7 +49,8 @@ final class EloquentScopeRepository implements ScopeRepository
         }
 
         if (! $user->isSuperAdmin()) {
-            $query->where('id', $user->school_id);
+            // Own school plus any schools the admin is linked to (card #307).
+            $query->whereIn('id', $user->managedSchoolIds());
         }
 
         return $query->get(['id', 'name_ar', 'name_en', 'educational_company_id'])->toArray();
@@ -101,7 +109,7 @@ final class EloquentScopeRepository implements ScopeRepository
             return School::whereKey($schoolId)->exists();
         }
 
-        return $user->school_id === $schoolId;
+        return in_array((int) $schoolId, $user->managedSchoolIds(), true);
     }
 
     public function yearExistsFor(User $user, int $yearId): bool

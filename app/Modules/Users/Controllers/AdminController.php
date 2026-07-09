@@ -5,6 +5,7 @@ namespace App\Modules\Users\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\JobTitle;
 use App\Models\Role;
+use App\Models\School;
 use App\Models\User;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use App\Modules\Users\Repositories\Contracts\AdminRepository;
@@ -114,7 +115,18 @@ class AdminController extends Controller
     {
         $jobTitles = JobTitle::query()->forSchool($this->activeSchoolId())->active()->orderBy('sort_order')->get();
         $selectedJobTitleId = (int) $request->query('job_title_id') ?: null;
-        return view('admin.users.admins.create', compact('jobTitles', 'selectedJobTitleId'));
+        $schools = $this->assignableSchools();
+        $selectedSchoolIds = [];
+        return view('admin.users.admins.create', compact('jobTitles', 'selectedJobTitleId', 'schools', 'selectedSchoolIds'));
+    }
+
+    /** Schools a super-admin may link an admin to (empty collection otherwise). */
+    private function assignableSchools()
+    {
+        if (! auth()->user()?->isSuperAdmin()) {
+            return collect();
+        }
+        return School::orderBy('sort_order')->orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
     }
 
     public function store(Request $request): RedirectResponse
@@ -147,6 +159,10 @@ class AdminController extends Controller
             if ($role) {
                 $user->roles()->syncWithoutDetaching($role);
             }
+            // Link the admin to the schools it manages (super-admin only, card #307).
+            if (auth()->user()?->isSuperAdmin() && ! empty($data['school_ids'])) {
+                $user->managedSchools()->sync($data['school_ids']);
+            }
         });
         return redirect()->route('admin.users.admins.index')
             ->with('status', __('users.admin_created'));
@@ -160,7 +176,9 @@ class AdminController extends Controller
         }
         $jobTitles = JobTitle::query()->forSchool($this->activeSchoolId())->active()->orderBy('sort_order')->get();
         $selectedJobTitleId = $admin->job_title_id;
-        return view('admin.users.admins.edit', compact('admin', 'jobTitles', 'selectedJobTitleId'));
+        $schools = $this->assignableSchools();
+        $selectedSchoolIds = $admin->managedSchools()->pluck('schools.id')->all();
+        return view('admin.users.admins.edit', compact('admin', 'jobTitles', 'selectedJobTitleId', 'schools', 'selectedSchoolIds'));
     }
 
     public function show(int $id): View|RedirectResponse
@@ -199,6 +217,10 @@ class AdminController extends Controller
             $admin->plain_password_for_card = encrypt($data['password']);
         }
         $admin->save();
+        // Sync managed schools (super-admin only, card #307).
+        if (auth()->user()?->isSuperAdmin()) {
+            $admin->managedSchools()->sync($data['school_ids'] ?? []);
+        }
         return redirect()->route('admin.users.admins.index')
             ->with('status', __('users.admin_updated'));
     }
@@ -296,6 +318,8 @@ class AdminController extends Controller
             'whatsapp' => 'nullable|string|max:32',
             'password' => 'nullable|string|min:6|max:64',
             'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'school_ids' => 'nullable|array',
+            'school_ids.*' => 'integer|exists:schools,id',
         ]);
     }
 

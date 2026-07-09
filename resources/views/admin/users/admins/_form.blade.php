@@ -139,6 +139,27 @@
     </div>
 </div>
 
+{{-- Section: Linked schools (super-admin only, card #307) --}}
+@if(auth()->user()?->isSuperAdmin() && ($schools ?? collect())->isNotEmpty())
+    @php $selSchools = array_map('intval', old('school_ids', $selectedSchoolIds ?? [])); @endphp
+    <div class="ad-form-section">
+        <div class="ad-section-title">
+            <i class="la la-university"></i> @lang('users.admin_schools_section')
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12 mb-2">
+                <label class="ad-form-label">@lang('users.admin_schools_label')</label>
+                <select name="school_ids[]" class="form-control select2-schools" multiple size="6">
+                    @foreach($schools as $sc)
+                        <option value="{{ $sc->id }}" @selected(in_array((int) $sc->id, $selSchools, true))>{{ $sc->name_ar ?? $sc->name_en }}</option>
+                    @endforeach
+                </select>
+                <small class="text-muted">@lang('users.admin_schools_hint')</small>
+            </div>
+        </div>
+    </div>
+@endif
+
 {{-- Section: Profile photo --}}
 <div class="ad-form-section">
     <div class="ad-section-title">

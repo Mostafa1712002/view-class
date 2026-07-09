@@ -20,6 +20,12 @@ trait HasSchoolScope
             $scoped = session('scope.school_id') ?? session('admin.scope.school_id');
             return (int) ($scoped ?: $u->school_id) ?: null;
         }
+        // Multi-school admins (card #307) may switch among their linked schools
+        // via the header scope selector; honour it when the school is allowed.
+        $scoped = session('scope.school_id');
+        if ($scoped && in_array((int) $scoped, $u->managedSchoolIds(), true)) {
+            return (int) $scoped;
+        }
         return $u->school_id;
     }
 

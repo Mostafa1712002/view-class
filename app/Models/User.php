@@ -15,6 +15,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
 
+    /** Per-request memo for managedSchoolIds(); not a DB attribute. */
+    protected ?array $managedSchoolIdsCache = null;
+
     protected $fillable = [
         'name',
         'name_ar',
@@ -95,6 +98,30 @@ class User extends Authenticatable
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
+    }
+
+    /** Schools this admin account is explicitly linked to (card #307). */
+    public function managedSchools(): BelongsToMany
+    {
+        return $this->belongsToMany(School::class, 'admin_school', 'admin_id', 'school_id')->withTimestamps();
+    }
+
+    /**
+     * School ids the admin may operate within: its primary school plus any
+     * explicitly linked schools. Falls back to just the primary school when no
+     * links exist, so pre-#307 admins behave exactly as before.
+     */
+    public function managedSchoolIds(): array
+    {
+        if (! isset($this->managedSchoolIdsCache)) {
+            $ids = $this->managedSchools()->pluck('schools.id')->all();
+            if ($this->school_id) {
+                $ids[] = (int) $this->school_id;
+            }
+            $this->managedSchoolIdsCache = array_values(array_unique(array_map('intval', $ids)));
+        }
+
+        return $this->managedSchoolIdsCache;
     }
 
     public function section(): BelongsTo
