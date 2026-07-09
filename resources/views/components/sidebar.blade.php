@@ -1145,6 +1145,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('student.reports.exam-schedule') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.reports.exam-schedule') }}" data-label="جدول الاختبارات"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-title">جدول الاختبارات</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.portfolio') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.portfolio') }}" data-label="ملف الإنجاز"><x-svg-icon name="trophy" class="vc-ico" /><span class="menu-title">ملف الإنجاز</span></a></li>
                 <li class="nav-item {{ request()->routeIs('my.certificates.*') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('my.certificates.index') ? route('my.certificates.index') : '#' }}" data-label="@lang('certificates.my_title')"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('certificates.my_title')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('my.behavior.*') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('my.behavior.index') ? route('my.behavior.index') : '#' }}" data-label="@lang('behavior.my.title')"><x-svg-icon name="clipboard-pulse" class="vc-ico" /><span class="menu-title">@lang('behavior.my.title')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.special-education') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.special-education') ? route('student.special-education') : '#' }}" data-label="@lang('student.special_ed.title')"><x-svg-icon name="heart" class="vc-ico" /><span class="menu-title">@lang('student.special_ed.title')</span></a></li>
             </div>
 
@@ -1239,6 +1240,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </li>
                 <li class="nav-item {{ request()->routeIs('my.libraries.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.libraries.index') ? route('my.libraries.index') : '#' }}" data-label="@lang('shell.nav_libraries')"><x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span></a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('my.behavior.*') ? 'active' : '' }}" data-section="parent">
+                    <a href="{{ Route::has('my.behavior.index') ? route('my.behavior.index') : '#' }}" data-label="@lang('behavior.my.title')"><x-svg-icon name="clipboard-pulse" class="vc-ico" /><span class="menu-title">@lang('behavior.my.title')</span></a>
                 </li>
                 <li class="nav-item {{ request()->routeIs('admin.my-evaluations.*') || request()->routeIs('admin.evaluations.subjects') || request()->routeIs('admin.evaluations.execute.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('admin.my-evaluations.index') ? route('admin.my-evaluations.index') : '#' }}" data-label="@lang('shell.nav_evaluations')"><x-svg-icon name="star" class="vc-ico" /><span class="menu-title">@lang('shell.nav_evaluations')</span></a>

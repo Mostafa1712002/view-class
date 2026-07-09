@@ -314,6 +314,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('my/policies', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'index'])->name('policies.my.index');
     Route::get('my/policies/{id}', [\App\Modules\Policies\Controllers\MyPolicyController::class, 'show'])->whereNumber('id')->name('policies.my.show');
 
+    // === My behaviour points (student sees own, parent sees children) ===
+    Route::get('my/behavior', [\App\Modules\Behavior\Controllers\MyBehaviorController::class, 'index'])->name('my.behavior.index');
+
     // === Parent Libraries page (ولي الأمر) — card #182 ===
     Route::get('my/libraries', [\App\Modules\Libraries\Controllers\ParentLibraryController::class, 'index'])->name('my.libraries.index');
 

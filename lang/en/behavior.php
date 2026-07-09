@@ -170,4 +170,9 @@ return [
         'title' => 'Behaviour recorded',
         'body' => 'A behaviour (:behavior) was recorded for :student.',
     ],
+    'my' => [
+        'title' => 'My conduct points',
+        'empty' => 'No behaviour records yet.',
+        'none' => 'No points data to show.',
+    ],
 ];
