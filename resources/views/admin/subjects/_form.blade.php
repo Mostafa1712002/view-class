@@ -178,6 +178,10 @@
     body.theme-light .icon-grid {
         display: flex; flex-wrap: wrap; gap: .6rem;
     }
+    /* The simple-line-icons stylesheet has a global [data-icon]:before{content:attr(data-icon)}
+       rule that leaks the raw class name (e.g. "la-bell") as text onto these buttons.
+       The real glyph is the inner <i class="la ...">, so kill the stray pseudo-element. */
+    body.theme-light .icon-pick::before { content: none !important; }
     body.theme-light .icon-pick {
         width: 54px; height: 54px; border-radius: 12px;
         border: 1px solid #e5e7eb; background: #fff; color: #64748b;

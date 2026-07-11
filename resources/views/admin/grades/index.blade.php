@@ -223,6 +223,15 @@
     @endif
 </div>
 
+@push('styles')
+<style>
+    /* Hide native number-input spinner arrows — they crowd the narrow grade cells. */
+    .grade-input::-webkit-outer-spin-button,
+    .grade-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .grade-input { -moz-appearance: textfield; appearance: textfield; }
+</style>
+@endpush
+
 @push('scripts')
 <script>
     document.querySelectorAll('.grade-input').forEach(input => {
