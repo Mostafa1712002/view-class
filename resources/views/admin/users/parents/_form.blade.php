@@ -149,6 +149,18 @@
     <div class="head"><h5><i class="la la-id-badge"></i> @lang('users.parent_account_info')</h5></div>
     <div class="body">
         <div class="pf-grid cols-3">
+            @if(($schools ?? collect())->isNotEmpty())
+            <div class="pf-field">
+                <label>@lang('users.school') <span class="req">*</span></label>
+                @php $selSchool = old('school_id', $parent->school_id ?? ''); @endphp
+                <select name="school_id" class="form-control" required>
+                    <option value="">@lang('users.select_school')</option>
+                    @foreach($schools as $s)
+                        <option value="{{ $s->id }}" @selected((string)$selSchool === (string)$s->id)>{{ $s->name_ar ?: $s->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div class="pf-field">
                 <label>@lang('users.username') <span class="req">*</span></label>
                 <input type="text" name="username" class="form-control" value="{{ old('username', $parent->username ?? '') }}" required />

@@ -64,6 +64,18 @@
         {{-- Identity & work --}}
         <h6 class="text-muted mb-2"><i class="la la-id-card"></i> @lang('users.teacher_form_identity')</h6>
         <div class="row">
+            @if(($schools ?? collect())->isNotEmpty())
+            <div class="form-group col-md-4">
+                <label>@lang('users.school') <span class="text-danger">*</span></label>
+                @php $selSchool = old('school_id', $teacher->school_id ?? ''); @endphp
+                <select name="school_id" class="form-control" required>
+                    <option value="">@lang('users.select_school')</option>
+                    @foreach($schools as $s)
+                        <option value="{{ $s->id }}" @selected((string)$selSchool === (string)$s->id)>{{ $s->name_ar ?: $s->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div class="form-group col-md-4">
                 <label>@lang('users.passport_number')</label>
                 <input type="text" name="passport_number" class="form-control"

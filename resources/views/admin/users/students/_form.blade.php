@@ -3,7 +3,7 @@
 @php
     $val = function ($key, $modelKey = null) use ($student, $profile) {
         $modelKey = $modelKey ?? $key;
-        if (in_array($key, ['name','username','email','national_id','gender','date_of_birth','phone','address','section_id','class_room_id','name_en'])) {
+        if (in_array($key, ['name','username','email','national_id','gender','date_of_birth','phone','address','section_id','class_room_id','name_en','school_id'])) {
             return old($key, $student->{$modelKey} ?? '');
         }
         return old($key, $profile->{$modelKey} ?? '');
@@ -55,6 +55,10 @@
             [
                 'icon' => 'la la-graduation-cap', 'title' => __('users.student_school_info'),
                 'fields' => [
+                    ...(($schools ?? collect())->isNotEmpty() ? [[
+                        'name' => 'school_id', 'label' => __('users.school'), 'type' => 'select', 'required' => true, 'col' => 'col-md-3',
+                        'options' => ['' => __('users.select_school')] + $schools->mapWithKeys(fn ($s) => [$s->id => ($s->name_ar ?: $s->name)])->toArray(),
+                    ]] : []),
                     ['name' => 'section_id', 'label' => __('users.grade_level'), 'type' => 'select', 'col' => 'col-md-3',
                         'attrs' => 'id="student-section-select"',
                         'options' => ['' => __('users.select_section')] + ($sections->pluck('name', 'id')->toArray())],

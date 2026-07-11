@@ -180,6 +180,8 @@ return [
     'no_results' => 'لا توجد نتائج.',
     'select_class' => 'اختر فصلاً',
     'select_section' => 'اختر صفًا',
+    'school' => 'المدرسة',
+    'select_school' => 'اختر المدرسة',
     'select_nationality' => 'اختر الجنسية',
     'select_job_title' => 'اختر مسمى وظيفيًا',
     'all' => 'الكل',

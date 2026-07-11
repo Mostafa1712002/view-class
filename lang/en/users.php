@@ -174,6 +174,8 @@ return [
     'no_results' => 'No results found.',
     'select_class' => 'Select a class',
     'select_section' => 'Select a grade',
+    'school' => 'School',
+    'select_school' => 'Select a school',
     'select_job_title' => 'Select a job title',
     'all' => 'All',
     'platform_name' => 'Platform',

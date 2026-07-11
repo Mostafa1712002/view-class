@@ -120,19 +120,15 @@ class AdminController extends Controller
         return view('admin.users.admins.create', compact('jobTitles', 'selectedJobTitleId', 'schools', 'selectedSchoolIds'));
     }
 
-    /** Schools a super-admin may link an admin to (empty collection otherwise). */
-    private function assignableSchools()
-    {
-        if (! auth()->user()?->isSuperAdmin()) {
-            return collect();
-        }
-        return School::orderBy('sort_order')->orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
-    }
-
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateAdmin($request);
-        $schoolId = $this->activeSchoolId();
+        // Primary school = first linked school a super-admin picked; a school
+        // admin is forced to their own scope. (assignableSchools/writeSchoolId
+        // live in HasSchoolScope, shared with the student/teacher/parent forms.)
+        $schoolId = auth()->user()?->isSuperAdmin()
+            ? ((int) ($data['school_ids'][0] ?? 0) ?: null)
+            : $this->activeSchoolId();
         $photoPath = $request->hasFile('profile_picture')
             ? $request->file('profile_picture')->store('admins', 'public')
             : null;

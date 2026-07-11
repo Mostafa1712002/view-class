@@ -41,13 +41,13 @@ class ParentController extends Controller
 
     public function create(): View
     {
-        return view('admin.users.parents.create');
+        return view('admin.users.parents.create', ['schools' => $this->assignableSchools()]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateParent($request);
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->writeSchoolId($request);
         DB::transaction(function () use ($data, $request, $schoolId) {
             $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
             $user = User::create($this->withoutNulls(array_merge($this->mapProfile($data), [
@@ -76,7 +76,8 @@ class ParentController extends Controller
         if (!$parent) {
             return redirect()->route('admin.users.parents.index')->with('error', __('users.not_found'));
         }
-        return view('admin.users.parents.edit', compact('parent'));
+        $schools = $this->assignableSchools();
+        return view('admin.users.parents.edit', compact('parent', 'schools'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -90,6 +91,9 @@ class ParentController extends Controller
             'username' => $data['username'],
             'email' => ($data['email'] ?? null) ?: ($data['username'].'@viewclass.local'),
         ]));
+        if (auth()->user()?->isSuperAdmin()) {
+            $parent->school_id = $this->writeSchoolId($request);
+        }
         if (!empty($data['password'])) {
             $parent->password = Hash::make($data['password']);
             $parent->plain_password_for_card = encrypt($data['password']);
@@ -344,6 +348,7 @@ class ParentController extends Controller
     private function validateParent(Request $request, ?int $id = null): array
     {
         return $request->validate([
+            'school_id' => (auth()->user()?->isSuperAdmin() ? 'required' : 'nullable').'|integer|exists:schools,id',
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
             'first_name' => 'nullable|string|max:128',

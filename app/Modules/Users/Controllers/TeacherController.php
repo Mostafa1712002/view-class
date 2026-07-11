@@ -43,13 +43,13 @@ class TeacherController extends Controller
 
     public function create(): View
     {
-        return view('admin.users.teachers.create');
+        return view('admin.users.teachers.create', ['schools' => $this->assignableSchools()]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateTeacher($request);
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->writeSchoolId($request);
         DB::transaction(function () use ($data, $request, $schoolId) {
             $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
             $name = $this->composeArabicName($data);
@@ -92,7 +92,8 @@ class TeacherController extends Controller
             return redirect()->route('admin.users.teachers.index')->with('error', __('users.not_found'));
         }
         $teacher->load('teacherProfile');
-        return view('admin.users.teachers.edit', compact('teacher'));
+        $schools = $this->assignableSchools();
+        return view('admin.users.teachers.edit', compact('teacher', 'schools'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -105,6 +106,9 @@ class TeacherController extends Controller
         DB::transaction(function () use ($teacher, $data, $request) {
             $name = $this->composeArabicName($data);
             $nameEn = $this->composeEnglishName($data);
+            if (auth()->user()?->isSuperAdmin()) {
+                $teacher->school_id = $this->writeSchoolId($request);
+            }
             $teacher->fill([
                 'name' => $name,
                 'name_ar' => $name,
@@ -491,6 +495,7 @@ class TeacherController extends Controller
     private function validateTeacher(Request $request, ?int $id = null): array
     {
         return $request->validate([
+            'school_id' => (auth()->user()?->isSuperAdmin() ? 'required' : 'nullable').'|integer|exists:schools,id',
             // legacy single-field name kept optional for back-compat
             'name' => 'nullable|string|max:255',
             // Arabic name parts

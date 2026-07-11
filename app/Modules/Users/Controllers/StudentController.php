@@ -146,14 +146,15 @@ class StudentController extends Controller
         $schoolId = $this->activeSchoolId();
         $sections = Section::query()->where('school_id', $schoolId)->orderBy('name')->get();
         $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
+        $schools = $this->assignableSchools();
 
-        return view('admin.users.students.create', compact('sections', 'classes'));
+        return view('admin.users.students.create', compact('sections', 'classes', 'schools'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateStudent($request);
-        $schoolId = $this->activeSchoolId();
+        $schoolId = $this->writeSchoolId($request);
 
         $user = DB::transaction(function () use ($data, $schoolId) {
             $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
@@ -223,8 +224,9 @@ class StudentController extends Controller
         $sections = Section::query()->where('school_id', $schoolId)->orderBy('name')->get();
         $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
         $profile = StudentProfile::firstOrNew(['user_id' => $student->id]);
+        $schools = $this->assignableSchools();
 
-        return view('admin.users.students.edit', compact('student', 'sections', 'classes', 'profile'));
+        return view('admin.users.students.edit', compact('student', 'sections', 'classes', 'profile', 'schools'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -249,6 +251,11 @@ class StudentController extends Controller
             'section_id' => $data['section_id'] ?? null,
             'class_room_id' => $data['class_room_id'] ?? null,
         ]);
+        // Super-admin may re-file a student under a different school; a school
+        // admin never changes it (writeSchoolId returns their own scope).
+        if (auth()->user()?->isSuperAdmin()) {
+            $student->school_id = $this->writeSchoolId($request);
+        }
         if (! empty($data['password'])) {
             $student->password = Hash::make($data['password']);
             $student->plain_password_for_card = encrypt($data['password']);
@@ -655,6 +662,7 @@ class StudentController extends Controller
     private function validateStudent(Request $request, ?int $id = null): array
     {
         return $request->validate([
+            'school_id' => (auth()->user()?->isSuperAdmin() ? 'required' : 'nullable').'|integer|exists:schools,id',
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
             'username' => 'required|string|max:64|unique:users,username'.($id ? ','.$id : ''),

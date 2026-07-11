@@ -2,8 +2,40 @@
 
 namespace App\Modules\Users\Controllers\Concerns;
 
+use App\Models\School;
+use Illuminate\Http\Request;
+
 trait HasSchoolScope
 {
+    /**
+     * Schools the current actor may assign a user to. Super-admin → every
+     * school; anyone else → empty (their school is forced, so the create/edit
+     * forms hide the picker). Mirrors the multi-school picker from card #307.
+     */
+    protected function assignableSchools()
+    {
+        if (! auth()->user()?->isSuperAdmin()) {
+            return collect();
+        }
+
+        return School::orderBy('sort_order')->orderBy('name_ar')
+            ->get(['id', 'name', 'name_ar', 'name_en']);
+    }
+
+    /**
+     * Resolve which school a create/edit writes to. A super-admin picks it
+     * explicitly via the required 'school_id' field; everyone else is forced
+     * to their own active scope and can never file a user under another school.
+     */
+    protected function writeSchoolId(Request $request): ?int
+    {
+        if (auth()->user()?->isSuperAdmin()) {
+            return (int) $request->input('school_id') ?: null;
+        }
+
+        return $this->activeSchoolId();
+    }
+
     /**
      * Resolve the active school id from the authenticated user, falling back
      * to a session-stored scope (used by super-admin to switch schools).
