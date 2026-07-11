@@ -95,7 +95,14 @@ async function recordFlow(browser, flow) {
       const step = flow.steps[i];
       // Step 0's page is already loaded by the first-paint goto above.
       if (step.goto && i > 0) await page.goto(BASE + step.goto, { waitUntil: 'networkidle' }).catch(() => {});
-      if (step.scroll) await page.evaluate(y => window.scrollTo({ top: y, behavior: 'smooth' }), step.scroll).catch(() => {});
+      // The Vuexy layout scrolls the <body> element, not the window — scroll all
+      // three candidates so `scroll` works regardless of which one owns overflow.
+      if (step.scroll) await page.evaluate(y => {
+        const opt = { top: y, behavior: 'smooth' };
+        window.scrollTo(opt);
+        document.documentElement.scrollTo && document.documentElement.scrollTo(opt);
+        document.body.scrollTo && document.body.scrollTo(opt);
+      }, step.scroll).catch(() => {});
       await overlay(page, { id: flow.id, title: flow.title, caption: step.caption });
       await sleep(step.dwell || 4000);
     }
