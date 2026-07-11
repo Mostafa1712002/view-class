@@ -21,8 +21,6 @@
 </div>
 
 <div class="content-body">
-    @include('components.alerts')
-
     <div class="card">
         <div class="card-header"><h5 class="mb-0">@lang('schools.edit_class')</h5></div>
         <div class="card-body">
@@ -36,6 +34,15 @@
                 <div class="col-md-2">
                     <label class="form-label">@lang('schools.grade_level_number')</label>
                     <input type="number" min="1" max="12" name="grade_level" class="form-control" value="{{ old('grade_level', $class->grade_level) }}" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">@lang('schools.student_gender')</label>
+                    @php $cg = old('gender', $class->gender); @endphp
+                    <select name="gender" class="form-control" required>
+                        <option value="boys" @selected($cg==='boys')>@lang('schools.gender_boys')</option>
+                        <option value="girls" @selected($cg==='girls')>@lang('schools.gender_girls')</option>
+                        <option value="mixed" @selected($cg==='mixed')>@lang('schools.gender_mixed')</option>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">@lang('schools.capacity')</label>

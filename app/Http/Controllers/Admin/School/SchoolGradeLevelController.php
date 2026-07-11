@@ -25,9 +25,10 @@ class SchoolGradeLevelController extends Controller
 
     public function storeSection(Request $request, School $school)
     {
+        // Gender moved to the class (فصل) — the grade (صف) no longer carries it
+        // (card #315). The sections.gender column defaults to 'male' in the DB.
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'gender' => 'required|in:male,female',
             'level' => 'required|in:primary,intermediate,secondary',
         ]);
         $validated['school_id'] = $school->id;
@@ -62,6 +63,7 @@ class SchoolGradeLevelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|min:1|max:12',
+            'gender' => 'required|in:boys,girls,mixed',
             'lead_teacher_id' => 'nullable|exists:users,id',
             'capacity' => 'required|integer|min:1|max:200',
             'academic_year_id' => 'required|exists:academic_years,id',
@@ -124,6 +126,7 @@ class SchoolGradeLevelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|min:1|max:12',
+            'gender' => 'required|in:boys,girls,mixed',
             'lead_teacher_id' => 'nullable|exists:users,id',
             'capacity' => 'required|integer|min:1|max:200',
             'academic_year_id' => 'required|exists:academic_years,id',

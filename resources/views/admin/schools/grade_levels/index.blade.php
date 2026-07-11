@@ -19,8 +19,6 @@
 </div>
 
 <div class="content-body">
-    @include('components.alerts')
-
     {{-- Add grade level (= section) --}}
     <div class="card mb-3">
         <div class="card-header"><h5 class="mb-0">@lang('schools.add_grade_level')</h5></div>
@@ -40,13 +38,6 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">@lang('common.gender')</label>
-                    <select name="gender" class="form-control" required>
-                        <option value="male">@lang('schools.gender_male')</option>
-                        <option value="female">@lang('schools.gender_female')</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
                     <button class="btn btn-primary w-100"><i class="la la-plus"></i> @lang('common.create')</button>
                 </div>
             </form>

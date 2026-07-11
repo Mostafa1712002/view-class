@@ -18,6 +18,7 @@ class ClassRoom extends Model
         'section_id',
         'academic_year_id',
         'grade_level',
+        'gender',
         'division',
         'lead_teacher_id',
         'capacity',

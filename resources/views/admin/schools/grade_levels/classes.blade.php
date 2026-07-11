@@ -20,8 +20,6 @@
 </div>
 
 <div class="content-body">
-    @include('components.alerts')
-
     <div class="card mb-3">
         <div class="card-header"><h5 class="mb-0">@lang('schools.add_class')</h5></div>
         <div class="card-body">
@@ -34,6 +32,14 @@
                 <div class="col-md-2">
                     <label class="form-label">@lang('schools.grade_level_number')</label>
                     <input type="number" min="1" max="12" name="grade_level" class="form-control" value="1" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">@lang('schools.student_gender')</label>
+                    <select name="gender" class="form-control" required>
+                        <option value="boys">@lang('schools.gender_boys')</option>
+                        <option value="girls">@lang('schools.gender_girls')</option>
+                        <option value="mixed">@lang('schools.gender_mixed')</option>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">@lang('schools.capacity')</label>
