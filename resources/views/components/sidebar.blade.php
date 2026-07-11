@@ -543,9 +543,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-programs">
-                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_ana_wa_qadarat')"><a href="#" data-label="@lang('shell.nav_ana_wa_qadarat')"><x-svg-icon name="lightbulb" class="vc-ico" /><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
-                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_alawwal')"><a href="#" data-label="@lang('shell.nav_alawwal')"><x-svg-icon name="flag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>
-                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_speed_reading')"><a href="#" data-label="@lang('shell.nav_speed_reading')"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_speed_reading')</span></a></li>
+                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_ana_wa_qadarat')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_ana_wa_qadarat')"><x-svg-icon name="lightbulb" class="vc-ico" /><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
+                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_alawwal')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_alawwal')"><x-svg-icon name="flag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>
+                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_speed_reading')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_speed_reading')"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_speed_reading')</span></a></li>
             </div>
 
             {{-- ========== 2. عمليات تعليمية ========== --}}
@@ -994,9 +994,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </li>
                 @endif
 
-                <li class="nav-item {{ request()->routeIs('admin.canteens.*') ? 'active' : '' }}" data-section="system">
-                    <a href="{{ route('admin.canteens.index') }}" data-label="@lang('shell.nav_cafeteria')"><x-svg-icon name="cup-hot" class="vc-ico" /><span class="menu-title">@lang('shell.nav_cafeteria')</span></a>
-                </li>
+                {{-- المقصف — مُخفى من كل الحسابات (card #313). الكود والجداول باقية للرجوع. --}}
 
                 {{-- السلوك --}}
                 @if($canViewBehavior)
@@ -1068,11 +1066,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <a href="{{ Route::has('policies.my.index') ? route('policies.my.index') : '#' }}" data-label="@lang('shell.nav_my_policies')"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_policies')</span></a>
             </li>
 
-            @if($sidebarUser && $sidebarUser->hasRole('parent'))
-            <li class="nav-item {{ request()->routeIs('my.canteen.*') ? 'active' : '' }}">
-                <a href="{{ Route::has('my.canteen.index') ? route('my.canteen.index') : '#' }}" data-label="@lang('canteen.parent.title')"><x-svg-icon name="cup-hot" class="vc-ico" /><span class="menu-title">@lang('canteen.parent.title')</span></a>
-            </li>
-            @endif
+            {{-- المقصف لولي الأمر — مُخفى (card #313) --}}
 
             {{-- ========== بوابة المعلم ========== --}}
             @if($sidebarUser && $sidebarUser->isTeacher())

@@ -92,6 +92,9 @@
         <div class="head"><h5><i class="la la-link"></i> @lang('users.update_by_student_numbers')</h5></div>
         <div class="body">
             <p class="px-help">@lang('users.update_by_student_help')</p>
+            <div class="px-row" style="margin-bottom:.9rem;">
+                <a href="{{ route('admin.users.parents.import.template') }}" class="btn-ghost"><i class="la la-download"></i> @lang('users.download_template')</a>
+            </div>
             <form action="{{ route('admin.users.parents.link.numbers') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="px-row">

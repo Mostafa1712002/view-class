@@ -32,6 +32,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // برامج نوعية — placeholder "coming soon" target for the sidebar links (card #311)
+    Route::view('/programs/coming-soon', 'programs.coming-soon')->name('programs.coming-soon');
+
     // دليل الاستخدام — in-app tutorial video center (Docs)
     Route::get('/docs', [\App\Http\Controllers\DocsController::class, 'index'])->name('docs.index');
 
@@ -320,12 +323,14 @@ Route::middleware(['auth'])->group(function () {
     // === Parent Libraries page (ولي الأمر) — card #182 ===
     Route::get('my/libraries', [\App\Modules\Libraries\Controllers\ParentLibraryController::class, 'index'])->name('my.libraries.index');
 
+    /* المقصف مُقفل من كل الحسابات — card #313 (الكود والجداول باقية للرجوع).
     // === Parent canteen controls (ولي الأمر) — card #116 / Task 20 part 4b ===
     Route::get('my/canteen', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'index'])->name('my.canteen.index');
     Route::put('my/canteen/{student}/limit', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'updateLimit'])->whereNumber('student')->name('my.canteen.limit');
     Route::get('my/canteen/{student}/products', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'products'])->whereNumber('student')->name('my.canteen.products');
     Route::post('my/canteen/{student}/products/{product}/toggle', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'toggleBlock'])->whereNumber('student')->whereNumber('product')->name('my.canteen.products.toggle');
     Route::get('my/canteen/{student}/orders', [\App\Modules\Canteen\Controllers\MyCanteenController::class, 'orders'])->whereNumber('student')->name('my.canteen.orders');
+    */
 });
 
 // Sprint 4 — Subjects Module
@@ -375,6 +380,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     // behaviour for their school. Deleting a record stays admin-only here.
     Route::delete('behavior/records/{id}', [\App\Modules\Behavior\Controllers\BehaviorRecordController::class, 'destroy'])->whereNumber('id')->name('behavior.records.destroy');
 
+    /* المقصف مُقفل من كل الحسابات — card #313 (الكود والجداول باقية للرجوع).
     // === E-canteen: canteens management (المقصف الإلكتروني) — card #116 / Task 20 ===
     Route::get('canteens', [\App\Modules\Canteen\Controllers\CanteenController::class, 'index'])->name('canteens.index');
     Route::get('canteens/create', [\App\Modules\Canteen\Controllers\CanteenController::class, 'create'])->name('canteens.create');
@@ -415,6 +421,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('canteen-orders', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'store'])->name('canteen-orders.store');
     Route::get('canteen-orders/{id}', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'show'])->whereNumber('id')->name('canteen-orders.show');
     Route::put('canteen-orders/{id}/status', [\App\Modules\Canteen\Controllers\CanteenOrderController::class, 'updateStatus'])->whereNumber('id')->name('canteen-orders.status');
+    */
 
     // === Subject tracks (شعب المواد) — card 61 ===
     Route::get('subjects/tracks',              [\App\Modules\Subjects\Controllers\SubjectTrackController::class, 'index'])->name('subject-tracks.index');

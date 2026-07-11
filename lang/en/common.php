@@ -7,6 +7,8 @@ return [
     'save' => 'Save',
     'cancel' => 'Cancel',
     'back' => 'Back',
+    'coming_soon' => 'Coming soon',
+    'coming_soon_hint' => 'This section is under development and will be available soon.',
     'search' => 'Search',
     'filter' => 'Filter',
     'clear' => 'Clear filters',
