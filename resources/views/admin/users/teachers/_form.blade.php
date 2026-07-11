@@ -197,6 +197,41 @@
     </div>
 </div>
 
+@if(!empty($teacher?->id) && isset($sections))
+<div class="card mb-3 border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <strong><i class="la la-chalkboard-teacher"></i> @lang('users.teacher_assignment')</strong>
+        <div class="text-muted small">@lang('users.teacher_assignment_hint')</div>
+    </div>
+    <div class="card-body">
+        @php $hasAny = false; @endphp
+        @foreach($sections as $sec)
+            @php $secClasses = $classes->where('section_id', $sec->id); @endphp
+            @if($secClasses->isNotEmpty())
+                @php $hasAny = true; @endphp
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">{{ $sec->name }}</h6>
+                    <div class="row">
+                        @foreach($secClasses as $cl)
+                            <div class="form-group col-md-3">
+                                <label class="d-flex align-items-center gap-1 m-0">
+                                    <input type="checkbox" name="assigned_class_ids[]" value="{{ $cl->id }}"
+                                           @checked(in_array($cl->id, $assignedClassIds ?? []))>
+                                    <span>{{ $cl->name }}</span>
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        @endforeach
+        @unless($hasAny)
+            <div class="text-muted">@lang('users.teacher_assignment_empty')</div>
+        @endunless
+    </div>
+</div>
+@endif
+
 <div class="d-flex gap-1 mt-3">
     <button class="btn btn-primary"><i class="la la-save"></i> @lang('users.save')</button>
     <a href="{{ route('admin.users.teachers.index') }}" class="btn btn-outline-secondary">@lang('users.cancel')</a>

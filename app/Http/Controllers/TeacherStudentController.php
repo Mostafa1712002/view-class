@@ -54,7 +54,8 @@ class TeacherStudentController extends Controller
             });
         }
 
-        $students = $query->paginate(20)->withQueryString();
+        // Grouped by صف (section) → فصل (class) per card #318, so no pagination.
+        $students = $query->get();
 
         // Quick attendance counts scoped to the current academic year
         $academicYear = AcademicYear::where('is_current', true)
@@ -77,7 +78,12 @@ class TeacherStudentController extends Controller
                 return $total > 0 ? round(($presentLate / $total) * 100, 1) : null;
             });
 
-        return view('teacher.students.index', compact('students', 'academicYear', 'attendanceRates'));
+        // Group students by grade (صف) then class (فصل) for the grouped listing.
+        $grouped = $students
+            ->groupBy(fn ($s) => optional($s->classRoom?->section)->name ?: __('teacher_students.no_grade'))
+            ->map(fn ($inSection) => $inSection->groupBy(fn ($s) => optional($s->classRoom)->name ?: __('teacher_students.no_class')));
+
+        return view('teacher.students.index', compact('students', 'grouped', 'academicYear', 'attendanceRates'));
     }
 
     // ── Show ─────────────────────────────────────────────────────────────────

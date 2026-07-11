@@ -7,6 +7,7 @@ use App\Models\ClassRoom;
 use App\Models\JobTitle;
 use App\Models\Role;
 use App\Models\School;
+use App\Models\Section;
 use App\Models\TeacherAssignment;
 use App\Models\TeacherProfile;
 use App\Models\User;
@@ -93,7 +94,15 @@ class TeacherController extends Controller
         }
         $teacher->load('teacherProfile');
         $schools = $this->assignableSchools();
-        return view('admin.users.teachers.edit', compact('teacher', 'schools'));
+
+        // "التخصيص" panel — assign the teacher to specific classes within their
+        // school so their "طلابي" page lists those students (card #318).
+        $assignSchoolId = $teacher->school_id ?? $this->activeSchoolId();
+        $sections = Section::query()->where('school_id', $assignSchoolId)->orderBy('name')->get();
+        $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
+        $assignedClassIds = DB::table('class_teacher')->where('teacher_id', $teacher->id)->pluck('class_id')->all();
+
+        return view('admin.users.teachers.edit', compact('teacher', 'schools', 'sections', 'classes', 'assignedClassIds'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -131,6 +140,7 @@ class TeacherController extends Controller
             }
             $teacher->save();
             $this->syncProfile($teacher, $data, $request);
+            $this->syncAssignedClasses($teacher, $request);
         });
         return redirect()->route('admin.users.teachers.index')
             ->with('status', __('users.teacher_updated'));
@@ -554,6 +564,30 @@ class TeacherController extends Controller
         ], fn ($v) => filled($v));
         $joined = trim(implode(' ', $parts));
         return $joined !== '' ? $joined : null;
+    }
+
+    /**
+     * Sync the teacher's "التخصيص" class assignments (card #318). Only classes
+     * inside the teacher's own school are accepted, so an admin can never link
+     * a teacher to another tenant's class.
+     */
+    private function syncAssignedClasses(User $teacher, Request $request): void
+    {
+        $ids = collect($request->input('assigned_class_ids', []))
+            ->map(fn ($v) => (int) $v)->filter();
+
+        $valid = ClassRoom::query()
+            ->whereIn('id', $ids)
+            ->when($teacher->school_id, fn ($q) => $q->whereHas('section', fn ($s) => $s->where('school_id', $teacher->school_id)))
+            ->pluck('id');
+
+        DB::table('class_teacher')->where('teacher_id', $teacher->id)->delete();
+        $rows = $valid->map(fn ($cid) => [
+            'class_id' => $cid, 'teacher_id' => $teacher->id, 'created_at' => now(), 'updated_at' => now(),
+        ])->all();
+        if ($rows) {
+            DB::table('class_teacher')->insert($rows);
+        }
     }
 
     private function syncProfile(User $user, array $data, Request $request): void

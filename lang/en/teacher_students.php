@@ -13,6 +13,8 @@ return [
     'search_btn'          => 'Search',
     'clear_btn'           => 'Clear',
     'no_students'         => 'No students are currently linked to you.',
+    'no_grade'            => 'No grade',
+    'no_class'            => 'No class',
     'col_name'            => 'Student Name',
     'col_academic_no'     => 'Academic No.',
     'col_grade'           => 'Grade',

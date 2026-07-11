@@ -13,6 +13,8 @@ return [
     'search_btn'          => 'بحث',
     'clear_btn'           => 'مسح',
     'no_students'         => 'لا يوجد طلاب مرتبطون بك في الوقت الحالي.',
+    'no_grade'            => 'بدون صف',
+    'no_class'            => 'بدون فصل',
     'col_name'            => 'اسم الطالب',
     'col_academic_no'     => 'الرقم الأكاديمي',
     'col_grade'           => 'الصف الدراسي',

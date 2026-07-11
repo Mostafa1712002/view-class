@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    {{-- Results --}}
+    {{-- Results — grouped by صف (grade) then فصل (class) --}}
     @if($students->isEmpty())
         <div class="card">
             <div class="card-body text-center py-5">
@@ -53,96 +53,92 @@
             </div>
         </div>
     @else
-        <div class="card">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>@lang('teacher_students.col_name')</th>
-                                <th>@lang('teacher_students.col_academic_no')</th>
-                                <th>@lang('teacher_students.col_grade')</th>
-                                <th>@lang('teacher_students.col_class')</th>
-                                <th>@lang('teacher_students.col_section')</th>
-                                <th>@lang('teacher_students.col_gender')</th>
-                                <th>@lang('teacher_students.col_last_activity')</th>
-                                <th>@lang('teacher_students.col_status')</th>
-                                <th>@lang('teacher_students.att_rate')</th>
-                                <th class="text-center">@lang('teacher_students.col_actions')</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($students as $student)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            @if($student->avatar || $student->profile_picture)
-                                                <img
-                                                    src="{{ asset('storage/' . ($student->profile_picture ?? $student->avatar)) }}"
-                                                    class="rounded-circle"
-                                                    width="36" height="36"
-                                                    alt="{{ $student->name }}"
-                                                >
-                                            @else
-                                                <span
-                                                    class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
-                                                    style="width:36px;height:36px;font-size:.85rem;flex-shrink:0;"
-                                                >
-                                                    {{ mb_substr($student->name ?? '?', 0, 1) }}
-                                                </span>
-                                            @endif
-                                            <div>
-                                                <div class="fw-semibold">{{ $student->name }}</div>
-                                                @if($student->name_en && $student->name_en !== $student->name)
-                                                    <small class="text-muted">{{ $student->name_en }}</small>
+        @foreach($grouped as $gradeName => $classes)
+            <h5 class="mt-4 mb-2"><i class="la la-layer-group text-primary me-1"></i>{{ $gradeName }}</h5>
+            @foreach($classes as $className => $classStudents)
+                <div class="card mb-3">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <span><i class="la la-chalkboard me-1"></i>{{ $className }}</span>
+                        <span class="badge bg-secondary">{{ $classStudents->count() }}</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>@lang('teacher_students.col_name')</th>
+                                        <th>@lang('teacher_students.col_academic_no')</th>
+                                        <th>@lang('teacher_students.col_gender')</th>
+                                        <th>@lang('teacher_students.col_last_activity')</th>
+                                        <th>@lang('teacher_students.col_status')</th>
+                                        <th>@lang('teacher_students.att_rate')</th>
+                                        <th class="text-center">@lang('teacher_students.col_actions')</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($classStudents as $student)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    @if($student->avatar || $student->profile_picture)
+                                                        <img
+                                                            src="{{ asset('storage/' . ($student->profile_picture ?? $student->avatar)) }}"
+                                                            class="rounded-circle"
+                                                            width="36" height="36"
+                                                            alt="{{ $student->name }}"
+                                                        >
+                                                    @else
+                                                        <span
+                                                            class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                                                            style="width:36px;height:36px;font-size:.85rem;flex-shrink:0;"
+                                                        >
+                                                            {{ mb_substr($student->name ?? '?', 0, 1) }}
+                                                        </span>
+                                                    @endif
+                                                    <div>
+                                                        <div class="fw-semibold">{{ $student->name }}</div>
+                                                        @if($student->name_en && $student->name_en !== $student->name)
+                                                            <small class="text-muted">{{ $student->name_en }}</small>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ $student->national_id ?? '-' }}</td>
+                                            <td>
+                                                @if($student->gender === 'male')
+                                                    @lang('teacher_students.gender_male')
+                                                @elseif($student->gender === 'female')
+                                                    @lang('teacher_students.gender_female')
+                                                @else
+                                                    -
                                                 @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{{ $student->national_id ?? '-' }}</td>
-                                    <td>{{ $student->classRoom?->grade_level ? $student->classRoom->grade_level_label : '-' }}</td>
-                                    <td>{{ $student->classRoom?->name ?? '-' }}</td>
-                                    <td>{{ $student->classRoom?->section?->name ?? '-' }}</td>
-                                    <td>
-                                        @if($student->gender === 'male')
-                                            @lang('teacher_students.gender_male')
-                                        @elseif($student->gender === 'female')
-                                            @lang('teacher_students.gender_female')
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>{{ $student->last_login_at?->diffForHumans() ?? '-' }}</td>
-                                    <td>
-                                        @if($student->is_active)
-                                            <span class="badge badge-success">@lang('teacher_students.status_active')</span>
-                                        @else
-                                            <span class="badge badge-secondary">@lang('teacher_students.status_inactive')</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ isset($attendanceRates[$student->id]) ? $attendanceRates[$student->id] . '%' : '-' }}</td>
-                                    <td class="text-center">
-                                        <a
-                                            href="{{ route('teacher.students.show', $student->id) }}"
-                                            class="btn btn-sm btn-outline-primary"
-                                        >
-                                            <i class="la la-eye me-1"></i>@lang('teacher_students.view_btn')
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                            </td>
+                                            <td>{{ $student->last_login_at?->diffForHumans() ?? '-' }}</td>
+                                            <td>
+                                                @if($student->is_active)
+                                                    <span class="badge badge-success">@lang('teacher_students.status_active')</span>
+                                                @else
+                                                    <span class="badge badge-secondary">@lang('teacher_students.status_inactive')</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ isset($attendanceRates[$student->id]) ? $attendanceRates[$student->id] . '%' : '-' }}</td>
+                                            <td class="text-center">
+                                                <a
+                                                    href="{{ route('teacher.students.show', $student->id) }}"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                >
+                                                    <i class="la la-eye me-1"></i>@lang('teacher_students.view_btn')
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        {{-- Pagination --}}
-        @if($students->hasPages())
-            <div class="d-flex justify-content-center mt-4">
-                {{ $students->links() }}
-            </div>
-        @endif
+            @endforeach
+        @endforeach
     @endif
 
 </div>

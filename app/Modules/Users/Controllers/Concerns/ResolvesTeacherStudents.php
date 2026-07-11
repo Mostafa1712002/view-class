@@ -12,10 +12,11 @@ use Illuminate\Support\Facades\DB;
  * (added for card #192) and extracted here so all teacher-facing controllers
  * can reuse it without duplicating the logic.
  *
- * The teacher ⇄ class link is recorded in three places:
+ * The teacher ⇄ class link is recorded in four places:
  *   1. classes.lead_teacher_id                          (class leader)
  *   2. schedule_periods.teacher_id → schedules.class_id (timetable)
  *   3. subject_teacher.section_id  → classes.section_id (section assignment)
+ *   4. class_teacher.class_id                           (التخصيص panel, card #318)
  *
  * Students are matched via both enrolment sources:
  *   - users.class_room_id  (direct column — updated by student-edit form)
@@ -56,6 +57,11 @@ trait ResolvesTeacherStudents
                 DB::table('classes')->whereIn('section_id', $sectionIds)->pluck('id')
             );
         }
+
+        // 4) classes assigned directly via the teacher-settings "التخصيص" panel
+        $classIds = $classIds->merge(
+            DB::table('class_teacher')->where('teacher_id', $teacherId)->pluck('class_id')
+        );
 
         $classIds = $classIds->filter()->unique()->values();
         if ($classIds->isEmpty()) {
