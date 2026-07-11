@@ -19,7 +19,13 @@ class GradeController extends Controller
      */
     public function index(Request $request)
     {
-        $subjects = Subject::orderBy('name')->get();
+        // A teacher only sees the subjects linked to them (card #319); admins see all.
+        $user = auth()->user();
+        $teacherOnly = $user && $user->isTeacher() && !$user->isSchoolAdmin() && !$user->isSuperAdmin();
+        $subjects = Subject::query()
+            ->when($teacherOnly, fn ($q) => $q->whereIn('id',
+                DB::table('subject_teacher')->where('user_id', $user->id)->pluck('subject_id')))
+            ->orderBy('name')->get();
         $classes = ClassRoom::with('students')->orderBy('name')->get();
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
 

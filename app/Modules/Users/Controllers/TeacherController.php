@@ -4,6 +4,7 @@ namespace App\Modules\Users\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClassRoom;
+use App\Models\Subject;
 use App\Models\JobTitle;
 use App\Models\Role;
 use App\Models\School;
@@ -44,7 +45,49 @@ class TeacherController extends Controller
 
     public function create(): View
     {
-        return view('admin.users.teachers.create', ['schools' => $this->assignableSchools()]);
+        return view('admin.users.teachers.create', [
+            'schools' => $this->assignableSchools(),
+            'subjects' => $this->assignableSubjects(),
+            'selectedSubjectIds' => [],
+        ]);
+    }
+
+    /**
+     * Subjects an admin may link a teacher to (card #319). Super-admin sees all;
+     * a school-admin is scoped to their own school's subjects.
+     */
+    private function assignableSubjects(?int $schoolId = null): \Illuminate\Support\Collection
+    {
+        $sid = $schoolId ?? $this->activeSchoolId();
+        return Subject::query()
+            ->when($sid, fn ($q) => $q->where('school_id', $sid))
+            ->orderBy('name')->get();
+    }
+
+    /**
+     * Sync the teacher's direct subject links (card #319). Only the section-less
+     * rows (the plain teacher↔subject link) are managed here; section-scoped rows
+     * created by schedule/weekly-plan assignments are left untouched.
+     */
+    private function syncSubjects(User $teacher, Request $request): void
+    {
+        $ids = collect($request->input('subject_ids', []))
+            ->map(fn ($v) => (int) $v)->filter()->unique();
+
+        $valid = Subject::query()
+            ->whereIn('id', $ids)
+            ->when($teacher->school_id, fn ($q) => $q->where('school_id', $teacher->school_id))
+            ->pluck('id');
+
+        DB::table('subject_teacher')->where('user_id', $teacher->id)->whereNull('section_id')->delete();
+        $rows = $valid->map(fn ($sid) => [
+            'user_id' => $teacher->id, 'subject_id' => $sid,
+            'section_id' => null, 'academic_year_id' => null,
+            'created_at' => now(), 'updated_at' => now(),
+        ])->all();
+        if ($rows) {
+            DB::table('subject_teacher')->insert($rows);
+        }
     }
 
     public function store(Request $request): RedirectResponse
@@ -81,6 +124,7 @@ class TeacherController extends Controller
                 $user->roles()->syncWithoutDetaching($role);
             }
             $this->syncProfile($user, $data, $request);
+            $this->syncSubjects($user, $request);
         });
         return redirect()->route('admin.users.teachers.index')
             ->with('status', __('users.teacher_created'));
@@ -102,7 +146,11 @@ class TeacherController extends Controller
         $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
         $assignedClassIds = DB::table('class_teacher')->where('teacher_id', $teacher->id)->pluck('class_id')->all();
 
-        return view('admin.users.teachers.edit', compact('teacher', 'schools', 'sections', 'classes', 'assignedClassIds'));
+        // "المواد" — subjects the teacher is linked to (card #319).
+        $subjects = $this->assignableSubjects($teacher->school_id);
+        $selectedSubjectIds = $teacher->subjects()->pluck('subjects.id')->unique()->values()->all();
+
+        return view('admin.users.teachers.edit', compact('teacher', 'schools', 'sections', 'classes', 'assignedClassIds', 'subjects', 'selectedSubjectIds'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -141,6 +189,7 @@ class TeacherController extends Controller
             $teacher->save();
             $this->syncProfile($teacher, $data, $request);
             $this->syncAssignedClasses($teacher, $request);
+            $this->syncSubjects($teacher, $request);
         });
         return redirect()->route('admin.users.teachers.index')
             ->with('status', __('users.teacher_updated'));
@@ -539,6 +588,9 @@ class TeacherController extends Controller
             'hire_date' => 'nullable|date',
             'nationality' => 'nullable|string|max:80',
             'profile_photo' => 'nullable|image|max:2048',
+            // subject links (card #319)
+            'subject_ids' => 'nullable|array',
+            'subject_ids.*' => 'integer|exists:subjects,id',
         ]);
     }
 

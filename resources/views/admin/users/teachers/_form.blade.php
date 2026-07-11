@@ -197,6 +197,33 @@
     </div>
 </div>
 
+@isset($subjects)
+<div class="card mb-3 border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <strong><i class="la la-book"></i> @lang('users.teacher_subjects')</strong>
+        <div class="text-muted small">@lang('users.teacher_subjects_hint')</div>
+    </div>
+    <div class="card-body">
+        @php $selSubjectIds = collect(old('subject_ids', $selectedSubjectIds ?? []))->map(fn ($v) => (int) $v)->all(); @endphp
+        @if($subjects->isEmpty())
+            <div class="text-muted">@lang('users.teacher_subjects_empty')</div>
+        @else
+            <div class="row">
+                @foreach($subjects as $sub)
+                    <div class="form-group col-md-3">
+                        <label class="d-flex align-items-center gap-1 m-0">
+                            <input type="checkbox" name="subject_ids[]" value="{{ $sub->id }}"
+                                   @checked(in_array($sub->id, $selSubjectIds))>
+                            <span>{{ $sub->name }}</span>
+                        </label>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+</div>
+@endisset
+
 @if(!empty($teacher?->id) && isset($sections))
 <div class="card mb-3 border-0 shadow-sm">
     <div class="card-header bg-white">
