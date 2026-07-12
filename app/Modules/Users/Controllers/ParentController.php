@@ -66,6 +66,8 @@ class ParentController extends Controller
             $this->attachParentRole($user);
         });
 
+        $this->focusScopeOnSchool($schoolId);
+
         return redirect()->route('admin.users.parents.index')
             ->with('status', __('users.parent_created'));
     }
@@ -102,6 +104,7 @@ class ParentController extends Controller
             $parent->profile_picture = $request->file('profile_picture')->store('parents/photos', 'public');
         }
         $parent->save();
+        $this->focusScopeOnSchool($parent->school_id);
         return redirect()->route('admin.users.parents.index')
             ->with('status', __('users.parent_updated'));
     }

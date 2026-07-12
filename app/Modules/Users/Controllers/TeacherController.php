@@ -126,6 +126,7 @@ class TeacherController extends Controller
             $this->syncProfile($user, $data, $request);
             $this->syncSubjects($user, $request);
         });
+        $this->focusScopeOnSchool($schoolId);
         return redirect()->route('admin.users.teachers.index')
             ->with('status', __('users.teacher_created'));
     }
@@ -191,6 +192,7 @@ class TeacherController extends Controller
             $this->syncAssignedClasses($teacher, $request);
             $this->syncSubjects($teacher, $request);
         });
+        $this->focusScopeOnSchool($teacher->school_id);
         return redirect()->route('admin.users.teachers.index')
             ->with('status', __('users.teacher_updated'));
     }

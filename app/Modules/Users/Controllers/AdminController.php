@@ -160,6 +160,7 @@ class AdminController extends Controller
                 $user->managedSchools()->sync($data['school_ids']);
             }
         });
+        $this->focusScopeOnSchool($schoolId);
         return redirect()->route('admin.users.admins.index')
             ->with('status', __('users.admin_created'));
     }
@@ -217,6 +218,7 @@ class AdminController extends Controller
         if (auth()->user()?->isSuperAdmin()) {
             $admin->managedSchools()->sync($data['school_ids'] ?? []);
         }
+        $this->focusScopeOnSchool($admin->school_id);
         return redirect()->route('admin.users.admins.index')
             ->with('status', __('users.admin_updated'));
     }

@@ -197,6 +197,8 @@ class StudentController extends Controller
             return $user;
         });
 
+        $this->focusScopeOnSchool($schoolId);
+
         return redirect()->route('admin.users.students.index')
             ->with('status', __('users.student_created', ['name' => $user->name]));
     }
@@ -263,6 +265,7 @@ class StudentController extends Controller
         $student->save();
 
         $this->syncProfile($student->id, $data);
+        $this->focusScopeOnSchool($student->school_id);
 
         return redirect()->route('admin.users.students.index')
             ->with('status', __('users.student_updated', ['name' => $student->name]));

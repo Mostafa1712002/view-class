@@ -82,4 +82,23 @@ trait HasSchoolScope
     {
         return array_filter($payload, static fn ($v) => $v !== null);
     }
+
+    /**
+     * After a super-admin files a user under a school, point the active scope at
+     * that school so the redirected list actually shows the new user. Without
+     * this, a super-admin scoped to school A who adds a user to school B lands
+     * back on school A's list and the user appears to "vanish". No-op for
+     * non-super-admins (their scope is already their own school).
+     */
+    protected function focusScopeOnSchool(?int $schoolId): void
+    {
+        if ($schoolId === null || ! auth()->user()?->isSuperAdmin()) {
+            return;
+        }
+
+        $scope = session('scope', []);
+        $scope['school_id'] = $schoolId;
+        $scope['company_id'] = School::whereKey($schoolId)->value('educational_company_id');
+        session()->put('scope', $scope);
+    }
 }
