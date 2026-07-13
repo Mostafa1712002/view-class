@@ -176,6 +176,20 @@ class ParentController extends Controller
         return $this->streamCsv('parents-template.csv', [$headers, $sample]);
     }
 
+    /**
+     * A focused template for linking parents to students by identity numbers:
+     * just the two ID columns (plus names for readability). The full import
+     * template above carries the whole parent profile, which is confusing when
+     * the only task is matching an existing parent to an existing student.
+     */
+    public function linkTemplate(): StreamedResponse
+    {
+        $headers = ['رقم هوية ولي الأمر', 'اسم ولي الأمر', 'هوية الطالب', 'اسم الطالب'];
+        $sample = ['1010101010', 'ولي أمر تجريبي', '9111111111', 'طالب تجريبي'];
+
+        return $this->streamCsv('parents-link-template.csv', [$headers, $sample]);
+    }
+
     /** Export current parents so the admin can edit and re-upload. */
     public function export(): StreamedResponse
     {

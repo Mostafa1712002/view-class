@@ -231,6 +231,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         // Excel tools — declared before parents/{id} so the wildcard does not swallow them
         Route::get('parents/import', [\App\Modules\Users\Controllers\ParentController::class, 'importForm'])->name('parents.import');
         Route::get('parents/import/template', [\App\Modules\Users\Controllers\ParentController::class, 'importTemplate'])->name('parents.import.template');
+        Route::get('parents/link/template', [\App\Modules\Users\Controllers\ParentController::class, 'linkTemplate'])->name('parents.link.template');
         Route::post('parents/import', [\App\Modules\Users\Controllers\ParentController::class, 'import'])->name('parents.import.run');
         Route::get('parents/export', [\App\Modules\Users\Controllers\ParentController::class, 'export'])->name('parents.export');
         Route::post('parents/import-update', [\App\Modules\Users\Controllers\ParentController::class, 'importUpdate'])->name('parents.import.update');
