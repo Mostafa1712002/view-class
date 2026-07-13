@@ -54,8 +54,12 @@ class DashboardController extends Controller
         }
 
         // Sprint 1 QA round 2 — sections 2-7 are rendered from the same repository the API uses.
-        $schoolId = $user->school_id;
-        $companyId = optional($user->school)->educational_company_id;
+        // Honour the active scope so a multi-school admin's dashboard follows the
+        // school they switched to in the header (not just their primary school).
+        $schoolId = $this->activeSchoolId($user);
+        $companyId = $schoolId
+            ? School::whereKey($schoolId)->value('educational_company_id')
+            : optional($user->school)->educational_company_id;
 
         $data['interactionRates'] = $interactionRates->execute($schoolId);
         $data['contentStatsData'] = $contentStats->execute($schoolId);
@@ -65,6 +69,24 @@ class DashboardController extends Controller
         $data['weeklyActivity'] = $weeklyActivity->execute($schoolId);
 
         return view('dashboard', $data);
+    }
+
+    /**
+     * The school the dashboard should report on: the active scope school when it
+     * is one the user may see (super-admin → any; multi-school admin → a managed
+     * school), otherwise the user's primary school. Mirrors HasSchoolScope so the
+     * dashboard follows the header school switcher.
+     */
+    private function activeSchoolId(User $user): ?int
+    {
+        $scoped = session('scope.school_id');
+        if ($user->isSuperAdmin()) {
+            return (int) ($scoped ?: $user->school_id) ?: null;
+        }
+        if ($scoped && in_array((int) $scoped, $user->managedSchoolIds(), true)) {
+            return (int) $scoped;
+        }
+        return $user->school_id;
     }
 
     private function getSuperAdminStats(): array
@@ -90,7 +112,7 @@ class DashboardController extends Controller
 
     private function getSchoolAdminStats(User $user): array
     {
-        $schoolId = $user->school_id;
+        $schoolId = $this->activeSchoolId($user);
         $today = Carbon::today();
         $thisWeek = Carbon::now()->startOfWeek();
         $thisMonth = Carbon::now()->startOfMonth();
