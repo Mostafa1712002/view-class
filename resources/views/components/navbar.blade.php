@@ -384,14 +384,14 @@
                 <span id="shell-clock-time" class="text-bold-600">—</span>
             </li>
 
-            <li class="nav-item" data-shell-hide-xs>
+            <li class="nav-item">
                 <a class="nav-link" href="#" title="@lang('shell.search')" aria-label="@lang('shell.search')"
                    onclick="event.preventDefault(); const bar=document.getElementById('shell-search-bar'); if(bar){bar.classList.toggle('d-none'); const i=bar.querySelector('input'); if(i && !bar.classList.contains('d-none')) i.focus();}">
                     <x-svg-icon name="search" class="ficon" size="18" />
                 </a>
             </li>
 
-            <li class="nav-item dropdown" data-shell-hide-xs>
+            <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" title="@lang('shell.switch_language')">
                     <x-svg-icon name="globe" class="ficon" size="18" />
                     <span class="d-none d-lg-inline ms-1">{{ strtoupper($shellLocale) }}</span>
@@ -592,44 +592,65 @@
     </div>
 
     <script>
+    // Header search over the SIDEBAR MENU sections (QA request): filter the
+    // navigation links themselves — not students/teachers — and jump to the
+    // chosen section. Purely client-side over the rendered sidebar.
     (function () {
         var input = document.getElementById('shell-search-input');
         var box   = document.getElementById('shell-search-results');
         if (!input || !box) { return; }
         var isRtl = {{ $shellIsRtl ? 'true' : 'false' }};
-        var timer = null, lastQ = '';
+        var lastQ = null, items = null;
 
         function hide() { box.classList.add('d-none'); box.innerHTML = ''; }
         function esc(s) { return (s || '').replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
-        function render(items) {
-            if (!items.length) {
+        // Build the menu index once (lazily): every sidebar link with real text
+        // and a navigable href, de-duplicated by destination.
+        function index() {
+            if (items) { return items; }
+            items = [];
+            var seen = {};
+            var menu = document.querySelector('#main-menu, .main-menu, .gp-sidebar, aside');
+            if (!menu) { return items; }
+            menu.querySelectorAll('a[href]').forEach(function (a) {
+                var href = a.getAttribute('href');
+                if (!href || href === '#' || href.charAt(0) === '#' || /^javascript:/i.test(href)) { return; }
+                var label = (a.querySelector('.menu-title, .menu-item, .gp-sec-label') || a).textContent.replace(/\s+/g, ' ').trim();
+                if (!label) { return; }
+                var key = href + '|' + label;
+                if (seen[key]) { return; }
+                seen[key] = 1;
+                items.push({ name: label, url: href });
+            });
+            return items;
+        }
+
+        function render(list) {
+            if (!list.length) {
                 box.innerHTML = '<div style="padding:.7rem 1rem;color:#94a3b8;font-size:.85rem;">@lang('shell.search_no_results')</div>';
                 box.classList.remove('d-none');
                 return;
             }
-            box.innerHTML = items.map(function (r) {
-                return '<a href="' + r.url + '" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;color:#1e293b;text-decoration:none;border-bottom:1px solid #f1f5f9;">' +
-                    '<span style="flex:0 0 auto;font-size:.7rem;font-weight:700;color:#64748b;background:#f1f5f9;border-radius:999px;padding:.15rem .5rem;">' + esc(r.type) + '</span>' +
+            box.innerHTML = list.map(function (r) {
+                return '<a href="' + esc(r.url) + '" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;color:#1e293b;text-decoration:none;border-bottom:1px solid #f1f5f9;">' +
                     '<span style="flex:1 1 auto;' + (isRtl ? 'text-align:right;' : '') + '">' + esc(r.name) + '</span></a>';
             }).join('');
             box.classList.remove('d-none');
         }
 
         function run(q) {
-            fetch(input.dataset.url + '?q=' + encodeURIComponent(q), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(function (r) { return r.json(); })
-                .then(function (d) { render(d.results || []); })
-                .catch(function () { hide(); });
+            var needle = q.toLowerCase();
+            var list = index().filter(function (it) { return it.name.toLowerCase().indexOf(needle) !== -1; }).slice(0, 12);
+            render(list);
         }
 
         input.addEventListener('input', function () {
             var q = input.value.trim();
             if (q === lastQ) { return; }
             lastQ = q;
-            clearTimeout(timer);
-            if (q.length < 2) { hide(); return; }
-            timer = setTimeout(function () { run(q); }, 250);
+            if (q.length < 1) { hide(); return; }
+            run(q);
         });
         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
