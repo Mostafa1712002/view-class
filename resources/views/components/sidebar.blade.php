@@ -44,6 +44,9 @@
     $canViewReports       = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('reports');
     $canViewNoor          = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('noor');
     $canViewJobTitles     = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('job_titles');
+    // Global roles editor is super-admin only: roles.edit fails closed (not a
+    // ".view" default-allow), so canDo() returns true only for super-admins.
+    $canManageRoles       = $sidebarUser && $sidebarUser->canDo('roles.edit');
     // Additional staff modules that previously rendered unconditionally. Same
     // default-allow formula: non-staff (student/parent) never hidden; configured
     // staff see only modules they hold the .view permission for.
@@ -968,6 +971,13 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         <li class="{{ request()->routeIs('admin.users.job-titles.*') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.users.job-titles.index') ? route('admin.users.job-titles.index') : '#' }}">
                                 <x-svg-icon name="tag" class="vc-ico" /><span class="menu-item">@lang('users.job_titles')</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if($canManageRoles)
+                        <li class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.roles.index') ? route('admin.roles.index') : '#' }}">
+                                <x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('roles.title')</span>
                             </a>
                         </li>
                         @endif

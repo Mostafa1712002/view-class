@@ -309,6 +309,19 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('{id}/impersonate', [\App\Modules\Users\Controllers\ImpersonateController::class, 'confirm'])->whereNumber('id')->name('impersonate.confirm');
         Route::post('{id}/impersonate', [\App\Modules\Users\Controllers\ImpersonateController::class, 'start'])->name('impersonate.start');
     });
+
+    // Global roles → permissions editor (super-admin only in practice).
+    // See .kiro/specs/roles-permissions §3.4. roles.edit fails closed (it is not
+    // a ".view" default-allow slug), so only super-admins pass the write routes;
+    // RoleController also asserts isSuperAdmin() so the roles.view index route
+    // does not leak to school-admins via the default-allow-".view" rule (US-007).
+    Route::middleware(['permission:roles.view'])->group(function () {
+        Route::get('roles', [\App\Modules\Users\Controllers\RoleController::class, 'index'])->name('roles.index');
+    });
+    Route::middleware(['permission:roles.edit'])->group(function () {
+        Route::get('roles/{role}/permissions', [\App\Modules\Users\Controllers\RoleController::class, 'editPermissions'])->name('roles.permissions.edit');
+        Route::put('roles/{role}/permissions', [\App\Modules\Users\Controllers\RoleController::class, 'updatePermissions'])->name('roles.permissions.update');
+    });
 });
 
 Route::middleware(['auth'])->group(function () {
