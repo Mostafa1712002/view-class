@@ -224,40 +224,104 @@
 </div>
 @endisset
 
-@if(!empty($teacher?->id) && isset($sections))
+@isset($sections)
 <div class="card mb-3 border-0 shadow-sm">
     <div class="card-header bg-white">
         <strong><i class="la la-chalkboard-teacher"></i> @lang('users.teacher_assignment')</strong>
         <div class="text-muted small">@lang('users.teacher_assignment_hint')</div>
     </div>
     <div class="card-body">
-        @php $hasAny = false; @endphp
-        @foreach($sections as $sec)
-            @php $secClasses = $classes->where('section_id', $sec->id); @endphp
-            @if($secClasses->isNotEmpty())
-                @php $hasAny = true; @endphp
-                <div class="mb-3">
-                    <h6 class="text-muted mb-2">{{ $sec->name }}</h6>
-                    <div class="row">
-                        @foreach($secClasses as $cl)
-                            <div class="form-group col-md-3">
-                                <label class="d-flex align-items-center gap-1 m-0">
-                                    <input type="checkbox" name="assigned_class_ids[]" value="{{ $cl->id }}"
-                                           @checked(in_array($cl->id, $assignedClassIds ?? []))>
-                                    <span>{{ $cl->name }}</span>
-                                </label>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-        @endforeach
-        @unless($hasAny)
+        @php
+            $assignedIds = collect(old('assigned_class_ids', $assignedClassIds ?? []))->map(fn ($v) => (int) $v)->all();
+            $secWithClasses = $sections->filter(fn ($sec) => $classes->where('section_id', $sec->id)->isNotEmpty());
+        @endphp
+        @if($secWithClasses->isEmpty())
             <div class="text-muted">@lang('users.teacher_assignment_empty')</div>
-        @endunless
+        @else
+        {{-- Cascade (card #320): pick a الصف first, then only its الفصول appear. --}}
+        <div class="tsa">
+            <div class="form-group">
+                <label class="font-weight-bold m-0">@lang('users.teacher_assignment_grade')</label>
+                <div class="tsa-grid mt-1">
+                    @foreach($secWithClasses as $sec)
+                        <label class="tsa-item tsa-section-item" data-school="{{ $sec->school_id }}">
+                            <input type="checkbox" class="tsa-section" value="{{ $sec->id }}"
+                                   @checked($classes->where('section_id', $sec->id)->pluck('id')->intersect($assignedIds)->isNotEmpty())>
+                            <span>{{ $sec->name }}</span>
+                        </label>
+                    @endforeach
+                    <p class="tsa-empty-sections text-muted m-0">@lang('users.teacher_assignment_pick_school')</p>
+                </div>
+            </div>
+            <div class="form-group mb-0">
+                <label class="font-weight-bold m-0">@lang('users.teacher_assignment_class')</label>
+                <div class="tsa-grid tsa-classes mt-1">
+                    @foreach($secWithClasses as $sec)
+                        @foreach($classes->where('section_id', $sec->id) as $cl)
+                            <label class="tsa-item tsa-class" data-section="{{ $sec->id }}">
+                                <input type="checkbox" name="assigned_class_ids[]" value="{{ $cl->id }}"
+                                       @checked(in_array($cl->id, $assignedIds))>
+                                <span>{{ $cl->name }}</span>
+                            </label>
+                        @endforeach
+                    @endforeach
+                    <p class="tsa-empty text-muted m-0">@lang('users.teacher_assignment_pick_grade')</p>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
-@endif
+
+@push('scripts')
+<script>
+(function () {
+    document.querySelectorAll('.tsa').forEach(function (root) {
+        var form         = root.closest('form');
+        var schoolSel    = form ? form.querySelector('select[name="school_id"]') : null;
+        var sectionItems = Array.prototype.slice.call(root.querySelectorAll('.tsa-section-item'));
+        var sections     = Array.prototype.slice.call(root.querySelectorAll('.tsa-section'));
+        var classes      = Array.prototype.slice.call(root.querySelectorAll('.tsa-class'));
+        var empty        = root.querySelector('.tsa-empty');
+        var emptySecs    = root.querySelector('.tsa-empty-sections');
+
+        function apply() {
+            // Step 1 — when a school picker exists, only that school's grades show.
+            var sid = schoolSel ? schoolSel.value : '';
+            var visibleSecs = 0;
+            sectionItems.forEach(function (item) {
+                var match = !schoolSel ? true : (sid ? item.getAttribute('data-school') === sid : false);
+                item.hidden = !match;
+                if (match) { visibleSecs++; } else { item.querySelector('input').checked = false; }
+            });
+            if (emptySecs) { emptySecs.hidden = !(schoolSel && !sid); }
+
+            // Step 2 — a class shows only when its (visible) grade is ticked.
+            var on = sections.filter(function (s) {
+                return s.checked && !s.closest('.tsa-section-item').hidden;
+            }).map(function (s) { return s.value; });
+            var anyVisible = false;
+            classes.forEach(function (item) {
+                var show = on.indexOf(item.getAttribute('data-section')) !== -1;
+                item.hidden = !show;
+                if (show) { anyVisible = true; } else { item.querySelector('input').checked = false; }
+            });
+            if (empty) { empty.hidden = anyVisible; }
+        }
+        sections.forEach(function (s) { s.addEventListener('change', apply); });
+        if (schoolSel) { schoolSel.addEventListener('change', apply); }
+        apply();
+    });
+})();
+</script>
+<style>
+.tsa-grid { display: flex; flex-wrap: wrap; gap: .35rem .9rem;
+    border: 1px solid #e5e7eb; border-radius: .5rem; padding: .6rem .75rem; }
+.tsa-item { display: flex; align-items: center; gap: .4rem; margin: 0; font-weight: 500; cursor: pointer; }
+.tsa-item input { flex: 0 0 auto; }
+</style>
+@endpush
+@endisset
 
 <div class="d-flex gap-1 mt-3">
     <button class="btn btn-primary"><i class="la la-save"></i> @lang('users.save')</button>

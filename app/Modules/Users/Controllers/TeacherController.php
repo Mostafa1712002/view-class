@@ -45,11 +45,45 @@ class TeacherController extends Controller
 
     public function create(): View
     {
+        [$sections, $classes] = $this->assignmentOptions($this->assignmentScopeIds());
         return view('admin.users.teachers.create', [
             'schools' => $this->assignableSchools(),
             'subjects' => $this->assignableSubjects(),
             'selectedSubjectIds' => [],
+            'sections' => $sections,
+            'classes' => $classes,
+            'assignedClassIds' => [],
         ]);
+    }
+
+    /**
+     * Schools the "التخصيص" picker may offer grades/classes from. Super-admin →
+     * every school they manage (the form's school <select> filters client-side);
+     * a school-admin → just their own active school.
+     * @return array<int, int>
+     */
+    private function assignmentScopeIds(?int $fallback = null): array
+    {
+        $ids = $this->assignableSchools()->pluck('id')->all();
+        if ($ids) {
+            return $ids;
+        }
+        $fb = $fallback ?? $this->activeSchoolId();
+        return $fb ? [$fb] : [];
+    }
+
+    /**
+     * Sections + their classes for the "التخصيص" picker, scoped to given schools.
+     * @param array<int, int> $schoolIds
+     * @return array{0: \Illuminate\Support\Collection, 1: \Illuminate\Support\Collection}
+     */
+    private function assignmentOptions(array $schoolIds): array
+    {
+        $sections = Section::query()
+            ->when($schoolIds, fn ($q) => $q->whereIn('school_id', $schoolIds), fn ($q) => $q->whereRaw('0=1'))
+            ->orderBy('name')->get();
+        $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
+        return [$sections, $classes];
     }
 
     /**
@@ -125,6 +159,7 @@ class TeacherController extends Controller
             }
             $this->syncProfile($user, $data, $request);
             $this->syncSubjects($user, $request);
+            $this->syncAssignedClasses($user, $request);
         });
         return redirect()->route('admin.users.teachers.index')
             ->with('status', __('users.teacher_created'));
@@ -141,9 +176,7 @@ class TeacherController extends Controller
 
         // "التخصيص" panel — assign the teacher to specific classes within their
         // school so their "طلابي" page lists those students (card #318).
-        $assignSchoolId = $teacher->school_id ?? $this->activeSchoolId();
-        $sections = Section::query()->where('school_id', $assignSchoolId)->orderBy('name')->get();
-        $classes = ClassRoom::query()->whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get();
+        [$sections, $classes] = $this->assignmentOptions($this->assignmentScopeIds($teacher->school_id));
         $assignedClassIds = DB::table('class_teacher')->where('teacher_id', $teacher->id)->pluck('class_id')->all();
 
         // "المواد" — subjects the teacher is linked to (card #319).
@@ -591,6 +624,9 @@ class TeacherController extends Controller
             // subject links (card #319)
             'subject_ids' => 'nullable|array',
             'subject_ids.*' => 'integer|exists:subjects,id',
+            // class assignments (card #318 / #320)
+            'assigned_class_ids' => 'nullable|array',
+            'assigned_class_ids.*' => 'integer|exists:classes,id',
         ]);
     }
 
