@@ -58,7 +58,7 @@ final class EloquentScopeRepository implements ScopeRepository
 
     public function yearsFor(User $user, ?int $schoolId): array
     {
-        $schoolId = $user->isSuperAdmin() ? $schoolId : $user->school_id;
+        $schoolId = $this->resolveScopedSchoolId($user, $schoolId);
         if (! $schoolId) {
             return [];
         }
@@ -78,10 +78,11 @@ final class EloquentScopeRepository implements ScopeRepository
         }
 
         // Term ownership rides on the year's school ownership: only return terms
-        // for a year the user is allowed to see.
+        // for a year the user is allowed to see (any school the admin manages,
+        // not just the primary one — a multi-school admin switches schools).
         $yearQuery = AcademicYear::whereKey($yearId);
         if (! $user->isSuperAdmin()) {
-            $yearQuery->where('school_id', $user->school_id);
+            $yearQuery->whereIn('school_id', $user->managedSchoolIds());
         }
         if (! $yearQuery->exists()) {
             return [];
@@ -116,7 +117,7 @@ final class EloquentScopeRepository implements ScopeRepository
     {
         $query = AcademicYear::whereKey($yearId);
         if (! $user->isSuperAdmin()) {
-            $query->where('school_id', $user->school_id);
+            $query->whereIn('school_id', $user->managedSchoolIds());
         }
 
         return $query->exists();
@@ -126,9 +127,27 @@ final class EloquentScopeRepository implements ScopeRepository
     {
         $query = AcademicTerm::whereKey($termId);
         if (! $user->isSuperAdmin()) {
-            $query->whereHas('academicYear', fn ($q) => $q->where('school_id', $user->school_id));
+            $query->whereHas('academicYear', fn ($q) => $q->whereIn('school_id', $user->managedSchoolIds()));
         }
 
         return $query->exists();
+    }
+
+    /**
+     * The school a scope query should target: super-admin gets whatever was
+     * requested; a school-admin gets the requested school when it's one they
+     * manage (card #307 multi-school), otherwise their primary school.
+     */
+    private function resolveScopedSchoolId(User $user, ?int $requested): ?int
+    {
+        if ($user->isSuperAdmin()) {
+            return $requested;
+        }
+
+        if ($requested && in_array((int) $requested, $user->managedSchoolIds(), true)) {
+            return (int) $requested;
+        }
+
+        return $user->school_id;
     }
 }

@@ -204,7 +204,13 @@
 
 @php
     $shellUser = auth()->user();
-    $shellSchool = $shellUser?->school;
+    // The header + scope selectors reflect the ACTIVE school (the one picked in
+    // the scope switcher), not merely the account's primary school — so a
+    // multi-school admin (or a super-admin) sees the school they switched to.
+    // session('scope.school_id') is already validated server-side (SetScopeAction
+    // → schoolExistsFor), so trusting it here can't leak another tenant's school.
+    $shellScopeSchoolId = session('scope.school_id') ?: $shellUser?->school_id;
+    $shellSchool = $shellScopeSchoolId ? \App\Models\School::find($shellScopeSchoolId) : null;
     $shellCompany = $shellSchool?->educationalCompany;
     $shellLocale = app()->getLocale();
     $shellIsRtl = $shellLocale === 'ar';
@@ -214,7 +220,7 @@
 
     $shellScopeSession = session('scope', [
         'company_id' => optional($shellSchool)->educational_company_id,
-        'school_id' => $shellUser?->school_id,
+        'school_id' => $shellScopeSchoolId,
         'academic_year_id' => $shellCurrentYear?->id,
         'academic_term_id' => null,
     ]);
