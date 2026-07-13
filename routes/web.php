@@ -576,7 +576,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::delete('lessons/{id}', [\App\Modules\Lessons\Controllers\LessonController::class, 'destroy'])->name('lessons.destroy');
 
     // Exams Management
-    Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
+    Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->middleware('role_permission:exams.view');
     Route::post('exams/{exam}/publish', [\App\Http\Controllers\Admin\ExamController::class, 'publish'])->name('exams.publish');
     Route::post('exams/{exam}/unpublish', [\App\Http\Controllers\Admin\ExamController::class, 'unpublish'])->name('exams.unpublish');
     Route::post('exams/{exam}/activate', [\App\Http\Controllers\Admin\ExamController::class, 'activate'])->name('exams.activate');
@@ -816,7 +816,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ad
 // Libraries (public + private + virtual labs) — read (index, show, items)
 // Virtual labs are platform-wide (no school_id), so browse/view is safe for
 // teachers; only lab CRUD stays admin-only in the group above (card #290).
-Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('admin/libraries')->name('admin.libraries.')->group(function () {
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher', 'role_permission:libraries.view'])->prefix('admin/libraries')->name('admin.libraries.')->group(function () {
     // PublicLibraryController::index — school-scoped: activeSchoolId() line 24
     Route::get('public', [\App\Modules\Libraries\Controllers\PublicLibraryController::class, 'index'])->name('public.index');
     // PublicLibraryController::show — school-scoped: findScoped() line 75
@@ -847,7 +847,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('te
     Route::get('weekly-plans/{weekly_plan}/duplicate', [\App\Http\Controllers\Admin\WeeklyPlanController::class, 'duplicate'])->name('weekly-plans.duplicate');
 
     // Exams for Teachers
-    Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
+    Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->middleware('role_permission:exams.view');
     Route::post('exams/{exam}/publish', [\App\Http\Controllers\Admin\ExamController::class, 'publish'])->name('exams.publish');
     Route::post('exams/{exam}/unpublish', [\App\Http\Controllers\Admin\ExamController::class, 'unpublish'])->name('exams.unpublish');
     Route::post('exams/{exam}/activate', [\App\Http\Controllers\Admin\ExamController::class, 'activate'])->name('exams.activate');
