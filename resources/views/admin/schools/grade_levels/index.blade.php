@@ -53,7 +53,6 @@
                             <th>#</th>
                             <th>@lang('schools.grade_level_name')</th>
                             <th>@lang('schools.stage')</th>
-                            <th>@lang('common.gender')</th>
                             <th>@lang('schools.classes_count')</th>
                             <th>@lang('common.actions')</th>
                         </tr>
@@ -64,7 +63,6 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $section->name }}</td>
                                 <td>@lang('schools.stage_'.$section->level)</td>
-                                <td>@lang('schools.gender_'.$section->gender)</td>
                                 <td>{{ $section->classes->count() }}</td>
                                 <td>
                                     <a href="{{ route('admin.schools.grade-levels.classes', [$school, $section]) }}" class="btn btn-sm btn-outline-primary">
@@ -76,7 +74,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="text-center text-muted">@lang('schools.no_grades_yet')</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted">@lang('schools.no_grades_yet')</td></tr>
                         @endforelse
                     </tbody>
                 </table>

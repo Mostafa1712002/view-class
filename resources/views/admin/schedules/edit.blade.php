@@ -154,6 +154,44 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteBtn = document.getElementById('deletePeriodBtn');
     const scheduleId = {{ $schedule->id }};
 
+    // subject_id => [teacher ids] from the subject_teacher pivot; derive the reverse map.
+    const subjectTeachers = @json($subjectTeacherMap ?? (object) []);
+    const teacherSubjects = {};
+    Object.keys(subjectTeachers).forEach(function (sid) {
+        subjectTeachers[sid].forEach(function (tid) {
+            (teacherSubjects[tid] = teacherSubjects[tid] || []).push(Number(sid));
+        });
+    });
+
+    const subjectSelect = document.getElementById('subject_id');
+    const teacherSelect = document.getElementById('teacher_id');
+
+    // Show only options linked to the chosen value in `map`. driverVal empty => show all.
+    // The current selection is always kept visible so an existing (possibly legacy)
+    // subject↔teacher pair is never hidden; on a user change an incompatible pick resets.
+    function filterOptions(driverVal, map, targetSelect, preserveSelected) {
+        const allowed = driverVal ? (map[driverVal] || []) : null;
+        const cur = targetSelect.value;
+        Array.prototype.forEach.call(targetSelect.options, function (opt) {
+            if (!opt.value) { opt.hidden = false; opt.disabled = false; return; }
+            const ok = allowed === null
+                || allowed.indexOf(Number(opt.value)) !== -1
+                || (preserveSelected && opt.value === cur);
+            opt.hidden = ok ? false : true;
+            opt.disabled = !ok;
+        });
+        if (!preserveSelected && cur && allowed !== null && allowed.indexOf(Number(cur)) === -1) {
+            targetSelect.value = '';
+        }
+    }
+
+    subjectSelect.addEventListener('change', function () {
+        filterOptions(this.value, subjectTeachers, teacherSelect, false);
+    });
+    teacherSelect.addEventListener('change', function () {
+        filterOptions(this.value, teacherSubjects, subjectSelect, false);
+    });
+
     document.querySelectorAll('.period-cell').forEach(cell => {
         cell.addEventListener('click', function() {
             const day = this.dataset.day;
@@ -165,16 +203,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (content) {
                 document.getElementById('period_id').value = content.dataset.id;
-                document.getElementById('subject_id').value = content.dataset.subject;
-                document.getElementById('teacher_id').value = content.dataset.teacher;
+                subjectSelect.value = content.dataset.subject;
+                teacherSelect.value = content.dataset.teacher;
                 document.getElementById('room').value = content.dataset.room || '';
                 deleteBtn.style.display = 'block';
+                // Existing period: narrow both selects but keep the saved pair visible.
+                filterOptions(subjectSelect.value, subjectTeachers, teacherSelect, true);
+                filterOptions(teacherSelect.value, teacherSubjects, subjectSelect, true);
             } else {
                 document.getElementById('period_id').value = '';
-                document.getElementById('subject_id').value = '';
-                document.getElementById('teacher_id').value = '';
+                subjectSelect.value = '';
+                teacherSelect.value = '';
                 document.getElementById('room').value = '';
                 deleteBtn.style.display = 'none';
+                // Fresh add: reset both selects to show every option.
+                filterOptions('', subjectTeachers, teacherSelect, false);
+                filterOptions('', teacherSubjects, subjectSelect, false);
             }
 
             modal.show();

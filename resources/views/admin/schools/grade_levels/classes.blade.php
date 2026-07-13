@@ -78,6 +78,7 @@
                             <th>#</th>
                             <th>@lang('schools.class_name')</th>
                             <th>@lang('schools.grade_level_number')</th>
+                            <th>@lang('schools.student_gender')</th>
                             <th>@lang('schools.capacity')</th>
                             <th>@lang('schools.vacancies')</th>
                             <th>@lang('schools.students')</th>
@@ -92,6 +93,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $class->name }}</td>
                                 <td>{{ $class->grade_level }}</td>
+                                <td>{{ $class->gender ? __('schools.gender_'.$class->gender) : '—' }}</td>
                                 <td>{{ $class->capacity }}</td>
                                 <td>{{ $vacancies }}</td>
                                 <td>{{ $class->students_count }}</td>
@@ -108,7 +110,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="8" class="text-center text-muted">@lang('schools.no_classes_yet')</td></tr>
+                            <tr><td colspan="9" class="text-center text-muted">@lang('schools.no_classes_yet')</td></tr>
                         @endforelse
                     </tbody>
                 </table>

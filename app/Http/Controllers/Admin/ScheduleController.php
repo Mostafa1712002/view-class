@@ -304,11 +304,21 @@ class ScheduleController extends Controller
         $subjects = $subjectsQuery->get();
         $teachers = $teachersQuery->get();
 
+        // subject_id => [teacher user_ids] from the subject_teacher pivot, scoped to this
+        // school's subjects. The pivot's teacher column is `user_id` (the model's
+        // teachers() relation mistakenly points at a non-existent teacher_id column).
+        $subjectTeacherMap = DB::table('subject_teacher')
+            ->whereIn('subject_id', $subjects->pluck('id'))
+            ->get(['subject_id', 'user_id'])
+            ->groupBy('subject_id')
+            ->map(fn ($rows) => $rows->pluck('user_id')->map(fn ($id) => (int) $id)->values())
+            ->toArray();
+
         $timetable = $this->buildClassTimetable($schedule);
         $days = $this->activeDaysLabels();
         $periodsCount = self::PERIODS_PER_DAY;
 
-        return view('admin.schedules.edit', compact('schedule', 'timetable', 'days', 'periodsCount', 'subjects', 'teachers'));
+        return view('admin.schedules.edit', compact('schedule', 'timetable', 'days', 'periodsCount', 'subjects', 'teachers', 'subjectTeacherMap'));
     }
 
     public function update(Request $request, Schedule $schedule)
