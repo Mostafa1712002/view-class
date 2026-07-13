@@ -663,43 +663,6 @@
         });
     })();
 
-    // Hide the fixed header on scroll-down, reveal it on scroll-up, so the
-    // content underneath gets the full height (QA request, card سيدبار والهيدر).
-    // Capture phase so we also catch scrolling from the theme's inner content
-    // container (.vertical-layout), not only the window.
-    (function () {
-        var nav = document.querySelector('.header-navbar');
-        if (!nav) { return; }
-        // Toggle a class (styled with !important) rather than an inline transform:
-        // the Vuexy theme has its own scroll handler that rewrites the navbar's
-        // inline transform, so an inline value here gets clobbered on every scroll.
-        var style = document.createElement('style');
-        style.textContent = '.header-navbar{transition:transform .25s ease;}'
-            + '.header-navbar.vc-hide-on-scroll{transform:translateY(-100%)!important;}';
-        document.head.appendChild(style);
-        // Track last position PER scrolling element: the content container AND
-        // the sidebar's own scrollbar both fire scroll events, and a shared
-        // counter lets their very different offsets clobber each other and flip
-        // the detected direction. Key by the element itself, and ignore scrolls
-        // coming from inside the sidebar entirely.
-        var positions = new WeakMap();
-        var winLast = 0;
-        window.addEventListener('scroll', function (e) {
-            var el = e.target;
-            if (el && el.closest && el.closest('.main-menu')) { return; }
-            var y, prev;
-            if (!el || el === document || el === window) {
-                y = window.pageYOffset || 0; prev = winLast; winLast = y;
-            } else {
-                y = el.scrollTop || 0; prev = positions.get(el) || 0; positions.set(el, y);
-            }
-            if (y > prev && y > 80) {
-                nav.classList.add('vc-hide-on-scroll');           // scrolling down
-            } else if (y < prev) {
-                nav.classList.remove('vc-hide-on-scroll');        // scrolling up
-            }
-        }, true);
-    })();
     </script>
 
     <script>

@@ -184,10 +184,12 @@
             /* Drop low-value items on phones (search, language, role-switch live in avatar dropdown anyway) */
             [data-shell-hide-xs] { display: none !important; }
         }
-        /* Scope strip: stack cleanly on phones, single row from sm up */
-        #shell-scope-mobile { padding: 6px 12px; gap: 6px; }
-        #shell-scope-mobile form { width: 100%; gap: 6px !important; }
-        #shell-scope-mobile select { min-width: 0; }
+        /* Scope strip: keep it to a single compact row on phones (QA: the header
+           was too tall on mobile because the scope selects wrapped onto 3 rows). */
+        #shell-scope-mobile { padding: 4px 10px; gap: 5px; flex-wrap: nowrap !important; overflow-x: auto; }
+        #shell-scope-mobile form { width: 100%; gap: 5px !important; flex-wrap: nowrap !important; }
+        #shell-scope-mobile select,
+        #shell-scope-mobile > form > span { min-width: 0; flex: 1 1 0 !important; height: 28px !important; font-size: .74rem !important; }
         @media (max-width: 575.98px) {
             #shell-scope-mobile select { flex: 1 1 100% !important; max-width: 100% !important; }
         }
