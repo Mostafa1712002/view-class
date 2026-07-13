@@ -354,6 +354,7 @@
                         <thead>
                             <tr>
                                 <th>@lang('users.name')</th>
+                                @if(auth()->user()->isSuperAdmin())<th>@lang('users.school')</th>@endif
                                 <th>@lang('users.national_id')</th>
                                 <th>@lang('users.phone')</th>
                                 <th class="text-center">@lang('users.children_count')</th>
@@ -379,6 +380,7 @@
                                         </div>
                                     </div>
                                 </td>
+                                @if(auth()->user()->isSuperAdmin())<td data-label="@lang('users.school')">{{ optional($u->school)->name_ar ?? '—' }}</td>@endif
                                 <td data-label="@lang('users.national_id')">
                                     @if($u->national_id)
                                         <span class="pp-id-chip">{{ $u->national_id }}</span>
@@ -444,7 +446,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7">
+                                <td colspan="{{ auth()->user()->isSuperAdmin() ? 8 : 7 }}">
                                     <div class="pp-empty">
                                         <x-svg-icon name="people-fill" :size="40" class="ic-muted" />
                                         <div class="lbl">@lang('users.no_results')</div>

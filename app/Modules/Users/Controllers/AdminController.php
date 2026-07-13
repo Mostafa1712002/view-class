@@ -29,8 +29,8 @@ class AdminController extends Controller
         $q = $request->string('q')->toString();
         $jobTitleId = (int) $request->input('job_title_id') ?: null;
 
-        $admins = $this->buildAdminListQuery($schoolId, $q ?: null, $jobTitleId)
-            ->with(['jobTitle', 'roles'])
+        $admins = $this->buildAdminListQuery($this->listSchoolId(), $q ?: null, $jobTitleId)
+            ->with(['jobTitle', 'roles', 'school'])
             ->orderBy('users.name')
             ->paginate(25)
             ->withQueryString();
@@ -160,7 +160,6 @@ class AdminController extends Controller
                 $user->managedSchools()->sync($data['school_ids']);
             }
         });
-        $this->focusScopeOnSchool($schoolId);
         return redirect()->route('admin.users.admins.index')
             ->with('status', __('users.admin_created'));
     }
@@ -218,7 +217,6 @@ class AdminController extends Controller
         if (auth()->user()?->isSuperAdmin()) {
             $admin->managedSchools()->sync($data['school_ids'] ?? []);
         }
-        $this->focusScopeOnSchool($admin->school_id);
         return redirect()->route('admin.users.admins.index')
             ->with('status', __('users.admin_updated'));
     }

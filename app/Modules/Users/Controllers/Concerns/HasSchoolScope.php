@@ -84,21 +84,18 @@ trait HasSchoolScope
     }
 
     /**
-     * After a super-admin files a user under a school, point the active scope at
-     * that school so the redirected list actually shows the new user. Without
-     * this, a super-admin scoped to school A who adds a user to school B lands
-     * back on school A's list and the user appears to "vanish". No-op for
-     * non-super-admins (their scope is already their own school).
+     * School id to filter the user-management LISTS by. A super-admin manages
+     * users across every tenant, so their directory is global (null = no school
+     * filter) regardless of the header scope — the scope narrows dashboards and
+     * settings, not the global user directory. Everyone else stays scoped to
+     * their own active school (fail-closed via activeSchoolId()).
      */
-    protected function focusScopeOnSchool(?int $schoolId): void
+    protected function listSchoolId(): ?int
     {
-        if ($schoolId === null || ! auth()->user()?->isSuperAdmin()) {
-            return;
+        if (auth()->user()?->isSuperAdmin()) {
+            return null;
         }
 
-        $scope = session('scope', []);
-        $scope['school_id'] = $schoolId;
-        $scope['company_id'] = School::whereKey($schoolId)->value('educational_company_id');
-        session()->put('scope', $scope);
+        return $this->activeSchoolId();
     }
 }

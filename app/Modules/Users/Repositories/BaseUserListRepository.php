@@ -15,7 +15,7 @@ abstract class BaseUserListRepository implements UserListRepository
     /** Optional extra eager-load relations for index queries. */
     protected function indexWith(): array
     {
-        return [];
+        return ['school'];
     }
 
     /** Optional extra columns to add to the search OR clause. */

@@ -418,6 +418,7 @@
                 <thead>
                     <tr>
                         <th>@lang('users.name')</th>
+                        @if(auth()->user()->isSuperAdmin())<th>@lang('users.school')</th>@endif
                         <th>@lang('users.username')</th>
                         <th>@lang('users.job_title')</th>
                         <th>@lang('users.status')</th>
@@ -448,6 +449,7 @@
                                 </div>
                             </div>
                         </td>
+                        @if(auth()->user()->isSuperAdmin())<td data-label="@lang('users.school')"><span class="ad-secondary">{{ optional($u->school)->name_ar ?? '—' }}</span></td>@endif
                         <td data-label="@lang('users.username')">
                             <span class="ad-secondary">{{ $u->username ?? '—' }}</span>
                         </td>
@@ -522,7 +524,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">
+                        <td colspan="{{ auth()->user()->isSuperAdmin() ? 7 : 6 }}">
                             <div class="ad-empty">
                                 <x-svg-icon name="shield-lock-fill" :size="40" class="ic-muted" />
                                 <div class="lbl">

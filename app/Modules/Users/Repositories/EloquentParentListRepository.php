@@ -13,7 +13,7 @@ class EloquentParentListRepository extends BaseUserListRepository implements Par
 
     protected function indexWith(): array
     {
-        return ['children'];
+        return ['children', 'school'];
     }
 
     protected function extraSearchColumns(): array

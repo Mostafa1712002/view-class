@@ -65,6 +65,7 @@
                     <tr>
                         <th style="width:32px"><input type="checkbox" id="js-check-all" /></th>
                         <th>@lang('users.name')</th>
+                        @if(auth()->user()->isSuperAdmin())<th>@lang('users.school')</th>@endif
                         <th>@lang('users.username')</th>
                         <th>@lang('users.national_id')</th>
                         <th>@lang('users.employee_id')</th>
@@ -82,6 +83,7 @@
                             <strong>{{ $u->name }}</strong>
                             @if($u->email)<br><small class="text-muted">{{ $u->email }}</small>@endif
                         </td>
+                        @if(auth()->user()->isSuperAdmin())<td>{{ optional($u->school)->name_ar ?? '—' }}</td>@endif
                         <td><code>{{ $u->username ?? '—' }}</code></td>
                         <td>{{ $u->national_id ?? '—' }}</td>
                         <td>{{ $u->employee_id ?? '—' }}</td>
@@ -121,7 +123,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="text-center text-muted py-4">@lang('users.no_results')</td></tr>
+                    <tr><td colspan="{{ auth()->user()->isSuperAdmin() ? 10 : 9 }}" class="text-center text-muted py-4">@lang('users.no_results')</td></tr>
                 @endforelse
                 </tbody>
             </table>

@@ -396,6 +396,7 @@
                     <tr>
                         <th style="width:36px;"><input type="checkbox" id="js-check-all" /></th>
                         <th>@lang('users.name')</th>
+                        @if(auth()->user()->isSuperAdmin())<th>@lang('users.school')</th>@endif
                         <th>@lang('users.national_id')</th>
                         <th>@lang('users.grade_level')</th>
                         <th>@lang('users.class')</th>
@@ -422,6 +423,7 @@
                                 </span>
                             </span>
                         </td>
+                        @if(auth()->user()->isSuperAdmin())<td>{{ optional($u->school)->name_ar ?? '—' }}</td>@endif
                         <td>{{ $u->national_id ?? '—' }}</td>
                         <td>
                             @if(optional($u->section)->name)
@@ -481,7 +483,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9">
+                        <td colspan="{{ auth()->user()->isSuperAdmin() ? 10 : 9 }}">
                             <div class="empty-state">
                                 <div class="icon-wrap"><x-svg-icon name="mortarboard-fill" :size="48" class="ic-eval" /></div>
                                 <h4>@lang('users.no_results')</h4>
@@ -509,6 +511,7 @@
                         <span class="status-pill {{ $isActive ? 'on' : 'off' }}">{{ $isActive ? __('users.student_status_active') : __('users.student_status_inactive') }}</span>
                     </div>
                     <div class="meta">
+                        @if(auth()->user()->isSuperAdmin())<span><strong>@lang('users.school'):</strong> {{ optional($u->school)->name_ar ?? '—' }}</span>@endif
                         <span><strong>@lang('users.national_id'):</strong> {{ $u->national_id ?? '—' }}</span>
                         <span><strong>@lang('users.grade_level'):</strong> {{ optional($u->section)->name ?? '—' }}</span>
                         <span><strong>@lang('users.class'):</strong> {{ optional($u->classRoom)->name ?? '—' }}</span>
