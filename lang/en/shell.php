@@ -6,6 +6,7 @@ return [
     'notifications_system' => 'System Notifications',
     'switch_language' => 'Switch Language',
     'search' => 'Search',
+    'search_no_results' => 'No results',
     'profile_edit' => 'Edit Profile',
     'change_password' => 'Change Password',
     'upload_avatar' => 'Update Avatar',

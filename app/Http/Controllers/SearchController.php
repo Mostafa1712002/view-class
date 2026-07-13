@@ -60,9 +60,13 @@ class SearchController extends Controller
 
         $user = Auth::user();
         $schoolId = $user->school_id;
+        $isSuper = $user->isSuperAdmin();
         $results = [];
 
-        $students = User::where('school_id', $schoolId)
+        // Super-admin searches every school; everyone else is scoped to theirs.
+        $bySchool = fn ($q, string $col = 'school_id') => $isSuper ? $q : $q->where($col, $schoolId);
+
+        $students = $bySchool(User::query())
             ->where('name', 'like', "%{$query}%")
             ->whereHas('roles', fn($q) => $q->where('slug', 'student'))
             ->take(5)
@@ -75,7 +79,7 @@ class SearchController extends Controller
                 'url' => route('manage.users.show', $u),
             ]);
 
-        $teachers = User::where('school_id', $schoolId)
+        $teachers = $bySchool(User::query())
             ->where('name', 'like', "%{$query}%")
             ->whereHas('roles', fn($q) => $q->where('slug', 'teacher'))
             ->take(3)
@@ -88,7 +92,7 @@ class SearchController extends Controller
                 'url' => route('manage.users.show', $u),
             ]);
 
-        $classes = ClassRoom::whereHas('section', fn($q) => $q->where('school_id', $schoolId))
+        $classes = ClassRoom::whereHas('section', fn($q) => $isSuper ? $q : $q->where('school_id', $schoolId))
             ->where('name', 'like', "%{$query}%")
             ->take(3)
             ->get()
@@ -100,7 +104,7 @@ class SearchController extends Controller
                 'url' => route('manage.classes.show', $c),
             ]);
 
-        $subjects = Subject::where('school_id', $schoolId)
+        $subjects = $bySchool(Subject::query())
             ->where('name', 'like', "%{$query}%")
             ->take(3)
             ->get()

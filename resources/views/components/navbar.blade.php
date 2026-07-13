@@ -584,8 +584,93 @@
     @endauth
 
     <div id="shell-search-bar" class="d-none w-100" style="position:absolute; top:56px; {{ $shellIsRtl ? 'left' : 'right' }}:0; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,.08); padding:10px 20px; z-index:1040;">
-        <input type="text" class="form-control" placeholder="@lang('shell.search')" />
+        <input type="text" id="shell-search-input" class="form-control" autocomplete="off"
+               placeholder="@lang('shell.search')"
+               data-url="{{ route('search.quick') }}" />
+        <div id="shell-search-results" class="d-none"
+             style="position:absolute; {{ $shellIsRtl ? 'left' : 'right' }}:20px; {{ $shellIsRtl ? 'right' : 'left' }}:20px; top:100%; margin-top:2px; background:#fff; border:1px solid #e5e7eb; border-radius:.5rem; box-shadow:0 8px 24px rgba(15,23,42,.12); max-height:360px; overflow-y:auto; z-index:1041;"></div>
     </div>
+
+    <script>
+    (function () {
+        var input = document.getElementById('shell-search-input');
+        var box   = document.getElementById('shell-search-results');
+        if (!input || !box) { return; }
+        var isRtl = {{ $shellIsRtl ? 'true' : 'false' }};
+        var timer = null, lastQ = '';
+
+        function hide() { box.classList.add('d-none'); box.innerHTML = ''; }
+        function esc(s) { return (s || '').replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+        function render(items) {
+            if (!items.length) {
+                box.innerHTML = '<div style="padding:.7rem 1rem;color:#94a3b8;font-size:.85rem;">@lang('shell.search_no_results')</div>';
+                box.classList.remove('d-none');
+                return;
+            }
+            box.innerHTML = items.map(function (r) {
+                return '<a href="' + r.url + '" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;color:#1e293b;text-decoration:none;border-bottom:1px solid #f1f5f9;">' +
+                    '<span style="flex:0 0 auto;font-size:.7rem;font-weight:700;color:#64748b;background:#f1f5f9;border-radius:999px;padding:.15rem .5rem;">' + esc(r.type) + '</span>' +
+                    '<span style="flex:1 1 auto;' + (isRtl ? 'text-align:right;' : '') + '">' + esc(r.name) + '</span></a>';
+            }).join('');
+            box.classList.remove('d-none');
+        }
+
+        function run(q) {
+            fetch(input.dataset.url + '?q=' + encodeURIComponent(q), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json(); })
+                .then(function (d) { render(d.results || []); })
+                .catch(function () { hide(); });
+        }
+
+        input.addEventListener('input', function () {
+            var q = input.value.trim();
+            if (q === lastQ) { return; }
+            lastQ = q;
+            clearTimeout(timer);
+            if (q.length < 2) { hide(); return; }
+            timer = setTimeout(function () { run(q); }, 250);
+        });
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                var first = box.querySelector('a');
+                if (first) { window.location.href = first.getAttribute('href'); }
+            } else if (e.key === 'Escape') { hide(); }
+        });
+        document.addEventListener('click', function (e) {
+            if (!box.contains(e.target) && e.target !== input) { hide(); }
+        });
+    })();
+
+    // Hide the fixed header on scroll-down, reveal it on scroll-up, so the
+    // content underneath gets the full height (QA request, card سيدبار والهيدر).
+    // Capture phase so we also catch scrolling from the theme's inner content
+    // container (.vertical-layout), not only the window.
+    (function () {
+        var nav = document.querySelector('.header-navbar');
+        if (!nav) { return; }
+        nav.style.transition = 'transform .25s ease';
+        // Track last position PER scroll source: window and the inner content
+        // container report different offsets, so a shared counter would misread
+        // the direction when their events interleave.
+        var last = {};
+        window.addEventListener('scroll', function (e) {
+            var el = e.target, key, y;
+            if (!el || el === document || el === window) {
+                key = 'win'; y = window.pageYOffset || 0;
+            } else {
+                key = 'el'; y = el.scrollTop || 0;
+            }
+            var prev = last[key] || 0;
+            if (y > prev && y > 80) {
+                nav.style.transform = 'translateY(-100%)';        // scrolling down
+            } else if (y < prev) {
+                nav.style.transform = 'translateY(0)';            // scrolling up
+            }
+            last[key] = y;
+        }, true);
+    })();
+    </script>
 
     <script>
         (function () {

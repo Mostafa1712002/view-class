@@ -6,6 +6,7 @@ return [
     'notifications_system' => 'إشعارات النظام',
     'switch_language' => 'تبديل اللغة',
     'search' => 'بحث',
+    'search_no_results' => 'لا توجد نتائج',
     'profile_edit' => 'تعديل البيانات الشخصية',
     'change_password' => 'تغيير كلمة المرور',
     'upload_avatar' => 'تحديث الصورة الشخصية',
