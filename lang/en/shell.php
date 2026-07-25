@@ -48,6 +48,7 @@ return [
     'scope_company' => 'Educational company',
     'scope_school' => 'School',
     'scope_semester' => 'Semester',
+    'scope_all_companies' => 'All companies',
     'scope_all_schools' => 'All schools',
     'scope_all_years' => 'All semesters',
     'scope_apply' => 'Apply',

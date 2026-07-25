@@ -352,6 +352,7 @@
                 <form id="shell-scope-form" method="POST" action="{{ route('scope.set') }}" class="shell-nav-center d-none d-xl-flex align-items-center m-0">
                     @csrf
                     <select name="company_id" class="form-control form-control-sm mx-1" style="min-width:140px; max-width:180px" onchange="this.form.submit()" aria-label="@lang('shell.scope_company')">
+                        <option value="all" @selected(empty($shellScopeSession['company_id']))>@lang('shell.scope_all_companies')</option>
                         @foreach($shellScopeCompanies as $c)
                             <option value="{{ $c['id'] }}" @selected(($shellScopeSession['company_id'] ?? null) == $c['id'])>
                                 {{ $shellLocale === 'en' ? ($c['name_en'] ?: $c['name_ar']) : ($c['name_ar'] ?: $c['name_en']) }}

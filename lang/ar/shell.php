@@ -48,6 +48,7 @@ return [
     'scope_company' => 'الشركة التعليمية',
     'scope_school' => 'المدرسة',
     'scope_semester' => 'الفصل الدراسي',
+    'scope_all_companies' => 'جميع الشركات',
     'scope_all_schools' => 'جميع المدارس',
     'scope_all_years' => 'جميع الفصول',
     'scope_apply' => 'تطبيق',
