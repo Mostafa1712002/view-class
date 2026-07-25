@@ -92,10 +92,9 @@ trait HasSchoolScope
      */
     protected function listSchoolId(): ?int
     {
-        if (auth()->user()?->isSuperAdmin()) {
-            return null;
-        }
-
+        // Follow the active scope for everyone: a super-admin on "all schools"
+        // resolves to null (every school, with the school column shown), and a
+        // super-admin who picks one school in the header narrows the list to it.
         return $this->activeSchoolId();
     }
 }
