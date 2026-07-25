@@ -19,22 +19,39 @@
 </div>
 
 <div class="content-body">
-    {{-- Add grade level (= section) --}}
+    @if($errors->any())
+        <div class="alert alert-danger">{{ $errors->first() }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @php $unmapped = $sections->whereNull('grade_number'); @endphp
+    @if($unmapped->count())
+        <div class="alert alert-warning d-flex justify-content-between align-items-center">
+            <span><i class="la la-exclamation-triangle"></i> @lang('schools.needs_standardization', ['count' => $unmapped->count()])</span>
+            <a href="{{ route('admin.schools.standardization.index', $school) }}" class="btn btn-sm btn-warning">
+                @lang('schools.standardize_now')
+            </a>
+        </div>
+    @endif
+
+    {{-- Add grade level (= section) — picked from the fixed standard list --}}
     <div class="card mb-3">
         <div class="card-header"><h5 class="mb-0">@lang('schools.add_grade_level')</h5></div>
         <div class="card-body">
             <form action="{{ route('admin.schools.grade-levels.store', $school) }}" method="POST" class="row g-2 align-items-end">
                 @csrf
-                <div class="col-md-4">
-                    <label class="form-label">@lang('schools.grade_level_name')</label>
-                    <input type="text" name="name" class="form-control" placeholder="@lang('schools.grade_level_name_hint')" required>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">@lang('schools.stage')</label>
-                    <select name="level" class="form-control" required>
-                        <option value="primary">@lang('schools.stage_primary')</option>
-                        <option value="intermediate">@lang('schools.stage_intermediate')</option>
-                        <option value="secondary">@lang('schools.stage_secondary')</option>
+                <div class="col-md-5">
+                    <label class="form-label">@lang('schools.grade_type')</label>
+                    <select name="grade_number" class="form-control" required>
+                        <option value="">— @lang('schools.grade_type') —</option>
+                        @foreach($standardGrades as $ordinal => $grade)
+                            <option value="{{ $ordinal }}">{{ $ordinal }} — {{ $grade['name'] }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -50,7 +67,7 @@
                 <table class="table table-bordered table-striped align-middle">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>@lang('schools.grade_level_number')</th>
                             <th>@lang('schools.grade_level_name')</th>
                             <th>@lang('schools.stage')</th>
                             <th>@lang('schools.classes_count')</th>
@@ -60,7 +77,13 @@
                     <tbody>
                         @forelse($sections as $section)
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    @if($section->grade_number)
+                                        <span class="badge badge-primary">{{ $section->grade_number }}</span>
+                                    @else
+                                        <span class="badge badge-warning">—</span>
+                                    @endif
+                                </td>
                                 <td>{{ $section->name }}</td>
                                 <td>@lang('schools.stage_'.$section->level)</td>
                                 <td>{{ $section->classes->count() }}</td>
@@ -71,6 +94,18 @@
                                     <a href="{{ route('manage.books.grades', ['school' => $school->id]) }}" class="btn btn-sm btn-outline-secondary">
                                         <i class="la la-book"></i> @lang('schools.books')
                                     </a>
+                                    {{-- Map an existing grade to a standard entry (assigns ordinal, keeps classes/students) --}}
+                                    <form action="{{ route('admin.schools.grade-levels.update', [$school, $section]) }}" method="POST" class="d-inline-flex align-items-center ml-1">
+                                        @csrf
+                                        @method('PUT')
+                                        <select name="grade_number" class="form-control form-control-sm d-inline-block" style="width:auto" required>
+                                            <option value="">@lang('schools.map_to_standard')</option>
+                                            @foreach($standardGrades as $ordinal => $grade)
+                                                <option value="{{ $ordinal }}" @selected($section->grade_number === $ordinal)>{{ $ordinal }} — {{ $grade['name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <button class="btn btn-sm btn-outline-success ml-1" title="@lang('common.save')"><i class="la la-save"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty

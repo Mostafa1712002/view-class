@@ -10,26 +10,26 @@ marked ⚠️.
 ## Phase 1: Grade naming standardization (safe)
 
 ### Task 1.1: Standard grade lookup + ordinal column
-- [ ] Migration: add `sections.grade_number` (tinyint 1..12, nullable) + unique index `(school_id, gender, grade_number)`
-- [ ] `App\Modules\Promotion\Support\StandardGrades` constant (12 entries → name, level, ordinal)
-- [ ] `Section` model: fillable `grade_number`, cast int, helper to resolve label from ordinal
+- [x] Migration: add `sections.grade_number` (tinyint 1..12, nullable) + unique index `(school_id, grade_number)` — gender-agnostic per card #C1 (grades are gender-neutral containers)
+- [x] `App\Modules\Promotion\Support\StandardGrades` constant (12 entries → name, level, ordinal, short label)
+- [x] `Section` model: fillable `grade_number`, cast int, `standard_label` accessor
 
 **Outcome:** grades can carry a standard ordinal.
 **Dependencies:** None
 
 ### Task 1.2: Grade create/edit uses the standard dropdown
-- [ ] `SchoolGradeLevelController@storeSection`: accept a standard-entry choice; set `name`, `level`, `grade_number`
-- [ ] grade-levels blade: replace free-text name with "نوع الصف الدراسي" dropdown
-- [ ] Allow renaming/mapping an existing grade to a standard entry (assign ordinal) without touching its classes/students
-- [ ] Validation: reject duplicate ordinal per school+gender
+- [x] `SchoolGradeLevelController@storeSection`: accept a standard-entry choice; set `name`, `level`, `grade_number`
+- [x] grade-levels blade: replace free-text name with "نوع الصف الدراسي" dropdown
+- [x] Allow renaming/mapping an existing grade to a standard entry via `@updateSection` (assign ordinal) without touching its classes/students
+- [x] Validation: reject duplicate ordinal per school (gender-agnostic, card #C1)
 
 **Outcome:** US-001 satisfied.
 **Dependencies:** 1.1
 
 ### Task 1.3: Propagate standard options to subjects + Excel import
-- [ ] Subjects create (`/admin/subjects/create`): grade options from `StandardGrades`
-- [ ] StudentImport template + preview validation: standardized grade options; flag non-standard rows
-- [ ] Regenerate `resources/templates/students_import.xlsx` header/options as needed
+- [x] Subjects create (`/admin/subjects/create`): grade options from `StandardGrades` (`gradeLevelOptions()` now delegates to `StandardGrades::options()`)
+- [x] StudentImport preview validation flags non-standard grade rows (`ClassifyStudentRows` + `grade_not_standard` error); import form lists the standard grade names as reference
+- [~] xlsx binary NOT regenerated — the parser maps by header row and does not depend on in-cell dropdowns; the standard names are surfaced on the import page instead
 
 **Outcome:** US-002 satisfied (card note #8).
 **Dependencies:** 1.1
@@ -39,17 +39,17 @@ marked ⚠️.
 ## Phase 2: Class numbering (safe)
 
 ### Task 2.1: Class number column + uniqueness
-- [ ] Migration: add `classes.number` (smallint, nullable) + unique index `(section_id, number)`
-- [ ] `ClassRoom` model: fillable `number`, cast int
-- [ ] `storeClass` / `updateClass`: validate `number` unique within grade (exclude self on edit) — Rule #1
-- [ ] classes blade: add `number` input; show "رقم الصف" column in the list
+- [x] Migration: add `classes.number` (smallint, nullable) + unique index `(section_id, number)`
+- [x] `ClassRoom` model: fillable `number`, cast int
+- [x] `storeClass` / `updateClass`: validate `number` unique within grade (exclude self on edit) — Rule #1
+- [x] classes blade: add `number` input; new "رقم الفصل" (class number) column, kept distinct from the existing "رقم الصف" (grade ordinal / grade_level) column
 
 **Outcome:** US-003 satisfied.
 **Dependencies:** None
 
 ### Task 2.2: Legacy backfill for grade ordinals + class numbers
-- [ ] One-time guided screen (or command) to assign `grade_number` to legacy grades and `number` to legacy classes
-- [ ] Surface "needs standardization" state; block promotion until resolved
+- [x] One-time guided screen (`SchoolStandardizationController` + `standardization/index.blade.php`) to assign `grade_number` to legacy grades and `number` to legacy classes; collisions (dup ordinal / dup class number) are rejected with a clear message
+- [x] "needs standardization" banner on the grade-levels page; `SchoolStandardizationController::isReady()` helper for Phase 5 to block promotion until resolved
 
 **Outcome:** existing data becomes promotion-ready.
 **Dependencies:** 1.1, 2.1
@@ -59,16 +59,16 @@ marked ⚠️.
 ## Phase 3: Pass/fail confirmation (safe)
 
 ### Task 3.1: Enrollment result field
-- [ ] Migration: add `class_student.result` enum(pending/passed/failed) default pending
-- [ ] Expose via `withPivot('result')` on `ClassRoom::students()` and the User side
+- [x] Migration: add `class_student.result` enum(pending/passed/failed) default pending
+- [x] Expose via `withPivot('result')` on `ClassRoom::students()` and the User side (`User::enrolledClasses()`)
 
 **Outcome:** result stored per enrollment.
 **Dependencies:** None
 
 ### Task 3.2: Pass/fail UI + action
-- [ ] `SetEnrollmentResultAction` + repository method (scoped by school)
-- [ ] Roster screen with per-student toggle + "mark all passed" bulk; reachable from class page and promotion preview
-- [ ] Routes `promotion.results` / `promotion.results.save`
+- [x] `SetEnrollmentResultAction` + `EnrollmentResultRepository` (contract + Eloquent impl, bound in `RepositoryServiceProvider`); all pivot writes scoped by school
+- [x] Roster screen (`promotion/results.blade.php`) with per-student passed/failed/pending toggle + "mark all passed" bulk; linked from the class page (promotion preview link deferred to Phase 5)
+- [x] Routes `admin.schools.promotion.results` / `.results.save`
 
 **Outcome:** US-004 satisfied.
 **Dependencies:** 3.1
@@ -78,9 +78,9 @@ marked ⚠️.
 ## Phase 4: Graduated students filter (safe)
 
 ### Task 4.1: Real graduation flag + broadened filter
-- [ ] Migration: add `users.graduated_at` (timestamp nullable)
-- [ ] `StudentController@applyFilters` + `studentCounts`: `graduates` = `graduated_at` NOT NULL OR legacy `%خريج%`
-- [ ] Confirm "الطلاب الخريجون" item in "خيارات أخرى" points at `?filter=graduates` (already does)
+- [x] Migration: add `users.graduated_at` (timestamp nullable)
+- [x] `StudentController@applyFilters` + `studentCounts`: `graduates` = `graduated_at` NOT NULL OR legacy `%خريج%`
+- [x] Confirm "الطلاب الخريجون" item in "خيارات أخرى" points at `?filter=graduates` (already does)
 
 **Outcome:** US-006 filter ready before any promotion can graduate a student.
 **Dependencies:** None
@@ -150,13 +150,13 @@ marked ⚠️.
 
 | Phase | Tasks | Completed | Destructive | Status |
 |-------|-------|-----------|-------------|--------|
-| 1. Grade naming | 3 | 0 | No | Not Started |
-| 2. Class numbering | 2 | 0 | No | Not Started |
-| 3. Pass/fail | 2 | 0 | No | Not Started |
-| 4. Graduated filter | 1 | 0 | No | Not Started |
+| 1. Grade naming | 3 | 3 | No | Complete |
+| 2. Class numbering | 2 | 2 | No | Complete |
+| 3. Pass/fail | 2 | 2 | No | Complete |
+| 4. Graduated filter | 1 | 1 | No | Complete |
 | 5. Promotion engine | 5 | 0 | ⚠️ Yes | Not Started |
 | 6. Integration | 2 | 0 | No | Not Started |
-| **Total** | **15** | **0** | — | **0%** |
+| **Total** | **15** | **8** | — | **53%** |
 
 **Safety rule:** Phase 5 tasks 5.4/5.5 (the writes) may only be built after 5.1
 (batch tables) and 5.2 (password gate + tested planner) are complete. No

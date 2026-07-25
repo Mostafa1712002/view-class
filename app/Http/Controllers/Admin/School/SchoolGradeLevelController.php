@@ -7,8 +7,10 @@ use App\Models\ClassRoom;
 use App\Models\School;
 use App\Models\Section;
 use App\Models\User;
+use App\Modules\Promotion\Support\StandardGrades;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SchoolGradeLevelController extends Controller
 {
@@ -16,26 +18,74 @@ class SchoolGradeLevelController extends Controller
     {
         $sections = $school->sections()
             ->with(['classes' => fn($q) => $q->withCount('students')])
+            ->orderBy('grade_number')
             ->orderBy('level')
             ->orderBy('name')
             ->get();
 
-        return view('admin.schools.grade_levels.index', compact('school', 'sections'));
+        $standardGrades = StandardGrades::all();
+
+        return view('admin.schools.grade_levels.index', compact('school', 'sections', 'standardGrades'));
     }
 
     public function storeSection(Request $request, School $school)
     {
-        // Gender moved to the class (فصل) — the grade (صف) no longer carries it
-        // (card #315). The sections.gender column defaults to 'male' in the DB.
+        // Grades are picked from the fixed standard list (نوع الصف الدراسي). The
+        // chosen ordinal drives name + level; gender stays on the class (card #C1).
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'level' => 'required|in:primary,intermediate,secondary',
+            'grade_number' => ['required', 'integer', Rule::in(array_keys(StandardGrades::all()))],
         ]);
-        $validated['school_id'] = $school->id;
+        $ordinal = (int) $validated['grade_number'];
 
-        Section::create($validated);
+        if ($this->gradeNumberTaken($school, $ordinal)) {
+            return back()->with('error', __('schools.grade_number_taken'));
+        }
+
+        $grade = StandardGrades::get($ordinal);
+        Section::create([
+            'school_id' => $school->id,
+            'name' => $grade['name'],
+            'level' => $grade['level'],
+            'grade_number' => $ordinal,
+        ]);
 
         return back()->with('success', __('common.created_successfully'));
+    }
+
+    /**
+     * Map an existing (legacy) grade to a standard entry — assigns the ordinal
+     * and syncs name/level. Classes and students are left untouched.
+     */
+    public function updateSection(Request $request, School $school, Section $section)
+    {
+        abort_unless($section->school_id === $school->id, 404);
+
+        $validated = $request->validate([
+            'grade_number' => ['required', 'integer', Rule::in(array_keys(StandardGrades::all()))],
+        ]);
+        $ordinal = (int) $validated['grade_number'];
+
+        if ($this->gradeNumberTaken($school, $ordinal, $section->id)) {
+            return back()->with('error', __('schools.grade_number_taken'));
+        }
+
+        $grade = StandardGrades::get($ordinal);
+        $section->update([
+            'name' => $grade['name'],
+            'level' => $grade['level'],
+            'grade_number' => $ordinal,
+        ]);
+
+        return back()->with('success', __('common.updated_successfully'));
+    }
+
+    /** Duplicate ordinal guard — gender-agnostic, per school (card #C1). */
+    private function gradeNumberTaken(School $school, int $ordinal, ?int $ignoreId = null): bool
+    {
+        return Section::where('school_id', $school->id)
+            ->where('grade_number', $ordinal)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
     }
 
     public function showClasses(School $school, Section $section)
@@ -64,6 +114,11 @@ class SchoolGradeLevelController extends Controller
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|min:1|max:12',
             'gender' => 'required|in:boys,girls,mixed',
+            // رقم الفصل — unique within this grade (Rule #1).
+            'number' => [
+                'nullable', 'integer', 'min:1', 'max:100',
+                Rule::unique('classes', 'number')->where(fn ($q) => $q->where('section_id', $section->id)),
+            ],
             'lead_teacher_id' => 'nullable|exists:users,id',
             'capacity' => 'required|integer|min:1|max:200',
             'academic_year_id' => 'required|exists:academic_years,id',
@@ -127,6 +182,13 @@ class SchoolGradeLevelController extends Controller
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|min:1|max:12',
             'gender' => 'required|in:boys,girls,mixed',
+            // رقم الفصل — unique within this grade, excluding this class (Rule #1).
+            'number' => [
+                'nullable', 'integer', 'min:1', 'max:100',
+                Rule::unique('classes', 'number')
+                    ->where(fn ($q) => $q->where('section_id', $section->id))
+                    ->ignore($class->id),
+            ],
             'lead_teacher_id' => 'nullable|exists:users,id',
             'capacity' => 'required|integer|min:1|max:200',
             'academic_year_id' => 'required|exists:academic_years,id',

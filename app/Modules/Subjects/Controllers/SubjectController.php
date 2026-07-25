@@ -433,28 +433,7 @@ class SubjectController extends Controller
      */
     private function gradeLevelOptions(): array
     {
-        $ordinals = [
-            1 => 'الأول', 2 => 'الثاني', 3 => 'الثالث', 4 => 'الرابع',
-            5 => 'الخامس', 6 => 'السادس',
-        ];
-
-        $out = [];
-        // 1..6  Primary
-        for ($g = 1; $g <= 6; $g++) {
-            $out[$g] = $ordinals[$g].' الابتدائي';
-        }
-        // 7..9  Intermediate
-        $intermediate = [7 => 'الأول', 8 => 'الثاني', 9 => 'الثالث'];
-        foreach ($intermediate as $g => $ord) {
-            $out[$g] = $ord.' المتوسط';
-        }
-        // 10..12 Secondary
-        $secondary = [10 => 'الأول', 11 => 'الثاني', 12 => 'الثالث'];
-        foreach ($secondary as $g => $ord) {
-            $out[$g] = $ord.' الثانوي';
-        }
-
-        return $out;
+        return \App\Modules\Promotion\Support\StandardGrades::options();
     }
 
     private function validateSubject(Request $request, ?Subject $subject = null): array

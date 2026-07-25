@@ -31,7 +31,11 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">@lang('schools.grade_level_number')</label>
-                    <input type="number" min="1" max="12" name="grade_level" class="form-control" value="1" required>
+                    <input type="number" min="1" max="12" name="grade_level" class="form-control" value="{{ $section->grade_number ?: 1 }}" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">@lang('schools.class_number')</label>
+                    <input type="number" min="1" max="100" name="number" class="form-control" placeholder="@lang('schools.class_number_hint')">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">@lang('schools.student_gender')</label>
@@ -78,6 +82,7 @@
                             <th>#</th>
                             <th>@lang('schools.class_name')</th>
                             <th>@lang('schools.grade_level_number')</th>
+                            <th>@lang('schools.class_number')</th>
                             <th>@lang('schools.student_gender')</th>
                             <th>@lang('schools.capacity')</th>
                             <th>@lang('schools.vacancies')</th>
@@ -93,6 +98,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $class->name }}</td>
                                 <td>{{ $class->grade_level }}</td>
+                                <td>{{ $class->number ?? '—' }}</td>
                                 <td>{{ $class->gender ? __('schools.gender_'.$class->gender) : '—' }}</td>
                                 <td>{{ $class->capacity }}</td>
                                 <td>{{ $vacancies }}</td>
@@ -110,7 +116,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="9" class="text-center text-muted">@lang('schools.no_classes_yet')</td></tr>
+                            <tr><td colspan="10" class="text-center text-muted">@lang('schools.no_classes_yet')</td></tr>
                         @endforelse
                     </tbody>
                 </table>

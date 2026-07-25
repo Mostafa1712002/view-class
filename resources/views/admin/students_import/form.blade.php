@@ -104,6 +104,15 @@
                     @else
                         <p class="text-muted mb-0">@lang('student_import.grades_empty')</p>
                     @endif
+
+                    <hr>
+                    <h6 class="mb-2">@lang('student_import.standard_grades_title')</h6>
+                    <p class="text-muted mb-1"><small>@lang('student_import.standard_grades_hint')</small></p>
+                    <ul class="mb-0" style="columns:2;-webkit-columns:2;">
+                        @foreach(\App\Modules\Promotion\Support\StandardGrades::all() as $ord => $g)
+                            <li><small>{{ $g['name'] }}</small></li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         </div>

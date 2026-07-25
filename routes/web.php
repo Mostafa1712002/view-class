@@ -119,6 +119,7 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
         Route::delete('academic-years/{year}/terms/{term}/weeks/{week}', [\App\Http\Controllers\Admin\School\SchoolAcademicYearController::class, 'destroyWeek'])->name('academic-years.terms.weeks.destroy');
         Route::get('grade-levels', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'index'])->name('grade-levels.index');
         Route::post('grade-levels', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'storeSection'])->name('grade-levels.store');
+        Route::put('grade-levels/{section}', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'updateSection'])->name('grade-levels.update');
         Route::get('grade-levels/{section}/classes', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'showClasses'])->name('grade-levels.classes');
         Route::post('grade-levels/{section}/classes', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'storeClass'])->name('grade-levels.classes.store');
         Route::get('grade-levels/{section}/classes/{class}/edit', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'editClass'])->name('grade-levels.classes.edit');
@@ -128,6 +129,14 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
         Route::get('grade-levels/{section}/classes/{class}', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'showClass'])->name('grade-levels.classes.show');
         Route::post('grade-levels/{section}/classes/{class}/students', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'addStudent'])->name('grade-levels.classes.students.add');
         Route::post('grade-levels/{section}/classes/{class}/students/transfer', [\App\Http\Controllers\Admin\School\SchoolGradeLevelController::class, 'transferStudents'])->name('grade-levels.classes.students.transfer');
+        // Guided legacy backfill: assign grade ordinals + class numbers (promotion-ready).
+        Route::get('standardization', [\App\Http\Controllers\Admin\School\SchoolStandardizationController::class, 'index'])->name('standardization.index');
+        Route::post('standardization', [\App\Http\Controllers\Admin\School\SchoolStandardizationController::class, 'save'])->name('standardization.save');
+
+        // Pass/fail confirmation roster (US-004) — set each enrollment's result.
+        Route::get('promotion/results', [\App\Modules\Promotion\Controllers\PromotionResultsController::class, 'show'])->name('promotion.results');
+        Route::post('promotion/results', [\App\Modules\Promotion\Controllers\PromotionResultsController::class, 'save'])->name('promotion.results.save');
+
         Route::get('permissions', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'index'])->name('permissions.index');
         Route::post('permissions/toggle', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'toggle'])->name('permissions.toggle');
         Route::post('permissions/copy', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'copyFrom'])->name('permissions.copy');

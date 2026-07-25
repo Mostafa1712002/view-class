@@ -23,6 +23,8 @@ return [
 
     'grades_title'  => 'Click a grade to copy it',
     'grades_empty'  => 'No grades defined for this school yet.',
+    'standard_grades_title' => 'Standard grades',
+    'standard_grades_hint'  => 'Use one of these names in the "Grade" column.',
     'copied'        => 'Copied',
 
     'columns_title' => 'Required columns in the Excel file',
@@ -98,6 +100,7 @@ return [
         'missing_library'  => 'The Excel reading library is not available on the server.',
         'missing_field'    => 'Required field missing: :field',
         'grade_not_found'  => 'Grade not found among the school grades: :grade',
+        'grade_not_standard' => 'Grade ":grade" is not one of the standard grades.',
         'class_not_found'  => 'The class is not found inside the grade: :class',
         'class_without_grade' => 'A class cannot be set without a grade.',
         'username_taken'   => 'Username already taken: :username',

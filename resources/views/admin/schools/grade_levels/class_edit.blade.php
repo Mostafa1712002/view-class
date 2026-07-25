@@ -36,6 +36,10 @@
                     <input type="number" min="1" max="12" name="grade_level" class="form-control" value="{{ old('grade_level', $class->grade_level) }}" required>
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label">@lang('schools.class_number')</label>
+                    <input type="number" min="1" max="100" name="number" class="form-control" value="{{ old('number', $class->number) }}" placeholder="@lang('schools.class_number_hint')">
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">@lang('schools.student_gender')</label>
                     @php $cg = old('gender', $class->gender); @endphp
                     <select name="gender" class="form-control" required>

@@ -5,6 +5,7 @@ namespace App\Modules\StudentImport\Actions;
 use App\Models\ClassRoom;
 use App\Models\Section;
 use App\Models\User;
+use App\Modules\Promotion\Support\StandardGrades;
 use App\Modules\StudentImport\DTOs\StudentImportRowDto;
 
 /**
@@ -99,6 +100,13 @@ final class ClassifyStudentRows
 
             // 3. Grade / Class strict existence (only when supplied).
             if ($row->grade !== null) {
+                // Flag non-standard grade names (must match the fixed standard list).
+                if (! StandardGrades::isStandardName($row->grade)) {
+                    $out[] = $this->invalid($data, __('student_import.errors.grade_not_standard', ['grade' => $row->grade]));
+
+                    continue;
+                }
+
                 $sectionId = $sections[$this->norm($row->grade)] ?? null;
                 if (! $sectionId) {
                     $out[] = $this->invalid($data, __('student_import.errors.grade_not_found', ['grade' => $row->grade]));

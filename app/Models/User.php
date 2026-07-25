@@ -32,6 +32,7 @@ class User extends Authenticatable
         'school_id',
         'section_id',
         'class_room_id',
+        'graduated_at',
         'employee_id',
         'national_id',
         'phone',
@@ -71,6 +72,7 @@ class User extends Authenticatable
             'date_of_birth' => 'date',
             'birth_date' => 'date',
             'hire_date' => 'date',
+            'graduated_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'notification_preferences' => 'array',
@@ -152,6 +154,7 @@ class User extends Authenticatable
     public function enrolledClasses(): BelongsToMany
     {
         return $this->belongsToMany(ClassRoom::class, 'class_student', 'student_id', 'class_id')
+            ->withPivot('result')
             ->withTimestamps();
     }
 

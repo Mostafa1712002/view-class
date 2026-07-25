@@ -166,6 +166,19 @@ return [
     'grade_level_name' => 'Grade Level Name',
     'grade_level_name_hint' => 'e.g. Grade 1 Primary',
     'grade_level_number' => 'Grade #',
+    'grade_type' => 'Grade Type',
+    'grade_number_taken' => 'This grade number is already used in this school.',
+    'map_to_standard' => 'Map to standard…',
+    'class_number' => 'Class #',
+    'class_number_hint' => 'e.g. 1',
+    'class_number_taken' => 'This class number is already used within this grade.',
+    'needs_standardization' => ':count grade(s) need a standard number before promotion.',
+    'standardize_now' => 'Standardize now',
+    'standardization' => 'Standardize grades & classes',
+    'standardization_intro' => 'Assign a standard number (1..12) to each grade and a number to each class. This one-time step makes the school promotion-ready.',
+    'needs_grade_number' => 'Needs number',
+    'standardize_grade_collision' => 'Grade number collision (:grades) — assign a distinct number to each grade.',
+    'standardize_class_collision' => 'Duplicate class numbers within grade: :grade.',
     'stage_primary' => 'Primary',
     'stage_intermediate' => 'Intermediate',
     'stage_secondary' => 'Secondary',
@@ -226,4 +239,17 @@ return [
 
     // Errors
     'cannot_delete_has_users' => 'Cannot delete a school with linked users',
+
+    // Pass/fail results (Phase 3)
+    'results_title' => 'Student results (pass/fail)',
+    'results_intro' => 'Set each student\'s result for this class, or use "Mark all passed".',
+    'results_saved' => ':count enrollment result(s) saved.',
+    'results_mark_all' => 'Mark all passed',
+    'results_mark_all_confirm' => 'This marks every student in this class as passed. Continue?',
+    'results_no_students' => 'No students are enrolled in this class.',
+    'result' => 'Result',
+    'result_passed' => 'Passed',
+    'result_failed' => 'Failed',
+    'result_pending' => 'Pending',
+    'student_name' => 'Student name',
 ];

@@ -20,6 +20,7 @@ class ClassRoom extends Model
         'grade_level',
         'gender',
         'division',
+        'number',
         'lead_teacher_id',
         'capacity',
         'room',
@@ -28,6 +29,7 @@ class ClassRoom extends Model
 
     protected $casts = [
         'capacity' => 'integer',
+        'number' => 'integer',
         'is_active' => 'boolean',
     ];
 
@@ -49,6 +51,7 @@ class ClassRoom extends Model
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'class_student', 'class_id', 'student_id')
+            ->withPivot('result')
             ->withTimestamps();
     }
 

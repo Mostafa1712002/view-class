@@ -7,6 +7,8 @@ use App\Modules\Auth\Repositories\Contracts\UserRepository;
 use App\Modules\Auth\Repositories\EloquentSessionRepository;
 use App\Modules\Auth\Repositories\EloquentUserRepository;
 use App\Modules\Auth\Services\JwtService;
+use App\Modules\Promotion\Repositories\Contracts\EnrollmentResultRepository;
+use App\Modules\Promotion\Repositories\EloquentEnrollmentResultRepository;
 use App\Modules\Books\Repositories\Contracts\BookRepository;
 use App\Modules\Books\Repositories\EloquentBookRepository;
 use App\Modules\Dashboard\Repositories\Contracts\DashboardStatsRepository;
@@ -150,6 +152,7 @@ class RepositoryServiceProvider extends ServiceProvider
         ParentCrmRepository::class               => EloquentParentCrmRepository::class,
         AdmissionRepository::class               => EloquentAdmissionRepository::class,
         EducationalSiteRepository::class         => EloquentEducationalSiteRepository::class,
+        EnrollmentResultRepository::class        => EloquentEnrollmentResultRepository::class,
     ];
 
     public function register(): void

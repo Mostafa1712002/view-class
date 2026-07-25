@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Modules\Promotion\Support\StandardGrades;
 
 class Section extends Model
 {
@@ -15,13 +16,21 @@ class Section extends Model
         'school_id',
         'gender',
         'level',
+        'grade_number',
         'description',
         'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'grade_number' => 'integer',
     ];
+
+    /** Short standard label for this grade's ordinal, or null if unmapped. */
+    public function getStandardLabelAttribute(): ?string
+    {
+        return $this->grade_number ? StandardGrades::label($this->grade_number) : null;
+    }
 
     public function school(): BelongsTo
     {

@@ -46,6 +46,9 @@
             <a href="{{ route('admin.schools.grade-levels.classes.students', [$school, $section, $class]) }}" class="btn btn-outline-info">
                 <i class="la la-users"></i> @lang('schools.students')
             </a>
+            <a href="{{ route('admin.schools.promotion.results', ['school' => $school, 'class' => $class->id]) }}" class="btn btn-outline-success">
+                <i class="la la-check-double"></i> @lang('schools.results_title')
+            </a>
             <a href="{{ route('admin.schools.grade-levels.classes', [$school, $section]) }}" class="btn btn-outline-secondary">
                 <i class="la la-arrow-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}"></i> @lang('common.back')
             </a>

@@ -83,7 +83,9 @@ class StudentController extends Controller
             });
         }
         if (($f['filter'] ?? '') === 'graduates') {
-            $builder->whereHas('section', fn ($s) => $s->where('name', 'like', '%خريج%'));
+            $builder->where(fn ($w) => $w
+                ->whereNotNull('users.graduated_at')
+                ->orWhereHas('section', fn ($s) => $s->where('name', 'like', '%خريج%')));
         }
         if (($f['filter'] ?? '') === 'no_parents') {
             $builder->whereDoesntHave('parents');
@@ -120,7 +122,9 @@ class StudentController extends Controller
             'active' => $base()->where('users.is_active', true)->count(),
             'inactive' => $base()->where('users.is_active', false)->count(),
             'no_parents' => $base()->whereDoesntHave('parents')->count(),
-            'graduates' => $base()->whereHas('section', fn ($s) => $s->where('name', 'like', '%خريج%'))->count(),
+            'graduates' => $base()->where(fn ($w) => $w
+                ->whereNotNull('users.graduated_at')
+                ->orWhereHas('section', fn ($s) => $s->where('name', 'like', '%خريج%')))->count(),
             'per_section' => $perSection,
         ];
     }

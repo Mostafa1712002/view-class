@@ -166,6 +166,19 @@ return [
     'grade_level_name' => 'اسم الصف الدراسي',
     'grade_level_name_hint' => 'مثال: الأول الابتدائي',
     'grade_level_number' => 'رقم الصف',
+    'grade_type' => 'نوع الصف الدراسي',
+    'grade_number_taken' => 'رقم الصف مستخدم بالفعل في هذه المدرسة.',
+    'map_to_standard' => 'ربط بصف قياسي…',
+    'class_number' => 'رقم الفصل',
+    'class_number_hint' => 'مثال: 1',
+    'class_number_taken' => 'رقم الفصل مستخدم بالفعل داخل هذا الصف.',
+    'needs_standardization' => 'يوجد :count صف بحاجة إلى تعيين رقم قياسي قبل الترحيل.',
+    'standardize_now' => 'توحيد الترقيم الآن',
+    'standardization' => 'توحيد الصفوف والفصول',
+    'standardization_intro' => 'عيّن رقمًا قياسيًا (1..12) لكل صف ورقمًا لكل فصل. هذه خطوة لمرة واحدة تجعل بيانات المدرسة جاهزة للترحيل.',
+    'needs_grade_number' => 'بحاجة لرقم',
+    'standardize_grade_collision' => 'تعارض في أرقام الصفوف (:grades) — عيّن رقمًا مختلفًا لكل صف.',
+    'standardize_class_collision' => 'توجد أرقام فصول مكررة داخل الصف: :grade.',
     'stage_primary' => 'ابتدائي',
     'stage_intermediate' => 'متوسط',
     'stage_secondary' => 'ثانوي',
@@ -226,4 +239,17 @@ return [
 
     // Errors
     'cannot_delete_has_users' => 'لا يمكن حذف المدرسة لوجود مستخدمين مرتبطين بها',
+
+    // Pass/fail results (Phase 3)
+    'results_title' => 'نتائج الطلاب (ناجح/راسب)',
+    'results_intro' => 'حدّد نتيجة كل طالب في هذا الفصل، أو استخدم زر «تعيين الكل ناجح».',
+    'results_saved' => 'تم حفظ نتائج :count طالب.',
+    'results_mark_all' => 'تعيين الكل ناجح',
+    'results_mark_all_confirm' => 'سيتم تعيين جميع طلاب هذا الفصل كناجحين. متابعة؟',
+    'results_no_students' => 'لا يوجد طلاب مسجّلون في هذا الفصل.',
+    'result' => 'النتيجة',
+    'result_passed' => 'ناجح',
+    'result_failed' => 'راسب',
+    'result_pending' => 'قيد الانتظار',
+    'student_name' => 'اسم الطالب',
 ];
