@@ -537,19 +537,12 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
 
             @if($isStaff)
 
-            {{-- ========== 1. برامج نوعية ========== --}}
-            <div class="gp-section-header sec-programs" data-section-toggle="programs">
-                <span class="gp-sec-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
-                </span>
-                <span class="gp-sec-label">@lang('shell.section_programs')</span>
-                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
-            </div>
-            <div class="gp-section-content" id="gp-sec-programs">
-                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_ana_wa_qadarat')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_ana_wa_qadarat')"><x-svg-icon name="lightbulb" class="vc-ico" /><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
-                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_alawwal')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_alawwal')"><x-svg-icon name="flag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>
-                <li class="nav-item" data-section="programs" data-label="@lang('shell.nav_speed_reading')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_speed_reading')"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_speed_reading')</span></a></li>
-            </div>
+            {{-- Standalone program links (the "برامج نوعية" grouping was removed per card;
+                 the three items stay as renamed coming-soon links until the other
+                 platforms are wired in). --}}
+            <li class="nav-item" data-label="@lang('shell.nav_ana_wa_qadarat')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_ana_wa_qadarat')"><x-svg-icon name="lightbulb" class="vc-ico" /><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
+            <li class="nav-item" data-label="@lang('shell.nav_alawwal')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_alawwal')"><x-svg-icon name="flag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>
+            <li class="nav-item" data-label="@lang('shell.nav_speed_reading')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_speed_reading')"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_speed_reading')</span></a></li>
 
             {{-- ========== 2. عمليات تعليمية ========== --}}
             <div class="gp-section-header sec-educational" data-section-toggle="educational">

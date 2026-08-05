@@ -69,7 +69,7 @@ return [
     'section_system_settings' => 'System settings',
 
     'nav_ana_wa_qadarat' => 'Ana & Al-Qadarat',
-    'nav_alawwal' => 'Al-Awwal',
+    'nav_alawwal' => 'Al-Awwal Plus',
     'nav_speed_reading' => 'Speed Reading App',
 
     'nav_exams_management' => 'Subjects management',

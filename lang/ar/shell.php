@@ -68,9 +68,9 @@ return [
     'section_communication' => 'عمليات التواصل',
     'section_system_settings' => 'إعدادات النظام',
 
-    'nav_ana_wa_qadarat' => 'منصة أنا والقدرات',
-    'nav_alawwal' => 'الأول',
-    'nav_speed_reading' => 'تطبيق القراءة السريعة واللفظية',
+    'nav_ana_wa_qadarat' => 'أنا والقدرات',
+    'nav_alawwal' => 'الأول بلس',
+    'nav_speed_reading' => 'تطبيقي القراءة السريعة والقدرات اللفظية',
 
     'nav_exams_management' => 'إدارة المواد',
     'nav_attendance_management' => 'غياب الطلاب',
