@@ -190,11 +190,20 @@ class EvaluationFormController extends Controller
     /** Shared data for create/edit views. */
     private function formViewData(?EvaluationForm $form = null): array
     {
+        // Current academic year of the acting school — feeds the "سنة" quick-fill
+        // on the create/edit form. Null-safe: no school scope or no year => blank.
+        $schoolId = $this->activeSchoolId();
+        $year = $schoolId
+            ? \App\Models\AcademicYear::forSchool($schoolId)->current()->first()
+            : null;
+
         return [
             'form'     => $form,
             'types'    => FormType::options(),
             'domains'  => UsageDomain::options(),
             'levels'   => $form ? $form->levels->pluck('label')->all() : [],
+            'ayStart'  => $year?->start_date?->format('Y-m-d'),
+            'ayEnd'    => $year?->end_date?->format('Y-m-d'),
         ];
     }
 

@@ -49,14 +49,26 @@
         <input type="number" name="levels_count" id="ev-levels-count" value="{{ $val('levels_count', count($levelLabels) ?: 4) }}" class="form-control" min="2" max="10">
     </div>
 
-    {{-- Requested (card #335, deferred/out-of-scope): year/month/week options + academic-year linking for these dates. --}}
-    <div class="col-md-6 col-12 mb-3">
-        <label class="form-label">@lang('evaluation.form.fields.start_date')</label>
-        <input type="date" name="start_date" value="{{ $f?->start_date?->format('Y-m-d') ?? old('start_date') }}" class="form-control">
+    {{-- Card #335: optional quick-fill. Picking أسبوع/شهر/سنة auto-computes the
+         close date (سنة links to the school's academic year); pickers stay editable. --}}
+    <div class="col-md-4 col-12 mb-3">
+        <label class="form-label">@lang('evaluation.form.fields.duration')</label>
+        <select id="ev-duration" class="form-control"
+                data-ay-start="{{ $ayStart ?? '' }}" data-ay-end="{{ $ayEnd ?? '' }}">
+            <option value="">@lang('evaluation.form.fields.duration_custom')</option>
+            <option value="week">@lang('evaluation.form.fields.duration_week')</option>
+            <option value="month">@lang('evaluation.form.fields.duration_month')</option>
+            <option value="year">@lang('evaluation.form.fields.duration_year')</option>
+        </select>
+        <small class="text-muted">@lang('evaluation.form.fields.duration_help')</small>
     </div>
-    <div class="col-md-6 col-12 mb-3">
+    <div class="col-md-4 col-12 mb-3">
+        <label class="form-label">@lang('evaluation.form.fields.start_date')</label>
+        <input type="date" name="start_date" id="ev-start-date" value="{{ $f?->start_date?->format('Y-m-d') ?? old('start_date') }}" class="form-control">
+    </div>
+    <div class="col-md-4 col-12 mb-3">
         <label class="form-label">@lang('evaluation.form.fields.close_date')</label>
-        <input type="date" name="close_date" value="{{ $f?->close_date?->format('Y-m-d') ?? old('close_date') }}" class="form-control">
+        <input type="date" name="close_date" id="ev-close-date" value="{{ $f?->close_date?->format('Y-m-d') ?? old('close_date') }}" class="form-control">
     </div>
 </div>
 
@@ -179,6 +191,30 @@ jQuery(function ($) {
     function applyJobPerf() { $jpPanel.toggle($jpCheck.is(':checked')); }
     $jpCheck.on('change', applyJobPerf);
     applyJobPerf();
+
+    // Quick-fill dates from a chosen duration. Additive: admin can still edit
+    // either picker afterwards; "مخصّص" (empty) leaves both untouched.
+    var $dur = $('#ev-duration'), $start = $('#ev-start-date'), $close = $('#ev-close-date');
+    // Local Y-m-d — avoid toISOString()'s UTC shift (would land a day early in +TZ).
+    function iso(d) {
+        var m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+        return d.getFullYear() + '-' + m + '-' + day;
+    }
+    $dur.on('change', function () {
+        var mode = $dur.val();
+        if (!mode) return; // مخصّص — leave dates as-is
+        if (mode === 'year') {
+            var ays = $dur.data('ay-start'), aye = $dur.data('ay-end');
+            if (ays && aye) { $start.val(ays); $close.val(aye); return; }
+        }
+        var base = $start.val() ? new Date($start.val() + 'T00:00:00') : new Date();
+        if (!$start.val()) $start.val(iso(base));
+        var end = new Date(base);
+        if (mode === 'week') end.setDate(end.getDate() + 7);
+        else if (mode === 'month') end.setMonth(end.getMonth() + 1);
+        else end.setFullYear(end.getFullYear() + 1); // year fallback
+        $close.val(iso(end));
+    });
 });
 </script>
 @endpush
