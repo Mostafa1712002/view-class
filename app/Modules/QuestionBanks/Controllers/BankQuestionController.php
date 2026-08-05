@@ -92,7 +92,19 @@ class BankQuestionController extends Controller
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        return view('admin.question-banks.questions.index', compact('bank', 'questions', 'lessons', 'typeCounts'));
+        // Promotion targets (super-admin): copy selected questions into a public
+        // or owner («منصة الأول») bank.
+        $promotionTargets = collect();
+        if (auth()->user()?->isSuperAdmin()) {
+            $promotionTargets = \App\Models\QuestionBank::query()
+                ->where('is_library', false)
+                ->where('id', '!=', $bank->id)
+                ->where(fn ($q) => $q->where('is_owner_bank', true)->orWhere('visibility', 'public'))
+                ->orderBy('name_ar')
+                ->get(['id', 'name_ar', 'is_owner_bank', 'visibility']);
+        }
+
+        return view('admin.question-banks.questions.index', compact('bank', 'questions', 'lessons', 'typeCounts', 'promotionTargets'));
     }
 
     public function create(Request $request, int $bankId): View

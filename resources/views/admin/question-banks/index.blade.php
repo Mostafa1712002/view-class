@@ -274,7 +274,15 @@
             <li class="breadcrumb-item active">@lang('question_banks.page_title')</li>
         </ol>
     </div>
-    <div class="content-header-right col-md-3 col-12 text-md-right d-flex align-items-start justify-content-md-end pt-1">
+    <div class="content-header-right col-md-4 col-12 text-md-right d-flex align-items-start justify-content-md-end pt-1" style="gap:.4rem;flex-wrap:wrap;">
+        @if(auth()->user()?->isSuperAdmin())
+        <a class="btn-ghost" href="{{ route('admin.question-banks.owner-review') }}">
+            <x-svg-icon name="collection" :size="16" /> @lang('question_banks.owner_review_title')
+        </a>
+        <a class="btn-ghost" href="{{ route('admin.question-banks.access-requests') }}">
+            <x-svg-icon name="inbox" :size="16" /> @lang('question_banks.access_requests_title')
+        </a>
+        @endif
         @unless(auth()->user()?->isTeacher())
         <a class="btn-gold" href="{{ route('admin.question-banks.create') }}">
             <x-svg-icon name="plus-lg" :size="16" /> @lang('question_banks.add')
@@ -575,6 +583,29 @@
                                                     <x-svg-icon name="files" :size="16" class="ic-info" /> @lang('question_banks.action_copy_to_school')
                                                 </button>
                                             </form>
+                                        @endif
+                                        {{-- Owner bank: a school requests access, then copies once approved --}}
+                                        @if($bank->is_owner_bank && ! $isSuperAdmin)
+                                            @if(in_array($bank->id, $approvedOwnerBankIds ?? []))
+                                                <form action="{{ route('admin.question-banks.copy-from-owner', $bank->id) }}" method="POST"
+                                                      onsubmit="return confirm('@lang('question_banks.confirm_copy_to_school')')">
+                                                    @csrf
+                                                    <button type="submit" class="qb-dropdown-item">
+                                                        <x-svg-icon name="files" :size="16" class="ic-success" /> @lang('question_banks.action_copy_from_owner')
+                                                    </button>
+                                                </form>
+                                            @elseif(in_array($bank->id, $pendingOwnerBankIds ?? []))
+                                                <span class="qb-dropdown-item text-muted">
+                                                    <x-svg-icon name="hourglass-split" :size="16" class="ic-warn" /> @lang('question_banks.access_pending')
+                                                </span>
+                                            @else
+                                                <form action="{{ route('admin.question-banks.access-request', $bank->id) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="qb-dropdown-item">
+                                                        <x-svg-icon name="unlock-fill" :size="16" class="ic-gold" /> @lang('question_banks.action_request_access')
+                                                    </button>
+                                                </form>
+                                            @endif
                                         @endif
                                         @if($canEdit)
                                             <div class="qb-dropdown-divider"></div>

@@ -310,6 +310,33 @@
             </div>
         </div>
 
+        @if(auth()->user()?->isSuperAdmin() && $promotionTargets->isNotEmpty())
+        <div class="d-flex align-items-center mb-2 flex-wrap" style="gap:.5rem;">
+            <select id="qbPromoteDest" class="form-control" style="max-width:340px;">
+                <option value="">@lang('question_banks.promote_pick_dest')</option>
+                @foreach($promotionTargets as $t)
+                    <option value="{{ $t->id }}">{{ $t->name_ar }} — {{ $t->is_owner_bank ? __('question_banks.scope_owner') : __('question_banks.scope_company') }}</option>
+                @endforeach
+            </select>
+            <button type="button" class="btn btn-primary" onclick="qbPromoteSelected()">
+                <i class="la la-arrow-up"></i> @lang('question_banks.promote_selected')
+            </button>
+        </div>
+        <form id="qbPromoteForm" method="POST" action="{{ route('admin.question-banks.questions.copy', $bank->id) }}" style="display:none;">@csrf</form>
+        <script>
+        function qbPromoteSelected(){
+            var dest=document.getElementById('qbPromoteDest').value;
+            if(!dest){alert(@json(__('question_banks.promote_pick_dest')));return;}
+            var ids=Array.prototype.slice.call(document.querySelectorAll('.q-row-check:checked')).map(function(c){return c.value;});
+            if(!ids.length){alert(@json(__('question_banks.promote_none_selected')));return;}
+            var f=document.getElementById('qbPromoteForm');
+            f.querySelectorAll('input[name="question_ids[]"],input[name="destination_bank_id"]').forEach(function(e){e.remove();});
+            ids.forEach(function(id){var i=document.createElement('input');i.type='hidden';i.name='question_ids[]';i.value=id;f.appendChild(i);});
+            var d=document.createElement('input');d.type='hidden';d.name='destination_bank_id';d.value=dest;f.appendChild(d);
+            f.submit();
+        }
+        </script>
+        @endif
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 q-table">
                 <thead class="thead-light">

@@ -12,35 +12,35 @@
 
 ## Phase 2: Owner review of school questions (safe/read-only)
 ### Task 2.1: Owner-review screen
-- [ ] `privateBanksAcrossSchools(?schoolFilter)` repo method
-- [ ] `GET question-banks/owner-review` (super-admin) + blade (school filter, counts, drill-in)
+- [x] `privateBanksAcrossSchools(?schoolFilter)` repo method
+- [x] `GET question-banks/owner-review` (super-admin) + blade (school filter, counts, drill-in)
 
 ## Phase 3: Per-question promotion (writes new rows, originals intact)
 ### Task 3.1: Copy selected questions
-- [ ] `copyQuestions(srcBankId, questionIds[], destBankId, scope)` repo (deep-copy row + passage + answers)
-- [ ] Question list: super-admin checkboxes + "نقل إلى" (destination = public|owner bank)
-- [ ] `POST question-banks/{bank}/questions/copy`
+- [x] `copyQuestions(srcBankId, questionIds[], destBankId, scope)` repo (deep-copy row + passage + answers)
+- [x] Question list: super-admin checkboxes + "نقل إلى" (destination = public|owner bank)
+- [x] `POST question-banks/{bank}/questions/copy`
 
 ## Phase 4: Access request + approval (cross-tenant gate)
 ### Task 4.1: Schema + model
-- [ ] Migration `question_bank_access_requests` (unique bank+school)
-- [ ] `QuestionBankAccessRequest` model + relations
+- [x] Migration `question_bank_access_requests` (unique bank+school)
+- [x] `QuestionBankAccessRequest` model + relations
 ### Task 4.2: Request + decide flow
-- [ ] `POST question-banks/{bank}/access-request` (school-admin) + `hasApprovedAccess`
-- [ ] `GET question-banks/access-requests` inbox + `POST .../decide` (super-admin)
-- [ ] Gate `copyFromOwnerBank` on approved request; public copy stays free
-- [ ] Notifications: `BankAccessRequested`, `BankAccessDecided`
+- [x] `POST question-banks/{bank}/access-request` (school-admin) + `hasApprovedAccess`
+- [x] `GET question-banks/access-requests` inbox + `POST .../decide` (super-admin)
+- [x] Gate `copyFromOwnerBank` on approved request; public copy stays free
+- [x] Notifications: `BankAccessRequested`, `BankAccessDecided`
 
 ## Phase 5: Verify
-- [ ] Local seed (public + owner + two-school private) → test each tier view, request→approve→copy, per-question promote, tenant isolation
-- [ ] Deploy + live demo per phase
+- [x] Local seed (public + owner + two-school private) → test each tier view, request→approve→copy, per-question promote, tenant isolation
+- [x] Deploy + live demo per phase
 
 ---
 ## Progress
 | Phase | Status |
 |-------|--------|
 | 1 Owner tier + view | ✅ Done |
-| 2 Owner review | Not started |
-| 3 Per-question promote | Not started |
-| 4 Access approval | Not started |
-| 5 Verify | Not started |
+| 2 Owner review | ✅ Done |
+| 3 Per-question promote | ✅ Done |
+| 4 Access approval | ✅ Done |
+| 5 Verify | ✅ Done (local 21/21) |

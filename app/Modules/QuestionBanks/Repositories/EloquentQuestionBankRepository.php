@@ -2,6 +2,7 @@
 
 namespace App\Modules\QuestionBanks\Repositories;
 
+use App\Models\BankQuestion;
 use App\Models\QuestionBank;
 use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -355,6 +356,69 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
             ->unique()
             ->values()
             ->all();
+    }
+
+    public function privateBanksAcrossSchools(?int $schoolFilter, int $perPage = 25): LengthAwarePaginator
+    {
+        return QuestionBank::query()
+            ->with(['school:id,name,name_en', 'subjects:id,name,name_en', 'creator:id,name,username'])
+            ->withCount('questions')
+            ->where('is_library', false)
+            ->where('is_owner_bank', false)
+            ->where('visibility', QuestionBank::VISIBILITY_PRIVATE)
+            ->whereNotNull('school_id')
+            ->when($schoolFilter, fn ($q) => $q->where('school_id', $schoolFilter))
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function copyQuestions(int $srcBankId, array $questionIds, int $destBankId): int
+    {
+        $ids = array_values(array_filter(array_map('intval', $questionIds)));
+        if (empty($ids)) {
+            return 0;
+        }
+
+        return DB::transaction(function () use ($srcBankId, $ids, $destBankId) {
+            $questions = BankQuestion::query()
+                ->where('question_bank_id', $srcBankId)
+                ->whereIn('id', $ids)
+                ->get();
+
+            $copied = 0;
+            foreach ($questions as $q) {
+                $new = $q->replicate();
+                $new->question_bank_id = $destBankId;
+                $new->source = 'promoted';
+                $new->created_by = auth()->id();
+                $new->status = 'approved';
+                $new->save();
+
+                // Copy any normalized answer rows (answer_data JSON rides along in replicate()).
+                $answers = DB::table('question_answers')->where('question_id', $q->id)->get();
+                foreach ($answers as $a) {
+                    $row = (array) $a;
+                    unset($row['id']);
+                    $row['question_id'] = $new->id;
+                    $row['created_at'] = now();
+                    $row['updated_at'] = now();
+                    DB::table('question_answers')->insert($row);
+                }
+                $copied++;
+            }
+
+            return $copied;
+        });
+    }
+
+    public function hasApprovedAccess(int $bankId, int $schoolId): bool
+    {
+        return DB::table('question_bank_access_requests')
+            ->where('question_bank_id', $bankId)
+            ->where('school_id', $schoolId)
+            ->where('status', 'approved')
+            ->exists();
     }
 
     private function withoutNulls(array $payload): array

@@ -4,8 +4,12 @@ namespace App\Modules\QuestionBanks\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\QuestionBank;
+use App\Models\QuestionBankAccessRequest;
+use App\Models\School;
 use App\Models\Subject;
 use App\Models\User;
+use App\Modules\QuestionBanks\Notifications\BankAccessDecided;
+use App\Modules\QuestionBanks\Notifications\BankAccessRequested;
 use App\Modules\QuestionBanks\Repositories\Contracts\QuestionBankRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
@@ -32,9 +36,21 @@ class QuestionBankController extends Controller
 
         $vocab = $this->vocabulary();
 
+        // Owner-bank access state for a school-admin (drives request/copy buttons).
+        $approvedOwnerBankIds = [];
+        $pendingOwnerBankIds = [];
+        $user = auth()->user();
+        if ($user && ! $user->isSuperAdmin() && $schoolId) {
+            $reqs = QuestionBankAccessRequest::where('school_id', $schoolId)->get(['question_bank_id', 'status']);
+            $approvedOwnerBankIds = $reqs->where('status', 'approved')->pluck('question_bank_id')->all();
+            $pendingOwnerBankIds = $reqs->where('status', 'pending')->pluck('question_bank_id')->all();
+        }
+
         return view('admin.question-banks.index', [
             'banks'        => $banks,
             'stats'        => $stats,
+            'approvedOwnerBankIds' => $approvedOwnerBankIds,
+            'pendingOwnerBankIds'  => $pendingOwnerBankIds,
             'filters'      => $filters,
             'subjects'     => $subjects,
             'creators'     => $creators,
@@ -356,6 +372,132 @@ class QuestionBankController extends Controller
         return redirect()
             ->route('admin.question-banks.edit', $copy->id)
             ->with('success', __('question_banks.flash_copied'));
+    }
+
+    // ---- Phase 2: owner review of school-added questions (super-admin) ----
+
+    public function ownerReview(Request $request): View
+    {
+        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+
+        $schoolFilter = $request->integer('school_id') ?: null;
+        $banks = $this->banks->privateBanksAcrossSchools($schoolFilter);
+        $schools = School::orderBy('name')->get(['id', 'name', 'name_en']);
+
+        return view('admin.question-banks.owner-review', compact('banks', 'schools', 'schoolFilter'));
+    }
+
+    // ---- Phase 3: promote selected questions into a public/owner bank ----
+
+    public function copyQuestions(Request $request, int $bankId): RedirectResponse
+    {
+        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+
+        $data = $request->validate([
+            'question_ids'     => ['required', 'array', 'min:1'],
+            'question_ids.*'   => ['integer'],
+            'destination_bank_id' => ['required', 'integer'],
+        ]);
+
+        // Source bank + destination bank must both exist; destination must be a
+        // public or owner bank (not a private school bank).
+        $src = QuestionBank::findOrFail($bankId);
+        $dest = QuestionBank::findOrFail((int) $data['destination_bank_id']);
+        abort_if($dest->id === $src->id, 422);
+        abort_unless($dest->is_owner_bank || $dest->visibility === QuestionBank::VISIBILITY_PUBLIC, 422, __('question_banks.copy_dest_invalid'));
+
+        $count = $this->banks->copyQuestions($src->id, $data['question_ids'], $dest->id);
+
+        return redirect()
+            ->back()
+            ->with('success', __('question_banks.flash_questions_copied', ['count' => $count, 'bank' => $dest->name_ar]));
+    }
+
+    /** Destination banks a super-admin may promote INTO: public + owner banks. */
+    public function promotionTargets(): \Illuminate\Support\Collection
+    {
+        return QuestionBank::query()
+            ->where('is_library', false)
+            ->where(fn ($q) => $q->where('is_owner_bank', true)->orWhere('visibility', QuestionBank::VISIBILITY_PUBLIC))
+            ->orderBy('name_ar')
+            ->get(['id', 'name_ar', 'name_en', 'is_owner_bank', 'visibility']);
+    }
+
+    // ---- Phase 4: cross-tenant access request + approval ----
+
+    public function requestAccess(Request $request, int $bankId): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        abort_if(! $schoolId, 403);
+
+        $bank = QuestionBank::findOrFail($bankId);
+        abort_unless($bank->is_owner_bank, 422, __('question_banks.access_only_owner'));
+
+        $req = QuestionBankAccessRequest::updateOrCreate(
+            ['question_bank_id' => $bank->id, 'school_id' => $schoolId],
+            ['requested_by' => auth()->id(), 'status' => 'pending', 'decided_by' => null, 'decided_at' => null],
+        );
+
+        $schoolName = School::whereKey($schoolId)->value('name') ?? '';
+        foreach ($this->superAdmins() as $admin) {
+            $admin->notify(new BankAccessRequested($bank->id, $bank->name_ar ?? '', $schoolName));
+        }
+
+        return redirect()->back()->with('success', __('question_banks.flash_access_requested'));
+    }
+
+    public function accessRequests(): View
+    {
+        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+
+        $requests = QuestionBankAccessRequest::with(['bank:id,name_ar,name_en', 'school:id,name', 'requester:id,name,username'])
+            ->orderByRaw("FIELD(status,'pending','approved','rejected')")
+            ->orderByDesc('id')
+            ->paginate(30);
+
+        return view('admin.question-banks.access-requests', compact('requests'));
+    }
+
+    public function decideAccessRequest(Request $request, int $requestId): RedirectResponse
+    {
+        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+
+        $decision = $request->validate(['decision' => ['required', 'in:approved,rejected']])['decision'];
+        $req = QuestionBankAccessRequest::with('bank')->findOrFail($requestId);
+
+        $req->update(['status' => $decision, 'decided_by' => auth()->id(), 'decided_at' => now()]);
+
+        $admins = User::where('school_id', $req->school_id)
+            ->whereHas('roles', fn ($r) => $r->where('slug', 'school-admin'))
+            ->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new BankAccessDecided($req->question_bank_id, $req->bank->name_ar ?? '', $decision === 'approved'));
+        }
+
+        return redirect()->back()->with('success', __('question_banks.flash_access_decided'));
+    }
+
+    /** School copies from an owner bank — gated by an approved access request. */
+    public function copyFromOwner(Request $request, int $bankId): RedirectResponse
+    {
+        $schoolId = $this->activeSchoolId();
+        abort_if(! $schoolId, 403);
+
+        $bank = QuestionBank::findOrFail($bankId);
+        abort_unless($bank->is_owner_bank, 422);
+        abort_unless($this->banks->hasApprovedAccess($bank->id, $schoolId), 403, __('question_banks.access_not_granted'));
+
+        $copy = $this->banks->copyToSchool($bank, $schoolId, auth()->id());
+
+        return redirect()
+            ->route('admin.question-banks.edit', $copy->id)
+            ->with('success', __('question_banks.flash_copied'));
+    }
+
+    /** @return \Illuminate\Support\Collection<int,User> */
+    private function superAdmins(): \Illuminate\Support\Collection
+    {
+        return User::whereHas('roles', fn ($r) => $r->where('slug', 'super-admin'))->get();
     }
 
     public function destroy(int $id): RedirectResponse

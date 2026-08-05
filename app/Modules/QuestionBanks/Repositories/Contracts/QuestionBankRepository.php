@@ -55,4 +55,20 @@ interface QuestionBankRepository
      * plus company-wide general/shared banks. Respects the tenant/company boundary.
      */
     public function visibleBankIds(?int $schoolId): array;
+
+    /**
+     * Private (school-owned) banks across ALL schools, for the owner review
+     * screen. Optional filter to one school. Super-admin scope only.
+     */
+    public function privateBanksAcrossSchools(?int $schoolFilter, int $perPage = 25): LengthAwarePaginator;
+
+    /**
+     * Deep-copy the given questions (belonging to $srcBankId) into $destBankId as
+     * new rows (with their passage + answers), leaving originals intact. Returns
+     * the number of questions copied.
+     */
+    public function copyQuestions(int $srcBankId, array $questionIds, int $destBankId): int;
+
+    /** True when $schoolId has an APPROVED access request for owner bank $bankId. */
+    public function hasApprovedAccess(int $bankId, int $schoolId): bool;
 }

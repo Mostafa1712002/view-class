@@ -512,6 +512,14 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('question-banks/{id}/promote', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'promote'])->name('question-banks.promote');
     Route::post('question-banks/{id}/copy-to-my-school', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'copyToMySchool'])->name('question-banks.copy-to-my-school');
 
+    // Unified banks (qb-unified-banks spec): owner review, per-question promote, access approval
+    Route::get('question-banks/owner-review', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'ownerReview'])->name('question-banks.owner-review');
+    Route::get('question-banks/access-requests', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'accessRequests'])->name('question-banks.access-requests');
+    Route::post('question-banks/access-requests/{requestId}/decide', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'decideAccessRequest'])->name('question-banks.access-requests.decide');
+    Route::post('question-banks/{bankId}/questions/copy', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'copyQuestions'])->name('question-banks.questions.copy');
+    Route::post('question-banks/{bankId}/access-request', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'requestAccess'])->name('question-banks.access-request');
+    Route::post('question-banks/{bankId}/copy-from-owner', [\App\Modules\QuestionBanks\Controllers\QuestionBankController::class, 'copyFromOwner'])->name('question-banks.copy-from-owner');
+
     // Retired duplicate "إدارة المواد / class-periods" tab — consolidated into الحصص (/admin/lessons).
     // Keep the old URLs alive as redirects so bookmarks/links don't 404.
     Route::get('class-periods/time-slots', fn () => redirect()->route('admin.lessons.time-slots.index'))->name('class-periods.time-slots.index');
