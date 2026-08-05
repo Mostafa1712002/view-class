@@ -11,6 +11,8 @@ return [
     // Buttons
     'print'        => 'Print',
     'export_csv'   => 'Export CSV',
+    'export_pdf'   => 'Export PDF',
+    'export_excel' => 'Export Excel',
     'show'         => 'Show',
     'reset'        => 'Reset',
     'view'         => 'View evaluation',

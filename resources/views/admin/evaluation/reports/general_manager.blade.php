@@ -20,6 +20,12 @@
         </div>
     </div>
     <div class="content-header-right col-md-5 col-12 text-end no-print">
+        <a href="{{ route('admin.eval-reports.general-manager', array_merge(request()->query(), ['export' => 'pdf'])) }}" class="btn btn-outline-danger" target="_blank">
+            <i class="la la-file-pdf"></i> @lang('eval_reports.export_pdf')
+        </a>
+        <a href="{{ route('admin.eval-reports.general-manager', array_merge(request()->query(), ['export' => 'xlsx'])) }}" class="btn btn-outline-success">
+            <i class="la la-file-excel"></i> @lang('eval_reports.export_excel')
+        </a>
         <a href="{{ route('admin.eval-reports.general-manager', array_merge(request()->query(), ['export' => 'csv'])) }}" class="btn btn-outline-secondary">
             <i class="la la-file-csv"></i> @lang('eval_reports.export_csv')
         </a>

@@ -183,9 +183,12 @@ class EvaluationExecutionController extends Controller
             'responses'       => $this->indexResponses($eval),
             'evidences'       => $this->indexEvidences($eval),
             'locked'          => ($eval->status?->isLocked() ?? false) || !$isEvaluator,
-            'editable'        => $isEvaluator && in_array($eval->status?->value, ['draft'], true),
+            // needs_review = the approver sent it back; the evaluator must be able to
+            // re-open the fill form and resubmit (not just view it read-only).
+            'editable'        => $isEvaluator && in_array($eval->status?->value, ['draft', 'needs_review'], true),
             'isSubjectViewer' => $isSubjectViewer,
             'canComment'      => $canComment,
+            'reviewNotes'     => $this->latestReviewNotes($eval),
             'summary'         => $this->buildSummary($eval, $payload),
             'itemMeta'        => $this->buildItemMeta($eval),
         ]);
@@ -253,6 +256,7 @@ class EvaluationExecutionController extends Controller
             'editable'         => true,  // item-level gate applied via editableItemIds
             'isSubjectViewer'  => false,
             'canComment'       => false,
+            'reviewNotes'      => $this->latestReviewNotes($eval),
             // Phase E extras passed to the view (for progressive enhancement)
             'sharedMode'       => true,
             'editableItemIds'  => $editableItemIds,
@@ -285,8 +289,9 @@ class EvaluationExecutionController extends Controller
             $responsible = $item['responsible_role'] ?? null;
             $itemId      = (int) $item['id'];
 
-            // User can edit this item if responsible_role matches one of their roles.
-            $canEdit = $responsible !== null && in_array($responsible, $userRoleSlugs, true);
+            // User can edit this item if responsible_role matches one of their roles,
+            // OR the item is unassigned (null role → open to any acting evaluee).
+            $canEdit = $responsible === null || in_array($responsible, $userRoleSlugs, true);
 
             if ($canEdit) {
                 $editableItemIds[] = $itemId;
@@ -409,6 +414,31 @@ class EvaluationExecutionController extends Controller
         }
 
         return $user->roles->pluck('slug')->all();
+    }
+
+    /**
+     * The latest review note the approver attached when they pressed «طلب مراجعة».
+     * RequestReview has no dedicated column, so it rides on the review notification
+     * payload (matched by evaluation_id — resilient to shared evals with null evaluator).
+     *
+     * @return array{notes:string,items:int[]}|null
+     */
+    private function latestReviewNotes(Evaluation $eval): ?array
+    {
+        $n = \App\Models\Notification::query()
+            ->where('type', 'evaluation_review')
+            ->orderByDesc('id')
+            ->get()
+            ->first(fn ($row) => (int) data_get($row->data, 'evaluation_id') === (int) $eval->id);
+
+        if (!$n) {
+            return null;
+        }
+
+        return [
+            'notes' => (string) data_get($n->data, 'review_notes', ''),
+            'items' => (array) data_get($n->data, 'review_items', []),
+        ];
     }
 
     /** Pull the answer arrays out of the request in a shape WritesResponses expects. */

@@ -346,7 +346,9 @@ class SaveEvaluationDraft
                 continue;
             }
             $responsible = $item['responsible_role'] ?? null;
-            if ($responsible !== null && in_array($responsible, $userRoleSlugs, true)) {
+            // Unassigned items (no responsible_role) fall to any acting evaluee — mirrors
+            // SubmitEvaluation so draft-save and submit agree on what a user may write.
+            if ($responsible === null || in_array($responsible, $userRoleSlugs, true)) {
                 $ids[] = (int) $item['id'];
             }
         }

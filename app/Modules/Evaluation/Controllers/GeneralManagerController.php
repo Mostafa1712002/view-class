@@ -8,11 +8,12 @@ use App\Models\School;
 use App\Models\Subject;
 use App\Models\User;
 use App\Modules\Evaluation\Enums\EvaluationStatus;
+use App\Modules\Attendance\Controllers\Concerns\ExportsReports;
 use App\Modules\Evaluation\Services\ReportAggregator;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Sprint 8 — Task 20b: general-manager cross-org screen.
@@ -23,12 +24,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class GeneralManagerController extends Controller
 {
     use HasSchoolScope;
+    use ExportsReports;
 
     public function __construct(private readonly ReportAggregator $aggregator)
     {
     }
 
-    public function index(Request $request): View|StreamedResponse
+    public function index(Request $request): View|Response
     {
         $schoolId = $this->activeSchoolId();
         $filters  = $this->filters($request);
@@ -36,8 +38,10 @@ class GeneralManagerController extends Controller
         $rows = $this->aggregator->teacherSummary($schoolId, $filters);
         $kpis = $this->aggregator->teacherSummaryKpis($schoolId, $filters, $rows);
 
-        if ($request->query('export') === 'csv') {
-            return $this->exportCsv($rows);
+        // Bulk export of ALL rows currently in scope/filters, in one file.
+        $export = (string) $request->query('export');
+        if (in_array($export, ['csv', 'xlsx', 'pdf'], true)) {
+            return $this->exportReport($export, $rows, $kpis, $filters);
         }
 
         return view('admin.evaluation.reports.general_manager', [
@@ -97,7 +101,12 @@ class GeneralManagerController extends Controller
         ];
     }
 
-    private function exportCsv(\Illuminate\Support\Collection $rows): StreamedResponse
+    /**
+     * Bundle every teacher-summary row (current scope + filters) into one file.
+     * PDF/xlsx/CSV all reuse the SAME header + flattened rows via the shared
+     * ExportsReports trait (mPDF Arabic RTL for PDF; PhpSpreadsheet for xlsx).
+     */
+    private function exportReport(string $format, \Illuminate\Support\Collection $rows, array $kpis, array $filters): Response
     {
         $headers = [
             __('eval_reports.cols.teacher'),
@@ -119,19 +128,21 @@ class GeneralManagerController extends Controller
             $r['final_score'] ?? '', $r['avg_pct'] ?? '',
             $r['status']?->label() ?? '', $r['evidence_count'],
             $r['eval_date'] ? \Illuminate\Support\Carbon::parse($r['eval_date'])->format('Y-m-d') : '',
-        ]);
+        ])->all();
 
-        $filename = 'general-manager-'.now()->format('Ymd-His').'.csv';
+        $base = 'evaluation-reports-'.now()->format('Ymd-His');
 
-        return response()->streamDownload(function () use ($headers, $lines) {
-            $out = fopen('php://output', 'w');
-            fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, $headers, ',', '"', '\\');
-            foreach ($lines as $line) {
-                fputcsv($out, $line, ',', '"', '\\');
-            }
-            fclose($out);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return match ($format) {
+            'xlsx' => $this->exportExcel($headers, $lines, $base.'.xlsx'),
+            'pdf'  => $this->exportPdf('admin.evaluation.reports.general_manager_pdf', [
+                'headers'    => $headers,
+                'lines'      => $lines,
+                'kpis'       => $kpis,
+                'count'      => $rows->count(),
+                'generated'  => now(),
+            ], $base.'.pdf', 'L'),
+            default => $this->exportCsv($headers, $lines, $base.'.csv'),
+        };
     }
 
     private function ternary(mixed $v): ?bool

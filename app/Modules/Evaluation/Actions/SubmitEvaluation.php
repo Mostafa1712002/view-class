@@ -445,7 +445,10 @@ class SubmitEvaluation
                 continue;
             }
             $responsible = $item['responsible_role'] ?? null;
-            if ($responsible !== null && in_array($responsible, $userRoleSlugs, true)) {
+            // An item with no responsible_role is unassigned → any acting evaluee may
+            // fill/submit it (otherwise a shared form whose items were never given a
+            // role would be submittable by nobody → false "nothing to submit").
+            if ($responsible === null || in_array($responsible, $userRoleSlugs, true)) {
                 $ids[] = (int) $item['id'];
             }
         }

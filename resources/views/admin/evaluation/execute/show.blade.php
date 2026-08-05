@@ -8,6 +8,10 @@
     $levels  = collect($payload['levels'] ?? [])->sortBy('sort_order')->values();
     $allowItemNotes = (bool) ($form?->setting('allow_item_notes', false));
     $allowGeneralNotes = (bool) ($form?->setting('allow_general_notes', true));
+    // Single source of truth for "show the fill form vs. the read-only result".
+    // Driven by the controller's $editable (draft / needs_review for the evaluator,
+    // or shared-mode items) and never for a locked (approved/locked) evaluation.
+    $showForm = !empty($editable) && empty($locked);
 @endphp
 
 @push('styles')
@@ -104,7 +108,15 @@
         </div>
     @endif
 
-    @if ($evaluation->status?->value !== 'draft')
+    {{-- Card 339: the approver's «طلب مراجعة» note, surfaced to the evaluee. --}}
+    @if (!empty($reviewNotes['notes'] ?? null))
+        <div class="alert alert-warning">
+            <strong><i class="la la-exclamation-triangle"></i> @lang('evaluation.execute.review_note'):</strong>
+            {{ $reviewNotes['notes'] }}
+        </div>
+    @endif
+
+    @if (! $showForm)
         {{-- Result / read-only view (submitted, completed, approved, locked, ...) --}}
         <div class="card ex-result-card mb-3">
             <div class="card-body">
@@ -336,7 +348,7 @@
     @endif
 </div>
 
-@unless ($locked || $evaluation->status?->value !== 'draft')
+@if ($showForm)
 {{-- Shared Add-Evidence modal (outside #ex-form) --}}
 <div class="modal fade" id="ev-modal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
@@ -387,7 +399,7 @@
 <form method="POST" id="ev-del-form" class="d-none" data-base="{{ url('admin/evaluations/execute/'.$evaluation->id.'/evidence') }}">
   @csrf @method('DELETE')
 </form>
-@endunless
+@endif
 
 @push('scripts')
 <script>
