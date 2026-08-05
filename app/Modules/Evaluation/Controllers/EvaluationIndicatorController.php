@@ -42,6 +42,7 @@ class EvaluationIndicatorController extends Controller
             'item'       => $evItem,
             'indicators' => $evItem->indicators()->with('level')->orderBy('sort_order')->get(),
             'isRubric'   => $evForm->type === FormType::Rubric,
+            'showWeight' => $evForm->type !== FormType::Rubric && $evForm->type !== FormType::Checklist,
             'levels'     => $evForm->type === FormType::Rubric ? $evForm->levels : collect(),
         ]);
     }
@@ -153,6 +154,7 @@ class EvaluationIndicatorController extends Controller
             'text'              => ['required', 'string', 'max:1000'],
             'description'       => ['nullable', 'string'],
             'level_id'          => ['nullable', 'integer'],
+            'weight'            => ['nullable', 'numeric', 'min:0', 'max:100'],
             'is_required'       => ['nullable', 'boolean'],
             'needs_note'        => ['nullable', 'boolean'],
             'needs_evidence'    => ['nullable', 'boolean'],

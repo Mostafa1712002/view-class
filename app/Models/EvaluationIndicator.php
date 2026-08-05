@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class EvaluationIndicator extends Model
 {
     protected $fillable = [
-        'item_id', 'form_id', 'level_id', 'text', 'description', 'sort_order',
+        'item_id', 'form_id', 'level_id', 'text', 'description', 'sort_order', 'weight',
         'is_required', 'needs_note', 'needs_evidence', 'evidence_required', 'status',
     ];
 
     protected $casts = [
         'sort_order'        => 'integer',
+        'weight'            => 'decimal:2',
         'is_required'       => 'boolean',
         'needs_note'        => 'boolean',
         'needs_evidence'    => 'boolean',

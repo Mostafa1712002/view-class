@@ -16,7 +16,7 @@ return [
         'of_100'       => 'من 100%',
         'columns' => [
             'order'            => '#',
-            'name'             => 'اسم العنصر',
+            'name'             => 'معيار',
             'responsible_role' => 'الجهة المسؤولة',
             'item_type'        => 'النوع',
             'weight'           => 'الوزن',
@@ -28,7 +28,7 @@ return [
             'actions'          => 'التحكم',
         ],
         'fields' => [
-            'name'             => 'اسم العنصر',
+            'name'             => 'معيار',
             'description'      => 'الوصف',
             'weight'           => 'الوزن النسبي (%)',
             'max_score'        => 'أعلى درجة',
@@ -43,6 +43,8 @@ return [
             // Phase A (v2)
             'responsible_role'               => 'الجهة المسؤولة',
             'responsible_role_placeholder'   => 'مثال: school-admin، supervisor',
+            'responsible_user'               => 'الجهة المسؤولة',
+            'responsible_user_placeholder'   => 'اختر الحساب المسؤول',
             'item_type'                      => 'نوع العنصر',
             'calc_method'                    => 'طريقة الاحتساب',
             'evidence_needs_approval'        => 'الشواهد تحتاج موافقة',
@@ -54,6 +56,12 @@ return [
             'internal_notes_placeholder'     => 'ملاحظات لا تظهر للمقيّم',
         ],
         'advanced_config' => 'الإعدادات المتقدمة للعنصر',
+        'indicators_section' => 'المؤشرات والنسب',
+        'add_indicator'      => 'إضافة مؤشر',
+        'indicator_text'     => 'نص المؤشر',
+        'indicator_weight'   => 'النسبة (%)',
+        'indicators_hint'    => 'يوزَّع الوزن النسبي للمعيار على مؤشراته؛ مجموع النسب يجب ألا يتجاوز وزن المعيار.',
+        'indicators_sum'     => 'مجموع النسب',
     ],
 
     // ── Indicators (المؤشرات) ──────────────────────────────────────
@@ -86,6 +94,7 @@ return [
             'needs_note'       => 'يتطلب ملاحظة',
             'needs_evidence'   => 'يتطلب شواهد',
             'evidence_required'=> 'الشواهد إلزامية',
+            'weight'           => 'النسبة (%)',
             'status'           => 'الحالة',
         ],
         'level_only_rubric' => 'ربط المستوى متاح لنماذج الروبرك فقط.',
@@ -145,5 +154,6 @@ return [
         'required_zero_weight'   => 'لا يمكن أن يكون العنصر الإجباري بوزن صفر.',
         'level_required_rubric'  => 'يجب اختيار المستوى لنماذج الروبرك.',
         'level_invalid'          => 'المستوى المختار لا يخص هذا النموذج.',
+        'indicators_over_weight' => 'مجموع نسب المؤشرات (:sum%) يتجاوز الوزن النسبي للمعيار (:weight%).',
     ],
 ];

@@ -16,7 +16,7 @@ return [
         'of_100'       => 'of 100%',
         'columns' => [
             'order'            => '#',
-            'name'             => 'Item name',
+            'name'             => 'Criterion',
             'responsible_role' => 'Responsible role',
             'item_type'        => 'Type',
             'weight'           => 'Weight',
@@ -28,7 +28,7 @@ return [
             'actions'          => 'Actions',
         ],
         'fields' => [
-            'name'             => 'Item name',
+            'name'             => 'Criterion',
             'description'      => 'Description',
             'weight'           => 'Relative weight (%)',
             'max_score'        => 'Max score',
@@ -43,6 +43,8 @@ return [
             // Phase A (v2)
             'responsible_role'               => 'Responsible role',
             'responsible_role_placeholder'   => 'e.g. school-admin, supervisor',
+            'responsible_user'               => 'Responsible party',
+            'responsible_user_placeholder'   => 'Select the responsible account',
             'item_type'                      => 'Item type',
             'calc_method'                    => 'Calc method',
             'evidence_needs_approval'        => 'Evidence needs approval',
@@ -54,6 +56,12 @@ return [
             'internal_notes_placeholder'     => 'Notes not shown to the evaluator',
         ],
         'advanced_config' => 'Advanced item config',
+        'indicators_section' => 'Indicators & percentages',
+        'add_indicator'      => 'Add indicator',
+        'indicator_text'     => 'Indicator text',
+        'indicator_weight'   => 'Percentage (%)',
+        'indicators_hint'    => 'The criterion weight is distributed across its indicators; the sum of percentages must not exceed the criterion weight.',
+        'indicators_sum'     => 'Sum of percentages',
     ],
 
     // ── Indicators ──────────────────────────────────────────────────
@@ -86,6 +94,7 @@ return [
             'needs_note'       => 'Needs note',
             'needs_evidence'   => 'Needs evidence',
             'evidence_required'=> 'Evidence mandatory',
+            'weight'           => 'Percentage (%)',
             'status'           => 'Status',
         ],
         'level_only_rubric' => 'Level binding is available for Rubric forms only.',
@@ -145,5 +154,6 @@ return [
         'required_zero_weight'   => 'A required item cannot have weight zero.',
         'level_required_rubric'  => 'You must select a level for Rubric forms.',
         'level_invalid'          => 'The selected level does not belong to this form.',
+        'indicators_over_weight' => 'Sum of indicator percentages (:sum%) exceeds the criterion weight (:weight%).',
     ],
 ];

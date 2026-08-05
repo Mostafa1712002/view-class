@@ -26,11 +26,19 @@ class SaveEvaluationIndicator
     {
         return DB::transaction(function () use ($form, $item, $indicator, $data) {
             $levelId = $this->resolveLevel($form, $data['level_id'] ?? null);
+            $weight  = isset($data['weight']) && $data['weight'] !== '' ? round((float) $data['weight'], 2) : null;
+
+            // Σ this item's indicator percentages ≤ criterion weight (weighted,
+            // non-Rubric forms — Rubric distributes by level, not percentage).
+            if ($weight !== null && $form->type !== FormType::Rubric && $form->type !== FormType::Checklist) {
+                $this->guardIndicatorWeight($item, $indicator, $weight);
+            }
 
             $payload = [
                 'text'              => $data['text'],
                 'description'       => $data['description'] ?? null,
                 'level_id'          => $levelId,
+                'weight'            => $weight,
                 'is_required'       => (bool) ($data['is_required'] ?? false),
                 'needs_note'        => (bool) ($data['needs_note'] ?? false),
                 'needs_evidence'    => (bool) ($data['needs_evidence'] ?? false),
@@ -52,6 +60,25 @@ class SaveEvaluationIndicator
 
             return $indicator->refresh();
         });
+    }
+
+    /** Sum of OTHER active indicators' weights must leave room for this one (≤ criterion weight). */
+    private function guardIndicatorWeight(EvaluationItem $item, ?EvaluationIndicator $indicator, float $weight): void
+    {
+        $others = (float) $item->indicators()
+            ->where('status', 'active')
+            ->when($indicator, fn ($q) => $q->whereKeyNot($indicator->id))
+            ->sum('weight');
+
+        $cap = round((float) $item->weight, 2);
+        if (round($others + $weight, 2) > $cap + 0.001) {
+            throw ValidationException::withMessages([
+                'weight' => __('evaluation_items.errors.indicators_over_weight', [
+                    'sum'    => rtrim(rtrim(number_format($others + $weight, 2), '0'), '.'),
+                    'weight' => rtrim(rtrim(number_format($cap, 2), '0'), '.'),
+                ]),
+            ]);
+        }
     }
 
     /** Rubric → must pick a valid level of this form; otherwise null. */

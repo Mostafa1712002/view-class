@@ -44,6 +44,7 @@
 </div>
 
 <div class="content-body">
+    @include('admin.evaluation._next_issue', ['form' => $form, 'currentRoute' => 'admin.evaluations.items.index'])
     @if(session('status'))<div class="alert alert-success">{{ session('status') }}</div>@endif
     @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
     @if ($errors->any())
@@ -99,7 +100,9 @@
                                     @if ($item->description)<div class="text-muted small fw-normal">{{ \Illuminate\Support\Str::limit($item->description, 80) }}</div>@endif
                                 </td>
                                 <td>
-                                    @if ($item->responsible_role)
+                                    @if ($item->responsibleUser)
+                                        <span class="badge badge-light-secondary">{{ $item->responsibleUser->name }}</span>
+                                    @elseif ($item->responsible_role)
                                         <span class="badge badge-light-secondary">{{ $item->responsible_role }}</span>
                                     @else
                                         <span class="text-muted">—</span>
@@ -139,7 +142,8 @@
                                                     data-visible_to_evaluator_only="{{ $item->visible_to_evaluator_only ? 1 : 0 }}"
                                                     data-visible_to_subject_after_result="{{ $item->visible_to_subject_after_result ? 1 : 0 }}"
                                                     data-status="{{ $item->status }}"
-                                                    data-responsible_role="{{ $item->responsible_role }}"
+                                                    data-responsible_user_id="{{ $item->responsible_user_id }}"
+                                                    data-indicators="{{ $item->indicators->map(fn($ind) => ['id' => $ind->id, 'text' => $ind->text, 'weight' => $ind->weight])->toJson() }}"
                                                     data-item_type="{{ $item->item_type ?? 'manual' }}"
                                                     data-calc_method="{{ $item->calc_method ?? 'manual' }}"
                                                     data-evidence_needs_approval="{{ $item->evidence_needs_approval ? 1 : 0 }}"
@@ -239,9 +243,14 @@
                     <p class="text-muted small mb-2"><x-svg-icon name="gear-fill" :size="16" class="ic-muted me-1" /> @lang('evaluation_items.items.advanced_config')</p>
                     <div class="row">
                         <div class="col-md-4 col-12 mb-3">
-                            <label class="form-label">@lang('evaluation_items.items.fields.responsible_role')</label>
-                            <input type="text" name="responsible_role" id="f-responsible_role" class="form-control" maxlength="40"
-                                   placeholder="@lang('evaluation_items.items.fields.responsible_role_placeholder')">
+                            <label class="form-label">@lang('evaluation_items.items.fields.responsible_user')</label>
+                            <select name="responsible_user_id" id="f-responsible_user_id" class="form-control">
+                                <option value="">@lang('evaluation_items.items.fields.responsible_user_placeholder')</option>
+                                @foreach ($responsibleUsers as $u)
+                                    @php $roleSlug = optional($u->roles->first())->slug; @endphp
+                                    <option value="{{ $u->id }}">{{ $u->name }}@if($roleSlug) — {{ $roleSlug }}@endif</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-4 col-12 mb-3">
                             <label class="form-label">@lang('evaluation_items.items.fields.item_type')</label>
@@ -283,6 +292,35 @@
                             </div>
                         @endforeach
                     </div>
+
+                    @if ($isWeighted && !$isRubric)
+                    {{-- Inline indicators + percentage distribution (#336) --}}
+                    <hr class="my-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <p class="text-muted small mb-0"><x-svg-icon name="list-ul" :size="16" class="ic-muted me-1" /> @lang('evaluation_items.items.indicators_section')</p>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="ev-ind-add-row"><x-svg-icon name="plus-lg" :size="14" /> @lang('evaluation_items.items.add_indicator')</button>
+                    </div>
+                    <p class="text-muted small mb-2">{{ __('evaluation_items.items.indicators_hint') }}</p>
+                    <div id="ev-ind-rows"></div>
+                    <div class="ev-meta mt-1">@lang('evaluation_items.items.indicators_sum'): <b id="ev-ind-sum">0</b>%
+                        <span class="text-muted">/ <span id="ev-ind-cap">0</span>%</span>
+                        <span id="ev-ind-warn" class="text-danger ms-2" style="display:none;">⚠</span>
+                    </div>
+                    <template id="ev-ind-tpl">
+                        <div class="row ev-ind-row align-items-end mb-2">
+                            <input type="hidden" class="ev-ind-id" data-name="id">
+                            <div class="col-8">
+                                <input type="text" class="form-control ev-ind-text" data-name="text" maxlength="1000" placeholder="@lang('evaluation_items.items.indicator_text')">
+                            </div>
+                            <div class="col-3">
+                                <input type="number" class="form-control ev-ind-weight" data-name="weight" min="0" max="100" step="0.01" placeholder="@lang('evaluation_items.items.indicator_weight')">
+                            </div>
+                            <div class="col-1 ps-0">
+                                <button type="button" class="btn btn-sm btn-outline-danger ev-ind-del"><x-svg-icon name="trash3-fill" :size="14" /></button>
+                            </div>
+                        </div>
+                    </template>
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal">@lang('evaluation_items.actions.cancel')</button>
@@ -302,11 +340,61 @@ jQuery(function ($) {
     var csrf = @json(csrf_token());
     var flags = ['is_required','needs_evidence','evidence_required','allow_note','visible_to_evaluator_only','visible_to_subject_after_result',
                  'evidence_needs_approval','editable_after_review','editable_after_approval'];
+    var hasIndicators = @json($isWeighted && !$isRubric);
 
     function openModal() {
         if (window.bootstrap) { new bootstrap.Modal(document.getElementById('ev-item-modal')).show(); }
         else { $('#ev-item-modal').modal('show'); }
     }
+
+    // ── Inline indicator rows ────────────────────────────────────────
+    function addIndRow(data) {
+        if (!hasIndicators) return;
+        var tpl = document.getElementById('ev-ind-tpl');
+        var frag = document.importNode(tpl.content, true);
+        $('#ev-ind-rows').append(frag);
+        var $row = $('#ev-ind-rows .ev-ind-row').last();
+        if (data) {
+            $row.find('.ev-ind-id').val(data.id || '');
+            $row.find('.ev-ind-text').val(data.text || '');
+            $row.find('.ev-ind-weight').val(data.weight != null ? data.weight : '');
+        }
+        reindexInd();
+    }
+    function reindexInd() {
+        $('#ev-ind-rows .ev-ind-row').each(function (i) {
+            $(this).find('[data-name]').each(function () {
+                $(this).attr('name', 'indicators[' + i + '][' + $(this).data('name') + ']');
+            });
+        });
+        recalcIndSum();
+    }
+    function recalcIndSum() {
+        if (!hasIndicators) return;
+        var sum = 0;
+        $('#ev-ind-rows .ev-ind-weight').each(function () { sum += parseFloat($(this).val()) || 0; });
+        sum = Math.round(sum * 100) / 100;
+        var cap = parseFloat($('#f-weight').val()) || 0;
+        $('#ev-ind-sum').text(sum);
+        $('#ev-ind-cap').text(cap);
+        $('#ev-ind-warn').toggle(sum > cap + 0.001);
+    }
+
+    $('#ev-ind-add-row').on('click', function () { addIndRow(); });
+    $('#ev-ind-rows').on('click', '.ev-ind-del', function () { $(this).closest('.ev-ind-row').remove(); reindexInd(); });
+    $('#ev-ind-rows').on('input', '.ev-ind-weight', recalcIndSum);
+    $('#f-weight').on('input', recalcIndSum);
+
+    $('#ev-item-form').on('submit', function (e) {
+        if (!hasIndicators) return;
+        recalcIndSum();
+        var sum = parseFloat($('#ev-ind-sum').text()) || 0;
+        var cap = parseFloat($('#f-weight').val()) || 0;
+        if (sum > cap + 0.001) {
+            e.preventDefault();
+            alert(@json(__('evaluation_items.items.indicators_hint')));
+        }
+    });
 
     $('#ev-add-item').on('click', function () {
         $('#ev-item-modal-title').text(@json(__('evaluation_items.items.add')));
@@ -318,6 +406,9 @@ jQuery(function ($) {
         $('#f-item_type').val('manual');
         $('#f-calc_method').val('manual');
         $('#f-min_percentage').val('');
+        $('#f-responsible_user_id').val('');
+        $('#ev-ind-rows').empty();
+        recalcIndSum();
         openModal();
     });
 
@@ -333,11 +424,17 @@ jQuery(function ($) {
         $('#f-status').val(d.status);
         flags.forEach(function (f) { $('#f-' + f).prop('checked', String(d[f]) === '1'); });
         // Phase A (v2) advanced fields
-        $('#f-responsible_role').val(d.responsible_role || '');
+        $('#f-responsible_user_id').val(d.responsible_user_id ? String(d.responsible_user_id) : '');
         $('#f-item_type').val(d.item_type || 'manual');
         $('#f-calc_method').val(d.calc_method || 'manual');
         $('#f-min_percentage').val(d.min_percentage || '');
         $('#f-internal_notes').val(d.internal_notes || '');
+        // Inline indicators (jQuery already parses the JSON in data-indicators)
+        $('#ev-ind-rows').empty();
+        if (hasIndicators && Array.isArray(d.indicators)) {
+            d.indicators.forEach(function (ind) { addIndRow(ind); });
+        }
+        recalcIndSum();
         openModal();
     });
 

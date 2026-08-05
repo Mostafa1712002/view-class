@@ -13,7 +13,7 @@ class EvaluationItem extends Model
         'is_required', 'needs_evidence', 'evidence_required', 'allow_note',
         'visible_to_evaluator_only', 'visible_to_subject_after_result', 'status',
         // Phase A (v2) advanced item config
-        'responsible_role', 'item_type', 'calc_method',
+        'responsible_role', 'responsible_user_id', 'item_type', 'calc_method',
         'evidence_needs_approval', 'editable_after_review', 'editable_after_approval',
         'min_percentage', 'internal_notes',
     ];
@@ -33,10 +33,12 @@ class EvaluationItem extends Model
         'editable_after_review'           => 'boolean',
         'editable_after_approval'         => 'boolean',
         'min_percentage'                  => 'decimal:2',
+        'responsible_user_id'             => 'integer',
     ];
 
     public function form(): BelongsTo { return $this->belongsTo(EvaluationForm::class, 'form_id'); }
     public function indicators(): HasMany { return $this->hasMany(EvaluationIndicator::class, 'item_id')->orderBy('sort_order'); }
+    public function responsibleUser(): BelongsTo { return $this->belongsTo(User::class, 'responsible_user_id'); }
 
     public function isActive(): bool { return $this->status === 'active'; }
 }

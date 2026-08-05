@@ -57,6 +57,7 @@
                             <th style="width:30px;"></th>
                             <th>@lang('evaluation_items.indicators.columns.text')</th>
                             @if ($isRubric)<th style="width:110px;">@lang('evaluation_items.indicators.columns.level')</th>@endif
+                            @if ($showWeight)<th style="width:90px;">@lang('evaluation_items.indicators.fields.weight')</th>@endif
                             <th style="width:80px;">@lang('evaluation_items.indicators.columns.required')</th>
                             <th style="width:80px;">@lang('evaluation_items.indicators.columns.evidence')</th>
                             <th style="width:90px;">@lang('evaluation_items.indicators.columns.status')</th>
@@ -79,6 +80,7 @@
                                     @if ($ind->description)<div class="text-muted small fw-normal">{{ \Illuminate\Support\Str::limit($ind->description, 80) }}</div>@endif
                                 </td>
                                 @if ($isRubric)<td>@if ($ind->level)<span class="ev-lvl-pill">{{ $ind->level->label }}</span>@else<span class="text-muted small">—</span>@endif</td>@endif
+                                @if ($showWeight)<td>@if ($ind->weight !== null){{ rtrim(rtrim(number_format((float)$ind->weight, 2), '0'), '.') }}%@else<span class="text-muted">—</span>@endif</td>@endif
                                 <td>@if ($ind->is_required)<x-svg-icon name="check-circle-fill" :size="16" class="ic-success" />@else<x-svg-icon name="dash" :size="16" class="ic-muted" />@endif</td>
                                 <td>@if ($ind->needs_evidence)<x-svg-icon name="paperclip" :size="16" class="ic-success" />@else<x-svg-icon name="dash" :size="16" class="ic-muted" />@endif</td>
                                 <td><span class="ev-pill {{ $ind->status }}">@lang('evaluation_items.status.'.$ind->status)</span></td>
@@ -92,6 +94,7 @@
                                                     data-text="{{ $ind->text }}"
                                                     data-description="{{ $ind->description }}"
                                                     data-level_id="{{ $ind->level_id }}"
+                                                    data-weight="{{ $ind->weight }}"
                                                     data-is_required="{{ $ind->is_required ? 1 : 0 }}"
                                                     data-needs_note="{{ $ind->needs_note ? 1 : 0 }}"
                                                     data-needs_evidence="{{ $ind->needs_evidence ? 1 : 0 }}"
@@ -166,6 +169,14 @@
                         @else
                             <div class="col-12 mb-2"><small class="text-muted"><x-svg-icon name="info-circle-fill" :size="16" class="ic-info me-1" /> @lang('evaluation_items.indicators.level_only_rubric')</small></div>
                         @endif
+                        @if ($showWeight)
+                            <div class="col-md-6 col-12 mb-3">
+                                <label class="form-label">@lang('evaluation_items.indicators.fields.weight')</label>
+                                <input type="number" name="weight" id="i-weight" class="form-control" min="0" max="100" step="0.01"
+                                       placeholder="0 – {{ rtrim(rtrim(number_format((float)$item->weight, 2), '0'), '.') }}">
+                                <small class="text-muted">@lang('evaluation_items.items.columns.weight'): {{ rtrim(rtrim(number_format((float)$item->weight, 2), '0'), '.') }}%</small>
+                            </div>
+                        @endif
                         <div class="col-md-6 col-12 mb-3">
                             <label class="form-label">@lang('evaluation_items.indicators.fields.status')</label>
                             <select name="status" id="i-status" class="form-control">
@@ -216,6 +227,7 @@ jQuery(function ($) {
         $('#ev-ind-form').attr('action', storeUrl);
         $('#ev-ind-method').val('POST');
         if (isRubric) { $('#i-level_id').val('').trigger('change'); }
+        $('#i-weight').val('');
         openModal();
     });
 
@@ -227,6 +239,7 @@ jQuery(function ($) {
         $('#i-text').val(d.text);
         $('#i-description').val(d.description || '');
         $('#i-status').val(d.status);
+        $('#i-weight').val(d.weight != null && d.weight !== '' ? d.weight : '');
         if (isRubric) { $('#i-level_id').val(d.level_id ? String(d.level_id) : '').trigger('change'); }
         flags.forEach(function (f) { $('#i-' + f).prop('checked', String(d[f]) === '1'); });
         openModal();

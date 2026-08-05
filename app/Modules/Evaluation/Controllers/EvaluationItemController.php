@@ -39,10 +39,31 @@ class EvaluationItemController extends Controller
 
         return view('admin.evaluation.items.index', [
             'form'            => $evForm,
-            'items'           => $items,
+            'items'           => $items->load('indicators:id,item_id,text,weight,sort_order'),
             'isWeighted'      => $evForm->type !== FormType::Checklist,
+            'isRubric'        => $evForm->type === FormType::Rubric,
             'weightTotal'     => round((float) $items->where('status', 'active')->sum('weight'), 2),
+            'responsibleUsers'=> $this->responsibleUsers($evForm),
         ]);
+    }
+
+    /**
+     * Admin/supervisor accounts eligible as an item's responsible party:
+     * the form-school's admins/supervisors plus system super-admins.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\User>
+     */
+    private function responsibleUsers(EvaluationForm $form)
+    {
+        return \App\Models\User::query()
+            ->whereHas('roles', fn ($r) => $r->whereIn('slug', ['super-admin', 'school-admin', 'supervisor']))
+            ->when($form->school_id !== null, fn ($q) => $q->where(function ($w) use ($form) {
+                $w->where('users.school_id', $form->school_id)
+                  ->orWhereHas('roles', fn ($r) => $r->where('slug', 'super-admin'));
+            }))
+            ->with('roles:id,slug')
+            ->orderBy('name')
+            ->get(['id', 'name', 'school_id']);
     }
 
     public function store(Request $request, int $form): RedirectResponse
@@ -160,7 +181,7 @@ class EvaluationItemController extends Controller
             'visible_to_subject_after_result' => ['nullable', 'boolean'],
             'status'                          => ['nullable', 'in:active,disabled'],
             // Phase A (v2) advanced item config
-            'responsible_role'                => ['nullable', 'string', 'max:40'],
+            'responsible_user_id'             => ['nullable', 'integer'],
             'item_type'                       => ['nullable', 'in:manual,auto,evidence_only,mixed'],
             'calc_method'                     => ['nullable', 'in:manual,auto_platform,after_evidence,external'],
             'evidence_needs_approval'         => ['nullable', 'boolean'],
@@ -168,6 +189,11 @@ class EvaluationItemController extends Controller
             'editable_after_approval'         => ['nullable', 'boolean'],
             'min_percentage'                  => ['nullable', 'numeric', 'min:0', 'max:100'],
             'internal_notes'                  => ['nullable', 'string'],
+            // Inline indicator distribution (#336)
+            'indicators'                      => ['nullable', 'array'],
+            'indicators.*.id'                 => ['nullable', 'integer'],
+            'indicators.*.text'               => ['nullable', 'string', 'max:1000'],
+            'indicators.*.weight'             => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
     }
 
