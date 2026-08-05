@@ -94,6 +94,8 @@ return [
         'section_sharing' => 'مشاركة البنك مع المدارس',
         'section_education' => 'الربط التعليمي',
         'section_permissions' => 'الصلاحيات',
+        'is_owner_bank' => 'بنك منصة الأول (خاص بالمالك)',
+        'is_owner_bank_hint' => 'بنك يملكه المالك ولا يُنسخ منه إلا بموافقته؛ لا يظهر للمدارس كبنك عام.',
         'section_future' => 'إعدادات الربط المستقبلي',
         'sharing_hint' => 'حدّد المدارس التي يمكنها رؤية هذا البنك العام',
         'sharing_empty_means_all' => 'إذا لم تحدد أي مدرسة، يصبح البنك متاحًا لكل المدارس على المنصة.',
@@ -142,6 +144,7 @@ return [
     'tab_all' => 'الكل',
     'tab_general' => 'عام (شركة)',
     'tab_private' => 'خاص (مدرسة)',
+    'tab_owner' => 'منصة الأول',
     'tab_under_review' => 'قيد المراجعة',
 
     // Column labels
@@ -151,6 +154,7 @@ return [
     // Scope display
     'scope_company' => 'شركة — عام',
     'scope_school' => 'مدرسة — خاص',
+    'scope_owner' => 'منصة الأول',
 
     // Approval notice
     'notice_general_approved_only' => 'تظهر للمدارس الأسئلة المعتمدة فقط من البنوك العامة.',

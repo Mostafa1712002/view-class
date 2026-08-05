@@ -8,6 +8,7 @@
     $total = $stats['total'] ?? 0;
     $publicCount = $stats['public'] ?? 0;
     $privateCount = $stats['private'] ?? 0;
+    $ownerCount = $stats['owner'] ?? 0;
     $activeCount = $stats['active'] ?? 0;
 
     $hasAnyFilter = collect($filters)->filter(fn($v) => $v !== null && $v !== '')->isNotEmpty();
@@ -336,6 +337,11 @@
             <x-svg-icon name="lock-fill" :size="16" class="ic-eval" /> @lang('question_banks.tab_private')
             <span class="badge">{{ $privateCount }}</span>
         </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'owner'])) }}"
+           class="qb-tab {{ $activeTab==='owner' ? 'active' : '' }}">
+            <x-svg-icon name="award" :size="16" class="ic-navy" /> @lang('question_banks.tab_owner')
+            <span class="badge">{{ $ownerCount }}</span>
+        </a>
         <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'under_review'])) }}"
            class="qb-tab {{ $activeTab==='under_review' ? 'active' : '' }}">
             <x-svg-icon name="clock-history" :size="16" class="ic-warn" /> @lang('question_banks.tab_under_review')
@@ -455,7 +461,11 @@
                             @endif
                         </td>
                         <td data-label="@lang('question_banks.col_visibility')">
-                            @if($isGeneral)
+                            @if($bank->is_owner_bank)
+                                <span class="qb-scope-general">
+                                    <x-svg-icon name="award" :size="14" class="ic-navy" /> @lang('question_banks.scope_owner')
+                                </span>
+                            @elseif($isGeneral)
                                 <span class="qb-scope-general">
                                     <x-svg-icon name="globe" :size="14" class="ic-info" /> @lang('question_banks.scope_company')
                                 </span>

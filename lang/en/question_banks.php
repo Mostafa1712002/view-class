@@ -82,6 +82,8 @@ return [
         'section_sharing' => 'Share bank with schools',
         'section_education' => 'Educational link',
         'section_permissions' => 'Permissions',
+        'is_owner_bank' => 'Owner bank (Al-Awwal)',
+        'is_owner_bank_hint' => 'A bank the platform owner keeps; schools can only copy from it with the owner\'s approval, and it is not shown to schools as a public bank.',
         'section_future' => 'Future link configuration',
         'sharing_hint' => 'Choose the schools that can see this general bank',
         'sharing_empty_means_all' => 'If no school is selected, the bank is available to all schools on the platform.',
@@ -125,6 +127,7 @@ return [
     'tab_all' => 'All',
     'tab_general' => 'General (company)',
     'tab_private' => 'Private (school)',
+    'tab_owner' => 'Al-Awwal',
     'tab_under_review' => 'Under review',
 
     'col_category' => 'Category',
@@ -132,6 +135,7 @@ return [
 
     'scope_company' => 'Company — general',
     'scope_school' => 'School — private',
+    'scope_owner' => 'Al-Awwal',
 
     'notice_general_approved_only' => 'Schools see only approved questions from general banks.',
 

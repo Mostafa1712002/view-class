@@ -28,6 +28,14 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
             });
         }
 
+        // Owner («منصة الأول») tier is separated out: the owner tab shows only
+        // owner banks; every other tab excludes them.
+        if (! empty($filters['is_owner_bank'])) {
+            $query->where('is_owner_bank', true);
+        } else {
+            $query->where('is_owner_bank', false);
+        }
+
         if (! empty($filters['visibility'])) {
             $query->where('visibility', $filters['visibility']);
         }
@@ -61,9 +69,10 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
         $base = fn () => $this->baseQuery($schoolId);
 
         return [
-            'total' => (clone $base())->count(),
-            'public' => (clone $base())->where('visibility', QuestionBank::VISIBILITY_PUBLIC)->count(),
-            'private' => (clone $base())->where('visibility', QuestionBank::VISIBILITY_PRIVATE)->count(),
+            'total' => (clone $base())->where('is_owner_bank', false)->count(),
+            'public' => (clone $base())->where('is_owner_bank', false)->where('visibility', QuestionBank::VISIBILITY_PUBLIC)->count(),
+            'private' => (clone $base())->where('is_owner_bank', false)->where('visibility', QuestionBank::VISIBILITY_PRIVATE)->count(),
+            'owner' => (clone $base())->where('is_owner_bank', true)->count(),
             'active' => (clone $base())->where('status', QuestionBank::STATUS_ACTIVE)->count(),
         ];
     }
@@ -273,8 +282,12 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
             $companyId = $this->companyIdForSchool($schoolId);
 
             $query->where(function ($q) use ($schoolId, $companyId) {
-                // 1) The school's own banks (private or public it created).
-                $q->where('school_id', $schoolId)
+                // 0) Owner («منصة الأول») banks — surfaced read-only in the owner
+                //    tab so a school can request access; separated from other tabs
+                //    by the is_owner_bank filter in paginate().
+                $q->where('is_owner_bank', true)
+                  // 1) The school's own banks (private or public it created).
+                  ->orWhere('school_id', $schoolId)
                   // 2) General (public) banks of the same company, available to all company schools (no explicit pivot).
                   ->orWhere(function ($pub) use ($companyId) {
                       $pub->where('visibility', QuestionBank::VISIBILITY_PUBLIC)

@@ -200,6 +200,17 @@
                 <span>@lang('question_banks.form.exportable')</span>
             </label>
         </div>
+        @if(auth()->user()?->isSuperAdmin())
+        <div class="col-12 mb-3">
+            <label class="qb-toggle">
+                <input type="hidden" name="is_owner_bank" value="0">
+                <input type="checkbox" name="is_owner_bank" value="1"
+                       {{ old('is_owner_bank', $bank->is_owner_bank ?? false) ? 'checked' : '' }}>
+                <span>@lang('question_banks.form.is_owner_bank')</span>
+            </label>
+            <small class="text-muted d-block">@lang('question_banks.form.is_owner_bank_hint')</small>
+        </div>
+        @endif
         <div class="col-md-6 mb-3">
             <label class="form-label">@lang('question_banks.form.external_platform')</label>
             <input type="text" name="external_platform" value="{{ old('external_platform', $bank->external_platform) }}"

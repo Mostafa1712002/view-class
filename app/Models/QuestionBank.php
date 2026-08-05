@@ -18,6 +18,7 @@ class QuestionBank extends Model
         'name_en',
         'description',
         'is_library',
+        'is_owner_bank',
         'visibility',
         'status',
         'source',
@@ -37,6 +38,7 @@ class QuestionBank extends Model
 
     protected $casts = [
         'is_library' => 'boolean',
+        'is_owner_bank' => 'boolean',
         'is_ana_qudurat_linkable' => 'boolean',
         'exportable' => 'boolean',
         'grade_level' => 'integer',
@@ -46,6 +48,20 @@ class QuestionBank extends Model
 
     public const VISIBILITY_PUBLIC = 'public';
     public const VISIBILITY_PRIVATE = 'private';
+
+    public const TIER_OWNER = 'owner';
+    public const TIER_PUBLIC = 'public';
+    public const TIER_PRIVATE = 'private';
+
+    /** Which of the three tiers a bank belongs to (owner wins over visibility). */
+    public function getTierAttribute(): string
+    {
+        if ($this->is_owner_bank) {
+            return self::TIER_OWNER;
+        }
+
+        return $this->visibility === self::VISIBILITY_PUBLIC ? self::TIER_PUBLIC : self::TIER_PRIVATE;
+    }
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';

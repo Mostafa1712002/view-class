@@ -134,6 +134,8 @@ class QuestionBankController extends Controller
             'category_type'           => $data['category_type'] ?? null,
             'is_ana_qudurat_linkable' => (bool) ($data['is_ana_qudurat_linkable'] ?? false),
             'exportable'              => (bool) ($data['exportable'] ?? true),
+            // Only a super-admin can carve a bank into the owner («منصة الأول») tier.
+            'is_owner_bank'           => (auth()->user()?->isSuperAdmin() ?? false) && (bool) ($data['is_owner_bank'] ?? false),
             'external_platform'       => $data['source'] === QuestionBank::SOURCE_AL_AWWAL
                                             ? 'al_awwal'
                                             : ($data['external_platform'] ?? null),
@@ -288,6 +290,7 @@ class QuestionBankController extends Controller
             'category_type' => $data['category_type'] ?? null,
             'is_ana_qudurat_linkable' => (bool) ($data['is_ana_qudurat_linkable'] ?? false),
             'exportable' => (bool) ($data['exportable'] ?? true),
+            'is_owner_bank' => (auth()->user()?->isSuperAdmin() ?? false) && (bool) ($data['is_owner_bank'] ?? false),
             'external_platform' => $data['external_platform'] ?? null,
         ], $subjectIds, $memberRoles, $schoolIds);
 
@@ -375,6 +378,7 @@ class QuestionBankController extends Controller
         $visibilityFromTab = match ($tab) {
             'general' => 'public',
             'private' => 'private',
+            'owner'   => null,
             default   => $request->get('visibility'),
         };
         $statusFromTab = ($tab === 'under_review') ? 'under_review' : $request->get('status');
@@ -382,6 +386,8 @@ class QuestionBankController extends Controller
         return [
             'q'          => trim((string) $request->get('q', '')),
             'visibility' => $visibilityFromTab,
+            // The owner («منصة الأول») tier is carved out of the other tabs.
+            'is_owner_bank' => $tab === 'owner',
             'status'     => $statusFromTab,
             'source'     => $request->get('source'),
             'subject_id' => $request->get('subject_id'),
@@ -397,6 +403,7 @@ class QuestionBankController extends Controller
             'name_en'                 => ['nullable', 'string', 'max:255'],
             'description'             => ['nullable', 'string', 'max:1000'],
             'visibility'              => ['required', 'in:public,private'],
+            'is_owner_bank'           => ['nullable', 'boolean'],
             'status'                  => ['required', 'in:active,inactive,under_review,archived'],
             'source'                  => ['required', 'in:manual,al_awwal,library,import,ana_qudurat'],
             'grade_level'             => ['nullable', 'integer', 'min:1', 'max:12'],
