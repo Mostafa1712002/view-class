@@ -20,8 +20,13 @@ class EvaluationAssignmentController extends Controller
 {
     use HasSchoolScope;
 
-    /** Roles that may act as evaluators. */
-    private const EVALUATOR_ROLES = ['teacher', 'school-admin', 'super-admin'];
+    /**
+     * Roles that belong to the end-user side (teacher/student/parent) — never
+     * eligible as evaluators. Evaluators are administrative-side accounts
+     * (super-admin, school-admin, and any supervisor/manager role), the same
+     * definition AdminController uses for "حسابات الجانب الاداري".
+     */
+    private const END_USER_ROLES = ['teacher', 'student', 'parent'];
 
     public function __construct(
         private readonly EvaluationFormRepository $forms,
@@ -139,7 +144,8 @@ class EvaluationAssignmentController extends Controller
         $schoolId = $this->scopeSchool($form);
 
         return User::query()
-            ->whereHas('roles', fn ($r) => $r->whereIn('slug', self::EVALUATOR_ROLES))
+            ->whereHas('roles', fn ($r) => $r->whereNotIn('slug', self::END_USER_ROLES))
+            ->whereDoesntHave('roles', fn ($r) => $r->whereIn('slug', self::END_USER_ROLES))
             ->when($schoolId !== null, fn ($q) => $q->where('users.school_id', $schoolId))
             ->orderBy('users.name')
             ->limit(500)
