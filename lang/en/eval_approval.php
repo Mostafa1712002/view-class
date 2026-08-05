@@ -55,6 +55,7 @@ return [
         'reject'  => 'Reject',
         'review'  => 'Request review',
         'reopen'  => 'Reopen',
+        'cancel_review' => 'Cancel review request',
         'back'    => 'Back',
         'cancel'  => 'Cancel',
     ],
@@ -95,6 +96,7 @@ return [
 
     // ---- Flash --------------------------------------------------------------
     'flash' => [
+        'review_cancelled' => 'Review request cancelled.',
         'approved' => 'Evaluation approved successfully.',
         'rejected' => 'Evaluation rejected and the evaluator notified.',
         'reviewed' => 'Evaluation sent for review and the evaluator notified.',
@@ -103,6 +105,7 @@ return [
 
     // ---- Errors / guards ----------------------------------------------------
     'errors' => [
+        'cannot_cancel_review' => 'Cannot cancel the review request in the current state.',
         'cannot_approve'    => 'This evaluation cannot be approved in its current state.',
         'cannot_reject'     => 'This evaluation cannot be rejected in its current state.',
         'cannot_review'     => 'This evaluation cannot be sent for review in its current state.',
@@ -174,4 +177,6 @@ return [
         'view'        => 'View',
         'no_settings' => 'Default (average of completed + approved)',
     ],
+    'cancel_review_confirm' => 'This cancels the review request and returns the evaluation to the approval queue. Continue?',
+    'flash_review_cancelled' => 'Review request cancelled.',
 ];

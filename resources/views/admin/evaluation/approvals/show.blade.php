@@ -150,7 +150,12 @@
         @if ($canReview)
             <button type="button" class="btn btn-warning" data-toggle="modal" data-bs-toggle="modal" data-target="#review-modal" data-bs-target="#review-modal"><i class="la la-exclamation-triangle"></i> @lang('eval_approval.actions.review')</button>
         @endif
-        @if ($canReopenStatus && $canReopen)
+        @if ($statusVal === 'needs_review' && $canReopen)
+            <form method="POST" action="{{ route('admin.evaluations.approvals.cancel-review', $evaluation->id) }}" onsubmit="return confirm('@lang('eval_approval.cancel_review_confirm')')">
+                @csrf
+                <button type="submit" class="btn btn-outline-primary"><i class="la la-undo"></i> @lang('eval_approval.actions.cancel_review')</button>
+            </form>
+        @elseif ($canReopenStatus && $canReopen)
             <form method="POST" action="{{ route('admin.evaluations.approvals.reopen', $evaluation->id) }}" onsubmit="return confirm('@lang('eval_approval.reopen_confirm')')">
                 @csrf
                 <button type="submit" class="btn btn-outline-primary"><i class="la la-unlock"></i> @lang('eval_approval.actions.reopen')</button>

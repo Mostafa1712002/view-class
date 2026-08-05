@@ -176,6 +176,28 @@ class EvaluationApprovalController extends Controller
             ->with('status', __('eval_approval.flash.reviewed'));
     }
 
+    /**
+     * Cancel a pending review request: revert needs_review back to completed
+     * (undo «طلب مراجعة»), so the evaluation returns to the approval queue.
+     */
+    public function cancelReview(Request $request, Evaluation $evaluation): RedirectResponse
+    {
+        $this->authorizeScope($evaluation);
+
+        if ($evaluation->status?->value !== EvaluationStatus::NeedsReview->value) {
+            return back()->withErrors(['approval' => __('eval_approval.errors.cannot_cancel_review')]);
+        }
+
+        $evaluation->fill([
+            'status'      => EvaluationStatus::Completed,
+            'approved_by' => null,
+            'approved_at' => null,
+        ])->save();
+
+        return redirect()->route('admin.evaluations.approvals.show', $evaluation->id)
+            ->with('status', __('eval_approval.flash.review_cancelled'));
+    }
+
     public function reopen(Request $request, Evaluation $evaluation): RedirectResponse
     {
         $this->authorizeScope($evaluation);
