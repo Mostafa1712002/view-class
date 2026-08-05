@@ -84,7 +84,7 @@
 {{-- ===== GP Sidebar v3 — navy brand surface, gold active, unified section system ===== --}}
 <style>
 /* ══════════════════════════════════════════════════════════════════
-   ViewClass Sidebar v3 — "المنصة الذهبية"
+   ViewClass Sidebar v3 — "منصة الأول"
    Deep-navy brand surface + gold accents. Light icons for high
    contrast & clarity (QA #221). Larger readable nav text. One
    coherent section system replaces the prior 4-colour scheme.

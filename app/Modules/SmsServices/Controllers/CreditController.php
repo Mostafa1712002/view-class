@@ -26,8 +26,8 @@ class CreditController extends Controller
 
     /** Static bank-account info shown to schools (settings-driven later). */
     private const BANKS = [
-        'alrajhi' => ['label' => 'مصرف الراجحي', 'iban' => 'SA00 0000 0000 0000 0000 0000', 'account' => '000000000000', 'name' => 'المنصة الذهبية'],
-        'alahli'  => ['label' => 'البنك الأهلي',  'iban' => 'SA11 1111 1111 1111 1111 1111', 'account' => '111111111111', 'name' => 'المنصة الذهبية'],
+        'alrajhi' => ['label' => 'مصرف الراجحي', 'iban' => 'SA00 0000 0000 0000 0000 0000', 'account' => '000000000000', 'name' => 'منصة الأول'],
+        'alahli'  => ['label' => 'البنك الأهلي',  'iban' => 'SA11 1111 1111 1111 1111 1111', 'account' => '111111111111', 'name' => 'منصة الأول'],
     ];
 
     public function __construct(private readonly CreditService $credit) {}

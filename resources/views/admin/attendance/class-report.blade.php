@@ -9,7 +9,7 @@
     .main-menu, .header-navbar, footer.footer, .content-header, .breadcrumb-wrapper,
     .no-print, .pagination, nav, form { display: none !important; }
     body::before {
-        content: "{{ $brand_name_ar ?? 'المنصة الذهبية' }} — تقرير حضور الصف";
+        content: "{{ $brand_name_ar ?? 'منصة الأول' }} — تقرير حضور الصف";
         display: block;
         background: {{ $brand_secondary_color ?? '#14233A' }};
         color: {{ $brand_primary_color ?? '#C9A227' }};

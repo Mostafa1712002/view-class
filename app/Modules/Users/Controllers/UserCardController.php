@@ -96,7 +96,7 @@ class UserCardController extends Controller
                 ->with('error', __('user_cards.flash_no_users'));
         }
 
-        $platform = Setting::get('brand_name_ar', 'المنصة الذهبية', null);
+        $platform = Setting::get('brand_name_ar', 'منصة الأول', null);
         $url      = config('app.url', request()->getSchemeAndHttpHost());
 
         $cards = $users->map(fn (User $u) => $this->cardFor($u))->values();

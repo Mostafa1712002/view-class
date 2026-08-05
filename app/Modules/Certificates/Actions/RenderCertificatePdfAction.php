@@ -6,7 +6,7 @@ use App\Models\Certificate;
 
 /**
  * Renders a single certificate to a PDF (mPDF, Arabic RTL, XB Riyaz font),
- * branded "المنصة الذهبية", overlaying dynamic text fields on the template
+ * branded "منصة الأول", overlaying dynamic text fields on the template
  * background. Dynamic fields are real HTML text (not baked into the image) so
  * the Arabic content remains extractable / high-resolution.
  */

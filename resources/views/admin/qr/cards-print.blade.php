@@ -21,7 +21,7 @@
 <div class="cards">
     @forelse($cards as $card)
     <div class="qr-card">
-        <div class="brand">{{ config('app.name', 'المنصة الذهبية') }}</div>
+        <div class="brand">{{ config('app.name', 'منصة الأول') }}</div>
         <h4>{{ optional($card->student)->name }}</h4>
         <div class="meta">الفصل: {{ optional(optional($card->student)->classRoom)->name ?? '—' }}</div>
         <div class="meta">رقم الهوية: {{ optional($card->student)->national_id ?? '—' }}</div>

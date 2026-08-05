@@ -84,7 +84,7 @@
                 @if($isSuperAdmin)
                 <div class="card mb-4 border-warning">
                     <div class="card-header bg-warning bg-opacity-10">
-                        <h5 class="mb-0"><x-svg-icon name="brush" class="me-2" />هوية المنصة (Golden Platform)</h5>
+                        <h5 class="mb-0"><x-svg-icon name="brush" class="me-2" />هوية المنصة (Alawal)</h5>
                         <small class="text-muted">هذه الإعدادات تؤثر على جميع شاشات المنصة — تظهر للمشرف العام فقط</small>
                     </div>
                     <div class="card-body">

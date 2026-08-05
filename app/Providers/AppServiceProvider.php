@@ -33,8 +33,8 @@ class AppServiceProvider extends ServiceProvider
         // Skip DB hit during artisan commands that don't render views
         if ($this->app->runningInConsole()) {
             view()->share([
-                'brand_name_ar'         => 'المنصة الذهبية',
-                'brand_name_en'         => 'Golden Platform',
+                'brand_name_ar'         => 'منصة الأول',
+                'brand_name_en'         => 'Alawal',
                 'brand_logo'            => '',
                 'brand_favicon'         => '',
                 'brand_primary_color'   => '#C9A227',
@@ -47,8 +47,8 @@ class AppServiceProvider extends ServiceProvider
         try {
             $brand = Cache::remember('platform_brand', 3600, function () {
                 return [
-                    'brand_name_ar'         => Setting::get('brand_name_ar', 'المنصة الذهبية', null),
-                    'brand_name_en'         => Setting::get('brand_name_en', 'Golden Platform',  null),
+                    'brand_name_ar'         => Setting::get('brand_name_ar', 'منصة الأول', null),
+                    'brand_name_en'         => Setting::get('brand_name_en', 'Alawal',  null),
                     'brand_logo'            => Setting::get('brand_logo',    '',                 null),
                     'brand_favicon'         => Setting::get('brand_favicon', '',                 null),
                     'brand_primary_color'   => Setting::get('brand_primary_color',   '#C9A227',  null),
@@ -59,8 +59,8 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // DB not yet migrated (fresh install) — use hardcoded defaults
             $brand = [
-                'brand_name_ar'         => 'المنصة الذهبية',
-                'brand_name_en'         => 'Golden Platform',
+                'brand_name_ar'         => 'منصة الأول',
+                'brand_name_en'         => 'Alawal',
                 'brand_logo'            => '',
                 'brand_favicon'         => '',
                 'brand_primary_color'   => '#C9A227',

@@ -29,7 +29,7 @@
         'password'=>'••••','national_id'=>'1234567890','passport_no'=>'A1234567','email'=>'m@example.com',
         'mobile'=>'0501234567','date'=>now()->format('Y-m-d'),'student_name'=>'سعد محمد','student_no'=>'STU-204',
         'grade'=>'السادس','class'=>'6/أ','stage'=>'الابتدائية','subject'=>'الرياضيات','period'=>'الثالثة','day'=>'الأحد',
-        'parent_name'=>'محمد العتيبي','school_name'=>'مدارس المنصة الذهبية','teacher_name'=>'أ. خالد','admin_name'=>'الإدارة',
+        'parent_name'=>'محمد العتيبي','school_name'=>'مدارس منصة الأول','teacher_name'=>'أ. خالد','admin_name'=>'الإدارة',
         'report_link'=>'https://example.com/r/204','platform_link'=>'https://example.com',
         'check_in'=>'07:15','check_out'=>'13:30','attendance_state'=>'حاضر','absence_reason'=>'—',
     ];

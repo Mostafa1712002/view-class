@@ -38,7 +38,7 @@ class WhatsappService
             '{subject_name}' => $vars['subject_name'] ?? '',
             '{period_name}'  => $vars['period_name'] ?? '',
             '{school_name}'  => $vars['school_name'] ?? '',
-            '{brand}'        => $vars['brand'] ?? 'المنصة الذهبية',
+            '{brand}'        => $vars['brand'] ?? 'منصة الأول',
         ];
 
         return str_replace(
@@ -126,7 +126,7 @@ class WhatsappService
             'subject_name' => $subject?->name ?? '',
             'period_name'  => $attendance->period ? ('الحصة ' . $attendance->period) : '',
             'school_name'  => $school?->name ?? '',
-            'brand'        => 'المنصة الذهبية',
+            'brand'        => 'منصة الأول',
         ]);
 
         $driver = $this->resolveDriver();

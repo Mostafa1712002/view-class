@@ -163,7 +163,7 @@
     .main-menu, .header-navbar, footer.footer, .breadcrumb-wrapper,
     .no-print, .pagination { display: none !important; }
     body::before {
-        content: "{{ $brand_name_ar ?? 'المنصة الذهبية' }} — كشف درجات";
+        content: "{{ $brand_name_ar ?? 'منصة الأول' }} — كشف درجات";
         display: block;
         background: {{ $brand_secondary_color ?? '#14233A' }};
         color: {{ $brand_primary_color ?? '#C9A227' }};

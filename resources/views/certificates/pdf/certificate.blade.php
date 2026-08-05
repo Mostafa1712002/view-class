@@ -6,7 +6,7 @@
         ? Storage::disk('public')->path($template->background_path)
         : null;
     $lines = $template?->body['lines'] ?? [];
-    $brand = config('app.name', 'المنصة الذهبية');
+    $brand = config('app.name', 'منصة الأول');
     $portrait = $template && $template->orientation === 'portrait';
 
     // Gold accent used for the frame + flourishes.

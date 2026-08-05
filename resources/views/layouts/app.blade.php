@@ -35,7 +35,7 @@
         .swal2-toast { box-shadow: 0 10px 30px rgba(30, 25, 10, .18) !important; border: 1px solid #efe6cf; }
         .swal2-popup.swal2-toast .swal2-title { font-size: .95rem; }
     </style>
-    {{-- Golden Platform brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
+    {{-- Alawal brand fonts: Playfair for English serif headings, Cairo already loaded above for Arabic. --}}
     @if(!$isRtl)
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
     @endif
@@ -64,12 +64,12 @@
     <link rel="stylesheet" type="text/css" href="{{ asset($customCss) }}">
     <!-- END Custom CSS-->
 
-    <!-- BEGIN Design System — Golden Platform unified tokens & components -->
+    <!-- BEGIN Design System — Alawal unified tokens & components -->
     <link rel="stylesheet" type="text/css" href="{{ asset('css/design-system.css') }}?v={{ @filemtime(public_path('css/design-system.css')) ?: '1' }}">
     <!-- END Design System -->
 
     <style>
-        /* ============ Golden Platform brand tokens ============ */
+        /* ============ Alawal brand tokens ============ */
         :root {
             --gold-100: #f6d27a;
             --gold-200: #e3b85c;

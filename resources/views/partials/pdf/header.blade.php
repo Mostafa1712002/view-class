@@ -14,7 +14,7 @@
                 @endif
                 <div class="pdf-report-title">{{ $reportTitle }}</div>
                 <div class="pdf-brand">
-                    {{ $brand_name_ar ?? 'المنصة الذهبية' }}
+                    {{ $brand_name_ar ?? 'منصة الأول' }}
                     @if($reportSchool) &nbsp;·&nbsp; {{ $reportSchool }} @endif
                 </div>
             </td>

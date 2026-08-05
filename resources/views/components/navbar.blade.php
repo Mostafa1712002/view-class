@@ -288,13 +288,13 @@
             </button>
             <a class="navbar-brand d-flex align-items-center m-0 p-0" href="{{ route('dashboard') }}">
                 @if(!empty($brand_logo))
-                    <img class="brand-logo" alt="{{ $brand_name_ar ?? 'المنصة الذهبية' }}" src="{{ asset($brand_logo) }}" style="height: 32px;">
-                    <span class="brand-text ms-1 d-none d-lg-inline text-white">{{ $brand_name_ar ?? 'المنصة الذهبية' }}</span>
+                    <img class="brand-logo" alt="{{ $brand_name_ar ?? 'منصة الأول' }}" src="{{ asset($brand_logo) }}" style="height: 32px;">
+                    <span class="brand-text ms-1 d-none d-lg-inline text-white">{{ $brand_name_ar ?? 'منصة الأول' }}</span>
                 @else
                     <span class="brand-text-logo d-flex align-items-center gap-1" style="line-height:1; user-select:none;">
                         <span style="display:inline-block; width:8px; height:28px; background:#C9A227; border-radius:3px; flex-shrink:0;"></span>
-                        <span class="ms-1 fw-bold text-white d-none d-lg-inline" style="font-size:1.05rem; letter-spacing:.01em;">{{ $brand_name_ar ?? 'المنصة الذهبية' }}</span>
-                        <span class="ms-1 fw-bold text-white d-inline d-lg-none text-nowrap" style="font-size:.78rem;">{{ $brand_name_ar ?? 'المنصة الذهبية' }}</span>
+                        <span class="ms-1 fw-bold text-white d-none d-lg-inline" style="font-size:1.05rem; letter-spacing:.01em;">{{ $brand_name_ar ?? 'منصة الأول' }}</span>
+                        <span class="ms-1 fw-bold text-white d-inline d-lg-none text-nowrap" style="font-size:.78rem;">{{ $brand_name_ar ?? 'منصة الأول' }}</span>
                     </span>
                 @endif
             </a>
