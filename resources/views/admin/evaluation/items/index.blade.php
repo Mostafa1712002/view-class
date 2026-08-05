@@ -210,6 +210,37 @@
                                 <input type="number" name="weight" id="f-weight" class="form-control" min="0" max="100" step="0.01" value="0">
                             </div>
                         @endif
+                    </div>
+
+                    @if ($isWeighted)
+                    {{-- Inline indicators + percentage distribution (#336) — placed right under معيار + الوزن النسبي per QA --}}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <p class="text-muted small mb-0"><x-svg-icon name="list-ul" :size="16" class="ic-muted me-1" /> @lang('evaluation_items.items.indicators_section')</p>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="ev-ind-add-row"><x-svg-icon name="plus-lg" :size="14" /> @lang('evaluation_items.items.add_indicator')</button>
+                    </div>
+                    <p class="text-muted small mb-2">{{ __('evaluation_items.items.indicators_hint') }}</p>
+                    <div id="ev-ind-rows"></div>
+                    <div class="ev-meta mt-1 mb-3">@lang('evaluation_items.items.indicators_sum'): <b id="ev-ind-sum">0</b>%
+                        <span class="text-muted">/ <span id="ev-ind-cap">0</span>%</span>
+                        <span id="ev-ind-warn" class="text-danger ms-2" style="display:none;">⚠</span>
+                    </div>
+                    <template id="ev-ind-tpl">
+                        <div class="row ev-ind-row align-items-end mb-2">
+                            <input type="hidden" class="ev-ind-id" data-name="id">
+                            <div class="col-8">
+                                <input type="text" class="form-control ev-ind-text" data-name="text" maxlength="1000" placeholder="@lang('evaluation_items.items.indicator_text')">
+                            </div>
+                            <div class="col-3">
+                                <input type="number" class="form-control ev-ind-weight" data-name="weight" min="0" max="100" step="0.01" placeholder="@lang('evaluation_items.items.indicator_weight')">
+                            </div>
+                            <div class="col-1 ps-0">
+                                <button type="button" class="btn btn-sm btn-outline-danger ev-ind-del"><x-svg-icon name="trash3-fill" :size="14" /></button>
+                            </div>
+                        </div>
+                    </template>
+                    @endif
+
+                    <div class="row">
                         <div class="col-12 mb-3">
                             <label class="form-label">@lang('evaluation_items.items.fields.description')</label>
                             <textarea name="description" id="f-description" rows="2" class="form-control"></textarea>
@@ -292,35 +323,6 @@
                             </div>
                         @endforeach
                     </div>
-
-                    @if ($isWeighted)
-                    {{-- Inline indicators + percentage distribution (#336) — all weighted types incl. rubric --}}
-                    <hr class="my-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <p class="text-muted small mb-0"><x-svg-icon name="list-ul" :size="16" class="ic-muted me-1" /> @lang('evaluation_items.items.indicators_section')</p>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="ev-ind-add-row"><x-svg-icon name="plus-lg" :size="14" /> @lang('evaluation_items.items.add_indicator')</button>
-                    </div>
-                    <p class="text-muted small mb-2">{{ __('evaluation_items.items.indicators_hint') }}</p>
-                    <div id="ev-ind-rows"></div>
-                    <div class="ev-meta mt-1">@lang('evaluation_items.items.indicators_sum'): <b id="ev-ind-sum">0</b>%
-                        <span class="text-muted">/ <span id="ev-ind-cap">0</span>%</span>
-                        <span id="ev-ind-warn" class="text-danger ms-2" style="display:none;">⚠</span>
-                    </div>
-                    <template id="ev-ind-tpl">
-                        <div class="row ev-ind-row align-items-end mb-2">
-                            <input type="hidden" class="ev-ind-id" data-name="id">
-                            <div class="col-8">
-                                <input type="text" class="form-control ev-ind-text" data-name="text" maxlength="1000" placeholder="@lang('evaluation_items.items.indicator_text')">
-                            </div>
-                            <div class="col-3">
-                                <input type="number" class="form-control ev-ind-weight" data-name="weight" min="0" max="100" step="0.01" placeholder="@lang('evaluation_items.items.indicator_weight')">
-                            </div>
-                            <div class="col-1 ps-0">
-                                <button type="button" class="btn btn-sm btn-outline-danger ev-ind-del"><x-svg-icon name="trash3-fill" :size="14" /></button>
-                            </div>
-                        </div>
-                    </template>
-                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal">@lang('evaluation_items.actions.cancel')</button>
