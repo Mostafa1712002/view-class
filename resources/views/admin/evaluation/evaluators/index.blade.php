@@ -101,10 +101,10 @@
                 <div class="modal-body">
                     <div class="mb-3" id="ev-evaluator-select-wrap">
                         <label class="form-label">@lang('evaluation.evaluators.fields.evaluator') <span class="text-danger">*</span></label>
-                        <select name="evaluator_id" id="f-evaluator" class="form-control ev-select2">
-                            <option value="">@lang('evaluation.evaluators.fields.select_evaluator')</option>
+                        <select name="evaluator_ids[]" id="f-evaluator" class="form-control ev-select2" multiple data-placeholder="@lang('evaluation.evaluators.fields.select_evaluator')">
                             @foreach ($evaluators as $e)<option value="{{ $e['id'] }}">{{ $e['label'] }}</option>@endforeach
                         </select>
+                        <small class="form-text text-muted">@lang('evaluation.evaluators.fields.evaluator_multi_hint')</small>
                     </div>
                     <div>
                         <label class="form-label">@lang('evaluation.evaluators.fields.targets') <span class="text-danger">*</span></label>
@@ -139,7 +139,14 @@ jQuery(function ($) {
         else { $('#ev-evaluator-modal').modal('show'); }
     }
     function initSelect2() {
-        if ($.fn.select2) { $('#f-evaluator').select2({ dropdownParent: $('#ev-evaluator-modal'), width: '100%' }); }
+        if ($.fn.select2) {
+            $('#f-evaluator').select2({
+                dropdownParent: $('#ev-evaluator-modal'),
+                width: '100%',
+                placeholder: @json(__('evaluation.evaluators.fields.select_evaluator')),
+                allowClear: true
+            });
+        }
     }
 
     $('#ev-add-evaluator').on('click', function () {
@@ -148,8 +155,8 @@ jQuery(function ($) {
         $('#ev-evaluator-form').attr('action', storeUrl);
         $('#ev-eval-method').val('POST');
         $('#ev-evaluator-select-wrap').show();
-        $('.ev-tgt').prop('checked', false);
-        if ($.fn.select2) { $('#f-evaluator').val('').trigger('change'); }
+        $('.ev-tgt').prop('checked', false).prop('disabled', false);
+        $('#f-evaluator').val(null).trigger('change');
         openModal();
         initSelect2();
     });
@@ -162,17 +169,18 @@ jQuery(function ($) {
         // On edit the evaluator is fixed (server reads it from the assignment).
         $('#ev-evaluator-select-wrap').hide();
         var ids = String(d.targets || '').split(',').filter(Boolean);
-        $('.ev-tgt').prop('checked', false);
+        $('.ev-tgt').prop('checked', false).prop('disabled', false);
         ids.forEach(function (id) { $('#ftgt-' + id).prop('checked', true); });
         openModal();
     });
 
-    // Self-eval client guard (server is authoritative): hide own-user targets.
+    // Self-eval client guard (server is authoritative): disable targets whose
+    // own user is among the selected evaluators.
     $('#f-evaluator').on('change', function () {
         if (allowSelf) { return; }
-        var uid = String($(this).val());
+        var uids = ($(this).val() || []).map(String);
         $('.ev-tgt').each(function () {
-            var own = String($(this).data('user')) === uid;
+            var own = uids.indexOf(String($(this).data('user'))) !== -1;
             $(this).prop('disabled', own);
             if (own) { $(this).prop('checked', false); }
         });

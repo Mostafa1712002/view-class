@@ -83,20 +83,54 @@ class EvaluationAssignmentController extends Controller
         }
 
         $data = $request->validate([
-            'evaluator_id' => ['required', 'integer'],
-            'target_ids'   => ['required', 'array', 'min:1'],
-            'target_ids.*' => ['integer'],
+            'evaluator_ids'   => ['required', 'array', 'min:1'],
+            'evaluator_ids.*' => ['integer'],
+            'target_ids'      => ['required', 'array', 'min:1'],
+            'target_ids.*'    => ['integer'],
         ]);
 
-        try {
-            $this->assign->assign($evForm, (int) $data['evaluator_id'], $data['target_ids'], (int) auth()->id());
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
+        // Restrict to admin-side candidates scoped to this school — silently drops
+        // anything not eligible (teacher/student/parent or another school).
+        $allowed = $this->evaluatorCandidates($evForm)->pluck('id')->all();
+        $evaluatorIds = array_values(array_intersect(
+            array_map('intval', array_unique($data['evaluator_ids'])),
+            $allowed
+        ));
+
+        if (empty($evaluatorIds)) {
+            return back()->withErrors(['evaluator_ids' => __('evaluation.evaluators.errors.user_not_found')])->withInput();
         }
 
-        return redirect()
+        // One assignment per evaluator against the chosen targets. Already-assigned
+        // evaluators are reused (unique form_id+evaluator_id) instead of erroring.
+        $assigned = 0;
+        $failures = [];
+        foreach ($evaluatorIds as $evaluatorId) {
+            try {
+                $this->assign->assign($evForm, $evaluatorId, $data['target_ids'], (int) auth()->id());
+                $assigned++;
+            } catch (ValidationException $e) {
+                foreach ($e->errors() as $messages) {
+                    foreach ((array) $messages as $m) {
+                        $failures[] = $m;
+                    }
+                }
+            }
+        }
+
+        if ($assigned === 0) {
+            return back()->withErrors(['evaluator_ids' => $failures ?: [__('evaluation.evaluators.errors.user_not_found')]])->withInput();
+        }
+
+        $redirect = redirect()
             ->route('admin.evaluations.evaluators.index', $evForm->id)
-            ->with('status', __('evaluation.evaluators.flash.assigned'));
+            ->with('status', __('evaluation.evaluators.flash.assigned', ['count' => $assigned]));
+
+        if (!empty($failures)) {
+            $redirect->with('error', implode(' ', array_unique($failures)));
+        }
+
+        return $redirect;
     }
 
     public function update(Request $request, int $form, int $assignment): RedirectResponse

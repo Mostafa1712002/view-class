@@ -268,6 +268,7 @@ return [
             'evaluator'  => 'Evaluator',
             'targets'    => 'Assigned targets',
             'select_evaluator' => 'Select evaluator',
+            'evaluator_multi_hint' => 'You can assign more than one evaluator to the same targets.',
         ],
         'current' => [
             'title'   => 'Assigned evaluators',
@@ -287,7 +288,7 @@ return [
             'cancel' => 'Cancel',
         ],
         'flash' => [
-            'assigned' => 'Evaluator assigned successfully.',
+            'assigned' => ':count evaluator(s) assigned successfully.',
             'updated'  => 'Evaluator scope updated.',
             'removed'  => 'Evaluator unassigned.',
         ],
