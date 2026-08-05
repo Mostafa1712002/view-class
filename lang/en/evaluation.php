@@ -2,7 +2,7 @@
 
 return [
     'types' => [
-        'rubric'       => 'Rubric',
+        'rubric'       => 'Performance levels',
         'rating_scale' => 'Rating Scale',
         'checklist'    => 'Checklist',
         'percentage'   => 'Percentage',
@@ -125,7 +125,7 @@ return [
             'type'          => 'Form type',
             'usage_domain'  => 'Usage domain',
             'levels_count'  => 'Number of levels',
-            'level_names'   => 'Level names',
+            'level_names'   => 'Evaluation criteria',
             'level_n'       => 'Level :n',
             'levels_help'   => 'Order levels from lowest to highest.',
             'checklist_note'=> 'Checklist type needs no multiple levels — met / not met is enough.',
@@ -310,6 +310,7 @@ return [
             'no'         => 'No',
         ],
         'publish_btn' => 'Publish now',
+        'next_issue'  => 'Next',
         'close_confirm'   => 'Close this form? No new evaluations can be started.',
         'archive_confirm' => 'Archive this form?',
         'flash' => [

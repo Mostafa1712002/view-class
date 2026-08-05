@@ -8,7 +8,7 @@
     $toggles = [
         'allow_edit', 'allow_subject_view_results', 'allow_subject_comment', 'show_total_avg',
         'hide_percentages', 'class_visit_only', 'require_all_indicators', 'allow_general_notes',
-        'allow_item_notes', 'require_evidence_per_flagged_item', 'allow_multiple_evaluators',
+        'allow_item_notes', 'require_evidence_per_flagged_item',
         'average_on_multiple', 'links_to_job_performance', 'notify_on_publish', 'notify_on_submit',
         'notify_on_result_available',
     ];
@@ -49,6 +49,7 @@
         <input type="number" name="levels_count" id="ev-levels-count" value="{{ $val('levels_count', count($levelLabels) ?: 4) }}" class="form-control" min="2" max="10">
     </div>
 
+    {{-- Requested (card #335, deferred/out-of-scope): year/month/week options + academic-year linking for these dates. --}}
     <div class="col-md-6 col-12 mb-3">
         <label class="form-label">@lang('evaluation.form.fields.start_date')</label>
         <input type="date" name="start_date" value="{{ $f?->start_date?->format('Y-m-d') ?? old('start_date') }}" class="form-control">
@@ -72,22 +73,6 @@
 <div id="ev-checklist-note" class="alert alert-info" style="display:none;">@lang('evaluation.form.fields.checklist_note')</div>
 <div id="ev-percentage-note" class="alert alert-info" style="display:none;">@lang('evaluation.form.fields.percentage_note')</div>
 
-{{-- Phase E (#202): Shared mode toggle --}}
-<div class="card p-3 mb-3" style="background:#f0f8ff;border:1px solid #b8d4f0;border-radius:12px;">
-    <h6 class="mb-2" style="color:#1a5276;"><i class="la la-users"></i> @lang('evaluation.form.shared_mode_title')</h6>
-    <div class="form-check">
-        <input type="hidden" name="shared_mode" value="0">
-        <input type="checkbox" name="shared_mode" value="1" id="shared_mode" class="form-check-input"
-               {{ old('shared_mode', $f?->shared_mode ?? false) ? 'checked' : '' }}>
-        <label class="form-check-label" for="shared_mode">
-            @lang('evaluation.form.toggles.shared_mode')
-        </label>
-    </div>
-    <small class="text-muted d-block mt-1">
-        @lang('evaluation.form.shared_mode_help')
-    </small>
-</div>
-
 {{-- Settings toggles --}}
 <h6 class="mt-2 mb-2" style="font-weight:700;color:var(--gold-500);"><i class="la la-cog"></i> @lang('evaluation.form.settings_title')</h6>
 <div class="row">
@@ -100,6 +85,15 @@
             </div>
         </div>
     @endforeach
+    {{-- Multi-evaluator setting: drives the shared_mode column (one shared evaluation
+         per subject, items split by role) — the real "multiple evaluators per person" feature. --}}
+    <div class="col-md-4 col-12 mb-2">
+        <div class="form-check">
+            <input type="hidden" name="shared_mode" value="0">
+            <input type="checkbox" name="shared_mode" value="1" id="set-shared_mode" class="form-check-input" {{ old('shared_mode', $f?->shared_mode ?? false) ? 'checked' : '' }}>
+            <label class="form-check-label" for="set-shared_mode">@lang('evaluation.form.toggles.allow_multiple_evaluators')</label>
+        </div>
+    </div>
 </div>
 
 {{-- Job-performance settings (shown only when links_to_job_performance is checked) --}}
