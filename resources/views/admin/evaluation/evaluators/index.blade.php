@@ -9,6 +9,17 @@
     body.theme-light .ev-add-btn:hover { transform:translateY(-1px); }
     body.theme-light .ev-empty { padding:2.5rem 1rem; text-align:center; color:#94a3b8; }
     body.theme-light .ev-target-pick { max-height:240px; overflow:auto; border:1px solid #e5e7eb; border-radius:10px; padding:.5rem; }
+    /* Evaluator multi-picker: clean gold chips matching the admin theme. */
+    #ev-evaluator-modal .select2-container--bootstrap4 .select2-selection { min-height:calc(1.5em + 1rem + 2px); border-color:#e5e7eb; border-radius:10px; }
+    #ev-evaluator-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+        background:linear-gradient(135deg,var(--gold-200),var(--gold-500)); color:#fff; border:none;
+        border-radius:999px; padding:.15rem .6rem; margin:.2rem .2rem 0; font-weight:600; font-size:.85rem;
+    }
+    #ev-evaluator-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove {
+        color:#fff; opacity:.85; margin-inline-end:.35rem; float:none; border:none; background:transparent;
+    }
+    #ev-evaluator-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove:hover { opacity:1; color:#fff; }
+    #ev-evaluator-modal .select2-container--bootstrap4.select2-container--disabled .select2-selection__choice__remove { display:none; }
 </style>
 @endpush
 
@@ -138,15 +149,17 @@ jQuery(function ($) {
         if (window.bootstrap) { new bootstrap.Modal(document.getElementById('ev-evaluator-modal')).show(); }
         else { $('#ev-evaluator-modal').modal('show'); }
     }
-    function initSelect2() {
-        if ($.fn.select2) {
-            $('#f-evaluator').select2({
-                dropdownParent: $('#ev-evaluator-modal'),
-                width: '100%',
-                placeholder: @json(__('evaluation.evaluators.fields.select_evaluator')),
-                allowClear: true
-            });
-        }
+    // Init the evaluator picker once as a bootstrap4-themed multi-select so the
+    // selection renders as removable gold chips matching the admin theme.
+    if ($.fn.select2) {
+        $('#f-evaluator').select2({
+            dropdownParent: $('#ev-evaluator-modal'),
+            theme: 'bootstrap4',
+            width: '100%',
+            dir: (document.documentElement.getAttribute('dir') || 'rtl'),
+            placeholder: @json(__('evaluation.evaluators.fields.select_evaluator')),
+            closeOnSelect: false
+        });
     }
 
     $('#ev-add-evaluator').on('click', function () {
@@ -156,9 +169,9 @@ jQuery(function ($) {
         $('#ev-eval-method').val('POST');
         $('#ev-evaluator-select-wrap').show();
         $('.ev-tgt').prop('checked', false).prop('disabled', false);
-        $('#f-evaluator').val(null).trigger('change');
+        // Fresh add: enabled, empty picker.
+        $('#f-evaluator').prop('disabled', false).val(null).trigger('change');
         openModal();
-        initSelect2();
     });
 
     $('.ev-edit-evaluator').on('click', function () {
@@ -166,8 +179,12 @@ jQuery(function ($) {
         $('#ev-eval-title').text(@json(__('evaluation.evaluators.edit_title')) + ' — ' + d.name);
         $('#ev-evaluator-form').attr('action', updateBase + '/' + d.id);
         $('#ev-eval-method').val('PUT');
-        // On edit the evaluator is fixed (server reads it from the assignment).
-        $('#ev-evaluator-select-wrap').hide();
+        // On edit the evaluator is fixed (server reads it from the assignment):
+        // show it pre-selected as a locked chip for context, disabled so it can't change.
+        $('#ev-evaluator-select-wrap').show();
+        $('#f-evaluator').prop('disabled', false)
+            .val([String(d.evaluator)]).trigger('change')
+            .prop('disabled', true).trigger('change.select2');
         var ids = String(d.targets || '').split(',').filter(Boolean);
         $('.ev-tgt').prop('checked', false).prop('disabled', false);
         ids.forEach(function (id) { $('#ftgt-' + id).prop('checked', true); });
