@@ -137,6 +137,13 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
         Route::get('promotion/results', [\App\Modules\Promotion\Controllers\PromotionResultsController::class, 'show'])->name('promotion.results');
         Route::post('promotion/results', [\App\Modules\Promotion\Controllers\PromotionResultsController::class, 'save'])->name('promotion.results.save');
 
+        // Automatic year-end promotion (US-009/010/011): dry-run preview, then a
+        // password-gated execute and a rollback of the latest batch.
+        Route::get('promotion/preview', [\App\Modules\Promotion\Controllers\PromotionController::class, 'preview'])->name('promotion.preview');
+        Route::post('promotion/execute', [\App\Modules\Promotion\Controllers\PromotionController::class, 'execute'])->name('promotion.execute');
+        Route::get('promotion/batches', [\App\Modules\Promotion\Controllers\PromotionController::class, 'batches'])->name('promotion.batches');
+        Route::post('promotion/batches/{batch}/rollback', [\App\Modules\Promotion\Controllers\PromotionController::class, 'rollback'])->name('promotion.batches.rollback');
+
         Route::get('permissions', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'index'])->name('permissions.index');
         Route::post('permissions/toggle', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'toggle'])->name('permissions.toggle');
         Route::post('permissions/copy', [\App\Http\Controllers\Admin\School\SchoolPermissionController::class, 'copyFrom'])->name('permissions.copy');

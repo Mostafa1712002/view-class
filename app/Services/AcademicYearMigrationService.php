@@ -51,6 +51,8 @@ class AcademicYearMigrationService
                     'academic_year_id' => $destination->id,
                     'name' => $class->name,
                     'grade_level' => $class->grade_level,
+                    'gender' => $class->gender,
+                    'number' => $class->number,
                     'division' => $class->division,
                     'lead_teacher_id' => $class->lead_teacher_id,
                     'capacity' => $class->capacity,

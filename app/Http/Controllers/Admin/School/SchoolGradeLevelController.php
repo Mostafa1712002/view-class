@@ -117,7 +117,9 @@ class SchoolGradeLevelController extends Controller
             // رقم الفصل — unique within this grade (Rule #1).
             'number' => [
                 'nullable', 'integer', 'min:1', 'max:100',
-                Rule::unique('classes', 'number')->where(fn ($q) => $q->where('section_id', $section->id)),
+                Rule::unique('classes', 'number')->where(fn ($q) => $q
+                    ->where('section_id', $section->id)
+                    ->where('academic_year_id', $request->input('academic_year_id'))),
             ],
             'lead_teacher_id' => 'nullable|exists:users,id',
             'capacity' => 'required|integer|min:1|max:200',
@@ -186,7 +188,9 @@ class SchoolGradeLevelController extends Controller
             'number' => [
                 'nullable', 'integer', 'min:1', 'max:100',
                 Rule::unique('classes', 'number')
-                    ->where(fn ($q) => $q->where('section_id', $section->id))
+                    ->where(fn ($q) => $q
+                        ->where('section_id', $section->id)
+                        ->where('academic_year_id', $request->input('academic_year_id')))
                     ->ignore($class->id),
             ],
             'lead_teacher_id' => 'nullable|exists:users,id',

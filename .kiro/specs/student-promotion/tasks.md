@@ -90,41 +90,41 @@ marked ⚠️.
 ## Phase 5: Promotion engine (⚠️ DESTRUCTIVE — safety gates first)
 
 ### Task 5.1: ⚠️ Batch audit tables + repository
-- [ ] Migrations: `promotion_batches`, `promotion_batch_items` (schema in design.md)
-- [ ] Models + `PromotionRepository` contract + `EloquentPromotionRepository`; bind in `RepositoryServiceProvider`
-- [ ] All Eloquent for promotion lives in the repository (module rule)
+- [x] Migrations: `promotion_batches`, `promotion_batch_items` (schema in design.md)
+- [x] Models + `PromotionRepository` contract + `EloquentPromotionRepository`; bind in `RepositoryServiceProvider`
+- [x] All Eloquent for promotion lives in the repository (module rule)
 
 **Outcome:** audit/undo storage exists before any write.
 **Dependencies:** 1.1, 2.1, 3.1, 4.1
 
 ### Task 5.2: ⚠️ Password gate + planner (pure, no writes)
-- [ ] `PromotionPlanner::plan()` — high→low, class-number matching, graduation, empty-lowest-grade, capacity overflow with alphabetical-last (design pseudo-code)
-- [ ] DTOs: `PromotionPlan`, `GradePlan`, `PlannedMove`
-- [ ] Password verification helper (`Hash::check` vs auth user) + auth throttling
-- [ ] Unit-test the planner against the card's capacity example (cap 20, 10 staying + 20 incoming → last 10 relocate to class 4)
+- [x] `PromotionPlanner::plan()` — high→low, class-number matching, graduation, empty-lowest-grade, capacity overflow with alphabetical-last (design pseudo-code)
+- [x] DTOs: `PromotionPlan`, `GradePlan`, `PlannedMove`
+- [x] Password verification helper (`Hash::check` vs auth user) + auth throttling
+- [x] Unit-test the planner against the card's capacity example (cap 20, 10 staying + 20 incoming → last 10 relocate to class 4)
 
 **Outcome:** the algorithm is proven safe before it can mutate data.
 **Dependencies:** 5.1
 
 ### Task 5.3: Preview (safe, uses planner)
-- [ ] `PreviewPromotionAction` + `promotion.preview` route/screen: per-grade/class promoted/graduated/overflow/unplaced counts, capacity warnings, pending-result warning
-- [ ] Block preview→execute while preconditions unmet (missing ordinals/numbers/target classes)
+- [x] `PreviewPromotionAction` + `promotion.preview` route/screen: per-grade/class promoted/graduated/overflow/unplaced counts, capacity warnings, pending-result warning
+- [x] Block preview→execute while preconditions unmet (missing ordinals/numbers/target classes)
 
 **Outcome:** US-009 satisfied.
 **Dependencies:** 5.2
 
 ### Task 5.4: ⚠️ Execute (password-confirmed, transactional)
-- [ ] `ExecutePromotionAction`: verify password → re-plan under lock → apply (pivot + `users.section_id`/`class_room_id` + `graduated_at`) → write batch + items → summary
-- [ ] Guard against double-run of same source→dest with an un-rolled-back batch
-- [ ] `ClassCapacityExceeded` notification to `school-admin` for unplaceable students
-- [ ] Routes `promotion.execute`
+- [x] `ExecutePromotionAction`: verify password → re-plan under lock → apply (pivot + `users.section_id`/`class_room_id` + `graduated_at`) → write batch + items → summary
+- [x] Guard against double-run of same source→dest with an un-rolled-back batch
+- [x] `ClassCapacityExceeded` notification to `school-admin` for unplaceable students
+- [x] Routes `promotion.execute`
 
 **Outcome:** US-005, US-006(write), US-007, US-008, US-010 satisfied.
 **Dependencies:** 5.3 (and 5.1, 5.2)
 
 ### Task 5.5: ⚠️ Rollback
-- [ ] `RollbackPromotionAction`: password-gated; only latest `executed` batch; restore `from_*`, clear `graduated_at`, re-attach pivots; skip+report missing students; mark `rolled_back`
-- [ ] `promotion.batches` history screen + `promotion.batches.rollback` route
+- [x] `RollbackPromotionAction`: password-gated; only latest `executed` batch; restore `from_*`, clear `graduated_at`, re-attach pivots; skip+report missing students; mark `rolled_back`
+- [x] `promotion.batches` history screen + `promotion.batches.rollback` route
 
 **Outcome:** US-011 satisfied.
 **Dependencies:** 5.4
@@ -134,12 +134,12 @@ marked ⚠️.
 ## Phase 6: Integration & polish
 
 ### Task 6.1: Wire into existing migrate page
-- [ ] Add tabs/links from `migrate.blade.php` to results/preview/history
-- [ ] Localization strings (ar/en) for all new labels
+- [x] Add tabs/links from `migrate.blade.php` to results/preview/history
+- [x] Localization strings (ar/en) for all new labels
 
 ### Task 6.2: End-to-end verification (local first)
-- [ ] Seed a two-grade school, mark results, preview, execute, verify students list + graduated filter + capacity notification, then rollback and confirm full restoration
-- [ ] Confirm multi-tenant isolation (a second school untouched)
+- [x] Seed a two-grade school, mark results, preview, execute, verify students list + graduated filter + capacity notification, then rollback and confirm full restoration
+- [x] Confirm multi-tenant isolation (a second school untouched)
 
 **Outcome:** feature verified locally before deploy.
 **Dependencies:** Phase 5

@@ -153,6 +153,7 @@ class RepositoryServiceProvider extends ServiceProvider
         AdmissionRepository::class               => EloquentAdmissionRepository::class,
         EducationalSiteRepository::class         => EloquentEducationalSiteRepository::class,
         EnrollmentResultRepository::class        => EloquentEnrollmentResultRepository::class,
+        \App\Modules\Promotion\Repositories\Contracts\PromotionRepository::class => \App\Modules\Promotion\Repositories\EloquentPromotionRepository::class,
     ];
 
     public function register(): void

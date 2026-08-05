@@ -22,6 +22,19 @@
 <div class="content-body">
     @include('components.alerts')
 
+    {{-- Automatic year-end promotion (grade ordinal +1, class-number matching) --}}
+    <div class="card mb-3 border-primary">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h5 class="mb-1"><i class="la la-graduation-cap text-primary"></i> @lang('schools.promotion_title')</h5>
+                <p class="text-muted mb-0">@lang('schools.promotion_hint')</p>
+            </div>
+            <a href="{{ route('admin.schools.promotion.preview', $school) }}" class="btn btn-primary">
+                <i class="la la-share"></i> @lang('schools.promotion_open')
+            </a>
+        </div>
+    </div>
+
     <div class="card mb-3">
         <div class="card-body">
             <div class="form-group">
