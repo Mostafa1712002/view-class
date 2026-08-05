@@ -42,6 +42,7 @@
 </div>
 
 <div class="content-body">
+    @include('admin.evaluation._next_issue', ['form' => $form, 'currentRoute' => 'admin.evaluations.targets.index'])
     @if(session('status'))<div class="alert alert-success">{{ session('status') }}</div>@endif
     @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
     @if ($errors->any())<div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif

@@ -120,7 +120,7 @@ class EvaluationFormController extends Controller
             return redirect()->route('admin.evaluations.index')->with('error', __('evaluation.form.not_found'));
         }
 
-        $problems = $this->checker->problems($form);
+        $problems = $this->checker->detailedProblems($form);
 
         return view('admin.evaluation.publish.confirm', [
             'form'     => $form,

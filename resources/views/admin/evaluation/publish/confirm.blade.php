@@ -12,6 +12,8 @@
     body.theme-light .ev-summary-list li:last-child { border-bottom:0; }
     body.theme-light .ev-summary-list .k { color:#64748b; font-weight:600; }
     body.theme-light .ev-summary-list .v { font-weight:800; color:var(--gold-500); }
+    body.theme-light .ev-blocker-link { color:inherit; text-decoration:underline; cursor:pointer; }
+    body.theme-light .ev-blocker-link:hover { color:#7f1d1d; }
 </style>
 @endpush
 
@@ -45,7 +47,11 @@
                     @if (!empty($problems))
                         <div class="alert alert-danger">
                             <h6 class="alert-heading"><i class="la la-exclamation-circle"></i> @lang('evaluation.publish.blocked_title')</h6>
-                            <ul class="mb-0">@foreach ($problems as $p)<li>{{ $p }}</li>@endforeach</ul>
+                            <ul class="mb-0">
+                                @foreach ($problems as $p)
+                                    <li><a href="{{ route($p['route'], $p['params']) }}" class="ev-blocker-link">{{ $p['message'] }}</a></li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
 
