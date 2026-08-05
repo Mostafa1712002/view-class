@@ -28,9 +28,9 @@ class SaveEvaluationIndicator
             $levelId = $this->resolveLevel($form, $data['level_id'] ?? null);
             $weight  = isset($data['weight']) && $data['weight'] !== '' ? round((float) $data['weight'], 2) : null;
 
-            // Σ this item's indicator percentages ≤ criterion weight (weighted,
-            // non-Rubric forms — Rubric distributes by level, not percentage).
-            if ($weight !== null && $form->type !== FormType::Rubric && $form->type !== FormType::Checklist) {
+            // Σ this item's indicator percentages ≤ criterion weight (every weighted
+            // type incl. rubric — checklist has no per-item weight to distribute).
+            if ($weight !== null && $form->type !== FormType::Checklist) {
                 $this->guardIndicatorWeight($item, $indicator, $weight);
             }
 

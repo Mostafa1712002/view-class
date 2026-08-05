@@ -77,9 +77,10 @@ class SaveEvaluationItem
                 $this->audit->updated($item, "تعديل عنصر تقييم: {$item->name}", $old);
             }
 
-            // Inline indicator distribution (non-Rubric only — Rubric indicators bind
-            // to a level via the dedicated indicators page, which this modal can't set).
-            if ($form->type !== FormType::Rubric && array_key_exists('indicators', $data)) {
+            // Inline indicator distribution for every weighted type (incl. rubric).
+            // Rubric rows keep their level binding on update; modal-added rows have no
+            // level (bind it later on the dedicated indicators page).
+            if (array_key_exists('indicators', $data)) {
                 $this->syncIndicators($form, $item, $isWeighted ? $weight : null, $data['indicators'] ?? []);
             }
 

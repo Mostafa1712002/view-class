@@ -293,8 +293,8 @@
                         @endforeach
                     </div>
 
-                    @if ($isWeighted && !$isRubric)
-                    {{-- Inline indicators + percentage distribution (#336) --}}
+                    @if ($isWeighted)
+                    {{-- Inline indicators + percentage distribution (#336) — all weighted types incl. rubric --}}
                     <hr class="my-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <p class="text-muted small mb-0"><x-svg-icon name="list-ul" :size="16" class="ic-muted me-1" /> @lang('evaluation_items.items.indicators_section')</p>
@@ -340,7 +340,7 @@ jQuery(function ($) {
     var csrf = @json(csrf_token());
     var flags = ['is_required','needs_evidence','evidence_required','allow_note','visible_to_evaluator_only','visible_to_subject_after_result',
                  'evidence_needs_approval','editable_after_review','editable_after_approval'];
-    var hasIndicators = @json($isWeighted && !$isRubric);
+    var hasIndicators = @json($isWeighted);
 
     function openModal() {
         if (window.bootstrap) { new bootstrap.Modal(document.getElementById('ev-item-modal')).show(); }

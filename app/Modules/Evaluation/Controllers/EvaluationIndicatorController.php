@@ -42,7 +42,7 @@ class EvaluationIndicatorController extends Controller
             'item'       => $evItem,
             'indicators' => $evItem->indicators()->with('level')->orderBy('sort_order')->get(),
             'isRubric'   => $evForm->type === FormType::Rubric,
-            'showWeight' => $evForm->type !== FormType::Rubric && $evForm->type !== FormType::Checklist,
+            'showWeight' => $evForm->type !== FormType::Checklist,
             'levels'     => $evForm->type === FormType::Rubric ? $evForm->levels : collect(),
         ]);
     }
