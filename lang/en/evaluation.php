@@ -124,7 +124,7 @@ return [
             'description'   => 'Description',
             'type'          => 'Form type',
             'usage_domain'  => 'Usage domain',
-            'levels_count'  => 'Number of levels',
+            'levels_count'  => 'Number of criteria',
             'level_names'   => 'Evaluation criteria',
             'level_n'       => 'Level :n',
             'levels_help'   => 'Order levels from lowest to highest.',
