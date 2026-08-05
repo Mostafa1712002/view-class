@@ -150,6 +150,12 @@
                                                     <button type="submit" class="dropdown-item"><x-svg-icon name="lock" /> @lang('evaluation.form.actions_menu.close')</button>
                                                 </form>
                                             @endif
+                                            @if ($form->status?->value === 'closed')
+                                                <form action="{{ route('admin.evaluations.reopen', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.publish.reopen_confirm')')">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item text-success"><x-svg-icon name="megaphone" /> @lang('evaluation.form.actions_menu.reopen')</button>
+                                                </form>
+                                            @endif
                                             @if (in_array($form->status?->value, ['draft','ready','published','closed'], true))
                                                 <form action="{{ route('admin.evaluations.archive', $form->id) }}" method="POST" onsubmit="return confirm('@lang('evaluation.publish.archive_confirm')')">
                                                     @csrf

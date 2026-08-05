@@ -21,6 +21,16 @@
         <a href="{{ route('admin.evaluations.evaluators.index', $form->id) }}" class="btn btn-outline-secondary btn-sm"><i class="la la-user-check"></i> @lang('evaluation.form.actions_menu.evaluators')</a>
         @if (in_array($form->status?->value, ['draft','ready'], true))
             <a href="{{ route('admin.evaluations.publish.confirm', $form->id) }}" class="btn btn-success btn-sm"><i class="la la-bullhorn"></i> @lang('evaluation.form.actions_menu.publish')</a>
+        @elseif ($form->status?->value === 'published')
+            <form method="POST" action="{{ route('admin.evaluations.close', $form->id) }}" class="d-inline" onsubmit="return confirm('@lang('evaluation.publish.close_confirm')')">
+                @csrf
+                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="la la-lock"></i> @lang('evaluation.form.actions_menu.close')</button>
+            </form>
+        @elseif ($form->status?->value === 'closed')
+            <form method="POST" action="{{ route('admin.evaluations.reopen', $form->id) }}" class="d-inline" onsubmit="return confirm('@lang('evaluation.publish.reopen_confirm')')">
+                @csrf
+                <button type="submit" class="btn btn-success btn-sm"><i class="la la-bullhorn"></i> @lang('evaluation.form.actions_menu.reopen')</button>
+            </form>
         @endif
     </div>
 </div>

@@ -94,6 +94,27 @@ class PublishEvaluationForm
         $this->audit->record('form.close', "إغلاق نموذج التقييم «{$form->title}»", $form, $old, $form->toArray());
     }
 
+    /**
+     * Reopen a closed form back to published. The published snapshot already exists
+     * from the original publish, so no re-validation/re-snapshot — just flip the
+     * status and clear closed_at so evaluators can start it again.
+     */
+    public function reopen(EvaluationForm $form, int $actorId): void
+    {
+        if ($form->status?->value !== 'closed') {
+            throw ValidationException::withMessages([
+                'status' => __('evaluation.publish.errors.not_closed'),
+            ]);
+        }
+
+        $old = $form->toArray();
+        $form->status    = \App\Modules\Evaluation\Enums\FormStatus::Published;
+        $form->closed_at = null;
+        $form->save();
+
+        $this->audit->record('form.reopen', "إعادة فتح نموذج التقييم «{$form->title}»", $form, $old, $form->toArray());
+    }
+
     /** Archive a form (allowed when it has real evaluations instead of deleting). */
     public function archive(EvaluationForm $form, int $actorId): void
     {

@@ -662,6 +662,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('evaluations/{id}/publish', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'publishConfirm'])->name('evaluations.publish.confirm');
     Route::post('evaluations/{id}/publish', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'publish'])->name('evaluations.publish');
     Route::post('evaluations/{id}/close', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'close'])->name('evaluations.close');
+    Route::post('evaluations/{id}/reopen', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'reopen'])->name('evaluations.reopen');
     Route::post('evaluations/{id}/archive', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'archive'])->name('evaluations.archive');
 
     // NOTE: the evaluator/subject-facing routes (Tasks 9-12: my-evaluations, subject picker,

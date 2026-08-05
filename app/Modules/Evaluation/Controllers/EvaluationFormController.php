@@ -171,6 +171,22 @@ class EvaluationFormController extends Controller
         return back()->with('status', __('evaluation.publish.flash.closed'));
     }
 
+    public function reopen(int $id): RedirectResponse
+    {
+        $form = $this->forms->findScoped($id, $this->activeSchoolId());
+        if (!$form) {
+            return redirect()->route('admin.evaluations.index')->with('error', __('evaluation.form.not_found'));
+        }
+
+        try {
+            $this->publisher->reopen($form, (int) auth()->id());
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return back()->with('status', __('evaluation.publish.flash.reopened'));
+    }
+
     public function archive(int $id): RedirectResponse
     {
         $form = $this->forms->findScoped($id, $this->activeSchoolId());
