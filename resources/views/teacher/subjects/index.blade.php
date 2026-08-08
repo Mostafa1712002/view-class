@@ -30,12 +30,12 @@
     body.theme-light .subject-card .subject-icon-wrap .ic {
         width: 44px; height: 44px; border-radius: 12px;
         display: inline-flex; align-items: center; justify-content: center;
-        background: #fff; color: var(--gold-500, #cfa046); font-size: 1.4rem;
+        background: #fff; color: var(--gold-500, #af6900); font-size: 1.4rem;
         box-shadow: inset 0 0 0 1px rgba(207,160,70,.18);
     }
     .subject-card-anchor { display:block; height:100%; text-decoration:none; color:inherit; }
     .subject-card-anchor:hover { text-decoration:none; color:inherit; }
-    body.theme-light .subject-card .manage-cta { margin-top:.85rem; text-align:center; font-weight:600; font-size:.85rem; color:#fff; background:linear-gradient(135deg,var(--gold-300,#e0c37a),var(--gold-500,#cfa046)); border-radius:9px; padding:.5rem .75rem; display:flex; align-items:center; justify-content:center; gap:.4rem; }
+    body.theme-light .subject-card .manage-cta { margin-top:.85rem; text-align:center; font-weight:600; font-size:.85rem; color:#fff; background:linear-gradient(135deg,var(--gold-300,#e0c37a),var(--gold-500,#af6900)); border-radius:9px; padding:.5rem .75rem; display:flex; align-items:center; justify-content:center; gap:.4rem; }
     body.theme-light .subject-card .card-body { padding: 1rem 1.1rem; flex: 1; display:flex; flex-direction:column; }
     body.theme-light .subject-card h6 { font-weight: 700; color: #0f172a; font-size: 1.02rem; margin-bottom: .35rem; }
     body.theme-light .grade-chip {
@@ -54,7 +54,7 @@
         padding: .2rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 600;
         margin-bottom: .3rem;
     }
-    body.theme-light .src-chip.src-viewclass { background: #fdf3d8; color: var(--gold-500, #cfa046); }
+    body.theme-light .src-chip.src-viewclass { background: #fdf3d8; color: var(--gold-500, #af6900); }
     body.theme-light .src-chip.src-school { background: #eef2ff; color: #4338ca; }
     body.theme-light .src-chip.src-system { background: #fef2f2; color: #b91c1c; }
     body.theme-light .subject-counts {
@@ -70,7 +70,7 @@
     }
     body.theme-light .subject-counts .count-pill .n { font-weight: 800; color: #0f172a; font-size: .92rem; }
     body.theme-light .subject-counts .count-pill .l { color: #64748b; font-size: .7rem; }
-    body.theme-light .subject-counts .count-pill .ic { color: var(--gold-500, #cfa046); flex-shrink: 0; }
+    body.theme-light .subject-counts .count-pill .ic { color: var(--gold-500, #af6900); flex-shrink: 0; }
 </style>
 @endpush
 

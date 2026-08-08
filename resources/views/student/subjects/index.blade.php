@@ -27,7 +27,7 @@
         justify-content: center;
         height: 90px;
         font-size: 2.2rem;
-        color: var(--gold-500, #cfa046);
+        color: var(--gold-500, #af6900);
     }
     body.theme-light .subject-card .card-body { padding: 1rem 1.1rem; flex: 1; }
     body.theme-light .subject-card h6 { font-weight: 700; color: #0f172a; font-size: 1rem; margin-bottom: .3rem; }
@@ -46,7 +46,7 @@
         border-top: 1px solid #e5e7eb;
     }
     body.theme-light .btn-open-subject {
-        background: linear-gradient(135deg, var(--gold-300, #ddb85c), var(--gold-500, #cfa046));
+        background: linear-gradient(135deg, var(--gold-300, #ddb85c), var(--gold-500, #af6900));
         color: #fff !important;
         border: none;
         border-radius: 10px;

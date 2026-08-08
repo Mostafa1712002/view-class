@@ -26,7 +26,7 @@
         border: 1px solid #e2e8f0; border-radius: 10px; padding: .35rem .7rem;
         background: #fff;
     }
-    .tr-toolbar .search-field i { color: var(--gold-400, #cfa046); }
+    .tr-toolbar .search-field i { color: var(--gold-400, #af6900); }
     .tr-toolbar .search-field input {
         flex: 1; border: 0; outline: none; font-size: .93rem; background: transparent; color: #0f172a;
     }

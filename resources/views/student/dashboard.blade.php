@@ -14,7 +14,7 @@
     body.theme-light .student-hero .avatar {
         width: 56px; height: 56px; border-radius: 16px;
         background: linear-gradient(135deg, #fff6dd, #fde2a8);
-        color: var(--gold-500, #cfa046); font-size: 1.6rem; font-weight: 800;
+        color: var(--gold-500, #af6900); font-size: 1.6rem; font-weight: 800;
         display: inline-flex; align-items: center; justify-content: center;
         box-shadow: inset 0 0 0 1px rgba(207,160,70,.2);
     }
@@ -35,7 +35,7 @@
     body.theme-light .stat-card.present .ic { background: #ecfdf5; color: #047857; }
     body.theme-light .stat-card.absent  .ic { background: #fef2f2; color: #b91c1c; }
     body.theme-light .stat-card.late    .ic { background: #fffbeb; color: #b45309; }
-    body.theme-light .stat-card.average .ic { background: #fff6dd; color: var(--gold-500, #cfa046); }
+    body.theme-light .stat-card.average .ic { background: #fff6dd; color: var(--gold-500, #af6900); }
     body.theme-light .student-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; }
     body.theme-light .student-panel .card-header {
         background: #fff; border-bottom: 1px solid #f1f5f9;
@@ -43,7 +43,7 @@
     }
     body.theme-light .student-panel .card-header h5 { font-weight: 700; color: #0f172a; font-size: 1rem; }
     body.theme-light .student-panel .btn-link-gold {
-        color: var(--gold-500, #cfa046); font-weight: 600; font-size: .82rem;
+        color: var(--gold-500, #af6900); font-weight: 600; font-size: .82rem;
         text-decoration: none; border: 1px solid #f1e3bd; border-radius: 999px; padding: .25rem .8rem;
     }
     body.theme-light .student-panel .btn-link-gold:hover { background: #fff6dd; }

@@ -92,7 +92,7 @@
     /* Direction-agnostic: the knob always slides toward the inline-end of the track.
        Using logical inset + a positive translate lets the browser mirror it in RTL,
        so the white knob never slips outside the pill (was off-screen in RTL before). */
-    .cv-switch input:checked + .cv-slider { background: var(--gold-400, #cfa046); }
+    .cv-switch input:checked + .cv-slider { background: var(--gold-400, #af6900); }
     .cv-switch input:checked + .cv-slider::before { transform: translateX(20px); }
     [dir="rtl"] .cv-switch input:checked + .cv-slider::before { transform: translateX(-20px); }
 

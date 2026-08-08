@@ -5,7 +5,7 @@
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 13px; line-height: 1.8; color: #222; }
         h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
-        h2 { font-size: 14px; text-align: center; color: #cfa046; margin-top: 0; }
+        h2 { font-size: 14px; text-align: center; color: #af6900; margin-top: 0; }
         .box { border: 1px solid #ccc; padding: 14px; margin-top: 18px; }
         .row { margin-bottom: 14px; }
         .line { border-bottom: 1px dotted #888; display: inline-block; width: 60%; }

@@ -10,7 +10,7 @@
     body.theme-light .docs-hero p { color:#64748b; margin:0; font-size:.95rem; }
     body.theme-light .docs-track { margin-bottom:2rem; }
     body.theme-light .docs-track-head { display:flex; align-items:center; gap:.6rem; margin-bottom:1rem; }
-    body.theme-light .docs-track-head .ic { width:40px; height:40px; border-radius:11px; display:inline-flex; align-items:center; justify-content:center; background:#fff; color:var(--gold-500,#cfa046); font-size:1.3rem; box-shadow:inset 0 0 0 1px rgba(207,160,70,.18); }
+    body.theme-light .docs-track-head .ic { width:40px; height:40px; border-radius:11px; display:inline-flex; align-items:center; justify-content:center; background:#fff; color:var(--gold-500,#af6900); font-size:1.3rem; box-shadow:inset 0 0 0 1px rgba(207,160,70,.18); }
     body.theme-light .docs-track-head h4 { font-weight:800; color:#0f172a; margin:0; font-size:1.15rem; }
     body.theme-light .docs-track-head .cnt { margin-inline-start:auto; font-size:.78rem; color:#64748b; background:#f1f5f9; padding:.2rem .7rem; border-radius:999px; font-weight:600; }
     body.theme-light .video-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; height:100%; display:flex; flex-direction:column; transition:box-shadow .15s ease, transform .15s ease; }
@@ -25,7 +25,7 @@
     body.theme-light .video-body .desc { color:#475569; font-size:.85rem; line-height:1.7; flex:1; }
     body.theme-light .video-meta { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-top:.7rem; }
     body.theme-light .video-meta .chip { font-size:.72rem; font-weight:600; padding:.2rem .55rem; border-radius:999px; background:#f8fafc; border:1px solid #eef2f7; color:#475569; }
-    body.theme-light .video-meta .chip i { color:var(--gold-500,#cfa046); }
+    body.theme-light .video-meta .chip i { color:var(--gold-500,#af6900); }
 </style>
 @endpush
 

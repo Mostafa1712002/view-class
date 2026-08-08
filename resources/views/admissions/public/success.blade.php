@@ -9,7 +9,7 @@
         .card { background: #fff; border-radius: 16px; padding: 40px; text-align: center; max-width: 480px; box-shadow: 0 12px 32px rgba(15,23,42,.08); }
         .check { width: 64px; height: 64px; border-radius: 50%; background: #dcfce7; color: #16a34a; font-size: 34px; line-height: 64px; margin: 0 auto 18px; }
         h1 { color: #1e293b; margin: 0 0 8px; }
-        .code { font-weight: 800; color: #cfa046; font-size: 18px; }
+        .code { font-weight: 800; color: #af6900; font-size: 18px; }
     </style>
 </head>
 <body>

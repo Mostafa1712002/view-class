@@ -29,14 +29,14 @@
     /* These extend the existing --gold-100…500 already defined in <head>.
        We redefine them here to make the design system self-contained and
        add the missing 600/700 steps for pressed/dark states. */
-    --gold-50:  #fdf8ed;
-    --gold-100: #f6e8b8;
-    --gold-200: #e3b85c;   /* light accent */
-    --gold-300: #cfa046;   /* hover accent  */
-    --gold-400: #c9a227;   /* brand gold (primary action)  */
-    --gold-500: #9c6b1f;   /* dark accent / hover states */
-    --gold-600: #7a5018;   /* pressed / deep */
-    --gold-700: #5c3b10;   /* darkest — text on light gold bg */
+    --gold-50:  #f5e6d0;
+    --gold-100: #d99b33;
+    --gold-200: #c58519;   /* light accent */
+    --gold-300: #af6900;   /* official brown-gold accent */
+    --gold-400: #8f5600;   /* primary action */
+    --gold-500: #744500;   /* dark accent / hover states */
+    --gold-600: #5a3500;   /* pressed / deep */
+    --gold-700: #422700;   /* darkest — text on light gold bg */
 
     /* ── Navy scale ── */
     --navy:         #14233a;   /* brand navy — dark surfaces, sidebar */

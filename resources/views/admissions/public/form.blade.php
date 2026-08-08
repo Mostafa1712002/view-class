@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $setting->form_title ?: ('التسجيل — '.$school->name) }}</title>
     <style>
-        :root { --gold:#cfa046; --navy:#1e293b; }
+        :root { --gold:#af6900; --navy:#1e293b; }
         * { box-sizing: border-box; }
         body { font-family: 'Cairo', Tahoma, sans-serif; margin: 0; background: #f1f5f9; color: #0f172a; }
         .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }

@@ -165,7 +165,7 @@
         display: inline-flex; align-items: center; gap: .35rem;
         font-size: .8rem; font-weight: 500; color: #64748b; cursor: pointer; margin-bottom: 0;
     }
-    .wp-auto-toggle input { accent-color: #cfa046; }
+    .wp-auto-toggle input { accent-color: #af6900; }
     .ml-auto { margin-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: auto; }
 
     /* Column customization dropdown
@@ -183,7 +183,7 @@
         border-radius: 8px; font-size: .85rem; color: #334155; cursor: pointer; margin: 0;
     }
     .wp-cols-menu label:hover { background: #f8fafc; }
-    .wp-cols-menu input { accent-color: #cfa046; }
+    .wp-cols-menu input { accent-color: #af6900; }
 </style>
 @endpush
 

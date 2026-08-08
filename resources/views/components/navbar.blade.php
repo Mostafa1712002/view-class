@@ -42,7 +42,7 @@
     font-size: .76rem; font-weight: 600; color: var(--gold-500, #b5832a);
     display: inline-flex; align-items: center; gap: .25rem;
 }
-.vc-notif-markall:hover { color: var(--gold-400, #cfa046); text-decoration: underline; }
+.vc-notif-markall:hover { color: var(--gold-400, #af6900); text-decoration: underline; }
 .vc-notif-list { max-height: 360px; overflow-y: auto; background: #fff; }
 .vc-notif-item {
     display: flex; align-items: flex-start; gap: .7rem;
@@ -66,12 +66,12 @@
 .vc-notif-title { font-size: .85rem; font-weight: 700; color: #2b2b2b; line-height: 1.35; }
 .vc-notif-text { font-size: .78rem; color: #7a756c; line-height: 1.4; }
 .vc-notif-time { font-size: .7rem; color: #b0a892; display: inline-flex; align-items: center; gap: .25rem; margin-top: 1px; }
-.vc-notif-dot { flex: 0 0 auto; width: 8px; height: 8px; margin-top: 6px; border-radius: 999px; background: var(--gold-400, #cfa046); }
+.vc-notif-dot { flex: 0 0 auto; width: 8px; height: 8px; margin-top: 6px; border-radius: 999px; background: var(--gold-400, #af6900); }
 .vc-notif-empty { text-align: center; padding: 2.4rem 1rem; }
 .vc-notif-empty-ico {
     width: 56px; height: 56px; border-radius: 50%; margin: 0 auto .7rem;
     display: inline-flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #fdf6e6, #f6e9c8); color: var(--gold-400, #cfa046); font-size: 1.5rem;
+    background: linear-gradient(135deg, #fdf6e6, #f6e9c8); color: var(--gold-400, #af6900); font-size: 1.5rem;
 }
 .vc-notif-empty-title { font-weight: 700; color: #5d5443; margin: 0; font-size: .9rem; }
 .vc-notif-empty-sub { color: #a99e85; font-size: .78rem; margin: .15rem 0 0; }
@@ -80,7 +80,7 @@
     padding: .7rem; background: #fcfaf4; border-top: 1px solid #efe6cf;
     font-size: .82rem; font-weight: 600; color: var(--gold-500, #b5832a); text-decoration: none;
 }
-.vc-notif-foot:hover { background: #f7efdc; color: var(--gold-400, #cfa046); }
+.vc-notif-foot:hover { background: #f7efdc; color: var(--gold-400, #af6900); }
 
 /* ══════════════════════════════════════════════════════════════════
    HEADER v3 — clean navy bar matched to the sidebar (QA #221)

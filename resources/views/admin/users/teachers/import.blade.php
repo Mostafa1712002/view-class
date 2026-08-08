@@ -53,7 +53,7 @@
         <div class="col-lg-6 mb-3">
             <div class="card h-100">
                 <div class="card-header bg-white d-flex align-items-center">
-                    <i class="la la-edit mr-1" style="color:#cfa046"></i>
+                    <i class="la la-edit mr-1" style="color:#af6900"></i>
                     <strong>@lang('users.import_update_title')</strong>
                 </div>
                 <div class="card-body">

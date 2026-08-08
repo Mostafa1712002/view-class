@@ -71,11 +71,11 @@
     <style>
         /* ============ Alawal brand tokens ============ */
         :root {
-            --gold-100: #f6d27a;
-            --gold-200: #e3b85c;
-            --gold-300: #cfa046;
-            --gold-400: #b7842e;
-            --gold-500: #9c6b1f;
+            --gold-100: #d99b33;
+            --gold-200: #c58519;
+            --gold-300: #af6900;
+            --gold-400: #8f5600;
+            --gold-500: #744500;
 
             --black-100: #0b0b0b;
             --black-200: #121212;
@@ -85,7 +85,7 @@
             --white-200: #f5f5f5;
             --white-300: #dcdcdc;
 
-            --brand-green: #1f6f4a;
+            --brand-green: #346d50;
 
             --text-primary: var(--white-100);
             --text-secondary: #a1a1a1;
@@ -612,6 +612,8 @@
             color: var(--gold-500);
         }
     </style>
+
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/alawal-brand.css') }}?v={{ @filemtime(public_path('css/alawal-brand.css')) ?: '1' }}">
 
     @stack('styles')
 </head>

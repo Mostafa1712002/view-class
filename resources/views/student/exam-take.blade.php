@@ -113,7 +113,7 @@
         {{-- === Anti-cheat (ac) === full-screen lock overlay (hidden until triggered) --}}
         <div id="exam-lock-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(33,37,41,.92);color:#fff;align-items:center;justify-content:center;text-align:center;padding:24px;">
             <div>
-                <i class="bi bi-lock-fill" style="font-size:3rem;color:#cfa046;"></i>
+                <i class="bi bi-lock-fill" style="font-size:3rem;color:#af6900;"></i>
                 <h4 class="mt-3 mb-2" id="exam-lock-title">تم قفل الاختبار</h4>
                 <p class="mb-3" id="exam-lock-message">تم فتح هذا الاختبار في نافذة أو جهاز آخر.</p>
                 <a href="{{ route('student.exams') }}" class="btn btn-light btn-sm" id="exam-lock-back" style="display:none;">العودة للاختبارات</a>

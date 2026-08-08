@@ -18,7 +18,7 @@
     body.theme-light .subject-hero .s-icon {
         width: 60px; height: 60px; border-radius: 14px;
         background: linear-gradient(135deg, #fff6dd, #fde2a8);
-        color: var(--gold-500, #cfa046);
+        color: var(--gold-500, #af6900);
         font-size: 1.8rem; font-weight: 800;
         display: inline-flex; align-items: center; justify-content: center;
         box-shadow: inset 0 0 0 1px rgba(207,160,70,.2);

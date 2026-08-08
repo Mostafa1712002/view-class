@@ -28,7 +28,7 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="d-flex align-items-center">
-                <i class="la la-chalkboard-teacher mr-1" style="font-size:1.6rem;color:#cfa046"></i>
+                <i class="la la-chalkboard-teacher mr-1" style="font-size:1.6rem;color:#af6900"></i>
                 <div>
                     <small class="text-muted d-block">@lang('users.name')</small>
                     <strong style="font-size:1.05rem">{{ $teacher->name }}</strong>

@@ -23,7 +23,7 @@
     }
     .qb-form-section__title::before {
         content: ''; position: absolute; bottom: -1px; inset-inline-start: 0;
-        width: 36px; height: 2px; background: var(--gold-400, #cfa046); border-radius: 2px;
+        width: 36px; height: 2px; background: var(--gold-400, #af6900); border-radius: 2px;
     }
 
     .qb-form-section .form-label {
@@ -78,7 +78,7 @@
 
     .btn-gold {
         background: linear-gradient(135deg, var(--gold-300, #e3c285), var(--gold-500, #c8941f));
-        border: 1px solid var(--gold-400, #cfa046); color: #fff;
+        border: 1px solid var(--gold-400, #af6900); color: #fff;
         font-weight: 600; padding: .6rem 1.25rem; border-radius: 10px;
         box-shadow: 0 1px 2px rgba(207,160,70,.18);
         transition: transform .15s ease, box-shadow .2s ease;

@@ -66,7 +66,7 @@
     .ws-search-results .row-item:hover { background:#f0fdf4; }
     .ws-chosen { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.5rem; }
     .ws-chosen .chip { background:#fffdf7; border:1px solid #e8d5a3; color:#5a4a1f; border-radius:999px; padding:.15rem .55rem; font-size:.78rem; display:inline-flex; align-items:center; gap:.35rem; }
-    .ws-chosen .chip button { border:0; background:transparent; color:#b7842e; cursor:pointer; line-height:1; padding:0; }
+    .ws-chosen .chip button { border:0; background:transparent; color:#8f5600; cursor:pointer; line-height:1; padding:0; }
 
     .ws-spinner { display:none; }
     .ws-spinner.is-on { display:inline-flex; }
