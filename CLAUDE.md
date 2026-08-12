@@ -2,6 +2,18 @@
 
 These rules apply to **all new code** in this repository. Existing Sprint 1–10 code predates them and is considered legacy; refactor opportunistically when touching it.
 
+## Delivery workflow (model split)
+
+Every coding task on this project follows a plan → build → review split so the strongest model owns the decisions and a cheaper model does the mechanical work:
+
+1. **Plan & design — Opus.** Read the card/spec, investigate the code, decide the approach, and write the plan (Kiro specs when the task is non-trivial). Architectural calls, root-cause analysis, and any product decision stay on Opus.
+2. **Implement — Sonnet.** Hand the settled plan to Sonnet (via the Agent tool with `model: "sonnet"`) to write the code. Sonnet does not make architecture or product decisions; if it hits an ambiguity, it stops and returns to Opus.
+3. **Review — after coding.** Once Sonnet finishes, review the diff before it ships — Opus reviews inline, or run `/code-review`, or delegate the review to `codex:rescue` (GPT). Fix findings, then deploy.
+
+**Codex alternative:** for implementation or a second diagnosis/review pass, the `codex:rescue` skill / `codex-rescue` agent (GPT-5.4) may replace or supplement Sonnet — same rule, Opus still owns plan + final verification.
+
+Pure-explanation cards (QA asking "how does X work / where is Y") are not coding tasks — answer them directly, no split.
+
 ## Module Pattern
 
 All new feature code lives under `app/Modules/<ModuleName>/` organised by feature, not by file type.
