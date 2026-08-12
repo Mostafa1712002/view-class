@@ -38,7 +38,12 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
         }
 
         if (! empty($filters['visibility'])) {
-            $query->where('visibility', $filters['visibility']);
+            // «الأول بلس» banks are stored as public + is_owner_bank; filter on the flag.
+            if ($filters['visibility'] === 'owner') {
+                $query->where('is_owner_bank', true);
+            } else {
+                $query->where('visibility', $filters['visibility'])->where('is_owner_bank', false);
+            }
         }
 
         if (! empty($filters['status'])) {

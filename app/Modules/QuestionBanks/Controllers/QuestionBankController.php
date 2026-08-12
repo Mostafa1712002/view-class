@@ -117,6 +117,16 @@ class QuestionBankController extends Controller
     {
         $data = $this->validateBank($request);
 
+        // «الأول بلس» owner tier: super-admin only; persisted as a public bank flagged is_owner_bank.
+        $wantsOwner = ($data['visibility'] === 'owner');
+        if ($wantsOwner) {
+            if (! (auth()->user()?->isSuperAdmin() ?? false)) {
+                abort(403, __('question_banks.error_general_forbidden'));
+            }
+            $data['visibility'] = 'public';
+            $data['is_owner_bank'] = true;
+        }
+
         // Only super-admin or school-admin can create general (public) banks.
         if ($data['visibility'] === 'public' && ! $this->canManageGeneralBanks()) {
             abort(403, __('question_banks.error_general_forbidden'));
@@ -284,6 +294,16 @@ class QuestionBankController extends Controller
         abort_if(! $bank, 404);
 
         $data = $this->validateBank($request);
+
+        // «الأول بلس» owner tier: super-admin only; persisted as a public bank flagged is_owner_bank.
+        $wantsOwner = ($data['visibility'] === 'owner');
+        if ($wantsOwner) {
+            if (! (auth()->user()?->isSuperAdmin() ?? false)) {
+                abort(403, __('question_banks.error_general_forbidden'));
+            }
+            $data['visibility'] = 'public';
+            $data['is_owner_bank'] = true;
+        }
 
         // Only super-admin or school-admin can update/change a general bank.
         $becomingPublic = $data['visibility'] === 'public';
@@ -544,7 +564,7 @@ class QuestionBankController extends Controller
             'name_ar'                 => ['nullable', 'string', 'max:255'],
             'name_en'                 => ['nullable', 'string', 'max:255'],
             'description'             => ['nullable', 'string', 'max:1000'],
-            'visibility'              => ['required', 'in:public,private'],
+            'visibility'              => ['required', 'in:public,private,owner'],
             'is_owner_bank'           => ['nullable', 'boolean'],
             'status'                  => ['required', 'in:active,inactive,under_review,archived'],
             'source'                  => ['required', 'in:manual,al_awwal,library,import,ana_qudurat'],
@@ -661,6 +681,7 @@ class QuestionBankController extends Controller
             'visibilities' => [
                 QuestionBank::VISIBILITY_PUBLIC => __('question_banks.visibility_public'),
                 QuestionBank::VISIBILITY_PRIVATE => __('question_banks.visibility_private'),
+                'owner' => __('question_banks.tab_owner'),
             ],
             'statuses' => [
                 QuestionBank::STATUS_ACTIVE => __('question_banks.status_active'),
