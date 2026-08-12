@@ -58,7 +58,7 @@ return [
 
     // Source
     'source_manual'       => 'داخلي',
-    'source_al_awwal'     => 'منصة الأول',
+    'source_al_awwal'     => 'الأول بلس',
     'source_library'      => 'مكتبة بنوك',
     'source_import'       => 'استيراد Excel',
     'source_ana_qudurat'  => 'أنا والقدرات (قديم)',
@@ -94,7 +94,7 @@ return [
         'section_sharing' => 'مشاركة البنك مع المدارس',
         'section_education' => 'الربط التعليمي',
         'section_permissions' => 'الصلاحيات',
-        'is_owner_bank' => 'بنك منصة الأول (خاص بالمالك)',
+        'is_owner_bank' => 'بنك الأول بلس (خاص بالمالك)',
         'is_owner_bank_hint' => 'بنك يملكه المالك ولا يُنسخ منه إلا بموافقته؛ لا يظهر للمدارس كبنك عام.',
         'section_future' => 'إعدادات الربط المستقبلي',
         'sharing_hint' => 'حدّد المدارس التي يمكنها رؤية هذا البنك العام',
@@ -144,7 +144,7 @@ return [
     'tab_all' => 'الكل',
     'tab_general' => 'عام (شركة)',
     'tab_private' => 'خاص (مدرسة)',
-    'tab_owner' => 'منصة الأول',
+    'tab_owner' => 'الأول بلس',
     'tab_under_review' => 'قيد المراجعة',
 
     // Column labels
@@ -154,7 +154,7 @@ return [
     // Scope display
     'scope_company' => 'شركة — عام',
     'scope_school' => 'مدرسة — خاص',
-    'scope_owner' => 'منصة الأول',
+    'scope_owner' => 'الأول بلس',
 
     // Approval notice
     'notice_general_approved_only' => 'تظهر للمدارس الأسئلة المعتمدة فقط من البنوك العامة.',
@@ -199,13 +199,13 @@ return [
     'batch_created_partial' => 'تم إنشاء :created بنك وتم تخطي :skipped بنك موجود مسبقًا',
     'batch_term_placeholder' => 'مثال: الفصل الأول 2025/2026',
     'owner_review_title' => 'مراجعة أسئلة المدارس',
-    'owner_review_hint' => 'بنوك المدارس الخاصة وأسئلتها في مكان واحد؛ يمكنك فتح أي بنك ونقل أسئلته المميزة لبنك عام أو بنك منصة الأول.',
+    'owner_review_hint' => 'بنوك المدارس الخاصة وأسئلتها في مكان واحد؛ يمكنك فتح أي بنك ونقل أسئلته المميزة لبنك عام أو بنك الأول بلس.',
     'owner_review_empty' => 'لا توجد بنوك خاصة بالمدارس بعد.',
     'owner_review_view' => 'عرض الأسئلة',
     'filter_school' => 'المدرسة',
     'filter_all_schools' => 'كل المدارس',
     'col_questions' => 'الأسئلة',
-    'access_requests_title' => 'طلبات الوصول لبنوك منصة الأول',
+    'access_requests_title' => 'طلبات الوصول لبنوك الأول بلس',
     'access_requests_empty' => 'لا توجد طلبات.',
     'access_req_bank' => 'البنك',
     'access_req_by' => 'مقدّم الطلب',
@@ -218,12 +218,12 @@ return [
     'access_pending' => 'بانتظار الموافقة',
     'action_request_access' => 'طلب الوصول',
     'action_copy_from_owner' => 'نسخ إلى مدرستي',
-    'access_only_owner' => 'الطلب متاح فقط لبنوك منصة الأول.',
+    'access_only_owner' => 'الطلب متاح فقط لبنوك الأول بلس.',
     'access_not_granted' => 'لم تتم الموافقة على وصولك لهذا البنك بعد.',
     'flash_access_requested' => 'تم إرسال طلب الوصول، بانتظار موافقة المالك.',
     'flash_access_decided' => 'تم تحديث حالة الطلب.',
     'flash_questions_copied' => 'تم نسخ :count سؤالًا إلى «:bank».',
-    'copy_dest_invalid' => 'وجهة النسخ يجب أن تكون بنكًا عامًا أو بنك منصة الأول.',
+    'copy_dest_invalid' => 'وجهة النسخ يجب أن تكون بنكًا عامًا أو بنك الأول بلس.',
     'promote_pick_dest' => 'اختر بنك الوجهة',
     'promote_selected' => 'نقل الأسئلة المحددة',
     'promote_none_selected' => 'لم تحدد أي أسئلة.',

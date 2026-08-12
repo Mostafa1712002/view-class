@@ -328,34 +328,6 @@
         </div>
     </div>
 
-    {{-- Tab bar: general / private / under-review / all --}}
-    <div class="qb-tabs">
-        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'all'])) }}"
-           class="qb-tab {{ $activeTab==='all' ? 'active' : '' }}">
-            <x-svg-icon name="list-ul" :size="16" class="ic-navy" /> @lang('question_banks.tab_all')
-            <span class="badge">{{ $total }}</span>
-        </a>
-        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'general'])) }}"
-           class="qb-tab {{ $activeTab==='general' ? 'active' : '' }}">
-            <x-svg-icon name="globe" :size="16" class="ic-info" /> @lang('question_banks.tab_general')
-            <span class="badge">{{ $publicCount }}</span>
-        </a>
-        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'private'])) }}"
-           class="qb-tab {{ $activeTab==='private' ? 'active' : '' }}">
-            <x-svg-icon name="lock-fill" :size="16" class="ic-eval" /> @lang('question_banks.tab_private')
-            <span class="badge">{{ $privateCount }}</span>
-        </a>
-        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'owner'])) }}"
-           class="qb-tab {{ $activeTab==='owner' ? 'active' : '' }}">
-            <x-svg-icon name="award" :size="16" class="ic-navy" /> @lang('question_banks.tab_owner')
-            <span class="badge">{{ $ownerCount }}</span>
-        </a>
-        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'under_review'])) }}"
-           class="qb-tab {{ $activeTab==='under_review' ? 'active' : '' }}">
-            <x-svg-icon name="clock-history" :size="16" class="ic-warn" /> @lang('question_banks.tab_under_review')
-        </a>
-    </div>
-
     {{-- Filters --}}
     <form action="{{ route('admin.question-banks.index') }}" method="GET" class="qb-filter-card">
     <input type="hidden" name="tab" value="{{ $activeTab }}">
@@ -417,6 +389,34 @@
             @endif
         </div>
     </form>
+
+    {{-- Tab bar: general / private / under-review / all --}}
+    <div class="qb-tabs">
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'all'])) }}"
+           class="qb-tab {{ $activeTab==='all' ? 'active' : '' }}">
+            <x-svg-icon name="list-ul" :size="16" class="ic-navy" /> @lang('question_banks.tab_all')
+            <span class="badge">{{ $total }}</span>
+        </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'general'])) }}"
+           class="qb-tab {{ $activeTab==='general' ? 'active' : '' }}">
+            <x-svg-icon name="globe" :size="16" class="ic-info" /> @lang('question_banks.tab_general')
+            <span class="badge">{{ $publicCount }}</span>
+        </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'private'])) }}"
+           class="qb-tab {{ $activeTab==='private' ? 'active' : '' }}">
+            <x-svg-icon name="lock-fill" :size="16" class="ic-eval" /> @lang('question_banks.tab_private')
+            <span class="badge">{{ $privateCount }}</span>
+        </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'owner'])) }}"
+           class="qb-tab {{ $activeTab==='owner' ? 'active' : '' }}">
+            <x-svg-icon name="award" :size="16" class="ic-navy" /> @lang('question_banks.tab_owner')
+            <span class="badge">{{ $ownerCount }}</span>
+        </a>
+        <a href="{{ route('admin.question-banks.index', array_merge(request()->except('tab','page'), ['tab'=>'under_review'])) }}"
+           class="qb-tab {{ $activeTab==='under_review' ? 'active' : '' }}">
+            <x-svg-icon name="clock-history" :size="16" class="ic-warn" /> @lang('question_banks.tab_under_review')
+        </a>
+    </div>
 
     {{-- Toolbar --}}
     <div class="qb-toolbar">

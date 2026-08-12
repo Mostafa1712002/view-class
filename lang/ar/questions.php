@@ -61,7 +61,7 @@ return [
         'reset' => 'إعادة ضبط',
         'search' => 'ابحث في نص السؤال',
         'type' => 'نوع السؤال',
-        'difficulty' => 'مستوى الصعوبة',
+        'difficulty' => 'مستوى السؤال',
         'lesson' => 'الدرس',
         'status' => 'الحالة',
         'all' => 'الكل',
@@ -90,7 +90,7 @@ return [
             'answer' => 'معلومات الجواب',
         ],
         'type' => 'نوع السؤال',
-        'difficulty' => 'مستوى الصعوبة',
+        'difficulty' => 'مستوى السؤال',
         'points' => 'درجة السؤال',
         'lesson' => 'الربط بالدرس',
         'lesson_placeholder' => 'لا شيء',
@@ -144,7 +144,7 @@ return [
     ],
 
     'preview' => [
-        'difficulty' => 'مستوى الصعوبة',
+        'difficulty' => 'مستوى السؤال',
         'points' => 'درجة السؤال',
         'lesson' => 'الدرس',
         'type' => 'نوع السؤال',

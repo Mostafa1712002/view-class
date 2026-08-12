@@ -127,7 +127,7 @@ return [
     'tab_all' => 'All',
     'tab_general' => 'General (company)',
     'tab_private' => 'Private (school)',
-    'tab_owner' => 'Al-Awwal',
+    'tab_owner' => 'Al-Awwal Plus',
     'tab_under_review' => 'Under review',
 
     'col_category' => 'Category',
@@ -135,7 +135,7 @@ return [
 
     'scope_company' => 'Company — general',
     'scope_school' => 'School — private',
-    'scope_owner' => 'Al-Awwal',
+    'scope_owner' => 'Al-Awwal Plus',
 
     'notice_general_approved_only' => 'Schools see only approved questions from general banks.',
 
