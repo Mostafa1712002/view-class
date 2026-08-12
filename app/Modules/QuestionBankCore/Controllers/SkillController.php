@@ -4,6 +4,7 @@ namespace App\Modules\QuestionBankCore\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\SubjectLesson;
 use App\Modules\QuestionBankCore\Actions\Import\ParseSkillsExcel;
 use App\Modules\QuestionBankCore\Models\SkillImportBatch;
 use App\Modules\QuestionBankCore\Repositories\Contracts\SkillRepository;
@@ -246,6 +247,7 @@ class SkillController extends Controller
             'subject_id'  => ['nullable', 'integer', 'exists:subjects,id'],
             'semester_id' => ['nullable', 'integer', 'exists:academic_terms,id'],
             'week_id'     => ['nullable', 'integer', 'exists:study_weeks,id'],
+            'lesson_id'   => ['nullable', 'integer', 'exists:subject_lessons,id'],
             'skill_type'  => ['required', 'in:normal,ability,tahsili,verbal,quantitative'],
             'is_tahsili'  => ['nullable', 'boolean'],
             'is_ability'  => ['nullable', 'boolean'],
@@ -260,7 +262,23 @@ class SkillController extends Controller
             'subjects'  => $this->scope->subjectsForSchool($schoolId),
             'semesters' => $schoolId ? $this->scope->semestersForSchool($schoolId) : collect(),
             'types'     => $this->typeLabels(),
+            'lessons'   => $this->lessonsForSchool($schoolId),
         ];
+    }
+
+    private function lessonsForSchool(?int $schoolId): \Illuminate\Support\Collection
+    {
+        $subjectIds = $this->scope->subjectsForSchool($schoolId)->pluck('id');
+        if ($subjectIds->isEmpty()) {
+            return collect();
+        }
+
+        return SubjectLesson::query()
+            ->whereHas('unit', fn ($q) => $q->whereIn('subject_id', $subjectIds))
+            ->with('unit:id,subject_id,name_ar')
+            ->orderBy('unit_id')
+            ->orderBy('sort_order')
+            ->get();
     }
 
     private function typeLabels(): array

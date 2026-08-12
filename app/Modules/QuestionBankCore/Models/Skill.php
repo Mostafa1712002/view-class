@@ -26,6 +26,7 @@ class Skill extends Model
         'subject_id',
         'semester_id',
         'week_id',
+        'lesson_id',
         'skill_type',
         'is_tahsili',
         'is_ability',
@@ -51,6 +52,11 @@ class Skill extends Model
     public function week(): BelongsTo
     {
         return $this->belongsTo(StudyWeek::class, 'week_id');
+    }
+
+    public function lesson(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\SubjectLesson::class, 'lesson_id');
     }
 
     public function assignments(): HasMany

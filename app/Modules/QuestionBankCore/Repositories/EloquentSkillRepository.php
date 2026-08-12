@@ -31,7 +31,7 @@ class EloquentSkillRepository implements SkillRepository
     public function paginateForAdmin(?int $schoolId, array $filters, int $perPage = 20): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->scopedQuery($schoolId)
-            ->with(['subject:id,name', 'semester:id,name', 'week:id,name'])
+            ->with(['subject:id,name', 'semester:id,name', 'week:id,name', 'lesson:id,name_ar'])
             ->when($filters['q'] ?? null, fn (Builder $q, $term) => $q->where('name', 'like', "%{$term}%"))
             ->when($filters['subject_id'] ?? null, fn (Builder $q, $v) => $q->where('subject_id', $v))
             ->when($filters['semester_id'] ?? null, fn (Builder $q, $v) => $q->where('semester_id', $v))

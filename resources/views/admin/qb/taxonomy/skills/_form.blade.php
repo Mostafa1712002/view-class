@@ -16,6 +16,17 @@
             </select>
         </div>
         <div class="col-md-3">
+            <label class="form-label">مهارة الدرس</label>
+            <select name="lesson_id" class="form-select">
+                <option value="">— بدون درس —</option>
+                @foreach($lessons as $lesson)
+                    <option value="{{ $lesson->id }}" @selected(old('lesson_id', $skill->lesson_id ?? null) == $lesson->id)>
+                        {{ optional($lesson->unit)->name_ar ? optional($lesson->unit)->name_ar.' — ' : '' }}{{ $lesson->name_ar }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
             <label class="form-label">الفصل الدراسي</label>
             <select name="semester_id" class="form-select">
                 <option value="">— لا شيء —</option>

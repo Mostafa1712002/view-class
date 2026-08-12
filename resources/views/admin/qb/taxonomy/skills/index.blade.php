@@ -80,7 +80,7 @@
             <div class="table-responsive">
                 <table class="table mb-0" style="font-size:13px;">
                     <thead><tr>
-                        <th>#</th><th>المهارة</th><th>المادة</th><th>الفصل الدراسي</th>
+                        <th>#</th><th>المهارة</th><th>المادة</th><th>الدرس</th><th>الفصل الدراسي</th>
                         <th>الأسبوع</th><th>النوع</th><th>قدرات</th><th>تحصيلي</th>
                         <th>الحالة</th><th>التاريخ</th><th>العمليات</th>
                     </tr></thead>
@@ -90,6 +90,7 @@
                                 <td>{{ $sk->id }}</td>
                                 <td>{{ $sk->name }}</td>
                                 <td>{{ optional($sk->subject)->name ?? '—' }}</td>
+                                <td>{{ optional($sk->lesson)->name_ar ?? '—' }}</td>
                                 <td>{{ optional($sk->semester)->name ?? '—' }}</td>
                                 <td>{{ optional($sk->week)->name ?? '—' }}</td>
                                 <td>{{ $types[$sk->skill_type] ?? $sk->skill_type }}</td>
