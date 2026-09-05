@@ -40,12 +40,22 @@ class AdminPortfolioController extends Controller
         return view('admin.portfolio.index', compact('tab', 'users'));
     }
 
-    public function showUser(User $user): View
+    /**
+     * Every action that reads or mutates a user's portfolio must confirm the
+     * target is a teacher/student AND lives in the acting admin's tenant, so a
+     * school-admin cannot reach a user in another school (cross-tenant IDOR).
+     */
+    private function assertUserInScope(User $user): void
     {
         abort_unless($user->isTeacher() || $user->isStudent(), 404);
 
         $schoolId = $this->listSchoolId();
         abort_if($schoolId && $user->school_id !== $schoolId, 403);
+    }
+
+    public function showUser(User $user): View
+    {
+        $this->assertUserInScope($user);
 
         $isTeacher = $user->isTeacher();
         $sections  = $isTeacher ? PortfolioEntry::SECTIONS_TEACHER : PortfolioEntry::SECTIONS_STUDENT;
@@ -58,6 +68,7 @@ class AdminPortfolioController extends Controller
 
     public function storeEntry(Request $request, User $user): RedirectResponse
     {
+        $this->assertUserInScope($user);
         $this->saveEntry($request, $user);
 
         return back()->with('success', 'تم إضافة العنصر بنجاح');
@@ -65,6 +76,7 @@ class AdminPortfolioController extends Controller
 
     public function updateEntry(Request $request, User $user, PortfolioEntry $entry): RedirectResponse
     {
+        $this->assertUserInScope($user);
         abort_unless($entry->user_id === $user->id, 404);
         $this->saveEntry($request, $user, $entry);
 
@@ -73,6 +85,7 @@ class AdminPortfolioController extends Controller
 
     public function destroyEntry(User $user, PortfolioEntry $entry): RedirectResponse
     {
+        $this->assertUserInScope($user);
         abort_unless($entry->user_id === $user->id, 404);
         $this->deleteEntry($entry);
 
