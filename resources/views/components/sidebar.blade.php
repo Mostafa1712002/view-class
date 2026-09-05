@@ -540,9 +540,222 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
             {{-- Standalone program links (the "برامج نوعية" grouping was removed per card;
                  the three items stay as renamed coming-soon links until the other
                  platforms are wired in). --}}
-            <li class="nav-item" data-label="@lang('shell.nav_ana_wa_qadarat')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_ana_wa_qadarat')"><x-svg-icon name="lightbulb" class="vc-ico" /><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
             <li class="nav-item" data-label="@lang('shell.nav_alawwal')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_alawwal')"><x-svg-icon name="flag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>
+            <li class="nav-item" data-label="@lang('shell.nav_ana_wa_qadarat')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_ana_wa_qadarat')"><x-svg-icon name="lightbulb" class="vc-ico" /><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
             <li class="nav-item" data-label="@lang('shell.nav_speed_reading')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_speed_reading')"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_speed_reading')</span></a></li>
+
+            {{-- ========== NEW: 6 additive sections (sidebar-restructure spec) ==========
+                 ADDITIVE ONLY — every item below links to an EXISTING page also reachable
+                 from its original section further down. Duplicate active-highlight is
+                 expected and accepted (card requirement: do not delete/hide anything). --}}
+
+            {{-- #1 الإضافات والإسنادات --}}
+            <div class="gp-section-header sec-extras" data-section-toggle="extras">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.section_extras')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-extras">
+                <li class="nav-item {{ request()->routeIs('admin.educational-companies.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.educational-companies.index') ? route('admin.educational-companies.index') : '#' }}"><x-svg-icon name="building" class="vc-ico" /><span class="menu-title">@lang('shell.nav_companies')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admin.educational-complexes.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.educational-complexes.index') ? route('admin.educational-complexes.index') : '#' }}"><x-svg-icon name="diagram-3" class="vc-ico" /><span class="menu-title">@lang('shell.nav_complexes')</span></a></li>
+                @if($canViewSchools)
+                <li class="nav-item {{ request()->routeIs('admin.schools.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.schools.index') ? route('admin.schools.index') : '#' }}"><x-svg-icon name="building" class="vc-ico" /><span class="menu-title">@lang('shell.nav_school')</span></a></li>
+                @endif
+                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="grid-3x3-gap" class="vc-ico" /><span class="menu-title">@lang('shell.nav_classes')</span></a></li>
+                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_team')</span></a></li>
+                @if($canViewStudents)
+                <li class="nav-item {{ request()->routeIs('admin.users.students.*') && !request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.users.students.index') ? route('admin.users.students.index') : '#' }}"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users_students')</span></a></li>
+                @endif
+                @if($canViewParents)
+                <li class="nav-item {{ request()->routeIs('admin.users.parents.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.users.parents.index') ? route('admin.users.parents.index') : '#' }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users_parents')</span></a></li>
+                @endif
+                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="arrow-repeat" class="vc-ico" /><span class="menu-title">@lang('shell.nav_promotion')</span></a></li>
+                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="calendar-range" class="vc-ico" /><span class="menu-title">@lang('shell.nav_terms_weeks')</span></a></li>
+            </div>{{-- /gp-sec-extras --}}
+
+            {{-- #2 الشؤون التعليمية والخطط --}}
+            <div class="gp-section-header sec-academic" data-section-toggle="academic">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.section_academic')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-academic">
+                <li class="nav-item {{ request()->routeIs('admin.school-schedule.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('admin.school-schedule.index') ? route('admin.school-schedule.index') : '#' }}"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-title">@lang('shell.nav_school_schedule')</span></a></li>
+                @if($canViewWeeklyPlans)
+                <li class="nav-item {{ request()->routeIs('manage.weekly-plans.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.weekly-plans.index') ? route('manage.weekly-plans.index') : '#' }}"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a></li>
+                @endif
+                <li class="nav-item has-sub {{ (request()->routeIs('admin.subjects.*') || request()->routeIs('admin.lessons.*') || request()->routeIs('admin.exams.*')) ? 'active open' : '' }}" data-section="academic">
+                    <a href="#"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams_management')</span></a>
+                    <ul class="menu-content">
+                        @if($canViewSubjects)<li class="{{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}"><x-svg-icon name="book" class="vc-ico" /><span class="menu-item">@lang('shell.nav_add_subject')</span></a></li>@endif
+                        <li class="{{ request()->routeIs('admin.lessons.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.lessons.index') ? route('admin.lessons.index') : '#' }}"><x-svg-icon name="clock" class="vc-ico" /><span class="menu-item">@lang('shell.nav_periods')</span></a></li>
+                        @if($canViewExams)<li class="{{ request()->routeIs('admin.exams.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>@endif
+                    </ul>
+                </li>
+                <li class="nav-item" data-section="academic"><a href="#"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_special_programs')</span></a></li>
+                <li class="nav-item" data-section="academic"><a href="#"><x-svg-icon name="laptop" class="vc-ico" /><span class="menu-title">@lang('shell.nav_distance_learning')</span></a></li>
+                @if($canViewVirtualClasses)
+                <li class="nav-item {{ request()->routeIs('manage.virtual-classes.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : '#' }}"><x-svg-icon name="camera-video" class="vc-ico" /><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a></li>
+                @endif
+                @if($canViewDiscussion)
+                <li class="nav-item {{ request()->routeIs('manage.discussion-rooms.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.discussion-rooms.index') ? route('manage.discussion-rooms.index') : '#' }}"><x-svg-icon name="chat-dots" class="vc-ico" /><span class="menu-title">@lang('shell.nav_discussion_rooms')</span></a></li>
+                @endif
+                @if($canViewQuestionBanks)
+                <li class="nav-item {{ request()->routeIs('admin.question-banks.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('admin.question-banks.index') ? route('admin.question-banks.index') : '#' }}"><x-svg-icon name="question-circle" class="vc-ico" /><span class="menu-title">@lang('shell.nav_question_banks')</span></a></li>
+                @endif
+                @if(Route::has('admin.qb.skills.index') && (!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('skills')))
+                <li class="nav-item {{ request()->routeIs('admin.qb.skills.*') ? 'active' : '' }}" data-section="academic"><a href="{{ route('admin.qb.skills.index') }}"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.nav_subject_skills')</span></a></li>
+                @endif
+            </div>{{-- /gp-sec-academic --}}
+
+            {{-- #3 القياس والتقويم --}}
+            <div class="gp-section-header sec-assessment" data-section-toggle="assessment">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M6 0a.5.5 0 0 1 .5.5v.5h3V.5a.5.5 0 0 1 1 0V1h2a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H3.5a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h2V.5A.5.5 0 0 1 6 0z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.section_assessment')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-assessment">
+                <li class="nav-item {{ request()->routeIs('admin.evaluations.*') && !request()->routeIs('admin.evaluations.approvals.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.evaluations.index') ? route('admin.evaluations.index') : '#' }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_eval_forms')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admin.my-evaluations.*') || request()->routeIs('admin.evaluations.subjects') || request()->routeIs('admin.evaluations.execute.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.my-evaluations.index') ? route('admin.my-evaluations.index') : '#' }}"><x-svg-icon name="star" class="vc-ico" /><span class="menu-title">@lang('shell.nav_evaluations')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admin.evaluations.approvals.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.evaluations.approvals.index') ? route('admin.evaluations.approvals.index') : '#' }}"><x-svg-icon name="check2-all" class="vc-ico" /><span class="menu-title">@lang('shell.nav_eval_approvals')</span></a></li>
+                @if($canViewGrades)
+                <li class="nav-item has-sub {{ (request()->routeIs('admin.grades.*') || request()->routeIs('admin.grade-reports.*') || request()->routeIs('admin.grades.entry.*')) ? 'active open' : '' }}" data-section="assessment">
+                    <a href="#"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.nav_grades')</span></a>
+                    <ul class="menu-content">
+                        <li class="{{ request()->routeIs('admin.grade-reports.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.grade-reports.index') ? route('admin.grade-reports.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">تقارير الدرجات</span></a></li>
+                        <li class="{{ request()->routeIs('admin.grades.entry.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.grades.entry.index') ? route('admin.grades.entry.index') : '#' }}"><x-svg-icon name="grid-3x3-gap" class="vc-ico" /><span class="menu-item">إدخال الدرجات (ديناميكي)</span></a></li>
+                        <li class="{{ (request()->routeIs('admin.grades.index') || request()->routeIs('admin.grades.store') || request()->routeIs('admin.grades.publish')) ? 'active' : '' }}"><a href="{{ Route::has('admin.grades.index') ? route('admin.grades.index') : '#' }}"><x-svg-icon name="pencil" class="vc-ico" /><span class="menu-item">إدخال الدرجات (مبسط)</span></a></li>
+                    </ul>
+                </li>
+                @endif
+                <li class="nav-item" data-section="assessment"><a href="#"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admin.class-visits.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.class-visits.index') ? route('admin.class-visits.index') : '#' }}"><x-svg-icon name="geo-alt" class="vc-ico" /><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
+            </div>{{-- /gp-sec-assessment --}}
+
+            {{-- #4 الدعم والتقارير --}}
+            <div class="gp-section-header sec-support" data-section-toggle="support">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM4.5 7.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm5 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.section_support')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-support">
+                @if($canViewBooks)
+                <li class="nav-item {{ request()->routeIs('manage.books.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('manage.books.index') ? route('manage.books.index') : '#' }}"><x-svg-icon name="book-half" class="vc-ico" /><span class="menu-title">@lang('shell.nav_books')</span></a></li>
+                @endif
+                @if($canViewLibraries)
+                <li class="nav-item has-sub {{ request()->routeIs('admin.libraries.*') ? 'active open' : '' }}" data-section="support">
+                    <a href="#"><x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span></a>
+                    <ul class="menu-content">
+                        <li class="{{ request()->routeIs('admin.libraries.public.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.libraries.public.index') ? route('admin.libraries.public.index') : '#' }}"><x-svg-icon name="globe" class="vc-ico" /><span class="menu-item">@lang('shell.nav_library_public')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.libraries.private.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.libraries.private.index') ? route('admin.libraries.private.index') : '#' }}"><x-svg-icon name="lock" class="vc-ico" /><span class="menu-item">@lang('shell.nav_library_private')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.libraries.labs.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.libraries.labs.index') ? route('admin.libraries.labs.index') : '#' }}"><x-svg-icon name="eyedropper" class="vc-ico" /><span class="menu-item">@lang('shell.nav_labs')</span></a></li>
+                    </ul>
+                </li>
+                @endif
+                @if($canViewEducationalSites)
+                <li class="nav-item {{ request()->routeIs('admin.educational-sites.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('admin.educational-sites.index') ? route('admin.educational-sites.index') : '#' }}"><x-svg-icon name="box-arrow-up-right" class="vc-ico" /><span class="menu-title">@lang('shell.nav_edu_sites')</span></a></li>
+                @endif
+                @if($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
+                <li class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('admin.surveys.index') ? route('admin.surveys.index') : '#' }}"><x-svg-icon name="bar-chart-line" class="vc-ico" /><span class="menu-title">@lang('shell.nav_surveys')</span></a></li>
+                @else
+                <li class="nav-item {{ request()->routeIs('my.surveys.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('my.surveys.index') ? route('my.surveys.index') : '#' }}"><x-svg-icon name="bar-chart-line" class="vc-ico" /><span class="menu-title">@lang('shell.nav_surveys')</span></a></li>
+                @endif
+                @if($canViewReports)
+                <li class="nav-item has-sub {{ request()->routeIs('admin.reports.*') ? 'active open' : '' }}" data-section="support">
+                    <a href="#"><x-svg-icon name="bar-chart" class="vc-ico" /><span class="menu-title">@lang('shell.nav_reports')</span></a>
+                    <ul class="menu-content">
+                        <li class="{{ request()->routeIs('admin.reports.administrative') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.administrative') ? route('admin.reports.administrative') : '#' }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('shell.nav_reports_admin')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.reports.statistical') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.statistical') ? route('admin.reports.statistical') : '#' }}"><x-svg-icon name="graph-up" class="vc-ico" /><span class="menu-item">@lang('shell.nav_reports_stats')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.reports.user-reports') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.user-reports') ? route('admin.reports.user-reports') : '#' }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-item">@lang('shell.nav_reports_users')</span></a></li>
+                    </ul>
+                </li>
+                @endif
+                <li class="nav-item" data-section="support"><a href="#"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_points_rewards')</span></a></li>
+                @if($canViewCertificates)
+                <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('admin.certificates.index') ? route('admin.certificates.index') : '#' }}"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('shell.nav_certificates')</span></a></li>
+                @endif
+                @if($canViewAnnouncements && Route::has('admin.announcements.index'))
+                <li class="nav-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}" data-section="support"><a href="{{ route('admin.announcements.index') }}"><x-svg-icon name="megaphone" class="vc-ico" /><span class="menu-title">@lang('shell.nav_announcements')</span></a></li>
+                @endif
+                @if($canViewCalendar)
+                <li class="nav-item {{ request()->routeIs('manage.school-calendar.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('manage.school-calendar.index') ? route('manage.school-calendar.index') : '#' }}"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-title">@lang('shell.nav_academic_calendar')</span></a></li>
+                @endif
+                <li class="nav-item" data-section="support"><a href="#"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
+            </div>{{-- /gp-sec-support --}}
+
+            {{-- #5 القبول والتسجيل --}}
+            <div class="gp-section-header sec-admissions" data-section-toggle="admissions">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2 2H4a4 4 0 0 0-4 4v.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V14a4 4 0 0 0-4-4z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.section_admissions')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-admissions">
+                @if($canViewAdmissions)
+                <li class="nav-item {{ request()->routeIs('admissions.*') ? 'active' : '' }}" data-section="admissions"><a href="{{ Route::has('admissions.index') ? route('admissions.index') : '#' }}"><x-svg-icon name="person-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
+                @endif
+            </div>{{-- /gp-sec-admissions --}}
+
+            {{-- #6 التواصل والدعم الفني --}}
+            <div class="gp-section-header sec-comm2" data-section-toggle="comm2">
+                <span class="gp-sec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793V2z"/></svg>
+                </span>
+                <span class="gp-sec-label">@lang('shell.section_comm2')</span>
+                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+            </div>
+            <div class="gp-section-content" id="gp-sec-comm2">
+                @if($canViewMailbox && Route::has('my.mailbox.index'))
+                <li class="nav-item {{ request()->routeIs('my.mailbox.*') ? 'active' : '' }}" data-section="comm2"><a href="{{ route('my.mailbox.index') }}"><x-svg-icon name="inbox" class="vc-ico" /><span class="menu-title">@lang('shell.nav_mailbox')</span></a></li>
+                @endif
+                @php
+                    $smsItems2 = [
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.send',                'icon' => 'send',      'label' => 'إرسال رسالة قصيرة',          'active' => 'admin.sms.send'],
+                        ['gate' => $canViewWhatsapp, 'route' => 'admin.whatsapp.send',           'icon' => 'chat-dots', 'label' => 'رسائل الواتساب',            'active' => 'admin.whatsapp.send'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.excel.create',        'icon' => 'file',      'label' => 'إرسال رسالة قصيرة من Excel', 'active' => 'admin.sms.excel.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.reports.index',       'icon' => 'list',      'label' => 'تقارير الرسائل',            'active' => 'admin.sms.reports.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.templates.index',     'icon' => 'file',      'label' => 'قوالب الرسائل القصيرة',      'active' => 'admin.sms.templates.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.auto-messages.index', 'icon' => 'chat-dots', 'label' => 'نماذج الرسائل',             'active' => 'admin.sms.auto-messages.*'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms-services.index',      'icon' => 'send',      'label' => 'إعدادات رسائل',             'active' => 'admin.sms-services.*'],
+                        ['gate' => $canViewWhatsapp, 'route' => 'admin.whatsapp.index',          'icon' => 'chat-dots', 'label' => 'إعدادات واتساب',            'active' => 'admin.whatsapp.index'],
+                        ['gate' => $canViewSms,      'route' => 'admin.sms.sender-name.index',   'icon' => 'people',    'label' => 'خدمات إضافية',              'active' => 'admin.sms.sender-name.*'],
+                    ];
+                    $smsVisible2 = collect($smsItems2)
+                        ->filter(fn($i) => $i['gate'] && Route::has($i['route']))
+                        ->unique(fn($i) => $i['route']);
+                @endphp
+                @if($smsVisible2->isNotEmpty())
+                <li class="nav-item has-sub {{ request()->routeIs('admin.sms-services.*') || request()->routeIs('admin.sms.*') || request()->routeIs('admin.whatsapp.*') ? 'active open' : '' }}" data-section="comm2">
+                    <a href="#"><x-svg-icon name="phone" class="vc-ico" /><span class="menu-title">@lang('shell.nav_sms')</span></a>
+                    <ul class="menu-content">
+                        @foreach($smsVisible2 as $i)
+                        <li class="{{ request()->routeIs($i['active']) ? 'active' : '' }}"><a href="{{ route($i['route']) }}"><x-svg-icon name="{{ $i['icon'] }}" class="vc-ico" /><span class="menu-item">{{ $i['label'] }}</span></a></li>
+                        @endforeach
+                    </ul>
+                </li>
+                @endif
+                @if($canViewParentsContact && Route::has('admin.parents-contact.index'))
+                <li class="nav-item {{ request()->routeIs('admin.parents-contact.*') ? 'active' : '' }}" data-section="comm2"><a href="{{ route('admin.parents-contact.index') }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_parent_contact')</span></a></li>
+                @endif
+                @php
+                    $sidebarSupportRoute2 = ($sidebarUser && ($sidebarUser->isSuperAdmin() || $sidebarUser->isSchoolAdmin()))
+                        ? (Route::has('admin.support.index') ? route('admin.support.index') : '#')
+                        : (Route::has('my.support.index') ? route('my.support.index') : '#');
+                    $sidebarSupportActive2 = request()->routeIs('admin.support.*') || request()->routeIs('my.support.*');
+                @endphp
+                @if($canViewSupport)
+                <li class="nav-item {{ $sidebarSupportActive2 ? 'active' : '' }}" data-section="comm2"><a href="{{ $sidebarSupportRoute2 }}"><x-svg-icon name="life-preserver" class="vc-ico" /><span class="menu-title">@lang('shell.nav_support')</span></a></li>
+                @endif
+            </div>{{-- /gp-sec-comm2 --}}
 
             {{-- ========== 2. عمليات تعليمية ========== --}}
             <div class="gp-section-header sec-educational" data-section-toggle="educational">

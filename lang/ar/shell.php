@@ -190,4 +190,28 @@ return [
     'portal_my_attendance' => 'سجل حضوري',
     'portal_contact_teacher' => 'تواصل مع المعلم',
     'portal_exams' => 'الاختبارات',
+
+    // ── Sidebar restructure: 6 new top-level sections (additive, card #1-6) ──
+    'section_extras' => 'الإضافات والإسنادات',
+    'section_academic' => 'الشؤون التعليمية والخطط',
+    'section_assessment' => 'القياس والتقويم',
+    'section_support' => 'الدعم والتقارير',
+    'section_admissions' => 'القبول والتسجيل',
+    'section_comm2' => 'التواصل والدعم الفني',
+
+    'nav_companies' => 'الشركات التعليمية',
+    'nav_complexes' => 'المجمعات التعليمية',
+    'nav_school' => 'المدرسة',
+    'nav_classes' => 'صفوف وفصول',
+    'nav_team' => 'فريق العمل',
+    'nav_promotion' => 'الترحيل',
+    'nav_terms_weeks' => 'الفصول الدراسية والأسابيع',
+    'nav_add_subject' => 'اضافة مادة',
+    'nav_special_programs' => 'البرامج التعليمية الخاصة',
+    'nav_distance_learning' => 'التعليم عن بعد',
+    'nav_question_banks' => 'بنوك الأسئلة',
+    'nav_subject_skills' => 'مهارات المواد',
+    'nav_exams' => 'الاختبارات',
+    'nav_points_rewards' => 'النقاط والمكافآت',
+    'nav_academic_calendar' => 'التقويم الدراسي',
 ];
