@@ -564,15 +564,15 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('admin.schools.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.schools.index') ? route('admin.schools.index') : '#' }}"><x-svg-icon name="building" class="vc-ico" /><span class="menu-title">@lang('shell.nav_school')</span></a></li>
                 @endif
                 <li class="nav-item {{ request()->routeIs('admin.classes-overview.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.classes-overview.index') ? route('admin.classes-overview.index') : '#' }}"><x-svg-icon name="grid-3x3-gap" class="vc-ico" /><span class="menu-title">@lang('shell.nav_classes')</span></a></li>
-                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_team')</span></a></li>
+                <li class="nav-item" data-section="extras"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_team')</span></a></li>
                 @if($canViewStudents)
                 <li class="nav-item {{ request()->routeIs('admin.users.students.*') && !request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.users.students.index') ? route('admin.users.students.index') : '#' }}"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users_students')</span></a></li>
                 @endif
                 @if($canViewParents)
                 <li class="nav-item {{ request()->routeIs('admin.users.parents.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.users.parents.index') ? route('admin.users.parents.index') : '#' }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users_parents')</span></a></li>
                 @endif
-                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="arrow-repeat" class="vc-ico" /><span class="menu-title">@lang('shell.nav_promotion')</span></a></li>
-                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="calendar-range" class="vc-ico" /><span class="menu-title">@lang('shell.nav_terms_weeks')</span></a></li>
+                <li class="nav-item" data-section="extras"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="arrow-repeat" class="vc-ico" /><span class="menu-title">@lang('shell.nav_promotion')</span></a></li>
+                <li class="nav-item" data-section="extras"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="calendar-range" class="vc-ico" /><span class="menu-title">@lang('shell.nav_terms_weeks')</span></a></li>
             </div>{{-- /gp-sec-extras --}}
 
             {{-- #2 الشؤون التعليمية والخطط --}}
@@ -596,8 +596,8 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         @if($canViewExams)<li class="{{ request()->routeIs('admin.exams.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>@endif
                     </ul>
                 </li>
-                <li class="nav-item" data-section="academic"><a href="#"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_special_programs')</span></a></li>
-                <li class="nav-item" data-section="academic"><a href="#"><x-svg-icon name="laptop" class="vc-ico" /><span class="menu-title">@lang('shell.nav_distance_learning')</span></a></li>
+                <li class="nav-item" data-section="academic"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_special_programs')</span></a></li>
+                <li class="nav-item" data-section="academic"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="laptop" class="vc-ico" /><span class="menu-title">@lang('shell.nav_distance_learning')</span></a></li>
                 @if($canViewVirtualClasses)
                 <li class="nav-item {{ request()->routeIs('manage.virtual-classes.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : '#' }}"><x-svg-icon name="camera-video" class="vc-ico" /><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a></li>
                 @endif
@@ -634,7 +634,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 @endif
-                <li class="nav-item" data-section="assessment"><a href="#"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
+                <li class="nav-item" data-section="assessment"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('admin.class-visits.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.class-visits.index') ? route('admin.class-visits.index') : '#' }}"><x-svg-icon name="geo-alt" class="vc-ico" /><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
             </div>{{-- /gp-sec-assessment --}}
 
@@ -678,7 +678,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 @endif
-                <li class="nav-item" data-section="support"><a href="#"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_points_rewards')</span></a></li>
+                <li class="nav-item" data-section="support"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_points_rewards')</span></a></li>
                 @if($canViewCertificates)
                 <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('admin.certificates.index') ? route('admin.certificates.index') : '#' }}"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('shell.nav_certificates')</span></a></li>
                 @endif
@@ -688,7 +688,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if($canViewCalendar)
                 <li class="nav-item {{ request()->routeIs('manage.school-calendar.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('manage.school-calendar.index') ? route('manage.school-calendar.index') : '#' }}"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-title">@lang('shell.nav_academic_calendar')</span></a></li>
                 @endif
-                <li class="nav-item" data-section="support"><a href="#"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
+                <li class="nav-item" data-section="support"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
             </div>{{-- /gp-sec-support --}}
 
             {{-- #5 القبول والتسجيل --}}
