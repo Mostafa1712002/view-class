@@ -31,6 +31,7 @@ return [
     'nav_library_public' => 'المكتبة العامة',
     'nav_library_private' => 'المكتبات الخاصة',
     'nav_labs' => 'المعامل الافتراضية',
+    'nav_portfolio_management' => 'إدارة ملف أنجاز',
     'nav_counseling' => 'الإرشاد الطلابي',
     'nav_special_ed' => 'التربية الخاصة',
     'nav_policies' => 'سياسات التعليم',

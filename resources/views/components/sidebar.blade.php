@@ -828,6 +828,13 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </li>
                 @endif
 
+                {{-- إدارة ملف أنجاز — achievement-portfolio card (Mohamed Farouk) --}}
+                @if($canViewLibraries && Route::has('admin.portfolio.index'))
+                <li class="nav-item {{ request()->routeIs('admin.portfolio.*') ? 'active' : '' }}" data-section="educational">
+                    <a href="{{ route('admin.portfolio.index') }}" data-label="@lang('shell.nav_portfolio_management')"><x-svg-icon name="trophy" class="vc-ico" /><span class="menu-title">@lang('shell.nav_portfolio_management')</span></a>
+                </li>
+                @endif
+
                 <li class="nav-item" data-section="educational" data-label="@lang('shell.nav_counseling')"><a href="#" data-label="@lang('shell.nav_counseling')"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
 
                 <li class="nav-item {{ request()->routeIs('manage.special-education.*') ? 'active' : '' }}" data-section="educational">
@@ -1337,6 +1344,11 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('teacher.students.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ route('teacher.students.index') }}" data-label="@lang('teacher_students.sidebar_link')"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('teacher_students.sidebar_link')</span></a>
                 </li>
+                @if(Route::has('teacher.portfolio'))
+                <li class="nav-item {{ request()->routeIs('teacher.portfolio') ? 'active' : '' }}" data-section="teacher">
+                    <a href="{{ route('teacher.portfolio') }}" data-label="ملف الإنجاز"><x-svg-icon name="trophy" class="vc-ico" /><span class="menu-title">ملف الإنجاز</span></a>
+                </li>
+                @endif
                 <li class="nav-item {{ request()->routeIs('admin.behavior.records.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ Route::has('admin.behavior.records.index') ? route('admin.behavior.records.index') : '#' }}" data-label="@lang('shell.nav_behavior')"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_behavior')</span></a>
                 </li>

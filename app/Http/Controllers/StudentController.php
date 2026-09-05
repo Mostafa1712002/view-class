@@ -8,7 +8,10 @@ use App\Models\Attendance;
 use App\Models\Certificate;
 use App\Models\Exam;
 use App\Models\Grade;
+use App\Models\PortfolioEntry;
 use App\Models\StudentExam;
+use App\Models\User;
+use App\Modules\Portfolio\Repositories\Contracts\PortfolioEntryRepository;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -425,7 +428,30 @@ class StudentController extends Controller
 
     public function portfolio(): View
     {
-        $student      = auth()->user();
+        $student = auth()->user();
+        $data    = $this->portfolioData($student);
+
+        // Entry sections (أقسام المواد / المشاريع التعليمية) added on the
+        // student's behalf via the admin achievement-portfolio page.
+        $data['entrySections'] = array_intersect_key(
+            PortfolioEntry::SECTIONS_STUDENT,
+            array_flip(PortfolioEntry::SECTIONS_STUDENT_ENTRY)
+        );
+        $data['entries'] = app(PortfolioEntryRepository::class)->groupedForUser($student->id);
+
+        return view('student.portfolio', $data);
+    }
+
+    /**
+     * Assemble the achievement-portfolio data (certificates, published grades,
+     * exam results, attendance) for a given student. Extracted so the admin
+     * "إدارة ملف أنجاز" pages can reuse it for any student, not just the
+     * logged-in one — see .kiro/specs/achievement-portfolio.
+     *
+     * @return array<string, mixed>
+     */
+    public function portfolioData(User $student): array
+    {
         $academicYear = AcademicYear::where('is_current', true)->first();
 
         // Published certificates issued to this student
@@ -462,11 +488,11 @@ class StudentController extends Controller
         $attLate         = $allAttendances->where('status', 'late')->count();
         $attendanceRate  = $attTotal > 0 ? round((($attPresent + $attLate) / $attTotal) * 100, 1) : 0;
 
-        return view('student.portfolio', compact(
+        return compact(
             'student', 'academicYear', 'certificates',
             'grades', 'avgGrade', 'topGrades',
             'examResults', 'attendanceRate'
-        ));
+        );
     }
 
     /**

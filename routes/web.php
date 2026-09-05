@@ -1181,6 +1181,9 @@ Route::middleware(['auth'])->prefix('my/surveys')->name('my.surveys.')->group(fu
 // Migrated to permission:-based gating; full route set lives in the module file.
 require base_path('app/Modules/Certificates/Routes/web.php');
 
+// === Achievement portfolio — إدارة ملف أنجاز ===
+require base_path('app/Modules/Portfolio/Routes/web.php');
+
 // ==========================================
 // Internal Mailbox
 // ==========================================

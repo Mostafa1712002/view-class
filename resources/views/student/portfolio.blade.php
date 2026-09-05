@@ -139,6 +139,40 @@
         </div>
     </div>
 
+    {{-- أقسام المواد / المشاريع التعليمية --}}
+    @foreach($entrySections as $key => $label)
+    <div class="card mb-4">
+        <div class="card-header"><h5 class="mb-0">{{ $label }}</h5></div>
+        <div class="card-body">
+            @php $sectionEntries = $entries->get($key, collect()); @endphp
+            @if($sectionEntries->isEmpty())
+                <p class="text-muted mb-0">لا توجد عناصر بعد</p>
+            @else
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>العنوان</th><th>التاريخ</th><th>مرفق</th></tr></thead>
+                    <tbody>
+                    @foreach($sectionEntries as $entry)
+                    <tr>
+                        <td>{{ $entry->title }}</td>
+                        <td>{{ $entry->entry_date?->format('Y-m-d') ?? '-' }}</td>
+                        <td>
+                            @if($entry->attachment_path)
+                                <a href="{{ Storage::url($entry->attachment_path) }}" target="_blank" rel="noopener">عرض المرفق</a>
+                            @else
+                                -
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endforeach
+
     {{-- Certificates --}}
     @if($certificates->count() > 0)
     <div class="card mb-4">
