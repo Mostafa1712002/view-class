@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('sprint4.subjects.page_title'))
+@section('title', __('subject_tracks.page_title'))
 @section('body_class','theme-light')
 
 @push('styles')
@@ -100,17 +100,19 @@
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
-        <h2 class="content-header-title mb-0">@lang('sprint4.subjects.index_title')</h2>
+        <h2 class="content-header-title mb-0">@lang('subject_tracks.page_title')</h2>
         <div class="breadcrumb-wrapper">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
-                <li class="breadcrumb-item active">@lang('sprint4.subjects.plural')</li>
+                <li class="breadcrumb-item active">@lang('subject_tracks.page_title')</li>
             </ol>
         </div>
     </div>
 </div>
 
 <div class="content-body">
+    @include('admin.subjects._tabs')
+
     {{-- KPI tiles --}}
     <div class="row subjects-kpis mb-3">
         <div class="col-md-3 col-6 mb-2">
