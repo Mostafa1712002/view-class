@@ -74,6 +74,15 @@ final class PermissionCatalog
         'support'            => ['label' => 'الدعم الفني',          'actions' => ['view','create','edit','reply','assign','change_status','close','delete','view_attachments']],
         'admissions'         => ['label' => 'القبول والتسجيل',      'actions' => ['view','edit','delete','change_status','schedule','export','copy_link','copy_company_link','edit_school_settings','edit_settings','edit_info','convert_to_student']],
         'educational_sites'  => ['label' => 'المواقع التعليمية',    'actions' => ['view','create','edit','delete','reorder','toggle_active']],
+
+        // ── catalog audit (card #348) — real admin pages reachable from the
+        // sidebar with no corresponding permission group before this fix ──
+        'policies'     => ['label' => 'سياسات التعليم',      'actions' => ['view','create','edit','delete']],
+        'lessons'      => ['label' => 'الحصص الدراسية',      'actions' => ['view','create','edit','delete']],
+        'class_visits' => ['label' => 'الزيارات الصفية',     'actions' => ['view','create','edit','delete']],
+        'user_cards'   => ['label' => 'بطاقات المستخدمين',   'actions' => ['view','create']],
+        'surveys'      => ['label' => 'الاستبيانات',          'actions' => ['view','create','edit','delete','publish']],
+        'special_education' => ['label' => 'التربية الخاصة', 'actions' => ['view','create','edit','delete']],
     ];
 
     public const SCOPE_LABELS = [
