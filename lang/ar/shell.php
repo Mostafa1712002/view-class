@@ -47,6 +47,8 @@ return [
     'font_size_large' => 'كبير',
 
     'scope_company' => 'الشركة التعليمية',
+    'scope_no_company' => 'بدون شركة',
+    'scope_complex' => 'المجمع التعليمي',
     'scope_school' => 'المدرسة',
     'scope_semester' => 'الفصل الدراسي',
     'scope_all_companies' => 'جميع الشركات',

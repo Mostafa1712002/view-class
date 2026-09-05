@@ -2,8 +2,10 @@
 
 namespace App\Modules\QuestionBankCore\Models;
 
+use App\Models\EducationalCompany;
 use App\Models\School;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -20,6 +22,7 @@ class Compound extends Model
         'educational_company_id',
         'name_ar',
         'name_en',
+        'logo',
         'status',
         'sort_order',
     ];
@@ -32,6 +35,11 @@ class Compound extends Model
     {
         return $this->belongsToMany(School::class, 'compound_school', 'compound_id', 'school_id')
             ->withTimestamps();
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(EducationalCompany::class, 'educational_company_id');
     }
 
     public function getDisplayNameAttribute(): string

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -51,6 +52,17 @@ class School extends Model
     public function educationalCompany(): BelongsTo
     {
         return $this->belongsTo(EducationalCompany::class);
+    }
+
+    /**
+     * The school's educational complex (المجمع). Single source of truth is the
+     * compound_school pivot — sync(array_filter([$id])) enforces at most one row
+     * per school; do not add a schools.complex_id column (educational-companies-complexes card).
+     */
+    public function compounds(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Modules\QuestionBankCore\Models\Compound::class, 'compound_school', 'school_id', 'compound_id')
+            ->withTimestamps();
     }
 
     public function branchRecord(): BelongsTo

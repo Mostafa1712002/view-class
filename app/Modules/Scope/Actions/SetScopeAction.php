@@ -13,19 +13,39 @@ final class SetScopeAction
     public function __construct(private ScopeRepository $repo) {}
 
     /**
-     * @param array{company_id?:int|null,school_id?:int|null,academic_year_id?:int|null,academic_term_id?:int|null} $input
-     * @return array<string,int|null>
+     * @param array{company_id?:int|string|null,compound_id?:int|null,school_id?:int|null,academic_year_id?:int|null,academic_term_id?:int|null} $input
+     * @return array{company_id:int|string|null,compound_id:int|null,school_id:int|null,academic_year_id:int|null,academic_term_id:int|null}
      */
     public function execute(User $user, array $input): array
     {
-        $companyId = $this->nullableInt($input['company_id'] ?? null);
+        // 'none' is the "بدون شركة" sentinel (companyless schools) — distinct from
+        // null, which keeps meaning "no filter / global" everywhere else (Option A,
+        // educational-companies-complexes card: never force the implicit global
+        // super-admin view away). This session key is UI-only today — nothing
+        // scopes actual data reads by it — so introducing the sentinel is safe.
+        $companyRaw = $input['company_id'] ?? null;
+        if ($companyRaw === 'none') {
+            $companyId = 'none';
+        } else {
+            $companyId = $this->nullableInt($companyRaw);
+            if ($companyId !== null && ! $this->repo->companyExistsFor($user, $companyId)) {
+                $companyId = null;
+            }
+        }
+
+        $compoundId = $this->nullableInt($input['compound_id'] ?? null);
+        if ($compoundId !== null && ! $this->repo->complexExistsFor($user, $compoundId)) {
+            $compoundId = null;
+        }
+        // Complex cascades from company: no real company selected → no complex.
+        if (! is_int($companyId)) {
+            $compoundId = null;
+        }
+
         $schoolId = $this->nullableInt($input['school_id'] ?? null);
         $yearId = $this->nullableInt($input['academic_year_id'] ?? null);
         $termId = $this->nullableInt($input['academic_term_id'] ?? null);
 
-        if ($companyId !== null && ! $this->repo->companyExistsFor($user, $companyId)) {
-            $companyId = null;
-        }
         if ($schoolId !== null && ! $this->repo->schoolExistsFor($user, $schoolId)) {
             $schoolId = null;
         }
@@ -58,6 +78,7 @@ final class SetScopeAction
 
         $resolved = [
             'company_id' => $companyId,
+            'compound_id' => $compoundId,
             'school_id' => $schoolId,
             'academic_year_id' => $yearId,
             'academic_term_id' => $termId,

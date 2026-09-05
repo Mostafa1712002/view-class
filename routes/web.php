@@ -101,6 +101,27 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')
     // Schools Management
     Route::resource('schools', \App\Http\Controllers\Admin\SchoolController::class);
 
+    // الشركات التعليمية — card «الشركات والمجمعات التعليمية»
+    Route::prefix('educational-companies')->name('educational-companies.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\EducationalCompanyController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\Admin\EducationalCompanyController::class, 'store'])->name('store');
+        Route::put('{company}', [\App\Http\Controllers\Admin\EducationalCompanyController::class, 'update'])->name('update');
+        Route::delete('{company}', [\App\Http\Controllers\Admin\EducationalCompanyController::class, 'destroy'])->name('destroy');
+        Route::get('{company}', [\App\Http\Controllers\Admin\EducationalCompanyController::class, 'show'])->name('show');
+    });
+
+    // المجمعات التعليمية — same card, reuses the existing Compound model/table
+    Route::prefix('educational-complexes')->name('educational-complexes.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\EducationalComplexController::class, 'index'])->name('index');
+        Route::get('by-company', [\App\Http\Controllers\Admin\EducationalComplexController::class, 'byCompany'])->name('by-company');
+        Route::post('/', [\App\Http\Controllers\Admin\EducationalComplexController::class, 'store'])->name('store');
+        Route::put('{complex}', [\App\Http\Controllers\Admin\EducationalComplexController::class, 'update'])->name('update');
+        Route::delete('{complex}', [\App\Http\Controllers\Admin\EducationalComplexController::class, 'destroy'])->name('destroy');
+    });
+
+    // صفوف وفصول — classes across all schools (same card)
+    Route::get('classes-overview', [\App\Http\Controllers\Admin\ClassesOverviewController::class, 'index'])->name('classes-overview.index');
+
     // Per-school control menu — Sprint 2
     Route::prefix('schools/{school}')->name('schools.')->group(function () {
         Route::get('settings', [\App\Http\Controllers\Admin\School\SchoolSettingsController::class, 'show'])->name('settings.show');

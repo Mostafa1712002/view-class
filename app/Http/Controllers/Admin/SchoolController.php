@@ -5,14 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EducationalCompany;
 use App\Models\School;
+use App\Modules\QuestionBankCore\Models\Compound;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SchoolController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $name = trim((string) $request->get('q', ''));
+        $companyId = $request->get('company_id');
+        $complexId = $request->get('compound_id');
+
         $schools = School::query()
+            ->with(['educationalCompany:id,name_ar,name_en', 'compounds:id,name_ar,name_en'])
             ->withCount(['users', 'sections', 'classes'])
             ->withCount([
                 'users as students_count' => function ($q) {
@@ -23,26 +29,40 @@ class SchoolController extends Controller
                         ->where('status', 'active');
                 },
             ])
+            ->when($name !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('name_ar', 'like', "%{$name}%")
+                ->orWhere('name_en', 'like', "%{$name}%")
+                ->orWhere('name', 'like', "%{$name}%")))
+            ->when($companyId === '__none__', fn ($q) => $q->whereNull('educational_company_id'))
+            ->when($companyId && $companyId !== '__none__', fn ($q) => $q->where('educational_company_id', $companyId))
+            ->when($complexId, fn ($q) => $q->whereHas('compounds', fn ($c) => $c->where('compounds.id', $complexId)))
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('admin.schools.index', compact('schools'));
+        $companies = EducationalCompany::orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
+        $complexes = Compound::orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
+
+        return view('admin.schools.index', compact('schools', 'companies', 'complexes', 'name', 'companyId', 'complexId'));
     }
 
     public function create()
     {
         $companies = EducationalCompany::orderBy('name_ar')->get();
+        $complexes = collect();
         $branches = \App\Modules\SchoolBranches\Models\SchoolBranch::where('is_active', true)
             ->orderBy('name_ar')->get();
         $cities = config('saudi_cities', []);
         $timezones = $this->timezoneOptions();
-        return view('admin.schools.create', compact('companies', 'branches', 'cities', 'timezones'));
+        return view('admin.schools.create', compact('companies', 'complexes', 'branches', 'cities', 'timezones'));
     }
 
     public function store(Request $request)
     {
         $validated = $this->validateSchool($request);
+        $compoundId = $validated['compound_id'] ?? null;
+        unset($validated['compound_id']);
 
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('schools', 'public');
@@ -53,7 +73,10 @@ class SchoolController extends Controller
         // Auto-generate code if not given (e.g. DEMO-AUTO-3).
         $validated['code'] = $validated['code'] ?? $this->generateCode($validated['name_ar']);
 
-        School::create($validated);
+        $school = School::create($validated);
+        // Single source of truth = compound_school pivot (no schools.complex_id column).
+        // sync() with at most one id enforces "one complex per school".
+        $school->compounds()->sync(array_filter([$compoundId]));
 
         return redirect()->route('admin.schools.index')
             ->with('success', __('common.created_successfully'));
@@ -68,16 +91,22 @@ class SchoolController extends Controller
     public function edit(School $school)
     {
         $companies = EducationalCompany::orderBy('name_ar')->get();
+        $complexes = $school->educational_company_id
+            ? Compound::where('educational_company_id', $school->educational_company_id)->orderBy('name_ar')->get()
+            : collect();
         $branches = \App\Modules\SchoolBranches\Models\SchoolBranch::where('is_active', true)
             ->orderBy('name_ar')->get();
         $cities = config('saudi_cities', []);
         $timezones = $this->timezoneOptions();
-        return view('admin.schools.edit', compact('school', 'companies', 'branches', 'cities', 'timezones'));
+        $selectedComplexId = $school->compounds->first()?->id;
+        return view('admin.schools.edit', compact('school', 'companies', 'complexes', 'branches', 'cities', 'timezones', 'selectedComplexId'));
     }
 
     public function update(Request $request, School $school)
     {
         $validated = $this->validateSchool($request, $school->id);
+        $compoundId = $validated['compound_id'] ?? null;
+        unset($validated['compound_id']);
 
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('schools', 'public');
@@ -86,6 +115,7 @@ class SchoolController extends Controller
         $validated['name'] = $validated['name'] ?? $validated['name_ar'];
 
         $school->update($validated);
+        $school->compounds()->sync(array_filter([$compoundId]));
 
         return redirect()->route('admin.schools.index')
             ->with('success', __('common.updated_successfully'));
@@ -129,6 +159,7 @@ class SchoolController extends Controller
             'timezone' => $tzRule,
             'default_language' => 'required|in:ar,en',
             'educational_company_id' => 'nullable|exists:educational_companies,id',
+            'compound_id' => 'nullable|exists:compounds,id',
             'code' => $codeRule,
             'address' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:30',

@@ -21,4 +21,9 @@ class EducationalCompany extends Model
     {
         return $this->hasMany(School::class);
     }
+
+    public function compounds(): HasMany
+    {
+        return $this->hasMany(\App\Modules\QuestionBankCore\Models\Compound::class);
+    }
 }

@@ -100,6 +100,15 @@
             @endforeach
         </select>
     </div>
+    <div class="col-md-6 mb-3">
+        <label for="compound_id" class="form-label">@lang('schools.educational_complex')</label>
+        <select class="form-control select2" id="compound_id" name="compound_id">
+            <option value="">—</option>
+            @foreach(($complexes ?? []) as $cx)
+                <option value="{{ $cx->id }}" @selected(($selectedComplexId ?? old('compound_id')) == $cx->id)>{{ $cx->name_ar ?: $cx->name_en }}</option>
+            @endforeach
+        </select>
+    </div>
 
     <div class="col-md-6 mb-3">
         <label for="phone" class="form-label">@lang('common.phone')</label>
@@ -163,3 +172,49 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    if (!window.jQuery) return;
+    jQuery(function ($) {
+        var $company = $('#educational_company_id');
+        var $complex = $('#compound_id');
+        if (!$company.length || !$complex.length) return;
+
+        var byCompanyUrl = @json(route('admin.educational-complexes.by-company'));
+        var preselectedComplexId = @json($selectedComplexId ?? old('compound_id'));
+
+        // Cascades from the company select (design.md: complex options depend on
+        // the chosen company). preselect keeps the school's current complex
+        // selected the first time this runs (edit form).
+        function loadComplexes(companyId, preselect) {
+            $complex.empty().append($('<option>', { value: '', text: '—' }));
+            if (!companyId) {
+                $complex.trigger('change');
+                return;
+            }
+
+            $.getJSON(byCompanyUrl, { company_id: companyId }).done(function (list) {
+                (list || []).forEach(function (item) {
+                    $complex.append($('<option>', {
+                        value: item.id,
+                        text: item.name,
+                        selected: preselect && String(preselect) === String(item.id),
+                    }));
+                });
+                $complex.trigger('change');
+            });
+        }
+
+        if ($company.val()) {
+            loadComplexes($company.val(), preselectedComplexId);
+        }
+
+        $company.on('change', function () {
+            loadComplexes($company.val(), null);
+        });
+    });
+})();
+</script>
+@endpush

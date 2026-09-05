@@ -563,7 +563,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if($canViewSchools)
                 <li class="nav-item {{ request()->routeIs('admin.schools.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.schools.index') ? route('admin.schools.index') : '#' }}"><x-svg-icon name="building" class="vc-ico" /><span class="menu-title">@lang('shell.nav_school')</span></a></li>
                 @endif
-                <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="grid-3x3-gap" class="vc-ico" /><span class="menu-title">@lang('shell.nav_classes')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admin.classes-overview.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.classes-overview.index') ? route('admin.classes-overview.index') : '#' }}"><x-svg-icon name="grid-3x3-gap" class="vc-ico" /><span class="menu-title">@lang('shell.nav_classes')</span></a></li>
                 <li class="nav-item" data-section="extras"><a href="#"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_team')</span></a></li>
                 @if($canViewStudents)
                 <li class="nav-item {{ request()->routeIs('admin.users.students.*') && !request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.users.students.index') ? route('admin.users.students.index') : '#' }}"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users_students')</span></a></li>

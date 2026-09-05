@@ -46,6 +46,8 @@ return [
     'font_size_large' => 'Large',
 
     'scope_company' => 'Educational company',
+    'scope_no_company' => 'No company',
+    'scope_complex' => 'Educational complex',
     'scope_school' => 'School',
     'scope_semester' => 'Semester',
     'scope_all_companies' => 'All companies',

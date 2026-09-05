@@ -38,6 +38,28 @@
     @include('components.alerts')
 
     <div class="card">
+        <div class="card-header">
+            <form action="{{ route('admin.schools.index') }}" method="GET" class="d-flex flex-wrap gap-1">
+                <input type="search" name="q" value="{{ $name }}" class="form-control form-control-sm" style="max-width:220px" placeholder="@lang('schools.filter_name')">
+                <select name="company_id" class="form-control form-control-sm" style="max-width:200px">
+                    <option value="">@lang('schools.filter_all_companies')</option>
+                    <option value="__none__" @selected($companyId === '__none__')>@lang('schools.filter_no_company')</option>
+                    @foreach($companies as $c)
+                        <option value="{{ $c->id }}" @selected((string) $companyId === (string) $c->id)>{{ $c->name_ar ?: $c->name_en }}</option>
+                    @endforeach
+                </select>
+                <select name="compound_id" class="form-control form-control-sm" style="max-width:200px">
+                    <option value="">@lang('schools.filter_all_complexes')</option>
+                    @foreach($complexes as $cx)
+                        <option value="{{ $cx->id }}" @selected((string) $complexId === (string) $cx->id)>{{ $cx->name_ar ?: $cx->name_en }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="btn btn-outline-secondary btn-sm">@lang('schools.filter_apply')</button>
+                @if($name || $companyId || $complexId)
+                    <a href="{{ route('admin.schools.index') }}" class="btn btn-outline-secondary btn-sm">@lang('common.clear')</a>
+                @endif
+            </form>
+        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered table-striped align-middle">
@@ -45,6 +67,8 @@
                         <tr>
                             <th>#</th>
                             <th>@lang('schools.name')</th>
+                            <th>@lang('schools.educational_company')</th>
+                            <th>@lang('schools.educational_complex')</th>
                             <th>@lang('schools.branch')</th>
                             <th>@lang('schools.sort_order')</th>
                             <th>@lang('schools.sections_count')</th>
@@ -58,13 +82,15 @@
                     <tbody>
                         @forelse($schools as $school)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $loop->iteration + ($schools->currentPage() - 1) * $schools->perPage() }}</td>
                             <td>
                                 <strong>{{ app()->getLocale() === 'en' ? ($school->name_en ?: $school->name_ar ?: $school->name) : ($school->name_ar ?: $school->name) }}</strong>
                                 @if($school->code)
                                     <br><small class="text-muted">{{ $school->code }}</small>
                                 @endif
                             </td>
+                            <td>{{ $school->educationalCompany?->name_ar ?: $school->educationalCompany?->name_en ?: __('schools.no_educational_company') }}</td>
+                            <td>{{ $school->compounds->first()?->name_ar ?: $school->compounds->first()?->name_en ?: __('schools.no_educational_complex') }}</td>
                             <td>{{ $school->branch ?? '-' }}</td>
                             <td>{{ $school->sort_order ?? '-' }}</td>
                             <td>{{ $school->sections_count }}</td>
@@ -104,7 +130,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center">@lang('common.no_data')</td>
+                            <td colspan="12" class="text-center">@lang('common.no_data')</td>
                         </tr>
                         @endforelse
                     </tbody>

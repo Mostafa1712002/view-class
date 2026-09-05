@@ -32,7 +32,7 @@ class ScopeController extends Controller
 
     public function set(Request $request, SetScopeAction $action): RedirectResponse
     {
-        $action->execute($request->user(), $request->only(['company_id', 'school_id', 'academic_year_id']));
+        $action->execute($request->user(), $request->only(['company_id', 'compound_id', 'school_id', 'academic_year_id']));
         return back();
     }
 }

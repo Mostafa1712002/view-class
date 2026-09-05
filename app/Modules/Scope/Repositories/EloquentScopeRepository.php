@@ -7,6 +7,7 @@ use App\Models\AcademicYear;
 use App\Models\EducationalCompany;
 use App\Models\School;
 use App\Models\User;
+use App\Modules\QuestionBankCore\Models\Compound;
 use App\Modules\Scope\Repositories\Contracts\ScopeRepository;
 
 final class EloquentScopeRepository implements ScopeRepository
@@ -40,12 +41,18 @@ final class EloquentScopeRepository implements ScopeRepository
             ->toArray();
     }
 
-    public function schoolsFor(User $user, ?int $companyId): array
+    public function schoolsFor(User $user, int|string|null $companyId, ?int $compoundId = null): array
     {
         $query = School::query()->orderBy('sort_order')->orderBy('name_ar');
 
-        if ($companyId) {
+        if ($companyId === 'none') {
+            $query->whereNull('educational_company_id');
+        } elseif ($companyId) {
             $query->where('educational_company_id', $companyId);
+        }
+
+        if ($compoundId) {
+            $query->whereHas('compounds', fn ($q) => $q->where('compounds.id', $compoundId));
         }
 
         if (! $user->isSuperAdmin()) {
@@ -54,6 +61,24 @@ final class EloquentScopeRepository implements ScopeRepository
         }
 
         return $query->get(['id', 'name_ar', 'name_en', 'educational_company_id'])->toArray();
+    }
+
+    /**
+     * Complex selector cascades from company only (educational-companies-complexes
+     * card, header Option A): no real company chosen → no complexes to offer.
+     */
+    public function complexesFor(int|string|null $companyId): array
+    {
+        if (! $companyId || $companyId === 'none') {
+            return [];
+        }
+
+        return Compound::query()
+            ->where('educational_company_id', $companyId)
+            ->orderBy('sort_order')
+            ->orderBy('name_ar')
+            ->get(['id', 'name_ar', 'name_en'])
+            ->toArray();
     }
 
     public function yearsFor(User $user, ?int $schoolId): array
@@ -111,6 +136,21 @@ final class EloquentScopeRepository implements ScopeRepository
         }
 
         return in_array((int) $schoolId, $user->managedSchoolIds(), true);
+    }
+
+    public function complexExistsFor(User $user, int $complexId): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return Compound::whereKey($complexId)->exists();
+        }
+
+        $companyIds = School::query()
+            ->whereIn('id', $user->managedSchoolIds())
+            ->pluck('educational_company_id')
+            ->filter()
+            ->unique();
+
+        return Compound::whereKey($complexId)->whereIn('educational_company_id', $companyIds)->exists();
     }
 
     public function yearExistsFor(User $user, int $yearId): bool
