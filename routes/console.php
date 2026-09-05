@@ -16,3 +16,7 @@ Schedule::command('evaluation:notify-visit-reminder')->dailyAt('07:30');
 
 // Card #233 — school-calendar pre-event reminders.
 Schedule::command('school-calendar:send-reminders')->everyFiveMinutes();
+
+// إدارة رسائل غياب الطالب — auto mode, fires per-school once local time
+// passes its configured end-of-day send_time.
+Schedule::command('attendance:send-daily-absence-messages')->hourly();

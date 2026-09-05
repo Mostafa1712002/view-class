@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Attendance\Controllers\AbsenceMessageController;
 use App\Modules\Attendance\Controllers\FollowUpController;
 use App\Modules\Attendance\Controllers\ReportExportController;
 use App\Modules\Attendance\Controllers\ReportsController;
@@ -44,6 +45,18 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
             ->middleware('permission:attendance.view')->name('user-reports');
         Route::post('user-reports/send', [FollowUpController::class, 'sendUserReports'])
             ->middleware('permission:attendance.notify_parent')->name('user-reports.send');
+
+        // إدارة رسائل غياب الطالب — settings + manual send + template.
+        Route::get('absence-messages', [AbsenceMessageController::class, 'index'])
+            ->middleware('permission:attendance.view')->name('absence-messages.index');
+        Route::get('absence-messages/preview', [AbsenceMessageController::class, 'previewAbsent'])
+            ->middleware('permission:attendance.view')->name('absence-messages.preview');
+        Route::post('absence-messages/settings', [AbsenceMessageController::class, 'saveSettings'])
+            ->middleware('permission:attendance.notify_parent')->name('absence-messages.settings.save');
+        Route::post('absence-messages/template', [AbsenceMessageController::class, 'saveTemplate'])
+            ->middleware('permission:attendance.notify_parent')->name('absence-messages.template.save');
+        Route::post('absence-messages/send', [AbsenceMessageController::class, 'send'])
+            ->middleware('permission:attendance.notify_parent')->name('absence-messages.send');
     });
 
 // #263 — reports (read-only screens; gated by attendance.view_reports)

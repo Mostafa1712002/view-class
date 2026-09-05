@@ -102,6 +102,7 @@ return [
     'nav_daily_attendance' => 'حضور وغياب يومي',
     'nav_period_attendance' => 'حضور وغياب حصة',
     'nav_follow_late_absence' => 'متابعة التأخير والغياب',
+    'nav_absence_messages' => 'إدارة رسائل غياب الطالب',
     'nav_days_absence_report' => 'تقرير غياب أيام وفق الفصول',
     'nav_subjects_absence_summary' => 'ملخص غياب المواد الدراسية',
 

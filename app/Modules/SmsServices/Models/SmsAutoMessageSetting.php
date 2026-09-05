@@ -50,6 +50,16 @@ class SmsAutoMessageSetting extends Model
             'default'  => 'عزيزي ولي الأمر، استأذن الطالب/ة {student_name} من المدرسة بتاريخ {date}. {school_name}',
             'has_threshold' => false,
         ],
+        // إدارة رسائل غياب الطالب — is_enabled=true means "auto" mode (send
+        // automatically after send_time); false means manual-only. The saved
+        // body lives on the school's SmsTemplate (see AbsenceMessageController)
+        // and is mirrored into template_body here so the generic auto-messages
+        // screen (which iterates EVENT_TYPES) stays consistent with this row.
+        'absent_daily' => [
+            'label'    => 'رسائل غياب الطالب اليومي بعد انتهاء اليوم الدراسي',
+            'default'  => 'عزيزي ولي الأمر، نُفيدكم بغياب الطالب/ة {student_name} اليوم {date}. {school_name}',
+            'has_threshold' => false,
+        ],
     ];
 
     protected $fillable = [
@@ -58,6 +68,7 @@ class SmsAutoMessageSetting extends Model
         'is_enabled',
         'template_body',
         'threshold',
+        'send_time',
     ];
 
     protected $casts = [
