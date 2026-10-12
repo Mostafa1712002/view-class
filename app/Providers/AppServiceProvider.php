@@ -76,7 +76,8 @@ class AppServiceProvider extends ServiceProvider
         // load() first: addLines() on an unloaded group would mark it loaded with only this key.
         foreach (['ar' => $brand['brand_name_ar'], 'en' => $brand['brand_name_en']] as $locale => $name) {
             app('translator')->load('*', 'auth', $locale);
-            app('translator')->addLines(['auth.app_name' => $name], $locale);
+            // e(): @lang echoes unescaped and this value is editable from the settings page.
+            app('translator')->addLines(['auth.app_name' => e($name)], $locale);
         }
     }
 }
