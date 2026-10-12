@@ -22,7 +22,7 @@ return new class extends Migration
     private const GROUP = 'viewing';
 
     /** Roles that receive this permission. */
-    private array $adminRoleIds = [1]; // super-admin
+    private array $adminRoleSlugs = ['super-admin'];
 
     public function up(): void
     {
@@ -38,7 +38,8 @@ return new class extends Migration
             return;
         }
 
-        foreach ($this->adminRoleIds as $roleId) {
+        // Resolved by slug so a fresh install (roles not seeded yet) skips the mapping.
+        foreach (DB::table('roles')->whereIn('slug', $this->adminRoleSlugs)->pluck('id') as $roleId) {
             DB::table('permission_role')->updateOrInsert(
                 ['role_id' => $roleId, 'permission_id' => $permissionId],
                 ['updated_at' => $now]

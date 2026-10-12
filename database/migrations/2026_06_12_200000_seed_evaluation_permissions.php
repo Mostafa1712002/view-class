@@ -16,11 +16,13 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /** Roles that receive every evaluation permission. */
-    private array $adminRoleIds = [1, 2];
+    private array $adminRoleSlugs = ['super-admin', 'school-admin'];
 
     public function up(): void
     {
         $now = now();
+        // Resolved by slug so a fresh install (roles not seeded yet) skips the mapping.
+        $adminRoleIds = DB::table('roles')->whereIn('slug', $this->adminRoleSlugs)->pluck('id');
 
         foreach (EvaluationPermissions::all() as $slug => $name) {
             // 1. Ensure the permission row exists (idempotent on slug).
@@ -34,7 +36,7 @@ return new class extends Migration
             }
 
             // 2. Map it to each admin role (idempotent on role_id+permission_id).
-            foreach ($this->adminRoleIds as $roleId) {
+            foreach ($adminRoleIds as $roleId) {
                 DB::table('permission_role')->updateOrInsert(
                     ['role_id' => $roleId, 'permission_id' => $permissionId],
                     ['updated_at' => $now]
