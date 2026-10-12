@@ -70,5 +70,13 @@ class AppServiceProvider extends ServiceProvider
         }
 
         view()->share($brand);
+
+        // Views print the brand via @lang('auth.app_name'); point it at the settings row
+        // so each deployment shows its own name.
+        // load() first: addLines() on an unloaded group would mark it loaded with only this key.
+        foreach (['ar' => $brand['brand_name_ar'], 'en' => $brand['brand_name_en']] as $locale => $name) {
+            app('translator')->load('*', 'auth', $locale);
+            app('translator')->addLines(['auth.app_name' => $name], $locale);
+        }
     }
 }
