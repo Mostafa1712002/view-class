@@ -22,6 +22,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Mail\Markdown;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -341,7 +342,7 @@ class AdminCertificateController extends Controller
 
         $deliver = [
             'in_platform' => fn () => $this->deliverInPlatform($recipients, $message, $shareUrl),
-            'email'       => fn () => $this->deliverEmail($recipients, $message),
+            'email'       => fn () => $this->deliverEmail($recipients, $message, $shareUrl),
             'sms'         => fn () => $this->deliverSms($cert->school_id, $recipients, $message),
             'whatsapp'    => fn () => $this->deliverWhatsapp($recipients, $message),
         ];
@@ -407,15 +408,23 @@ class AdminCertificateController extends Controller
         return $count;
     }
 
-    private function deliverEmail(Collection $recipients, string $message): int
+    private function deliverEmail(Collection $recipients, string $message, string $shareUrl = ''): int
     {
+        $subject = __('certificates.send_page.title');
+        $html = (string) app(Markdown::class)->render('emails.message', [
+            'heading'    => $subject,
+            'body'       => $message,
+            'actionUrl'  => $shareUrl,
+            'actionText' => __('certificates.preview_page.view'),
+        ]);
+
         $count = 0;
         foreach ($recipients as $user) {
             if (empty($user->email)) {
                 continue;
             }
-            Mail::raw($message, function ($mail) use ($user) {
-                $mail->to($user->email)->subject(__('certificates.send_page.title'));
+            Mail::html($html, function ($mail) use ($user, $subject) {
+                $mail->to($user->email)->subject($subject);
             });
             $count++;
         }
