@@ -8,4 +8,8 @@
 - [x] 6. Sidebar «فريق العمل» → new page
 - [x] 7. ar + en lang keys
 - [x] 8. Local test: super-admin all-schools, super-admin scoped, school-admin; old 4 pages still OK; screenshots in claudedocs/
-- [ ] 9. Deploy viewclass + rawaniedu, verify live, Trello comment + move card
+- [x] 9. Deploy viewclass + rawaniedu, verify live, Trello comment + move card
+
+## Shipped 2026-10-22
+Commit 640a48d, live on viewclass.newaves-systems.com and rawaniedu.com (no migration). Card moved to `testing prompt`.
+Open: create/edit forms for teachers/admins still return to their own list pages after saving (only delete + job-title writes return to the team page).
