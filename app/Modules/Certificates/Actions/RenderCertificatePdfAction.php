@@ -67,9 +67,7 @@ final class RenderCertificatePdfAction
     private function resolveFields(Certificate $certificate): array
     {
         $recipient = $certificate->recipient;
-        $school = $certificate->school_id
-            ? \App\Models\School::find($certificate->school_id)
-            : null;
+        $school = $this->school($certificate);
 
         $grade = null;
         if ($recipient && $recipient->class_room_id) {
@@ -81,6 +79,8 @@ final class RenderCertificatePdfAction
             'school'       => $school->name ?? config('app.name'),
             'grade'        => $grade ?? '',
             'date'         => optional($certificate->issue_date)->format('Y-m-d') ?? now()->format('Y-m-d'),
+            'manager'      => $school?->manager?->name ?? '',
+            'agent'        => $school?->agent?->name ?? '',
         ];
     }
 
@@ -97,7 +97,8 @@ final class RenderCertificatePdfAction
             'signer_name'   => $certificate->signer_name,
             'signature_url' => $this->localPath($certificate->signature_path),
             'logo_url'      => $this->localPath($certificate->logo_path),
-            'stamp_url'     => $this->localPath($certificate->stamp_path),
+            // The certificate's own stamp wins; otherwise the school's stamp.
+            'stamp_url'     => $this->localPath($certificate->stamp_path) ?? $this->localPath($this->school($certificate)?->stamp),
             'body_html'     => $certificate->body_html,
             'grades'        => $this->resolveGrades($certificate),
         ];
@@ -106,9 +107,19 @@ final class RenderCertificatePdfAction
     /** Watermark image: the school's logo, falling back to the certificate's own logo. */
     private function watermarkPath(Certificate $certificate): ?string
     {
-        $school = $certificate->school_id ? \App\Models\School::find($certificate->school_id) : null;
+        return $this->localPath($this->school($certificate)?->logo) ?? $this->localPath($certificate->logo_path);
+    }
 
-        return $this->localPath($school?->logo) ?? $this->localPath($certificate->logo_path);
+    private ?\App\Models\School $school = null;
+
+    /** The certificate's school (with manager + agent), loaded once per render. */
+    private function school(Certificate $certificate): ?\App\Models\School
+    {
+        if ($certificate->school_id && $this->school?->id !== (int) $certificate->school_id) {
+            $this->school = \App\Models\School::with(['manager:id,name', 'agent:id,name'])->find($certificate->school_id);
+        }
+
+        return $certificate->school_id ? $this->school : null;
     }
 
     /** Absolute filesystem path for a public-disk file, or null if unset/missing. */

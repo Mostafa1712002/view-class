@@ -27,6 +27,8 @@
             '{school}'       => $fields['school'],
             '{grade}'        => $fields['grade'],
             '{date}'         => $fields['date'],
+            '{manager}'      => $fields['manager'] ?? '',
+            '{agent}'        => $fields['agent'] ?? '',
         ]);
     };
 @endphp
@@ -208,9 +210,14 @@
                                 <img src="{{ $signatureUrl }}" alt="" style="max-height:50px; margin-bottom:4px;">
                             @endif
                             <div class="sig-line"></div>
-                            @lang('certificates.pdf.signature')
                             @if($signerName)
+                                @lang('certificates.pdf.signature')
                                 <div class="signer">{{ $signerName }}</div>
+                            @elseif(! empty($fields['manager']))
+                                @lang('certificates.pdf.manager')
+                                <div class="signer">{{ $fields['manager'] }}</div>
+                            @else
+                                @lang('certificates.pdf.signature')
                             @endif
                         </td>
                         <td width="40%" style="text-align:center;">
@@ -221,6 +228,9 @@
                             @endif
                         </td>
                         <td width="30%" style="text-align:center;">
+                            @if(! empty($fields['agent']))
+                                <div class="meta">@lang('certificates.pdf.agent'): {{ $fields['agent'] }}</div>
+                            @endif
                             <div class="meta">
                                 {{ $fields['school'] }}<br>
                                 @if($fields['grade']){{ $fields['grade'] }} &middot; @endif{{ $fields['date'] }}

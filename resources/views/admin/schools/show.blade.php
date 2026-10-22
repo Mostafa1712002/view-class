@@ -59,6 +59,24 @@
                             <td>{{ $school->address ?? '-' }}</td>
                         </tr>
                         <tr>
+                            <th>@lang('schools.manager_user_id')</th>
+                            <td>{{ $school->manager?->name ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>@lang('schools.agent_user_id')</th>
+                            <td>{{ $school->agent?->name ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>@lang('schools.stamp')</th>
+                            <td>
+                                @if($school->stamp)
+                                    <img src="{{ asset('storage/'.$school->stamp) }}" style="max-height:90px;" alt="@lang('schools.stamp')">
+                                @else
+                                    -
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
                             <th>@lang('common.status')</th>
                             <td>
                                 @if($school->is_active)

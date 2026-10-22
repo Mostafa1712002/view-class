@@ -413,6 +413,13 @@
             padding: .375rem .75rem .375rem 1.75rem;
             background-position: left .75rem center;
         }
+        /* Select2 bootstrap4 theme pins the arrow to the right with no RTL rule,
+           so in Arabic it sat on top of the selected text. Move it to the left;
+           the rendered text already reserves padding-left for it. */
+        html[dir="rtl"] .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+            left: 3px;
+            right: auto;
+        }
         .form-select:focus {
             border-color: var(--gold-300);
             outline: 0;

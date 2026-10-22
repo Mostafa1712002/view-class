@@ -311,4 +311,10 @@ return [
     'promotion_status_rolled_back' => 'Rolled back',
     'promotion_notify_title' => 'Class capacity exceeded during promotion',
     'promotion_notify_body' => 'Could not promote :count student(s) into class number :number in “:grade” — no room.',
+    'manager_user_id' => 'School manager',
+    'manager_user_id_hint' => 'Staff with the “School Manager” job title or school-admin role — printed on student certificates',
+    'agent_user_id' => 'Vice principal',
+    'agent_user_id_hint' => 'Staff with the “Vice Principal” job title — printed on student certificates',
+    'stamp' => 'School stamp',
+    'stamp_hint' => 'Stamp image (transparent PNG preferred) — max 2 MB, shown on student certificates',
 ];

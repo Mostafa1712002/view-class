@@ -34,6 +34,8 @@ return [
         'presented_to' => 'This certificate is presented to',
         'signature'    => 'Signature',
         'seal'         => 'Certificate',
+        'manager'      => 'School manager',
+        'agent'        => 'Vice principal',
     ],
 
     // Fields

@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EducationalCompany;
 use App\Models\School;
+use App\Models\User;
 use App\Modules\QuestionBankCore\Models\Compound;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SchoolController extends Controller
 {
@@ -20,7 +22,7 @@ class SchoolController extends Controller
         $gender = in_array($request->get('gender'), ['boys', 'girls', 'mixed'], true) ? $request->get('gender') : null;
 
         $schools = School::query()
-            ->with(['educationalCompany:id,name_ar,name_en', 'compounds:id,name_ar,name_en'])
+            ->with(['educationalCompany:id,name_ar,name_en', 'compounds:id,name_ar,name_en', 'manager:id,name', 'agent:id,name'])
             ->withCount(['users', 'sections', 'classes'])
             ->withCount([
                 'users as students_count' => function ($q) {
@@ -59,7 +61,9 @@ class SchoolController extends Controller
             ->orderBy('name_ar')->get();
         $cities = config('saudi_cities', []);
         $timezones = $this->timezoneOptions();
-        return view('admin.schools.create', compact('companies', 'complexes', 'branches', 'cities', 'timezones'));
+        $managerCandidates = $this->staffCandidates('manager');
+        $agentCandidates = $this->staffCandidates('agent');
+        return view('admin.schools.create', compact('companies', 'complexes', 'branches', 'cities', 'timezones', 'managerCandidates', 'agentCandidates'));
     }
 
     public function store(Request $request)
@@ -70,6 +74,9 @@ class SchoolController extends Controller
 
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('schools', 'public');
+        }
+        if ($request->hasFile('stamp')) {
+            $validated['stamp'] = $request->file('stamp')->store('schools/stamps', 'public');
         }
 
         // Backfill the legacy `name` column from name_ar so old code keeps working.
@@ -88,7 +95,7 @@ class SchoolController extends Controller
 
     public function show(School $school)
     {
-        $school->load(['sections', 'academicYears', 'educationalCompany']);
+        $school->load(['sections', 'academicYears', 'educationalCompany', 'manager:id,name', 'agent:id,name']);
         return view('admin.schools.show', compact('school'));
     }
 
@@ -103,7 +110,9 @@ class SchoolController extends Controller
         $cities = config('saudi_cities', []);
         $timezones = $this->timezoneOptions();
         $selectedComplexId = $school->compounds->first()?->id;
-        return view('admin.schools.edit', compact('school', 'companies', 'complexes', 'branches', 'cities', 'timezones', 'selectedComplexId'));
+        $managerCandidates = $this->staffCandidates('manager', $school->manager_user_id);
+        $agentCandidates = $this->staffCandidates('agent', $school->agent_user_id);
+        return view('admin.schools.edit', compact('school', 'companies', 'complexes', 'branches', 'cities', 'timezones', 'selectedComplexId', 'managerCandidates', 'agentCandidates'));
     }
 
     public function update(Request $request, School $school)
@@ -114,6 +123,9 @@ class SchoolController extends Controller
 
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('schools', 'public');
+        }
+        if ($request->hasFile('stamp')) {
+            $validated['stamp'] = $request->file('stamp')->store('schools/stamps', 'public');
         }
 
         $validated['name'] = $validated['name'] ?? $validated['name_ar'];
@@ -175,8 +187,34 @@ class SchoolController extends Controller
             'instagram' => 'nullable|url|max:255',
             'linkedin' => 'nullable|url|max:255',
             'logo' => 'nullable|image|max:2048',
+            'stamp' => 'nullable|image|max:2048',
+            'manager_user_id' => ['nullable', Rule::in($this->staffCandidates('manager', $schoolId ? School::find($schoolId)?->manager_user_id : null)->pluck('id')->all())],
+            'agent_user_id' => ['nullable', Rule::in($this->staffCandidates('agent', $schoolId ? School::find($schoolId)?->agent_user_id : null)->pluck('id')->all())],
             'is_active' => 'sometimes|boolean',
         ]);
+    }
+
+    /**
+     * Users who can be linked to a school as its manager (job title
+     * «مدير مدرسة» or the school-admin role) or agent (job title «وكيل»).
+     * Not limited to the school's own users: a new school has none yet.
+     * The currently linked user is always kept so editing never drops it.
+     */
+    private function staffCandidates(string $kind, ?int $keepId = null)
+    {
+        return User::query()
+            ->where(function ($q) use ($kind, $keepId) {
+                $q->whereHas('jobTitle', fn ($j) => $j->where('slug', $kind === 'manager' ? 'school_manager' : 'vice'));
+                if ($kind === 'manager') {
+                    $q->orWhereHas('roles', fn ($r) => $r->where('slug', 'school-admin'));
+                }
+                if ($keepId) {
+                    $q->orWhere('users.id', $keepId);
+                }
+            })
+            ->with('school:id,name,name_ar')
+            ->orderBy('name')
+            ->get(['id', 'name', 'school_id']);
     }
 
     /**

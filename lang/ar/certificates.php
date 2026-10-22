@@ -34,6 +34,8 @@ return [
         'presented_to' => 'تُمنح هذه الشهادة إلى',
         'signature'    => 'التوقيع',
         'seal'         => 'شهادة',
+        'manager'      => 'مدير المدرسة',
+        'agent'        => 'وكيل المدرسة',
     ],
 
     // Fields

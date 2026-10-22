@@ -26,10 +26,13 @@ class School extends Model
         'stage',
         'city',
         'student_gender',
+        'manager_user_id',
+        'agent_user_id',
         'timezone',
         'default_language',
         'code',
         'logo',
+        'stamp',
         'cover_image',
         'address',
         'phone',
@@ -48,6 +51,18 @@ class School extends Model
         'is_active' => 'boolean',
         'settings' => 'array',
     ];
+
+    /** School manager (المدير) — printed on student certificates. */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_user_id')->withTrashed();
+    }
+
+    /** School vice principal (الوكيل) — printed on student certificates. */
+    public function agent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'agent_user_id')->withTrashed();
+    }
 
     public function educationalCompany(): BelongsTo
     {

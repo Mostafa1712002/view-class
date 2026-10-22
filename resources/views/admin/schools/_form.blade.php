@@ -70,7 +70,10 @@
             <option value="">—</option>
             <option value="boys"  @selected($val('student_gender') === 'boys')>@lang('schools.gender_boys')</option>
             <option value="girls" @selected($val('student_gender') === 'girls')>@lang('schools.gender_girls')</option>
-            <option value="mixed" @selected($val('student_gender','mixed') === 'mixed')>@lang('schools.gender_mixed')</option>
+            {{-- «مختلط» is no longer offered; kept only so a legacy mixed school can be re-saved unchanged. --}}
+            @if($val('student_gender') === 'mixed')
+                <option value="mixed" selected>@lang('schools.gender_mixed')</option>
+            @endif
         </select>
         @error('student_gender')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
@@ -110,6 +113,20 @@
         </select>
     </div>
 
+    @foreach(['manager_user_id' => $managerCandidates ?? collect(), 'agent_user_id' => $agentCandidates ?? collect()] as $field => $people)
+        <div class="col-md-6 mb-3">
+            <label for="{{ $field }}" class="form-label">@lang('schools.' . $field)</label>
+            <select class="form-control select2 @error($field) is-invalid @enderror" id="{{ $field }}" name="{{ $field }}">
+                <option value="">—</option>
+                @foreach($people as $person)
+                    <option value="{{ $person->id }}" @selected($val($field) == $person->id)>{{ $person->name }}@if($person->school) — {{ $person->school->name_ar ?: $person->school->name }}@endif</option>
+                @endforeach
+            </select>
+            @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <small class="text-muted">@lang('schools.' . $field . '_hint')</small>
+        </div>
+    @endforeach
+
     <div class="col-md-6 mb-3">
         <label for="phone" class="form-label">@lang('common.phone')</label>
         <input type="text" class="form-control" id="phone" name="phone" value="{{ $val('phone') }}">
@@ -140,6 +157,16 @@
         @endif
         <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
         <small class="text-muted">@lang('schools.logo_hint')</small>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label for="stamp" class="form-label">@lang('schools.stamp')</label>
+        @if($isEdit && $school->stamp)
+            <div class="mb-2"><img src="{{ asset('storage/'.$school->stamp) }}" style="max-height:80px;" alt="@lang('schools.stamp')"></div>
+        @endif
+        <input type="file" class="form-control @error('stamp') is-invalid @enderror" id="stamp" name="stamp" accept="image/*">
+        @error('stamp')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <small class="text-muted">@lang('schools.stamp_hint')</small>
     </div>
 
     <div class="col-12">
