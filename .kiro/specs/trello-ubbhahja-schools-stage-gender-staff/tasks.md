@@ -7,4 +7,4 @@
 - [x] Certificate PDF: manager, agent, school stamp fallback
 - [x] RTL select2 arrow fix (global)
 - [x] Local test (create/edit/show/index + rendered PDF), screenshots in claudedocs/card-ubbhahja-r2-*
-- [ ] Deploy viewclass.newaves-systems.com + rawaniedu.com, verify live
+- [x] Deploy viewclass.newaves-systems.com + rawaniedu.com (0613852), verified live 2026-10-22: create form (no مختلط, arrow left, manager list), save with stamp, show page, certificate PDF prints manager + stamp. Live has no users with job title «وكيل» yet, so the agent list is empty until one is added.
