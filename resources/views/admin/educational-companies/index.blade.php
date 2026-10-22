@@ -79,6 +79,25 @@
                             </td>
                         </tr>
 
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center">{{ __('educational_companies.no_companies') }}</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                {{ $companies->links() }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Edit modals live outside the table/card: inside .table-responsive the card's
+     transform traps position:fixed, so the dialog was clipped under the backdrop. --}}
+@foreach($companies as $company)
                         {{-- Edit modal --}}
                         <div class="modal fade" id="editCompanyModal{{ $company->id }}" tabindex="-1" role="dialog" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -115,21 +134,7 @@
                                 </div>
                             </div>
                         </div>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center">{{ __('educational_companies.no_companies') }}</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mt-3">
-                {{ $companies->links() }}
-            </div>
-        </div>
-    </div>
-</div>
+@endforeach
 
 {{-- Add modal --}}
 <div class="modal fade" id="addCompanyModal" tabindex="-1" role="dialog" aria-hidden="true">

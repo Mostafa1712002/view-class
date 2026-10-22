@@ -51,3 +51,11 @@ carries `data-section="X"`:
 - One 1553-line file, delicate. Edit in additive blocks; never touch existing lines except the #543–545
   swap. After edit: `php artisan view:clear`, load a page locally, expand each new section, click through
   every link, confirm no 500 and existing nav intact. Screenshot before/after.
+
+## Update 2026-10-22 (card #359) — duplicates removed
+QA confirmed the six sections and asked to drop every page that now lives in a new section from its
+old place. Admin sidebar now lists each page once: the old «عمليات التواصل» section is gone (all its
+items moved), «العمليات التعليمية» keeps only pages not re-homed (الجداول، ملف الإنجاز، التربية الخاصة،
+المواعيد، تقارير التقييم، الحضور والغياب، QR، غياب المعلمين), «إعدادات النظام» keeps السياسات،
+المستخدمون (without الطلاب/أولياء الأمور)، الأعوام الدراسية، السلوك. المسارات / الأسابيع / المعايير /
+المجمعات moved into the new «إدارة المواد» group. The standalone التقويم link is hidden for admins.

@@ -84,6 +84,25 @@
                             </td>
                         </tr>
 
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center">{{ __('educational_complexes.no_complexes') }}</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                {{ $complexes->links() }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Edit modals live outside the table/card: inside .table-responsive the card's
+     transform traps position:fixed, so the dialog was clipped under the backdrop. --}}
+@foreach($complexes as $complex)
                         {{-- Edit modal --}}
                         <div class="modal fade" id="editComplexModal{{ $complex->id }}" tabindex="-1" role="dialog" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -129,21 +148,7 @@
                                 </div>
                             </div>
                         </div>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center">{{ __('educational_complexes.no_complexes') }}</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mt-3">
-                {{ $complexes->links() }}
-            </div>
-        </div>
-    </div>
-</div>
+@endforeach
 
 {{-- Add modal --}}
 <div class="modal fade" id="addComplexModal" tabindex="-1" role="dialog" aria-hidden="true">
