@@ -194,7 +194,7 @@ return [
     'standardize_grade_collision' => 'تعارض في أرقام الصفوف (:grades) — عيّن رقمًا مختلفًا لكل صف.',
     'standardize_class_collision' => 'توجد أرقام فصول مكررة داخل الصف: :grade.',
     'stage_primary' => 'ابتدائي',
-    'stage_intermediate' => 'متوسط',
+    'stage_intermediate' => 'إعدادي',
     'stage_secondary' => 'ثانوي',
     'gender_male' => 'بنين',
     'gender_female' => 'بنات',
