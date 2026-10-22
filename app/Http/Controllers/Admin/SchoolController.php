@@ -16,6 +16,8 @@ class SchoolController extends Controller
         $name = trim((string) $request->get('q', ''));
         $companyId = $request->get('company_id');
         $complexId = $request->get('compound_id');
+        $stage = in_array($request->get('stage'), ['primary', 'intermediate', 'secondary'], true) ? $request->get('stage') : null;
+        $gender = in_array($request->get('gender'), ['boys', 'girls', 'mixed'], true) ? $request->get('gender') : null;
 
         $schools = School::query()
             ->with(['educationalCompany:id,name_ar,name_en', 'compounds:id,name_ar,name_en'])
@@ -36,6 +38,8 @@ class SchoolController extends Controller
             ->when($companyId === '__none__', fn ($q) => $q->whereNull('educational_company_id'))
             ->when($companyId && $companyId !== '__none__', fn ($q) => $q->where('educational_company_id', $companyId))
             ->when($complexId, fn ($q) => $q->whereHas('compounds', fn ($c) => $c->where('compounds.id', $complexId)))
+            ->when($stage, fn ($q) => $q->where('stage', $stage))
+            ->when($gender, fn ($q) => $q->where('student_gender', $gender))
             ->orderBy('sort_order')
             ->orderBy('id')
             ->paginate(15)
@@ -44,7 +48,7 @@ class SchoolController extends Controller
         $companies = EducationalCompany::orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
         $complexes = Compound::orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
 
-        return view('admin.schools.index', compact('schools', 'companies', 'complexes', 'name', 'companyId', 'complexId'));
+        return view('admin.schools.index', compact('schools', 'companies', 'complexes', 'name', 'companyId', 'complexId', 'stage', 'gender'));
     }
 
     public function create()

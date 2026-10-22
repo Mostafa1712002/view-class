@@ -54,8 +54,20 @@
                         <option value="{{ $cx->id }}" @selected((string) $complexId === (string) $cx->id)>{{ $cx->name_ar ?: $cx->name_en }}</option>
                     @endforeach
                 </select>
+                <select name="stage" class="form-control form-control-sm" style="max-width:170px">
+                    <option value="">@lang('schools.filter_all_stages')</option>
+                    @foreach(['primary', 'intermediate', 'secondary'] as $s)
+                        <option value="{{ $s }}" @selected($stage === $s)>@lang('schools.stage_' . $s)</option>
+                    @endforeach
+                </select>
+                <select name="gender" class="form-control form-control-sm" style="max-width:150px">
+                    <option value="">@lang('schools.filter_all_genders')</option>
+                    @foreach(['boys', 'girls', 'mixed'] as $g)
+                        <option value="{{ $g }}" @selected($gender === $g)>@lang('schools.gender_' . $g)</option>
+                    @endforeach
+                </select>
                 <button type="submit" class="btn btn-outline-secondary btn-sm">@lang('schools.filter_apply')</button>
-                @if($name || $companyId || $complexId)
+                @if($name || $companyId || $complexId || $stage || $gender)
                     <a href="{{ route('admin.schools.index') }}" class="btn btn-outline-secondary btn-sm">@lang('common.clear')</a>
                 @endif
             </form>
@@ -69,6 +81,8 @@
                             <th>@lang('schools.name')</th>
                             <th>@lang('schools.educational_company')</th>
                             <th>@lang('schools.educational_complex')</th>
+                            <th>@lang('schools.educational_stage')</th>
+                            <th>@lang('schools.gender')</th>
                             <th>@lang('schools.branch')</th>
                             <th>@lang('schools.sort_order')</th>
                             <th>@lang('schools.sections_count')</th>
@@ -91,6 +105,8 @@
                             </td>
                             <td>{{ $school->educationalCompany?->name_ar ?: $school->educationalCompany?->name_en ?: __('schools.no_educational_company') }}</td>
                             <td>{{ $school->compounds->first()?->name_ar ?: $school->compounds->first()?->name_en ?: __('schools.no_educational_complex') }}</td>
+                            <td>{{ $school->stage ? __('schools.stage_' . $school->stage) : '-' }}</td>
+                            <td>{{ $school->student_gender ? __('schools.gender_' . $school->student_gender) : '-' }}</td>
                             <td>{{ $school->branch ?? '-' }}</td>
                             <td>{{ $school->sort_order ?? '-' }}</td>
                             <td>{{ $school->sections_count }}</td>
@@ -130,7 +146,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="12" class="text-center">@lang('common.no_data')</td>
+                            <td colspan="14" class="text-center">@lang('common.no_data')</td>
                         </tr>
                         @endforelse
                     </tbody>
