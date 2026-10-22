@@ -226,7 +226,7 @@ class AdminController extends Controller
         // Guard against accidental deletion: the acting admin must re-enter their
         // own password to confirm (see the delete modal in admins/index).
         if (! Hash::check((string) $request->input('confirm_password'), (string) auth()->user()->password)) {
-            return redirect()->route('admin.users.admins.index')
+            return redirect()->back()
                 ->with('error', __('users.delete_password_wrong'));
         }
 
@@ -234,7 +234,7 @@ class AdminController extends Controller
         if ($admin) {
             $admin->delete();
         }
-        return redirect()->route('admin.users.admins.index')
+        return redirect()->back()
             ->with('status', __('users.admin_deleted'));
     }
 

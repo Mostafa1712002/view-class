@@ -51,6 +51,8 @@ use App\Modules\Users\Repositories\Contracts\AdminRepository;
 use App\Modules\Users\Repositories\Contracts\ParentRepository;
 use App\Modules\Users\Repositories\Contracts\StudentRepository;
 use App\Modules\Users\Repositories\Contracts\TeacherRepository;
+use App\Modules\Users\Repositories\Contracts\TeamRepository;
+use App\Modules\Users\Repositories\EloquentTeamListRepository;
 use App\Modules\Users\Repositories\EloquentAdminListRepository;
 use App\Modules\Users\Repositories\EloquentParentListRepository;
 use App\Modules\Users\Repositories\EloquentStudentListRepository;
@@ -115,6 +117,7 @@ class RepositoryServiceProvider extends ServiceProvider
         ParentRepository::class => EloquentParentListRepository::class,
         TeacherRepository::class => EloquentTeacherListRepository::class,
         AdminRepository::class => EloquentAdminListRepository::class,
+        TeamRepository::class => EloquentTeamListRepository::class,
         SubjectRepository::class => EloquentSubjectRepository::class,
         TeacherMaterialRepository::class => EloquentTeacherMaterialRepository::class,
         BookRepository::class => EloquentBookRepository::class,

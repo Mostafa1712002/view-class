@@ -46,7 +46,7 @@ class JobTitleController extends Controller
 
         JobTitle::create($data);
 
-        return redirect()->route('admin.users.job-titles.index')
+        return redirect()->back()
             ->with('status', __('users.job_title_created'));
     }
 
@@ -72,7 +72,7 @@ class JobTitleController extends Controller
         $data['sort_order'] ??= $jobTitle->sort_order;
         $jobTitle->update($data);
 
-        return redirect()->route('admin.users.job-titles.index')
+        return redirect()->back()
             ->with('status', __('users.job_title_updated'));
     }
 
@@ -86,7 +86,7 @@ class JobTitleController extends Controller
         }
         $jobTitle->delete();
 
-        return redirect()->route('admin.users.job-titles.index')
+        return redirect()->back()
             ->with('status', __('users.job_title_deleted'));
     }
 }

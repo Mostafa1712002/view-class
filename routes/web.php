@@ -282,6 +282,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
         Route::get('parents/{id}/students', [\App\Modules\Users\Controllers\ParentController::class, 'students'])->whereNumber('id')->name('parents.students');
         Route::post('parents/{id}/students', [\App\Modules\Users\Controllers\ParentController::class, 'syncStudents'])->whereNumber('id')->name('parents.students.sync');
 
+        Route::get('team', [\App\Modules\Users\Controllers\TeamController::class, 'index'])->name('team.index');
         Route::get('teachers', [\App\Modules\Users\Controllers\TeacherController::class, 'index'])->name('teachers.index');
         Route::get('teachers/workloads', [\App\Modules\Users\Controllers\TeacherController::class, 'workloads'])->name('teachers.workloads');
         Route::get('teachers/import', [\App\Modules\Users\Controllers\TeacherController::class, 'importForm'])->name('teachers.import');

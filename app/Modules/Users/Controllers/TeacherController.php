@@ -241,7 +241,7 @@ class TeacherController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         if (! Hash::check((string) $request->input('confirm_password'), (string) auth()->user()->password)) {
-            return redirect()->route('admin.users.teachers.index')
+            return redirect()->back()
                 ->with('error', __('users.delete_password_wrong'));
         }
 
@@ -249,7 +249,7 @@ class TeacherController extends Controller
         if ($teacher) {
             $teacher->delete();
         }
-        return redirect()->route('admin.users.teachers.index')
+        return redirect()->back()
             ->with('status', __('users.teacher_deleted'));
     }
 
