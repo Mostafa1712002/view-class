@@ -19,3 +19,6 @@
 | 1 tabs | ☐ |
 | 2 rename | ☐ |
 | 3 ship | ☐ |
+
+## 2026-11-09 follow-up
+- [x] Tracks tab + subjects table still said «شعبة» → lang now says «مسار» (commit 1a1049f, live viewclass; rawaniedu not deployed).
