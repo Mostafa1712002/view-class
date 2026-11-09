@@ -67,7 +67,7 @@
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">@lang('sprint4.subjects.form.section')</label>
                 <input type="text" name="section" class="form-control" value="{{ old('section', $subject->section) }}" placeholder="عام / علمي / أدبي">
-                <small class="text-muted">يمكن تركها فارغة للمواد العامة.</small>
+                <small class="text-muted">يمكن تركه فارغًا للمواد العامة.</small>
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">@lang('sprint4.subjects.form.certificate_order')</label>
