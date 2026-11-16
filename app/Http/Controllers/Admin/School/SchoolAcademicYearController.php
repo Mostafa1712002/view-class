@@ -89,6 +89,19 @@ class SchoolAcademicYearController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
+        if (! $term->start_date || ! $term->end_date
+            || \Illuminate\Support\Carbon::parse($validated['start_date'])->toDateString() < $term->start_date->toDateString()
+            || \Illuminate\Support\Carbon::parse($validated['end_date'])->toDateString() > $term->end_date->toDateString()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'start_date' => __('schools.week_outside_term'),
+            ]);
+        }
+        if ($term->weeks()->whereDate('start_date', '<=', $validated['end_date'])
+            ->whereDate('end_date', '>=', $validated['start_date'])->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'start_date' => __('schools.week_overlap'),
+            ]);
+        }
         $validated['academic_term_id'] = $term->id;
         $validated['sort_order'] = ($term->weeks()->max('sort_order') ?? 0) + 1;
 

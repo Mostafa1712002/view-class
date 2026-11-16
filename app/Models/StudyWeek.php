@@ -20,6 +20,22 @@ class StudyWeek extends Model
         'end_date' => 'date',
     ];
 
+    public function isCurrent(): bool
+    {
+        $today = now('Asia/Riyadh')->toDateString();
+
+        return $this->start_date && $this->end_date
+            && $this->start_date->toDateString() <= $today
+            && $this->end_date->toDateString() >= $today;
+    }
+
+    public function scopeCurrent($query)
+    {
+        $today = now('Asia/Riyadh')->toDateString();
+
+        return $query->whereDate('start_date', '<=', $today)->whereDate('end_date', '>=', $today);
+    }
+
     public function term(): BelongsTo
     {
         return $this->belongsTo(AcademicTerm::class, 'academic_term_id');

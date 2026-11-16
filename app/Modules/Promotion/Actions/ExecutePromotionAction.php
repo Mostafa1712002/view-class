@@ -60,6 +60,23 @@ class ExecutePromotionAction
                 throw new RuntimeException(implode(' • ', $plan['blockers']));
             }
 
+            // Lock students before checking history so both execution paths serialize.
+            $studentIds = array_column($plan['moves'], 'student_id');
+            User::whereIn('id', $studentIds)->orderBy('id')->lockForUpdate()->get();
+            $alreadyMoved = PromotionBatchItem::movedIntoYear($dst->id)
+                ->whereIn('student_id', $studentIds)->pluck('student_id')->flip();
+            foreach ($plan['moves'] as &$move) {
+                if ($alreadyMoved->has($move['student_id'])) {
+                    $plan['summary'][$move['action']]--;
+                    $plan['summary']['not_moved']++;
+                    $move['action'] = 'not_moved';
+                    $move['reason'] = 'already promoted';
+                    $move['to_section_id'] = $move['from_section_id'];
+                    $move['to_class_id'] = $move['from_class_id'];
+                }
+            }
+            unset($move);
+
             $batch = PromotionBatch::create([
                 'school_id' => $school->id,
                 'source_year_id' => $src->id,

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'current_week' => 'الأسبوع الحالي',
+    'current_term' => 'الفصل الحالي',
+    'week_outside_term' => 'يجب أن يكون الأسبوع ضمن تواريخ الفصل الدراسي. حدد تواريخ الفصل أولاً.',
+    'week_overlap' => 'يتداخل الأسبوع مع أسبوع آخر في الفصل الدراسي.',
+    'promotion_year_required' => 'يجب أن ينتمي كلا الصفين إلى سنة دراسية.',
+    'promotion_students_already_promoted' => 'تم ترحيل :count من الطلاب إلى هذه السنة مسبقاً.',
+    'choose_school' => 'اختر مدرسة',
     // Headings
     'title' => 'المدارس',
     'add_school' => 'إضافة مدرسة',

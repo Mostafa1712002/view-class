@@ -12,6 +12,13 @@ class PromotionBatchItem extends Model
         'from_section_id', 'from_class_id', 'to_section_id', 'to_class_id', 'reason',
     ];
 
+    public function scopeMovedIntoYear($query, int $yearId)
+    {
+        return $query->whereIn('action', ['promoted', 'graduated', 'overflow_moved'])
+            ->whereHas('batch', fn ($batch) => $batch
+                ->where('destination_year_id', $yearId)->where('status', 'executed'));
+    }
+
     public function batch(): BelongsTo
     {
         return $this->belongsTo(PromotionBatch::class, 'batch_id');

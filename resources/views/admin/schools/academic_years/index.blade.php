@@ -101,7 +101,9 @@
                             @forelse($year->terms as $term)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $term->name }}</td>
+                                    <td>{{ $term->name }}
+                                        @if($term->is_current_by_date)<span class="badge bg-success">@lang('schools.current_term')</span>@endif
+                                    </td>
                                     <td>{{ optional($term->start_date)->format('Y-m-d') ?? '-' }}</td>
                                     <td>{{ optional($term->end_date)->format('Y-m-d') ?? '-' }}</td>
                                     <td>{{ $term->weeks->count() }}</td>
@@ -142,7 +144,9 @@
                                                 @foreach($term->weeks as $week)
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $week->name }}</td>
+                                                        <td>{{ $week->name }}
+                                                            @if($week->isCurrent())<span class="badge bg-success">@lang('schools.current_week')</span>@endif
+                                                        </td>
                                                         <td>{{ optional($week->start_date)->format('Y-m-d') }}</td>
                                                         <td>{{ optional($week->end_date)->format('Y-m-d') }}</td>
                                                         <td>

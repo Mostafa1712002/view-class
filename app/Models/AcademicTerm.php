@@ -28,6 +28,20 @@ class AcademicTerm extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
+    public function getIsCurrentByDateAttribute(): bool
+    {
+        $today = now('Asia/Riyadh')->toDateString();
+
+        return $this->start_date && $this->end_date
+            && $this->start_date->toDateString() <= $today
+            && $this->end_date->toDateString() >= $today;
+    }
+
+    public function currentWeek(): ?StudyWeek
+    {
+        return $this->weeks()->current()->first();
+    }
+
     public function weeks(): HasMany
     {
         return $this->hasMany(StudyWeek::class)->orderBy('sort_order');

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'current_week' => 'Current week',
+    'current_term' => 'Current term',
+    'week_outside_term' => 'The week must be within the term dates. Set the term dates first.',
+    'week_overlap' => 'The week overlaps another week in this term.',
+    'promotion_year_required' => 'Both classes must belong to an academic year.',
+    'promotion_students_already_promoted' => ':count students have already been promoted into this year.',
+    'choose_school' => 'Choose a school',
     // Headings
     'title' => 'Schools',
     'add_school' => 'Add School',

@@ -52,6 +52,9 @@ class RollbackPromotionAction
                         if ($item->to_class_id) {
                             $this->repo->detachStudent((int) $item->to_class_id, $student);
                         }
+                        if ($batch->summary['source_enrolments_retained'] ?? false) {
+                            break;
+                        }
                         if ($item->from_class_id) {
                             $this->repo->attachStudent((int) $item->from_class_id, $student, 'passed');
                         }

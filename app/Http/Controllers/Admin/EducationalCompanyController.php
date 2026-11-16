@@ -88,7 +88,7 @@ class EducationalCompanyController extends Controller
         // (unlike compounds.name_en, which is nullable) — the card only asks for
         // one name field, so fall back to the Arabic name rather than migrating
         // the column.
-        $data['name_en'] = $data['name_en'] ?: $data['name_ar'];
+        $data['name_en'] = ($data['name_en'] ?? null) ?: $data['name_ar'];
         $data['status'] = 'active';
 
         return $data;

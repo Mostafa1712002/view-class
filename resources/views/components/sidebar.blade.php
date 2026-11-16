@@ -573,8 +573,8 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if($canViewParents)
                 <li class="nav-item {{ request()->routeIs('admin.users.parents.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.users.parents.index') ? route('admin.users.parents.index') : '#' }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users_parents')</span></a></li>
                 @endif
-                <li class="nav-item" data-section="extras"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="arrow-repeat" class="vc-ico" /><span class="menu-title">@lang('shell.nav_promotion')</span></a></li>
-                <li class="nav-item" data-section="extras"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="calendar-range" class="vc-ico" /><span class="menu-title">@lang('shell.nav_terms_weeks')</span></a></li>
+                <li class="nav-item" data-section="extras"><a href="{{ route('admin.promotion.landing') }}"><x-svg-icon name="arrow-repeat" class="vc-ico" /><span class="menu-title">@lang('shell.nav_promotion')</span></a></li>
+                <li class="nav-item" data-section="extras"><a href="{{ route('admin.terms-weeks.landing') }}"><x-svg-icon name="calendar-range" class="vc-ico" /><span class="menu-title">@lang('shell.nav_terms_weeks')</span></a></li>
             </div>{{-- /gp-sec-extras --}}
 
             {{-- #2 الشؤون التعليمية والخطط --}}

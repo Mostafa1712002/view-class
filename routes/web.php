@@ -71,6 +71,8 @@ Route::middleware('auth')->group(function () {
 
 // Admin Routes (Super Admin Only)
 Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('promotion', [\App\Modules\Promotion\Controllers\AcademicLandingController::class, 'promotion'])->name('promotion.landing');
+    Route::get('terms-weeks', [\App\Modules\Promotion\Controllers\AcademicLandingController::class, 'termsWeeks'])->name('terms-weeks.landing');
     // School Branches (Trello card 51) — global lookup, schools point at one branch.
     Route::get('school-branches', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'index'])->name('school-branches.index');
     Route::get('school-branches/create', [\App\Modules\SchoolBranches\Controllers\SchoolBranchController::class, 'create'])->name('school-branches.create');
