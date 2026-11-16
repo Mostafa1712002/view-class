@@ -1,14 +1,14 @@
 # Tasks — order: 374 → 373 → 365 → 366 → 367 → 370 → 369 → 372 → 371 → 368
 Why: 374 gives a guard test re-run after each card; 373 gives data the others are tested against; 365–369 are small (existing modules, wiring); 372/371/368 are new modules.
 
-- [ ] 374 RBAC test + fixes
-- [ ] 373 dashboard real queries + demo data (viewclass only)
-- [ ] 365 companies/complexes E2E
-- [ ] 366 promotion per-student guard + sidebar
-- [ ] 367 current week + sidebar
-- [ ] 370 exams lifecycle + sidebar
-- [ ] 369 distance-learning hub + sidebar
-- [ ] 372 coaching module
+- [x] 374 RBAC test + fixes
+- [x] 373 dashboard real queries + demo data (viewclass only)
+- [x] 365 companies/complexes E2E
+- [x] 366 promotion per-student guard + sidebar
+- [x] 367 current week + sidebar
+- [x] 370 exams lifecycle + sidebar
+- [x] 369 distance-learning hub + sidebar
+- [x] 372 coaching module
 - [ ] 371 points & rewards
 - [ ] 368 special programs
 
@@ -19,3 +19,7 @@ Why: 374 gives a guard test re-run after each card; 373 gives data the others ar
 - 372: reference https://my.viewclass.com/admin/Coaching needs a login — can someone share screenshots or an account?
 - 369: no approved scope beyond virtual classes + discussion rooms + attendance.
 - 373: demo data on rawaniedu? (default: no, client data)
+
+## Status 2026-11-16
+Live on viewclass + rawaniedu at 7c304f2 (backups /root/backups/*-pre-sprint-20261116.sql.gz). Demo data: viewclass school 1 only (`vc:demo-data --school=1 --remove` undoes it).
+8 cards → testing prompt (Mohamed Farouk). 371 + 368 blocked: questions posted on the cards.
