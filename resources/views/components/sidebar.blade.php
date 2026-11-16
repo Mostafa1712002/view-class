@@ -695,7 +695,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if($canViewCalendar)
                 <li class="nav-item {{ request()->routeIs('manage.school-calendar.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('manage.school-calendar.index') ? route('manage.school-calendar.index') : '#' }}"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-title">@lang('shell.nav_academic_calendar')</span></a></li>
                 @endif
-                <li class="nav-item" data-section="support"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
+                @can('viewAny', \App\Modules\Counseling\Models\CounselingCase::class)
+                <li class="nav-item" data-section="support"><a href="{{ route('manage.counseling.index') }}"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
+                @endcan
             </div>{{-- /gp-sec-support --}}
 
             {{-- #5 القبول والتسجيل --}}

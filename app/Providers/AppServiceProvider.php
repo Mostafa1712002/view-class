@@ -18,6 +18,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::policy(\App\Modules\Counseling\Models\CounselingCase::class, \App\Modules\Counseling\Policies\CounselingCasePolicy::class);
+
         RateLimiter::for('auth-login', fn (Request $request) => [
             Limit::perMinute(5)->by($request->ip()),
         ]);

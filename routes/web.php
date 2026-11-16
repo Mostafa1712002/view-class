@@ -1317,3 +1317,5 @@ require __DIR__.'/../app/Modules/Admissions/Routes/web.php';
 
 // Teacher materials hub — Trello #287
 require __DIR__.'/../app/Modules/TeacherMaterials/Routes/web.php';
+
+require __DIR__.'/../app/Modules/Counseling/Routes/web.php';
