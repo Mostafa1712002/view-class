@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_permission' => \App\Http\Middleware\RolePermission::class,
             'jwt' => \App\Modules\Auth\Http\Middleware\AuthenticateJwt::class,
         ]);
+        // Reject unauthorized roles before route binding looks up protected records.
+        $middleware->prependToPriorityList(
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\CheckRole::class,
+        );
         $middleware->web(append: [
             \App\Modules\Localization\Http\Middleware\SetLocale::class,
         ]);
