@@ -21,6 +21,43 @@
         </a>
     </div>
 
+    <div class="card mb-4"><div class="card-body">
+        <h2 class="h5">{{ __('exam_transfer.title') }}</h2>
+        @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+        @if($errors->any())<div class="alert alert-danger">{{ $errors->first() }}</div>@endif
+        <form method="POST" action="{{ route($routePrefix.'.push-to-grade-report', $exam) }}" class="row g-3">
+            @csrf
+            <div class="col-md-5">
+                <label for="transfer-report" class="form-label">{{ __('exam_transfer.report') }}</label>
+                <select id="transfer-report" name="grade_report_id" class="form-select" required>
+                    <option value="">{{ __('exam_transfer.choose') }}</option>
+                    @foreach($gradeReports as $report)
+                        <option value="{{ $report->id }}">{{ $report->title }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label for="transfer-column" class="form-label">{{ __('exam_transfer.column') }}</label>
+                <select id="transfer-column" name="grade_report_column_id" class="form-select" required disabled></select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary" type="submit">{{ __('exam_transfer.submit') }}</button></div>
+        </form>
+    </div></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const reports = @json($gradeReports->mapWithKeys(fn ($report) => [$report->id => $report->columns]));
+            const report = document.getElementById('transfer-report');
+            const column = document.getElementById('transfer-column');
+            report.addEventListener('change', function () {
+                column.replaceChildren();
+                (reports[report.value] || []).forEach(function (item) {
+                    column.add(new Option(item.title + ' (' + item.max_score + ')', item.id));
+                });
+                column.disabled = !column.options.length;
+            });
+        });
+    </script>
+
     {{-- Summary Cards --}}
     <div class="row mb-4">
         <div class="col-md-3">

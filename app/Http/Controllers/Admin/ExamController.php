@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
+use App\Models\GradeReport;
+use App\Models\StudentGradeValue;
+use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
+use App\Modules\Users\Controllers\Concerns\ResolvesTeacherStudents;
 use App\Models\ExamQuestion;
 use App\Models\StudentExam;
 use App\Models\Subject;
@@ -16,6 +20,8 @@ use Illuminate\Support\Facades\DB;
 
 class ExamController extends Controller
 {
+    use HasSchoolScope, ResolvesTeacherStudents;
+
     /**
      * Route-name prefix for links/redirects — teacher.exams when reached under
      * /teacher, admin.exams otherwise. Lets the shared exam views work from both
@@ -280,6 +286,9 @@ class ExamController extends Controller
      */
     public function results(Exam $exam)
     {
+        $gradeReports = $this->gradeReportsForExam($exam)
+            ->with(['columns' => fn ($q) => $q->where('type', 'numeric')])->get();
+
         $exam->load(['questions', 'studentExams' => function ($query) {
             $query->with(['student', 'answers.question', 'exitAttempts' => function ($q) {
                 $q->orderBy('occurred_at');
@@ -288,7 +297,64 @@ class ExamController extends Controller
 
         $routePrefix = $this->routePrefix();
 
-        return view('admin.exams.results', compact('exam', 'routePrefix'));
+        return view('admin.exams.results', compact('exam', 'routePrefix', 'gradeReports'));
+    }
+
+    private function gradeReportsForExam(Exam $exam)
+    {
+        $schoolId = $this->scopedSchoolId();
+        // Exams have no school_id; the class's school is authoritative.
+        $examSchoolId = $exam->classRoom?->section?->school_id
+            ?? $exam->academicYear?->school_id ?? $exam->teacher?->school_id;
+        abort_if($examSchoolId === null, 404);
+        abort_if($schoolId !== null && (int) $examSchoolId !== $schoolId, 404);
+
+        $query = GradeReport::where('school_id', $examSchoolId);
+        if (! Auth::user()->hasAnyRole(['super-admin', 'school-admin'])) {
+            abort_unless((int) $exam->teacher_id === Auth::id(), 403);
+            $query->whereIn('class_id', $this->teachingClassIds(Auth::id()));
+        }
+
+        return $query->when($exam->class_id, fn ($q) => $q
+            ->orderByRaw('CASE WHEN class_id = ? THEN 0 ELSE 1 END', [$exam->class_id]))
+            ->orderBy('title');
+    }
+
+    public function pushToGradeReport(Request $request, Exam $exam)
+    {
+        $reports = $this->gradeReportsForExam($exam);
+        $data = $request->validate([
+            'grade_report_id' => ['required', 'integer'],
+            'grade_report_column_id' => ['required', 'integer'],
+        ]);
+        $report = $reports->findOrFail($data['grade_report_id']);
+        $column = $report->columns()->where('type', 'numeric')
+            ->findOrFail($data['grade_report_column_id']);
+        if ($report->is_locked) {
+            return back()->withErrors(['grade_report_id' => __('grades_admin.report_locked')]);
+        }
+        if ($exam->total_marks <= 0 || $column->max_score === null) {
+            return back()->withErrors(['grade_report_column_id' => __('exam_transfer.invalid_scale')]);
+        }
+
+        // Repeated transfers are idempotent; the latest graded attempt wins.
+        $attempts = $exam->studentExams()->where('status', 'graded')->whereNotNull('score')
+            ->orderByDesc('attempt_number')->orderByDesc('id')->get()->unique('student_id');
+        DB::transaction(function () use ($attempts, $exam, $report, $column) {
+            foreach ($attempts as $attempt) {
+                StudentGradeValue::updateOrCreate([
+                    'grade_report_column_id' => $column->id,
+                    'student_id' => $attempt->student_id,
+                ], [
+                    'grade_report_id' => $report->id,
+                    'score' => round($attempt->score / $exam->total_marks * $column->max_score, 2),
+                    'recorded_by' => Auth::id(),
+                ]);
+            }
+        });
+
+        return redirect()->route($this->routePrefix().'.results', $exam)
+            ->with('success', __('exam_transfer.transferred', ['count' => $attempts->count()]));
     }
 
     /**

@@ -604,7 +604,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 <li class="nav-item" data-section="academic"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_special_programs')</span></a></li>
-                <li class="nav-item" data-section="academic"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="laptop" class="vc-ico" /><span class="menu-title">@lang('shell.nav_distance_learning')</span></a></li>
+                <li class="nav-item" data-section="academic"><a href="{{ Route::has('manage.distance-learning.index') ? route('manage.distance-learning.index') : '#' }}"><x-svg-icon name="laptop" class="vc-ico" /><span class="menu-title">@lang('shell.nav_distance_learning')</span></a></li>
                 @if($canViewVirtualClasses)
                 <li class="nav-item {{ request()->routeIs('manage.virtual-classes.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : '#' }}"><x-svg-icon name="camera-video" class="vc-ico" /><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a></li>
                 @endif
@@ -641,7 +641,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 @endif
-                <li class="nav-item" data-section="assessment"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
+                <li class="nav-item" data-section="assessment"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('admin.class-visits.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.class-visits.index') ? route('admin.class-visits.index') : '#' }}"><x-svg-icon name="geo-alt" class="vc-ico" /><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
             </div>{{-- /gp-sec-assessment --}}
 

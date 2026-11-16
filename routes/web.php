@@ -630,6 +630,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::post('exams/{exam}/activate', [\App\Http\Controllers\Admin\ExamController::class, 'activate'])->name('exams.activate');
     Route::post('exams/{exam}/complete', [\App\Http\Controllers\Admin\ExamController::class, 'complete'])->name('exams.complete');
     Route::get('exams/{exam}/results', [\App\Http\Controllers\Admin\ExamController::class, 'results'])->name('exams.results');
+    Route::post('exams/{exam}/push-to-grade-report', [\App\Http\Controllers\Admin\ExamController::class, 'pushToGradeReport'])->name('exams.push-to-grade-report');
     // === Anti-cheat (ac) — Trello #229: re-open a student's auto-locked attempt ===
     Route::post('exams/{exam}/attempts/{studentExam}/reopen', [\App\Http\Controllers\Admin\ExamController::class, 'reopenAttempt'])->name('exams.attempts.reopen');
 
@@ -903,6 +904,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('te
     Route::post('exams/{exam}/activate', [\App\Http\Controllers\Admin\ExamController::class, 'activate'])->name('exams.activate');
     Route::post('exams/{exam}/complete', [\App\Http\Controllers\Admin\ExamController::class, 'complete'])->name('exams.complete');
     Route::get('exams/{exam}/results', [\App\Http\Controllers\Admin\ExamController::class, 'results'])->name('exams.results');
+    Route::post('exams/{exam}/push-to-grade-report', [\App\Http\Controllers\Admin\ExamController::class, 'pushToGradeReport'])->name('exams.push-to-grade-report');
     // === Anti-cheat (ac) — Trello #229: re-open a student's auto-locked attempt ===
     Route::post('exams/{exam}/attempts/{studentExam}/reopen', [\App\Http\Controllers\Admin\ExamController::class, 'reopenAttempt'])->name('exams.attempts.reopen');
 

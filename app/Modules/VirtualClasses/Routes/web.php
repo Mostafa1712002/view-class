@@ -63,3 +63,7 @@ Route::middleware(['auth'])
         Route::get('/', [StudentVirtualClassController::class, 'index'])->name('index');
         Route::post('{id}/join', [StudentVirtualClassController::class, 'join'])->whereNumber('id')->name('join');
     });
+
+Route::middleware(['auth', 'role:super-admin,school-admin,teacher', 'permission:virtual_classes.view'])
+    ->get('manage/distance-learning', [\App\Modules\VirtualClasses\Controllers\DistanceLearningController::class, 'index'])
+    ->name('manage.distance-learning.index');

@@ -32,6 +32,25 @@ trait ResolvesTeacherStudents
      */
     protected function teachingStudentIds(int $teacherId, ?int $schoolId): array
     {
+        $classIds = collect($this->teachingClassIds($teacherId));
+        if ($classIds->isEmpty()) {
+            return [];
+        }
+
+        $studentIds = DB::table('users')
+            ->where(function ($w) use ($classIds) {
+                $w->whereIn('class_room_id', $classIds)
+                    ->orWhereIn('id', DB::table('class_student')->whereIn('class_id', $classIds)->select('student_id'));
+            })
+            ->whereNull('deleted_at')
+            ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
+            ->pluck('id');
+
+        return $studentIds->map(fn ($id) => (int) $id)->all();
+    }
+
+    protected function teachingClassIds(int $teacherId): array
+    {
         $classIds = collect();
 
         // 1) classes they lead
@@ -63,20 +82,6 @@ trait ResolvesTeacherStudents
             DB::table('class_teacher')->where('teacher_id', $teacherId)->pluck('class_id')
         );
 
-        $classIds = $classIds->filter()->unique()->values();
-        if ($classIds->isEmpty()) {
-            return [];
-        }
-
-        $studentIds = DB::table('users')
-            ->where(function ($w) use ($classIds) {
-                $w->whereIn('class_room_id', $classIds)
-                    ->orWhereIn('id', DB::table('class_student')->whereIn('class_id', $classIds)->select('student_id'));
-            })
-            ->whereNull('deleted_at')
-            ->when($schoolId, fn ($w) => $w->where('school_id', $schoolId))
-            ->pluck('id');
-
-        return $studentIds->map(fn ($id) => (int) $id)->all();
+        return $classIds->filter()->unique()->values()->all();
     }
 }
