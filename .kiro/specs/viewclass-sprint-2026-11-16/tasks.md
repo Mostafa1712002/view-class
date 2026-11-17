@@ -9,6 +9,7 @@ Why: 374 gives a guard test re-run after each card; 373 gives data the others ar
 - [x] 370 exams lifecycle + sidebar
 - [x] 369 distance-learning hub + sidebar
 - [x] 372 coaching module
+  - [x] 372 round 2 (11-17, Farouk): grade + class filters, multi-student pick, «اختيار كل الطلاب» on create (57cdea1)
 - [ ] 371 points & rewards
 - [ ] 368 special programs
 
@@ -23,3 +24,6 @@ Why: 374 gives a guard test re-run after each card; 373 gives data the others ar
 ## Status 2026-11-16
 Live on viewclass + rawaniedu at 7c304f2 (backups /root/backups/*-pre-sprint-20261116.sql.gz). Demo data: viewclass school 1 only (`vc:demo-data --school=1 --remove` undoes it).
 8 cards → testing prompt (Mohamed Farouk). 371 + 368 blocked: questions posted on the cards.
+
+## Status 2026-11-17
+372 round 2 live on viewclass + rawaniedu at 57cdea1: create form filters students by «الصف الدراسي» (section) and «الفصل» (class column or class_student pivot), multi-select, select-all resolved on the server; one case per student. «فصل دراسي وصف» read as grade + class (students are not linked to academic terms) — noted on the card. Back in testing prompt.
