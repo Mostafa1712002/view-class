@@ -22,6 +22,7 @@
 
 <div class="content-body">
     @include('components.alerts')
+    @include('admin.schools.promotion._back')
 
     <div class="alert alert-info">
         <i class="la la-info-circle"></i> @lang('schools.results_intro')
@@ -30,6 +31,7 @@
     <div class="card">
         <form action="{{ route('admin.schools.promotion.results.save', $school) }}" method="POST">
             @csrf
+            @include('admin.schools.promotion._carry')
             <input type="hidden" name="class" value="{{ $class->id }}">
 
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap">

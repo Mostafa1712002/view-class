@@ -21,6 +21,7 @@
 
 <div class="content-body">
     @include('components.alerts')
+    @include('admin.schools.promotion._back')
 
     {{-- Automatic year-end promotion (grade ordinal +1, class-number matching) --}}
     <div class="card mb-3 border-primary">
@@ -56,12 +57,13 @@
             <form action="{{ route('admin.schools.academic-years.migrate.classes', $school) }}" method="POST"
                   onsubmit="return confirm(@json(__('schools.migrate_confirm')))">
                 @csrf
+                @include('admin.schools.promotion._carry')
                 <div class="row g-2 align-items-end">
                     <div class="col-md-5">
                         <label class="form-label">@lang('schools.migrate_source_year')</label>
                         <select name="source_year_id" class="form-control" required>
                             @foreach($years as $y)
-                                <option value="{{ $y->id }}">{{ $y->name }}</option>
+                                <option value="{{ $y->id }}" @selected(request('source') == $y->id)>{{ $y->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -69,7 +71,7 @@
                         <label class="form-label">@lang('schools.migrate_destination_year')</label>
                         <select name="destination_year_id" class="form-control" required>
                             @foreach($years as $y)
-                                <option value="{{ $y->id }}" @selected($y->is_current)>{{ $y->name }}</option>
+                                <option value="{{ $y->id }}" @selected(request('destination') ? request('destination') == $y->id : $y->is_current)>{{ $y->name }}</option>
                             @endforeach
                         </select>
                     </div>

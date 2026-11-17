@@ -30,6 +30,7 @@
         <div class="alert alert-danger">{{ $errors->first() }}</div>
     @endif
 
+    @include('admin.schools.promotion._back')
     <div class="alert alert-info">
         <i class="la la-info-circle"></i> @lang('schools.standardization_intro')
     </div>
@@ -43,8 +44,9 @@
 
     <form action="{{ route('admin.schools.standardization.save', $school) }}" method="POST">
         @csrf
+        @include('admin.schools.promotion._carry')
         @forelse($sections as $section)
-            <div class="card mb-3">
+            <div class="card mb-3 {{ $section->grade_number ? '' : 'border border-warning' }}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         {{ $section->name }}

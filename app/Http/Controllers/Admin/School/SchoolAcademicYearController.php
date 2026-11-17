@@ -160,7 +160,7 @@ class SchoolAcademicYearController extends Controller
         $result = $service->migrateClasses($school, $source, $destination);
 
         return redirect()
-            ->route('admin.schools.academic-years.migrate', $school)
+            ->route('admin.schools.academic-years.migrate', ['school' => $school] + $request->only('source', 'destination'))
             ->with('success', __('schools.migrate_classes_result', $result));
     }
 

@@ -170,6 +170,7 @@ class PromotionPlanner
                     $this->record($student, 'not_moved', $srcGrade, $srcClass, null, null, 'no_class_'.$k);
                 }
                 $this->capacityAlerts[] = [
+                    'section_id' => $dstGrade->id,
                     'grade' => $dstGrade->name,
                     'number' => $k,
                     'count' => count($remaining),

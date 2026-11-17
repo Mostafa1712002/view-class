@@ -105,7 +105,7 @@ class SchoolStandardizationController extends Controller
         });
 
         return redirect()
-            ->route('admin.schools.standardization.index', $school)
+            ->route('admin.schools.standardization.index', ['school' => $school] + $request->only('source', 'destination'))
             ->with('success', __('common.updated_successfully'));
     }
 

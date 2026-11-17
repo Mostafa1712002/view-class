@@ -60,17 +60,17 @@
         @if($readiness['unnumbered_grades'])
             <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap">
                 <span><i class="la la-ban"></i> {{ __('schools.promotion_unnumbered_grades', ['grades' => implode('، ', $readiness['unnumbered_grades'])]) }}</span>
-                <a href="{{ route('admin.schools.standardization.index', $school) }}" class="btn btn-sm btn-warning">@lang('schools.standardize_now')</a>
+                <a href="{{ route('admin.schools.standardization.index', ['school' => $school, 'source' => $src->id, 'destination' => $dst->id]) }}" class="btn btn-sm btn-warning">@lang('schools.standardize_now')</a>
             </div>
         @endif
         @if($readiness['destination_classes'] === 0)
             <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap">
                 <span><i class="la la-exclamation-triangle"></i> {{ __('schools.promotion_no_destination_classes', ['year' => $dst->name]) }}</span>
-                <a href="{{ route('admin.schools.academic-years.migrate', $school) }}" class="btn btn-sm btn-warning">@lang('schools.promote_to_new_year')</a>
+                <a href="{{ route('admin.schools.academic-years.migrate', ['school' => $school, 'source' => $src->id, 'destination' => $dst->id]) }}" class="btn btn-sm btn-warning">@lang('schools.migrate_type_classes')</a>
             </div>
         @endif
         @if(count($readiness['classes']) && $readiness['passed'] === 0)
-            <div class="alert alert-warning"><i class="la la-exclamation-triangle"></i> {{ __('schools.promotion_no_passed', ['year' => $src->name]) }}</div>
+            <div class="alert alert-warning"><i class="la la-exclamation-triangle"></i> {{ __('schools.promotion_no_passed', ['year' => $src->name]) }} @lang('schools.promotion_no_passed_hint')</div>
         @endif
 
         <div class="card mb-3">
@@ -100,8 +100,8 @@
                             <td>{{ $row['pending'] }}</td>
                             <td>
                                 <span class="badge badge-{{ $row['reason'] === 'ready' ? 'success' : 'warning' }}">@lang('schools.promotion_reason_'.$row['reason'])</span>
-                                @if(in_array($row['reason'], ['no_passed', 'ready'], true))
-                                    <a href="{{ route('admin.schools.promotion.results', ['school' => $school, 'class' => $row['class_id']]) }}" class="small">@lang('schools.results_title')</a>
+                                @if($row['students'] > 0)
+                                    <a href="{{ route('admin.schools.promotion.results', ['school' => $school, 'class' => $row['class_id'], 'source' => $src->id, 'destination' => $dst->id]) }}" class="btn btn-sm btn-outline-success py-0">@lang('schools.results_title')</a>
                                 @endif
                             </td>
                         </tr>
@@ -137,8 +137,11 @@
         @foreach($plan['blockers'] as $b)
             <div class="alert alert-danger"><i class="la la-ban"></i> {{ $b }}</div>
         @endforeach
-        @foreach($plan['warnings'] as $w)
-            <div class="alert alert-warning"><i class="la la-exclamation-triangle"></i> {{ $w }}</div>
+        @foreach(collect($plan['capacity_alerts'])->unique(fn ($a) => $a['section_id'].'-'.$a['number']) as $a)
+            <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap">
+                <span><i class="la la-exclamation-triangle"></i> {{ __('schools.promotion_warn_no_class', ['grade' => $a['grade'], 'number' => $a['number'], 'count' => $a['count']]) }}</span>
+                <a href="{{ route('admin.schools.grade-levels.classes', ['school' => $school, 'section' => $a['section_id'], 'source' => $src->id, 'destination' => $dst->id]) }}" class="btn btn-sm btn-warning">@lang('schools.promotion_add_class')</a>
+            </div>
         @endforeach
 
         {{-- Plan table --}}

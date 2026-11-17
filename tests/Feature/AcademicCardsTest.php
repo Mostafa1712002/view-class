@@ -131,6 +131,31 @@ class AcademicCardsTest extends TestCase
             ->assertOk()->assertSee(__('schools.promotion_same_year'))->assertViewHas('plan', null);
     }
 
+    public function test_fix_links_keep_the_years_and_genderless_classes_still_match(): void
+    {
+        [$school, $src, $dst, $source, $destination, $student] = $this->promotionFixture();
+        $source->section->update(['grade_number' => null]);
+        $years = ['source' => $src->id, 'destination' => $dst->id];
+        $this->get(route('admin.schools.promotion.preview', ['school' => $school] + $years))->assertOk()
+            ->assertSee(route('admin.schools.standardization.index', ['school' => $school] + $years))
+            ->assertSee(route('admin.schools.promotion.results', ['school' => $school, 'class' => $source->id] + $years));
+        $this->get(route('admin.schools.standardization.index', ['school' => $school] + $years))->assertOk()
+            ->assertSee(__('schools.promotion_back_to_preview'));
+        $this->get(route('admin.schools.academic-years.migrate', ['school' => $school] + $years))->assertOk()
+            ->assertSee('<option value="'.$src->id.'" selected', false);
+        $this->post(route('admin.schools.promotion.results.save', $school), ['class' => $source->id, 'mark_all' => 1] + $years)
+            ->assertRedirect(route('admin.schools.promotion.results', ['school' => $school, 'class' => $source->id] + $years));
+
+        // A legacy class without gender is promoted into the same-numbered class of the next grade.
+        $source->section->update(['grade_number' => 1]);
+        $next = Section::factory()->create(['school_id' => $school->id, 'grade_number' => 2]);
+        $source->update(['number' => 1, 'gender' => null]);
+        $destination->update(['section_id' => $next->id, 'number' => 1, 'gender' => 'mixed']);
+        $plan = app(PromotionPlanner::class)->plan($school, $src, $dst);
+        $this->assertSame(1, $plan['summary']['promoted']);
+        $this->assertSame($destination->id, $plan['moves'][0]['to_class_id']);
+    }
+
     public function test_execute_skips_students_promoted_by_another_source_year(): void
     {
         [$school, $src, $dst, $source, $destination, $student, $actor] = $this->promotionFixture();

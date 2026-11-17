@@ -63,7 +63,7 @@ class PromotionResultsController extends Controller
         }
 
         return redirect()
-            ->route('admin.schools.promotion.results', ['school' => $school, 'class' => $class->id])
+            ->route('admin.schools.promotion.results', ['school' => $school, 'class' => $class->id] + $request->only('source', 'destination'))
             ->with('success', __('schools.results_saved', ['count' => $count]));
     }
 

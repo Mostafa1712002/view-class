@@ -20,6 +20,7 @@
 </div>
 
 <div class="content-body">
+    @include('admin.schools.promotion._back')
     <div class="card mb-3">
         <div class="card-header"><h5 class="mb-0">@lang('schools.add_class')</h5></div>
         <div class="card-body">
@@ -62,7 +63,7 @@
                     <label class="form-label">@lang('schools.academic_year')</label>
                     <select name="academic_year_id" class="form-control" required>
                         @foreach($academicYears as $y)
-                            <option value="{{ $y->id }}" @selected($y->is_current)>{{ $y->name }}</option>
+                            <option value="{{ $y->id }}" @selected(request('destination') ? request('destination') == $y->id : $y->is_current)>{{ $y->name }}</option>
                         @endforeach
                     </select>
                 </div>

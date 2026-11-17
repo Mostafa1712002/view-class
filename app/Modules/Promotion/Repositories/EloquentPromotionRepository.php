@@ -34,7 +34,9 @@ class EloquentPromotionRepository implements PromotionRepository
         return ClassRoom::where('section_id', $sectionId)
             ->where('academic_year_id', $yearId)
             ->where('number', $number)
-            ->where('gender', $gender)
+            // Legacy classes have no gender; then match by number only.
+            ->when($gender !== '', fn ($q) => $q->where('gender', $gender))
+            ->orderBy('id')
             ->first();
     }
 
