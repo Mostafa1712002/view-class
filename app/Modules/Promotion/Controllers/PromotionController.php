@@ -37,8 +37,11 @@ class PromotionController extends Controller
         $dst = $this->scopedYear($request->query('destination'), $school);
 
         $plan = null;
-        if ($src && $dst) {
+        $readiness = null;
+        $sameYear = $src && $dst && $src->id === $dst->id;
+        if ($src && $dst && ! $sameYear) {
             $plan = $this->planner->plan($school, $src, $dst);
+            $readiness = $this->planner->readiness($school, $src, $dst);
         }
 
         return view('admin.schools.promotion.preview', [
@@ -47,6 +50,8 @@ class PromotionController extends Controller
             'src' => $src,
             'dst' => $dst,
             'plan' => $plan,
+            'readiness' => $readiness,
+            'sameYear' => $sameYear,
         ]);
     }
 

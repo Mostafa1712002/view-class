@@ -51,6 +51,70 @@
         </div>
     </div>
 
+    @if($sameYear)
+        {{-- alert-warning: the layout turns short .alert-danger blocks into toasts; this one must stay on the page. --}}
+        <div class="alert alert-warning"><i class="la la-ban"></i> @lang('schools.promotion_same_year')</div>
+    @endif
+
+    @if($readiness)
+        @if($readiness['unnumbered_grades'])
+            <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap">
+                <span><i class="la la-ban"></i> {{ __('schools.promotion_unnumbered_grades', ['grades' => implode('، ', $readiness['unnumbered_grades'])]) }}</span>
+                <a href="{{ route('admin.schools.standardization.index', $school) }}" class="btn btn-sm btn-warning">@lang('schools.standardize_now')</a>
+            </div>
+        @endif
+        @if($readiness['destination_classes'] === 0)
+            <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap">
+                <span><i class="la la-exclamation-triangle"></i> {{ __('schools.promotion_no_destination_classes', ['year' => $dst->name]) }}</span>
+                <a href="{{ route('admin.schools.academic-years.migrate', $school) }}" class="btn btn-sm btn-warning">@lang('schools.promote_to_new_year')</a>
+            </div>
+        @endif
+        @if(count($readiness['classes']) && $readiness['passed'] === 0)
+            <div class="alert alert-warning"><i class="la la-exclamation-triangle"></i> {{ __('schools.promotion_no_passed', ['year' => $src->name]) }}</div>
+        @endif
+
+        <div class="card mb-3">
+            <div class="card-header"><h5 class="mb-0">{{ __('schools.promotion_readiness', ['year' => $src->name]) }}</h5></div>
+            <div class="card-body table-responsive">
+                @if(count($readiness['classes']))
+                <table class="table table-sm">
+                    <thead><tr>
+                        <th>@lang('schools.migrate_grade')</th>
+                        <th>@lang('schools.migrate_class')</th>
+                        <th>@lang('schools.promotion_class_number')</th>
+                        <th>@lang('schools.promotion_students')</th>
+                        <th>@lang('schools.result_passed')</th>
+                        <th>@lang('schools.result_failed')</th>
+                        <th>@lang('schools.result_pending')</th>
+                        <th>@lang('schools.promotion_status')</th>
+                    </tr></thead>
+                    <tbody>
+                    @foreach($readiness['classes'] as $row)
+                        <tr>
+                            <td>{{ $row['grade'] }}</td>
+                            <td>{{ $row['class'] }}</td>
+                            <td>{{ $row['number'] ?? '—' }}</td>
+                            <td>{{ $row['students'] }}</td>
+                            <td>{{ $row['passed'] }}</td>
+                            <td>{{ $row['failed'] }}</td>
+                            <td>{{ $row['pending'] }}</td>
+                            <td>
+                                <span class="badge badge-{{ $row['reason'] === 'ready' ? 'success' : 'warning' }}">@lang('schools.promotion_reason_'.$row['reason'])</span>
+                                @if(in_array($row['reason'], ['no_passed', 'ready'], true))
+                                    <a href="{{ route('admin.schools.promotion.results', ['school' => $school, 'class' => $row['class_id']]) }}" class="small">@lang('schools.results_title')</a>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+                @else
+                    <p class="text-muted mb-0">{{ __('schools.promotion_no_source_classes', ['year' => $src->name]) }}</p>
+                @endif
+            </div>
+        </div>
+    @endif
+
     @if($plan)
         @php $s = $plan['summary']; @endphp
 

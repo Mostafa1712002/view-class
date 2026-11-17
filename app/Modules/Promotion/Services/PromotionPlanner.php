@@ -92,6 +92,57 @@ class PromotionPlanner
         ];
     }
 
+    /**
+     * Why a preview may come out empty: the plan silently skips grades without a
+     * number, classes without a number and students not marked 'passed'. This
+     * lists each source-year class with its result counts and the first reason
+     * it cannot contribute, so the screen can say so instead of showing zeros.
+     *
+     * @return array{unnumbered_grades: array<int,string>, destination_classes: int, passed: int, classes: array<int,array<string,mixed>>}
+     */
+    public function readiness(School $school, AcademicYear $src, AcademicYear $dst): array
+    {
+        $sections = Section::where('school_id', $school->id)->where('is_active', true)->get()->keyBy('id');
+        $topGrade = $sections->max('grade_number');
+        $classes = ClassRoom::whereIn('section_id', $sections->keys())->where('academic_year_id', $src->id)
+            ->withCount([
+                'students',
+                'students as passed_count' => fn ($q) => $q->where('class_student.result', 'passed'),
+                'students as failed_count' => fn ($q) => $q->where('class_student.result', 'failed'),
+            ])->get()
+            ->sortBy(fn ($c) => [$sections[$c->section_id]->grade_number ?? 99, $c->number ?? 99, $c->name])->values();
+
+        $rows = $classes->map(function (ClassRoom $class) use ($sections, $topGrade) {
+            $grade = $sections[$class->section_id];
+            $reason = match (true) {
+                $grade->grade_number === null => 'grade_unnumbered',
+                $class->students_count === 0 => 'no_students',
+                $class->passed_count === 0 => 'no_passed',
+                $class->number === null && (int) $grade->grade_number !== (int) $topGrade => 'class_unnumbered',
+                default => 'ready',
+            };
+
+            return [
+                'class_id' => $class->id,
+                'grade' => $grade->name,
+                'class' => $class->name,
+                'number' => $class->number,
+                'students' => $class->students_count,
+                'passed' => $class->passed_count,
+                'failed' => $class->failed_count,
+                'pending' => $class->students_count - $class->passed_count - $class->failed_count,
+                'reason' => $reason,
+            ];
+        });
+
+        return [
+            'unnumbered_grades' => $sections->whereNull('grade_number')->pluck('name')->values()->all(),
+            'destination_classes' => ClassRoom::whereIn('section_id', $sections->keys())->where('academic_year_id', $dst->id)->count(),
+            'passed' => $rows->sum('passed'),
+            'classes' => $rows->all(),
+        ];
+    }
+
     /** @var array<int,array<string,mixed>> */
     private array $moves = [];
     private array $blockers = [];

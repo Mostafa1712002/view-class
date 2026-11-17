@@ -106,6 +106,31 @@ class AcademicCardsTest extends TestCase
         $this->assertSame(1, $service->promoteStudents($source, $destination)['migrated']);
     }
 
+    public function test_preview_explains_why_nothing_would_move(): void
+    {
+        [$school, $src, $dst, $source, $destination, $student] = $this->promotionFixture();
+        $source->section->update(['grade_number' => null, 'name' => 'Grade Without Number']);
+        $source->students()->updateExistingPivot($student->id, ['result' => 'pending']);
+        $destination->delete();
+        $url = route('admin.schools.promotion.preview', ['school' => $school, 'source' => $src->id, 'destination' => $dst->id]);
+
+        $this->get($url)->assertOk()
+            ->assertSee(__('schools.promotion_unnumbered_grades', ['grades' => 'Grade Without Number']))
+            ->assertSee(__('schools.promotion_no_destination_classes', ['year' => $dst->name]))
+            ->assertSee(__('schools.promotion_no_passed', ['year' => $src->name]))
+            ->assertSee(__('schools.promotion_reason_grade_unnumbered'));
+
+        $source->section->update(['grade_number' => 1]);
+        $source->update(['number' => 1]);
+        $source->students()->updateExistingPivot($student->id, ['result' => 'passed']);
+        $this->get($url)->assertOk()
+            ->assertViewHas('readiness', fn ($r) => $r['unnumbered_grades'] === [] && $r['passed'] === 1
+                && $r['classes'][0]['reason'] === 'ready');
+
+        $this->get(route('admin.schools.promotion.preview', ['school' => $school, 'source' => $src->id, 'destination' => $src->id]))
+            ->assertOk()->assertSee(__('schools.promotion_same_year'))->assertViewHas('plan', null);
+    }
+
     public function test_execute_skips_students_promoted_by_another_source_year(): void
     {
         [$school, $src, $dst, $source, $destination, $student, $actor] = $this->promotionFixture();
