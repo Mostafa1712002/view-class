@@ -310,7 +310,7 @@ return [
     'promotion_rollback_invalid' => 'لا يمكن التراجع عن هذه العملية.',
     'promotion_rollback_not_latest' => 'يمكن التراجع فقط عن آخر عملية ترحيل مُنفّذة.',
     'promotion_unnumbered_grades' => 'الصفوف التالية بلا رقم قياسي، لذلك لن يدخل طلابها في الترحيل: :grades. عيّن أرقامها أولًا.',
-    'promotion_no_destination_classes' => 'العام الوجهة «:year» لا يحتوي على أي فصول، فلن يجد الطلاب فصلًا يُرحَّلون إليه. انسخ الفصول إليه أولًا.',
+    'promotion_no_destination_classes' => 'عام الوجهة «:year» لا يحتوي على أي فصول، فلن يجد الطلاب فصلًا يُرحَّلون إليه. انسخ الفصول إليه أولًا.',
     'promotion_no_passed' => 'لا يوجد في العام «:year» أي طالب نتيجته «ناجح»، والترحيل ينقل الناجحين فقط. حدّد نتائج الطلاب من صفحة كل فصل.',
     'promotion_readiness' => 'جاهزية فصول العام «:year»',
     'promotion_class_number' => 'رقم الفصل',
