@@ -27,3 +27,4 @@ Live on viewclass + rawaniedu at 7c304f2 (backups /root/backups/*-pre-sprint-202
 
 ## Status 2026-11-17
 372 round 2 live on viewclass + rawaniedu at 57cdea1: create form filters students by «الصف الدراسي» (section) and «الفصل» (class column or class_student pivot), multi-select, select-all resolved on the server; one case per student. «فصل دراسي وصف» read as grade + class (students are not linked to academic terms) — noted on the card. Back in testing prompt.
+- 11-17 round 3 (35a4ebb, live both): counseling list filters (school/grade/class/counselor/status/category/dates/student) + school, grade, class, opened columns. Card 4FY7b8KJ «آلية الترحيل» answered on the card (question only, no code); no live school has numbered grades/classes yet, so promotion needs «توحيد الترقيم» first.
