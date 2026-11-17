@@ -35,6 +35,10 @@ return [
     'all_students' => 'اختيار كل الطلاب',
     'students_required' => 'اختر طالبًا واحدًا على الأقل.',
     'created_many' => 'تم تسجيل الحالة لعدد :count من الطلاب.',
+    'date_from' => 'من تاريخ',
+    'date_to' => 'إلى تاريخ',
+    'search_student' => 'ابحث باسم الطالب',
+    'reset' => 'إلغاء التصفية',
     'choose' => 'اختر',
     'statuses' => [
         'open' => 'مفتوحة',

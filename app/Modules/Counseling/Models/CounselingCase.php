@@ -2,6 +2,7 @@
 
 namespace App\Modules\Counseling\Models;
 
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,6 +18,17 @@ class CounselingCase extends Model
     protected $fillable = ['school_id', 'student_id', 'counselor_id', 'category', 'title', 'summary', 'status', 'opened_at', 'closed_at', 'created_by'];
 
     protected $casts = ['opened_at' => 'datetime', 'closed_at' => 'datetime'];
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
+    /** The class the student sits in now (class column first, then the class_student pivot). */
+    public function studentClass(): ?\App\Models\ClassRoom
+    {
+        return $this->student?->classRoom ?? $this->student?->enrolledClasses->first();
+    }
 
     public function student()
     {

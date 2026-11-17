@@ -39,25 +39,49 @@ class CounselingController extends Controller
     public function index(Request $request)
     {
         $this->authorizeAccess();
+        $user = $request->user();
         $filters = $request->validate([
             'status' => ['nullable', Rule::in(CounselingCase::STATUSES)],
             'category' => ['nullable', Rule::in(CounselingCase::CATEGORIES)],
             'student' => ['nullable', 'string', 'max:255'],
+            'school_id' => ['nullable', 'integer'],
+            'section_id' => ['nullable', 'integer'],
+            'class_id' => ['nullable', 'integer'],
+            'counselor_id' => ['nullable', 'integer'],
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date'],
         ]);
-        $query = $this->cases->visibleTo($request->user());
+        $query = $this->cases->visibleTo($user);
         $statusCounts = (clone $query)->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
         $categoryCounts = (clone $query)->selectRaw('category, count(*) as total')->groupBy('category')->pluck('total', 'category');
-        foreach (['status', 'category'] as $field) {
+        // Non-super-admins are already held to their school by visibleTo(); their school_id filter is ignored.
+        $schoolId = $user->isSuperAdmin() ? ($filters['school_id'] ?? null) : $user->school_id;
+        foreach (['status', 'category', 'counselor_id'] as $field) {
             if (! empty($filters[$field])) {
                 $query->where($field, $filters[$field]);
             }
         }
+        $query->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->when(! empty($filters['section_id']) || ! empty($filters['class_id']), fn ($q) => $q->whereIn('student_id',
+                $this->studentsQuery(null, $filters['section_id'] ?? null, $filters['class_id'] ?? null)->select('users.id')))
+            ->when($filters['date_from'] ?? null, fn ($q, $date) => $q->whereDate('opened_at', '>=', $date))
+            ->when($filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('opened_at', '<=', $date));
         if (! empty($filters['student'])) {
             $query->whereHas('student', fn ($q) => $q->where('name', 'like', '%'.$filters['student'].'%'));
         }
-        $cases = $query->with(['student', 'counselor'])->latest()->paginate(20)->withQueryString();
+        $cases = $query->with(['school', 'counselor', 'student.section', 'student.classRoom.section', 'student.enrolledClasses.section'])
+            ->latest()->paginate(20)->withQueryString();
+        $sections = Section::with('school:id,name')->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get(['id', 'name', 'school_id']);
+        $classes = ClassRoom::whereIn('section_id', ! empty($filters['section_id']) ? [$filters['section_id']] : $sections->pluck('id'))
+            ->orderBy('name')->get(['id', 'name', 'division', 'section_id']);
+        $counselors = $user->isSuperAdmin() || $user->isSchoolAdmin()
+            ? User::whereHas('jobTitle', fn ($q) => $q->where('slug', 'counselor'))
+                ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get(['id', 'name'])
+            : collect();
 
-        return view('counseling.index', compact('cases', 'statusCounts', 'categoryCounts'));
+        return view('counseling.index', compact('cases', 'statusCounts', 'categoryCounts', 'sections', 'classes', 'counselors') + [
+            'schools' => $this->assignableSchools(),
+        ]);
     }
 
     /** Students of a school, optionally narrowed to a grade (section) and class; class links come from users.class_room_id or the class_student pivot. */

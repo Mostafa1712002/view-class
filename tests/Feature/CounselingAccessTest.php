@@ -165,6 +165,33 @@ class CounselingAccessTest extends TestCase
         $this->assertSame(0, CounselingCase::whereIn('title', ['Mixed', 'Empty'])->count());
     }
 
+    public function test_list_shows_school_grade_class_and_filters_by_them(): void
+    {
+        [$school, $a, , $student, $case, $other] = $this->fixture();
+        $section = Section::factory()->create(['school_id' => $school->id, 'name' => 'Grade Nine']);
+        $class = ClassRoom::factory()->create(['name' => 'Room 9', 'section_id' => $section->id, 'division' => null]);
+        $student->update(['class_room_id' => $class->id]);
+        $pivotStudent = User::factory()->create(['school_id' => $school->id]);
+        $pivotStudent->roles()->attach(Role::where('slug', 'student')->firstOrFail());
+        $class->students()->attach($pivotStudent->id);
+        $other->update(['student_id' => $pivotStudent->id]);
+        $loner = User::factory()->create(['school_id' => $school->id]);
+        $lonerCase = $case->replicate();
+        $lonerCase->fill(['student_id' => $loner->id, 'title' => 'Classless', 'opened_at' => now()->subYear()])->save();
+        $admin = $this->createSchoolAdmin($school);
+
+        $this->actingAs($admin)->get(route('manage.counseling.index'))->assertOk()
+            ->assertSee($school->name)->assertSee('Grade Nine')->assertSee('Room 9')->assertSee('Classless');
+        $this->get(route('manage.counseling.index', ['class_id' => $class->id]))->assertOk()
+            ->assertSee('Confidential A')->assertSee('Confidential B')->assertDontSee('Classless');
+        $this->get(route('manage.counseling.index', ['section_id' => $section->id, 'counselor_id' => $a->id]))->assertOk()
+            ->assertSee('Confidential A')->assertDontSee('Confidential B');
+        $this->get(route('manage.counseling.index', ['date_to' => now()->subMonth()->toDateString()]))->assertOk()
+            ->assertSee('Classless')->assertDontSee('Confidential A');
+        $this->get(route('manage.counseling.index', ['school_id' => School::factory()->create()->id]))->assertOk()
+            ->assertSee('Confidential A');
+    }
+
     public function test_permissions_are_only_granted_to_counselor_job_titles(): void
     {
         $job = JobTitle::where('slug', 'counselor')->firstOrFail();

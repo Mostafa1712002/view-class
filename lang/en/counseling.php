@@ -35,6 +35,10 @@ return [
     'all_students' => 'Select all students',
     'students_required' => 'Pick at least one student.',
     'created_many' => 'Case recorded for :count students.',
+    'date_from' => 'From date',
+    'date_to' => 'To date',
+    'search_student' => 'Search by student name',
+    'reset' => 'Clear filters',
     'choose' => 'Choose',
     'statuses' => [
         'open' => 'Open',
