@@ -31,10 +31,10 @@ interface PromotionRepository
     public function classesOfGradeForYear(int $sectionId, int $yearId): Collection;
 
     /**
-     * The class of a grade for a year with the given number AND gender track.
-     * Null when no such class exists (destination not prepared / gender mismatch).
+     * The class of a grade for a year with the given number (schools are
+     * single-gender, so gender is not matched). Null when no such class exists.
      */
-    public function classInGrade(int $sectionId, int $yearId, int $number, string $gender): ?ClassRoom;
+    public function classInGrade(int $sectionId, int $yearId, int $number): ?ClassRoom;
 
     /**
      * Students of a class whose enrollment result is 'passed', ordered by name

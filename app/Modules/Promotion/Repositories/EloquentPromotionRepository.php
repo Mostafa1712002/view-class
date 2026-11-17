@@ -29,13 +29,11 @@ class EloquentPromotionRepository implements PromotionRepository
             ->get();
     }
 
-    public function classInGrade(int $sectionId, int $yearId, int $number, string $gender): ?ClassRoom
+    public function classInGrade(int $sectionId, int $yearId, int $number): ?ClassRoom
     {
         return ClassRoom::where('section_id', $sectionId)
             ->where('academic_year_id', $yearId)
             ->where('number', $number)
-            // Legacy classes have no gender; then match by number only.
-            ->when($gender !== '', fn ($q) => $q->where('gender', $gender))
             ->orderBy('id')
             ->first();
     }

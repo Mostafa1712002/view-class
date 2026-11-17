@@ -7,6 +7,7 @@ use App\Modules\Promotion\Actions\{ExecutePromotionAction, RollbackPromotionActi
 use App\Modules\Promotion\Services\PromotionPlanner;
 use App\Services\AcademicYearMigrationService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AcademicCardsTest extends TestCase
@@ -154,6 +155,28 @@ class AcademicCardsTest extends TestCase
         $plan = app(PromotionPlanner::class)->plan($school, $src, $dst);
         $this->assertSame(1, $plan['summary']['promoted']);
         $this->assertSame($destination->id, $plan['moves'][0]['to_class_id']);
+    }
+
+    public function test_class_gender_follows_the_school(): void
+    {
+        $this->actingAs($this->createSuperAdmin());
+        $school = School::factory()->create(['student_gender' => 'girls']);
+        $year = AcademicYear::factory()->create(['school_id' => $school->id]);
+        $section = Section::factory()->create(['school_id' => $school->id]);
+        $page = route('admin.schools.grade-levels.classes', [$school, $section]);
+        $this->get($page)->assertOk()->assertDontSee('name="gender"', false);
+        $this->post(route('admin.schools.grade-levels.classes.store', [$school, $section]), [
+            'name' => 'Girls A', 'grade_level' => 1, 'number' => 1, 'capacity' => 30, 'academic_year_id' => $year->id, 'gender' => 'boys',
+        ])->assertSessionHasNoErrors();
+        $class = ClassRoom::where('name', 'Girls A')->firstOrFail();
+        $this->assertSame('girls', $class->gender);
+
+        $school->update(['student_gender' => 'boys']);
+        $this->assertSame('boys', $class->fresh()->gender);
+
+        DB::table('classes')->where('id', $class->id)->update(['gender' => 'mixed']);
+        (require database_path('migrations/2026_11_17_120000_sync_class_gender_from_school.php'))->up();
+        $this->assertSame('boys', $class->fresh()->gender);
     }
 
     public function test_execute_skips_students_promoted_by_another_source_year(): void

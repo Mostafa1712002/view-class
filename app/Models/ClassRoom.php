@@ -13,6 +13,20 @@ class ClassRoom extends Model
     use HasFactory;
     protected $table = 'classes';
 
+    /** A school is single-gender (card MX0W71Kh): the class takes the school's student_gender, never its own input. */
+    protected static function booted(): void
+    {
+        static::saving(function (ClassRoom $class) {
+            $schoolGender = \Illuminate\Support\Facades\DB::table('sections')
+                ->join('schools', 'schools.id', '=', 'sections.school_id')
+                ->where('sections.id', $class->section_id)
+                ->value('schools.student_gender');
+            if ($schoolGender !== null) {
+                $class->gender = $schoolGender;
+            }
+        });
+    }
+
     protected $fillable = [
         'name',
         'section_id',

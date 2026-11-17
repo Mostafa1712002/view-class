@@ -16,7 +16,7 @@ use App\Modules\Promotion\Support\StandardGrades;
  *
  * Rules (from the card):
  *  - grade ordinal N → N+1; the top grade (no N+1) graduates.
- *  - class number k → class number k in the next grade, same gender track.
+ *  - class number k → class number k in the next grade (a school is single-gender, so no gender match).
  *  - only students whose enrollment result is 'passed' move.
  *  - capacity overflow: the alphabetically-LAST students spill to class k+1;
  *    if there is no class to receive them they stay put (not_moved) and the
@@ -163,7 +163,7 @@ class PromotionPlanner
         $k = $targetNumber;
 
         while (! empty($remaining)) {
-            $dstClass = $this->repo->classInGrade($dstGrade->id, $dstYearId, $k, (string) $srcClass->gender);
+            $dstClass = $this->repo->classInGrade($dstGrade->id, $dstYearId, $k);
 
             if ($dstClass === null) {
                 foreach ($remaining as $student) {

@@ -113,7 +113,6 @@ class SchoolGradeLevelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|min:1|max:12',
-            'gender' => 'required|in:boys,girls,mixed',
             // رقم الفصل — unique within this grade (Rule #1).
             'number' => [
                 'nullable', 'integer', 'min:1', 'max:100',
@@ -183,7 +182,6 @@ class SchoolGradeLevelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade_level' => 'required|integer|min:1|max:12',
-            'gender' => 'required|in:boys,girls,mixed',
             // رقم الفصل — unique within this grade, excluding this class (Rule #1).
             'number' => [
                 'nullable', 'integer', 'min:1', 'max:100',

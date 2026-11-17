@@ -39,14 +39,6 @@
                     <input type="number" min="1" max="100" name="number" class="form-control" placeholder="@lang('schools.class_number_hint')">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">@lang('schools.student_gender')</label>
-                    <select name="gender" class="form-control" required>
-                        <option value="boys">@lang('schools.gender_boys')</option>
-                        <option value="girls">@lang('schools.gender_girls')</option>
-                        <option value="mixed">@lang('schools.gender_mixed')</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
                     <label class="form-label">@lang('schools.capacity')</label>
                     <input type="number" min="1" max="200" name="capacity" class="form-control" value="30" required>
                 </div>
@@ -84,7 +76,6 @@
                             <th>@lang('schools.class_name')</th>
                             <th>@lang('schools.grade_level_number')</th>
                             <th>@lang('schools.class_number')</th>
-                            <th>@lang('schools.student_gender')</th>
                             <th>@lang('schools.capacity')</th>
                             <th>@lang('schools.vacancies')</th>
                             <th>@lang('schools.students')</th>
@@ -100,7 +91,6 @@
                                 <td>{{ $class->name }}</td>
                                 <td>{{ $class->grade_level }}</td>
                                 <td>{{ $class->number ?? '—' }}</td>
-                                <td>{{ $class->gender ? __('schools.gender_'.$class->gender) : '—' }}</td>
                                 <td>{{ $class->capacity }}</td>
                                 <td>{{ $vacancies }}</td>
                                 <td>{{ $class->students_count }}</td>

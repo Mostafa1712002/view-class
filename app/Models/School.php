@@ -110,6 +110,15 @@ class School extends Model
         return $this->hasMany(AcademicYear::class);
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function (School $school) {
+            if ($school->wasChanged('student_gender') && $school->student_gender) {
+                ClassRoom::whereIn('section_id', $school->sections()->select('id'))->update(['gender' => $school->student_gender]);
+            }
+        });
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class);

@@ -71,7 +71,6 @@
                                 <thead>
                                     <tr>
                                         <th>@lang('schools.class_name')</th>
-                                        <th>@lang('schools.student_gender')</th>
                                         <th style="width:180px">@lang('schools.class_number')</th>
                                     </tr>
                                 </thead>
@@ -79,7 +78,6 @@
                                     @foreach($section->classes as $class)
                                         <tr>
                                             <td>{{ $class->name }}</td>
-                                            <td>{{ $class->gender ? __('schools.gender_'.$class->gender) : '—' }}</td>
                                             <td>
                                                 <input type="number" min="1" max="100" name="class_number[{{ $class->id }}]"
                                                        value="{{ $class->number }}" class="form-control form-control-sm"
