@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\ClassRoom;
 use App\Models\JobTitle;
+use App\Models\Role;
+use App\Models\Section;
 use App\Models\School;
 use App\Models\User;
 use App\Modules\Counseling\Models\CounselingCase;
@@ -17,7 +20,7 @@ class CounselingAccessTest extends TestCase
         // The full chain includes unrelated MySQL-only ALTER statements.
         $paths = [];
         foreach (['0001_01_01_000000_*', '2025_11_30_*', '2026_04_21_*', '2026_04_26_*',
-            '2026_04_27_*', '2026_06_14_300000_*', '2026_11_16_372*'] as $pattern) {
+            '2026_04_27_*', '2026_06_14_300000_*', '2026_07_25_000100_*', '2026_11_16_372*'] as $pattern) {
             $paths = array_merge($paths, glob(database_path('migrations/'.$pattern.'.php')));
         }
         sort($paths);
@@ -130,6 +133,36 @@ class CounselingAccessTest extends TestCase
         ])->assertStatus(422);
         $this->delete(route('manage.counseling.destroy', $case->id))->assertRedirect();
         $this->assertSoftDeleted('counseling_cases', ['id' => $case->id]);
+    }
+
+    public function test_one_case_per_selected_student_and_all_students_follow_grade_and_class(): void
+    {
+        [$school, $a, , $student] = $this->fixture();
+        $section = Section::factory()->create(['school_id' => $school->id]);
+        $class = ClassRoom::factory()->create(['name' => '1A', 'section_id' => $section->id, 'division' => null]);
+        $role = Role::where('slug', 'student')->firstOrFail();
+        $byColumn = User::factory()->create(['school_id' => $school->id, 'class_room_id' => $class->id]);
+        $byPivot = User::factory()->create(['school_id' => $school->id]);
+        $byColumn->roles()->attach($role);
+        $byPivot->roles()->attach($role);
+        $class->students()->attach($byPivot->id);
+        $base = ['counselor_id' => $a->id, 'category' => 'social', 'summary' => 'Summary', 'status' => 'open'];
+        $admin = $this->createSchoolAdmin($school);
+
+        $this->actingAs($admin)->get(route('manage.counseling.create'))->assertOk()->assertSee('1A');
+        $this->post(route('manage.counseling.store'), $base + ['title' => 'Many', 'student_ids' => [$student->id, $byPivot->id]])
+            ->assertRedirect(route('manage.counseling.index'));
+        $this->assertSame(2, CounselingCase::where('title', 'Many')->count());
+
+        $this->post(route('manage.counseling.store'), $base + ['title' => 'Class', 'all_students' => 1, 'filter_class_id' => $class->id])->assertRedirect();
+        $this->assertEqualsCanonicalizing([$byColumn->id, $byPivot->id], CounselingCase::where('title', 'Class')->pluck('student_id')->all());
+
+        $outsider = User::factory()->create(['school_id' => School::factory()->create()->id]);
+        $outsider->roles()->attach($role);
+        $this->post(route('manage.counseling.store'), $base + ['title' => 'Mixed', 'student_ids' => [$student->id, $outsider->id]])->assertStatus(422);
+        $this->post(route('manage.counseling.store'), $base + ['title' => 'Empty', 'all_students' => 1, 'filter_section_id' => 999999])
+            ->assertSessionHasErrors('student_ids');
+        $this->assertSame(0, CounselingCase::whereIn('title', ['Mixed', 'Empty'])->count());
     }
 
     public function test_permissions_are_only_granted_to_counselor_job_titles(): void

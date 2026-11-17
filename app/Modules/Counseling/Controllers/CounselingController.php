@@ -3,13 +3,17 @@
 namespace App\Modules\Counseling\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClassRoom;
+use App\Models\Section;
 use App\Models\User;
 use App\Modules\Counseling\Models\CounselingCase;
 use App\Modules\Counseling\Repositories\CounselingCaseRepository;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CounselingController extends Controller
 {
@@ -56,16 +60,43 @@ class CounselingController extends Controller
         return view('counseling.index', compact('cases', 'statusCounts', 'categoryCounts'));
     }
 
+    /** Students of a school, optionally narrowed to a grade (section) and class; class links come from users.class_room_id or the class_student pivot. */
+    private function studentsQuery(?int $schoolId, ?int $sectionId = null, ?int $classId = null)
+    {
+        return User::query()
+            ->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
+            ->whereHas('roles', fn ($q) => $q->where('slug', 'student'))
+            ->when($classId, fn ($q) => $q->where(fn ($w) => $w->where('class_room_id', $classId)
+                ->orWhereHas('enrolledClasses', fn ($c) => $c->where('classes.id', $classId))))
+            ->when($sectionId, fn ($q) => $q->where(fn ($w) => $w->where('section_id', $sectionId)
+                ->orWhereHas('classRoom', fn ($c) => $c->where('section_id', $sectionId))
+                ->orWhereHas('enrolledClasses', fn ($c) => $c->where('classes.section_id', $sectionId))));
+    }
+
     private function formData(CounselingCase $case): array
     {
         $schoolId = $case->school_id ?? (auth()->user()->isSuperAdmin() ? null : auth()->user()->school_id);
         $users = User::query()->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId));
+        $students = $this->studentsQuery($schoolId)->with(['classRoom', 'enrolledClasses'])->orderBy('name')->get();
+        $sections = Section::query()->when($schoolId !== null, fn ($q) => $q->where('school_id', $schoolId))
+            ->orderBy('name')->get(['id', 'name', 'school_id']);
 
         return [
             'case' => $case,
             'schools' => $this->assignableSchools(),
-            'students' => (clone $users)->whereHas('roles', fn ($q) => $q->where('slug', 'student'))->orderBy('name')->get(),
+            'students' => $students,
             'counselors' => (clone $users)->whereHas('jobTitle', fn ($q) => $q->where('slug', 'counselor'))->orderBy('name')->get(),
+            'sections' => $sections,
+            'classes' => ClassRoom::whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get(['id', 'name', 'division', 'section_id']),
+            // Same grade/class rules as studentsQuery(), used by the form to filter the student picker.
+            'studentOptions' => $students->map(fn (User $s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'school' => $s->school_id,
+                'classes' => $s->enrolledClasses->pluck('id')->push($s->class_room_id)->filter()->unique()->values(),
+                'sections' => $s->enrolledClasses->pluck('section_id')
+                    ->push($s->classRoom?->section_id, $s->section_id)->filter()->unique()->values(),
+            ])->values(),
         ];
     }
 
@@ -77,6 +108,7 @@ class CounselingController extends Controller
         return view('counseling.form', $this->formData(new CounselingCase(['counselor_id' => auth()->id(), 'status' => 'open'])));
     }
 
+    /** @return array{0: array, 1: array<int>} case attributes (without student) and the student ids */
     private function payload(Request $request, ?CounselingCase $case = null): array
     {
         $user = $request->user();
@@ -87,15 +119,32 @@ class CounselingController extends Controller
         $schoolId = $case?->school_id ?? ($user->isSuperAdmin() ? $request->input('school_id') : $user->school_id);
         $data = $request->validate([
             'school_id' => $user->isSuperAdmin() && ! $case ? ['required', 'integer', 'exists:schools,id'] : ['sometimes'],
-            'student_id' => ['required', 'integer'],
+            'student_id' => [$case ? 'required' : 'nullable', 'integer'],
+            'student_ids' => ['nullable', 'array'],
+            'student_ids.*' => ['integer'],
+            'all_students' => ['nullable', 'boolean'],
+            'filter_section_id' => ['nullable', 'integer'],
+            'filter_class_id' => ['nullable', 'integer'],
             'counselor_id' => ['required', 'integer'],
             'category' => ['required', Rule::in(CounselingCase::CATEGORIES)],
             'title' => ['required', 'string', 'max:255'],
             'summary' => ['required', 'string'],
             'status' => ['required', Rule::in(CounselingCase::STATUSES)],
         ]);
-        abort_unless(User::where('school_id', $schoolId)->whereKey($data['student_id'])
-            ->whereHas('roles', fn ($q) => $q->where('slug', 'student'))->exists(), 422);
+        if ($case) {
+            $ids = [(int) $data['student_id']];
+        } elseif ($request->boolean('all_students')) {
+            // Resolved here, not posted as ids, so a big school is not cut by max_input_vars.
+            $ids = $this->studentsQuery((int) $schoolId, $data['filter_section_id'] ?? null, $data['filter_class_id'] ?? null)
+                ->pluck('id')->all();
+        } else {
+            $ids = $data['student_ids'] ?? array_filter([$data['student_id'] ?? null]);
+        }
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if ($ids === []) {
+            throw ValidationException::withMessages(['student_ids' => __('counseling.students_required')]);
+        }
+        abort_unless($this->studentsQuery((int) $schoolId)->whereKey($ids)->count() === count($ids), 422);
         abort_unless(User::where('school_id', $schoolId)->whereKey($data['counselor_id'])
             ->whereHas('jobTitle', fn ($q) => $q->where('slug', 'counselor'))->exists(), 422);
         if (! $user->isSuperAdmin() && ! $user->isSchoolAdmin()) {
@@ -103,17 +152,24 @@ class CounselingController extends Controller
         }
         $data['school_id'] = $schoolId;
         $data['closed_at'] = $data['status'] === 'closed' ? ($case?->closed_at ?? now()) : null;
+        unset($data['student_id'], $data['student_ids'], $data['all_students'], $data['filter_section_id'], $data['filter_class_id']);
 
-        return $data;
+        return [$data, $ids];
     }
 
     public function store(Request $request)
     {
         $this->authorizeAccess();
         Gate::authorize('create', CounselingCase::class);
-        $case = CounselingCase::create($this->payload($request) + ['opened_at' => now(), 'created_by' => $request->user()->id]);
+        [$data, $ids] = $this->payload($request);
+        $extra = ['opened_at' => now(), 'created_by' => $request->user()->id];
+        $cases = DB::transaction(fn () => collect($ids)->map(fn ($id) => CounselingCase::create($data + $extra + ['student_id' => $id])));
 
-        return redirect()->route('manage.counseling.show', $case->id);
+        if ($cases->count() === 1) {
+            return redirect()->route('manage.counseling.show', $cases->first()->id);
+        }
+
+        return redirect()->route('manage.counseling.index')->with('success', __('counseling.created_many', ['count' => $cases->count()]));
     }
 
     public function show(int $id)
@@ -131,7 +187,8 @@ class CounselingController extends Controller
     public function update(Request $request, int $id)
     {
         $case = $this->findCase($id, 'update');
-        $case->update($this->payload($request, $case));
+        [$data, $ids] = $this->payload($request, $case);
+        $case->update($data + ['student_id' => $ids[0]]);
 
         return redirect()->route('manage.counseling.show', $case->id);
     }
