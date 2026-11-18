@@ -135,7 +135,7 @@
                                 @foreach($recent_schools as $school)
                                 <tr>
                                     <td>{{ app()->getLocale() === 'en' ? ($school->name_en ?: $school->name_ar ?: $school->name) : ($school->name_ar ?: $school->name) }}</td>
-                                    <td>{{ $school->email }}</td>
+                                    <td>@if($school->email)<a href="mailto:{{ $school->email }}">{{ $school->email }}</a>@else<span class="text-muted" title="@lang('dashboard.email_missing')">—</span>@endif</td>
                                     <td>
                                         <span class="badge bg-{{ $school->is_active ? 'success' : 'secondary' }}">
                                             {{ $school->is_active ? __('dashboard.status_active') : __('dashboard.status_inactive') }}

@@ -64,6 +64,7 @@ return [
     'day_fri' => 'الجمعة',
 
     'school_column' => 'المدرسة',
+    'email_missing' => 'لم يُضف بريد للمدرسة — أضفه من تعديل المدرسة',
     'email_column' => 'البريد',
     'status_column' => 'الحالة',
     'created_at_column' => 'تاريخ التسجيل',

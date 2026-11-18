@@ -369,8 +369,9 @@
                     </select>
                     <select name="compound_id" class="form-control form-control-sm mx-1" style="min-width:140px; max-width:180px" onchange="this.form.submit()" aria-label="@lang('shell.scope_complex')" @disabled(empty($shellScopeComplexes))>
                         @if(empty($shellScopeComplexes))
-                            <option value="">—</option>
+                            <option value="">@lang('shell.scope_no_complexes')</option>
                         @else
+                            <option value="" @selected(($shellScopeSession['compound_id'] ?? null) === null)>@lang('shell.scope_all_complexes')</option>
                             @foreach($shellScopeComplexes as $cx)
                                 <option value="{{ $cx['id'] }}" @selected(($shellScopeSession['compound_id'] ?? null) == $cx['id'])>
                                     {{ $shellLocale === 'en' ? ($cx['name_en'] ?: $cx['name_ar']) : ($cx['name_ar'] ?: $cx['name_en']) }}

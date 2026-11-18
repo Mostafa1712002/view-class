@@ -713,7 +713,19 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
             </div>
             <div class="gp-section-content" id="gp-sec-admissions">
                 @if($canViewAdmissions)
-                <li class="nav-item {{ request()->routeIs('admissions.*') ? 'active' : '' }}" data-section="admissions"><a href="{{ Route::has('admissions.index') ? route('admissions.index') : '#' }}"><x-svg-icon name="person-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_admissions')</span></a></li>
+                @php
+                    $admissionsMenu = [
+                    ['admissions.index', 'admissions.view', 'person-plus', 'nav_admission_requests', ['admissions.index', 'admissions.show', 'admissions.edit*', 'admissions.print*', 'admissions.export']],
+                    ['admissions.settings.form', 'admissions.edit_settings', 'ui-checks', 'nav_admission_form', ['admissions.settings.form*']],
+                    ['admissions.settings.schools', 'admissions.edit_school_settings', 'building', 'nav_admission_schools', ['admissions.settings.schools*']],
+                    ['admissions.info.index', 'admissions.edit_info', 'info-circle', 'nav_admission_info', ['admissions.info.*']],
+                    ];
+                @endphp
+                @foreach($admissionsMenu as [$route, $perm, $icon, $label, $active])
+                    @if(Route::has($route) && (!$sidebarUser || $sidebarUser->canDo($perm)))
+                    <li class="nav-item {{ request()->routeIs(...$active) ? 'active' : '' }}" data-section="admissions"><a href="{{ route($route) }}"><x-svg-icon name="{{ $icon }}" class="vc-ico" /><span class="menu-title">@lang('shell.'.$label)</span></a></li>
+                    @endif
+                @endforeach
                 @endif
             </div>{{-- /gp-sec-admissions --}}
 

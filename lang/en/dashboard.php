@@ -64,6 +64,7 @@ return [
     'day_fri' => 'Friday',
 
     'school_column' => 'School',
+    'email_missing' => 'No school email yet — add it from the school edit page',
     'email_column' => 'Email',
     'status_column' => 'Status',
     'created_at_column' => 'Registered at',

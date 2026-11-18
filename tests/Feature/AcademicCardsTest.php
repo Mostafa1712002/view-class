@@ -199,6 +199,17 @@ class AcademicCardsTest extends TestCase
             ->assertRedirect(route('manage.schedules.index', ['class_id' => $class->id]));
     }
 
+    public function test_scope_bar_complex_label_and_admissions_menu(): void
+    {
+        $this->actingAs($this->createSuperAdmin());
+        $page = $this->get(route('admin.schools.index'))->assertOk();
+        $page->assertSee(__('shell.scope_no_complexes'))->assertDontSee('<option value="">—</option>', false);
+        foreach (['nav_admission_requests', 'nav_admission_form', 'nav_admission_schools', 'nav_admission_info'] as $label) {
+            $page->assertSee(__('shell.'.$label));
+        }
+        $page->assertDontSee('<span class="menu-title">'.__('shell.nav_admissions').'</span>', false);
+    }
+
     public function test_execute_skips_students_promoted_by_another_source_year(): void
     {
         [$school, $src, $dst, $source, $destination, $student, $actor] = $this->promotionFixture();
