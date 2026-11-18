@@ -152,7 +152,12 @@ class AdmissionSettingsController extends Controller
     private function requireSchool(): int
     {
         $schoolId = $this->scopedSchoolId();
-        abort_if($schoolId === null, 400, 'اختر مدرسة محددة أولًا لتعديل إعدادات الاستمارة.');
+        // System admin on «جميع المدارس»: send them back with a message instead of a bare 400 page.
+        if ($schoolId === null) {
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                redirect()->route('admissions.index')->with('error', 'اختر مدرسة محددة من الشريط العلوي أولًا لفتح إعدادات التسجيل.')
+            );
+        }
 
         return $schoolId;
     }

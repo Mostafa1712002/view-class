@@ -208,6 +208,9 @@ class AcademicCardsTest extends TestCase
             $page->assertSee(__('shell.'.$label));
         }
         $page->assertDontSee('<span class="menu-title">'.__('shell.nav_admissions').'</span>', false);
+        // «جميع المدارس» scope: settings pages need one school → back to the requests list with a message.
+        $this->get(route('admissions.settings.form'))->assertRedirect(route('admissions.index'))->assertSessionHas('error');
+        $this->get(route('admissions.info.index'))->assertRedirect(route('admissions.index'));
     }
 
     public function test_execute_skips_students_promoted_by_another_source_year(): void
