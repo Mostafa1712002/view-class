@@ -1,4 +1,4 @@
-{{-- Schedule tabs — used by /admin/school-schedule and /admin/exams to switch
+{{-- Schedule tabs — used by the exam schedule (/admin/exams) to switch
      between the regular class schedule and the exam schedule.
      Expects: $active ∈ ['class','exam']. --}}
 @php($active = $active ?? 'exam')
@@ -27,14 +27,14 @@
 <nav class="schedule-tabs mb-3" aria-label="@lang('exams_admin.page_title')">
     {{-- Class-schedule tab is admin-only (no teacher school-schedule route) — hide for teachers. --}}
     @unless(request()->routeIs('teacher.*'))
-    <a href="{{ route('admin.school-schedule.index') }}"
+    <a href="{{ route('manage.schedules.index') }}"
        class="{{ $active === 'class' ? 'active' : '' }}"
        aria-current="{{ $active === 'class' ? 'page' : 'false' }}">
         <i class="la la-calendar"></i>
         @lang('exams_admin.tabs.class_schedule')
     </a>
     @endunless
-    <a href="{{ route(($routePrefix ?? 'admin.exams') . '.index') }}"
+    <a href="{{ ($routePrefix ?? 'admin.exams') === 'teacher.exams' ? route('teacher.exams.index') : route('admin.exam-schedule.index') }}"
        class="{{ $active === 'exam' ? 'active' : '' }}"
        aria-current="{{ $active === 'exam' ? 'page' : 'false' }}">
         <i class="la la-file-alt"></i>

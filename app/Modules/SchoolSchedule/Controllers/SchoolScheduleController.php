@@ -3,32 +3,23 @@
 namespace App\Modules\SchoolSchedule\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\ClassRoom;
 use App\Models\ScheduleEntry;
-use App\Models\Subject;
 use App\Models\TimeSlot;
-use App\Models\User;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\View\View;
 
 class SchoolScheduleController extends Controller
 {
     use HasSchoolScope;
 
-    public function index(Request $request): View
+    /**
+     * Merged into «الجدول المدرسي» (manage.schedules): this page read the retired
+     * schedule_entries table, while timetables are built in schedule_periods.
+     */
+    public function index(Request $request): \Illuminate\Http\RedirectResponse
     {
-        [$slots, $entries, $filters] = $this->loadSchedule($request);
-
-        $teachers = User::query()
-            ->where('school_id', $this->activeSchoolId())
-            ->whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))
-            ->orderBy('name')->get();
-        $subjects = Subject::query()->where('school_id', $this->activeSchoolId())->orderBy('name')->get();
-        $classes = ClassRoom::query()->orderBy('grade_level')->orderBy('division')->get();
-
-        return view('admin.school-schedule.index', compact('slots', 'entries', 'filters', 'teachers', 'subjects', 'classes'));
+        return redirect()->route('manage.schedules.index', array_filter($request->only('class_id', 'teacher_id', 'subject_id')));
     }
 
     public function pdf(Request $request): Response

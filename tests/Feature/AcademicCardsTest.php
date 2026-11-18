@@ -20,7 +20,7 @@ class AcademicCardsTest extends TestCase
         $this->assertSame(':memory:', config('database.connections.sqlite.database'));
         $patterns = [
             '0001_01_01_000000_*', '2025_11_30_*', '2026_04_21_*',
-            '2026_04_26_*', '2026_04_27_*',
+            '2026_04_26_*', '2026_04_27_*', '2026_04_28_100001_add_sprint4_fields_to_subjects*',
             '2026_05_17_100001_create_school_branches*', '2026_05_17_100002_add_card51*',
             '2026_06_15_500001_qbcore_create_compounds*',
             '2026_07_09_*', '2026_07_11_*', '2026_07_25_*',
@@ -177,6 +177,26 @@ class AcademicCardsTest extends TestCase
         DB::table('classes')->where('id', $class->id)->update(['gender' => 'mixed']);
         (require database_path('migrations/2026_11_17_120000_sync_class_gender_from_school.php'))->up();
         $this->assertSame('boys', $class->fresh()->gender);
+    }
+
+    public function test_exam_schedule_and_online_exams_have_separate_routes(): void
+    {
+        $this->actingAs($this->createSuperAdmin());
+        $section = Section::factory()->create();
+        $class = ClassRoom::factory()->create(['section_id' => $section->id]);
+        $soon = \App\Models\Exam::factory()->create(['class_id' => $class->id, 'academic_year_id' => $class->academic_year_id, 'title' => 'Scheduled Soon',
+            'start_time' => now()->addDay(), 'end_time' => now()->addDay()->addHour()]);
+        \App\Models\Exam::factory()->create(['class_id' => $class->id, 'academic_year_id' => $class->academic_year_id, 'title' => 'Held Last Month',
+            'start_time' => now()->subMonth(), 'end_time' => now()->subMonth()->addHour()]);
+
+        $this->assertStringContainsString('/admin/online-exams/'.$soon->id, route('admin.exams.show', $soon));
+        $this->get('/admin/exams')->assertOk()->assertViewIs('admin.exams.schedule')
+            ->assertSee('Scheduled Soon')->assertDontSee('Held Last Month');
+        $this->get('/admin/online-exams')->assertOk()->assertViewIs('admin.exams.index')->assertSee(__('exams_admin.online_title'));
+        $this->get('/admin/exams/'.$soon->id.'/results?tab=1')->assertStatus(301)
+            ->assertRedirect('/admin/online-exams/'.$soon->id.'/results?tab=1');
+        $this->get('/admin/school-schedule?class_id='.$class->id)
+            ->assertRedirect(route('manage.schedules.index', ['class_id' => $class->id]));
     }
 
     public function test_execute_skips_students_promoted_by_another_source_year(): void

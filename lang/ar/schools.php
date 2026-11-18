@@ -322,6 +322,7 @@ return [
     'promotion_reason_class_unnumbered' => 'الفصل بلا رقم',
     'promotion_reason_ready' => 'جاهز',
     'promotion_no_source_classes' => 'لا توجد فصول في العام «:year».',
+    'weeks_bulk' => 'إدارة الأسابيع بالجملة',
     'promotion_back_to_preview' => 'رجوع إلى معاينة الترحيل',
     'promotion_no_passed_hint' => 'اضغط «نتائج الطلاب» بجوار كل فصل في الجدول أدناه.',
     'promotion_add_class' => 'إضافة فصل',

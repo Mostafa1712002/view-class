@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('exams_admin.page_title'))
+@section('title', $routePrefix === 'admin.exams' ? __('exams_admin.online_title') : __('exams_admin.page_title'))
 @section('body_class','theme-light')
 
 @push('styles')
@@ -105,7 +105,7 @@
 @section('content')
 <div class="content-header row">
     <div class="content-header-left col-md-8 col-12 mb-2">
-        <h2 class="content-header-title mb-0">@lang('exams_admin.page_title')</h2>
+        <h2 class="content-header-title mb-0">{{ $routePrefix === 'admin.exams' ? __('exams_admin.online_title') : __('exams_admin.page_title') }}</h2>
         <div class="breadcrumb-wrapper">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">@lang('common.home')</a></li>
@@ -122,7 +122,11 @@
 
 <div class="content-body">
     {{-- Tabs: Class schedule | Exam schedule --}}
-    @include('admin.exams._schedule_tabs', ['active' => 'exam'])
+    @if($routePrefix === 'admin.exams')
+        <a href="{{ route('admin.exam-schedule.index') }}" class="btn btn-sm btn-outline-secondary mb-3">@lang('exams_admin.tabs.exam_schedule')</a>
+    @else
+        @include('admin.exams._schedule_tabs', ['active' => 'exam'])
+    @endif
 
     {{-- KPI tiles --}}
     <div class="row exams-kpis mb-3">

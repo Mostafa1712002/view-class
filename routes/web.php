@@ -624,28 +624,32 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::delete('lessons/{id}', [\App\Modules\Lessons\Controllers\LessonController::class, 'destroy'])->name('lessons.destroy');
 
     // Exams Management
-    Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->middleware('role_permission:exams.view');
-    Route::post('exams/{exam}/publish', [\App\Http\Controllers\Admin\ExamController::class, 'publish'])->name('exams.publish');
-    Route::post('exams/{exam}/unpublish', [\App\Http\Controllers\Admin\ExamController::class, 'unpublish'])->name('exams.unpublish');
-    Route::post('exams/{exam}/activate', [\App\Http\Controllers\Admin\ExamController::class, 'activate'])->name('exams.activate');
-    Route::post('exams/{exam}/complete', [\App\Http\Controllers\Admin\ExamController::class, 'complete'])->name('exams.complete');
-    Route::get('exams/{exam}/results', [\App\Http\Controllers\Admin\ExamController::class, 'results'])->name('exams.results');
-    Route::post('exams/{exam}/push-to-grade-report', [\App\Http\Controllers\Admin\ExamController::class, 'pushToGradeReport'])->name('exams.push-to-grade-report');
+    // Online exams (create, questions, publish, results) live under /admin/online-exams; /admin/exams is the read-only exam schedule.
+    Route::resource('online-exams', \App\Http\Controllers\Admin\ExamController::class)->names('exams')->parameters(['online-exams' => 'exam'])->middleware('role_permission:exams.view');
+    Route::post('online-exams/{exam}/publish', [\App\Http\Controllers\Admin\ExamController::class, 'publish'])->name('exams.publish');
+    Route::post('online-exams/{exam}/unpublish', [\App\Http\Controllers\Admin\ExamController::class, 'unpublish'])->name('exams.unpublish');
+    Route::post('online-exams/{exam}/activate', [\App\Http\Controllers\Admin\ExamController::class, 'activate'])->name('exams.activate');
+    Route::post('online-exams/{exam}/complete', [\App\Http\Controllers\Admin\ExamController::class, 'complete'])->name('exams.complete');
+    Route::get('online-exams/{exam}/results', [\App\Http\Controllers\Admin\ExamController::class, 'results'])->name('exams.results');
+    Route::post('online-exams/{exam}/push-to-grade-report', [\App\Http\Controllers\Admin\ExamController::class, 'pushToGradeReport'])->name('exams.push-to-grade-report');
     // === Anti-cheat (ac) — Trello #229: re-open a student's auto-locked attempt ===
-    Route::post('exams/{exam}/attempts/{studentExam}/reopen', [\App\Http\Controllers\Admin\ExamController::class, 'reopenAttempt'])->name('exams.attempts.reopen');
+    Route::post('online-exams/{exam}/attempts/{studentExam}/reopen', [\App\Http\Controllers\Admin\ExamController::class, 'reopenAttempt'])->name('exams.attempts.reopen');
 
     // Exam Questions Management
-    Route::get('exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'index'])->name('exams.questions.index');
-    Route::get('exams/{exam}/questions/create', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'create'])->name('exams.questions.create');
-    Route::post('exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'store'])->name('exams.questions.store');
-    Route::get('exams/{exam}/questions/{question}/edit', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'edit'])->name('exams.questions.edit');
-    Route::put('exams/{exam}/questions/{question}', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'update'])->name('exams.questions.update');
-    Route::delete('exams/{exam}/questions/{question}', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'destroy'])->name('exams.questions.destroy');
-    Route::post('exams/{exam}/questions/reorder', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'reorder'])->name('exams.questions.reorder');
-    Route::post('exams/{exam}/questions/{question}/duplicate', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'duplicate'])->name('exams.questions.duplicate');
+    Route::get('online-exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'index'])->name('exams.questions.index');
+    Route::get('online-exams/{exam}/questions/create', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'create'])->name('exams.questions.create');
+    Route::post('online-exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'store'])->name('exams.questions.store');
+    Route::get('online-exams/{exam}/questions/{question}/edit', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'edit'])->name('exams.questions.edit');
+    Route::put('online-exams/{exam}/questions/{question}', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'update'])->name('exams.questions.update');
+    Route::delete('online-exams/{exam}/questions/{question}', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'destroy'])->name('exams.questions.destroy');
+    Route::post('online-exams/{exam}/questions/reorder', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'reorder'])->name('exams.questions.reorder');
+    Route::post('online-exams/{exam}/questions/{question}/duplicate', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'duplicate'])->name('exams.questions.duplicate');
     // #217 — Add questions from bank
-    Route::get('exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'bankPicker'])->name('exams.questions.bank-picker');
-    Route::post('exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'addFromBank'])->name('exams.questions.add-from-bank');
+    Route::get('online-exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'bankPicker'])->name('exams.questions.bank-picker');
+    Route::post('online-exams/{exam}/questions/from-bank', [\App\Http\Controllers\Admin\ExamQuestionController::class, 'addFromBank'])->name('exams.questions.add-from-bank');
+    Route::get('exams', [\App\Http\Controllers\Admin\ExamController::class, 'schedule'])->name('exam-schedule.index')->middleware('role_permission:exams.view');
+    // Old /admin/exams/{exam}/... links (bookmarks, history) → the same page under /admin/online-exams.
+    Route::get('exams/{path}', [\App\Http\Controllers\Admin\ExamController::class, 'legacyRedirect'])->where('path', '.+')->name('exam-schedule.legacy');
 
     // Evaluation Forms (Sprint 8 — نماذج التقييم)
     Route::get('evaluations', [\App\Modules\Evaluation\Controllers\EvaluationFormController::class, 'index'])->name('evaluations.index');

@@ -101,6 +101,46 @@ class ExamController extends Controller
     }
 
     /**
+     * «جدول الاختبارات» — read-only list of scheduled exams by date. Creating and
+     * managing the exams themselves happens under /admin/online-exams.
+     */
+    public function schedule(Request $request)
+    {
+        $filters = $request->validate([
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date'],
+            'class_id' => ['nullable', 'integer'],
+            'subject_id' => ['nullable', 'integer'],
+        ]);
+        $filters['date_from'] ??= now()->toDateString();
+        $schoolId = $this->scopedSchoolId();
+
+        $exams = Exam::with(['subject', 'classRoom', 'teacher'])
+            ->whereNotNull('start_time')
+            // classes have no school_id; the school comes through the class's grade (section).
+            ->when($schoolId, fn ($q) => $q->whereHas('classRoom.section', fn ($s) => $s->where('school_id', $schoolId)))
+            ->whereDate('start_time', '>=', $filters['date_from'])
+            ->when($filters['date_to'] ?? null, fn ($q, $d) => $q->whereDate('start_time', '<=', $d))
+            ->when($filters['class_id'] ?? null, fn ($q, $id) => $q->where('class_id', $id))
+            ->when($filters['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))
+            ->orderBy('start_time')
+            ->paginate(30)->withQueryString();
+
+        $classes = ClassRoom::when($schoolId, fn ($q) => $q->whereHas('section', fn ($s) => $s->where('school_id', $schoolId)))->orderBy('name')->get();
+        $subjects = Subject::when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get();
+
+        return view('admin.exams.schedule', compact('exams', 'filters', 'classes', 'subjects'));
+    }
+
+    /** Old /admin/exams/{exam}/... URLs now live under /admin/online-exams. */
+    public function legacyRedirect(Request $request, string $path)
+    {
+        $query = $request->getQueryString();
+
+        return redirect('/admin/online-exams/'.$path.($query ? '?'.$query : ''), 301);
+    }
+
+    /**
      * Show the form for creating a new exam.
      */
     public function create()

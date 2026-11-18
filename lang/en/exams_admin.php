@@ -6,6 +6,16 @@ return [
     'plural'        => 'Exams',
     'breadcrumb'    => 'Exams',
 
+    'online_title'   => 'Online exams',
+    'manage_online'  => 'Manage online exams',
+    'schedule_hint'  => 'This page only shows exam dates. Creating exams, their questions, publishing and results is under «Exams» in Assessment.',
+    'schedule_from'  => 'From date',
+    'schedule_to'    => 'To date',
+    'schedule_filter'=> 'Show',
+    'schedule_date'  => 'Date',
+    'schedule_time'  => 'Time',
+    'schedule_empty' => 'No exams are scheduled in this period.',
+
     'tabs' => [
         'class_schedule' => 'Class Schedule',
         'exam_schedule'  => 'Exam Schedule',

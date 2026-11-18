@@ -322,6 +322,7 @@ return [
     'promotion_reason_class_unnumbered' => 'Class has no number',
     'promotion_reason_ready' => 'Ready',
     'promotion_no_source_classes' => 'There are no classes in ":year".',
+    'weeks_bulk' => 'Manage weeks in bulk',
     'promotion_back_to_preview' => 'Back to the promotion preview',
     'promotion_no_passed_hint' => 'Use «Student results» next to each class in the table below.',
     'promotion_add_class' => 'Add a class',

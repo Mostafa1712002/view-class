@@ -573,8 +573,10 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if($canViewParents)
                 <li class="nav-item {{ request()->routeIs('admin.users.parents.*') ? 'active' : '' }}" data-section="extras"><a href="{{ Route::has('admin.users.parents.index') ? route('admin.users.parents.index') : '#' }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users_parents')</span></a></li>
                 @endif
+                @if($sidebarUser?->isSuperAdmin())
                 <li class="nav-item" data-section="extras"><a href="{{ route('admin.promotion.landing') }}"><x-svg-icon name="arrow-repeat" class="vc-ico" /><span class="menu-title">@lang('shell.nav_promotion')</span></a></li>
                 <li class="nav-item" data-section="extras"><a href="{{ route('admin.terms-weeks.landing') }}"><x-svg-icon name="calendar-range" class="vc-ico" /><span class="menu-title">@lang('shell.nav_terms_weeks')</span></a></li>
+                @endif
             </div>{{-- /gp-sec-extras --}}
 
             {{-- #2 الشؤون التعليمية والخطط --}}
@@ -586,18 +588,19 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-academic">
-                <li class="nav-item {{ request()->routeIs('admin.school-schedule.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('admin.school-schedule.index') ? route('admin.school-schedule.index') : '#' }}"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-title">@lang('shell.nav_school_schedule')</span></a></li>
+                {{-- «الجدول المدرسي» lives once, under العمليات التعليمية (manage.schedules); /admin/school-schedule redirects there. --}}
                 @if($canViewWeeklyPlans)
                 <li class="nav-item {{ request()->routeIs('manage.weekly-plans.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.weekly-plans.index') ? route('manage.weekly-plans.index') : '#' }}"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a></li>
                 @endif
-                <li class="nav-item has-sub {{ (request()->routeIs('admin.subjects.*') || request()->routeIs('admin.lessons.*') || request()->routeIs('admin.exams.*') || request()->routeIs('admin.subject-tracks.*') || request()->routeIs('admin.qb.weeks.*') || request()->routeIs('admin.qb.standards.*') || request()->routeIs('admin.qb.compounds.*')) ? 'active open' : '' }}" data-section="academic">
+                <li class="nav-item has-sub {{ (request()->routeIs('admin.subjects.*') || request()->routeIs('admin.lessons.*') || request()->routeIs('admin.exam-schedule.*') || request()->routeIs('admin.subject-tracks.*') || request()->routeIs('admin.qb.weeks.*') || request()->routeIs('admin.qb.standards.*') || request()->routeIs('admin.qb.compounds.*')) ? 'active open' : '' }}" data-section="academic">
                     <a href="#"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams_management')</span></a>
                     <ul class="menu-content">
                         @if($canViewSubjects)<li class="{{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subjects.index') ? route('admin.subjects.index') : '#' }}"><x-svg-icon name="book" class="vc-ico" /><span class="menu-item">@lang('shell.nav_add_subject')</span></a></li>@endif
                         <li class="{{ request()->routeIs('admin.lessons.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.lessons.index') ? route('admin.lessons.index') : '#' }}"><x-svg-icon name="clock" class="vc-ico" /><span class="menu-item">@lang('shell.nav_periods')</span></a></li>
-                        @if($canViewExams)<li class="{{ request()->routeIs('admin.exams.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>@endif
+                        @if($canViewExams)<li class="{{ request()->routeIs('admin.exam-schedule.*') ? 'active' : '' }}"><a href="{{ route('admin.exam-schedule.index') }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_exam_schedule')</span></a></li>@endif
                         @if($canViewSubjects)<li class="{{ request()->routeIs('admin.subject-tracks.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.subject-tracks.index') ? route('admin.subject-tracks.index') : '#' }}"><x-svg-icon name="layout-text-sidebar" class="vc-ico" /><span class="menu-item">@lang('subject_tracks.page_title')</span></a></li>@endif
-                        @if(Route::has('admin.qb.weeks.index') && (!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('weeks')))<li class="{{ request()->routeIs('admin.qb.weeks.*') ? 'active' : '' }}"><a href="{{ route('admin.qb.weeks.index') }}"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-item">الأسابيع الدراسية</span></a></li>@endif
+                        {{-- Same study weeks as «الفصول الدراسية والأسابيع»; system admins get that fuller page instead. --}}
+                        @if(Route::has('admin.qb.weeks.index') && !($sidebarUser?->isSuperAdmin()) && (!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('weeks')))<li class="{{ request()->routeIs('admin.qb.weeks.*') ? 'active' : '' }}"><a href="{{ route('admin.qb.weeks.index') }}"><x-svg-icon name="calendar-week" class="vc-ico" /><span class="menu-item">الأسابيع الدراسية</span></a></li>@endif
                         {{-- المعايير + المجمعات بيانات مرجعية عامة (super-admin only route) → أظهرها لمدير النظام فقط --}}
                         @if(Route::has('admin.qb.standards.index') && (!$sidebarUser || $sidebarUser->isSuperAdmin()) && (!$sidebarUser || $sidebarUser->canViewModule('standards')))<li class="{{ request()->routeIs('admin.qb.standards.*') ? 'active' : '' }}"><a href="{{ route('admin.qb.standards.index') }}"><x-svg-icon name="bookmark-star" class="vc-ico" /><span class="menu-item">المعايير</span></a></li>@endif
                         @if(Route::has('admin.qb.compounds.index') && (!$sidebarUser || $sidebarUser->isSuperAdmin()) && (!$sidebarUser || $sidebarUser->canViewModule('compounds')))<li class="{{ request()->routeIs('admin.qb.compounds.*') ? 'active' : '' }}"><a href="{{ route('admin.qb.compounds.index') }}"><x-svg-icon name="diagram-3" class="vc-ico" /><span class="menu-item">المجمعات</span></a></li>@endif
@@ -641,7 +644,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 @endif
-                <li class="nav-item" data-section="assessment"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('admin.exams.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('admin.class-visits.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.class-visits.index') ? route('admin.class-visits.index') : '#' }}"><x-svg-icon name="geo-alt" class="vc-ico" /><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
             </div>{{-- /gp-sec-assessment --}}
 

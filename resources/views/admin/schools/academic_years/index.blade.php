@@ -120,6 +120,7 @@
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-outline-info" data-toggle="collapse" data-target="#weeks-{{ $term->id }}"><i class="la la-calendar-week"></i></button>
+                                        @if(Route::has('admin.qb.weeks.index'))<a href="{{ route('admin.qb.weeks.index', ['term_id' => $term->id]) }}" class="btn btn-sm btn-outline-secondary">@lang('schools.weeks_bulk')</a>@endif
                                         <form action="{{ route('admin.schools.academic-years.terms.destroy', [$school, $year, $term]) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                             @csrf
                                             @method('DELETE')
