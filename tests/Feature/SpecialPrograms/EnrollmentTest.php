@@ -9,7 +9,6 @@ use App\Models\Section;
 use App\Models\User;
 use App\Modules\SpecialPrograms\Models\SpEnrollment;
 use App\Modules\SpecialPrograms\Repositories\Contracts\EnrollmentRepository;
-use Illuminate\Support\Facades\Schema;
 use Tests\Feature\SpecialPrograms\Concerns\LoadsSpMigrations;
 use Tests\TestCase;
 
@@ -21,10 +20,6 @@ class EnrollmentTest extends TestCase
     {
         parent::setUp();
         $this->grantSpPermissions();
-        // the shared migration list omits 2026_07_25_100000 (sections.grade_number)
-        if (! Schema::hasColumn('sections', 'grade_number')) {
-            Schema::table('sections', fn ($t) => $t->unsignedTinyInteger('grade_number')->nullable());
-        }
     }
 
     /** @return array{0: School, 1: ClassRoom, 2: User[]} */
