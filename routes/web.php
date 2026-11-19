@@ -717,13 +717,13 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])->prefix('admin')->n
     Route::get('job-performance/{teacher}', [\App\Modules\Evaluation\Controllers\JobPerformanceController::class, 'show'])->name('job-performance.show');
 
     // Class visits (Sprint 8 Tasks 16-18 — الزيارات الصفية)
-    Route::get('class-visits', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'index'])->name('class-visits.index');
-    Route::get('class-visits/create', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'create'])->name('class-visits.create');
-    Route::post('class-visits', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'store'])->name('class-visits.store');
-    Route::get('class-visits/{id}/edit', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'edit'])->name('class-visits.edit');
-    Route::put('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'update'])->name('class-visits.update');
-    Route::delete('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'destroy'])->name('class-visits.destroy');
-    Route::post('class-visits/{id}/execute', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'execute'])->name('class-visits.execute');
+    Route::get('class-visits', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'index'])->name('class-visits.index')->middleware('permission:class_visits.view');
+    Route::get('class-visits/create', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'create'])->name('class-visits.create')->middleware('permission:class_visits.view');
+    Route::post('class-visits', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'store'])->name('class-visits.store')->middleware('permission:class_visits.view');
+    Route::get('class-visits/{id}/edit', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'edit'])->name('class-visits.edit')->middleware('permission:class_visits.view');
+    Route::put('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'update'])->name('class-visits.update')->middleware('permission:class_visits.view');
+    Route::delete('class-visits/{id}', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'destroy'])->name('class-visits.destroy')->middleware('permission:class_visits.view');
+    Route::post('class-visits/{id}/execute', [\App\Modules\Evaluation\Controllers\ClassVisitController::class, 'execute'])->name('class-visits.execute')->middleware('permission:class_visits.view');
 
     // Evaluation reports (Sprint 8 Tasks 19-20 — تقارير المشرفين + شاشة المدير العام)
     Route::get('eval-reports/supervisors', [\App\Modules\Evaluation\Controllers\SupervisorReportController::class, 'index'])->name('eval-reports.supervisors');
