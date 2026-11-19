@@ -11,8 +11,8 @@
     <div class="col-md-4 mb-3"><div class="ds-card"><div class="card-body">
         <h6><x-svg-icon name="people" :size="15" /> {{ __('special_programs/staff.enrolled_students') }}</h6>
         <p class="h3 mb-2">{{ $enrolled }}</p>
-        <a class="btn btn-outline-primary btn-sm" href="{{ route('manage.special-programs.enrollments.index', $program) }}">{{ __('special_programs/staff.tabs.enrollments') }}</a>
         @if(auth()->user()->canDo('special_programs.manage'))
+            <a class="btn btn-outline-primary btn-sm" href="{{ route('manage.special-programs.enrollments.index', $program) }}">{{ __('special_programs/staff.tabs.enrollments') }}</a>
             <a class="btn btn-primary btn-sm" href="{{ route('manage.special-programs.enrollments.create', $program) }}">{{ __('special_programs/staff.add_student') }}</a>
         @endif
     </div></div></div>

@@ -105,8 +105,10 @@ class EnrollmentTest extends TestCase
             $this->get($url)->assertOk()->assertSee(__('special_programs/staff.pick_school'));
         }
 
-        // teacher: view yes, write no; student: nothing
-        $this->actingAs($this->createTeacher($school))->get(route('manage.special-programs.enrollments.index', 'qiyas'))->assertOk();
+        // teacher: program page yes, enrolment list (national ids) and writes no; student: nothing
+        $this->actingAs($this->createTeacher($school))->get(route('manage.special-programs.program', 'qiyas'))->assertOk()
+            ->assertDontSee(route('manage.special-programs.enrollments.index', 'qiyas'));
+        $this->get(route('manage.special-programs.enrollments.index', 'qiyas'))->assertForbidden();
         $this->get(route('manage.special-programs.enrollments.create', 'qiyas'))->assertForbidden();
         $this->post(route('manage.special-programs.enrollments.store', 'qiyas'), [])->assertForbidden();
         $this->actingAs($this->createStudent($school))->get(route('manage.special-programs.index'))->assertForbidden();

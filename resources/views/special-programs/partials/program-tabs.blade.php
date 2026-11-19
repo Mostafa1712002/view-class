@@ -1,7 +1,7 @@
 {{-- @include('special-programs.partials.program-tabs', ['program' => $program, 'active' => 'enrollments']) --}}
 @php
     $tabDefs = [
-        'enrollments' => ['manage.special-programs.enrollments.index', 'special_programs.view'],
+        'enrollments' => ['manage.special-programs.enrollments.index', 'special_programs.manage'],
         'groups' => ['manage.special-programs.groups.index', 'special_programs.manage'],
         'teachers' => ['manage.special-programs.teachers.index', 'special_programs.manage'],
         'exams' => ['manage.special-programs.exams.index', 'special_programs.exams'],
