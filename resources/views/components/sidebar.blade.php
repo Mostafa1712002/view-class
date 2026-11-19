@@ -1022,7 +1022,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </a>
             </li>
             @endif
-            @if($sidebarUser && $sidebarUser->isTeacher() && Route::has('my.points.index'))
+            @if($sidebarUser && ($sidebarUser->isTeacher() || $sidebarUser->jobTitle?->slug === 'vice') && Route::has('my.points.index'))
             <li class="nav-item {{ request()->routeIs('my.points.*') ? 'active' : '' }}">
                 <a href="{{ route('my.points.index') }}" data-label="@lang('shell.nav_my_points')"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_points')</span></a>
             </li>
