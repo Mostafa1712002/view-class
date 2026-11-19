@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'My points',
+    'title_parent' => "My children's points",
+    'balance' => 'Points balance',
+    'child' => 'Child',
+    'no_children' => 'No children are linked to your account.',
+    'history' => 'Points history',
+    'empty_history' => 'No points yet.',
+    'cols' => ['rule' => 'Rule', 'source' => 'Source', 'points' => 'Points', 'reason' => 'Reason', 'date' => 'Date'],
+    'rewards' => 'Rewards',
+    'empty_rewards' => 'No rewards yet.',
+    'reward_cols' => ['period' => 'Period', 'points' => 'Points', 'status' => 'Status', 'delivered' => 'Delivered on'],
+    'status' => ['earned' => 'Earned', 'delivered' => 'Delivered'],
+    'behavior' => 'Behaviour balance',
+    'behavior_hint' => 'Read-only, separate from incentive points.',
+    'vice_rules' => 'My point rules',
+    'vice_hint' => 'Everything set for you appears here on your account.',
+    'rule_points' => 'Points per event',
+    'deadline' => 'Deadline',
+    'target' => 'Visits required per term',
+    'window' => 'Window',
+    'current_term' => 'Current term',
+    'none' => 'Not set',
+    'to' => 'to',
+];
