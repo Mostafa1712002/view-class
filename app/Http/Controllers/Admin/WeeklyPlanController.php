@@ -408,6 +408,7 @@ class WeeklyPlanController extends Controller
         }
 
         $plan = WeeklyPlan::create($validated);
+        app(\App\Modules\Gamification\Hooks\PreparationPointHooks::class)->planSaved($plan);
 
         return redirect()->route($this->routePrefix() . '.show', $plan)
             ->with('success', 'تم إنشاء الخطة الأسبوعية بنجاح');
@@ -506,6 +507,7 @@ class WeeklyPlanController extends Controller
         }
 
         $weeklyPlan->delete();
+        app(\App\Modules\Gamification\Hooks\PreparationPointHooks::class)->planDeleted($weeklyPlan->id);
 
         return redirect()->route($this->routePrefix() . '.index')
             ->with('success', 'تم حذف الخطة الأسبوعية بنجاح');
@@ -602,6 +604,7 @@ class WeeklyPlanController extends Controller
         $newPlan->locked_at = null;
         $newPlan->locked_by = null;
         $newPlan->save();
+        app(\App\Modules\Gamification\Hooks\PreparationPointHooks::class)->planSaved($newPlan);
 
         return redirect()->route($this->routePrefix() . '.edit', $newPlan)
             ->with('success', 'تم نسخ الخطة للأسبوع القادم بنجاح');
