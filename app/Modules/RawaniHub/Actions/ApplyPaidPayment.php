@@ -46,6 +46,13 @@ final class ApplyPaidPayment
             || ! is_numeric($remote['amount'] ?? null) || (int) $remote['amount'] !== (int) $payment->amount
             || strtoupper((string) ($remote['currency'] ?? '')) !== strtoupper((string) $payment->currency)
             || ! $payment->moyasar_invoice_id || ($remote['invoice_id'] ?? null) !== $payment->moyasar_invoice_id) {
+            // Money captured but not provably for this row: never applied, audited once so an admin can look.
+            if (($remote['status'] ?? null) === 'paid'
+                && ! ActivityLog::where(['action' => 'hub.payment.rejected', 'model_type' => HubPayment::class, 'model_id' => $payment->id])->exists()) {
+                ActivityLog::log('hub.payment.rejected', "دفع Moyasar {$moyasarPaymentId} مدفوع لكنه لا يطابق المبلغ أو العملة أو الفاتورة للدفعة #{$payment->id}", $payment, null,
+                    array_intersect_key($remote, array_flip(['id', 'status', 'amount', 'currency', 'invoice_id'])));
+            }
+
             return self::REJECTED;
         }
 

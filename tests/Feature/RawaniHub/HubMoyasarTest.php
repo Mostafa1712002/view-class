@@ -310,6 +310,22 @@ class HubMoyasarTest extends TestCase
         $this->assertSame('pending', $stale->fresh()->status);
     }
 
+    public function test_reconcile_never_gives_up_on_captured_money_that_fails_the_checks_and_audits_it_once(): void
+    {
+        $stale = $this->pending();
+        $stale->forceFill(['created_at' => now()->subHours(49)])->save();
+        Http::fake([
+            self::API.'/invoices/inv_1' => Http::response(['id' => 'inv_1', 'status' => 'paid', 'payments' => [['id' => 'pay_1', 'status' => 'paid']]]),
+            self::API.'/payments/pay_1' => Http::response($this->remotePayment(['invoice_id' => null])), // paid, but not provably ours
+        ]);
+
+        $this->artisan('hub:reconcile-payments')->assertSuccessful();
+        $this->artisan('hub:reconcile-payments')->assertSuccessful();
+
+        $this->assertSame(['pending', 'pending'], [$stale->fresh()->status, $stale->subscription->fresh()->status]);
+        $this->assertSame(1, \App\Models\ActivityLog::where('action', 'hub.payment.rejected')->where('model_id', $stale->id)->count());
+    }
+
     public function test_admin_check_applies_a_paid_invoice(): void
     {
         $payment = $this->pending();

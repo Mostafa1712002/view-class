@@ -32,8 +32,9 @@ class ReconcilePaymentsCommand extends Command
 
         foreach ($payments->pendingCreatedBefore(now()->subMinutes(10)) as $payment) {
             $outcome = $check->execute($payment);
-            // Gateway down: try again next run rather than fail a payment we couldn't see.
-            if (! in_array($outcome, [ApplyPaidPayment::APPLIED, ApplyPaidPayment::DUPLICATE, ApplyPaidPayment::NEEDS_REVIEW, CheckInvoice::ERROR], true)
+            // Gateway down: try again next run rather than fail a payment we couldn't see. Rejected = Moyasar holds money
+            // that failed our checks (audited by ApplyPaidPayment): never give up on it silently; it stays for an admin.
+            if (! in_array($outcome, [ApplyPaidPayment::APPLIED, ApplyPaidPayment::DUPLICATE, ApplyPaidPayment::NEEDS_REVIEW, ApplyPaidPayment::REJECTED, CheckInvoice::ERROR], true)
                 && $payment->created_at->lessThanOrEqualTo($giveUpBefore)) {
                 $outcome = $this->giveUp($payment->id, $payments, $subscriptions) ? 'failed' : $outcome;
             }
