@@ -22,4 +22,5 @@ return [
     'teacher_readonly' => 'Teacher accounts are view-only; the platform contract does not link them.',
     'platform_parent' => 'Parent on the platform', 'platform_children' => 'Children on the platform',
     'conflict_rows' => 'Platform accounts matching this person',
+    'wrong_role' => 'This person does not have the account\'s role on the platform.',
 ];

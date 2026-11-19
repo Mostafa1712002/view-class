@@ -281,6 +281,17 @@ class DirectoryTest extends TestCase
         $this->get('/admin/hub/directory?q=0551234567')->assertOk()->assertDontSee('شخص 5');
     }
 
+    public function test_link_refuses_a_person_without_the_accounts_role(): void
+    {
+        $this->as('super-admin');
+        $student = $this->person('student');
+        $this->fake->people = [$this->item(88, ['role' => 'parent'])];
+        $this->mirror();
+
+        $this->post("/admin/hub/accounts/{$this->row('88')->id}/link", ['user_id' => $student->id])->assertSessionHasErrors('user_id');
+        $this->assertNull($this->row('88')->user_id);
+    }
+
     public function test_admin_link_sets_confirmer_and_the_sync_pushes_link_external_id(): void
     {
         $student = $this->person('student');

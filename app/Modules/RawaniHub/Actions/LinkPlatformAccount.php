@@ -36,7 +36,9 @@ final class LinkPlatformAccount
                 $userId ?? throw ValidationException::withMessages(['user_id' => 'required for an unlinked account']);
                 in_array($account->role, ['student', 'parent'], true) // rawani/v1 writes students and parents only
                     || throw ValidationException::withMessages(['account' => __('hub_directory.teacher_readonly')]);
-                User::findOrFail($userId);
+                // The person must hold the account's role: a parent row never lands on a student (or the reverse).
+                User::whereKey($userId)->whereHas('roles', fn ($r) => $r->where('slug', $account->role))->exists()
+                    || throw ValidationException::withMessages(['user_id' => __('hub_directory.wrong_role')]);
                 $keep = $account;
                 $drop = $this->accounts->findForUser($account->platform_id, $account->role, $userId);
             } elseif ($account->status === 'conflict') {
