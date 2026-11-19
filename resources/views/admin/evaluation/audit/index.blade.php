@@ -93,7 +93,8 @@
                                 <td>{{ $log->created_at?->format('Y-m-d H:i') }}</td>
                                 <td class="fw-bold">{{ $log->user?->name_ar ?: $log->user?->name ?: __('eval_audit.system') }}</td>
                                 <td>
-                                    @php($roles = $log->user?->roles ?? collect())
+                                    {{-- Block form on purpose: an inline php(...) directive before a later php/endphp block breaks Blade compilation. --}}
+                                    @php $roles = $log->user?->roles ?? collect(); @endphp
                                     @if ($roles->isNotEmpty())
                                         @foreach ($roles as $role)
                                             <span class="ev-pill draft">{{ $role->name }}</span>
