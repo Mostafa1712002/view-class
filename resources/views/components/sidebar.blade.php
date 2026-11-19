@@ -688,7 +688,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 @endif
-                <li class="nav-item" data-section="support"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_points_rewards')</span></a></li>
+                <li class="nav-item {{ request()->routeIs('manage.points.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('manage.points.index') ? route('manage.points.index') : route('programs.coming-soon') }}"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_points_rewards')</span></a></li>
                 @if($canViewCertificates)
                 <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('admin.certificates.index') ? route('admin.certificates.index') : '#' }}"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('shell.nav_certificates')</span></a></li>
                 @endif
@@ -1018,6 +1018,11 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </a>
             </li>
             @endif
+            @if($sidebarUser && $sidebarUser->isTeacher() && Route::has('my.points.index'))
+            <li class="nav-item {{ request()->routeIs('my.points.*') ? 'active' : '' }}">
+                <a href="{{ route('my.points.index') }}" data-label="@lang('shell.nav_my_points')"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_points')</span></a>
+            </li>
+            @endif
 
             {{-- تقويم المدرسة --}}
             @php
@@ -1133,6 +1138,11 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-student-subjects">
+                @if(Route::has('my.points.index'))
+                <li class="nav-item {{ request()->routeIs('my.points.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ route('my.points.index') }}" data-label="@lang('shell.nav_my_points')"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_points')</span></a>
+                </li>
+                @endif
                 <li class="nav-item {{ request()->routeIs('student.subjects.index') ? 'active' : '' }}" data-section="student">
                     <a href="{{ Route::has('student.subjects.index') ? route('student.subjects.index') : '#' }}" data-label="@lang('shell.subjects_group')"><x-svg-icon name="grid" class="vc-ico" /><span class="menu-title">@lang('shell.subjects_group')</span></a>
                 </li>
@@ -1271,6 +1281,11 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}" data-label="@lang('shell.nav_my_appointments_booking')"><x-svg-icon name="calendar-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>
                 </li>
+                @if(Route::has('my.points.index'))
+                <li class="nav-item {{ request()->routeIs('my.points.*') ? 'active' : '' }}" data-section="parent">
+                    <a href="{{ route('my.points.index') }}" data-label="@lang('shell.nav_children_points')"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_children_points')</span></a>
+                </li>
+                @endif
                 <li class="nav-item {{ request()->routeIs('my.libraries.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.libraries.index') ? route('my.libraries.index') : '#' }}" data-label="@lang('shell.nav_libraries')"><x-svg-icon name="bookmark" class="vc-ico" /><span class="menu-title">@lang('shell.nav_libraries')</span></a>
                 </li>

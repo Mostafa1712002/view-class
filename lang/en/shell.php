@@ -197,4 +197,6 @@ return [
     'portal_my_attendance' => 'My attendance',
     'portal_contact_teacher' => 'Contact teacher',
     'portal_exams' => 'Exams',
+    'nav_my_points' => 'My points',
+    'nav_children_points' => "Children's points",
 ];

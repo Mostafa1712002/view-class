@@ -1323,3 +1323,4 @@ require __DIR__.'/../app/Modules/Admissions/Routes/web.php';
 require __DIR__.'/../app/Modules/TeacherMaterials/Routes/web.php';
 
 require __DIR__.'/../app/Modules/Counseling/Routes/web.php';
+require __DIR__.'/../app/Modules/Gamification/Routes/web.php';

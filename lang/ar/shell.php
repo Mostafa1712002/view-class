@@ -224,4 +224,6 @@ return [
     'nav_exams' => 'الاختبارات',
     'nav_points_rewards' => 'النقاط والمكافآت',
     'nav_academic_calendar' => 'التقويم الدراسي',
+    'nav_my_points' => 'نقاطي',
+    'nav_children_points' => "نقاط أبنائي",
 ];

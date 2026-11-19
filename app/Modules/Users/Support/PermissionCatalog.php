@@ -17,6 +17,7 @@ final class PermissionCatalog
      * Module definitions for the permission matrix UI.
      */
     public const MODULES = [
+        'points' => ['label' => 'النقاط والمكافآت', 'actions' => ['view','manage_rules','adjust','manage_rewards']],
         'counseling' => ['label' => 'الإرشاد الطلابي', 'actions' => ['view','manage']],
         'users'           => ['label' => 'المستخدمون',         'actions' => ['view','create','edit','delete','export','import','print','send_notifications','manage_permissions']],
         'students'        => ['label' => 'الطلاب',             'actions' => ['view','create','edit','delete','archive','export','import','print','view_details','send_notifications']],

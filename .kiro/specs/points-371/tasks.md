@@ -51,14 +51,14 @@ Phase 1 (wiring, 1 agent)
 ## Phase 1 — Wiring (one agent; owns every shared file)
 
 ### Task 1.1: Routes, permissions, policy, sidebar
-- [ ] `app/Modules/Gamification/Routes/web.php` — every route of design §8 (names exact) pointing at the Phase 2 controllers
-- [ ] `routes/web.php` — `require` the module routes (next to the Counseling require, `routes/web.php:1325`)
-- [ ] `app/Modules/Users/Support/PermissionCatalog.php` — add `'points'` group (design §10)
-- [ ] `database/migrations/2026_11_19_371001_seed_points_permissions.php` — 4 permissions + `permission_role` for `school-admin`; reversible
-- [ ] `app/Modules/Gamification/Policies/PointsPolicy.php` + register in `app/Providers/AppServiceProvider.php` (abilities: viewStaff, adjust (not self), manageRules, editPlatformRules, editRuleOverride(ruleKey) (no `vice.*` for a وكيل), manageRewards, viewPerson(user), viewChild(child))
-- [ ] `resources/views/components/sidebar.blade.php` — 4 edits of design §9, all behind `Route::has`
-- [ ] `lang/ar/shell.php` + `lang/en/shell.php` — `nav_my_points` «نقاطي», `nav_children_points` «نقاط أبنائي»
-- [ ] Empty controller classes with the method names used in routes (bodies filled by 2A/2B) so the route file loads
+- [x] `app/Modules/Gamification/Routes/web.php` — every route of design §8 (names exact) pointing at the Phase 2 controllers
+- [x] `routes/web.php` — `require` the module routes (next to the Counseling require, `routes/web.php:1325`)
+- [x] `app/Modules/Users/Support/PermissionCatalog.php` — add `'points'` group (design §10)
+- [x] `database/migrations/2026_11_19_371001_seed_points_permissions.php` — 4 permissions + `permission_role` for `school-admin`; reversible
+- [x] `app/Modules/Gamification/Policies/PointsPolicy.php` + register in `app/Providers/AppServiceProvider.php` (abilities: viewStaff, adjust (not self), manageRules, editPlatformRules, editRuleOverride(ruleKey) (no `vice.*` for a وكيل), manageRewards, viewPerson(user), viewChild(child))
+- [x] `resources/views/components/sidebar.blade.php` — 4 edits of design §9, all behind `Route::has`
+- [x] `lang/ar/shell.php` + `lang/en/shell.php` — `nav_my_points` «نقاطي», `nav_children_points` «نقاط أبنائي»
+- [x] Empty controller classes with the method names used in routes (bodies filled by 2A/2B) so the route file loads
 **Dependencies:** Phase 0
 
 ## Phase 2 — Screens (2 agents in parallel; RTL, `<x-svg-icon>`, existing layout/components)
@@ -140,11 +140,11 @@ Files: `Hooks/SchedulePointHooks.php`, `app/Http/Controllers/Admin/ScheduleContr
 | Phase | Tasks | Completed | Status |
 |-------|-------|-----------|--------|
 | 0. Core ledger + contract | 5 | 5 | Done (not yet merged to main) |
-| 1. Wiring | 1 | 0 | Not Started |
+| 1. Wiring | 1 | 1 | Done |
 | 2. Screens | 2 | 0 | Not Started |
 | 3. Hooks | 6 | 0 | Not Started |
 | 4. Review / verify / ship | 4 | 0 | Not Started |
-| **Total** | **18** | **5** | **28%** |
+| **Total** | **18** | **6** | **33%** |
 
 ## Deferred (not in this card)
 - Portfolio approval flows (student by teacher, teacher by complex supervisor), التحفيز, video tracking, worksheets, separate preparation upload, complex-supervisor ownership of visit targets — wait for client answers; rules already in the catalog as unwired.
