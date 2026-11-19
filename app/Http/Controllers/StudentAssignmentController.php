@@ -79,6 +79,7 @@ class StudentAssignmentController extends Controller
         $submission->is_late      = $assignment->is_overdue;
         $submission->status       = 'submitted';
         $submission->save();
+        app(\App\Modules\Gamification\Hooks\AssignmentPointHooks::class)->assignmentChanged($assignment, null);
 
         return redirect()
             ->route('student.assignments.show', $assignment->id)

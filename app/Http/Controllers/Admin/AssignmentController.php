@@ -188,6 +188,7 @@ class AssignmentController extends Controller
         $this->authorize($assignment);
 
         $assignment->delete();
+        app(\App\Modules\Gamification\Hooks\AssignmentPointHooks::class)->assignmentDeleted($assignment->id);
 
         return redirect()->route('admin.assignments.index')
             ->with('success', 'تم حذف الواجب بنجاح');
@@ -219,6 +220,7 @@ class AssignmentController extends Controller
             'graded_at' => now(),
             'status' => 'graded',
         ]);
+        app(\App\Modules\Gamification\Hooks\AssignmentPointHooks::class)->assignmentChanged($assignment, $student->id);
 
         return back()->with('success', 'تم تقييم الطالب بنجاح');
     }
