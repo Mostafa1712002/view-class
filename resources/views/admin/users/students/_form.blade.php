@@ -17,7 +17,7 @@
                 'icon' => 'la la-id-card', 'title' => __('users.student_basic_info'),
                 'fields' => [
                     ['name' => 'name', 'label' => __('users.student_full_name'), 'required' => true, 'col' => 'col-md-6'],
-                    ['name' => 'username', 'label' => __('users.username'), 'required' => true, 'col' => 'col-md-6'],
+                    ['name' => 'username', 'label' => __('users.username'), 'required' => !empty($student->id), 'col' => 'col-md-6', 'hint' => empty($student->id) ? __('users.username_hint') : null],
                     ['name' => 'password', 'label' => __('users.password'), 'type' => 'password', 'col' => 'col-md-6', 'hint' => __('users.password_hint')],
                     ['name' => 'national_id', 'label' => __('users.national_id'), 'col' => 'col-md-6'],
                     ['name' => 'first_name', 'label' => __('users.student_first_name'), 'col' => 'col-md-3'],
@@ -126,7 +126,7 @@
                                 <input type="password" name="{{ $f['name'] }}" class="form-control" autocomplete="new-password" />
                                 @isset($f['hint'])<small class="form-text text-muted">{{ $f['hint'] }}</small>@endisset
                             @else
-                                <input type="{{ $type }}" name="{{ $f['name'] }}" class="form-control" value="{{ $value }}" {{ $required ? 'required' : '' }} />
+                                <input type="{{ $type }}" name="{{ $f['name'] }}" class="form-control" value="{{ $value }}" {{ $required ? 'required' : '' }} @isset($f['hint']) placeholder="{{ $f['hint'] }}" @endisset />
                             @endif
                         </div>
                     @endforeach

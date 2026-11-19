@@ -25,6 +25,7 @@ return [
     'date_of_birth' => 'Date of birth',
     'hire_date' => 'Hire date',
     'password' => 'Password',
+    'username_hint' => 'Leave empty to use the national ID as the username',
     'password_hint' => 'Leave empty to use the national ID as the default password',
     'grade_level' => 'Grade level',
     'class' => 'Class',

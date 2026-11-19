@@ -666,6 +666,11 @@ class StudentController extends Controller
 
     private function validateStudent(Request $request, ?int $id = null): array
     {
+        // New students log in with the national ID unless a username is typed.
+        if ($id === null && trim((string) $request->input('username')) === '' && trim((string) $request->input('national_id')) !== '') {
+            $request->merge(['username' => trim((string) $request->input('national_id'))]);
+        }
+
         return $request->validate([
             'school_id' => (auth()->user()?->isSuperAdmin() ? 'required' : 'nullable').'|integer|exists:schools,id',
             'name' => 'required|string|max:255',
