@@ -83,6 +83,15 @@ class WhatsappAudienceTest extends TestCase
         // legacy single ref still works; empty selection never means "everyone"
         $this->assertSame([$s1->id], $ids($repo->resolveAudience('class_students', $school->id, $c1->id)));
         $this->assertCount(0, $repo->resolveAudience('grade_students', $school->id, []));
+
+        // SMS send re-resolves with a null ref and intersects with the posted ids: unchanged, school-scoped
+        $this->assertSame([$s1->id, $s2->id, $s3->id], $ids($repo->resolveAudience('class_students', $school->id, null)));
+
+        // a school-scoped sender cannot reach another school's teachers through the ref
+        $t = User::factory()->create(['school_id' => $other->id]);
+        $t->roles()->attach(Role::where('slug', 'teacher')->first());
+        $this->assertNotContains($t->id, $ids($repo->resolveAudience('school_teachers', $school->id, [(string) $other->id])));
+        $this->assertContains($t->id, $ids($repo->resolveAudience('school_teachers', null, [(string) $other->id])));
     }
 
     public function test_resolve_endpoint_and_store_use_refs_without_sending_real_messages(): void

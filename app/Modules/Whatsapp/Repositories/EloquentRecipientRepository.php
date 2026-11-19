@@ -14,19 +14,23 @@ class EloquentRecipientRepository implements RecipientRepository
     {
         // refs may be one value or many (multi-select); normalise to a clean list.
         $refs = array_values(array_unique(array_filter((array) $refId, fn ($v) => $v !== null && $v !== '')));
+        // null = legacy single-ref caller (SMS send re-resolves without its ref and
+        // intersects with the posted ids): keep its old "no ref = no filter" meaning.
+        // An array (WhatsApp multi-select) with nothing picked resolves to nobody.
+        $any = $refs !== [] || $refId === null;
 
         return match ($audience) {
             'all_students'   => $this->usersByRole('student', $schoolId)->get(),
             'all_teachers'   => $this->usersByRole('teacher', $schoolId)->get(),
             'all_parents'    => $this->usersByRole('parent', $schoolId)->get(),
-            'school_teachers' => $this->usersByRole('teacher', ((int) ($refs[0] ?? 0)) ?: $schoolId)->get(),
-            // ref-based audiences with nothing selected resolve to nobody (never "everyone").
+            // a school-scoped sender can never pick another school's teachers
+            'school_teachers' => $this->usersByRole('teacher', $schoolId ?? (((int) ($refs[0] ?? 0)) ?: null))->get(),
             'stage_students'  => $refs ? $this->stageStudents($schoolId, $refs)->get() : collect(),
-            'grade_students'  => $refs ? $this->gradeStudents($schoolId, array_map('intval', $refs))->get() : collect(),
-            'class_students'  => $refs ? $this->classStudents($schoolId, array_map('intval', $refs))->get() : collect(),
+            'grade_students'  => $any ? $this->gradeStudents($schoolId, $refs)->get() : collect(),
+            'class_students'  => $any ? $this->classStudents($schoolId, $refs)->get() : collect(),
             'stage_parents'   => $refs ? $this->parentsOf($this->stageStudents($schoolId, $refs)->get()) : collect(),
-            'grade_parents'   => $refs ? $this->parentsOf($this->gradeStudents($schoolId, array_map('intval', $refs))->get()) : collect(),
-            'class_parents'   => $refs ? $this->parentsOf($this->classStudents($schoolId, array_map('intval', $refs))->get()) : collect(),
+            'grade_parents'   => $any ? $this->parentsOf($this->gradeStudents($schoolId, $refs)->get()) : collect(),
+            'class_parents'   => $any ? $this->parentsOf($this->classStudents($schoolId, $refs)->get()) : collect(),
             default           => collect(),
         };
     }
@@ -95,21 +99,25 @@ class EloquentRecipientRepository implements RecipientRepository
             ->when($schoolId, fn (Builder $q) => $q->where('school_id', $schoolId));
     }
 
-    /** @param array<int> $classIds */
+    /** @param array<int|string> $classIds  empty = no class filter (legacy SMS) */
     private function classStudents(?int $schoolId, array $classIds): Builder
     {
+        $classIds = array_map('intval', $classIds);
+
         // a student is enrolled either via users.class_room_id or class_student pivot
-        return $this->usersByRole('student', $schoolId)->where(function (Builder $sub) use ($classIds) {
+        return $this->usersByRole('student', $schoolId)->when($classIds, fn (Builder $q) => $q->where(function (Builder $sub) use ($classIds) {
             $sub->whereIn('class_room_id', $classIds)
                 ->orWhereHas('enrolledClasses', fn (Builder $c) => $c->whereIn('classes.id', $classIds));
-        });
+        }));
     }
 
-    /** @param array<int> $gradeLevels */
+    /** @param array<int|string> $gradeLevels  empty = no grade filter (legacy SMS) */
     private function gradeStudents(?int $schoolId, array $gradeLevels): Builder
     {
+        $gradeLevels = array_map('intval', $gradeLevels);
+
         return $this->usersByRole('student', $schoolId)
-            ->whereHas('classRoom', fn (Builder $c) => $c->whereIn('grade_level', $gradeLevels));
+            ->when($gradeLevels, fn (Builder $q) => $q->whereHas('classRoom', fn (Builder $c) => $c->whereIn('grade_level', $gradeLevels)));
     }
 
     /** @param array<string> $levels sections.level values (primary|intermediate|secondary) */
