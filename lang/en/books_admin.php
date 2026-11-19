@@ -31,7 +31,9 @@ return [
         'actions' => 'Actions',
     ],
 
+    'allow_download_yes' => 'Allowed',
     'fields' => [
+        'allow_download' => 'Allow students to download',
         'title' => 'Title',
         'source' => 'Book source',
         'file' => 'Upload (PDF)',

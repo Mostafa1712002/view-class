@@ -972,6 +972,8 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     // === Books card 65 + digital reader card 103 ===
     Route::get('books', [\App\Modules\Books\Controllers\StudentBookController::class, 'index'])->name('books.index');
     Route::get('books/{id}/read', [\App\Modules\Books\Controllers\StudentBookController::class, 'read'])->whereNumber('id')->name('books.read');
+    Route::get('books/{id}/file', [\App\Modules\Books\Controllers\StudentBookController::class, 'file'])->whereNumber('id')->name('books.file');
+    Route::get('books/{id}/download', [\App\Modules\Books\Controllers\StudentBookController::class, 'download'])->whereNumber('id')->name('books.download');
     // === Absence reports + portfolio + exam schedule — card #172 ===
     Route::get('reports', [\App\Http\Controllers\StudentController::class, 'reportsIndex'])->name('reports.index');
     Route::get('reports/absence-days', [\App\Http\Controllers\StudentController::class, 'absenceDays'])->name('reports.absence-days');

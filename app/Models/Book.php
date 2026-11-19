@@ -26,12 +26,14 @@ class Book extends Model
         'cover_path',
         'is_ministry',
         'is_active',
+        'allow_download',
         'created_by',
     ];
 
     protected $casts = [
         'is_ministry' => 'boolean',
         'is_active' => 'boolean',
+        'allow_download' => 'boolean',
         'grade_level' => 'integer',
     ];
 

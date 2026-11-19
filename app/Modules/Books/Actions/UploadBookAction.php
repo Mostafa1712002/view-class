@@ -27,6 +27,7 @@ class UploadBookAction
             'source' => $data['source'],
             'is_ministry' => (bool) ($data['is_ministry'] ?? false),
             'is_active' => (bool) ($data['is_active'] ?? true),
+            'allow_download' => (bool) ($data['allow_download'] ?? true),
             'created_by' => $userId,
         ];
 
@@ -57,6 +58,7 @@ class UploadBookAction
             'source' => $data['source'],
             'is_ministry' => (bool) ($data['is_ministry'] ?? false),
             'is_active' => (bool) ($data['is_active'] ?? true),
+            'allow_download' => (bool) ($data['allow_download'] ?? true),
         ];
 
         if ($data['source'] === Book::SOURCE_FILE && $file) {

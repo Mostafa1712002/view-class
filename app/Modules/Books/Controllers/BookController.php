@@ -46,6 +46,7 @@ class BookController extends Controller
         $book = new Book([
             'source' => Book::SOURCE_FILE,
             'is_active' => true,
+            'allow_download' => true,
             'is_ministry' => (bool) $request->boolean('ministry'),
         ]);
 
@@ -154,6 +155,7 @@ class BookController extends Controller
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_ministry' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
+            'allow_download' => ['nullable', 'boolean'],
         ]);
     }
 

@@ -91,6 +91,15 @@
             <label class="form-check-label" for="is_active">@lang('books_admin.status_active')</label>
         </div>
     </div>
+
+    <div class="col-md-3">
+        <label class="form-label d-block">@lang('books_admin.fields.allow_download')</label>
+        <div class="form-check form-switch mt-2">
+            <input type="hidden" name="allow_download" value="0" />
+            <input class="form-check-input" type="checkbox" name="allow_download" value="1" id="allow_download" @checked(old('allow_download', $book->allow_download ?? true))>
+            <label class="form-check-label" for="allow_download">@lang('books_admin.allow_download_yes')</label>
+        </div>
+    </div>
 </div>
 
 <div class="mt-3 d-flex gap-2">

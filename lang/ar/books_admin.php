@@ -43,7 +43,9 @@ return [
         'cover' => 'غلاف الكتاب',
         'is_ministry' => 'كتاب وزاري',
         'is_active' => 'مُفعّل',
+        'allow_download' => 'السماح للطلاب بالتحميل',
     ],
+    'allow_download_yes' => 'مسموح',
 
     'source_file' => 'ملف',
     'source_external' => 'رابط خارجي',
