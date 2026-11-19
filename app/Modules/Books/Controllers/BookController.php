@@ -12,6 +12,7 @@ use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class BookController extends Controller
@@ -37,6 +38,20 @@ class BookController extends Controller
             'grades' => $this->gradeList(),
             'terms' => $this->termsList(),
         ]);
+    }
+
+    /** Staff preview of a book PDF (private disk), scoped to the active school. */
+    public function file(int $id)
+    {
+        $schoolId = $this->activeSchoolId();
+        // findScoped(null) is unscoped — only a super-admin may resolve to no school.
+        abort_if($schoolId === null && ! auth()->user()->isSuperAdmin(), 404);
+        $book = $this->books->findScoped($id, $schoolId);
+        abort_if(! $book, 404);
+        $disk = $book->fileDisk();
+        abort_unless($disk, 404);
+
+        return Storage::disk($disk)->response($book->file_path, null, ['Content-Disposition' => 'inline']);
     }
 
     public function create(Request $request): View

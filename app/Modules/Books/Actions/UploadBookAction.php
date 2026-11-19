@@ -32,7 +32,7 @@ class UploadBookAction
         ];
 
         if ($data['source'] === Book::SOURCE_FILE && $file) {
-            $payload['file_path'] = $file->store('books', 'public');
+            $payload['file_path'] = $file->store('books', 'local');
         } elseif ($data['source'] === Book::SOURCE_EXTERNAL) {
             $payload['external_url'] = $data['external_url'] ?? null;
         }
@@ -62,15 +62,13 @@ class UploadBookAction
         ];
 
         if ($data['source'] === Book::SOURCE_FILE && $file) {
-            if ($book->file_path) {
-                Storage::disk('public')->delete($book->file_path);
-            }
-            $payload['file_path'] = $file->store('books', 'public');
+            $book->deleteFile();
+            $payload['file_path'] = $file->store('books', 'local');
             $payload['external_url'] = null;
         } elseif ($data['source'] === Book::SOURCE_EXTERNAL) {
             $payload['external_url'] = $data['external_url'] ?? null;
             if ($book->file_path) {
-                Storage::disk('public')->delete($book->file_path);
+                $book->deleteFile();
                 $payload['file_path'] = null;
             }
         }

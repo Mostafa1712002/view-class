@@ -20,7 +20,7 @@
         @if(!empty($book->file_path))
             <small class="d-block mt-1">
                 @lang('books_admin.current_file'):
-                <a href="{{ asset('storage/' . $book->file_path) }}" target="_blank" rel="noopener">{{ basename($book->file_path) }}</a>
+                <a href="{{ route('manage.books.file', $book->id) }}" target="_blank" rel="noopener">{{ basename($book->file_path) }}</a>
                 <span class="text-muted">— @lang('books_admin.replace_file_hint')</span>
             </small>
         @endif

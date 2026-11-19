@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Book extends Model
 {
@@ -62,9 +63,39 @@ class Book extends Model
         if ($this->source === self::SOURCE_EXTERNAL) {
             return $this->external_url;
         }
-        return $this->file_path
-            ? asset('storage/' . ltrim($this->file_path, '/'))
+        // Book PDFs live on the private disk; staff open them through the
+        // permission-checked manage.books.file route, never a /storage URL.
+        return $this->file_path && $this->id
+            ? route('manage.books.file', $this->id)
             : null;
+    }
+
+    /**
+     * Disk currently holding the PDF: the private `local` disk, or `public`
+     * for files not yet moved by `books:move-to-private`.
+     * ponytail: drop the public fallback once the command has run on every server.
+     */
+    public function fileDisk(): ?string
+    {
+        if ($this->source !== self::SOURCE_FILE || ! $this->file_path) {
+            return null;
+        }
+        foreach (['local', 'public'] as $disk) {
+            if (Storage::disk($disk)->exists($this->file_path)) {
+                return $disk;
+            }
+        }
+
+        return null;
+    }
+
+    /** Remove the PDF from whichever disk holds it. */
+    public function deleteFile(): void
+    {
+        if ($this->file_path) {
+            Storage::disk('local')->delete($this->file_path);
+            Storage::disk('public')->delete($this->file_path);
+        }
     }
 
     public function getCoverUrlAttribute(): ?string

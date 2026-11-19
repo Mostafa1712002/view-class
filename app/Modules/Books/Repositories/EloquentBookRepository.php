@@ -70,9 +70,7 @@ class EloquentBookRepository implements BookRepository
 
     public function delete(Book $book): void
     {
-        if ($book->file_path) {
-            Storage::disk('public')->delete($book->file_path);
-        }
+        $book->deleteFile();
         if ($book->cover_path) {
             Storage::disk('public')->delete($book->cover_path);
         }

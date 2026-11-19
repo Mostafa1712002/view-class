@@ -48,9 +48,10 @@ class StudentBookController extends Controller
     public function file(int $id)
     {
         $book = $this->accessibleBook($id);
-        abort_unless($book->source === 'file' && $book->file_path && Storage::disk('public')->exists($book->file_path), 404);
+        $disk = $book->fileDisk();
+        abort_unless($disk, 404);
 
-        return Storage::disk('public')->response($book->file_path, null, ['Content-Disposition' => 'inline']);
+        return Storage::disk($disk)->response($book->file_path, null, ['Content-Disposition' => 'inline']);
     }
 
     /** Download — blocked server-side when the book disallows it. */
@@ -61,8 +62,9 @@ class StudentBookController extends Controller
         if ($book->source === 'external_url') {
             return redirect()->away((string) $book->external_url);
         }
-        abort_unless($book->file_path && Storage::disk('public')->exists($book->file_path), 404);
+        $disk = $book->fileDisk();
+        abort_unless($disk, 404);
 
-        return Storage::disk('public')->download($book->file_path);
+        return Storage::disk($disk)->download($book->file_path);
     }
 }

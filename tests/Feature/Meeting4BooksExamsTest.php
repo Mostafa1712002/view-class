@@ -45,8 +45,9 @@ class Meeting4BooksExamsTest extends TestCase
 
     private function book(School $school, bool $allow): Book
     {
+        Storage::fake('local');
         Storage::fake('public');
-        Storage::disk('public')->put('books/x.pdf', '%PDF-1.4 test');
+        Storage::disk('local')->put('books/x.pdf', '%PDF-1.4 test');
 
         return Book::create(['school_id' => $school->id, 'subject_id' => Subject::factory()->create()->id, 'title' => 'B',
             'source' => 'file', 'file_path' => 'books/x.pdf', 'is_active' => true, 'allow_download' => $allow]);

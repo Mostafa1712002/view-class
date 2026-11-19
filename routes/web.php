@@ -827,6 +827,8 @@ Route::middleware(['auth', 'role:super-admin,school-admin,teacher'])->prefix('ma
     Route::get('books', [\App\Modules\Books\Controllers\BookController::class, 'index'])->name('books.index');
     // BookGradeController::index — school-scoped: resolveBookSchoolId() → activeSchoolId() line 31
     Route::get('books/grades', [\App\Modules\Books\Controllers\BookGradeController::class, 'index'])->name('books.grades');
+    // BookController::file — school-scoped via findScoped(activeSchoolId()); PDFs sit on the private disk
+    Route::get('books/{id}/file', [\App\Modules\Books\Controllers\BookController::class, 'file'])->whereNumber('id')->name('books.file');
 
     // === Subject content management — cards #171 ===
     // Security: SubjectContentController::resolveSubject() checks school scope +
