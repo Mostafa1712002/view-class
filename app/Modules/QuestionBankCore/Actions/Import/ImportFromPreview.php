@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
  */
 final class ImportFromPreview
 {
-    public function __construct(private CreateQuestion $createQuestion) {}
+    public function __construct(private CreateQuestion $createQuestion, private ResolveImportImage $images) {}
 
     /**
      * @param  array<int,array<string,mixed>>  $previewRows
@@ -59,6 +59,7 @@ final class ImportFromPreview
             try {
                 DB::transaction(function () use ($bank, $batch, $pr, $statusChoice, $importedBy) {
                     $data = $this->buildPayload($bank, $pr, $statusChoice);
+                    $data = $this->resolveImages($bank, $pr, $data);
                     $question = $this->createQuestion->execute($bank, $data);
                     // Tag provenance (CreateQuestion defaults source=manual).
                     $question->update([
@@ -122,10 +123,8 @@ final class ImportFromPreview
             'explanation' => $pr['explanation'] ?? null,
             'difficulty' => $pr['difficulty'] ?? 1,
             'points' => $pr['points'] ?? 1,
-            // Image import (Method 1 URL / Method 2 ZIP) is UNVERIFIED: the raw URL
-            // is stored verbatim in attachment_path (normally a public-disk relative
-            // path), so display of imported images is not guaranteed. See spec note.
-            'attachment_path' => $pr['attachment_url'] ?? null,
+            // attachment_path / option_image_paths are filled by resolveImages().
+            'attachment_path' => null,
             'status' => $status,
             // answer inputs consumed by MapAnswerData
             'options_ar' => $pr['options_ar'] ?? [],
@@ -137,6 +136,26 @@ final class ImportFromPreview
             'matching_left' => $pr['matching_left'] ?? [],
             'matching_right' => $pr['matching_right'] ?? [],
         ];
+    }
+
+    /**
+     * Store the referenced images on the public disk and point the payload at them
+     * (attachment_path / option_image_paths), so they render like uploaded ones.
+     *
+     * @param  array<string,mixed>  $pr
+     * @param  array<string,mixed>  $data
+     * @return array<string,mixed>
+     */
+    private function resolveImages(QuestionBank $bank, array $pr, array $data): array
+    {
+        if (! empty($pr['attachment_url'])) {
+            $data['attachment_path'] = $this->images->execute($pr['attachment_url'], $bank->id);
+        }
+        foreach ($pr['option_images'] ?? [] as $i => $ref) {
+            $data['option_image_paths'][(int) $i] = $this->images->execute($ref, $bank->id);
+        }
+
+        return $data;
     }
 
     /**

@@ -81,11 +81,13 @@ final class ParseQuestionsExcel
         $headerRow = $rows[1] ?? [];
         $colByHeader = [];
         foreach ($headerRow as $letter => $value) {
-            $name = $this->norm($value);
+            $name = $this->normHeader($value);
             if ($name !== '') {
                 $colByHeader[$name] = $letter;
             }
         }
+
+        $embedded = $this->extractEmbeddedImages($sheet, $bank);
 
         $required = ['question_type', 'question_text', 'correct_answer'];
         $missingCols = array_values(array_diff($required, array_keys($colByHeader)));
@@ -110,6 +112,13 @@ final class ParseQuestionsExcel
                 continue;
             }
 
+            // A picture embedded in a cell stands in for an empty *_image cell.
+            foreach ($embedded[$rowNum] ?? [] as $letter => $ref) {
+                if (trim((string) ($cells[$letter] ?? '')) === '') {
+                    $cells[$letter] = $ref;
+                }
+            }
+
             $get = fn (string $header) => isset($colByHeader[$header])
                 ? trim((string) ($cells[$colByHeader[$header]] ?? ''))
                 : '';
@@ -117,6 +126,9 @@ final class ParseQuestionsExcel
             $raw = [];
             foreach ($colByHeader as $name => $letter) {
                 $raw[$name] = trim((string) ($cells[$letter] ?? ''));
+                if (ResolveImportImage::isEmbedded($raw[$name])) {
+                    $raw[$name] = '[صورة مدمجة]';
+                }
             }
 
             $errors = [];
@@ -235,6 +247,7 @@ final class ParseQuestionsExcel
     private function resolveMcq(array $cells, array $colByHeader, callable $get, array &$errors): array
     {
         $options = [];
+        $optionImages = [];
         for ($i = 1; $i <= 5; $i++) {
             $text = isset($colByHeader["answer_{$i}_text"])
                 ? trim((string) ($cells[$colByHeader["answer_{$i}_text"]] ?? ''))
@@ -246,7 +259,10 @@ final class ParseQuestionsExcel
                 $this->validateImageRef($img, "answer_{$i}_image", $errors);
             }
             if ($text !== '' || $img !== '') {
-                $options[] = $text !== '' ? $text : $img;
+                if ($img !== '') {
+                    $optionImages[count($options)] = $img; // dense index, matches correct_index
+                }
+                $options[] = $text;
             }
         }
 
@@ -259,14 +275,14 @@ final class ParseQuestionsExcel
             $errors[] = 'إجابة صحيحة غير موجودة أو خارج نطاق الخيارات.';
         }
 
-        return ['options_ar' => $options, 'correct_index' => $correctIndex];
+        return ['options_ar' => $options, 'option_images' => $optionImages, 'correct_index' => $correctIndex];
     }
 
     private function resolveTrueFalse(callable $get, array &$errors): array
     {
-        $raw = mb_strtolower($get('correct_answer'));
-        $true = in_array($raw, ['true', '1', 'صح', 'نعم', 'yes'], true);
-        $false = in_array($raw, ['false', '0', 'خطأ', 'لا', 'no'], true);
+        $raw = $this->norm($this->westernDigits($get('correct_answer')));
+        $true = in_array($raw, ['true', '1', 'صح', 'صحيح', 'نعم', 'yes', 't'], true);
+        $false = in_array($raw, ['false', '0', 'خطأ', 'خاطئة', 'خطا', 'لا', 'no', 'f'], true);
         if (! $true && ! $false) {
             $errors[] = 'سؤال صح وخطأ بإجابة غير صحيحة (true/false).';
 
@@ -327,8 +343,11 @@ final class ParseQuestionsExcel
             return null;
         }
         // Letter A..E
-        $upper = strtoupper($value);
-        $letters = ['A' => 0, 'B' => 1, 'C' => 2, 'D' => 3, 'E' => 4];
+        $value = $this->westernDigits($value);
+        $upper = strtoupper(rtrim($value, ".)-: "));
+        // Latin letters, plus the Arabic option labels teachers use (أ ب ج د هـ).
+        $letters = ['A' => 0, 'B' => 1, 'C' => 2, 'D' => 3, 'E' => 4,
+            'أ' => 0, 'ا' => 0, 'ب' => 1, 'ج' => 2, 'د' => 3, 'ه' => 4, 'هـ' => 4];
         if (isset($letters[$upper])) {
             $idx = $letters[$upper];
         } elseif (is_numeric($value)) {
@@ -419,7 +438,7 @@ final class ParseQuestionsExcel
 
     private function resolveGrade(string $value, array &$errors): ?int
     {
-        $value = trim($value);
+        $value = $this->westernDigits(trim($value));
         if ($value === '') {
             return null;
         }
@@ -440,7 +459,7 @@ final class ParseQuestionsExcel
 
     private function resolveDifficulty(string $value, array &$errors): int
     {
-        $value = $this->norm($value);
+        $value = $this->norm($this->westernDigits($value));
         if ($value === '') {
             return 1;
         }
@@ -455,7 +474,7 @@ final class ParseQuestionsExcel
 
     private function resolveScore(string $value): float
     {
-        $value = trim($value);
+        $value = $this->westernDigits(trim($value));
 
         return ($value !== '' && is_numeric($value)) ? (float) $value : 1.0;
     }
@@ -477,13 +496,17 @@ final class ParseQuestionsExcel
 
     private function validateImageRef(string $ref, string $field, array &$errors): void
     {
-        // Method 1 — a URL. Method 2 (ZIP filename) not consumed here.
+        if (ResolveImportImage::isEmbedded($ref)) {
+            return;
+        }
+        // A URL (downloaded at confirm) or a picture embedded in the cell. Bare
+        // filenames can't be resolved (no ZIP bundle), so reject them up front.
         $isUrl = (bool) filter_var($ref, FILTER_VALIDATE_URL);
         $path = $isUrl ? parse_url($ref, PHP_URL_PATH) : $ref;
         $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
 
-        if (! $isUrl && ! str_contains($ref, '.')) {
-            $errors[] = "رابط صورة غير صالح ({$field}): {$ref}";
+        if (! $isUrl) {
+            $errors[] = "الصورة في ({$field}) يجب أن تكون رابطًا كاملًا (https://…) أو صورة مدمجة داخل الخلية: {$ref}";
 
             return;
         }
@@ -521,6 +544,48 @@ final class ParseQuestionsExcel
         }
 
         return false;
+    }
+
+    /**
+     * Pictures a teacher pasted into the sheet, keyed [row][column letter] => "public:<path>".
+     * They are stored right away; unconfirmed previews leave a few orphan files at most.
+     *
+     * @return array<int,array<string,string>>
+     */
+    private function extractEmbeddedImages(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, QuestionBank $bank): array
+    {
+        $out = [];
+        foreach ($sheet->getDrawingCollection() as $drawing) {
+            if (! $drawing instanceof \PhpOffice\PhpSpreadsheet\Worksheet\Drawing) {
+                continue;
+            }
+            $ext = strtolower($drawing->getExtension());
+            $bytes = @file_get_contents($drawing->getPath());
+            if (! in_array($ext, self::ALLOWED_IMAGE_EXT, true) || $bytes === false || $bytes === '') {
+                continue;
+            }
+            [$col, $row] = Coordinate::coordinateFromString($drawing->getCoordinates());
+            $path = "bank-questions/{$bank->id}/imports/".bin2hex(random_bytes(10)).'.'.$ext;
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, $bytes);
+            $out[(int) $row][$col] = 'public:'.$path;
+        }
+
+        return $out;
+    }
+
+    /** "Question Text" / "question-text " → question_text. */
+    private function normHeader($value): string
+    {
+        return preg_replace('/[\s\-]+/u', '_', $this->norm(str_replace("\u{FEFF}", '', (string) $value)));
+    }
+
+    private function westernDigits(string $value): string
+    {
+        return strtr($value, [
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            '٫' => '.', ',' => '.',
+        ]);
     }
 
     private function norm($value): string
