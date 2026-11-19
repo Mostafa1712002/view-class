@@ -108,6 +108,7 @@ class ManageDiscussionController extends Controller
 
         ActivityLog::logDelete($room, 'حذف غرفة نقاش: '.$room->title);
         $this->repo->deleteRoom($id);
+        app(\App\Modules\Gamification\Hooks\DiscussionPointHooks::class)->discussionRoomDeleted($id);
 
         return redirect()
             ->route('manage.discussion-rooms.index')
@@ -242,6 +243,7 @@ class ManageDiscussionController extends Controller
         $roomId = $topic->room_id;
         ActivityLog::logDelete($topic, 'حذف موضوع نقاش: '.$topic->title);
         $this->repo->deleteTopic($topicId);
+        app(\App\Modules\Gamification\Hooks\DiscussionPointHooks::class)->discussionRoomChanged($roomId);
 
         return redirect()
             ->route('discussion.room', $roomId)
@@ -257,6 +259,7 @@ class ManageDiscussionController extends Controller
         $topicId = $comment->topic_id;
         ActivityLog::logDelete($comment, 'حذف رد في غرفة نقاش');
         $this->repo->deleteComment($commentId);
+        app(\App\Modules\Gamification\Hooks\DiscussionPointHooks::class)->discussionTopicChanged($topicId);
 
         return redirect()
             ->route('discussion.topic', $topicId)

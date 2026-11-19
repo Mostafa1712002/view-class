@@ -152,6 +152,7 @@ class DiscussionController extends Controller
             'user_id'   => auth()->id(),
             'body'      => $data['body'],
         ]);
+        app(\App\Modules\Gamification\Hooks\DiscussionPointHooks::class)->discussionTopicChanged($topic->id);
 
         return redirect()
             ->route('discussion.topic', $topicId)
@@ -172,6 +173,7 @@ class DiscussionController extends Controller
 
         $topicId = $comment->topic_id;
         $this->repo->deleteComment($commentId);
+        app(\App\Modules\Gamification\Hooks\DiscussionPointHooks::class)->discussionTopicChanged($topicId);
 
         return redirect()
             ->route('discussion.topic', $topicId)

@@ -141,6 +141,8 @@ final class RecalcAttendanceAction
             $summary
         );
 
+        app(\App\Modules\Gamification\Hooks\VirtualClassPointHooks::class)->virtualClassRecalculated($vc);
+
         return $summary;
     }
 
