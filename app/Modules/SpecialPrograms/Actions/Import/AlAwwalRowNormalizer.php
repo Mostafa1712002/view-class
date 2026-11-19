@@ -76,7 +76,7 @@ final class AlAwwalRowNormalizer
         return [
             'source_id' => $id,
             'is_passage' => $isPassage,
-            'passage_text' => $isPassage ? trim((string) ($row['passage_text'] ?? '')) : null,
+            'passage_text' => $isPassage ? $this->breaks((string) ($row['passage_text'] ?? '')) : null,
             'difficulty' => self::DIFFICULTY[$diffKey],
             'difficulty_key' => $diffKey,
             'term' => $term,
@@ -120,7 +120,7 @@ final class AlAwwalRowNormalizer
         $texts = [];
         $correct = [];
         foreach (array_values($group) as $k => $opt) {
-            $texts[] = trim((string) ($opt['text'] ?? ''));
+            $texts[] = $this->breaks((string) ($opt['text'] ?? ''));
             if (! empty($opt['is_correct'])) {
                 $correct[] = $k;
             }
@@ -139,7 +139,13 @@ final class AlAwwalRowNormalizer
             $s = substr($s, 2, -2);
         }
 
-        return trim(str_replace('\n', "\n", $s));
+        return $this->breaks(str_replace('\n', "\n", $s));
+    }
+
+    /** Source rows carry literal `<br />` tags; screens escape text, so they become real line breaks here. */
+    private function breaks(string $s): string
+    {
+        return trim(preg_replace('#[ \t]*<br\s*/?>[ \t]*#i', "\n", $s));
     }
 
     /** Hamza forms folded, tashkeel dropped, whitespace collapsed. */

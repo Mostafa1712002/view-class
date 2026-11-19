@@ -38,6 +38,16 @@ class AlAwwalRowNormalizerTest extends TestCase
         $this->assertFalse($r['items'][0]['generic_stem']);
     }
 
+    public function test_br_tags_become_line_breaks(): void
+    {
+        $r = (new AlAwwalRowNormalizer)->normalize($this->independent([
+            'question_text' => json_encode(['حصل على 30<br /> في الاختبار<BR>الخامس'], JSON_UNESCAPED_UNICODE),
+            'options' => json_encode($this->opts(['أ<br/>ب', 'ج', 'د', 'هـ'], 0), JSON_UNESCAPED_UNICODE),
+        ]));
+        $this->assertSame("حصل على 30\nفي الاختبار\nالخامس", $r['items'][0]['stem']);
+        $this->assertSame("أ\nب", $r['items'][0]['options'][0]);
+    }
+
     public function test_image_row_generic_stems_and_third_term(): void
     {
         $n = new AlAwwalRowNormalizer;
