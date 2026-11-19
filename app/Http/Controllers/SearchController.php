@@ -40,7 +40,8 @@ class SearchController extends Controller
             $results['subjects'] = $this->searchSubjects($query, $schoolId);
         }
 
-        if ($type === 'all' || $type === 'exams') {
+        // Students/parents never search the school's exams: some are aimed at chosen students only.
+        if (($type === 'all' || $type === 'exams') && ! $user->isStudent() && ! $user->isParent()) {
             $results['exams'] = $this->searchExams($query, $schoolId);
         }
 

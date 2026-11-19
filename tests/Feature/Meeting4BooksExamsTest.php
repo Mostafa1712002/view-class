@@ -109,6 +109,17 @@ class Meeting4BooksExamsTest extends TestCase
         $this->actingAs($b)->get(route('student.exams.show', $classWide))->assertOk();
     }
 
+    public function test_students_cannot_find_exams_through_global_search(): void
+    {
+        $school = School::factory()->create();
+        $class = ClassRoom::factory()->create();
+        $a = $this->student($school, $class);
+        $exam = $this->exam($class, [$a->id]);
+
+        $this->actingAs($this->student($school, $class))->getJson(route('search.index', ['q' => $exam->title, 'type' => 'exams']))
+            ->assertOk()->assertJsonMissingPath('results.exams');
+    }
+
     public function test_targeted_exam_stays_hidden_when_its_only_target_is_soft_deleted(): void
     {
         $school = School::factory()->create();
