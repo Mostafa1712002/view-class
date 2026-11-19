@@ -34,7 +34,8 @@ final class EvaluationPointHooks
             if ($evaluation->evaluator_id && $evaluation->form?->usage_domain === UsageDomain::JobPerformance) {
                 $close = $evaluation->form->close_date;
                 // ponytail: a form without close_date has no deadline to meet, so it earns nothing.
-                $onTime = $submitted && $close && $evaluation->submitted_at && $evaluation->submitted_at->lte($close);
+                // close_date is picked as a date (00:00), so the whole closing day is on time.
+                $onTime = $submitted && $close && $evaluation->submitted_at && $evaluation->submitted_at->lte($close->copy()->endOfDay());
                 $this->send(self::JOB, (int) $evaluation->evaluator_id, 'evaluation', $evaluation->id, $onTime ? 1.0 : 0.0);
             }
 

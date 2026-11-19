@@ -76,13 +76,17 @@ class PointsHooksEvaluationTest extends TestCase
         $hooks->evaluationChanged($e->fresh());
         $this->assertSame(0, $this->balance($vice));
 
+        $closingDay = $this->evaluation($vice, 'job_performance', now()->startOfDay());   // date-only close_date, submitted that day
+        $hooks->evaluationChanged($closingDay);
+        $this->assertSame(5, $this->balance($vice));
+
         $late = $this->evaluation($vice, 'job_performance', now()->subDay());
         $hooks->evaluationChanged($late);
-        $this->assertSame(0, $this->balance($vice));
+        $this->assertSame(5, $this->balance($vice)); // late earns nothing
 
         $other = $this->evaluation($vice, 'teacher', now()->addDay());   // not a job-performance form
         $hooks->evaluationChanged($other);
-        $this->assertSame(0, $this->balance($vice));
+        $this->assertSame(5, $this->balance($vice));
     }
 
     public function test_class_visits_cap_term_and_delete(): void
