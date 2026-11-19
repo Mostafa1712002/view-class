@@ -125,18 +125,18 @@ examReport(int $examId, ReportFilters $f): array             // avg/max/min, top
 ## Phase 2 — Import («الأول» bank)
 
 ### T2.1 Pure normalisers (no DB)
-- [ ] `M/Actions/Import/AlAwwalRowNormalizer.php`: D§4.2 step 3. It decodes in a loop, strips `["`/`"]`, splits passages into sub-items with a per-index skill, derives the correct index (throws unless exactly 1), maps difficulty to 1/2/3, maps `third` → `both`, and recognises generic stems («اختر», «اختر الإجابة الصحيحة», «اختر الاجابة الصحيحة»).
-- [ ] `M/Actions/Import/AlAwwalLevelMap.php`: (school_type_id, Name_Class) → grade 1..12 by ordinal word (D§4.2 step 4)
-- [ ] `M/Actions/Import/DedupeKey.php`: D§4.4. Normalises tashkeel, tatweel and whitespace, and includes the image-bytes md5.
-- [ ] `tests/Unit/SpecialPrograms/AlAwwalRowNormalizerTest.php`, `AlAwwalLevelMapTest.php`, `DedupeKeyTest.php`. Use fixtures copied from SM §8.1 samples (30929, 30953, 33155, 21988, 17968, 17959 double-encoded).
+- [x] `M/Actions/Import/AlAwwalRowNormalizer.php`: D§4.2 step 3. It decodes in a loop, strips `["`/`"]`, splits passages into sub-items with a per-index skill, derives the correct index (throws unless exactly 1), maps difficulty to 1/2/3, maps `third` → `both`, and recognises generic stems («اختر», «اختر الإجابة الصحيحة», «اختر الاجابة الصحيحة»).
+- [x] `M/Actions/Import/AlAwwalLevelMap.php`: (school_type_id, Name_Class) → grade 1..12 by ordinal word (D§4.2 step 4)
+- [x] `M/Actions/Import/DedupeKey.php`: D§4.4. Normalises tashkeel, tatweel and whitespace, and includes the image-bytes md5.
+- [x] `tests/Unit/SpecialPrograms/AlAwwalRowNormalizerTest.php`, `AlAwwalLevelMapTest.php`, `DedupeKeyTest.php`. Use fixtures copied from SM §8.1 samples (30929, 30953, 33155, 21988, 17968, 17959 double-encoded).
 
 **Outcome:** a fully unit-tested decode layer. **Dependencies:** none (can start day 1).
 
 ### T2.2 Import action + command + runbook
-- [ ] `M/Actions/Import/ImportAlAwwalBank.php`: D§4.2 steps 1–2 and 5–8, D§4.3 and D§4.4 (survivor = lowest id, level union, term widen, min week, `merged_source_ids`). Write through `MapAnswerData` + `CreateQuestion::syncAnswerRows`, with one `activity_logs` row per run. Support dry-run via an in-memory plan.
-- [ ] `app/Console/Commands/SpecialProgramsImportAlAwwal.php`: signature D§4.1. Builds a runtime `alawwal` connection via `config()->set`, prints a summary table, and writes the JSON report.
-- [ ] `claudedocs/special-programs-import-runbook.md`: slim extract (D§4.5 steps 1–4, exact `mysqldump` and `rsync --files-from` commands), dry-run, expected totals, verification SQL, cleanup (drop the temp DB, delete the files)
-- [ ] Local run: `--dry-run` then real, from `alawal_local` (root/123) + `~/www/alawal` into local `viewclass`. Record the actual totals in the runbook. Before dedupe: qiyas 3,630, nafis 1,714, tahsili 2,704; images 4,993. Dedupe counts are approximate (≈327/149 qiyas, ≈53/26 nafis, D§4.4). A re-run must be all "unchanged".
+- [x] `M/Actions/Import/ImportAlAwwalBank.php`: D§4.2 steps 1–2 and 5–8, D§4.3 and D§4.4 (survivor = lowest id, level union, term widen, min week, `merged_source_ids`). Write through `MapAnswerData` + `CreateQuestion::syncAnswerRows`, with one `activity_logs` row per run. Support dry-run via an in-memory plan.
+- [x] `app/Console/Commands/SpecialProgramsImportAlAwwal.php`: signature D§4.1. Builds a runtime `alawwal` connection via `config()->set`, prints a summary table, and writes the JSON report.
+- [x] `claudedocs/special-programs-import-runbook.md`: slim extract (D§4.5 steps 1–4, exact `mysqldump` and `rsync --files-from` commands), dry-run, expected totals, verification SQL, cleanup (drop the temp DB, delete the files)
+- [x] Local run: `--dry-run` then real, from `alawal_local` (root/123) + `~/www/alawal` into local `viewclass`. Record the actual totals in the runbook. Before dedupe: qiyas 3,630, nafis 1,714, tahsili 2,704; images 4,993. Dedupe counts are approximate (≈327/149 qiyas, ≈53/26 nafis, D§4.4). A re-run must be all "unchanged".
 
 **Outcome:** a re-runnable import, verified locally. **Dependencies:** T1.1, T1.2, T2.1.
 
@@ -145,53 +145,53 @@ examReport(int $examId, ReportFilters $f): array             // avg/max/min, top
 ## Phase 3 — Staff setup screens (parallel)
 
 ### T3.1 Hub, audience, enrolment
-- [ ] `M/Support/ProgramAudience.php`: eligible classes plus readiness alerts (D§6), modelled on `PromotionPlanner::readiness`
-- [ ] `M/Repositories/EloquentEnrollmentRepository.php`
-- [ ] `M/Actions/Enrollment/EnrollStudents.php`, `RemoveEnrollment.php`
-- [ ] `M/Http/Requests/EnrollRequest.php`
-- [ ] `M/Controllers/Staff/HubController.php`: hub (3 cards + empty-bank state) and program overview page
-- [ ] `M/Controllers/Staff/EnrollmentController.php`: list enrolled, «إضافة طالب لبرنامج» (class filter, search, «إضافة كل طلاب الفصل», «عرض كل الفصول»), remove
-- [ ] `M/Routes/staff-setup.php`: `index`, `program`, `enrollments.*`. Middleware: view routes `permission:special_programs.view`, write routes `.manage`.
-- [ ] `V/partials/program-tabs.blade.php`: tabs «الطلاب المسجلون | مجموعات الأداء | المعلمون | الاختبارات | بنك الأسئلة | التقارير | الإعدادات», each shown only if `Route::has()` (other tasks only `@include` this file)
-- [ ] `V/staff/hub.blade.php`, `V/staff/program.blade.php`, `V/staff/enrollments/index.blade.php`, `V/staff/enrollments/create.blade.php`
-- [ ] `lang/{ar,en}/special_programs/staff.php`
-- [ ] `tests/Feature/SpecialPrograms/EnrollmentTest.php`: enrol, bulk, re-enrol restore, one per (school, program), unnumbered-class alert, school isolation
+- [x] `M/Support/ProgramAudience.php`: eligible classes plus readiness alerts (D§6), modelled on `PromotionPlanner::readiness`
+- [x] `M/Repositories/EloquentEnrollmentRepository.php`
+- [x] `M/Actions/Enrollment/EnrollStudents.php`, `RemoveEnrollment.php`
+- [x] `M/Http/Requests/EnrollRequest.php`
+- [x] `M/Controllers/Staff/HubController.php`: hub (3 cards + empty-bank state) and program overview page
+- [x] `M/Controllers/Staff/EnrollmentController.php`: list enrolled, «إضافة طالب لبرنامج» (class filter, search, «إضافة كل طلاب الفصل», «عرض كل الفصول»), remove
+- [x] `M/Routes/staff-setup.php`: `index`, `program`, `enrollments.*`. Middleware: view routes `permission:special_programs.view`, write routes `.manage`.
+- [x] `V/partials/program-tabs.blade.php`: tabs «الطلاب المسجلون | مجموعات الأداء | المعلمون | الاختبارات | بنك الأسئلة | التقارير | الإعدادات», each shown only if `Route::has()` (other tasks only `@include` this file)
+- [x] `V/staff/hub.blade.php`, `V/staff/program.blade.php`, `V/staff/enrollments/index.blade.php`, `V/staff/enrollments/create.blade.php`
+- [x] `lang/{ar,en}/special_programs/staff.php`
+- [x] `tests/Feature/SpecialPrograms/EnrollmentTest.php`: enrol, bulk, re-enrol restore, one per (school, program), unnumbered-class alert, school isolation
 
 **Outcome:** US-ADM-1, US-ADM-2. **Dependencies:** T1.x.
 
 ### T3.2 Performance groups + program teachers
-- [ ] `M/Repositories/EloquentGroupRepository.php` (includes the `sp_teachers` queries)
-- [ ] `M/Actions/Enrollment/SaveGroup.php`, `AssignToGroup.php`, `AssignTeacher.php`
-- [ ] `M/Http/Requests/GroupRequest.php`
-- [ ] `M/Controllers/Staff/GroupController.php`: CRUD, add/move/remove members (enrolled students only, filter by current level via `SettingsRepository::bandsFor` plus the latest attempt %)
-- [ ] `M/Controllers/Staff/TeacherController.php`: «معلمو البرنامج» list/assign/remove (teacher picker = school teachers; subject = all or one `sp_subjects` row)
-- [ ] `M/Routes/staff-groups.php` (`groups.*`, `teachers.*`; `permission:special_programs.manage`)
-- [ ] `V/staff/groups/index.blade.php`, `form.blade.php`, `show.blade.php`, and `V/staff/teachers/index.blade.php`
-- [ ] `lang/{ar,en}/special_programs/groups.php`
-- [ ] `tests/Feature/SpecialPrograms/GroupsTest.php`: members must be enrolled, one group per student per program, teacher assignment per subject
+- [x] `M/Repositories/EloquentGroupRepository.php` (includes the `sp_teachers` queries)
+- [x] `M/Actions/Enrollment/SaveGroup.php`, `AssignToGroup.php`, `AssignTeacher.php`
+- [x] `M/Http/Requests/GroupRequest.php`
+- [x] `M/Controllers/Staff/GroupController.php`: CRUD, add/move/remove members (enrolled students only, filter by current level via `SettingsRepository::bandsFor` plus the latest attempt %)
+- [x] `M/Controllers/Staff/TeacherController.php`: «معلمو البرنامج» list/assign/remove (teacher picker = school teachers; subject = all or one `sp_subjects` row)
+- [x] `M/Routes/staff-groups.php` (`groups.*`, `teachers.*`; `permission:special_programs.manage`)
+- [x] `V/staff/groups/index.blade.php`, `form.blade.php`, `show.blade.php`, and `V/staff/teachers/index.blade.php`
+- [x] `lang/{ar,en}/special_programs/groups.php`
+- [x] `tests/Feature/SpecialPrograms/GroupsTest.php`: members must be enrolled, one group per student per program, teacher assignment per subject
 
 **Outcome:** US-ADM-3, US-ADM-4. **Dependencies:** T1.x. Uses the `EnrollmentRepository` contract (T3.1) and can run in parallel with it.
 
 ### T3.3 Program question bank screens
-- [ ] `M/Repositories/Contracts/BankRepository.php`, `M/Repositories/EloquentBankRepository.php`: filtered list (tashkeel-insensitive search), passages list, save, deactivate when used by `sp_attempt_items`, else delete
-- [ ] `M/Actions/Bank/SaveProgramQuestion.php`, `SaveProgramPassage.php`, `DeleteProgramQuestion.php`. Write through `CreateQuestion` / `UpdateQuestion` / `MapAnswerData`, plus `sp_questions` and levels. Renumber tahsili «أضف السؤال بعد رقم» inside one transaction.
-- [ ] `M/Http/Requests/QuestionRequest.php`, `PassageRequest.php`
-- [ ] `M/Controllers/Staff/BankController.php`: SA or `special_programs.questions`; subject limited by `GroupRepository::teacherSubjectIds` when the user is not SA
-- [ ] `M/Routes/staff-bank.php` (`bank.*`, `permission:special_programs.questions`)
-- [ ] `V/staff/bank/index.blade.php`, `passages.blade.php`, `question-form.blade.php`, `passage-form.blade.php`, `show.blade.php`
-- [ ] `lang/{ar,en}/special_programs/bank.php`
-- [ ] `tests/Feature/SpecialPrograms/BankAccessTest.php`: QE limited to the verbal subject cannot open or save quant; non-holder gets 403. Access only — the saves need MySQL; verify them manually.
+- [x] `M/Repositories/Contracts/BankRepository.php`, `M/Repositories/EloquentBankRepository.php`: filtered list (tashkeel-insensitive search), passages list, save, deactivate when used by `sp_attempt_items`, else delete
+- [x] `M/Actions/Bank/SaveProgramQuestion.php`, `SaveProgramPassage.php`, `DeleteProgramQuestion.php`. Write through `CreateQuestion` / `UpdateQuestion` / `MapAnswerData`, plus `sp_questions` and levels. Renumber tahsili «أضف السؤال بعد رقم» inside one transaction.
+- [x] `M/Http/Requests/QuestionRequest.php`, `PassageRequest.php`
+- [x] `M/Controllers/Staff/BankController.php`: SA or `special_programs.questions`; subject limited by `GroupRepository::teacherSubjectIds` when the user is not SA
+- [x] `M/Routes/staff-bank.php` (`bank.*`, `permission:special_programs.questions`)
+- [x] `V/staff/bank/index.blade.php`, `passages.blade.php`, `question-form.blade.php`, `passage-form.blade.php`, `show.blade.php`
+- [x] `lang/{ar,en}/special_programs/bank.php`
+- [x] `tests/Feature/SpecialPrograms/BankAccessTest.php`: QE limited to the verbal subject cannot open or save quant; non-holder gets 403. Access only — the saves need MySQL; verify them manually.
 
 **Outcome:** US-QE-1, US-QE-2. **Dependencies:** T1.x, T2.2 (banks exist locally for the manual checks).
 
 ### T3.4 Settings screens
-- [ ] `M/Actions/Settings/SaveLevelBands.php`, `SaveProgramSettings.php` (grade levels, weeks count, allow-school-edit)
-- [ ] `M/Http/Requests/LevelsRequest.php`
-- [ ] `M/Controllers/Staff/SettingsController.php`: per-program tabs; global = SA; school = `special_programs.settings` and `canSchoolEdit`, else read-only
-- [ ] `M/Routes/staff-settings.php`. Global pages and the target-grades page carry **route-level `role:super-admin`**.
-- [ ] `V/staff/settings/levels.blade.php`, `V/staff/settings/program.blade.php`
-- [ ] `lang/{ar,en}/special_programs/settings.php`
-- [ ] `tests/Feature/SpecialPrograms/SettingsTest.php`: overlap rejected, school edit blocked unless allowed, viewing writes no row
+- [x] `M/Actions/Settings/SaveLevelBands.php`, `SaveProgramSettings.php` (grade levels, weeks count, allow-school-edit)
+- [x] `M/Http/Requests/LevelsRequest.php`
+- [x] `M/Controllers/Staff/SettingsController.php`: per-program tabs; global = SA; school = `special_programs.settings` and `canSchoolEdit`, else read-only
+- [x] `M/Routes/staff-settings.php`. Global pages and the target-grades page carry **route-level `role:super-admin`**.
+- [x] `V/staff/settings/levels.blade.php`, `V/staff/settings/program.blade.php`
+- [x] `lang/{ar,en}/special_programs/settings.php`
+- [x] `tests/Feature/SpecialPrograms/SettingsTest.php`: overlap rejected, school edit blocked unless allowed, viewing writes no row
 
 **Outcome:** US-ADM-6. **Dependencies:** T1.x.
 
@@ -200,24 +200,24 @@ examReport(int $examId, ReportFilters $f): array             // avg/max/min, top
 ## Phase 4 — Exam building
 
 ### T4.1 Question pool + pickers
-- [ ] `M/Repositories/EloquentQuestionPoolRepository.php`. Level filter via `whereExists` on `sp_question_levels`. `snapshot()` reads `bank_questions` + `question_answers` + `attachment_path` (images: `answer_image`).
-- [ ] `M/Actions/Picking/Apportion.php`, `QiyasPicker.php`, `NafisPicker.php`, `TahsiliPicker.php`: D§5 exactly (whole passages, `term IN (x,'both')`, fallbacks, clamped apportion, tahsili buckets, range and shortfall)
-- [ ] `M/Actions/Picking/PickerFor.php`: program → picker resolver
-- [ ] `tests/Unit/SpecialPrograms/ApportionTest.php`
-- [ ] `tests/Feature/SpecialPrograms/PickersTest.php` (sqlite, `sp_questions` + levels rows only): qiyas term/both/weeks fallback/whole passage/level filter on and off; level drop when the target grade holds fewer than N (a grade-10 target with 2 questions still yields N); nafis reading picks N passages and every sub-item; tahsili 30/40/30 with a short range gives fewer items; no duplicate ids
+- [x] `M/Repositories/EloquentQuestionPoolRepository.php`. Level filter via `whereExists` on `sp_question_levels`. `snapshot()` reads `bank_questions` + `question_answers` + `attachment_path` (images: `answer_image`).
+- [x] `M/Actions/Picking/Apportion.php`, `QiyasPicker.php`, `NafisPicker.php`, `TahsiliPicker.php`: D§5 exactly (whole passages, `term IN (x,'both')`, fallbacks, clamped apportion, tahsili buckets, range and shortfall)
+- [x] `M/Actions/Picking/PickerFor.php`: program → picker resolver
+- [x] `tests/Unit/SpecialPrograms/ApportionTest.php`
+- [x] `tests/Feature/SpecialPrograms/PickersTest.php` (sqlite, `sp_questions` + levels rows only): qiyas term/both/weeks fallback/whole passage/level filter on and off; level drop when the target grade holds fewer than N (a grade-10 target with 2 questions still yields N); nafis reading picks N passages and every sub-item; tahsili 30/40/30 with a short range gives fewer items; no duplicate ids
 
 **Outcome:** deterministic, tested selection. **Dependencies:** T1.x.
 
 ### T4.2 Exam builder (admin + teacher)
-- [ ] `M/Repositories/EloquentExamRepository.php`: staff scope plus audience (D§6)
-- [ ] `M/Actions/Exams/CreateProgramExam.php`: validates all of D§8 before inserting, saves `expires_at`, enforces teacher limits (`GroupRepository::teacherSubjectIds`, `groupIdsLedBy`, `teachingClassIds`)
-- [ ] `M/Actions/Exams/DeleteProgramExam.php`: soft delete, creator or school-admin
-- [ ] `M/Http/Requests/StoreExamRequest.php`
-- [ ] `M/Controllers/Staff/ExamController.php`: index (columns D§8), create/store, show (config + monitor via `AttemptRepository::monitor`), destroy, `bank-stats` JSON (`QuestionPoolRepository::stats`), results Excel (`ExportsReports::exportExcel`)
-- [ ] `M/Routes/staff-exams.php` (`exams.*`, `permission:special_programs.exams`)
-- [ ] `V/staff/exams/index.blade.php`, `create.blade.php` (repeatable subject rows, live «المجموع/المتبقي», level counts, range helper, tahsili weekly-count card), `show.blade.php`
-- [ ] `lang/{ar,en}/special_programs/exams.php`
-- [ ] `tests/Feature/SpecialPrograms/ExamBuilderTest.php`: share > 100 rejected with no rows written; tahsili ≠ 100 rejected; teacher cannot use a foreign subject, class or group, or more than 100 questions; `expires_at` saved; delete keeps attempts; audience = enrolled ∩ (class ∪ group)
+- [x] `M/Repositories/EloquentExamRepository.php`: staff scope plus audience (D§6)
+- [x] `M/Actions/Exams/CreateProgramExam.php`: validates all of D§8 before inserting, saves `expires_at`, enforces teacher limits (`GroupRepository::teacherSubjectIds`, `groupIdsLedBy`, `teachingClassIds`)
+- [x] `M/Actions/Exams/DeleteProgramExam.php`: soft delete, creator or school-admin
+- [x] `M/Http/Requests/StoreExamRequest.php`
+- [x] `M/Controllers/Staff/ExamController.php`: index (columns D§8), create/store, show (config + monitor via `AttemptRepository::monitor`), destroy, `bank-stats` JSON (`QuestionPoolRepository::stats`), results Excel (`ExportsReports::exportExcel`)
+- [x] `M/Routes/staff-exams.php` (`exams.*`, `permission:special_programs.exams`)
+- [x] `V/staff/exams/index.blade.php`, `create.blade.php` (repeatable subject rows, live «المجموع/المتبقي», level counts, range helper, tahsili weekly-count card), `show.blade.php`
+- [x] `lang/{ar,en}/special_programs/exams.php`
+- [x] `tests/Feature/SpecialPrograms/ExamBuilderTest.php`: share > 100 rejected with no rows written; tahsili ≠ 100 rejected; teacher cannot use a foreign subject, class or group, or more than 100 questions; `expires_at` saved; delete keeps attempts; audience = enrolled ∩ (class ∪ group)
 
 **Outcome:** US-ADM-5, US-TCH-1 (create part). **Dependencies:** T1.x, contracts of T3.1/T3.2/T4.1/T5.1 (it can run in parallel with them).
 
@@ -226,24 +226,24 @@ examReport(int $examId, ReportFilters $f): array             // avg/max/min, top
 ## Phase 5 — Student attempt
 
 ### T5.1 Attempt engine
-- [ ] `M/Repositories/EloquentAttemptRepository.php`
-- [ ] `M/Actions/Attempts/StartSubject.php`: server-side enrolment + audience check (`ExamRepository::isInAudience`, bind a fake in tests), sequential lock and expiry check. `firstOrCreate` sets `deadline_at`. Generation runs once inside a transaction: picker, then `QuestionPoolRepository::snapshot`, then insert items.
-- [ ] `M/Actions/Attempts/SaveAnswer.php`: deadline + 5 s grace; returns no correctness
-- [ ] `M/Actions/Attempts/LogExit.php`
-- [ ] `M/Actions/Attempts/FinishAttempt.php`: a conditional UPDATE, then the event after commit only when 1 row changed; computes `examCompleted`
-- [ ] `M/Actions/Attempts/FinalizeOverdue.php`
-- [ ] `app/Console/Commands/SpecialProgramsFinalizeOverdue.php` (`special-programs:finalize-overdue`)
-- [ ] `tests/Feature/SpecialPrograms/AttemptLifecycleTest.php`. Bind a fake `QuestionPoolRepository` (in-memory snapshot) so no `bank_questions` is needed. Cover: double start gives one item set; the deadline is stable across calls; a late answer is rejected; the answer response has no `is_correct`; finish scores with unanswered counted wrong; overdue becomes `timed_out` through both the read path and the command; anti-cheat auto-end; lock and expiry; `Event::fake` sees exactly one `ProgramAttemptCompleted` with the D§10 payload, including after a second finish call.
+- [x] `M/Repositories/EloquentAttemptRepository.php`
+- [x] `M/Actions/Attempts/StartSubject.php`: server-side enrolment + audience check (`ExamRepository::isInAudience`, bind a fake in tests), sequential lock and expiry check. `firstOrCreate` sets `deadline_at`. Generation runs once inside a transaction: picker, then `QuestionPoolRepository::snapshot`, then insert items.
+- [x] `M/Actions/Attempts/SaveAnswer.php`: deadline + 5 s grace; returns no correctness
+- [x] `M/Actions/Attempts/LogExit.php`
+- [x] `M/Actions/Attempts/FinishAttempt.php`: a conditional UPDATE, then the event after commit only when 1 row changed; computes `examCompleted`
+- [x] `M/Actions/Attempts/FinalizeOverdue.php`
+- [x] `app/Console/Commands/SpecialProgramsFinalizeOverdue.php` (`special-programs:finalize-overdue`)
+- [x] `tests/Feature/SpecialPrograms/AttemptLifecycleTest.php`. Bind a fake `QuestionPoolRepository` (in-memory snapshot) so no `bank_questions` is needed. Cover: double start gives one item set; the deadline is stable across calls; a late answer is rejected; the answer response has no `is_correct`; finish scores with unanswered counted wrong; overdue becomes `timed_out` through both the read path and the command; anti-cheat auto-end; lock and expiry; `Event::fake` sees exactly one `ProgramAttemptCompleted` with the D§10 payload, including after a second finish call.
 
 **Outcome:** US-STU-2 server side, US-INT-1. **Dependencies:** T1.x, T4.1 (contract).
 
 ### T5.2 Student screens
-- [ ] `M/Controllers/Student/ProgramController.php`: «البرامج التعليمية» list (`ExamRepository::forStudent`), exam show with subject cards and lock state
-- [ ] `M/Controllers/Student/AttemptController.php`: start, take, answer, heartbeat, exit, finish, subject result, final result. Result pages only when closed; the review includes the passage text from `passages`.
-- [ ] `M/Routes/student.php` (`auth`, `role:student`)
-- [ ] `V/student/index.blade.php`, `exam.blade.php`, `take.blade.php` (one question/passage group per screen, dots, timer synced to the server remaining time, 5/1-minute warnings, autosave on change, `beforeunload`, blur/visibility → exit beacon, finish confirm «تأكيد إنهاء الاختبار», zoomable image), `subject-result.blade.php`, `final-result.blade.php`
-- [ ] `public/js/special-programs/player.js` (vanilla JS, no new dependency)
-- [ ] `lang/{ar,en}/special_programs/student.php`
+- [x] `M/Controllers/Student/ProgramController.php`: «البرامج التعليمية» list (`ExamRepository::forStudent`), exam show with subject cards and lock state
+- [x] `M/Controllers/Student/AttemptController.php`: start, take, answer, heartbeat, exit, finish, subject result, final result. Result pages only when closed; the review includes the passage text from `passages`.
+- [x] `M/Routes/student.php` (`auth`, `role:student`)
+- [x] `V/student/index.blade.php`, `exam.blade.php`, `take.blade.php` (one question/passage group per screen, dots, timer synced to the server remaining time, 5/1-minute warnings, autosave on change, `beforeunload`, blur/visibility → exit beacon, finish confirm «تأكيد إنهاء الاختبار», zoomable image), `subject-result.blade.php`, `final-result.blade.php`
+- [x] `public/js/special-programs/player.js` (vanilla JS, no new dependency)
+- [x] `lang/{ar,en}/special_programs/student.php`
 
 **Outcome:** US-STU-1, US-STU-2 UI, US-STU-3 (results). **Dependencies:** T5.1, T4.2 (`forStudent`).
 
@@ -252,23 +252,23 @@ examReport(int $examId, ReportFilters $f): array             // avg/max/min, top
 ## Phase 6 — Reports
 
 ### T6.1 Report repository
-- [ ] `M/Repositories/EloquentReportRepository.php`: every method from the contract, using SQL aggregates on `sp_attempts` / `sp_attempt_items`. Only closed attempts of non-deleted exams. School/teacher scope applied inside. Levels from `SettingsRepository::bandsFor`. Distribution bands per program (D§9).
-- [ ] `tests/Feature/SpecialPrograms/ReportsTest.php`: by-skill credits only the item's own skill (2 skills, 1 attempt); tahsili difficulty rows non-zero; level uses the program bands; date filter; teacher sees only his exams; school isolation; the student report trend is ordered by `ended_at`
+- [x] `M/Repositories/EloquentReportRepository.php`: every method from the contract, using SQL aggregates on `sp_attempts` / `sp_attempt_items`. Only closed attempts of non-deleted exams. School/teacher scope applied inside. Levels from `SettingsRepository::bandsFor`. Distribution bands per program (D§9).
+- [x] `tests/Feature/SpecialPrograms/ReportsTest.php`: by-skill credits only the item's own skill (2 skills, 1 attempt); tahsili difficulty rows non-zero; level uses the program bands; date filter; teacher sees only his exams; school isolation; the student report trend is ordered by `ended_at`
 
 **Outcome:** correct numbers for every screen. **Dependencies:** T1.x.
 
 ### T6.2 Staff report screens + exports
-- [ ] `M/Controllers/Staff/ReportController.php`: filter page, sections, `?section=` Excel export via `ExportsReports::exportExcel`, print/PDF via `exportPdf`, and the staff route for «تقرير أداء الطالب» (student of the active school; teacher only for his students)
-- [ ] `M/Routes/staff-reports.php` (`reports.*`, `permission:special_programs.reports`)
-- [ ] `V/reports/index.blade.php` (filters + Chart.js level bar + the «مستويات الأداء المعتمدة» strip), `V/reports/sections/*.blade.php` (7 section tables), `V/reports/pdf.blade.php`
-- [ ] `lang/{ar,en}/special_programs/reports.php`
+- [x] `M/Controllers/Staff/ReportController.php`: filter page, sections, `?section=` Excel export via `ExportsReports::exportExcel`, print/PDF via `exportPdf`, and the staff route for «تقرير أداء الطالب» (student of the active school; teacher only for his students)
+- [x] `M/Routes/staff-reports.php` (`reports.*`, `permission:special_programs.reports`)
+- [x] `V/reports/index.blade.php` (filters + Chart.js level bar + the «مستويات الأداء المعتمدة» strip), `V/reports/sections/*.blade.php` (7 section tables), `V/reports/pdf.blade.php`
+- [x] `lang/{ar,en}/special_programs/reports.php`
 
 **Outcome:** US-REP-1, plus the staff side of US-REP-2. **Dependencies:** T6.1, T6.3 (partial).
 
 ### T6.3 Student performance report partial (shared view)
-- [ ] `V/partials/student-report.blade.php`: header + level badge, Chart.js trend, per-subject table, per-skill/difficulty table, history with links passed in as a closure or route names
-- [ ] `V/partials/student-report-pdf.blade.php` (mPDF-safe, xbriyaz font)
-- [ ] `lang/{ar,en}/special_programs/student_report.php` (labels; the shared `special_programs.php` belongs to T1.2)
+- [x] `V/partials/student-report.blade.php`: header + level badge, Chart.js trend, per-subject table, per-skill/difficulty table, history with links passed in as a closure or route names
+- [x] `V/partials/student-report-pdf.blade.php` (mPDF-safe, xbriyaz font)
+- [x] `lang/{ar,en}/special_programs/student_report.php` (labels; the shared `special_programs.php` belongs to T1.2)
 
 **Outcome:** one report view rendered for staff, student and parent. **Dependencies:** T6.1 (data shape `studentReport()`).
 
@@ -277,18 +277,18 @@ examReport(int $examId, ReportFilters $f): array             // avg/max/min, top
 ## Phase 7 — Teacher and parent screens
 
 ### T7.1 Teacher reports
-- [ ] `M/Controllers/Staff/TeacherReportController.php`: «تقاريري» (`teacherExamSummary`), exam report (`examReport`: avg/max/min, top 10, weakest 10, levels, per subject, per-student skills), Excel
-- [ ] `M/Routes/staff-teacher.php` (`teacher-reports.*`, `role:teacher`, `permission:special_programs.reports`)
-- [ ] `V/staff/teacher/index.blade.php`, `V/staff/teacher/exam.blade.php`
-- [ ] `lang/{ar,en}/special_programs/teacher.php`
+- [x] `M/Controllers/Staff/TeacherReportController.php`: «تقاريري» (`teacherExamSummary`), exam report (`examReport`: avg/max/min, top 10, weakest 10, levels, per subject, per-student skills), Excel
+- [x] `M/Routes/staff-teacher.php` (`teacher-reports.*`, `role:teacher`, `permission:special_programs.reports`)
+- [x] `V/staff/teacher/index.blade.php`, `V/staff/teacher/exam.blade.php`
+- [x] `lang/{ar,en}/special_programs/teacher.php`
 
 **Outcome:** US-TCH-1 (results), US-TCH-2. **Dependencies:** T6.1.
 
 ### T7.2 Student «تقرير أدائي» + parent report
-- [ ] `M/Controllers/Student/ReportController.php` and `M/Routes/student-report.php` (`student.programs.report`, PDF)
-- [ ] `M/Controllers/Parent/ProgramController.php` and `M/Routes/parent.php`: child list → program report, with a `children()` guard (403/404 for other children)
-- [ ] `V/parent/index.blade.php`, `V/parent/report.blade.php` (both `@include` the T6.3 partial)
-- [ ] `lang/{ar,en}/special_programs/parent.php`
+- [x] `M/Controllers/Student/ReportController.php` and `M/Routes/student-report.php` (`student.programs.report`, PDF)
+- [x] `M/Controllers/Parent/ProgramController.php` and `M/Routes/parent.php`: child list → program report, with a `children()` guard (403/404 for other children)
+- [x] `V/parent/index.blade.php`, `V/parent/report.blade.php` (both `@include` the T6.3 partial)
+- [x] `lang/{ar,en}/special_programs/parent.php`
 
 **Outcome:** US-STU-3 (report), US-PAR-1. **Dependencies:** T6.1, T6.3.
 
@@ -335,11 +335,11 @@ If a feature task finds a shared-file change it needs, it appends the request he
 | Phase | Tasks | Completed | Status |
 |-------|-------|-----------|--------|
 | 1. Schema, models, wiring | 3 | 3 | Done |
-| 2. Import | 2 | 0 | Not Started |
-| 3. Staff setup screens | 4 | 0 | Not Started |
-| 4. Exam building | 2 | 0 | Not Started |
-| 5. Student attempt | 2 | 0 | Not Started |
-| 6. Reports | 3 | 0 | Not Started |
-| 7. Teacher & parent | 2 | 0 | Not Started |
+| 2. Import | 2 | 2 | Done |
+| 3. Staff setup screens | 4 | 4 | Done |
+| 4. Exam building | 2 | 2 | Done |
+| 5. Student attempt | 2 | 2 | Done |
+| 6. Reports | 3 | 3 | Done |
+| 7. Teacher & parent | 2 | 2 | Done |
 | 9. Verification & rollout | 3 | 0 | Not Started |
-| **Total** | **21** | **3** | **14%** |
+| **Total** | **21** | **18** | **86%** |
