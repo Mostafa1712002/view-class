@@ -34,7 +34,7 @@ final class ResetAccountPassword
             $password = Str::password(10, symbols: false);
             $ids = [];
             foreach ($this->accounts->forUser($account->user_id)->where('managed', true)->where('role', $account->role) as $row) {
-                $this->accounts->update($row, ['password' => $password, 'needs_sync' => true]);
+                $this->accounts->update($row, ['password' => $password, 'password_reset_pending' => true, 'needs_sync' => true]);
                 $ids[] = $row->id;
             }
             ActivityLog::log('hub.account.reset_password', "إعادة تعيين كلمة مرور المستخدم #{$account->user_id}", $account, null, ['accounts' => $ids]);

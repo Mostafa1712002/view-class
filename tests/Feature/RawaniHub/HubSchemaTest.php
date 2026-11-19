@@ -25,7 +25,7 @@ class HubSchemaTest extends TestCase
         $this->assertSame(':memory:', config('database.connections.sqlite.database'));
         $paths = [];
         foreach (['0001_01_01_000000_*', '2025_11_30_*', '2026_04_21_*', '2026_04_26_*',
-            '2026_04_27_*', '2026_05_17_100001_create_school_branches*', '2026_05_17_100002_add_card51*', '2026_06_14_300000_*', '2026_07_11_*', '2026_07_25_000100_*', '2026_11_20_100000_create_hub_tables'] as $pattern) {
+            '2026_04_27_*', '2026_05_17_100001_create_school_branches*', '2026_05_17_100002_add_card51*', '2026_06_14_300000_*', '2026_07_11_*', '2026_07_25_000100_*', '2026_11_20_*'] as $pattern) {
             $paths = array_merge($paths, glob(database_path('migrations/'.$pattern.'.php')));
         }
         sort($paths);
