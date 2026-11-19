@@ -266,6 +266,7 @@ class ExamController extends Controller
     public function destroy(Exam $exam)
     {
         $exam->delete();
+        app(\App\Modules\Gamification\Hooks\ExamPointHooks::class)->examDeleted($exam->id);
 
         return redirect()->route($this->routePrefix() . '.index')
             ->with('success', 'تم حذف الاختبار بنجاح.');
@@ -433,6 +434,7 @@ class ExamController extends Controller
             'session_token' => null,
             'started_at' => $studentExam->started_at ?? now(),
         ])->save();
+        app(\App\Modules\Gamification\Hooks\ExamPointHooks::class)->examAttemptChanged($exam, $studentExam->student_id);
 
         return back()->with('success', 'تم إعادة فتح الاختبار للطالب. يمكنه الآن استكمال الاختبار.');
     }

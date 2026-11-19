@@ -169,6 +169,7 @@ class StudentExamController extends Controller
                 $attempt->calculateScore();
             }
         });
+        app(\App\Modules\Gamification\Hooks\ExamPointHooks::class)->examAttemptChanged($exam, $student->id);
 
         return redirect()->route('student.exams.result', $exam)
             ->with('status', 'تم تسليم الاختبار بنجاح.');
@@ -298,6 +299,7 @@ class StudentExamController extends Controller
         } else {
             $attempt->calculateScore();
         }
+        app(\App\Modules\Gamification\Hooks\ExamPointHooks::class)->examAttemptChanged($exam, $attempt->student_id);
     }
 
     /**
