@@ -17,5 +17,7 @@ final class ComposeMessageDto
         public readonly array $recipientIds,
         public readonly ?int $schoolId,         // null = super-admin / all schools
         public readonly int $senderId,
+        /** @var array<int|string> selected class ids / grade levels / stage levels */
+        public readonly array $refIds = [],
     ) {}
 }

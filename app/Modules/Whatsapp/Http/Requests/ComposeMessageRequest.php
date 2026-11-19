@@ -42,7 +42,8 @@ class ComposeMessageRequest extends FormRequest
             ],
 
             'audience'       => ['required', 'string'],
-            'ref_id'         => ['nullable', 'integer'],
+            'ref_ids'        => ['nullable', 'array'],
+            'ref_ids.*'      => ['string', 'max:50'],
             'recipient_ids'   => ['required', 'array', 'min:1'],
             'recipient_ids.*' => ['integer'],
         ];

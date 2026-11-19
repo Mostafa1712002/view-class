@@ -7,8 +7,6 @@
 @php
     $isRtl = app()->getLocale() === 'ar';
     // Audiences that need a "reference" selection (which class / which grade).
-    $gradeAudiences = ['grade_students', 'grade_parents'];
-    $classAudiences = ['class_students', 'class_parents'];
 @endphp
 
 @push('styles')
@@ -190,11 +188,20 @@
                             </select>
                         </div>
 
+                        {{-- stage ref --}}
+                        <div class="ws-field d-none" id="ws-stage-field">
+                            <label for="ws-stage">المرحلة (يمكن اختيار أكثر من واحدة)</label>
+                            <select id="ws-stage" class="form-select" multiple size="3">
+                                @foreach($stages as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         {{-- grade ref --}}
                         <div class="ws-field d-none" id="ws-grade-field">
-                            <label for="ws-grade">الصف</label>
-                            <select id="ws-grade" class="form-select">
-                                <option value="">— اختر الصف —</option>
+                            <label for="ws-grade">الصف (يمكن اختيار أكثر من واحد)</label>
+                            <select id="ws-grade" class="form-select" multiple size="6">
                                 @foreach($gradeLevels as $g)
                                     <option value="{{ $g }}">الصف {{ $g }}</option>
                                 @endforeach
@@ -203,9 +210,8 @@
 
                         {{-- class ref --}}
                         <div class="ws-field d-none" id="ws-class-field">
-                            <label for="ws-class">الفصل</label>
-                            <select id="ws-class" class="form-select">
-                                <option value="">— اختر الفصل —</option>
+                            <label for="ws-class">الفصل (يمكن اختيار أكثر من واحد)</label>
+                            <select id="ws-class" class="form-select" multiple size="8">
                                 @foreach($classes as $c)
                                     <option value="{{ $c->id }}">{{ $c->name }}{{ $c->section?->name ? ' — '.$c->section->name : '' }}</option>
                                 @endforeach
@@ -280,6 +286,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var specField   = document.getElementById('ws-specific-field');
     var gradeSel    = document.getElementById('ws-grade');
     var classSel    = document.getElementById('ws-class');
+    var stageSel    = document.getElementById('ws-stage');
+    function picked(sel) { return Array.prototype.filter.call(sel.options, function (o) { return o.selected; }).map(function (o) { return o.value; }); }
 
     var resolveBtn  = document.getElementById('ws-resolve-btn');
     var resolveSpin = document.getElementById('ws-resolve-spin');
@@ -291,6 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var cntValid    = document.getElementById('ws-cnt-valid');
     var cntTotal    = document.getElementById('ws-cnt-total');
 
+    var STAGE = ['stage_students', 'stage_parents'];
     var GRADE = ['grade_students', 'grade_parents'];
     var CLASS = ['class_students', 'class_parents'];
 
@@ -325,6 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---- audience ref toggle ----
     function syncAudience() {
         var a = audienceSel.value;
+        toggle('ws-stage-field',    STAGE.indexOf(a) !== -1);
         toggle('ws-grade-field',    GRADE.indexOf(a) !== -1);
         toggle('ws-class-field',    CLASS.indexOf(a) !== -1);
         toggle('ws-specific-field', a === 'specific_users');
@@ -386,12 +396,15 @@ document.addEventListener('DOMContentLoaded', function () {
     resolveBtn.addEventListener('click', function () {
         var a = audienceSel.value;
         var payload = { audience: a };
-        if (GRADE.indexOf(a) !== -1) {
-            if (!gradeSel.value) { alert('اختر الصف أولاً.'); return; }
-            payload.ref_id = gradeSel.value;
+        if (STAGE.indexOf(a) !== -1) {
+            payload.ref_ids = picked(stageSel);
+            if (!payload.ref_ids.length) { alert('اختر المرحلة أولاً.'); return; }
+        } else if (GRADE.indexOf(a) !== -1) {
+            payload.ref_ids = picked(gradeSel);
+            if (!payload.ref_ids.length) { alert('اختر الصف أولاً.'); return; }
         } else if (CLASS.indexOf(a) !== -1) {
-            if (!classSel.value) { alert('اختر الفصل أولاً.'); return; }
-            payload.ref_id = classSel.value;
+            payload.ref_ids = picked(classSel);
+            if (!payload.ref_ids.length) { alert('اختر الفصل أولاً.'); return; }
         } else if (a === 'specific_users') {
             var ids = Object.keys(chosenUsers).map(Number);
             if (!ids.length) { alert('اختر مستخدمًا واحدًا على الأقل.'); return; }
@@ -446,6 +459,17 @@ document.addEventListener('DOMContentLoaded', function () {
             recipEmpty.textContent = 'لا يوجد مستلمون لهذه المجموعة.';
         }
     }
+
+    // carry the multi-select refs so the server re-resolves exactly the same audience
+    form.addEventListener('submit', function () {
+        form.querySelectorAll('input[name="ref_ids[]"]').forEach(function (n) { n.remove(); });
+        var a = audienceSel.value;
+        var sel = STAGE.indexOf(a) !== -1 ? stageSel : GRADE.indexOf(a) !== -1 ? gradeSel : CLASS.indexOf(a) !== -1 ? classSel : null;
+        if (!sel) return;
+        picked(sel).forEach(function (v) {
+            var i = document.createElement('input'); i.type = 'hidden'; i.name = 'ref_ids[]'; i.value = v; form.appendChild(i);
+        });
+    });
 
     function clearRecipients() {
         recipBody.innerHTML = '';

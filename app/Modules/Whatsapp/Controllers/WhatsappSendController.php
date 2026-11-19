@@ -25,10 +25,12 @@ class WhatsappSendController extends Controller
         'all_students'    => 'كل الطلاب',
         'all_teachers'    => 'كل المعلمين',
         'all_parents'     => 'كل أولياء الأمور',
-        'grade_students'  => 'طلاب صف معين',
-        'class_students'  => 'طلاب فصل معين',
-        'grade_parents'   => 'أولياء أمور صف معين',
-        'class_parents'   => 'أولياء أمور فصل معين',
+        'stage_students'  => 'طلاب مرحلة (أو أكثر)',
+        'stage_parents'   => 'أولياء أمور مرحلة (أو أكثر)',
+        'grade_students'  => 'طلاب صف (أو أكثر)',
+        'class_students'  => 'طلاب فصل (أو أكثر)',
+        'grade_parents'   => 'أولياء أمور صف (أو أكثر)',
+        'class_parents'   => 'أولياء أمور فصل (أو أكثر)',
         'school_teachers' => 'معلمو مدرسة معينة',
         'specific_users'  => 'مستخدمون محددون',
     ];
@@ -64,6 +66,7 @@ class WhatsappSendController extends Controller
             'audiences'   => self::AUDIENCES,
             'classes'     => $classes,
             'gradeLevels' => $gradeLevels,
+            'stages'      => $this->recipients->stagesForSchool($schoolId),
             'setting'     => $setting,
             'school'      => $school,
             'isAllSchools' => $schoolId === null,
@@ -79,7 +82,8 @@ class WhatsappSendController extends Controller
 
         $validated = $request->validate([
             'audience'        => ['required', 'string'],
-            'ref_id'          => ['nullable', 'integer'],
+            'ref_ids'         => ['nullable', 'array'],
+            'ref_ids.*'       => ['string', 'max:50'],
             'user_ids'        => ['nullable', 'array'],
             'user_ids.*'      => ['integer'],
         ]);
@@ -89,7 +93,7 @@ class WhatsappSendController extends Controller
         $list = $action->execute(
             $validated['audience'],
             $schoolId,
-            $validated['ref_id'] ?? null,
+            $validated['ref_ids'] ?? [],
             $validated['user_ids'] ?? []
         );
 
@@ -180,6 +184,7 @@ class WhatsappSendController extends Controller
             recipientIds: array_map('intval', $request->input('recipient_ids', [])),
             schoolId: $schoolId,
             senderId: $user->id,
+            refIds: array_map('strval', $request->input('ref_ids', [])),
         );
 
         $broadcast = $action->execute($dto);

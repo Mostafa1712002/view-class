@@ -15,10 +15,10 @@ interface RecipientRepository
      *
      * @param  string    $audience  group key (all_students, class_students, ...)
      * @param  int|null  $schoolId  active school, or null for all schools
-     * @param  int|null  $refId     class id / grade level / etc. (audience-specific)
+     * @param  int|string|array|null  $refId  class ids / grade levels / stage levels (one or many)
      * @return Collection<int, \App\Models\User>
      */
-    public function resolveAudience(string $audience, ?int $schoolId, ?int $refId = null): Collection;
+    public function resolveAudience(string $audience, ?int $schoolId, int|string|array|null $refId = null): Collection;
 
     /**
      * Fetch specific users by id, school-scoped (null-safe).
@@ -41,4 +41,11 @@ interface RecipientRepository
      * @return array<int>
      */
     public function gradeLevelsForSchool(?int $schoolId): array;
+
+    /**
+     * Stages (sections.level => Arabic label) present in the school.
+     *
+     * @return array<string,string>
+     */
+    public function stagesForSchool(?int $schoolId): array;
 }

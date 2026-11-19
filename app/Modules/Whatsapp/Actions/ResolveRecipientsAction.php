@@ -19,7 +19,7 @@ final class ResolveRecipientsAction
      * @param  array<int>  $explicitIds  used when audience = specific_users
      * @return array<int, array{id:int,name:string,role:string,number:?string,number_status:string,number_status_label:string}>
      */
-    public function execute(string $audience, ?int $schoolId, ?int $refId = null, array $explicitIds = []): array
+    public function execute(string $audience, ?int $schoolId, int|string|array|null $refId = null, array $explicitIds = []): array
     {
         $users = $audience === 'specific_users'
             ? $this->repo->findUsers($explicitIds, $schoolId)

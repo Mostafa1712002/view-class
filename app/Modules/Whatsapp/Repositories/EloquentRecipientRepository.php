@@ -10,17 +10,23 @@ use Illuminate\Support\Collection;
 
 class EloquentRecipientRepository implements RecipientRepository
 {
-    public function resolveAudience(string $audience, ?int $schoolId, ?int $refId = null): Collection
+    public function resolveAudience(string $audience, ?int $schoolId, int|string|array|null $refId = null): Collection
     {
+        // refs may be one value or many (multi-select); normalise to a clean list.
+        $refs = array_values(array_unique(array_filter((array) $refId, fn ($v) => $v !== null && $v !== '')));
+
         return match ($audience) {
             'all_students'   => $this->usersByRole('student', $schoolId)->get(),
             'all_teachers'   => $this->usersByRole('teacher', $schoolId)->get(),
             'all_parents'    => $this->usersByRole('parent', $schoolId)->get(),
-            'school_teachers' => $this->usersByRole('teacher', $refId ?: $schoolId)->get(),
-            'grade_students'  => $this->gradeStudents($schoolId, $refId)->get(),
-            'class_students'  => $this->classStudents($schoolId, $refId)->get(),
-            'grade_parents'   => $this->parentsOf($this->gradeStudents($schoolId, $refId)->get()),
-            'class_parents'   => $this->parentsOf($this->classStudents($schoolId, $refId)->get()),
+            'school_teachers' => $this->usersByRole('teacher', ((int) ($refs[0] ?? 0)) ?: $schoolId)->get(),
+            // ref-based audiences with nothing selected resolve to nobody (never "everyone").
+            'stage_students'  => $refs ? $this->stageStudents($schoolId, $refs)->get() : collect(),
+            'grade_students'  => $refs ? $this->gradeStudents($schoolId, array_map('intval', $refs))->get() : collect(),
+            'class_students'  => $refs ? $this->classStudents($schoolId, array_map('intval', $refs))->get() : collect(),
+            'stage_parents'   => $refs ? $this->parentsOf($this->stageStudents($schoolId, $refs)->get()) : collect(),
+            'grade_parents'   => $refs ? $this->parentsOf($this->gradeStudents($schoolId, array_map('intval', $refs))->get()) : collect(),
+            'class_parents'   => $refs ? $this->parentsOf($this->classStudents($schoolId, array_map('intval', $refs))->get()) : collect(),
             default           => collect(),
         };
     }
@@ -67,6 +73,18 @@ class EloquentRecipientRepository implements RecipientRepository
             ->all();
     }
 
+    public function stagesForSchool(?int $schoolId): array
+    {
+        return \App\Models\Section::query()
+            ->when($schoolId, fn (Builder $q) => $q->where('school_id', $schoolId))
+            ->whereNotNull('level')
+            ->distinct()
+            ->pluck('level')
+            ->sortBy(fn ($l) => array_search($l, ['primary', 'intermediate', 'secondary'], true))
+            ->mapWithKeys(fn ($l) => [$l => (new \App\Models\Section(['level' => $l]))->level_label])
+            ->all();
+    }
+
     // ---- internals -------------------------------------------------------
 
     private function usersByRole(string $roleSlug, ?int $schoolId): Builder
@@ -77,30 +95,28 @@ class EloquentRecipientRepository implements RecipientRepository
             ->when($schoolId, fn (Builder $q) => $q->where('school_id', $schoolId));
     }
 
-    private function classStudents(?int $schoolId, ?int $classId): Builder
+    /** @param array<int> $classIds */
+    private function classStudents(?int $schoolId, array $classIds): Builder
     {
-        $q = $this->usersByRole('student', $schoolId);
-
-        if ($classId) {
-            // a student is enrolled either via users.class_room_id or class_student pivot
-            $q->where(function (Builder $sub) use ($classId) {
-                $sub->where('class_room_id', $classId)
-                    ->orWhereHas('enrolledClasses', fn (Builder $c) => $c->where('classes.id', $classId));
-            });
-        }
-
-        return $q;
+        // a student is enrolled either via users.class_room_id or class_student pivot
+        return $this->usersByRole('student', $schoolId)->where(function (Builder $sub) use ($classIds) {
+            $sub->whereIn('class_room_id', $classIds)
+                ->orWhereHas('enrolledClasses', fn (Builder $c) => $c->whereIn('classes.id', $classIds));
+        });
     }
 
-    private function gradeStudents(?int $schoolId, ?int $gradeLevel): Builder
+    /** @param array<int> $gradeLevels */
+    private function gradeStudents(?int $schoolId, array $gradeLevels): Builder
     {
-        $q = $this->usersByRole('student', $schoolId);
+        return $this->usersByRole('student', $schoolId)
+            ->whereHas('classRoom', fn (Builder $c) => $c->whereIn('grade_level', $gradeLevels));
+    }
 
-        if ($gradeLevel !== null) {
-            $q->whereHas('classRoom', fn (Builder $c) => $c->where('grade_level', $gradeLevel));
-        }
-
-        return $q;
+    /** @param array<string> $levels sections.level values (primary|intermediate|secondary) */
+    private function stageStudents(?int $schoolId, array $levels): Builder
+    {
+        return $this->usersByRole('student', $schoolId)
+            ->whereHas('classRoom.section', fn (Builder $s) => $s->whereIn('level', $levels));
     }
 
     /**
@@ -117,7 +133,7 @@ class EloquentRecipientRepository implements RecipientRepository
 
         return User::query()
             ->with('roles')
-            ->whereHas('children', fn (Builder $q) => $q->whereIn('users.id', $students->pluck('id')->all()))
+            ->whereHas('children', fn (Builder $q) => $q->whereIn('parent_student.student_id', $students->pluck('id')->all()))
             ->get();
     }
 }

@@ -28,7 +28,7 @@ final class SendBroadcastAction
         // blindly) and scope to the active school.
         $users = $dto->audience === 'specific_users'
             ? $this->repo->findUsers($dto->recipientIds, $dto->schoolId)
-            : $this->repo->resolveAudience($dto->audience, $dto->schoolId, $this->refIdFromDto($dto))
+            : $this->repo->resolveAudience($dto->audience, $dto->schoolId, $dto->refIds)
                 ->whereIn('id', $dto->recipientIds);
 
         // Settings + driver for the active school. When schoolId is null
@@ -150,14 +150,5 @@ final class SendBroadcastAction
             // broadcast message kind so attendance rows ('absence'/'late') stay distinct.
             'type'              => 'broadcast_' . $dto->messageType,
         ]);
-    }
-
-    private function refIdFromDto(ComposeMessageDto $dto): ?int
-    {
-        // refId is carried inside audienceLabel parsing isn't reliable; the
-        // controller already resolved the recipient ids, so for non-specific
-        // audiences we simply intersect against the provided ids. refId not
-        // needed here because we filter by recipientIds.
-        return null;
     }
 }
