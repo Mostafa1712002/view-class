@@ -594,6 +594,68 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('admin.hub.platforms.*') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.platforms.index') }}"><x-svg-icon name="diagram-3" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_platforms')</span></a></li>
                 @endif
                 @endif
+
+                {{-- المستخدمون — parent hides only if every child is denied --}}
+                @if($canViewUsers || $canViewTeachers || $canViewJobTitles || $canViewNoor)
+                <li class="nav-item has-sub {{ request()->routeIs('admin.users.*') ? 'open' : '' }}" data-section="extras">
+                    <a href="#" data-label="@lang('shell.nav_users')"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users')</span></a>
+                    <ul class="menu-content">
+                        @if(auth()->check() && auth()->user()->isSuperAdmin())
+                        <li class="{{ request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.users.students.global-search') ? route('admin.users.students.global-search') : '#' }}">
+                                <x-svg-icon name="search" class="vc-ico" /><span class="menu-item">@lang('users.global_search')</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if($canViewTeachers)
+                        <li class="{{ request()->routeIs('admin.users.teachers.*') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.users.teachers.index') ? route('admin.users.teachers.index') : '#' }}">
+                                <x-svg-icon name="easel" class="vc-ico" /><span class="menu-item">@lang('users.teachers')</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if($canViewUsers)
+                        <li class="{{ request()->routeIs('admin.users.admins.*') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.users.admins.index') ? route('admin.users.admins.index') : '#' }}">
+                                <x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('users.admins')</span>
+                            </a>
+                        </li>
+                        @endif
+                        <li class="{{ request()->routeIs('admin.users.cards.*') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.users.cards.index') ? route('admin.users.cards.index') : '#' }}">
+                                <x-svg-icon name="person-vcard" class="vc-ico" /><span class="menu-item">@lang('users.cards')</span>
+                            </a>
+                        </li>
+                        @if($canViewJobTitles)
+                        <li class="{{ request()->routeIs('admin.users.job-titles.*') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.users.job-titles.index') ? route('admin.users.job-titles.index') : '#' }}">
+                                <x-svg-icon name="tag" class="vc-ico" /><span class="menu-item">@lang('users.job_titles')</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if($canManageRoles)
+                        <li class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.roles.index') ? route('admin.roles.index') : '#' }}">
+                                <x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('roles.title')</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if($canViewNoor)
+                        <li class="{{ request()->routeIs('admin.noor.*') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.noor.form') ? route('admin.noor.form') : '#' }}">
+                                <x-svg-icon name="file-earmark-arrow-down" class="vc-ico" /><span class="menu-item">@lang('shell.nav_users_import_noor')</span>
+                            </a>
+                        </li>
+                        @endif
+                    </ul>
+                </li>
+                @endif
+
+                @if($canViewAcademicYears)
+                <li class="nav-item {{ request()->routeIs('manage.academic-years.*') ? 'active' : '' }}" data-section="extras">
+                    <a href="{{ Route::has('manage.academic-years.index') ? route('manage.academic-years.index') : '#' }}" data-label="@lang('shell.nav_academic_years')"><x-svg-icon name="calendar" class="vc-ico" /><span class="menu-title">@lang('shell.nav_academic_years')</span></a>
+                </li>
+                @endif
             </div>{{-- /gp-sec-extras --}}
 
             {{-- #2 الشؤون التعليمية والخطط --}}
@@ -605,6 +667,12 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-academic">
+                @if($canViewSchedules)
+                <li class="nav-item {{ request()->routeIs('manage.schedules.*') ? 'active' : '' }}" data-section="academic">
+                    <a href="{{ Route::has('manage.schedules.index') ? route('manage.schedules.index') : '#' }}" data-label="@lang('shell.nav_schedule')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_schedule')</span></a>
+                </li>
+                @endif
+
                 {{-- «الجدول المدرسي» lives once, under العمليات التعليمية (manage.schedules); /admin/school-schedule redirects there. --}}
                 @if($canViewWeeklyPlans)
                 <li class="nav-item {{ request()->routeIs('manage.weekly-plans.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.weekly-plans.index') ? route('manage.weekly-plans.index') : '#' }}"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a></li>
@@ -637,6 +705,23 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if(Route::has('admin.qb.skills.index') && (!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('skills')))
                 <li class="nav-item {{ request()->routeIs('admin.qb.skills.*') ? 'active' : '' }}" data-section="academic"><a href="{{ route('admin.qb.skills.index') }}"><x-svg-icon name="mortarboard" class="vc-ico" /><span class="menu-title">@lang('shell.nav_subject_skills')</span></a></li>
                 @endif
+
+                {{-- إدارة ملف أنجاز — achievement-portfolio card (Mohamed Farouk) --}}
+                @if($canViewLibraries && Route::has('admin.portfolio.index'))
+                <li class="nav-item {{ request()->routeIs('admin.portfolio.*') ? 'active' : '' }}" data-section="academic">
+                    <a href="{{ route('admin.portfolio.index') }}" data-label="@lang('shell.nav_portfolio_management')"><x-svg-icon name="trophy" class="vc-ico" /><span class="menu-title">@lang('shell.nav_portfolio_management')</span></a>
+                </li>
+                @endif
+
+                <li class="nav-item {{ request()->routeIs('manage.special-education.*') ? 'active' : '' }}" data-section="academic">
+                    <a href="{{ Route::has('manage.special-education.index') ? route('manage.special-education.index') : '#' }}" data-label="@lang('special_education.title')">
+                        <x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('special_education.title')</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('admin.policies.*') ? 'active' : '' }}" data-section="academic">
+                    <a href="{{ Route::has('admin.policies.index') ? route('admin.policies.index') : '#' }}" data-label="@lang('shell.nav_policies')"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-title">@lang('shell.nav_policies')</span></a>
+                </li>
             </div>{{-- /gp-sec-academic --}}
 
             {{-- #3 القياس والتقويم --}}
@@ -662,7 +747,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 </li>
                 @endif
                 <li class="nav-item {{ request()->routeIs('admin.exams.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.nav_exams')</span></a></li>
+                @if(!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('class_visits'))
                 <li class="nav-item {{ request()->routeIs('admin.class-visits.*') ? 'active' : '' }}" data-section="assessment"><a href="{{ Route::has('admin.class-visits.index') ? route('admin.class-visits.index') : '#' }}"><x-svg-icon name="geo-alt" class="vc-ico" /><span class="menu-title">@lang('shell.nav_visits')</span></a></li>
+                @endif
             </div>{{-- /gp-sec-assessment --}}
 
             {{-- #4 الدعم والتقارير --}}
@@ -695,16 +782,35 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @else
                 <li class="nav-item {{ request()->routeIs('my.surveys.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('my.surveys.index') ? route('my.surveys.index') : '#' }}"><x-svg-icon name="bar-chart-line" class="vc-ico" /><span class="menu-title">@lang('shell.nav_surveys')</span></a></li>
                 @endif
-                @if($canViewReports)
-                <li class="nav-item has-sub {{ request()->routeIs('admin.reports.*') ? 'active open' : '' }}" data-section="support">
+                <li class="nav-item has-sub {{ request()->routeIs('admin.reports.*') || request()->routeIs('admin.attendance.reports.*') || request()->routeIs('admin.teacher-attendance.*') || request()->routeIs('admin.eval-reports.*') || request()->routeIs('admin.job-performance.*') || request()->routeIs('admin.eval-audit.*') ? 'active open' : '' }}" data-section="support">
                     <a href="#"><x-svg-icon name="bar-chart" class="vc-ico" /><span class="menu-title">@lang('shell.nav_reports')</span></a>
                     <ul class="menu-content">
+                        @if($canViewReports)
                         <li class="{{ request()->routeIs('admin.reports.administrative') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.administrative') ? route('admin.reports.administrative') : '#' }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('shell.nav_reports_admin')</span></a></li>
                         <li class="{{ request()->routeIs('admin.reports.statistical') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.statistical') ? route('admin.reports.statistical') : '#' }}"><x-svg-icon name="graph-up" class="vc-ico" /><span class="menu-item">@lang('shell.nav_reports_stats')</span></a></li>
                         <li class="{{ request()->routeIs('admin.reports.user-reports') ? 'active' : '' }}"><a href="{{ Route::has('admin.reports.user-reports') ? route('admin.reports.user-reports') : '#' }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-item">@lang('shell.nav_reports_users')</span></a></li>
+                        @endif
+                        @if($canViewAttendance)
+                        <li class="{{ request()->routeIs('admin.attendance.reports.status') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.status') ? route('admin.attendance.reports.status') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.aggregate') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.aggregate') ? route('admin.attendance.reports.aggregate') : '#' }}"><x-svg-icon name="stack" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_aggregate')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.index') ? route('admin.attendance.reports.index') : '#' }}"><x-svg-icon name="list" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_list')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.late') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.late') ? route('admin.attendance.reports.late') : '#' }}"><x-svg-icon name="hourglass-split" class="vc-ico" /><span class="menu-item">@lang('shell.nav_late_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.behavior') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.behavior') ? route('admin.attendance.reports.behavior') : '#' }}"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.day-absence') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.day-absence') ? route('admin.attendance.reports.day-absence') : '#' }}"><x-svg-icon name="calendar-day" class="vc-ico" /><span class="menu-item">@lang('shell.nav_days_absence_report')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.attendance.reports.period-absence') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.period-absence') ? route('admin.attendance.reports.period-absence') : '#' }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('shell.nav_subjects_absence_summary')</span></a></li>
+                        @endif
+                        @if($canViewTeacherAttendance)
+                        <li class="{{ request()->routeIs('admin.teacher-attendance.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.teacher-attendance.daily') ? route('admin.teacher-attendance.daily') : '#' }}"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-item">@lang('shell.nav_teacher_absence')</span></a></li>
+                        @endif
+                        <li class="{{ request()->routeIs('admin.eval-reports.supervisors') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.supervisors') ? route('admin.eval-reports.supervisors') : '#' }}"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_rep_supervisors')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.eval-reports.supervisors-detailed') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.supervisors-detailed') ? route('admin.eval-reports.supervisors-detailed') : '#' }}"><x-svg-icon name="list" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_rep_detailed')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.eval-reports.general-manager') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.general-manager') ? route('admin.eval-reports.general-manager') : '#' }}"><x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_rep_gm')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.job-performance.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.job-performance.index') ? route('admin.job-performance.index') : '#' }}"><x-svg-icon name="briefcase" class="vc-ico" /><span class="menu-item">@lang('shell.nav_job_performance')</span></a></li>
+                        @if (Route::has('admin.eval-audit.index'))
+                        <li class="{{ request()->routeIs('admin.eval-audit.*') ? 'active' : '' }}"><a href="{{ route('admin.eval-audit.index') }}"><x-svg-icon name="clock-history" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_audit')</span></a></li>
+                        @endif
                     </ul>
                 </li>
-                @endif
                 @can('viewStaff', \App\Modules\Gamification\Models\PointTransaction::class)
                 <li class="nav-item {{ request()->routeIs('manage.points.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('manage.points.index') ? route('manage.points.index') : route('programs.coming-soon') }}"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_points_rewards')</span></a></li>
                 @endcan
@@ -720,6 +826,63 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @can('viewAny', \App\Modules\Counseling\Models\CounselingCase::class)
                 <li class="nav-item" data-section="support"><a href="{{ route('manage.counseling.index') }}"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
                 @endcan
+                {{-- خدمات حضور QR (Card #265) — has-sub group; parent gated by qr.view,
+                     each child by its own qr.* permission via canDo(). Caret is JS-injected
+                     (#276) so the <a> carries no caret span. --}}
+                @if(!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('qr'))
+                <li class="nav-item has-sub {{ request()->routeIs('admin.qr.*') ? 'active open' : '' }}" data-section="support">
+                    <a href="#" data-label="خدمات حضور QR"><x-svg-icon name="qr-code-scan" class="vc-ico" /><span class="menu-title">خدمات حضور QR</span></a>
+                    <ul class="menu-content">
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        <li class="{{ request()->routeIs('admin.qr.cards.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.index') ? route('admin.qr.cards.index') : '#' }}"><x-svg-icon name="person-vcard" class="vc-ico" /><span class="menu-item">بطاقات QR</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.scan'))
+                        <li class="{{ request()->routeIs('admin.qr.scanner') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.scanner') ? route('admin.qr.scanner') : '#' }}"><x-svg-icon name="qr-code-scan" class="vc-ico" /><span class="menu-item">ماسح QR</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view_log'))
+                        <li class="{{ request()->routeIs('admin.qr.log') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.log') ? route('admin.qr.log') : '#' }}"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-item">سجل المسحات</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        <li class="{{ request()->routeIs('admin.qr.groups.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.groups.index') ? route('admin.qr.groups.index') : '#' }}"><x-svg-icon name="collection" class="vc-ico" /><span class="menu-item">المجموعات</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_students'))
+                        <li class="{{ request()->routeIs('admin.qr.link.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.link.index') ? route('admin.qr.link.index') : '#' }}"><x-svg-icon name="link-45deg" class="vc-ico" /><span class="menu-item">ربط الطلاب</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_devices'))
+                        <li class="{{ request()->routeIs('admin.qr.devices.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.devices.index') ? route('admin.qr.devices.index') : '#' }}"><x-svg-icon name="cpu" class="vc-ico" /><span class="menu-item">أجهزة IoT</span></a></li>
+                        @endif
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.print_card'))
+                        <li class="{{ request()->routeIs('admin.qr.cards.print') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.print') ? route('admin.qr.cards.print') : '#' }}"><x-svg-icon name="printer" class="vc-ico" /><span class="menu-item">طباعة بطاقات QR</span></a></li>
+                        @endif
+                    </ul>
+                </li>
+                @endif
+
+                @if($canViewAttendance)
+                <li class="nav-item has-sub {{ (request()->routeIs('admin.attendance.index') || request()->routeIs('admin.student-attendance.*')) ? 'active open' : '' }}" data-section="support">
+                    <a href="#" data-label="@lang('shell.nav_attendance_management')"><x-svg-icon name="person-x" class="vc-ico" /><span class="menu-title">@lang('shell.nav_attendance_management')</span></a>
+                    <ul class="menu-content">
+                        <li class="{{ request()->routeIs('admin.attendance.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.index') ? route('admin.attendance.index') : '#' }}"><x-svg-icon name="speedometer2" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_dashboard')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.student-attendance.daily') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.daily') ? route('admin.student-attendance.daily') : '#' }}"><x-svg-icon name="check-square" class="vc-ico" /><span class="menu-item">@lang('shell.nav_daily_attendance')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.student-attendance.period') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.period') ? route('admin.student-attendance.period') : '#' }}"><x-svg-icon name="stopwatch" class="vc-ico" /><span class="menu-item">@lang('shell.nav_period_attendance')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.student-attendance.follow-up') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.follow-up') ? route('admin.student-attendance.follow-up') : '#' }}"><x-svg-icon name="binoculars" class="vc-ico" /><span class="menu-item">@lang('shell.nav_follow_late_absence')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.student-attendance.absence-messages.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.absence-messages.index') ? route('admin.student-attendance.absence-messages.index') : '#' }}"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-item">@lang('shell.nav_absence_messages')</span></a></li>
+                    </ul>
+                </li>
+                @endif
+
+                {{-- السلوك --}}
+                @if($canViewBehavior)
+                <li class="nav-item has-sub {{ request()->routeIs('admin.behavior.*') ? 'active open' : '' }}" data-section="support">
+                    <a href="#" data-label="@lang('shell.nav_behavior')"><x-svg-icon name="shield-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_behavior')</span></a>
+                    <ul class="menu-content">
+                        <li class="{{ request()->routeIs('admin.behavior.groups.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.groups.index') }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_groups')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.behavior.behaviors.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.behaviors.index') }}"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behaviors')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.behavior.actions.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.actions.index') }}"><x-svg-icon name="gear-fill" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_actions')</span></a></li>
+                        <li class="{{ request()->routeIs('admin.behavior.records.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.records.index') }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('behavior.records.title')</span></a></li>
+                    </ul>
+                </li>
+                @endif
             </div>{{-- /gp-sec-support --}}
 
             {{-- #5 القبول والتسجيل --}}
@@ -798,40 +961,10 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if($canViewSupport)
                 <li class="nav-item {{ $sidebarSupportActive2 ? 'active' : '' }}" data-section="comm2"><a href="{{ $sidebarSupportRoute2 }}"><x-svg-icon name="life-preserver" class="vc-ico" /><span class="menu-title">@lang('shell.nav_support')</span></a></li>
                 @endif
-            </div>{{-- /gp-sec-comm2 --}}
-
-            {{-- ========== 2. عمليات تعليمية ========== --}}
-            <div class="gp-section-header sec-educational" data-section-toggle="educational">
-                <span class="gp-sec-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5z"/><path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032z"/></svg>
-                </span>
-                <span class="gp-sec-label">@lang('shell.section_educational')</span>
-                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
-            </div>
-            <div class="gp-section-content" id="gp-sec-educational">
-
-                @if($canViewSchedules)
-                <li class="nav-item {{ request()->routeIs('manage.schedules.*') ? 'active' : '' }}" data-section="educational">
-                    <a href="{{ Route::has('manage.schedules.index') ? route('manage.schedules.index') : '#' }}" data-label="@lang('shell.nav_schedule')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_schedule')</span></a>
-                </li>
-                @endif
-
-                {{-- إدارة ملف أنجاز — achievement-portfolio card (Mohamed Farouk) --}}
-                @if($canViewLibraries && Route::has('admin.portfolio.index'))
-                <li class="nav-item {{ request()->routeIs('admin.portfolio.*') ? 'active' : '' }}" data-section="educational">
-                    <a href="{{ route('admin.portfolio.index') }}" data-label="@lang('shell.nav_portfolio_management')"><x-svg-icon name="trophy" class="vc-ico" /><span class="menu-title">@lang('shell.nav_portfolio_management')</span></a>
-                </li>
-                @endif
-
-                <li class="nav-item {{ request()->routeIs('manage.special-education.*') ? 'active' : '' }}" data-section="educational">
-                    <a href="{{ Route::has('manage.special-education.index') ? route('manage.special-education.index') : '#' }}" data-label="@lang('special_education.title')">
-                        <x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('special_education.title')</span>
-                    </a>
-                </li>
 
                 {{-- المواعيد --}}
                 @if($canViewAppointments)
-                <li class="nav-item has-sub {{ (request()->routeIs('manage.appointment-schedules.*') || request()->routeIs('admin.appointment-settings.*') || request()->routeIs('manage.appointments.*')) ? 'active open' : '' }}" data-section="educational">
+                <li class="nav-item has-sub {{ (request()->routeIs('manage.appointment-schedules.*') || request()->routeIs('admin.appointment-settings.*') || request()->routeIs('manage.appointments.*')) ? 'active open' : '' }}" data-section="comm2">
                     <a href="#" data-label="@lang('shell.nav_appointments')"><x-svg-icon name="calendar" class="vc-ico" /><span class="menu-title">@lang('shell.nav_appointments')</span></a>
                     <ul class="menu-content">
                         <li class="{{ request()->routeIs('manage.appointment-schedules.*') ? 'active' : '' }}">
@@ -854,174 +987,8 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 @endif
+            </div>{{-- /gp-sec-comm2 --}}
 
-                {{-- تقارير التقييم --}}
-                <li class="nav-item has-sub {{ request()->routeIs('admin.eval-reports.*') || request()->routeIs('admin.job-performance.*') ? 'active open' : '' }}" data-section="educational">
-                    <a href="#" data-label="@lang('shell.nav_eval_reports')"><x-svg-icon name="bar-chart" class="vc-ico" /><span class="menu-title">@lang('shell.nav_eval_reports')</span></a>
-                    <ul class="menu-content">
-                        <li class="{{ request()->routeIs('admin.eval-reports.supervisors') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.supervisors') ? route('admin.eval-reports.supervisors') : '#' }}"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_rep_supervisors')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.eval-reports.supervisors-detailed') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.supervisors-detailed') ? route('admin.eval-reports.supervisors-detailed') : '#' }}"><x-svg-icon name="list" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_rep_detailed')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.eval-reports.general-manager') ? 'active' : '' }}"><a href="{{ Route::has('admin.eval-reports.general-manager') ? route('admin.eval-reports.general-manager') : '#' }}"><x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_rep_gm')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.job-performance.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.job-performance.index') ? route('admin.job-performance.index') : '#' }}"><x-svg-icon name="briefcase" class="vc-ico" /><span class="menu-item">@lang('shell.nav_job_performance')</span></a></li>
-                        @if (Route::has('admin.eval-audit.index'))
-                        <li class="{{ request()->routeIs('admin.eval-audit.*') ? 'active' : '' }}"><a href="{{ route('admin.eval-audit.index') }}"><x-svg-icon name="clock-history" class="vc-ico" /><span class="menu-item">@lang('shell.nav_eval_audit')</span></a></li>
-                        @endif
-                    </ul>
-                </li>
-
-                {{-- الحضور والغياب (Card #275) — every child wired to its real Sprint-10
-                     route via Route::has guards; dropdown gated by attendance.view --}}
-                @if($canViewAttendance)
-                <li class="nav-item has-sub {{ (request()->routeIs('admin.attendance.*') || request()->routeIs('admin.student-attendance.*')) ? 'active open' : '' }}" data-section="educational">
-                    <a href="#" data-label="@lang('shell.nav_attendance_management')"><x-svg-icon name="person-x" class="vc-ico" /><span class="menu-title">@lang('shell.nav_attendance_management')</span></a>
-                    <ul class="menu-content">
-                        <li class="{{ request()->routeIs('admin.attendance.reports.status') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.status') ? route('admin.attendance.reports.status') : '#' }}"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_report')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.reports.aggregate') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.aggregate') ? route('admin.attendance.reports.aggregate') : '#' }}"><x-svg-icon name="stack" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_aggregate')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.reports.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.index') ? route('admin.attendance.reports.index') : '#' }}"><x-svg-icon name="list" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_list')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.reports.late') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.late') ? route('admin.attendance.reports.late') : '#' }}"><x-svg-icon name="hourglass-split" class="vc-ico" /><span class="menu-item">@lang('shell.nav_late_report')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.reports.behavior') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.behavior') ? route('admin.attendance.reports.behavior') : '#' }}"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_report')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.index') ? route('admin.attendance.index') : '#' }}"><x-svg-icon name="speedometer2" class="vc-ico" /><span class="menu-item">@lang('shell.nav_attendance_dashboard')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.student-attendance.daily') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.daily') ? route('admin.student-attendance.daily') : '#' }}"><x-svg-icon name="check-square" class="vc-ico" /><span class="menu-item">@lang('shell.nav_daily_attendance')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.student-attendance.period') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.period') ? route('admin.student-attendance.period') : '#' }}"><x-svg-icon name="stopwatch" class="vc-ico" /><span class="menu-item">@lang('shell.nav_period_attendance')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.student-attendance.follow-up') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.follow-up') ? route('admin.student-attendance.follow-up') : '#' }}"><x-svg-icon name="binoculars" class="vc-ico" /><span class="menu-item">@lang('shell.nav_follow_late_absence')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.student-attendance.absence-messages.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.student-attendance.absence-messages.index') ? route('admin.student-attendance.absence-messages.index') : '#' }}"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-item">@lang('shell.nav_absence_messages')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.reports.day-absence') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.day-absence') ? route('admin.attendance.reports.day-absence') : '#' }}"><x-svg-icon name="calendar-day" class="vc-ico" /><span class="menu-item">@lang('shell.nav_days_absence_report')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.attendance.reports.period-absence') ? 'active' : '' }}"><a href="{{ Route::has('admin.attendance.reports.period-absence') ? route('admin.attendance.reports.period-absence') : '#' }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('shell.nav_subjects_absence_summary')</span></a></li>
-                    </ul>
-                </li>
-                @endif
-
-                {{-- خدمات حضور QR (Card #265) — has-sub group; parent gated by qr.view,
-                     each child by its own qr.* permission via canDo(). Caret is JS-injected
-                     (#276) so the <a> carries no caret span. --}}
-                @if(!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('qr'))
-                <li class="nav-item has-sub {{ request()->routeIs('admin.qr.*') ? 'active open' : '' }}" data-section="educational">
-                    <a href="#" data-label="خدمات حضور QR"><x-svg-icon name="qr-code-scan" class="vc-ico" /><span class="menu-title">خدمات حضور QR</span></a>
-                    <ul class="menu-content">
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
-                        <li class="{{ request()->routeIs('admin.qr.cards.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.index') ? route('admin.qr.cards.index') : '#' }}"><x-svg-icon name="person-vcard" class="vc-ico" /><span class="menu-item">بطاقات QR</span></a></li>
-                        @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.scan'))
-                        <li class="{{ request()->routeIs('admin.qr.scanner') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.scanner') ? route('admin.qr.scanner') : '#' }}"><x-svg-icon name="qr-code-scan" class="vc-ico" /><span class="menu-item">ماسح QR</span></a></li>
-                        @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view_log'))
-                        <li class="{{ request()->routeIs('admin.qr.log') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.log') ? route('admin.qr.log') : '#' }}"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-item">سجل المسحات</span></a></li>
-                        @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
-                        <li class="{{ request()->routeIs('admin.qr.groups.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.groups.index') ? route('admin.qr.groups.index') : '#' }}"><x-svg-icon name="collection" class="vc-ico" /><span class="menu-item">المجموعات</span></a></li>
-                        @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_students'))
-                        <li class="{{ request()->routeIs('admin.qr.link.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.link.index') ? route('admin.qr.link.index') : '#' }}"><x-svg-icon name="link-45deg" class="vc-ico" /><span class="menu-item">ربط الطلاب</span></a></li>
-                        @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_devices'))
-                        <li class="{{ request()->routeIs('admin.qr.devices.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.devices.index') ? route('admin.qr.devices.index') : '#' }}"><x-svg-icon name="cpu" class="vc-ico" /><span class="menu-item">أجهزة IoT</span></a></li>
-                        @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.print_card'))
-                        <li class="{{ request()->routeIs('admin.qr.cards.print') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.print') ? route('admin.qr.cards.print') : '#' }}"><x-svg-icon name="printer" class="vc-ico" /><span class="menu-item">طباعة بطاقات QR</span></a></li>
-                        @endif
-                    </ul>
-                </li>
-                @endif
-
-                @if($canViewTeacherAttendance)
-                <li class="nav-item {{ request()->routeIs('admin.teacher-attendance.*') ? 'active' : '' }}" data-section="educational" data-label="@lang('shell.nav_teacher_absence')"><a href="{{ Route::has('admin.teacher-attendance.daily') ? route('admin.teacher-attendance.daily') : '#' }}" data-label="@lang('shell.nav_teacher_absence')"><x-svg-icon name="person-badge" class="vc-ico" /><span class="menu-title">@lang('shell.nav_teacher_absence')</span></a></li>
-                @endif
-
-            </div>{{-- /gp-sec-educational --}}
-
-            {{-- ========== 4. إعدادات النظام ========== --}}
-            <div class="gp-section-header sec-system" data-section-toggle="system">
-                <span class="gp-sec-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.892 3.433-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.901-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/></svg>
-                </span>
-                <span class="gp-sec-label">@lang('shell.section_system_settings')</span>
-                <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
-            </div>
-            <div class="gp-section-content" id="gp-sec-system">
-
-                <li class="nav-item {{ request()->routeIs('admin.policies.*') ? 'active' : '' }}" data-section="system">
-                    <a href="{{ Route::has('admin.policies.index') ? route('admin.policies.index') : '#' }}" data-label="@lang('shell.nav_policies')"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-title">@lang('shell.nav_policies')</span></a>
-                </li>
-
-                {{-- المستخدمون — parent hides only if every child is denied --}}
-                @if($canViewUsers || $canViewTeachers || $canViewJobTitles || $canViewNoor)
-                <li class="nav-item has-sub {{ request()->routeIs('admin.users.*') ? 'open' : '' }}" data-section="system">
-                    <a href="#" data-label="@lang('shell.nav_users')"><x-svg-icon name="people" class="vc-ico" /><span class="menu-title">@lang('shell.nav_users')</span></a>
-                    <ul class="menu-content">
-                        @if(auth()->check() && auth()->user()->isSuperAdmin())
-                        <li class="{{ request()->routeIs('admin.users.students.global-search') ? 'active' : '' }}">
-                            <a href="{{ Route::has('admin.users.students.global-search') ? route('admin.users.students.global-search') : '#' }}">
-                                <x-svg-icon name="search" class="vc-ico" /><span class="menu-item">@lang('users.global_search')</span>
-                            </a>
-                        </li>
-                        @endif
-                        @if($canViewTeachers)
-                        <li class="{{ request()->routeIs('admin.users.teachers.*') ? 'active' : '' }}">
-                            <a href="{{ Route::has('admin.users.teachers.index') ? route('admin.users.teachers.index') : '#' }}">
-                                <x-svg-icon name="easel" class="vc-ico" /><span class="menu-item">@lang('users.teachers')</span>
-                            </a>
-                        </li>
-                        @endif
-                        @if($canViewUsers)
-                        <li class="{{ request()->routeIs('admin.users.admins.*') ? 'active' : '' }}">
-                            <a href="{{ Route::has('admin.users.admins.index') ? route('admin.users.admins.index') : '#' }}">
-                                <x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('users.admins')</span>
-                            </a>
-                        </li>
-                        @endif
-                        <li class="{{ request()->routeIs('admin.users.cards.*') ? 'active' : '' }}">
-                            <a href="{{ Route::has('admin.users.cards.index') ? route('admin.users.cards.index') : '#' }}">
-                                <x-svg-icon name="person-vcard" class="vc-ico" /><span class="menu-item">@lang('users.cards')</span>
-                            </a>
-                        </li>
-                        @if($canViewJobTitles)
-                        <li class="{{ request()->routeIs('admin.users.job-titles.*') ? 'active' : '' }}">
-                            <a href="{{ Route::has('admin.users.job-titles.index') ? route('admin.users.job-titles.index') : '#' }}">
-                                <x-svg-icon name="tag" class="vc-ico" /><span class="menu-item">@lang('users.job_titles')</span>
-                            </a>
-                        </li>
-                        @endif
-                        @if($canManageRoles)
-                        <li class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
-                            <a href="{{ Route::has('admin.roles.index') ? route('admin.roles.index') : '#' }}">
-                                <x-svg-icon name="shield-shaded" class="vc-ico" /><span class="menu-item">@lang('roles.title')</span>
-                            </a>
-                        </li>
-                        @endif
-                        @if($canViewNoor)
-                        <li class="{{ request()->routeIs('admin.noor.*') ? 'active' : '' }}">
-                            <a href="{{ Route::has('admin.noor.form') ? route('admin.noor.form') : '#' }}">
-                                <x-svg-icon name="file-earmark-arrow-down" class="vc-ico" /><span class="menu-item">@lang('shell.nav_users_import_noor')</span>
-                            </a>
-                        </li>
-                        @endif
-                    </ul>
-                </li>
-                @endif
-
-                @if($canViewAcademicYears)
-                <li class="nav-item {{ request()->routeIs('manage.academic-years.*') ? 'active' : '' }}" data-section="system">
-                    <a href="{{ Route::has('manage.academic-years.index') ? route('manage.academic-years.index') : '#' }}" data-label="@lang('shell.nav_academic_years')"><x-svg-icon name="calendar" class="vc-ico" /><span class="menu-title">@lang('shell.nav_academic_years')</span></a>
-                </li>
-                @endif
-
-                {{-- المقصف — مُخفى من كل الحسابات (card #313). الكود والجداول باقية للرجوع. --}}
-
-                {{-- السلوك --}}
-                @if($canViewBehavior)
-                <li class="nav-item has-sub {{ request()->routeIs('admin.behavior.*') ? 'active open' : '' }}" data-section="system">
-                    <a href="#" data-label="@lang('shell.nav_behavior')"><x-svg-icon name="shield-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_behavior')</span></a>
-                    <ul class="menu-content">
-                        <li class="{{ request()->routeIs('admin.behavior.groups.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.groups.index') }}"><x-svg-icon name="people" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_groups')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.behavior.behaviors.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.behaviors.index') }}"><x-svg-icon name="hammer" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behaviors')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.behavior.actions.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.actions.index') }}"><x-svg-icon name="gear-fill" class="vc-ico" /><span class="menu-item">@lang('shell.nav_behavior_actions')</span></a></li>
-                        <li class="{{ request()->routeIs('admin.behavior.records.*') ? 'active' : '' }}"><a href="{{ route('admin.behavior.records.index') }}"><x-svg-icon name="clipboard-check" class="vc-ico" /><span class="menu-item">@lang('behavior.records.title')</span></a></li>
-                    </ul>
-                </li>
-                @endif
-
-
-            </div>{{-- /gp-sec-system --}}
 
             @endif {{-- /isStaff --}}
 
