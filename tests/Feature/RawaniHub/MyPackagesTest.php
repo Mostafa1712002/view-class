@@ -142,9 +142,11 @@ class MyPackagesTest extends TestCase
     public function test_register_is_rate_limited_and_not_for_logged_in_users(): void
     {
         for ($i = 0; $i < 6; $i++) {
+            $this->get('/register')->assertOk(); // viewing the form (and its redirect after a typo) never counts
             $this->post('/register', ['name' => ''])->assertSessionHasErrors();
         }
         $this->post('/register', ['name' => ''])->assertStatus(429);
+        $this->get('/register')->assertOk();
 
         $this->actingAs($this->user('parent'))->get('/register')->assertRedirect();
     }
@@ -168,6 +170,15 @@ class MyPackagesTest extends TestCase
         $this->assertSame(0, $this->user('parent')->children()->count());
 
         $this->actingAs($this->user('student'))->get('/my/packages/children/create')->assertForbidden();
+    }
+
+    public function test_adding_children_is_rate_limited(): void
+    {
+        $this->actingAs($this->user('parent'));
+        for ($i = 0; $i < 10; $i++) {
+            $this->post('/my/packages/children', ['name' => ''])->assertSessionHasErrors();
+        }
+        $this->post('/my/packages/children', ['name' => ''])->assertStatus(429);
     }
 
     public function test_buy_precheck_shows_the_form_and_blocks_checkout_until_complete(): void
