@@ -22,6 +22,8 @@ use InvalidArgumentException;
  */
 final class ImportAlAwwalBank
 {
+    private const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'jfif'];
+
     public function __construct(
         private AlAwwalRowNormalizer $normalizer,
         private AlAwwalLevelMap $levelMap,
@@ -158,20 +160,32 @@ final class ImportAlAwwalBank
         if ($path === null) {
             return ['exists' => false, 'md5' => null, 'target' => null, 'size' => null, 'src' => null];
         }
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (! in_array($ext, self::IMAGE_EXTENSIONS, true)) {
+            throw new InvalidArgumentException("image path {$path}: extension not allowed");
+        }
         $full = rtrim($imagesDir, '/').'/'.ltrim($path, '/');
         if (! is_file($full)) {
             return ['exists' => false, 'md5' => null, 'target' => null, 'size' => null, 'src' => $full];
         }
-        $md5 = md5_file($full);
+        // The path comes from the source DB: resolve symlinks / `..` and refuse anything outside --images.
+        $base = realpath($imagesDir);
+        $real = realpath($full);
+        if ($base === false || $real === false || ! str_starts_with($real, rtrim($base, '/').'/')) {
+            throw new InvalidArgumentException("image path {$path}: outside the images directory");
+        }
+        $md5 = md5_file($real);
         $name = pathinfo($path, PATHINFO_FILENAME);
-        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (! preg_match('/^[A-Za-z0-9_-][A-Za-z0-9._-]*$/', $name)) {
+            $name = $md5;
+        }
         $target = "special-programs/{$program}/{$name}.".($ext === 'jfif' ? 'jpg' : $ext);
         if (isset($targets[$target]) && $targets[$target] !== $md5) {
             throw new InvalidArgumentException("image target {$target} already used by a different file ({$path})");
         }
         $targets[$target] = $md5;
 
-        return ['exists' => true, 'md5' => $md5, 'target' => $target, 'size' => filesize($full), 'src' => $full];
+        return ['exists' => true, 'md5' => $md5, 'target' => $target, 'size' => filesize($real), 'src' => $real];
     }
 
     private function dedupe(array &$plan): void
@@ -262,6 +276,9 @@ final class ImportAlAwwalBank
                 ['passage_text' => $norm['passage_text'], 'difficulty_level' => $norm['difficulty'], 'status' => 'approved'],
             );
             $passageId = $passage->id;
+            if ($passage->trashed()) { // deleted by staff in the bank screen: keep it deleted
+                return ['image' => $imageResult, 'items' => ['created' => 0, 'updated' => 0, 'unchanged' => count($norm['items'])]];
+            }
         }
 
         $counts = ['created' => 0, 'updated' => 0, 'unchanged' => 0];
@@ -271,7 +288,8 @@ final class ImportAlAwwalBank
             $existing = BankQuestion::withTrashed()->where('question_bank_id', $bank->id)
                 ->where('external_platform', 'al_awwal')->where('external_id', $ext)->first();
 
-            if ($existing && ($existing->metadata['sp_sig'] ?? null) === $sig && SpQuestion::where('bank_question_id', $existing->id)->exists()) {
+            // Trashed = deleted by staff in the bank screen; a re-run must not bring it back.
+            if ($existing && ($existing->trashed() || (($existing->metadata['sp_sig'] ?? null) === $sig && SpQuestion::where('bank_question_id', $existing->id)->exists()))) {
                 $counts['unchanged']++;
 
                 continue;
@@ -306,7 +324,8 @@ final class ImportAlAwwalBank
             }
             $this->createQuestion->syncAnswerRows($q, $answers['rows']);
 
-            $sp = SpQuestion::updateOrCreate(['bank_question_id' => $q->id], [
+            $sp = SpQuestion::firstOrNew(['bank_question_id' => $q->id], ['is_active' => true]); // keep a staff deactivation
+            $sp->fill([
                 'sp_subject_id' => $row['sp_subject_id'],
                 'sp_skill_id' => $it['skill_source_id'] !== null ? $skillMap[$it['skill_source_id']] : null,
                 'passage_id' => $passageId,
@@ -318,8 +337,7 @@ final class ImportAlAwwalBank
                 'has_image' => (bool) $image['target'],
                 'content_hash' => $row['key'],
                 'merged_source_ids' => $row['merged'] ?: null,
-                'is_active' => true,
-            ]);
+            ])->save();
             DB::table('sp_question_levels')->where('sp_question_id', $sp->id)->delete();
             DB::table('sp_question_levels')->insert(array_map(fn ($g) => ['sp_question_id' => $sp->id, 'grade_level' => $g], $row['levels']));
 
@@ -340,15 +358,22 @@ final class ImportAlAwwalBank
             return 'none';
         }
         $dest = storage_path('app/public/'.$image['target']);
-        if (is_file($dest) && filesize($dest) === $image['size']) {
+        if ($this->sameFile($dest, $image)) {
             return 'unchanged';
         }
         if (! is_dir(dirname($dest))) {
             mkdir(dirname($dest), 0775, true);
         }
-        copy($image['src'], $dest);
+        if (! copy($image['src'], $dest)) {
+            throw new \RuntimeException("could not copy {$image['src']} to {$dest}");
+        }
 
         return 'copied';
+    }
+
+    private function sameFile(string $dest, array $image): bool
+    {
+        return is_file($dest) && filesize($dest) === $image['size'] && md5_file($dest) === $image['md5'];
     }
 
     /** Stable across runs and independent of DB ids: everything that would change the written rows. */
@@ -381,14 +406,14 @@ final class ImportAlAwwalBank
                 $ext = $row['norm']['is_passage'] ? $id.':'.$it['sub_index'] : (string) $id;
                 $existing = $bankId ? BankQuestion::withTrashed()->where('question_bank_id', $bankId)
                     ->where('external_platform', 'al_awwal')->where('external_id', $ext)->first() : null;
-                $key = ! $existing ? 'created' : ((($existing->metadata['sp_sig'] ?? null) === $this->signature($row, $it)) ? 'unchanged' : 'updated');
+                $key = ! $existing ? 'created' : (($existing->trashed() || ($existing->metadata['sp_sig'] ?? null) === $this->signature($row, $it)) ? 'unchanged' : 'updated');
                 $counts[$key]++;
             }
             $img = $row['image']['target'];
             $dest = $img ? storage_path('app/public/'.$img) : null;
             $plan['rows'][$id]['result'] = [
                 'items' => $counts,
-                'image' => ! $img ? 'none' : ((is_file($dest) && filesize($dest) === $row['image']['size']) ? 'unchanged' : 'copied'),
+                'image' => ! $img ? 'none' : ($this->sameFile($dest, $row['image']) ? 'unchanged' : 'copied'),
             ];
         }
     }
