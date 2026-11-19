@@ -71,7 +71,23 @@ class ReportsTest extends TestCase
         $this->assertSame(1, (int) $rows['B']->answers);
         $this->assertSame(0, (int) $rows['B']->correct);
         $this->assertSame('ممتاز', $rows['A']->rating['name']);
-        $this->assertSame('يحتاج تحسين', $rows['B']->rating['name']);
+        $this->assertSame('ضعيف', $rows['B']->rating['name']);
+    }
+
+    public function test_skill_rating_uses_each_programs_own_levels(): void
+    {
+        $school = School::factory()->create();
+        $student = User::factory()->create(['school_id' => $school->id]);
+        $names = [];
+        foreach (['nafis', 'qiyas'] as $program) {
+            [$e, $es, $subj] = $this->exam($school, $program);
+            $k = $this->skill($subj, 'K');
+            $this->attempt($school, $program, $e, $es, $student, [[$k, 'easy', true], [$k, 'easy', true], [$k, 'easy', false]]);
+            $names[$program] = $this->repo->bySkill(new ReportFilters(school: $school->id, program: $program))->first()->rating['name'];
+        }
+        // 66.67%: nafis good (>=65), qiyas acceptable (60-69)
+        $this->assertSame('جيد', $names['nafis']);
+        $this->assertSame('مقبول', $names['qiyas']);
     }
 
     public function test_tahsili_difficulty_rows_are_non_zero(): void

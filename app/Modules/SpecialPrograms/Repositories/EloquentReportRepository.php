@@ -27,8 +27,6 @@ final class EloquentReportRepository implements ReportRepository
         'qiyas' => [[90, 100, '90-100'], [80, 89, '80-89'], [70, 79, '70-79'], [60, 69, '60-69'], [50, 59, '50-59'], [0, 49, '<50']],
     ];
 
-    private const SKILL_RATING = [[80, 'excellent', 'ممتاز'], [60, 'very_good', 'جيد جداً'], [50, 'good', 'جيد'], [0, 'needs_improvement', 'يحتاج تحسين']];
-
     private array $bandCache = [];
 
     public function __construct(private SettingsRepository $settings) {}
@@ -137,16 +135,17 @@ final class EloquentReportRepository implements ReportRepository
         $rows = $this->attempts($f)->join('sp_attempt_items as i', 'i.attempt_id', '=', 'a.id')
             ->join('sp_skills as k', 'k.id', '=', 'i.sp_skill_id')
             ->join('sp_subjects as s', 's.id', '=', 'k.sp_subject_id')
-            ->groupBy('i.sp_skill_id', 'k.name', 's.name_ar', 's.sort_order', 'k.sort_order')
+            ->groupBy('a.program', 'i.sp_skill_id', 'k.name', 's.name_ar', 's.sort_order', 'k.sort_order')
             ->orderBy('s.sort_order')->orderBy('k.sort_order')
-            ->selectRaw('i.sp_skill_id as skill_id, k.name as skill_name, s.name_ar as subject_name,
+            ->selectRaw('a.program, i.sp_skill_id as skill_id, k.name as skill_name, s.name_ar as subject_name,
                 count(distinct a.student_id) as students, count(*) as answers,
                 sum(case when i.is_correct then 1 else 0 end) as correct')->get();
 
-        return $rows->map(function ($r) {
+        return $rows->map(function ($r) use ($f) {
             $r->success_pct = $this->pct($r->correct, $r->answers);
-            [, $key, $name] = collect(self::SKILL_RATING)->first(fn ($b) => $r->success_pct >= $b[0]);
-            $r->rating = ['key' => $key, 'name' => $name];
+            // rating = the program's own configured performance levels
+            $lvl = $this->level($f->school, $r->program, $r->success_pct);
+            $r->rating = ['key' => $lvl['key'], 'name' => $lvl['name']];
 
             return $r;
         });
