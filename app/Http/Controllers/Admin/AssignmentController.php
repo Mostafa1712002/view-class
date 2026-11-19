@@ -106,7 +106,6 @@ class AssignmentController extends Controller
             'late_penalty_percent' => $request->late_penalty_percent ?? 0,
             'status' => $request->status,
         ]);
-        app(\App\Modules\Gamification\Hooks\AssignmentPointHooks::class)->assignmentEdited($assignment);
 
         return redirect()->route('admin.assignments.index')
             ->with('success', 'تم إنشاء الواجب بنجاح');
@@ -179,6 +178,7 @@ class AssignmentController extends Controller
             'late_penalty_percent' => $request->late_penalty_percent ?? 0,
             'status' => $request->status,
         ]);
+        app(\App\Modules\Gamification\Hooks\AssignmentPointHooks::class)->assignmentEdited($assignment);
 
         return redirect()->route('admin.assignments.index')
             ->with('success', 'تم تحديث الواجب بنجاح');
