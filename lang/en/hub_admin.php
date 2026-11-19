@@ -33,6 +33,7 @@ return [
     'disable' => 'Disable', 'enable' => 'Enable', 'reset_password' => 'Reset password', 'password_reset' => 'Password reset; copy it now',
     'password_once' => 'Password (shown only now):', 'confirm_reset' => 'A new password will be generated. Continue?',
     'conflict_notice' => 'An existing account with the same data was found on the platform. It is never linked automatically; review it, then choose "Link after review".',
+    'parent_gender' => 'Parent gender (required for a new parent)',
     'link_after_review' => 'Link after review', 'external_id' => 'Account id on the platform',
     'parent_of' => 'Children', 'child_of' => 'Parents', 'no_accounts' => 'No accounts yet',
     'status_pending' => 'Pending', 'status_needs_info' => 'Needs info', 'status_active' => 'Active', 'status_conflict' => 'Conflict',

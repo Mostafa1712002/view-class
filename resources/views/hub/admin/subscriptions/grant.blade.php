@@ -30,6 +30,7 @@
 <div class="col-md-4 mb-2"><label for="{{ $f }}">{{ __('hub_admin.'.$f) }}</label><input class="form-control" id="{{ $f }}" name="{{ $f }}" value="{{ old($f) }}"></div>
 @endforeach
 <div class="col-md-4 mb-2"><label for="gender">{{ __('hub_admin.gender') }}</label><select class="form-control" id="gender" name="gender">@foreach(['male', 'female'] as $g)<option value="{{ $g }}" @selected(old('gender') === $g)>{{ __('hub_admin.'.$g) }}</option>@endforeach</select></div>
+<div class="col-md-4 mb-2"><label for="parent_gender">{{ __('hub_admin.parent_gender') }}</label><select class="form-control" id="parent_gender" name="parent_gender"><option value="">—</option>@foreach(['male', 'female'] as $g)<option value="{{ $g }}" @selected(old('parent_gender') === $g)>{{ __('hub_admin.'.$g) }}</option>@endforeach</select></div>
 <div class="col-md-4 mb-2"><label for="stage">{{ __('hub_admin.stage') }}</label><select class="form-control" id="stage" name="stage">@foreach(['primary', 'intermediate', 'secondary'] as $g)<option value="{{ $g }}" @selected(old('stage') === $g)>{{ __('hub_admin.stage_'.$g) }}</option>@endforeach</select></div>
 </div></fieldset>
 <div class="form-row">

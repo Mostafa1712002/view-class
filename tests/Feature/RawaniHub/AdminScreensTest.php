@@ -163,7 +163,7 @@ class AdminScreensTest extends TestCase
         $this->post('/admin/hub/subscriptions/grant', ['package_id' => $pkg->id, 'mode' => 'existing', 'national_ids' => '9999999999'])->assertSessionHasErrors('national_ids');
 
         $this->post('/admin/hub/subscriptions/grant', ['package_id' => $pkg->id, 'mode' => 'new', 'name' => 'طالب جديد', 'gender' => 'male',
-            'national_id' => '2000000002', 'stage' => 'primary', 'grade' => 3, 'parent_name' => 'ولي', 'parent_national_id' => '3000000003'])->assertRedirect();
+            'national_id' => '2000000002', 'stage' => 'primary', 'grade' => 3, 'parent_name' => 'ولي', 'parent_national_id' => '3000000003', 'parent_gender' => 'female'])->assertRedirect();
         $new = User::where('national_id', '2000000002')->firstOrFail();
         $this->assertTrue($new->hasRole('student'));
         $this->assertSame(1, HubSubscription::where('user_id', $new->id)->count());

@@ -14,5 +14,6 @@ final readonly class BeneficiaryData
         public ?string $phone = null,
         public ?string $parentName = null,
         public ?string $parentNationalId = null,
+        public ?string $parentGender = null, // male|female, required when a NEW parent is created
     ) {}
 }

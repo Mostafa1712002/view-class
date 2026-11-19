@@ -66,11 +66,14 @@ final class FindOrCreateBeneficiary
             if (! $d->parentName) {
                 throw ValidationException::withMessages(['parent_name' => 'required with a new parent']);
             }
+            if (! in_array($d->parentGender, ['male', 'female'], true)) {
+                throw ValidationException::withMessages(['parent_gender' => 'male|female, required with a new parent']);
+            }
             $username = $this->username('rwp');
             $parent = User::create([
                 'school_id' => $this->schoolId(), 'name' => $d->parentName, 'name_ar' => $d->parentName,
                 'username' => $username, 'email' => $username.'@viewclass.local',
-                'national_id' => $d->parentNationalId, 'password' => Hash::make(Str::random(20)),
+                'national_id' => $d->parentNationalId, 'gender' => $d->parentGender, 'password' => Hash::make(Str::random(20)),
                 'is_active' => true, 'status' => 'active',
             ]);
             $this->assignRole($parent, 'parent');

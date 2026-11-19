@@ -14,6 +14,9 @@ class GrantRequest extends FormRequest
     public function rules(): array
     {
         $new = $this->input('mode') === 'new';
+        // A parent is created only when the national ID is not on file yet; an existing parent keeps the stored gender.
+        $newParent = $new && $this->filled('parent_national_id')
+            && ! \App\Models\User::where('national_id', $this->input('parent_national_id'))->exists();
 
         return [
             'package_id' => ['required', 'integer'],
@@ -30,6 +33,7 @@ class GrantRequest extends FormRequest
             'grade' => [$new ? 'required' : 'nullable', 'integer', 'min:1', 'max:12'],
             'parent_name' => ['nullable', 'string', 'max:191'],
             'parent_national_id' => ['nullable', 'string', 'max:20'],
+            'parent_gender' => [$newParent ? 'required' : 'nullable', 'in:male,female'],
         ];
     }
 }

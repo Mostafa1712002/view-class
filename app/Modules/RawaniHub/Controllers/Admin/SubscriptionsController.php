@@ -49,7 +49,7 @@ class SubscriptionsController extends Controller
                 $userIds[] = $beneficiary->execute(new BeneficiaryData(
                     name: $request->input('name'), gender: $request->input('gender'), nationalId: $request->input('national_id'),
                     stage: $request->input('stage'), grade: (int) $request->input('grade'),
-                    parentName: $request->input('parent_name'), parentNationalId: $request->input('parent_national_id'),
+                    parentName: $request->input('parent_name'), parentNationalId: $request->input('parent_national_id'), parentGender: $request->input('parent_gender'),
                 ))->id;
             } catch (NationalIdCollision $e) {
                 throw ValidationException::withMessages(['national_id' => $e->getMessage()]);
