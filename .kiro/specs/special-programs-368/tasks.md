@@ -303,9 +303,11 @@ If a feature task finds a shared-file change it needs, it appends the request he
 ## Phase 9 — Verification, rollout
 
 ### T9.1 Cross-cutting access test + review
-- [ ] `tests/Feature/SpecialPrograms/AccessTest.php`. Students and parents get 403 on every `manage.special-programs.*` GET route (enumerate the routes by name prefix). School A gets 404 on school B's exam, report and enrolment ids. A teacher sees only his own exams. A parent cannot see another child. Super-admin-only settings return 403 for every other role.
-- [ ] Run all `--filter=SpecialPrograms` + `RbacSuperAdminRoutesTest` + `CounselingAccessTest` (regression)
-- [ ] Code review of the whole diff (Opus inline, or `/code-review`, or `codex:rescue`). Check it against D§13. Make sure no correct answer reaches the browser before close.
+- [x] `tests/Feature/SpecialPrograms/AccessTest.php`. Students and parents get 403 on every `manage.special-programs.*` GET route (enumerate the routes by name prefix). School A gets 404 on school B's exam, report and enrolment ids. A teacher sees only his own exams. A parent cannot see another child. Super-admin-only settings return 403 for every other role.
+- [x] Run all `--filter=SpecialPrograms` + `RbacSuperAdminRoutesTest` + `CounselingAccessTest` (regression)
+- [x] Code review of the whole diff (Opus inline, or `/code-review`, or `codex:rescue`). Check it against D§13. Make sure no correct answer reaches the browser before close.
+
+**Outcome:** `AccessTest` (7 tests): students/parents 403 on every `manage.special-programs.*` GET (enumerated), super-admin-only settings 403 for school-admin/teacher/student/parent, school A 404 on school B exam/enrolment/group/teacher-row/student-report ids (writes leave B untouched), teacher sees only his exams, parent only his child, student only his own attempts, super-admin with no school scope gets no 4xx/5xx. Review fixes: import image path confinement + re-run keeps staff deletions, null answer key never scores, teacher-reports sidebar link, groups/teachers tabs gated by `manage`, school settings use `program-tabs`, trait loads `2026_07_25_100000`.
 
 ### T9.2 Local end-to-end (local-first rule)
 - [ ] Local MySQL: run the import (T2.2), then follow the acceptance flow in a browser (Playwright). As school-admin, enrol a grade-10 student in قدرات, create a qiyas exam (verbal + quant) for his class, and check the empty-level warning. As the student, take the exam, reload mid-way (the timer keeps going), let one subject time out. As school-admin, open the report and «تقرير أداء الطالب», then export Excel and PDF. As the parent, view the report.
@@ -341,5 +343,5 @@ If a feature task finds a shared-file change it needs, it appends the request he
 | 5. Student attempt | 2 | 2 | Done |
 | 6. Reports | 3 | 3 | Done |
 | 7. Teacher & parent | 2 | 2 | Done |
-| 9. Verification & rollout | 3 | 0 | Not Started |
-| **Total** | **21** | **18** | **86%** |
+| 9. Verification & rollout | 3 | 1 | In Progress |
+| **Total** | **21** | **19** | **90%** |
