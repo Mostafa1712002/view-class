@@ -615,3 +615,9 @@ Defaults in place, no answer needed unless the client disagrees:
 - Q3: existing account on a sub-platform (same national id / email) → "conflict", linked only after admin review; no auto-link.
 - Q5: آفاق = show login + generated password inside Rawani; no one-tap login / no new app releases now.
 - Precondition checks (read-only, live, 2026-11-19): aafaq `cron/resync_subscriptions.php` runs from root crontab via CLI (no URL trigger seen in access logs) → CLI-only guard is safe. anawlqdrat: **940** users `status='inactive'`, not blocked, not deleted → do NOT refuse `inactive` at login; Phase 0 limits enforcement to `blocked` (+ token revoke) and documents `inactive` as "pending admin review". Rawani "disable" uses `blocked`.
+
+## Decisions 2026-11-19 (round 2, user)
+- Q2 الأول: one «رواني» complex with 6 schools (3 stages × بنين/بنات); buyers are placed by grade automatically; the complex manager assigns exams to those sections (no auto-assign).
+- Q4 Mail: credentials are sent from **no-reply@rawaniedu.com** (mailbox already exists on Hostinger mail for rawaniedu.com; configure SMTP on rawani + verify SPF/DKIM at rollout).
+- Q7 آفاق kid login: generated `rw<id>@rawaniedu.com` placeholder email + generated password, shown to the parent.
+- Q8 Prices are VAT-inclusive (15%); buyer gets a simple payment receipt (no ZATCA e-invoice for now).
