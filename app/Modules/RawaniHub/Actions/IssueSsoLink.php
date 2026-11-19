@@ -35,7 +35,10 @@ final class IssueSsoLink
             throw new AuthorizationException('platform is not enabled');
         }
 
-        $result = (new PlatformClient((string) $platform->base_url, (string) $platform->secret))->sso($account->role, $owner->id);
+        // A platform marked sso=false (no SSO page live yet) never gets a code burned: show the credentials instead.
+        $result = ($platform->capabilities['sso'] ?? true)
+            ? (new PlatformClient((string) $platform->base_url, (string) $platform->secret))->sso($account->role, $owner->id)
+            : new \App\Modules\RawaniHub\DTOs\PlatformResult('unsupported', 501);
 
         if ($result->ok() && ! empty($result->data['url']) && self::onPlatformSite((string) $result->data['url'], (string) $platform->base_url)) {
             ActivityLog::log('hub.account.open', "فتح حساب المنصة #{$account->id}", $account, null, ['by' => $actor->id]);
