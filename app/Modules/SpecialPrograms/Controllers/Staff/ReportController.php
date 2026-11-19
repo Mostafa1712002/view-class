@@ -120,7 +120,8 @@ class ReportController extends Controller
         $chart = ['labels' => array_column($bands, 'name'), 'data' => array_map(fn ($b) => (int) ($counts[$b['key']] ?? 0), $bands),
             'colors' => array_column($bands, 'color')];
 
-        $classes = DB::table('classes')->when($f->school, fn ($q) => $q->where('school_id', $f->school))->orderBy('name')->get(['id', 'name', 'grade_level']);
+        // classes have no school_id column: scope through their section.
+        $classes = DB::table('classes')->when($f->school, fn ($q) => $q->whereIn('section_id', DB::table('sections')->select('id')->where('school_id', $f->school)))->orderBy('name')->get(['id', 'name', 'grade_level']);
 
         return view('special-programs.reports.index', [
             'program' => $program, 'filters' => $f, 'sections' => $sections, 'bands' => $bands, 'chart' => $chart,

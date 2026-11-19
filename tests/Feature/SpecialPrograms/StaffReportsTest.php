@@ -54,8 +54,12 @@ class StaffReportsTest extends TestCase
         $school = School::factory()->create();
         $student = $this->person('student', $school);
         $this->attempt($school, $student);
+        $mine = \App\Models\ClassRoom::factory()->create(['name' => 'OWN-CLASS', 'section_id' => \App\Models\Section::factory()->create(['school_id' => $school->id])->id]);
+        \App\Models\ClassRoom::factory()->create(['name' => 'OTHER-CLASS', 'section_id' => \App\Models\Section::factory()->create()->id]);
         foreach (['qiyas', 'tahsili', 'nafis'] as $p) {
-            $this->actingAs($this->person('school-admin', $school))->get(route('manage.special-programs.reports.index', $p))->assertOk();
+            // class filter lists the school's classes through their section (classes have no school_id)
+            $this->actingAs($this->person('school-admin', $school))->get(route('manage.special-programs.reports.index', $p))->assertOk()
+                ->assertSee('OWN-CLASS')->assertDontSee('OTHER-CLASS');
         }
         $this->actingAs($student->fresh())->get(route('manage.special-programs.reports.index', 'qiyas'))->assertForbidden();
 
