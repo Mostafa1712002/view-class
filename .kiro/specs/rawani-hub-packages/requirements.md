@@ -103,6 +103,7 @@ Background research for this spec lives in `research-rawani.md`, `research-anawl
 
 #### US-014: Automatic accounts on the included platforms
 - WHEN a subscription becomes active THE SYSTEM SHALL ensure that a platform account exists for the beneficiary on every platform in the snapshot, and on Al-Awwal for their parent too. Al-Awwal requires a parent, and the parent role is the only parent concept any sub-platform has.
+- WHEN a buyer starts checkout and data a platform requires is missing THE SYSTEM SHALL ask for it before creating the invoice.
 - WHEN required identity data is missing (for example Al-Awwal needs the national ID of the student and the parent) THE SYSTEM SHALL mark the account `needs_info`, show what is missing, and SHALL NOT call the platform.
 - WHEN the platform reports that an account with the same key already exists and is not linked to Rawani THE SYSTEM SHALL mark the account `conflict` and SHALL NOT take it over. Only an admin can confirm a link.
 - WHEN a call fails with a timeout, a 5xx or a 429 THE SYSTEM SHALL retry with backoff. After the last retry THE SYSTEM SHALL mark the account `failed` with the error.
@@ -195,7 +196,7 @@ Background research for this spec lives in `research-rawani.md`, `research-anawl
 - On viewclass.newaves-systems.com the hub has no routes, schedules or menu. Its tables exist but stay empty.
 
 ### NFR-004 Localisation
-- Every UI string is in `lang/ar/hub.php` and `lang/en/hub.php`. Arabic is primary.
+- Every UI string is in the `lang/{ar,en}/hub_*.php` files (one per screen group, design §3.5). Arabic is primary.
 
 ### NFR-005 Performance
 - Directory lists are paginated server-side. The mirror runs in pages of at most 500 rows, which matters because aafaq has 100k+ accounts.

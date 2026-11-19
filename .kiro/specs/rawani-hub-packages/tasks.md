@@ -12,6 +12,12 @@ Rules for every implementer:
 - **Ambiguity.** On an architectural or product ambiguity, stop and report back. Don't decide.
 - **ClickUp.** Each phase gets a team-visible ClickUp card (Midade workspace) when work starts, per the user's global rule.
 - **Live.** Deploy and SSH steps are done by the orchestrator, not implementer agents. Local first, live last.
+- **One agent per sub-platform repo per phase, working sequentially.** Inside one sub-platform repo the tasks share hot files:
+  - alawal: `routes/web.php` (0.1, 0.2)
+  - aafaq: `api/public/index.php` (0.4, 0.5, 0.6, 2F.*)
+  - anawlqdrat: the auth controllers (0.7, 2Q.*)
+
+  So that repo's tasks run in order. Parallelism is across repos.
 
 ---
 
@@ -35,6 +41,7 @@ The three repos are independent and can run in parallel.
 - [ ] Test
 
 ### Task 0.4 (aafaq): Close the open user endpoints (P0-AF-1, P0-AF-4)
+- [ ] **Precondition (orchestrator, read-only):** find how `cron/*.php` and `update_payments.php` actually run on live: crontab, an external URL ping with `?key=`, or not at all. If they are triggered by URL, the CLI-only guard must not ship until the trigger is moved to a crontab CLI entry.
 - [ ] Grep `afaq_reading`, `afaq_abilities_app` and the aafaq web pages for callers of each endpoint, and record the findings in the PR body
 - [ ] `getAllStudents` and `deleteStudentByEmail` require an admin session or are removed
 - [ ] `getStudentData` and `updateProfile` require credential material, or return reduced fields where the apps can't send it
@@ -52,6 +59,9 @@ The three repos are independent and can run in parallel.
 - [ ] Otherwise document risk R9 and stop
 
 ### Task 0.7 (anawlqdrat): Make blocking mean blocked (P0-AQ-1..3)
+- [ ] **Precondition (orchestrator, read-only):** on prod, count users with `status='inactive'`, `blocked=0` and not deleted, plus how many of them have an active subscription or logged in within 90 days. Self-registration creates `inactive` users, and login never checked the status before. The local snapshot (2025-10) has 6 such users, 1 of them with a recent login.
+  - If the active-use count is 0, ship as written.
+  - Otherwise, either set those users to `active` (the list goes to the client first) or limit the new rule to `blocked` and document `inactive` as "pending admin review". Decide before merging.
 - [ ] Refuse login for `status='inactive'`, the same as `blocked`
 - [ ] Revoke tokens on block, inactive, admin delete and self-delete
 - [ ] Add an `auth:api` middleware that returns 401 for blocked, inactive or soft-deleted users
@@ -109,7 +119,7 @@ Tasks 1.1–1.7 can run in parallel, and only 1.8 touches shared files. Until 1.
 - [ ] Arabic labels per design §3.5
 - [ ] Platform «اختبار الاتصال» and «توليد السر» (shown once)
 - [ ] Person page: accounts with status, last sync, error, credentials reveal and the retry, enable/disable and reset actions
-- [ ] `lang/ar/hub.php` and `lang/en/hub.php` with flat keys
+- [ ] `lang/{ar,en}/hub_admin.php` with flat keys (other tasks own `hub_my`, `hub_payments` and `hub_directory`)
 - [ ] Access tests (super-admin 200; school-admin, parent and student 403) and form tests
 
 ### Task 1.8: Wiring (the only task that edits shared files)
@@ -165,10 +175,13 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 - [ ] Routes in a new `app/Application/Api/routes/V1/Modules/Rawani/*.php`
 - [ ] Feature tests
 
-### Task 2Q.3 (anawlqdrat backend + anawlqdrat-front): SSO
+### Task 2Q.3 (anawlqdrat backend): SSO
 - [ ] `POST …/sso`, then the public `POST user/auth/sso/exchange` (throttled, re-runs the login checks, logs `login_type='sso'`)
-- [ ] SPA route `/sso` on `deploy-symmetry-fix`: exchange → `auth/attempt` → clear exam localStorage → `/`
-- [ ] Tests for both
+- [ ] Tests
+
+### Task 2Q.5 (anawlqdrat-front, branch `deploy-symmetry-fix`): SSO route
+- [ ] Route `/sso`: exchange → `auth/attempt` → clear exam localStorage → `/`
+- [ ] Local build check. The dist is copied to live by hand by the orchestrator.
 
 ### Task 2Q.4 (anawlqdrat): Wiring
 - [ ] Require the Rawani route file in `Api/routes/api.php`
@@ -218,10 +231,12 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 - [ ] Tests per design §9
 
 ### Task 3.4: «باقاتي» (parent and student) + add child
+- [ ] `lang/{ar,en}/hub_my.php`
 - [ ] List, buy (child picker or self), add-child form (national ID required when the package includes Al-Awwal), return/status page polling account statuses, credentials view
 - [ ] Tests, including another parent's child → 403
 
 ### Task 3.5: Payments admin + manual refund
+- [ ] `lang/{ar,en}/hub_payments.php`
 - [ ] Payments list with flags, «تحقق» (re-fetch) and «تسجيل استرداد»
 - [ ] Tests
 
@@ -245,6 +260,7 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 - [ ] Tests against `FakePlatform` paging
 
 ### Task 4.2: Directory screen + person page links
+- [ ] `lang/{ar,en}/hub_directory.php` (4.3 runs after 4.2 and reuses it)
 - [ ] Two tabs, filters and server pagination (design §3.5)
 - [ ] The person page shows the parent↔child links on both the Rawani and platform sides
 
@@ -270,7 +286,7 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 - [ ] Tests
 
 **Outcome:** one click from Rawani into alawal and anawlqdrat.
-**Dependencies:** 2A.3 and 2Q.3 live.
+**Dependencies:** 2A.3, 2Q.3 and 2Q.5 live. 5.1 adds its strings to `hub_my.php`, so it runs after 3.4.
 
 ---
 
@@ -292,11 +308,18 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 |-------|-------|-----------|--------|
 | 0. Security prerequisites | 7 | 0 | Not started |
 | 1. Rawani hub core | 9 | 0 | Not started |
-| 2. Contract on sub-platforms | 11 | 0 | Not started |
+| 2. Contract on sub-platforms | 12 | 0 | Not started |
 | 3. Online purchase | 6 | 0 | Not started |
 | 4. Master directory | 4 | 0 | Not started |
 | 5. SSO-lite | 1 | 0 | Not started |
 | 6. Live rollout | 7 | 0 | Not started |
-| **Total** | **45** | **0** | **0%** |
+| **Total** | **46** | **0** | **0%** |
 
-Waiting on the client (design §11): Q1–Q8. Phases 0–2 can start without any answers. Q2 blocks the Al-Awwal live placement, and Q1/Q7 affect Phase 3 copy and rules only.
+Waiting on the client (design §11): Q1–Q8.
+- Phases 1–2 can start without any answers.
+- Phase 0 mostly can too, with three exceptions:
+  - 0.1 removes a reset flow that is in use (926 tokens issued), so tell the client before it goes live. The replacement is Q6.
+  - 0.6 needs the RevenueCat secret key.
+  - 0.7 needs the prod count above.
+- Q2 blocks the Al-Awwal live placement.
+- Q1, Q7 and Q8 affect Phase 3 copy and rules only.

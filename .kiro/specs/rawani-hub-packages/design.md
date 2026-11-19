@@ -144,6 +144,12 @@ hub_platform_accounts (                    -- the person↔account map AND the d
 
 Two tables collapse into one here: the account map and the directory mirror. A row created by provisioning has `user_id`, and its `external_id` is filled once the platform answers. A row created by the mirror has `external_id` and starts with `user_id NULL` (`unlinked`). Linking sets `user_id`. The unique keys keep this from producing duplicates.
 
+The mirror matches each incoming item in this order:
+1. If the item carries a `rawani_id`, by (platform, role, `user_id`). This catches a create that timed out before Rawani stored the `external_id`.
+2. Otherwise by (platform, role, `external_id`).
+
+The mirror fills only the mirror columns, never the provisioning ones.
+
 ### 3.2 Entitlements (`EntitlementCalculator`)
 
 For person U and product (P, X), the window is computed from U's `active` subscriptions whose `items` snapshot contains (P, X):
@@ -192,6 +198,7 @@ mirror only:  unlinked ──admin link/create person──► active        any
 - `hub:sync-pending` runs every 5 minutes. It re-dispatches rows with `needs_sync=1` in `pending`, `active` or `disabled` whose last attempt was more than 10 minutes ago. This recovers lost jobs.
 - Before calling, the job checks `required_fields` against the person and their `hub_profiles` row. If something is missing it sets `needs_info` and stores the list of missing fields in `last_error`.
 - Platform disabled → skip; the row stays dirty.
+- A student account on a platform with `parents=true` waits (stays `pending`, no HTTP call) until its parent's account on that platform is `active`. When the parent turns active, the job sets `needs_sync` on the waiting children.
 
 ### 3.4 Credentials
 
@@ -223,7 +230,13 @@ So no `PermissionCatalog` rows are added. If the client later wants non-super-ad
 
 **Sidebar:** add a block «منصات رواني» inside the super-admin `extras` section (`resources/views/components/sidebar.blade.php`, next to the `isSuperAdmin()` promotion links, using `data-section="extras"`). It holds the items الباقات، الاشتراكات، المدفوعات، دليل المستخدمين، المنصات المرتبطة, each wrapped in `@if(Route::has(...))`. Students and parents get «باقاتي» in their own section, also gated by `Route::has('my.packages.index')`.
 
-**Lang:** `lang/ar/hub.php` and `lang/en/hub.php`, with flat keys only. The points module learned that dotted nested keys break `__()`.
+**Lang:** one file per screen group, so that parallel tasks never edit the same file:
+- `hub_admin.php` (platforms, packages, subscriptions, person page)
+- `hub_my.php` («باقاتي» and SSO)
+- `hub_payments.php`
+- `hub_directory.php`
+
+Each exists in `lang/ar` and `lang/en` and uses flat keys only. The points module learned that dotted nested keys break `__()`.
 
 ### 3.6 Who buys
 
@@ -270,7 +283,11 @@ canonical = METHOD + "\n" + LOGICAL_PATH + "\n" + timestamp + "\n" + nonce + "\n
 
 - **METHOD** is uppercase.
 - **LOGICAL_PATH** is the path **after** the contract base, starting with `/`, without the query string. Example: `/accounts/student/42`. Each host strips its own prefix, so aafaq's `/api/public/index.php/rawani/v1/...` and `/api/rawani/v1/...` both sign `/accounts/...`.
-- **Query string (GET):** sorted by key, RFC 3986 encoded, appended to the path as `?a=1&b=2`. If there is no query, there is no `?`.
+- **Query string (GET):** sorted by key, RFC 3986 encoded (PHP `http_build_query($q, '', '&', PHP_QUERY_RFC3986)` after `ksort`), and appended to the path as `?a=1&b=2`.
+  - If there is no query, there is no `?`.
+  - Empty-valued params are **not sent and not signed**.
+  - The client builds the query string once and uses the same bytes in the URL and in the signature.
+  - The server rebuilds it from the parsed query with the same function.
 - **raw_body** is the exact bytes sent. For a GET it is the empty string, whose sha256 is `e3b0c442…b855`.
 - **Verification:**
   1. `abs(now - timestamp) <= 300`, else 401 `STALE_TIMESTAMP`.
@@ -292,6 +309,15 @@ nonce     = 6f1c2a7e-4b1d-4c55-9a3e-2d7f8b9c0a11
 body      = {"enabled":true}
 sha256(body) = 26b3426b2593763c96d0890b4a77a0bbf66d13fc512b0c6b138a23c290f30a2a
 signature    = 649d974bb2489f8152928ecb06016daaf88de38ee4d54dada045438fb7a508b2
+
+# second vector: GET with an encoded query
+method    = GET
+query in  = {per: 500, cursor: "a b/c"}
+path      = /people?cursor=a%20b%2Fc&per=500
+timestamp = 1763550000
+nonce     = 0b7e1c4a-9d2f-4e61-8a3b-5c6d7e8f9a01
+body      = (empty)  sha256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+signature = 048cf64cf8727ac5b6688acff0a2b9a68d134b65ff99fb5c49f5350ee9985745
 ```
 
 ### 4.2 Envelope
@@ -325,7 +351,7 @@ All four endpoints use the same envelope on all three hosts. It is ViewClass's o
     "name": "…", "gender": "male|female",
     "national_id": "1234567890|null", "email": "real@x.com|null", "phone": "+9665…|null",
     "stage": "primary|intermediate|secondary|null", "grade": 1,
-    "parent": { "rawani_id": 77, "national_id": "…", "name": "…" }   // student role, platforms with parents
+    "parent_rawani_id": 77      // student role, platforms with parents only; the parent is its own account (see rule 8)
   },
   "enabled": true,
   "password": "only-on-create-or-reset",          // omitted otherwise; never stored in logs
@@ -346,7 +372,13 @@ Rules every platform follows:
 6. **`entitlements`:** replace all Rawani-owned grants for this account with the list.
    - Only grants tagged as Rawani's are touched. Access from schools, orgs, codes and other payments is never changed.
    - An empty list removes Rawani's grants and nothing else.
-7. **Response:** `200 {"external_id":"5531","login":"1234567890","created":true,"managed":true}`.
+7. **`password` on an existing account:** if the account is managed, set it (this is the reset). If it is linked, ignore it. Never return it.
+8. **Parents (platforms with `parents=true`):**
+   - A parent is upserted by its own `PUT /accounts/parent/{parent_rawani_id}`, with the same rules, its own 409 and its own password (the parent person's).
+   - A student PUT resolves its parent **only** by `parent_rawani_id` on the parent's stored Rawani id. If it is not there, the platform answers 422 `PARENT_NOT_LINKED`.
+   - Rawani orders the work: the student account's job does nothing while the parent account is not `active`. It stays `pending` with «بانتظار حساب ولي الأمر». It runs again when the parent turns active.
+   - So an existing Al-Awwal parent, which is the common case, goes through `conflict` → admin link once, and from then on all their Rawani children attach to it.
+9. **Response:** `200 {"external_id":"5531","login":"1234567890","created":true,"managed":true}`. A 409 carries the `external_id` and `login` of the existing account **for the role in the path**.
 
 **3. `POST /accounts/{role}/{rawani_id}/sso`** (only platforms with the `sso` capability).
 - Response: `{"url":"https://alawal.online/rawani/sso/<64-char token>","expires_at":"…"}`.
@@ -383,7 +415,7 @@ Throughput: aafaq has more than 100k accounts. At 500 rows a page that is about 
 | Where the Rawani id lives | new nullable unique `rawani_user_id` on `students` and `my__parents` | new nullable unique `users.rawani_user_id` | new nullable unique `reg_students.rawani_user_id` |
 | Natural key for 409 | (role, `identity_number`), which is unique and also reserved by soft-deleted students | none reliable. The username `rw<rawani_id>` is checked against email, phone and username, because login ORs all three. | `email` (UNIQUE) |
 | Login shown to the person | the national ID | `rw<rawani_id>` | the email: the person's real email if it is free in aafaq, otherwise `rw<rawani_id>@rawaniedu.com` (needs Q7: confirm the domain; aafaq never verifies email) |
-| Create also sets | Student placement: a new «رواني» complex holding one school per (stage × gender) with standard classrooms and one section «رواني» each. Mapping table `rawani_placements(stage, gender, grade → Grade_id, Classroom_id, section_id)`, filled by Al-Awwal admins on prod (data, not seed). `gender_id` comes from the school. The parent is upserted first by the same rules (role parent) and `parent_id` is set. A soft-deleted student is restored (`withTrashed()->restore()`). | `type=student`, `status=active`, `email_verified_at=now()`. Email only if it is real and unique across all three login columns, otherwise `''`. No org (the personal subscription is enough). | `password = passwordForStorage(credentialMaterial(plain))`, which is bcrypt of the uppercase SHA-256. `school` and `school_id` = `getDefaultSchoolId()` (5398 «شركة رواني» on live). `year` = grade, `term` = 1, `class` = `''`, `platform` = 0, `mobile` = phone or `''`. |
+| Create also sets | Student placement: a new «رواني» complex holding one school per (stage × gender) with standard classrooms and one section «رواني» each. Mapping table `rawani_placements(stage, gender, grade → Grade_id, Classroom_id, section_id)`, filled by Al-Awwal admins on prod (data, not seed). `gender_id` comes from the school. `parent_id` is resolved from `profile.parent_rawani_id` (contract rule 8; 422 `PARENT_NOT_LINKED` when it is missing). A soft-deleted student is restored (`withTrashed()->restore()`). | `type=student`, `status=active`, `email_verified_at=now()`. Email only if it is real and unique across all three login columns, otherwise `''`. No org (the personal subscription is enough). | `password = passwordForStorage(credentialMaterial(plain))`, which is bcrypt of the uppercase SHA-256. `school` and `school_id` = `getDefaultSchoolId()` (5398 «شركة رواني» on live). `year` = grade, `term` = 1, `class` = `''`, `platform` = 0, `mobile` = phone or `''`. |
 | Entitlement → access | No subscription concept, so Rawani's window becomes `rawani_access_until` on the student. The login gate for **managed** accounts is `is_active AND rawani_access_until >= now()`. **Linked** real-school students are never gated by it. | One `subscribes` row (User morph, exact string `App\Domain\User\Models\User`) per account, tagged with a new `subscribes.rawani_ref` UNIQUE = `rawani:<rawani_id>`. Start and end are set from the window. `[]` sets `status=expired` on that row only. When a window is shortened into the past, Passport tokens are revoked, because the subscription is only checked at login. The bridge skips the admin-UI `orgSubscriptionExceededBy` cap. `hasActiveSubscription()` ORs the personal row with the org row, so a personal row can stand on its own. | One `subscriptions` row per product: `subscription_type='user'`, `entity_id`, `app_type` 0 for reading and 1 for verbal, `payment_id='rawani:<rawani_id>:<product>'` (UNIQUE gives idempotency), then `applySubscriptionToUsers()`. `[]` sets `is_active=0` on those rows and runs the existing expire logic for that user. Known caveat: the expire cron zeroes `has_*_code` even when the user also redeemed a code (pre-existing, risk R8). |
 | Disable | Students: `is_active=0` (existing column, enforced from Phase 0). Parents: new `is_active` column plus a login check. Sets `rawani_disabled=1`. | `blocked=1` plus revoke all tokens. Sets `rawani_disabled=1`. | New `reg_students.is_active` (default 1), checked in `login`, `editedLogin`, `editedLogin2` and `checkUserPass`. Sets `rawani_disabled=1`. |
 | SSO | `POST sso` → `GET /rawani/sso/{token}` (web, no auth) → `Auth::guard($role)->login($model)` → the guard's home | `POST sso` returns `https://anawlqdrat.com/sso?code=…`. A public `POST /api/v1/user/auth/sso/exchange {code}` re-runs the login checks and returns a Passport token. A new SPA route `/sso` calls exchange, then `auth/attempt`, clears exam localStorage and goes to `/`. | `501 NOT_SUPPORTED`. Rawani shows the email and password and the store and .exe links. One-tap needs app releases by the external developer (Q5). |
@@ -404,6 +436,7 @@ We keep the 2026-08-29 decision: **hosted invoices**, no card form in our pages.
 `MoyasarGateway` uses `Http::withBasicAuth(secret,'')` against `config('moyasar.api_url')`. It does not add an SDK (moyasar-payments design, "Why no package").
 
 1. **Checkout** (`StartCheckout`):
+   - First, run the job's required-fields check (§3.3) for every account the package will create, including the parent's national ID on Al-Awwal. If anything is missing, show the form to complete it before any invoice exists, so a buyer never pays and then lands in `needs_info`.
    - In one DB transaction, create a `hub_subscriptions` row (pending, items snapshot, price) and a `hub_payments` row (pending, amount = price×100).
    - `POST /v1/invoices` with `{amount, currency:"SAR", description:"باقة <name> — <beneficiary>", callback_url: route('my.packages.return',$payment), metadata:{site: config('moyasar.site'), rawani_payment_id: $payment->id}}`.
    - **Never send metadata keys named `email` or `app`.** aafaq's `paymentBuyer()` would act on them.
@@ -422,7 +455,7 @@ We keep the 2026-08-29 decision: **hosted invoices**, no card form in our pages.
    3. If the row is already `paid`, record `duplicate` and stop.
    4. Otherwise set the payment to `paid` (`moyasar_payment_id`, `paid_at`) and set the subscription to `active` with `starts_at = max(now, last ends_at of the same user+package)` and `ends_at = starts_at + duration_days`.
    5. Mark the accounts dirty, then dispatch the sync jobs `afterCommit`.
-5. **Reconcile:** `hub:reconcile-payments` runs every 10 minutes. It checks pending payments older than 10 minutes and younger than 48 hours through the invoice API, then marks the rest `failed` after 48 hours. This also covers the case where the Moyasar account cannot hold a second webhook registration (unverified, risk R3).
+5. **Reconcile:** `hub:reconcile-payments` runs every 10 minutes. It checks pending payments older than 10 minutes and younger than 48 hours through the invoice API, then marks the rest `failed` after 48 hours, and their pending subscriptions `cancelled`. This also covers the case where the Moyasar account cannot hold a second webhook registration (unverified, risk R3).
 6. **Refund (manual):**
    1. The admin refunds in the Moyasar dashboard.
    2. In Rawani, «تسجيل استرداد» with a note sets the payment to `refunded` and the subscription to `refunded`.
@@ -561,11 +594,17 @@ Data goes only to rawaniedu: platform rows, secrets, packages and the hub school
 
 ## 11. Open questions for the client (only they can answer)
 
-- **Q1** Who can buy online? Only existing Rawani accounts (parents and students the admin created), or a public «سجّل واشترِ» page on rawaniedu.com? (Default: existing accounts only, in this spec.)
-- **Q2** Al-Awwal placement: is a separate «رواني» complex (one school per stage and gender, section «رواني») OK? Who assigns exams to those sections?
-- **Q3** When a buyer already has an account on a platform (same national ID or email), do we link after admin review (default) or create a separate account?
-- **Q4** Expiry and refund: access closes but the account stays (default). Is that right? Which mailbox should send credentials once mail is set up?
-- **Q5** aafaq apps: are on-screen email and password enough for now, or should the app developer add one-tap login (new store releases)? Do aafaq's own 40 SAR/year payment and the iOS purchase stay alongside packages?
-- **Q6** Al-Awwal forgot-password: after we close the open reset, should users reset through the school admin only, or through their Rawani parent account?
-- **Q7** Login email for aafaq children without their own email: is `rw<id>@rawaniedu.com` acceptable? Are prices VAT-inclusive, and is a tax invoice needed?
-- **Q8** Should anyone other than super-admins (for example a Rawani sales role) manage packages and grants? Do teacher packages exist?
+- **Q1** Online purchase: only for existing Rawani accounts, or also a public «سجّل واشترِ» page? (Default: existing accounts only.)
+- **Q2** Al-Awwal: is a separate «رواني» complex with section «رواني» OK, and who assigns exams to it?
+- **Q3** A buyer who already has an account on a platform: link it after admin review (default) or create a new one?
+- **Q4** Which mailbox should send login details? Until one exists, they are shown inside Rawani only.
+- **Q5** aafaq apps: are on-screen email and password enough, or should the app developer add one-tap login (new store releases)?
+- **Q6** Al-Awwal forgot-password after we close the open reset: through the school admin only, or through the Rawani parent?
+- **Q7** Is `rw<id>@rawaniedu.com` OK as the aafaq login for children with no email?
+- **Q8** Are prices VAT-inclusive, and is a tax invoice needed?
+
+Defaults in place, no answer needed unless the client disagrees:
+- Expiry closes access and keeps the account.
+- Only super-admins manage the hub.
+- No teacher packages.
+- aafaq's own 40 SAR payment and the iOS purchase stay.
