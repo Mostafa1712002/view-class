@@ -5,6 +5,7 @@ namespace App\Modules\SpecialPrograms\Support;
 use App\Models\AcademicYear;
 use App\Models\ClassRoom;
 use App\Models\User;
+use App\Modules\SpecialPrograms\Repositories\Contracts\SettingsRepository;
 use Illuminate\Support\Collection;
 
 /** Eligible classes and readiness alerts for a school/program (D§6). */
@@ -27,7 +28,8 @@ final class ProgramAudience
     public static function classes(int $schoolId, string $program, bool $all = false): Collection
     {
         $yearIds = AcademicYear::where('school_id', $schoolId)->where('is_current', true)->pluck('id');
-        $grades = Programs::defaultGradeLevels($program);
+        // the super-admin «الصفوف المستهدفة» setting, falling back to the program defaults
+        $grades = app(SettingsRepository::class)->gradeLevels($program);
 
         $classes = ClassRoom::with('section')
             ->whereHas('section', fn ($q) => $q->where('school_id', $schoolId))

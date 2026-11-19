@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Modules\SpecialPrograms\Models\SpEnrollment;
 use App\Modules\SpecialPrograms\Repositories\Contracts\EnrollmentRepository;
 use Tests\Feature\SpecialPrograms\Concerns\LoadsSpMigrations;
+use App\Modules\SpecialPrograms\Support\ProgramAudience;
+use App\Modules\SpecialPrograms\Repositories\Contracts\SettingsRepository;
 use Tests\TestCase;
 
 class EnrollmentTest extends TestCase
@@ -37,6 +39,14 @@ class EnrollmentTest extends TestCase
         }
 
         return [$school, $class, $list];
+    }
+
+    public function test_eligible_classes_follow_the_target_grades_setting(): void
+    {
+        [$school, $class] = $this->schoolWithClass(10);
+        $this->assertFalse(ProgramAudience::classes($school->id, 'nafis')->contains('id', $class->id));
+        app(SettingsRepository::class)->saveGradeLevels('nafis', [10], $this->createSuperAdmin()->id);
+        $this->assertTrue(ProgramAudience::classes($school->id, 'nafis')->contains('id', $class->id));
     }
 
     public function test_enrol_bulk_restore_and_uniqueness(): void
