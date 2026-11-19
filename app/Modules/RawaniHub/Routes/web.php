@@ -30,6 +30,7 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin/hub')->name('admi
     Route::post('subscriptions/{subscription}/cancel', [SubscriptionsController::class, 'cancel'])->whereNumber('subscription')->name('subscriptions.cancel');
 
     Route::get('payments', [PaymentsController::class, 'index'])->name('payments.index');
+    Route::post('payments/{payment}/check', [PaymentsController::class, 'check'])->whereNumber('payment')->name('payments.check');
     Route::post('payments/{payment}/refund', [PaymentsController::class, 'refund'])->whereNumber('payment')->name('payments.refund');
     Route::get('payments/{payment}/receipt', [PaymentsController::class, 'receipt'])->whereNumber('payment')->name('payments.receipt');
 

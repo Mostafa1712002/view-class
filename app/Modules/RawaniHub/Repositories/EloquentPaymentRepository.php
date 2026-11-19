@@ -5,7 +5,9 @@ namespace App\Modules\RawaniHub\Repositories;
 use App\Modules\RawaniHub\Models\HubPayment;
 use App\Modules\RawaniHub\Models\HubPaymentEvent;
 use App\Modules\RawaniHub\Repositories\Contracts\PaymentRepository;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EloquentPaymentRepository implements PaymentRepository
 {
@@ -37,6 +39,11 @@ class EloquentPaymentRepository implements PaymentRepository
                 ->whereHas('subscription', fn ($s) => $s->where('status', '!=', 'active')))
             ->orderByDesc('id')
             ->paginate($perPage);
+    }
+
+    public function pendingCreatedBefore(CarbonInterface $before): Collection
+    {
+        return HubPayment::where('status', 'pending')->where('created_at', '<=', $before)->orderBy('id')->get();
     }
 
     public function create(array $attributes): HubPayment

@@ -12,4 +12,5 @@ return [
     'refund_note_label' => 'Note', 'refunded_at' => 'Refunded at',
     'receipt' => 'Receipt', 'receipt_title' => 'Payment receipt', 'receipt_no' => 'Receipt no.', 'vat_included' => 'Amount includes 15% VAT',
     'receipt_not_invoice' => 'This is a payment receipt, not an electronic tax invoice.', 'print' => 'Print', 'back' => 'Back',
+    'check' => 'Check', 'checked' => 'Moyasar check result: :outcome',
 ];

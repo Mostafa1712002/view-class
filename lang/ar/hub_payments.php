@@ -12,4 +12,5 @@ return [
     'refund_note_label' => 'ملاحظة', 'refunded_at' => 'تاريخ الاسترداد',
     'receipt' => 'إيصال', 'receipt_title' => 'إيصال دفع', 'receipt_no' => 'رقم الإيصال', 'vat_included' => 'المبلغ شامل ضريبة القيمة المضافة 15%',
     'receipt_not_invoice' => 'هذا إيصال دفع وليس فاتورة ضريبية إلكترونية.', 'print' => 'طباعة', 'back' => 'رجوع',
+    'check' => 'تحقق', 'checked' => 'نتيجة التحقق من Moyasar: :outcome',
 ];

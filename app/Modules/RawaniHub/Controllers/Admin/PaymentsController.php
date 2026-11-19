@@ -3,6 +3,7 @@
 namespace App\Modules\RawaniHub\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\RawaniHub\Actions\CheckInvoice;
 use App\Modules\RawaniHub\Actions\RecordRefund;
 use App\Modules\RawaniHub\Models\HubPaymentEvent;
 use App\Modules\RawaniHub\Repositories\Contracts\PaymentRepository;
@@ -25,6 +26,16 @@ class PaymentsController extends Controller
         $refund->execute($request->user(), $payment, $request->validate(['note' => 'required|string|max:500'])['note']);
 
         return back()->with('success', __('hub_payments.refunded'));
+    }
+
+    /** «تحقق»: re-fetch the invoice from Moyasar and apply a paid attempt (same path as the return page). */
+    public function check(int $payment, CheckInvoice $check)
+    {
+        $p = $this->payments->find($payment);
+        abort_unless($p, 404);
+        $outcome = $check->execute($p);
+
+        return back()->with($outcome === CheckInvoice::ERROR ? 'error' : 'success', __('hub_payments.checked', ['outcome' => $outcome]));
     }
 
     public function receipt(int $payment)

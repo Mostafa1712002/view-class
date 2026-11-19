@@ -4,7 +4,9 @@ namespace App\Modules\RawaniHub\Repositories\Contracts;
 
 use App\Modules\RawaniHub\Models\HubPayment;
 use App\Modules\RawaniHub\Models\HubPaymentEvent;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface PaymentRepository
 {
@@ -18,6 +20,9 @@ interface PaymentRepository
 
     /** Filters: status, flag (paid_without_active|unmatched). */
     public function paginate(array $filters = [], int $perPage = 20): LengthAwarePaginator;
+
+    /** Pending payments created at or before $before, oldest first (reconcile input). */
+    public function pendingCreatedBefore(CarbonInterface $before): Collection;
 
     public function create(array $attributes): HubPayment;
 

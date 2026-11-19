@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Modules\RawaniHub\Actions\AddChild;
 use App\Modules\RawaniHub\Actions\CompleteBeneficiaryProfile;
 use App\Modules\RawaniHub\Actions\NationalIdCollision;
+use App\Modules\RawaniHub\Actions\CheckInvoice;
 use App\Modules\RawaniHub\Actions\StartCheckout;
 use App\Modules\RawaniHub\DTOs\BeneficiaryData;
 use App\Modules\RawaniHub\Http\Requests\ChildRequest;
@@ -109,9 +110,14 @@ class MyPackagesController extends Controller
         return redirect()->route('my.packages.index')->with('success', __('hub_my.child_added'));
     }
 
-    public function return(Request $request, HubPayment $payment)
+    public function return(Request $request, HubPayment $payment, CheckInvoice $check)
     {
         $this->authorizePayment($request->user(), $payment);
+        // Design §6.2: ignore the query string, ask Moyasar about the stored invoice; applying is idempotent.
+        if (in_array($payment->status, ['pending', 'failed'], true)) {
+            $check->execute($payment);
+            $payment->refresh();
+        }
         $state = $this->state($payment);
 
         return view('hub.my.return', ['payment' => $payment, 'state' => $state, 'accounts' => $state['accounts'], 'canSee' => $this->canSee($request->user(), $payment->subscription->user_id)]);

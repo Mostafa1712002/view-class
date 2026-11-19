@@ -20,6 +20,9 @@
 <td dir="ltr">{{ $p->moyasar_invoice_id ?? '—' }}</td><td dir="ltr">{{ $p->moyasar_payment_id ?? '—' }}</td><td>{{ $p->paid_at?->format('Y-m-d H:i') ?? '—' }}</td>
 <td>@if($sub)<a href="{{ route('admin.hub.subscriptions.index', ['package_id' => $sub->package_id]) }}">{{ __('hub_payments.subscription') }} #{{ $sub->id }}</a><br>@endif
 @if(in_array($p->status, ['paid', 'refunded']))<a href="{{ route('admin.hub.payments.receipt', $p->id) }}">{{ __('hub_payments.receipt') }}</a>@endif
+@if(in_array($p->status, ['pending', 'failed']) && $p->moyasar_invoice_id)
+<form method="POST" action="{{ route('admin.hub.payments.check', $p->id) }}" class="mt-1">@csrf<button class="btn btn-sm btn-outline-primary">{{ __('hub_payments.check') }}</button></form>
+@endif
 @if($p->status === 'paid')
 <form method="POST" action="{{ route('admin.hub.payments.refund', $p->id) }}" class="mt-1" onsubmit="return confirm('{{ __('hub_payments.refund_confirm') }}')">@csrf
 <label class="sr-only" for="note{{ $p->id }}">{{ __('hub_payments.refund_note') }}</label>
