@@ -64,7 +64,7 @@ class StudentController extends Controller
         $upcomingExams = collect();
         if (! empty($classIds)) {
             $now = now();
-            $upcomingExams = Exam::whereIn('class_id', $classIds)
+            $upcomingExams = Exam::visibleToStudent($student->id)->whereIn('class_id', $classIds)
                 ->where('is_published', true)
                 ->where(function ($q) use ($now) {
                     $q->whereNull('end_time')
@@ -230,7 +230,7 @@ class StudentController extends Controller
                 // class. Includes exams already in progress (start_time in the
                 // past) as long as the window has not closed — those are the
                 // ones the student should be able to enter and take right now.
-                $upcomingExams = Exam::whereIn('class_id', $classIds)
+                $upcomingExams = Exam::visibleToStudent($student->id)->whereIn('class_id', $classIds)
                     ->where('academic_year_id', $selectedYear->id)
                     ->where('is_published', true)
                     ->where(function ($q) use ($now) {
@@ -389,7 +389,7 @@ class StudentController extends Controller
         $resultsByExam = collect();
 
         if (! empty($classIds)) {
-            $exams = Exam::whereIn('class_id', $classIds)
+            $exams = Exam::visibleToStudent($student->id)->whereIn('class_id', $classIds)
                 ->where('is_published', true)
                 ->when($academicYear, fn ($q) => $q->where('academic_year_id', $academicYear->id))
                 ->with('subject')

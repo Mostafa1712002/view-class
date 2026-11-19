@@ -200,7 +200,7 @@ class ParentController extends Controller
         $completedExams = collect();
 
         if ($academicYear && !empty($classIds)) {
-            $upcomingExams = Exam::whereIn('class_id', $classIds)
+            $upcomingExams = Exam::visibleToStudent($child->id)->whereIn('class_id', $classIds)
                 ->where('academic_year_id', $academicYear->id)
                 ->where('is_published', true)
                 ->where('start_time', '>=', now())
@@ -208,7 +208,7 @@ class ParentController extends Controller
                 ->orderBy('start_time')
                 ->get();
 
-            $completedExams = Exam::whereIn('class_id', $classIds)
+            $completedExams = Exam::visibleToStudent($child->id)->whereIn('class_id', $classIds)
                 ->where('academic_year_id', $academicYear->id)
                 ->where('is_published', true)
                 ->where('start_time', '<', now())

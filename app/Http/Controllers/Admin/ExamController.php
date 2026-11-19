@@ -141,6 +141,48 @@ class ExamController extends Controller
     }
 
     /**
+     * «طلاب محددين»: validated student ids (empty = whole class). Ids must be
+     * students of the chosen class inside the active school, else 422.
+     *
+     * @return array<int,int>
+     */
+    private function resolveTargetStudents(Request $request, int $classId): array
+    {
+        if ($request->input('target_mode') !== 'students') {
+            return [];
+        }
+        $ids = array_values(array_unique(array_map('intval', (array) $request->input('student_ids', []))));
+        if ($ids === []) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['student_ids' => 'اختر طالبًا واحدًا على الأقل.']);
+        }
+        $schoolId = $this->scopedSchoolId();
+        $valid = $this->classStudentsQuery($classId, $schoolId)->whereKey($ids)->count();
+        abort_unless($valid === count($ids), 422, 'طلاب غير تابعين للصف أو للمدرسة.');
+
+        return $ids;
+    }
+
+    private function classStudentsQuery(?int $classId, ?int $schoolId)
+    {
+        return User::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->whereHas('roles', fn ($q) => $q->where('slug', 'student'))
+            ->when($classId, fn ($q) => $q->where(fn ($w) => $w->where('class_room_id', $classId)
+                ->orWhereHas('enrolledClasses', fn ($c) => $c->where('classes.id', $classId))));
+    }
+
+    /** Student picker data for the create/edit forms (filtered by class client-side). */
+    private function studentOptions(): array
+    {
+        return $this->classStudentsQuery(null, $this->scopedSchoolId())->with('enrolledClasses')->orderBy('name')->get()
+            ->map(fn (User $s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'classes' => $s->enrolledClasses->pluck('id')->push($s->class_room_id)->filter()->unique()->values(),
+            ])->values()->all();
+    }
+
+    /**
      * Show the form for creating a new exam.
      */
     public function create()
@@ -150,7 +192,9 @@ class ExamController extends Controller
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
         $routePrefix = $this->routePrefix();
 
-        return view('admin.exams.create', compact('subjects', 'classes', 'academicYears', 'routePrefix'));
+        $studentOptions = $this->studentOptions();
+
+        return view('admin.exams.create', compact('subjects', 'classes', 'academicYears', 'routePrefix', 'studentOptions'));
     }
 
     /**
@@ -175,7 +219,12 @@ class ExamController extends Controller
             'shuffle_questions' => 'boolean',
             'shuffle_answers' => 'boolean',
             'show_results' => 'boolean',
+            'target_mode' => 'nullable|in:class,students',
+            'student_ids' => 'nullable|array',
+            'student_ids.*' => 'integer',
         ]);
+        $studentIds = $this->resolveTargetStudents($request, (int) $validated['class_id']);
+        unset($validated['target_mode'], $validated['student_ids']);
 
         $validated['teacher_id'] = Auth::id();
         $validated['shuffle_questions'] = $request->boolean('shuffle_questions');
@@ -183,6 +232,7 @@ class ExamController extends Controller
         $validated['show_results'] = $request->boolean('show_results');
 
         $exam = Exam::create($validated);
+        $exam->targetStudents()->sync($studentIds);
 
         return redirect()->route($this->routePrefix() . '.questions.index', $exam)
             ->with('success', 'تم إنشاء الاختبار بنجاح. أضف الأسئلة الآن.');
@@ -223,7 +273,10 @@ class ExamController extends Controller
         $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
         $routePrefix = $this->routePrefix();
 
-        return view('admin.exams.edit', compact('exam', 'subjects', 'classes', 'academicYears', 'routePrefix'));
+        $studentOptions = $this->studentOptions();
+        $exam->load('targetStudents:id');
+
+        return view('admin.exams.edit', compact('exam', 'subjects', 'classes', 'academicYears', 'routePrefix', 'studentOptions'));
     }
 
     /**
@@ -248,13 +301,19 @@ class ExamController extends Controller
             'shuffle_questions' => 'boolean',
             'shuffle_answers' => 'boolean',
             'show_results' => 'boolean',
+            'target_mode' => 'nullable|in:class,students',
+            'student_ids' => 'nullable|array',
+            'student_ids.*' => 'integer',
         ]);
+        $studentIds = $this->resolveTargetStudents($request, (int) $validated['class_id']);
+        unset($validated['target_mode'], $validated['student_ids']);
 
         $validated['shuffle_questions'] = $request->boolean('shuffle_questions');
         $validated['shuffle_answers'] = $request->boolean('shuffle_answers');
         $validated['show_results'] = $request->boolean('show_results');
 
         $exam->update($validated);
+        $exam->targetStudents()->sync($studentIds);
         app(\App\Modules\Gamification\Hooks\ExamPointHooks::class)->examChanged($exam);
 
         return redirect()->route($this->routePrefix() . '.show', $exam)

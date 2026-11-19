@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Exam extends Model
@@ -85,6 +86,24 @@ class Exam extends Model
     public function questions(): HasMany
     {
         return $this->hasMany(ExamQuestion::class)->orderBy('order');
+    }
+
+    /** Specific students this exam is limited to; empty = every student of the class. */
+    public function targetStudents(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'exam_students', 'exam_id', 'student_id')->withTimestamps();
+    }
+
+    /** Exams open to this student: class-wide ones plus those that name them. */
+    public function scopeVisibleToStudent($query, int $studentId)
+    {
+        return $query->where(fn ($q) => $q->whereDoesntHave('targetStudents')
+            ->orWhereHas('targetStudents', fn ($t) => $t->where('users.id', $studentId)));
+    }
+
+    public function isVisibleTo(User $student): bool
+    {
+        return self::whereKey($this->id)->visibleToStudent($student->id)->exists();
     }
 
     public function studentExams(): HasMany

@@ -104,7 +104,7 @@ class StudentSubjectController extends Controller
         // ── Exams ─────────────────────────────────────────────────────────────
         $exams = collect();
         if (! empty($classIds)) {
-            $exams = Exam::where('subject_id', $subject->id)
+            $exams = Exam::visibleToStudent(auth()->id())->where('subject_id', $subject->id)
                 ->whereIn('class_id', $classIds)
                 ->where('is_published', true)
                 ->whereNotIn('status', ['cancelled'])

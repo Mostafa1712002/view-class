@@ -192,7 +192,7 @@ class StudentExamController extends Controller
     {
         $student = auth()->user();
 
-        if (! in_array($exam->class_id, $student->enrolledClassIds(), true)) {
+        if (! in_array($exam->class_id, $student->enrolledClassIds(), true) || ! $exam->isVisibleTo($student)) {
             return response()->json(['logged' => false], 403);
         }
 
@@ -334,7 +334,7 @@ class StudentExamController extends Controller
     {
         $student = auth()->user();
 
-        if (! in_array($exam->class_id, $student->enrolledClassIds(), true)) {
+        if (! in_array($exam->class_id, $student->enrolledClassIds(), true) || ! $exam->isVisibleTo($student)) {
             abort(403, 'هذا الاختبار غير متاح لصفك.');
         }
 
@@ -358,7 +358,7 @@ class StudentExamController extends Controller
      */
     private function guard(Exam $exam, $student): ?RedirectResponse
     {
-        if (! in_array($exam->class_id, $student->enrolledClassIds(), true)) {
+        if (! in_array($exam->class_id, $student->enrolledClassIds(), true) || ! $exam->isVisibleTo($student)) {
             abort(403, 'هذا الاختبار غير متاح لصفك.');
         }
 
