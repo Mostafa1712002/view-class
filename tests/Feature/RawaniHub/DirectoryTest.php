@@ -302,22 +302,18 @@ class DirectoryTest extends TestCase
         $this->assertNull($this->row('2')->user_id);
     }
 
-    public function test_unlink_detaches_admin_links_only_and_is_audited(): void
+    public function test_unlink_is_not_shipped(): void
     {
+        // Deferred: rawani/v1 has no detach call, and a later re-provision would hit the (platform, role, user_id) key.
         $admin = $this->as('super-admin');
         $u = $this->person('student');
         $linked = HubPlatformAccount::create(['platform_id' => $this->platform->id, 'role' => 'student', 'user_id' => $u->id, 'external_id' => '1',
             'managed' => false, 'link_confirmed_by' => $admin->id, 'status' => 'active']);
-        $managed = HubPlatformAccount::create(['platform_id' => $this->platform->id, 'role' => 'parent', 'user_id' => $u->id, 'external_id' => '2',
-            'managed' => true, 'status' => 'active', 'password' => 'pw']);
 
-        $this->delete("/admin/hub/accounts/{$linked->id}/link")->assertRedirect("/admin/hub/accounts/{$linked->id}/link");
-        $linked->refresh();
-        $this->assertSame([null, null, 'unlinked'], [$linked->user_id, $linked->link_confirmed_by, $linked->status]);
-        $this->assertSame(1, ActivityLog::where('action', 'hub.account.unlink')->count());
-
-        $this->delete("/admin/hub/accounts/{$managed->id}/link")->assertSessionHasErrors('account');
-        $this->assertSame($u->id, $managed->refresh()->user_id);
+        $this->assertFalse(Route::has('admin.hub.accounts.unlink'));
+        $this->delete("/admin/hub/accounts/{$linked->id}/link")->assertStatus(405);
+        $this->assertSame($u->id, $linked->refresh()->user_id);
+        $this->get("/admin/hub/accounts/{$linked->id}/link")->assertOk()->assertDontSee('_method');
     }
 
     public function test_directory_tabs_filters_and_platform_relatives_on_both_pages(): void

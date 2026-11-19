@@ -48,6 +48,5 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin/hub')->name('admi
     Route::prefix('accounts/{account}')->whereNumber('account')->name('accounts.')->group(function () {
         Route::get('link', [DirectoryController::class, 'linkForm'])->name('link.form');
         Route::post('create-person', [DirectoryController::class, 'createPerson'])->name('create_person');
-        Route::delete('link', [DirectoryController::class, 'unlink'])->name('unlink');
     });
 });

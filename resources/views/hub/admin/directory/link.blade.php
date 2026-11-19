@@ -22,11 +22,6 @@
 <dt>{{ __('hub_directory.person') }}</dt><dd>@if($a->user)<a href="{{ route('admin.hub.people.show', $a->user_id) }}">{{ $a->user->name }}</a>@else{{ __('hub_directory.not_linked') }}@endif</dd>
 </dl>
 
-@if($a->user_id && ! $a->managed && $a->link_confirmed_by)
-<form method="POST" action="{{ route('admin.hub.accounts.unlink', $a->id) }}" onsubmit="return confirm(@js(__('hub_directory.confirm_unlink')))">@csrf @method('DELETE')
-<button class="btn btn-outline-danger">{{ __('hub_directory.unlink') }}</button></form>
-@endif
-
 @if($a->status === 'conflict')
 <h2 class="h5 mt-4">{{ __('hub_directory.conflict_rows') }}</h2>
 <div class="table-responsive"><table class="table"><thead><tr><th scope="col">{{ __('hub_directory.name') }}</th><th scope="col">{{ __('hub_directory.external_id') }}</th><th scope="col">{{ __('hub_directory.reason') }}</th><th scope="col"></th></tr></thead><tbody>

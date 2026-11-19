@@ -4,7 +4,6 @@ namespace App\Modules\RawaniHub\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\RawaniHub\Actions\CreatePersonFromAccount;
-use App\Modules\RawaniHub\Actions\UnlinkPlatformAccount;
 use App\Modules\RawaniHub\Http\Requests\CreatePersonRequest;
 use App\Modules\RawaniHub\Repositories\Contracts\PlatformAccountRepository;
 use App\Modules\RawaniHub\Repositories\Contracts\PlatformRepository;
@@ -58,12 +57,5 @@ class DirectoryController extends Controller
         $person = $create->execute($request->user(), $account, $request->validated());
 
         return redirect()->route('admin.hub.people.show', $person->id)->with('success', __('hub_directory.person_created'));
-    }
-
-    public function unlink(Request $request, int $account, UnlinkPlatformAccount $unlink)
-    {
-        $row = $unlink->execute($request->user(), $account);
-
-        return redirect()->route('admin.hub.accounts.link.form', $row->id)->with('success', __('hub_directory.unlinked_done'));
     }
 }

@@ -29,7 +29,6 @@
 <form method="POST" action="{{ route('admin.hub.accounts.reveal', $a->id) }}" class="d-inline">@csrf<button class="btn btn-link p-0">{{ __('hub_admin.show_password') }}</button></form>
 <form method="POST" action="{{ route('admin.hub.accounts.reset', $a->id) }}" class="d-inline" onsubmit="return confirm(@js(__('hub_admin.confirm_reset')))">@csrf<button class="btn btn-link p-0">{{ __('hub_admin.reset_password') }}</button></form>
 @endif
-@if(! $a->managed && $a->link_confirmed_by)<a href="{{ route('admin.hub.accounts.link.form', $a->id) }}">{{ __('hub_directory.unlink') }}</a>@endif
 @if($a->status === 'conflict')
 <div class="alert alert-warning mt-2 mb-0" role="alert">{{ __('hub_admin.conflict_notice') }} <a href="{{ route('admin.hub.accounts.link.form', $a->id) }}">{{ __('hub_directory.candidates') }}</a>
 <form method="POST" action="{{ route('admin.hub.accounts.link', $a->id) }}" class="mt-2">@csrf
