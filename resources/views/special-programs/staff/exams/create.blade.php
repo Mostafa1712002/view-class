@@ -125,8 +125,8 @@
 @push('scripts')
 <script>
 (function () {
-  var bank = @json($bank), program = @json($program), statsUrl = @json(route('manage.special-programs.bank-stats', $program));
-  var old = @json(old('subjects', [])), teacherMode = @json($teacherMode);
+  var bank = @json($bank), program = @json($program), statsUrl = @js(route('manage.special-programs.bank-stats', $program));
+  var old = @js(old('subjects', [])), teacherMode = @json($teacherMode);
   var tpl = document.getElementById('subject-tpl'), box = document.getElementById('subject-rows'), addBtn = document.getElementById('add-subject');
   var typeSel = document.getElementById('type'), n = 0, timers = new WeakMap();
   var readingLabel = @json(__($ex.'.passages')), questionsLabel = @json(__($ex.'.questions'));
