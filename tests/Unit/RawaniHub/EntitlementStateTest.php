@@ -72,6 +72,27 @@ class EntitlementStateTest extends TestCase
         $this->assertSame('2026-12-01T00:00:00Z', $r[0]['until']);
     }
 
+    public function test_gap_is_not_bridged_current_window_wins(): void
+    {
+        $r = $this->calc([
+            $this->sub('2026-11-01 00:00:00', '2026-12-01 00:00:00', [[1, 'main']]),
+            $this->sub('2027-02-01 00:00:00', '2027-03-01 00:00:00', [[1, 'main']]),
+        ]);
+        $this->assertCount(1, $r);
+        $this->assertSame('2026-11-01T00:00:00Z', $r[0]['from']);
+        $this->assertSame('2026-12-01T00:00:00Z', $r[0]['until']);
+    }
+
+    public function test_gap_with_only_future_windows_returns_the_nearest(): void
+    {
+        $r = $this->calc([
+            $this->sub('2027-02-01 00:00:00', '2027-03-01 00:00:00', [[1, 'main']]),
+            $this->sub('2026-12-01 00:00:00', '2026-12-15 00:00:00', [[1, 'main']]),
+        ]);
+        $this->assertSame('2026-12-01T00:00:00Z', $r[0]['from']);
+        $this->assertSame('2026-12-15T00:00:00Z', $r[0]['until']);
+    }
+
     public function test_inactive_statuses_do_not_count(): void
     {
         foreach (['pending', 'expired', 'cancelled', 'refunded'] as $status) {

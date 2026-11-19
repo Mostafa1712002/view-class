@@ -9,33 +9,44 @@ use Carbon\CarbonInterface;
 class EntitlementCalculator
 {
     /**
-     * Window per product on one platform: from = min(starts_at), until = max(ends_at) over the
-     * subscriptions that count. A subscription counts when status is active, both dates are set
-     * and ends_at is after $now (ends_at <= now is expired, same edge as expireDue).
-     * Future starts count, so a renewal queued behind the current one stays in the window.
-     * ponytail: min/max spans a gap between non-contiguous subscriptions; renewals stack so none is expected.
+     * One window per product on one platform. A subscription counts when status is active, both
+     * dates are set and ends_at is after $now (ends_at <= now is expired, same edge as expireDue).
+     * Overlapping or touching intervals are merged; a gap is never bridged. The result is the
+     * merged interval containing $now, or, when none does, the nearest future one.
      *
      * @param  iterable<HubSubscription>  $subscriptions
      * @return list<array{product:string,from:string,until:string}> sorted by product code
      */
     public function entitlements(iterable $subscriptions, int $platformId, CarbonInterface $now): array
     {
-        $windows = [];
+        $byProduct = [];
         foreach ($subscriptions as $s) {
             if ($s->status !== 'active' || ! $s->starts_at || ! $s->ends_at || $s->ends_at->lte($now)) {
                 continue;
             }
             foreach ($s->items ?? [] as $item) {
-                if ((int) $item['platform_id'] !== $platformId) {
-                    continue;
+                if ((int) $item['platform_id'] === $platformId) {
+                    $byProduct[$item['product_code']][] = [$s->starts_at, $s->ends_at];
                 }
-                $code = $item['product_code'];
-                $w = $windows[$code] ?? ['from' => $s->starts_at, 'until' => $s->ends_at];
-                $windows[$code] = [
-                    'from' => $s->starts_at->lt($w['from']) ? $s->starts_at : $w['from'],
-                    'until' => $s->ends_at->gt($w['until']) ? $s->ends_at : $w['until'],
-                ];
             }
+        }
+
+        $windows = [];
+        foreach ($byProduct as $code => $intervals) {
+            usort($intervals, fn ($a, $b) => $a[0] <=> $b[0]);
+            $merged = [];
+            foreach ($intervals as [$from, $until]) {
+                $last = count($merged) - 1;
+                if ($last >= 0 && $from->lte($merged[$last]['until'])) {
+                    if ($until->gt($merged[$last]['until'])) {
+                        $merged[$last]['until'] = $until;
+                    }
+                } else {
+                    $merged[] = ['from' => $from, 'until' => $until];
+                }
+            }
+            // Every interval ends after now, so the first containing now or, failing that, the first one is right.
+            $windows[$code] = collect($merged)->first(fn ($w) => $w['from']->lte($now)) ?? $merged[0];
         }
         ksort($windows);
 
