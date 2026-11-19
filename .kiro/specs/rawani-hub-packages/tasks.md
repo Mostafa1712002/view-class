@@ -80,57 +80,57 @@ The three repos are independent and can run in parallel.
 Tasks 1.1–1.7 can run in parallel, and only 1.8 touches shared files. Until 1.8 lands, test with routes registered inside the test (`Route::middleware('web')->group(base_path('app/Modules/RawaniHub/Routes/web.php'))`).
 
 ### Task 1.1: Migrations and models
-- [ ] Migrations for every table in design §3.1 (`2026_11_2x_*`)
-- [ ] Models with casts:
+- [x] Migrations for every table in design §3.1 (`2026_11_2x_*`)
+- [x] Models with casts:
   - `encrypted` on `hub_platforms.secret` and `hub_platform_accounts.password`
   - json on `products`, `capabilities`, `required_fields`, `items`, `access` and `payload`
-- [ ] Relations: `HubSubscription->user/buyer/package`, `HubPlatformAccount->platform/user`
-- [ ] Test: the migration runs on a fresh DB and the uniques hold, including two NULL `user_id` rows on one platform
+- [x] Relations: `HubSubscription->user/buyer/package`, `HubPlatformAccount->platform/user`
+- [x] Test: the migration runs on a fresh DB and the uniques hold, including two NULL `user_id` rows on one platform
 
 ### Task 1.2: Repositories
-- [ ] Contracts plus Eloquent implementations for Package, Subscription, Payment, Platform and PlatformAccount (design §3)
-- [ ] Bindings go to Task 1.8; list them in the task report
+- [x] Contracts plus Eloquent implementations for Package, Subscription, Payment, Platform and PlatformAccount (design §3)
+- [x] Bindings go to Task 1.8; list them in the task report
 
 ### Task 1.3: `PlatformClient` + `FakePlatform`
-- [ ] `PlatformClient` covering ping, putAccount, sso and people:
+- [x] `PlatformClient` covering ping, putAccount, sso and people:
   - HMAC per design §4.1, signing the logical path and the sorted query
   - `Http::timeout(15)`
   - maps HTTP status and error code to a typed result (ok, conflict, invalid, retryable, unsupported, auth)
   - never logs the body
-- [ ] `tests/Support/FakePlatform.php`: `Http::fake` responders that implement the contract in memory (accounts by role and rawani_id, 409 on a preset natural key, programmable failures)
-- [ ] Unit test: the shared signature vector reproduces exactly
+- [x] `tests/Support/FakePlatform.php`: `Http::fake` responders that implement the contract in memory (accounts by role and rawani_id, 409 on a preset natural key, programmable failures)
+- [x] Unit test: the shared signature vector reproduces exactly
 
 ### Task 1.4: `EntitlementCalculator` + `AccountState` builder
-- [ ] Windows per design §3.2, plus required-field checks that return the missing list
-- [ ] Parent rows (platforms with `parents=true`) carry no entitlements
-- [ ] Unit tests: overlap, stacking, expired, refunded, two products, parent rows
+- [x] Windows per design §3.2, plus required-field checks that return the missing list
+- [x] Parent rows (platforms with `parents=true`) carry no entitlements
+- [x] Unit tests: overlap, stacking, expired, refunded, two products, parent rows
 
 ### Task 1.5: Sync job and commands
-- [ ] `SyncPlatformAccountJob`: unique per account, tries 6, backoff [60,300,900,3600,21600], state transitions per design §3.3, credential reuse per §3.4
-- [ ] `hub:sync-pending` and `hub:expire` (marks expired subscriptions and dirties their accounts)
-- [ ] Tests on `FakePlatform` covering every transition, including needs_info with no HTTP call and a disabled platform being skipped
+- [x] `SyncPlatformAccountJob`: unique per account, tries 6, backoff [60,300,900,3600,21600], state transitions per design §3.3, credential reuse per §3.4
+- [x] `hub:sync-pending` and `hub:expire` (marks expired subscriptions and dirties their accounts)
+- [x] Tests on `FakePlatform` covering every transition, including needs_info with no HTTP call and a disabled platform being skipped
 
 ### Task 1.6: Actions: packages, grant, cancel, account admin
-- [ ] `CreatePackage`, `UpdatePackage`, `GrantPackage` (multi-beneficiary, stacking), `CancelSubscription`, `FindOrCreateBeneficiary` (default school, parent link, national-ID collision rule)
-- [ ] `ResetAccountPassword`, `SetAccountEnabled`
-- [ ] Every action writes an ActivityLog entry and dispatches after commit
-- [ ] Tests
+- [x] `CreatePackage`, `UpdatePackage`, `GrantPackage` (multi-beneficiary, stacking), `CancelSubscription`, `FindOrCreateBeneficiary` (default school, parent link, national-ID collision rule)
+- [x] `ResetAccountPassword`, `SetAccountEnabled`
+- [x] Every action writes an ActivityLog entry and dispatches after commit
+- [x] Tests
 
 ### Task 1.7: Admin screens: platforms, packages, subscriptions/grant, person page
-- [ ] Controllers, form requests and Blade views under `resources/views/hub/` in the existing admin layout
-- [ ] Arabic labels per design §3.5
-- [ ] Platform «اختبار الاتصال» and «توليد السر» (shown once)
-- [ ] Person page: accounts with status, last sync, error, credentials reveal and the retry, enable/disable and reset actions
-- [ ] `lang/{ar,en}/hub_admin.php` with flat keys (other tasks own `hub_my`, `hub_payments` and `hub_directory`)
-- [ ] Access tests (super-admin 200; school-admin, parent and student 403) and form tests
+- [x] Controllers, form requests and Blade views under `resources/views/hub/` in the existing admin layout
+- [x] Arabic labels per design §3.5
+- [x] Platform «اختبار الاتصال» and «توليد السر» (shown once)
+- [x] Person page: accounts with status, last sync, error, credentials reveal and the retry, enable/disable and reset actions
+- [x] `lang/{ar,en}/hub_admin.php` with flat keys (other tasks own `hub_my`, `hub_payments` and `hub_directory`)
+- [x] Access tests (super-admin 200; school-admin, parent and student 403) and form tests
 
 ### Task 1.8: Wiring (the only task that edits shared files)
-- [ ] `config/rawani_hub.php` and `.env.example` (`RAWANI_HUB_ENABLED`, `RAWANI_HUB_SCHOOL_ID`)
-- [ ] Conditional route `require` in `routes/web.php` and `routes/api.php`
-- [ ] Conditional schedules in `routes/console.php`
-- [ ] Repository bindings in `RepositoryServiceProvider`
-- [ ] Sidebar block «منصات رواني» and «باقاتي», both behind `Route::has`
-- [ ] Test: flag off gives 404 on every hub route and no hub schedule. Flag on gives a working sidebar.
+- [x] `config/rawani_hub.php` and `.env.example` (`RAWANI_HUB_ENABLED`, `RAWANI_HUB_SCHOOL_ID`)
+- [x] Conditional route `require` in `routes/web.php` (api.php: no hub API routes exist until the webhook task)
+- [x] Conditional schedules in `routes/console.php`
+- [x] Repository bindings in `RepositoryServiceProvider`
+- [x] Sidebar: الباقات، الاشتراكات، المنصات المرتبطة behind `Route::has` (المدفوعات/الدليل/باقاتي follow their routes)
+- [x] Test: flag off gives 404 on every hub route and no hub schedule. Flag on gives a working sidebar.
 
 ### Task 1.9: Review + local E2E
 - [ ] Opus or `/code-review` pass on the Phase 1 diff
@@ -309,13 +309,13 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 | Phase | Tasks | Completed | Status |
 |-------|-------|-----------|--------|
 | 0. Security prerequisites | 7 | 0 | Not started |
-| 1. Rawani hub core | 9 | 0 | Not started |
+| 1. Rawani hub core | 9 | 8 | In progress (1.9 review + E2E left) |
 | 2. Contract on sub-platforms | 12 | 0 | Not started |
 | 3. Online purchase | 6 | 0 | Not started |
 | 4. Master directory | 4 | 0 | Not started |
 | 5. SSO-lite | 1 | 0 | Not started |
 | 6. Live rollout | 7 | 0 | Not started |
-| **Total** | **46** | **0** | **0%** |
+| **Total** | **46** | **8** | **17%** |
 
 Waiting on the client (design §11): Q1–Q8.
 - Phases 1–2 can start without any answers.
