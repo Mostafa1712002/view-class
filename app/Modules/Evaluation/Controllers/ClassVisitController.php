@@ -167,6 +167,7 @@ class ClassVisitController extends Controller
         }
 
         $this->visits->delete($visit);
+        app(\App\Modules\Gamification\Hooks\EvaluationPointHooks::class)->classVisitDeleted($visit->id);
 
         return redirect()->route('admin.class-visits.index')->with('status', __('class_visits.flash.deleted'));
     }

@@ -51,6 +51,7 @@ class RejectEvaluation
                 'approved_by'      => null,
                 'approved_at'      => null,
             ])->save();
+            app(\App\Modules\Gamification\Hooks\EvaluationPointHooks::class)->evaluationChanged($evaluation);
 
             $this->notifier->evaluationRejected($evaluation);
 

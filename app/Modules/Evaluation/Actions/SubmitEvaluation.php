@@ -102,6 +102,7 @@ class SubmitEvaluation
             ]);
             $this->refreshCounters($evaluation);
             $evaluation->save();
+            app(\App\Modules\Gamification\Hooks\EvaluationPointHooks::class)->evaluationChanged($evaluation);
 
             // 6) Notify.
             if ($status === EvaluationStatus::PendingApproval) {
@@ -296,6 +297,7 @@ class SubmitEvaluation
             ]);
             $this->refreshCounters($evaluation);
             $evaluation->save();
+            app(\App\Modules\Gamification\Hooks\EvaluationPointHooks::class)->evaluationChanged($evaluation);
 
             $this->audit->record(
                 'submit_shared',
