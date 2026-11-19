@@ -308,7 +308,7 @@ timestamp = 1763550000
 nonce     = 6f1c2a7e-4b1d-4c55-9a3e-2d7f8b9c0a11
 body      = {"enabled":true}
 sha256(body) = 26b3426b2593763c96d0890b4a77a0bbf66d13fc512b0c6b138a23c290f30a2a
-signature    = 649d974bb2489f8152928ecb06016daaf88de38ee4d54dada045438fb7a508b2
+signature    = 9117d1e5c2e4be4d2455f1971c4b5b1fd16761260eb8e4b05d7486d4563b3672   # recomputed 2026-11-19 with openssl (the earlier value was wrong)
 
 # second vector: GET with an encoded query
 method    = GET
