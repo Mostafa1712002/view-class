@@ -24,6 +24,8 @@ class FakePlatform
     public array $people = [];
     public array $capabilities = ['sso' => true, 'parents' => true];
     public array $requests = [];
+    /** Overrides the URL the sso endpoint answers with. */
+    public ?string $ssoUrl = null;
     /** Runs inside an authenticated request, before it is answered (simulates a change landing mid-call). */
     public ?\Closure $during = null;
     private array $nonces = [];
@@ -96,7 +98,7 @@ class FakePlatform
                     return $this->error(404, 'NOT_FOUND', 'no account');
                 }
 
-                return $this->ok(['url' => 'https://fake-platform.test/rawani/sso/'.str_repeat('a', 64), 'expires_at' => gmdate('Y-m-d\TH:i:s\Z', time() + 60)]);
+                return $this->ok(['url' => $this->ssoUrl ?? 'https://fake-platform.test/rawani/sso/'.str_repeat('a', 64), 'expires_at' => gmdate('Y-m-d\TH:i:s\Z', time() + 60)]);
             }
             if ($method === 'PUT') {
                 return $this->upsert($key, $role, (array) $r->data());
