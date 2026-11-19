@@ -26,7 +26,7 @@
             @if($book->read_url)
                 @php $isPdf = \Illuminate\Support\Str::endsWith(strtolower($book->file_path ?? ''), '.pdf'); @endphp
                 @if($isPdf)
-                    <object data="{{ $viewUrl }}#toolbar=1&view=FitH" type="application/pdf"
+                    <object data="{{ $viewUrl }}#toolbar={{ $book->allow_download ? 1 : 0 }}&view=FitH" type="application/pdf"
                             style="width:100%;height:80vh;border:0;border-radius:.5rem;">
                         <iframe src="{{ $viewUrl }}" style="width:100%;height:80vh;border:0;"></iframe>
                     </object>
@@ -34,11 +34,13 @@
                     <iframe src="{{ $viewUrl }}" style="width:100%;height:80vh;border:0;border-radius:.5rem;"
                             sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
                 @endif
+                @if($book->allow_download)
                 <div class="p-2 text-center">
                     <a href="{{ $viewUrl }}" target="_blank" rel="noopener" class="btn btn-link btn-sm">
                         <i class="la la-external-link-alt"></i> @lang('books_admin.student.open_new_tab')
                     </a>
                 </div>
+                @endif
             @else
                 <div class="text-center text-muted p-5">
                     <i class="la la-book" style="font-size:2.5rem;"></i>
