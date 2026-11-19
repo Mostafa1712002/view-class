@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'User directory', 'tab_accounts' => 'Platform accounts', 'tab_people' => 'Rawani people',
+    'never_auto' => 'No account is ever linked automatically; linking happens after your review.',
+    'linked_filter' => 'Link', 'linked_yes' => 'Linked', 'linked_no' => 'Not linked',
+    'search' => 'Search', 'search_hint' => 'Name, national ID, email or phone',
+    'name' => 'Name', 'national_id' => 'National ID', 'email' => 'Email', 'phone' => 'Phone', 'org' => 'Organisation on the platform',
+    'external_id' => 'Platform ID', 'seen_at' => 'Last seen by the mirror', 'platform_inactive' => 'Inactive on the platform',
+    'person' => 'Rawani person', 'not_linked' => 'Not linked', 'review' => 'Review', 'accounts_count' => 'Accounts',
+    'link_title' => 'Link account', 'account_details' => 'Account on the platform',
+    'candidates' => 'Link candidates', 'no_candidates' => 'No one with the same national ID, email or phone.',
+    'reason' => 'Matched on', 'reason_national_id' => 'Same national ID', 'reason_email' => 'Same email',
+    'reason_phone' => 'Same phone', 'reason_lookup' => 'Your search', 'reason_conflict' => 'The account the platform returned',
+    'lookup_label' => 'Find a Rawani person by national ID, email, username or phone (exact match)',
+    'link_this' => 'Link after review', 'confirm_link' => 'Link this account to this person? Make sure they are the same person.',
+    'create_person' => 'Create a Rawani person from this account',
+    'create_hint' => 'Complete the missing fields. If the national ID already belongs to a Rawani person, link the account to them instead.',
+    'create_submit' => 'Create and link', 'person_created' => 'Person created and account linked; it will sync shortly',
+    'unlink' => 'Unlink', 'confirm_unlink' => 'Unlink this account from the person? Nothing changes on the platform.',
+    'unlinked_done' => 'Unlinked',
+    'unlink_only_linked' => 'Only admin-linked accounts can be unlinked; accounts Rawani created are disabled instead.',
+    'create_only_unlinked' => 'A person can only be created from an unlinked student or parent account.',
+    'national_id_taken' => 'This national ID belongs to a Rawani person; link the account to them instead.',
+    'teacher_readonly' => 'Teacher accounts are view-only; the platform contract does not link them.',
+    'platform_parent' => 'Parent on the platform', 'platform_children' => 'Children on the platform',
+    'conflict_rows' => 'Platform accounts matching this person',
+];

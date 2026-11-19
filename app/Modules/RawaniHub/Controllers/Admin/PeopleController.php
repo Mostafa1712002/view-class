@@ -22,11 +22,13 @@ class PeopleController extends Controller
     public function show(int $user)
     {
         $person = $this->people->find($user);
+        $accounts = $this->accounts->forUser($person->id)->load('platform');
 
         return view('hub.admin.people.show', [
             'person' => $person,
             'profile' => HubProfile::find($person->id),
-            'accounts' => $this->accounts->forUser($person->id)->load('platform'),
+            'accounts' => $accounts,
+            'relatives' => $accounts->mapWithKeys(fn ($a) => [$a->id => $this->accounts->relatives($a)]),
             'subscriptions' => $this->subscriptions->paginate(['user_id' => $person->id], 50),
         ]);
     }
@@ -63,7 +65,9 @@ class PeopleController extends Controller
 
     public function link(LinkAccountRequest $request, int $account, LinkPlatformAccount $link)
     {
-        $row = $link->execute($request->user(), $account, externalId: $request->validated('external_id'));
+        $row = $link->execute($request->user(), $account,
+            userId: $request->validated('user_id') ? (int) $request->validated('user_id') : null,
+            externalId: $request->validated('external_id'));
 
         return $this->backTo($row, __('hub_admin.linked'));
     }

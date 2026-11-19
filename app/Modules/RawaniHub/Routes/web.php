@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\RawaniHub\Controllers\Admin\DirectoryController;
 use App\Modules\RawaniHub\Controllers\Admin\PackagesController;
 use App\Modules\RawaniHub\Controllers\Admin\PaymentsController;
 use App\Modules\RawaniHub\Controllers\Admin\PeopleController;
@@ -41,5 +42,12 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin/hub')->name('admi
         Route::post('reset-password', [PeopleController::class, 'resetPassword'])->name('reset');
         Route::post('reveal', [PeopleController::class, 'reveal'])->name('reveal');
         Route::post('link', [PeopleController::class, 'link'])->name('link');
+    });
+
+    Route::get('directory', [DirectoryController::class, 'index'])->name('directory.index');
+    Route::prefix('accounts/{account}')->whereNumber('account')->name('accounts.')->group(function () {
+        Route::get('link', [DirectoryController::class, 'linkForm'])->name('link.form');
+        Route::post('create-person', [DirectoryController::class, 'createPerson'])->name('create_person');
+        Route::delete('link', [DirectoryController::class, 'unlink'])->name('unlink');
     });
 });

@@ -18,7 +18,8 @@
 @foreach(['platform', 'role', 'login', 'status', 'last_sync', 'error'] as $h)<th scope="col">{{ __('hub_admin.'.$h) }}</th>@endforeach<th scope="col"></th>
 </tr></thead><tbody>
 @forelse($accounts as $a)
-<tr><td>{{ $a->platform?->name_ar }}</td><td>{{ __('hub_admin.role_'.$a->role) }}</td><td dir="ltr">{{ $a->login ?? '—' }}</td>
+<tr><td>{{ $a->platform?->name_ar }}@if(($rel = $relatives[$a->id] ?? collect())->isNotEmpty())<br><small>{{ $a->role === 'student' ? __('hub_directory.platform_parent') : __('hub_directory.platform_children') }}:
+@foreach($rel as $r)<a href="{{ $r->user_id ? route('admin.hub.people.show', $r->user_id) : route('admin.hub.accounts.link.form', $r->id) }}">{{ $r->name ?? '#'.$r->external_id }}</a>@if(! $loop->last)، @endif @endforeach</small>@endif</td><td>{{ __('hub_admin.role_'.$a->role) }}</td><td dir="ltr">{{ $a->login ?? '—' }}</td>
 <td>{{ __('hub_admin.status_'.$a->status) }}@unless($a->enabled) ({{ __('hub_admin.disable') }})@endunless<br><small>{{ $a->managed ? __('hub_admin.managed') : __('hub_admin.linked_acct') }}</small></td>
 <td>{{ $a->synced_at?->format('Y-m-d H:i') ?? '—' }}</td><td>{{ $a->last_error ?? '—' }}</td>
 <td>
@@ -28,8 +29,9 @@
 <form method="POST" action="{{ route('admin.hub.accounts.reveal', $a->id) }}" class="d-inline">@csrf<button class="btn btn-link p-0">{{ __('hub_admin.show_password') }}</button></form>
 <form method="POST" action="{{ route('admin.hub.accounts.reset', $a->id) }}" class="d-inline" onsubmit="return confirm(@js(__('hub_admin.confirm_reset')))">@csrf<button class="btn btn-link p-0">{{ __('hub_admin.reset_password') }}</button></form>
 @endif
+@if(! $a->managed && $a->link_confirmed_by)<a href="{{ route('admin.hub.accounts.link.form', $a->id) }}">{{ __('hub_directory.unlink') }}</a>@endif
 @if($a->status === 'conflict')
-<div class="alert alert-warning mt-2 mb-0" role="alert">{{ __('hub_admin.conflict_notice') }}
+<div class="alert alert-warning mt-2 mb-0" role="alert">{{ __('hub_admin.conflict_notice') }} <a href="{{ route('admin.hub.accounts.link.form', $a->id) }}">{{ __('hub_directory.candidates') }}</a>
 <form method="POST" action="{{ route('admin.hub.accounts.link', $a->id) }}" class="mt-2">@csrf
 <label for="external_id-{{ $a->id }}">{{ __('hub_admin.external_id') }}</label>
 <input class="form-control" id="external_id-{{ $a->id }}" name="external_id" required dir="ltr" value="{{ $a->external_id ?? $a->conflictExternalId() }}">
