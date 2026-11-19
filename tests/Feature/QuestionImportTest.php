@@ -10,6 +10,7 @@ use App\Models\Subject;
 use App\Modules\QuestionBankCore\Actions\Import\GenerateImportTemplate;
 use App\Modules\QuestionBankCore\Actions\Import\ImportFromPreview;
 use App\Modules\QuestionBankCore\Actions\Import\ParseQuestionsExcel;
+use App\Modules\QuestionBankCore\Actions\Import\ResolveImportImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -101,10 +102,25 @@ class QuestionImportTest extends TestCase
         $this->assertTrue((bool) BankQuestion::where('question_code', 'A2')->first()->answers()->where('answer_text', 'z')->first()->is_correct);
     }
 
+    /** Hermetic DNS: every host resolves to $ips. */
+    private function dns(array $ips): void
+    {
+        $this->app->instance(ResolveImportImage::class, new ResolveImportImage(fn () => $ips));
+    }
+
+    private function png(): string
+    {
+        ob_start();
+        imagepng(imagecreatetruecolor(2, 2));
+
+        return ob_get_clean();
+    }
+
     public function test_image_url_is_downloaded_and_stored_on_the_public_disk(): void
     {
         Storage::fake('public');
-        Http::fake(['https://cdn.example.org/*' => Http::response('PNGDATA', 200, ['Content-Type' => 'image/png'])]);
+        $this->dns(['93.184.216.34']);
+        Http::fake(['https://cdn.example.org/*' => Http::response($this->png(), 200, ['Content-Type' => 'image/png'])]);
         $bank = $this->bank();
         $file = $this->clientFile($bank, [[
             'question_code' => 'I1', 'question_type' => 'mcq', 'question_text' => 'ما الشكل؟',
@@ -154,6 +170,7 @@ class QuestionImportTest extends TestCase
     public function test_unreachable_image_fails_only_that_row(): void
     {
         Storage::fake('public');
+        $this->dns(['93.184.216.34']);
         Http::fake(['*' => Http::response('nope', 404)]);
         $bank = $this->bank();
         $file = $this->clientFile($bank, [
@@ -165,5 +182,63 @@ class QuestionImportTest extends TestCase
 
         $this->assertSame([1, 1], [$result->imported, $result->failed]);
         $this->assertNull(BankQuestion::where('question_code', 'B1')->first());
+    }
+
+    public function test_url_to_internal_or_odd_targets_is_never_fetched(): void
+    {
+        Storage::fake('public');
+        Http::fake(['*' => Http::response($this->png(), 200, ['Content-Type' => 'image/png'])]);
+        $cases = [
+            'http://127.0.0.1/a.png' => [],
+            'http://[::1]/a.png' => [],
+            'http://169.254.169.254/latest/meta-data/a.png' => [],
+            'http://[::ffff:10.0.0.1]/a.png' => [],
+            'https://cdn.example.org:8443/a.png' => ['93.184.216.34'],   // port
+            'https://user:pw@cdn.example.org/a.png' => ['93.184.216.34'], // userinfo
+            'https://rebind.example.org/a.png' => ['93.184.216.34', '10.1.2.3'], // ANY private record
+            'https://v6.example.org/a.png' => ['fd00::1'],
+            'https://nat64.example.org/a.png' => ['64:ff9b::a00:1'],
+            'https://nxdomain.example.org/a.png' => [],
+        ];
+        foreach ($cases as $url => $ips) {
+            try {
+                (new ResolveImportImage(fn () => $ips))->execute($url, 1);
+                $this->fail("fetched {$url}");
+            } catch (\RuntimeException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+        Http::assertNothingSent();
+    }
+
+    public function test_non_image_body_is_refused_even_with_an_image_content_type(): void
+    {
+        Storage::fake('public');
+        Http::fake(['*' => Http::response('<svg onload=alert(1)>', 200, ['Content-Type' => 'image/png'])]);
+        $this->expectException(\RuntimeException::class);
+        (new ResolveImportImage(fn () => ['93.184.216.34']))->execute('https://cdn.example.org/x.png', 1);
+    }
+
+    public function test_typed_public_reference_is_rejected_and_forged_paths_never_resolve(): void
+    {
+        Storage::fake('public');
+        $bank = $this->bank();
+        $file = $this->clientFile($bank, [
+            ['question_code' => 'F1', 'question_type' => 'short', 'question_text' => 'x', 'correct_answer' => 'a',
+                'question_image' => 'public:bank-questions/'.$bank->id.'/imports/0123456789abcdef0123.png'],
+        ]);
+
+        [$rows, $result] = $this->runImport($bank, $file);
+
+        $this->assertSame('invalid', $rows[0]['status']);
+        $this->assertSame(0, $result->imported);
+        foreach (['public:../../.env', 'public:bank-questions/'.($bank->id + 1).'/imports/0123456789abcdef0123.png', 'public:bank-questions/'.$bank->id.'/imports/0123456789abcdef0123.svg'] as $ref) {
+            try {
+                (new ResolveImportImage)->execute($ref, $bank->id);
+                $this->fail("resolved {$ref}");
+            } catch (\RuntimeException) {
+                $this->addToAssertionCount(1);
+            }
+        }
     }
 }

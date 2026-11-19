@@ -39,7 +39,7 @@ final class ParseQuestionsExcel
 
     private const ALLOWED_CATEGORIES = ['normal', 'tahsili', 'passage'];
 
-    private const ALLOWED_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    private const ALLOWED_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp']; // no svg: it can carry script
 
     private const DIFFICULTY_MAP = [
         'سهل' => 1, 'easy' => 1, '1' => 1,
@@ -112,6 +112,14 @@ final class ParseQuestionsExcel
                 continue;
             }
 
+            // "public:" refs are only ever minted by extractEmbeddedImages(); a typed one
+            // would point the question at an arbitrary public-disk file, so strip the
+            // prefix and let validateImageRef() reject it like any bare filename.
+            foreach ($cells as $letter => $value) {
+                if (ResolveImportImage::isEmbedded(ltrim((string) $value))) {
+                    $cells[$letter] = substr(ltrim((string) $value), 7);
+                }
+            }
             // A picture embedded in a cell stands in for an empty *_image cell.
             foreach ($embedded[$rowNum] ?? [] as $letter => $ref) {
                 if (trim((string) ($cells[$letter] ?? '')) === '') {
@@ -559,9 +567,11 @@ final class ParseQuestionsExcel
             if (! $drawing instanceof \PhpOffice\PhpSpreadsheet\Worksheet\Drawing) {
                 continue;
             }
-            $ext = strtolower($drawing->getExtension());
+            // Trust the decoded bytes, not the declared extension.
             $bytes = @file_get_contents($drawing->getPath());
-            if (! in_array($ext, self::ALLOWED_IMAGE_EXT, true) || $bytes === false || $bytes === '') {
+            $info = $bytes ? @getimagesizefromstring($bytes) : false;
+            $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'][$info['mime'] ?? ''] ?? null;
+            if ($ext === null || strlen($bytes) > 5 * 1024 * 1024) {
                 continue;
             }
             [$col, $row] = Coordinate::coordinateFromString($drawing->getCoordinates());
