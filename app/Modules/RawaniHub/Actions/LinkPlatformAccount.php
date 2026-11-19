@@ -34,6 +34,8 @@ final class LinkPlatformAccount
 
             if ($account->user_id === null) {
                 $userId ?? throw ValidationException::withMessages(['user_id' => 'required for an unlinked account']);
+                in_array($account->role, ['student', 'parent'], true) // rawani/v1 writes students and parents only
+                    || throw ValidationException::withMessages(['account' => __('hub_directory.teacher_readonly')]);
                 User::findOrFail($userId);
                 $keep = $account;
                 $drop = $this->accounts->findForUser($account->platform_id, $account->role, $userId);

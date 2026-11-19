@@ -339,4 +339,43 @@ class DirectoryTest extends TestCase
         $this->get("/admin/hub/accounts/{$this->row('5')->id}/link")->assertOk()->assertSee(__('hub_directory.platform_parent'))->assertSee('وليّ المنصة')
             ->assertSee(__('hub_directory.create_person'));
     }
+
+    public function test_the_queued_walk_chains_page_jobs_to_the_end(): void
+    {
+        $this->people(1, 2, 3, 4, 5);
+
+        $this->assertSame(0, Artisan::call('hub:mirror', ['--platform' => 'alawal', '--per' => 2]));
+
+        $this->assertSame(5, HubPlatformAccount::count());
+        $this->assertCount(3, $this->peopleCalls());
+        $this->assertNull($this->platform->refresh()->mirror_started_at);
+    }
+
+    public function test_conflict_row_lists_matching_mirror_rows_and_links_the_chosen_one(): void
+    {
+        $admin = $this->as('super-admin');
+        $u = $this->person('student', ['national_id' => '1000000042']);
+        $conflict = HubPlatformAccount::create(['platform_id' => $this->platform->id, 'role' => 'student', 'user_id' => $u->id, 'status' => 'conflict', 'managed' => true]);
+        $this->fake->people = [$this->item(42, ['name' => 'حساب قديم', 'national_id' => '1000000042']), $this->item(43, ['name' => 'زيد غير مطابق'])];
+        $this->mirror();
+        $mirror = $this->row('42');
+
+        $this->get("/admin/hub/accounts/{$conflict->id}/link")->assertOk()->assertSee('حساب قديم')->assertDontSee('زيد غير مطابق')->assertSee(__('hub_directory.reason_national_id'));
+
+        $this->post("/admin/hub/accounts/{$conflict->id}/link", ['external_id' => '42'])->assertRedirect("/admin/hub/people/{$u->id}");
+        $this->assertNull(HubPlatformAccount::find($conflict->id));
+        $mirror->refresh();
+        $this->assertSame([$u->id, $admin->id, false], [$mirror->user_id, $mirror->link_confirmed_by, $mirror->managed]);
+    }
+
+    public function test_teacher_rows_are_never_linked(): void
+    {
+        $this->as('super-admin');
+        $this->fake->people = [$this->item(9, ['role' => 'teacher'])];
+        $this->mirror();
+        $row = HubPlatformAccount::where(['external_id' => '9', 'role' => 'teacher'])->firstOrFail();
+
+        $this->post("/admin/hub/accounts/{$row->id}/link", ['user_id' => $this->person('student')->id])->assertSessionHasErrors('account');
+        $this->assertNull($row->refresh()->user_id);
+    }
 }
