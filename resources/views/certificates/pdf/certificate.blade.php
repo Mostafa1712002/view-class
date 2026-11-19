@@ -29,6 +29,7 @@
             '{date}'         => $fields['date'],
             '{manager}'      => $fields['manager'] ?? '',
             '{agent}'        => $fields['agent'] ?? '',
+            '{complex_manager}' => $fields['complex_manager'] ?? '',
         ]);
     };
 @endphp
@@ -230,6 +231,9 @@
                         <td width="30%" style="text-align:center;">
                             @if(! empty($fields['agent']))
                                 <div class="meta">@lang('certificates.pdf.agent'): {{ $fields['agent'] }}</div>
+                            @endif
+                            @if(! empty($fields['complex_manager']))
+                                <div class="meta">@lang('certificates.pdf.complex_manager'): {{ $fields['complex_manager'] }}</div>
                             @endif
                             <div class="meta">
                                 {{ $fields['school'] }}<br>

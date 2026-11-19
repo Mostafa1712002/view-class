@@ -80,8 +80,22 @@ final class RenderCertificatePdfAction
             'grade'        => $grade ?? '',
             'date'         => optional($certificate->issue_date)->format('Y-m-d') ?? now()->format('Y-m-d'),
             'manager'      => $school?->manager?->name ?? '',
-            'agent'        => $school?->agent?->name ?? '',
+            'agent'        => $this->agentName($certificate, $school),
+            'complex_manager' => $school?->compounds->first()?->manager?->name ?? '',
         ];
+    }
+
+    /** Chosen agent (a vice of the school) wins; none when disabled; else the school's default agent. */
+    private function agentName(Certificate $certificate, ?\App\Models\School $school): string
+    {
+        if ($certificate->print_agent === false) {
+            return '';
+        }
+        if ($certificate->agent_user_id) {
+            return \App\Models\User::withTrashed()->whereKey($certificate->agent_user_id)->value('name') ?? '';
+        }
+
+        return $school?->agent?->name ?? '';
     }
 
     /**
@@ -116,7 +130,7 @@ final class RenderCertificatePdfAction
     private function school(Certificate $certificate): ?\App\Models\School
     {
         if ($certificate->school_id && $this->school?->id !== (int) $certificate->school_id) {
-            $this->school = \App\Models\School::with(['manager:id,name', 'agent:id,name'])->find($certificate->school_id);
+            $this->school = \App\Models\School::with(['manager:id,name', 'agent:id,name', 'compounds.manager:id,name'])->find($certificate->school_id);
         }
 
         return $certificate->school_id ? $this->school : null;

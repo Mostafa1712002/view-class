@@ -88,6 +88,16 @@
                     <label>@lang('certificates.fields.signer_name')</label>
                     <input type="text" name="signer_name" class="form-control" maxlength="255" value="{{ old('signer_name') }}">
                 </div>
+                <div class="col-md-4 mb-1">
+                    <label>@lang('certificates.fields.agent')</label>
+                    <select name="agent_user_id" class="form-control">
+                        <option value="">@lang('certificates.fields.agent_default')</option>
+                        @foreach($agents as $a)
+                            <option value="{{ $a->id }}" @selected(old('agent_user_id') == $a->id)>{{ $a->name }}@if($a->id == $defaultAgentId) ★@endif</option>
+                        @endforeach
+                        <option value="none" @selected(old('agent_user_id') === 'none')>@lang('certificates.fields.agent_none')</option>
+                    </select>
+                </div>
                 <div class="col-md-8 mb-1">
                     <label>@lang('certificates.design.signature_type')</label>
                     <div>

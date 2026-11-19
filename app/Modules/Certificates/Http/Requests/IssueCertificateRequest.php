@@ -57,6 +57,17 @@ class IssueCertificateRequest extends FormRequest
 
             // Design fields (signer, signature, logo, stamp, free-text body).
             'signer_name'    => ['nullable', 'string', 'max:255'],
+            // The agent (وكيل) to print: a vice of THIS school; empty = school default, 'none' = print none.
+            'agent_user_id'  => [
+                'nullable',
+                Rule::when($this->input('agent_user_id') !== 'none', [
+                    'integer',
+                    Rule::exists('users', 'id')->where(function ($q) use ($schoolId) {
+                        $q->where('school_id', $schoolId ?? 0)
+                            ->whereIn('job_title_id', \App\Models\JobTitle::where('slug', 'vice')->select('id'));
+                    }),
+                ]),
+            ],
             'signature_type' => ['nullable', Rule::in(['manual', 'file'])],
             'signature_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1536'],
             // data:image/png;base64,... produced by the canvas signature pad.

@@ -23,6 +23,7 @@ class Compound extends Model
         'name_ar',
         'name_en',
         'logo',
+        'manager_user_id',
         'status',
         'sort_order',
     ];
@@ -35,6 +36,12 @@ class Compound extends Model
     {
         return $this->belongsToMany(School::class, 'compound_school', 'compound_id', 'school_id')
             ->withTimestamps();
+    }
+
+    /** Complex manager (مدير المجمع) — printed on student certificates. */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'manager_user_id')->withTrashed();
     }
 
     public function company(): BelongsTo

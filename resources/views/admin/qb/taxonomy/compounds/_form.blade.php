@@ -21,6 +21,16 @@
                 <option value="inactive" @selected(old('status', $compound->status ?? '') === 'inactive')>غير نشط</option>
             </select>
         </div>
+        <div class="col-md-6">
+            <label class="form-label">مدير المجمع</label>
+            <select name="manager_user_id" class="form-select">
+                <option value="">—</option>
+                @foreach(($managerCandidates ?? []) as $person)
+                    <option value="{{ $person->id }}" @selected(old('manager_user_id', $compound->manager_user_id ?? null) == $person->id)>{{ $person->name }}</option>
+                @endforeach
+            </select>
+            <small class="text-muted">يُطبع على شهادة الطالب</small>
+        </div>
         <div class="col-md-12">
             <label class="form-label">المدارس التابعة</label>
             <div class="row g-2" style="max-height:280px;overflow:auto;border:1px solid #e2e8f0;border-radius:8px;padding:10px;">

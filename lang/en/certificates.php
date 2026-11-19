@@ -36,10 +36,14 @@ return [
         'seal'         => 'Certificate',
         'manager'      => 'School manager',
         'agent'        => 'Vice principal',
+        'complex_manager' => 'Complex manager',
     ],
 
     // Fields
     'fields' => [
+        'agent'            => 'Agent printed on the certificate',
+        'agent_default'    => 'School default agent',
+        'agent_none'       => 'No agent (do not print)',
         'type'             => 'Certificate Type',
         'title'            => 'Certificate Title',
         'recipient'        => 'Recipient',

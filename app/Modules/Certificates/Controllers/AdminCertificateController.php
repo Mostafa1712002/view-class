@@ -69,6 +69,9 @@ class AdminCertificateController extends Controller
         return view('certificates.admin.issue', [
             'templates' => $this->templates->allForSchool($schoolId),
             'students'  => $this->getSchoolStudents($schoolId),
+            'agents'    => \App\Models\User::where('school_id', $schoolId ?? 0)
+                ->whereHas('jobTitle', fn ($j) => $j->where('slug', 'vice'))->orderBy('name')->get(['id', 'name']),
+            'defaultAgentId' => $schoolId ? \App\Models\School::find($schoolId)?->agent_user_id : null,
         ]);
     }
 
@@ -90,6 +93,8 @@ class AdminCertificateController extends Controller
             'issued_by'   => auth()->id(),
             'status'      => 'published',
             'signer_name'    => $data['signer_name'] ?? null,
+            'agent_user_id'  => is_numeric($data['agent_user_id'] ?? null) ? (int) $data['agent_user_id'] : null,
+            'print_agent'    => ($data['agent_user_id'] ?? null) !== 'none',
             'signature_type' => $data['signature_type'] ?? null,
             // body_html only carries meaning for the free-text 'general' type.
             'body_html'      => $data['type'] === 'general' ? ($data['body_html'] ?? null) : null,

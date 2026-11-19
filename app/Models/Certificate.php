@@ -24,6 +24,8 @@ class Certificate extends Model
         'status',
         'note',
         'signer_name',
+        'agent_user_id',
+        'print_agent',
         'signature_type',
         'signature_path',
         'logo_path',
@@ -37,6 +39,7 @@ class Certificate extends Model
     protected $casts = [
         'issue_date' => 'date',
         'progress'   => 'integer',
+        'print_agent' => 'boolean',
     ];
 
     public function recipient(): BelongsTo

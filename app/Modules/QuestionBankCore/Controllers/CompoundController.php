@@ -5,10 +5,12 @@ namespace App\Modules\QuestionBankCore\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\School;
+use App\Models\User;
 use App\Modules\QuestionBankCore\Models\Compound;
 use App\Modules\QuestionBankCore\Repositories\Contracts\CompoundRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -44,6 +46,7 @@ class CompoundController extends Controller
             'compound' => new Compound(['status' => 'active', 'sort_order' => 0]),
             'schools'  => $this->schools(),
             'selectedSchools' => [],
+            'managerCandidates' => $this->managerCandidates(),
         ]);
     }
 
@@ -57,6 +60,7 @@ class CompoundController extends Controller
             'name_en'    => $data['name_en'] ?? null,
             'status'     => $data['status'],
             'sort_order' => $data['sort_order'] ?? 0,
+            'manager_user_id' => $data['manager_user_id'] ?? null,
         ]);
         $this->compounds->syncSchools($compound, $data['schools'] ?? []);
         ActivityLog::log('compounds.create', "إضافة مجمع: {$compound->name_ar} (#{$compound->id})", $compound);
@@ -75,6 +79,7 @@ class CompoundController extends Controller
             'compound'        => $compound,
             'schools'         => $this->schools(),
             'selectedSchools' => $compound->schools->pluck('id')->all(),
+            'managerCandidates' => $this->managerCandidates($compound->id),
         ]);
     }
 
@@ -91,6 +96,7 @@ class CompoundController extends Controller
             'name_en'    => $data['name_en'] ?? null,
             'status'     => $data['status'],
             'sort_order' => $data['sort_order'] ?? 0,
+            'manager_user_id' => $data['manager_user_id'] ?? null,
         ]);
         $this->compounds->syncSchools($compound, $data['schools'] ?? []);
         ActivityLog::log('compounds.edit', "تعديل مجمع (#{$compound->id})", $compound);
@@ -119,9 +125,31 @@ class CompoundController extends Controller
             'name_en'    => ['nullable', 'string', 'max:255'],
             'status'     => ['required', 'in:active,inactive'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
+            'manager_user_id' => ['nullable', Rule::in($this->managerCandidates($request->route('compoundId'))->pluck('id')->all())],
             'schools'    => ['nullable', 'array'],
             'schools.*'  => ['integer', 'exists:schools,id'],
         ]);
+    }
+
+    /**
+     * Staff who can manage a complex: any user holding a job title or the
+     * school-admin role (the meeting names no specific title). The current
+     * manager is always kept so editing never drops it.
+     */
+    private function managerCandidates($compoundId = null)
+    {
+        $keep = $compoundId ? Compound::find($compoundId)?->manager_user_id : null;
+
+        return User::query()
+            ->where(function ($q) use ($keep) {
+                $q->whereNotNull('job_title_id')
+                    ->orWhereHas('roles', fn ($r) => $r->where('slug', 'school-admin'));
+                if ($keep) {
+                    $q->orWhere('users.id', $keep);
+                }
+            })
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 
     private function schools()
