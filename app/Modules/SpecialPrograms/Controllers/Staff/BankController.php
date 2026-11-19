@@ -235,7 +235,7 @@ class BankController extends Controller
             $file = $request->file('question_image');
             $data['image_md5'] = md5_file($file->getRealPath());
             $data['attachment_path'] = $file->storeAs('special-programs/'.$subject->program,
-                'question_'.time().'_'.uniqid().'.'.strtolower($file->getClientOriginalExtension() ?: 'jpg'), 'public');
+                'question_'.time().'_'.uniqid().'.'.($file->extension() ?: 'jpg'), 'public');
         } elseif ($current && ! $request->boolean('remove_image')) {
             $data['attachment_path'] = $current;
             $disk = Storage::disk('public');
