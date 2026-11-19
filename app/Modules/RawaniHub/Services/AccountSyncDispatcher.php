@@ -12,14 +12,20 @@ class AccountSyncDispatcher
 {
     public const JOB = \App\Modules\RawaniHub\Jobs\SyncPlatformAccountJob::class;
 
-    /** @param array<int,int> $accountIds */
-    public function afterCommit(array $accountIds): void
+    /**
+     * @param  array<int,int>  $accountIds
+     * @param  bool  $fresh  drop the accounts' unique lock first, so a job sleeping in a retry delay does not swallow this change
+     */
+    public function afterCommit(array $accountIds, bool $fresh = false): void
     {
         if (! class_exists(self::JOB)) {
             return;
         }
-        DB::afterCommit(function () use ($accountIds) {
+        DB::afterCommit(function () use ($accountIds, $fresh) {
             foreach (array_unique($accountIds) as $id) {
+                if ($fresh) {
+                    app(\Illuminate\Bus\UniqueLock::class)->release(new (self::JOB)($id));
+                }
                 dispatch(new (self::JOB)($id));
             }
         });

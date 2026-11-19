@@ -30,7 +30,7 @@ final class SetAccountEnabled
             $old = ['enabled' => $account->enabled];
             $account = $this->accounts->update($account, ['enabled' => $enabled, 'needs_sync' => true]);
             ActivityLog::log('hub.account.'.($enabled ? 'enable' : 'disable'), ($enabled ? 'تفعيل' : 'تعطيل')." حساب #{$account->id}", $account, $old, ['enabled' => $enabled]);
-            $this->dispatcher->afterCommit([$account->id]);
+            $this->dispatcher->afterCommit([$account->id], fresh: true);
 
             return $account;
         });

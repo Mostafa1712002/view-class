@@ -206,7 +206,7 @@ class HubActionsTest extends TestCase
         $admin = $this->admin();
         $school = DB::table('schools')->insertGetId(['name' => 's', 'code' => 'x', 'created_at' => now(), 'updated_at' => now()]);
         config(['rawani_hub.default_school_id' => $school]);
-        $dto = new BeneficiaryData('طالب', 'male', '1000000001', 'primary', 3, parentName: 'ولي', parentNationalId: '2000000002');
+        $dto = new BeneficiaryData('طالب', 'male', '1000000001', 'primary', 3, parentName: 'ولي', parentNationalId: '2000000002', parentGender: 'female');
 
         $s = app(FindOrCreateBeneficiary::class)->execute($dto);
         $this->assertSame($school, (int) $s->school_id);
@@ -215,6 +215,7 @@ class HubActionsTest extends TestCase
         $this->assertSame(3, (int) HubProfile::find($s->id)->grade);
         $parent = User::where('national_id', '2000000002')->first();
         $this->assertTrue($parent->hasRole('parent'));
+        $this->assertSame('female', $parent->gender);
         $this->assertSame(1, DB::table('parent_student')->where(['parent_id' => $parent->id, 'student_id' => $s->id, 'is_primary' => 1])->count());
 
         // admin: same ID returns the existing student, creates nothing
@@ -232,7 +233,7 @@ class HubActionsTest extends TestCase
         config(['rawani_hub.default_school_id' => DB::table('schools')->insertGetId(['name' => 's', 'code' => 'x', 'created_at' => now(), 'updated_at' => now()])]);
         User::factory()->create(['national_id' => '3000000003']);
         try {
-            app(FindOrCreateBeneficiary::class)->execute(new BeneficiaryData('ط', 'male', '1000000009', 'primary', 1, parentName: 'و', parentNationalId: '3000000003'));
+            app(FindOrCreateBeneficiary::class)->execute(new BeneficiaryData('ط', 'male', '1000000009', 'primary', 1, parentName: 'و', parentNationalId: '3000000003', parentGender: 'male'));
             $this->fail();
         } catch (NationalIdCollision) {
         }
@@ -310,6 +311,37 @@ class HubActionsTest extends TestCase
         $linked = HubPlatformAccount::create(['platform_id' => $a->id, 'role' => 'parent', 'user_id' => $s->id, 'managed' => false]);
         $this->expectException(ValidationException::class);
         app(ResetAccountPassword::class)->execute($admin, $linked->id);
+    }
+
+    public function test_a_new_parent_without_gender_is_refused_and_nothing_is_guessed(): void
+    {
+        $this->admin();
+        config(['rawani_hub.default_school_id' => DB::table('schools')->insertGetId(['name' => 's', 'code' => 'x', 'created_at' => now(), 'updated_at' => now()])]);
+        try {
+            app(FindOrCreateBeneficiary::class)->execute(new BeneficiaryData('ط', 'male', '1000000008', 'primary', 1, parentName: 'و', parentNationalId: '4000000004'));
+            $this->fail();
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('parent_gender', $e->errors());
+        }
+        $this->assertSame(0, User::whereIn('national_id', ['1000000008', '4000000004'])->count());
+    }
+
+    public function test_disable_and_reset_release_the_unique_lock_so_a_sleeping_retry_does_not_swallow_them(): void
+    {
+        \Illuminate\Support\Facades\Bus::fake();
+        $admin = $this->admin();
+        $p = $this->platform('alawal');
+        $s = User::factory()->create();
+        $acc = HubPlatformAccount::create(['platform_id' => $p->id, 'role' => 'student', 'user_id' => $s->id, 'status' => 'active', 'managed' => true]);
+
+        $job = \App\Modules\RawaniHub\Jobs\SyncPlatformAccountJob::class;
+        foreach ([1 => fn () => app(SetAccountEnabled::class)->execute($admin, $acc->id, false),
+            2 => fn () => app(ResetAccountPassword::class)->execute($admin, $acc->id)] as $n => $action) {
+            \Illuminate\Support\Facades\Cache::lock(\Illuminate\Bus\UniqueLock::getKey(new $job($acc->id)))->forceRelease();
+            $this->assertTrue(\Illuminate\Support\Facades\Cache::lock(\Illuminate\Bus\UniqueLock::getKey(new $job($acc->id)), 60)->get()); // the job asleep in its retry delay
+            $action();
+            \Illuminate\Support\Facades\Bus::assertDispatchedTimes($job, $n); // a held lock would have swallowed the dispatch
+        }
     }
 
     public function test_set_enabled_toggles_marks_dirty_and_rejects_unlinked(): void

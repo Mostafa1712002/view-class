@@ -334,7 +334,7 @@ All four endpoints use the same envelope on all three hosts. It is ViewClass's o
 | 401 | `INVALID_SIGNATURE`, `STALE_TIMESTAMP`, `REPLAYED_NONCE` | `failed`; the platform row gets `last_error` (check the secret or the clock) |
 | 404 | `NOT_FOUND` | Only for `sso`. Re-sync the account. |
 | 409 | `ACCOUNT_EXISTS` (`details.external_id`, `details.login`) | `conflict`; an admin links or resolves it |
-| 409 | `IDENTIFIER_TAKEN` (e.g. the same national ID is on a teacher, or a duplicate teacher ID) | `conflict` |
+| 409 | `IDENTIFIER_TAKEN` (e.g. the same national ID is on a teacher, or a duplicate teacher ID) | `conflict` (needs admin review, same as `ACCOUNT_EXISTS`; any other 409 code is `failed`) |
 | 422 | `VALIDATION_FAILED` (`details` = field errors), `PLACEMENT_UNAVAILABLE` (alawal has no section for that stage, gender and grade) | `failed` with the message |
 | 501 | `NOT_SUPPORTED` | e.g. `sso` on aafaq. The UI uses the fallback. |
 | 429, 5xx, timeout | `PLATFORM_ERROR` | Retry with backoff |

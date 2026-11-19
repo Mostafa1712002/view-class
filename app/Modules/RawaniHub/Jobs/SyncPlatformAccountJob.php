@@ -127,12 +127,12 @@ class SyncPlatformAccountJob implements ShouldBeUnique, ShouldQueue
         }
 
         $error = $this->describe($r);
-        if ($r->status === PlatformResult::CONFLICT && $r->code === 'ACCOUNT_EXISTS') {
+        if ($r->status === PlatformResult::CONFLICT && in_array($r->code, ['ACCOUNT_EXISTS', 'IDENTIFIER_TAKEN'], true)) {
             $this->settle($account, ['status' => 'conflict', 'last_error' => $error]);
-        } elseif ($r->status === PlatformResult::AUTH || $r->isRetryable()) {
-            if ($r->status === PlatformResult::AUTH) {
-                $platform->forceFill(['last_error' => 'auth failing: '.$error])->save();
-            }
+        } elseif ($r->status === PlatformResult::AUTH) { // a wrong secret or clock does not heal by waiting (design §3.3)
+            $platform->forceFill(['last_error' => 'auth failing: '.$error])->save();
+            $this->settle($account, ['status' => 'failed', 'last_error' => $error]);
+        } elseif ($r->isRetryable()) {
             $this->retryOrFail($account, $error);
         } else { // invalid, other 409, not_found, unsupported: settles at once
             $this->settle($account, ['status' => 'failed', 'last_error' => $error]);

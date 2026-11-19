@@ -38,7 +38,7 @@ final class ResetAccountPassword
                 $ids[] = $row->id;
             }
             ActivityLog::log('hub.account.reset_password', "إعادة تعيين كلمة مرور المستخدم #{$account->user_id}", $account, null, ['accounts' => $ids]);
-            $this->dispatcher->afterCommit($ids);
+            $this->dispatcher->afterCommit($ids, fresh: true);
 
             return $password;
         });

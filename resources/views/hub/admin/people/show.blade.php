@@ -21,7 +21,7 @@
 <tr><td>{{ $a->platform?->name_ar }}</td><td>{{ __('hub_admin.role_'.$a->role) }}</td><td dir="ltr">{{ $a->login ?? '—' }}</td>
 <td>{{ __('hub_admin.status_'.$a->status) }}@unless($a->enabled) ({{ __('hub_admin.disable') }})@endunless<br><small>{{ $a->managed ? __('hub_admin.managed') : __('hub_admin.linked_acct') }}</small></td>
 <td>{{ $a->synced_at?->format('Y-m-d H:i') ?? '—' }}</td><td>{{ $a->last_error ?? '—' }}</td>
-<td class="text-nowrap">
+<td>
 @if(in_array($a->status, ['failed', 'needs_info']))<form method="POST" action="{{ route('admin.hub.accounts.retry', $a->id) }}" class="d-inline">@csrf<button class="btn btn-link p-0">{{ __('hub_admin.retry') }}</button></form>@endif
 <form method="POST" action="{{ route('admin.hub.accounts.toggle', $a->id) }}" class="d-inline">@csrf<button class="btn btn-link p-0">{{ $a->enabled ? __('hub_admin.disable') : __('hub_admin.enable') }}</button></form>
 @if($a->managed)
@@ -32,7 +32,7 @@
 <div class="alert alert-warning mt-2 mb-0" role="alert">{{ __('hub_admin.conflict_notice') }}
 <form method="POST" action="{{ route('admin.hub.accounts.link', $a->id) }}" class="mt-2">@csrf
 <label for="external_id-{{ $a->id }}">{{ __('hub_admin.external_id') }}</label>
-<input class="form-control" id="external_id-{{ $a->id }}" name="external_id" required dir="ltr" value="{{ $a->external_id }}">
+<input class="form-control" id="external_id-{{ $a->id }}" name="external_id" required dir="ltr" value="{{ $a->external_id ?? $a->conflictExternalId() }}">
 <button class="btn btn-warning mt-2">{{ __('hub_admin.link_after_review') }}</button></form></div>
 @endif
 </td></tr>

@@ -229,16 +229,30 @@ class SyncJobTest extends TestCase
         $this->assertFalse($acc->needs_sync);
     }
 
-    public function test_auth_marks_platform_failing_and_backs_off(): void
+    public function test_auth_fails_at_once_without_retry_and_marks_the_platform(): void
     {
         $p = $this->platform();
         $acc = $this->account($p, $this->student());
         $this->fake->failNext(401, 'INVALID_SIGNATURE');
-        $this->runJob($acc, 1, expectRelease: 60);
+        $this->runJob($acc); // no release: no backoff
         $this->assertStringContainsString('auth failing', $p->fresh()->last_error);
         $acc->refresh();
-        $this->assertSame('pending', $acc->status);
-        $this->assertTrue($acc->needs_sync);
+        $this->assertSame('failed', $acc->status);
+        $this->assertStringContainsString('INVALID_SIGNATURE', $acc->last_error);
+        $this->assertFalse($acc->needs_sync);
+        $this->assertSame(1, \App\Models\ActivityLog::where('action', 'hub.account.failed')->count());
+    }
+
+    public function test_identifier_taken_is_a_conflict_for_admin_review(): void
+    {
+        $p = $this->platform();
+        $acc = $this->account($p, $this->student());
+        $this->fake->failNext(409, 'IDENTIFIER_TAKEN', ['external_id' => '77']);
+        $this->runJob($acc);
+        $acc->refresh();
+        $this->assertSame('conflict', $acc->status);
+        $this->assertSame('77', $acc->conflictExternalId());
+        $this->assertSame(1, \App\Models\ActivityLog::where('action', 'hub.account.conflict')->count());
     }
 
     public function test_retryable_backs_off_exponentially_then_fails_after_the_last_try(): void
