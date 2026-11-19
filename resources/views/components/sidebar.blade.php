@@ -38,6 +38,8 @@
     $canViewSubjects      = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('subjects');
     $canViewQuestionBanks = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('question_banks');
     $canViewExams         = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('exams');
+    $canViewSpecialPrograms = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('special_programs');
+    $spHubUrl = Route::has('manage.special-programs.index') ? route('manage.special-programs.index') : route('programs.coming-soon'); // query-free: tests render layouts without sp_* tables
     $canViewAssignments   = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('assignments');
     $canViewBooks         = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('books');
     $canViewLibraries     = !$sidebarUser || !$isStaff || $sidebarUser->canViewModule('libraries');
@@ -540,7 +542,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
             {{-- Standalone program links (the "برامج نوعية" grouping was removed per card;
                  the three items stay as renamed coming-soon links until the other
                  platforms are wired in). --}}
-            <li class="nav-item" data-label="@lang('shell.nav_alawwal')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_alawwal')"><x-svg-icon name="flag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>
+            @if($canViewSpecialPrograms)<li class="nav-item {{ request()->routeIs('manage.special-programs.*') ? 'active' : '' }}" data-label="@lang('shell.nav_alawwal')"><a href="{{ $spHubUrl }}" data-label="@lang('shell.nav_alawwal')"><x-svg-icon name="flag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_alawwal')</span></a></li>@endif
             <li class="nav-item" data-label="@lang('shell.nav_ana_wa_qadarat')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_ana_wa_qadarat')"><x-svg-icon name="lightbulb" class="vc-ico" /><span class="menu-title">@lang('shell.nav_ana_wa_qadarat')</span></a></li>
             <li class="nav-item" data-label="@lang('shell.nav_speed_reading')"><a href="{{ route('programs.coming-soon') }}" data-label="@lang('shell.nav_speed_reading')"><x-svg-icon name="book" class="vc-ico" /><span class="menu-title">@lang('shell.nav_speed_reading')</span></a></li>
 
@@ -606,7 +608,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         @if(Route::has('admin.qb.compounds.index') && (!$sidebarUser || $sidebarUser->isSuperAdmin()) && (!$sidebarUser || $sidebarUser->canViewModule('compounds')))<li class="{{ request()->routeIs('admin.qb.compounds.*') ? 'active' : '' }}"><a href="{{ route('admin.qb.compounds.index') }}"><x-svg-icon name="diagram-3" class="vc-ico" /><span class="menu-item">المجمعات</span></a></li>@endif
                     </ul>
                 </li>
-                <li class="nav-item" data-section="academic"><a href="{{ route('programs.coming-soon') }}"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_special_programs')</span></a></li>
+                @if($canViewSpecialPrograms)<li class="nav-item {{ request()->routeIs('manage.special-programs.*') ? 'active' : '' }}" data-section="academic"><a href="{{ $spHubUrl }}"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_special_programs')</span></a></li>@endif
                 <li class="nav-item" data-section="academic"><a href="{{ Route::has('manage.distance-learning.index') ? route('manage.distance-learning.index') : '#' }}"><x-svg-icon name="laptop" class="vc-ico" /><span class="menu-title">@lang('shell.nav_distance_learning')</span></a></li>
                 @if($canViewVirtualClasses)
                 <li class="nav-item {{ request()->routeIs('manage.virtual-classes.*') ? 'active' : '' }}" data-section="academic"><a href="{{ Route::has('manage.virtual-classes.index') ? route('manage.virtual-classes.index') : '#' }}"><x-svg-icon name="camera-video" class="vc-ico" /><span class="menu-title">@lang('shell.nav_virtual_classrooms')</span></a></li>
@@ -1060,6 +1062,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item {{ request()->routeIs('teacher.schedule') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ route('teacher.schedule') }}" data-label="@lang('shell.portal_my_schedule_link')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.portal_my_schedule_link')</span></a>
                 </li>
+                @if(Route::has('manage.special-programs.index'))<li class="nav-item {{ request()->routeIs('manage.special-programs.*') ? 'active' : '' }}" data-section="teacher"><a href="{{ route('manage.special-programs.index') }}" data-label="@lang('shell.nav_special_programs_teacher')"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_special_programs_teacher')</span></a></li>@endif
                 <li class="nav-item {{ request()->routeIs('teacher.weekly-plans.*') ? 'active' : '' }}" data-section="teacher">
                     <a href="{{ route('teacher.weekly-plans.index') }}" data-label="@lang('shell.portal_my_weekly_plans')"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.portal_my_weekly_plans')</span></a>
                 </li>
@@ -1170,6 +1173,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
             </div>
             <div class="gp-section-content" id="gp-sec-student-educational">
                 <li class="nav-item {{ request()->routeIs('student.weekly-plans') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.weekly-plans') ? route('student.weekly-plans') : '#' }}" data-label="@lang('shell.nav_weekly_plan')"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-title">@lang('shell.nav_weekly_plan')</span></a></li>
+                @if(Route::has('student.programs.index'))<li class="nav-item {{ request()->routeIs('student.programs.*') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.programs.index') }}" data-label="@lang('shell.nav_my_programs')"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_programs')</span></a></li>@endif
                 <li class="nav-item {{ request()->routeIs('student.books.*') ? 'active' : '' }}" data-section="student"><a href="{{ Route::has('student.books.index') ? route('student.books.index') : '#' }}" data-label="@lang('shell.nav_books')"><x-svg-icon name="book-half" class="vc-ico" /><span class="menu-title">@lang('shell.nav_books')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.schedule') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.schedule') }}" data-label="@lang('shell.nav_schedule')"><x-svg-icon name="calendar-check" class="vc-ico" /><span class="menu-title">@lang('shell.nav_schedule')</span></a></li>
                 <li class="nav-item {{ request()->routeIs('student.exams') ? 'active' : '' }}" data-section="student"><a href="{{ route('student.exams') }}" data-label="@lang('shell.portal_exams')"><x-svg-icon name="file-text" class="vc-ico" /><span class="menu-title">@lang('shell.portal_exams')</span></a></li>
@@ -1280,6 +1284,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
             </div>
             <div class="gp-section-content" id="gp-sec-parent">
                 <li class="nav-item {{ request()->routeIs('parent.contact-teacher') ? 'active' : '' }}" data-section="parent"><a href="{{ route('parent.contact-teacher') }}" data-label="@lang('shell.portal_contact_teacher')"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-title">@lang('shell.portal_contact_teacher')</span></a></li>
+                @if(Route::has('parent.programs.index'))<li class="nav-item {{ request()->routeIs('parent.programs.*') ? 'active' : '' }}" data-section="parent"><a href="{{ route('parent.programs.index') }}" data-label="@lang('shell.nav_my_programs')"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_programs')</span></a></li>@endif
                 <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="parent">
                     <a href="{{ Route::has('my.appointments.index') ? route('my.appointments.index') : '#' }}" data-label="@lang('shell.nav_my_appointments_booking')"><x-svg-icon name="calendar-plus" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_appointments_booking')</span></a>
                 </li>

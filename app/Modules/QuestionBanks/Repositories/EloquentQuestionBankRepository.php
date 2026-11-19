@@ -273,6 +273,8 @@ class EloquentQuestionBankRepository implements QuestionBankRepository
     {
         return $this->baseQuery($schoolId)
             ->where('status', QuestionBank::STATUS_ACTIVE)
+            // Special-program banks (#368) are hidden from the legacy exam picker: the legacy copy is text-only.
+            ->where(fn ($q) => $q->whereNull('category_type')->orWhere('category_type', '!=', QuestionBank::CATEGORY_SPECIAL_PROGRAM))
             ->pluck('id')
             ->all();
     }

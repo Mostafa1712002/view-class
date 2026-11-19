@@ -79,6 +79,7 @@ class QuestionBank extends Model
     public const CATEGORY_VERBAL = 'verbal';
     public const CATEGORY_QUANTITATIVE = 'quantitative';
     public const CATEGORY_SPEED_READING = 'speed_reading';
+    public const CATEGORY_SPECIAL_PROGRAM = 'special_program';
 
     public function school(): BelongsTo
     {

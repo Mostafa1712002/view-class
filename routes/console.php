@@ -20,3 +20,6 @@ Schedule::command('school-calendar:send-reminders')->everyFiveMinutes();
 // إدارة رسائل غياب الطالب — auto mode, fires per-school once local time
 // passes its configured end-of-day send_time.
 Schedule::command('attendance:send-daily-absence-messages')->hourly();
+
+// البرامج التعليمية الخاصة (#368) — finalize attempts whose server deadline has passed.
+Schedule::command('special-programs:finalize-overdue')->everyFiveMinutes();

@@ -218,6 +218,8 @@ return [
     'nav_terms_weeks' => 'الفصول الدراسية والأسابيع',
     'nav_add_subject' => 'اضافة مادة',
     'nav_special_programs' => 'البرامج التعليمية الخاصة',
+    'nav_special_programs_teacher' => 'البرامج الخاصة',
+    'nav_my_programs' => 'البرامج التعليمية',
     'nav_distance_learning' => 'التعليم عن بعد',
     'nav_question_banks' => 'بنوك الأسئلة',
     'nav_subject_skills' => 'مهارات المواد',

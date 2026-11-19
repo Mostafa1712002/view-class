@@ -569,7 +569,7 @@ class QuestionBankController extends Controller
             'status'                  => ['required', 'in:active,inactive,under_review,archived'],
             'source'                  => ['required', 'in:manual,al_awwal,library,import,ana_qudurat'],
             'grade_level'             => ['nullable', 'integer', 'min:1', 'max:12'],
-            'category_type'           => ['nullable', 'in:school,qudurat,verbal,quantitative,speed_reading'],
+            'category_type'           => ['nullable', 'in:school,qudurat,verbal,quantitative,speed_reading,special_program'],
             'is_ana_qudurat_linkable' => ['nullable', 'boolean'],
             'exportable'              => ['nullable', 'boolean'],
             'external_platform'       => ['nullable', 'string', 'max:100'],

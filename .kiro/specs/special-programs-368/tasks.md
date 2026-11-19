@@ -82,41 +82,41 @@ examReport(int $examId, ReportFilters $f): array             // avg/max/min, top
 ## Phase 1 — Schema, models, wiring
 
 ### T1.1 Migrations and test helper
-- [ ] `database/migrations/2026_11_19_368000_create_sp_content_tables.php`: `sp_subjects`, `sp_skills`, `sp_questions`, `sp_question_levels` (D§2.1)
-- [ ] `database/migrations/2026_11_19_368001_seed_sp_subjects.php`: 9 rows (codes and names in D§2.1; `source_subject_id` 21, 22, 62–65, 59–61)
-- [ ] `database/migrations/2026_11_19_368002_add_external_index_to_bank_questions.php`: `index(['external_platform','external_id'])` only, guarded with `Schema::hasTable`
-- [ ] `database/migrations/2026_11_19_368003_create_sp_school_tables.php`: `sp_settings`, `sp_teachers`, `sp_groups`, `sp_enrollments` (D§2.2)
-- [ ] `database/migrations/2026_11_19_368004_create_sp_exam_tables.php`: `sp_exams`, `sp_exam_targets`, `sp_exam_subjects`, `sp_exam_skill_shares` (D§2.3)
-- [ ] `database/migrations/2026_11_19_368005_create_sp_attempt_tables.php`: `sp_attempts`, `sp_attempt_items` (D§2.4)
-- [ ] `database/migrations/2026_11_19_368009_seed_special_programs_permissions.php`: D§11.2. Seed `permissions` and `permission_role` (school-admin: view, manage, exams, reports, settings; teacher: view, exams, reports). Seed `job_title_permissions` for slugs `supervisor`, `vice`, `school_manager` (view, manage, exams, reports; scope `school`). Write a `down()`.
-- [ ] `tests/Feature/SpecialPrograms/Concerns/LoadsSpMigrations.php`: trait that overrides `refreshDatabase()` with the base chain from `CounselingAccessTest` plus `2026_11_19_368*`. Skip `368002` (it needs `bank_questions`). Add a `grantSpPermissions()` helper and call it after `parent::setUp()`. `TestCase::setUp` runs `RoleSeeder`, which `sync()`s `permission_role` and wipes the 368009 grants.
-- [ ] Everything must be sqlite-safe: no `ALTER … MODIFY`, no `JSON_CONTAINS`, no FK to `users.id`, enums declared only in new tables.
+- [x] `database/migrations/2026_11_19_368000_create_sp_content_tables.php`: `sp_subjects`, `sp_skills`, `sp_questions`, `sp_question_levels` (D§2.1)
+- [x] `database/migrations/2026_11_19_368001_seed_sp_subjects.php`: 9 rows (codes and names in D§2.1; `source_subject_id` 21, 22, 62–65, 59–61)
+- [x] `database/migrations/2026_11_19_368002_add_external_index_to_bank_questions.php`: `index(['external_platform','external_id'])` only, guarded with `Schema::hasTable`
+- [x] `database/migrations/2026_11_19_368003_create_sp_school_tables.php`: `sp_settings`, `sp_teachers`, `sp_groups`, `sp_enrollments` (D§2.2)
+- [x] `database/migrations/2026_11_19_368004_create_sp_exam_tables.php`: `sp_exams`, `sp_exam_targets`, `sp_exam_subjects`, `sp_exam_skill_shares` (D§2.3)
+- [x] `database/migrations/2026_11_19_368005_create_sp_attempt_tables.php`: `sp_attempts`, `sp_attempt_items` (D§2.4)
+- [x] `database/migrations/2026_11_19_368009_seed_special_programs_permissions.php`: D§11.2. Seed `permissions` and `permission_role` (school-admin: view, manage, exams, reports, settings; teacher: view, exams, reports). Seed `job_title_permissions` for slugs `supervisor`, `vice`, `school_manager` (view, manage, exams, reports; scope `school`). Write a `down()`.
+- [x] `tests/Feature/SpecialPrograms/Concerns/LoadsSpMigrations.php`: trait that overrides `refreshDatabase()` with the base chain from `CounselingAccessTest` plus `2026_11_19_368*`. Skip `368002` (it needs `bank_questions`). Add a `grantSpPermissions()` helper and call it after `parent::setUp()`. `TestCase::setUp` runs `RoleSeeder`, which `sync()`s `permission_role` and wipes the 368009 grants.
+- [x] Everything must be sqlite-safe: no `ALTER … MODIFY`, no `JSON_CONTAINS`, no FK to `users.id`, enums declared only in new tables.
 
 **Outcome:** `php artisan migrate` succeeds on local MySQL, and the trait boots sqlite. **Dependencies:** none.
 
 ### T1.2 Models, support, event, shared lang, settings repo
-- [ ] `M/Models/` 13 models: `SpSubject`, `SpSkill`, `SpQuestion`, `SpSetting`, `SpTeacher`, `SpGroup`, `SpEnrollment`, `SpExam`, `SpExamTarget`, `SpExamSubject`, `SpSkillShare`, `SpAttempt`, `SpAttemptItem`. Include table names, casts (json and datetimes), relations, and `SoftDeletes` where the table has `deleted_at`.
-- [ ] `M/Support/Programs.php`: the `PROGRAMS` const (D§3) and `DEFAULT_BANDS` (D§2.2), with `keys()`, `label()`, `defaultGradeLevels()`.
-- [ ] `M/Support/PerformanceLevels.php`: 5 fixed levels (name, color, icon) and `for(float $pct, array $bands): array` (round to 2 dp, highest min ≤ pct, else lowest). Add `validate(array $bands): ?string` (5 bands, 0–100, no overlap, full cover).
-- [ ] 7 interfaces in `M/Repositories/Contracts/`, exactly as in "Shared contracts": `SettingsRepository`, `EnrollmentRepository`, `GroupRepository`, `QuestionPoolRepository`, `ExamRepository`, `AttemptRepository`, `ReportRepository`. Also `M/Actions/Picking/QuestionPicker.php` (interface) and `M/DTOs/ReportFilters.php` (readonly; `fromRequest()`).
-- [ ] `M/Repositories/EloquentSettingsRepository.php`. A read **never** inserts.
-- [ ] `M/Events/ProgramAttemptCompleted.php`: exactly as D§10 (`Dispatchable`, `ShouldDispatchAfterCommit`).
-- [ ] `lang/ar/special_programs.php` and `lang/en/special_programs.php`: program names, subject names, level names, attempt statuses, exam types, common buttons.
-- [ ] `tests/Unit/SpecialPrograms/PerformanceLevelsTest.php`: defaults per program, school override via the repository, boundaries (64.99 → مقبول/ضعيف for tahsili, 95 → ممتاز).
+- [x] `M/Models/` 13 models: `SpSubject`, `SpSkill`, `SpQuestion`, `SpSetting`, `SpTeacher`, `SpGroup`, `SpEnrollment`, `SpExam`, `SpExamTarget`, `SpExamSubject`, `SpSkillShare`, `SpAttempt`, `SpAttemptItem`. Include table names, casts (json and datetimes), relations, and `SoftDeletes` where the table has `deleted_at`.
+- [x] `M/Support/Programs.php`: the `PROGRAMS` const (D§3) and `DEFAULT_BANDS` (D§2.2), with `keys()`, `label()`, `defaultGradeLevels()`.
+- [x] `M/Support/PerformanceLevels.php`: 5 fixed levels (name, color, icon) and `for(float $pct, array $bands): array` (round to 2 dp, highest min ≤ pct, else lowest). Add `validate(array $bands): ?string` (5 bands, 0–100, no overlap, full cover).
+- [x] 7 interfaces in `M/Repositories/Contracts/`, exactly as in "Shared contracts": `SettingsRepository`, `EnrollmentRepository`, `GroupRepository`, `QuestionPoolRepository`, `ExamRepository`, `AttemptRepository`, `ReportRepository`. Also `M/Actions/Picking/QuestionPicker.php` (interface) and `M/DTOs/ReportFilters.php` (readonly; `fromRequest()`).
+- [x] `M/Repositories/EloquentSettingsRepository.php`. A read **never** inserts.
+- [x] `M/Events/ProgramAttemptCompleted.php`: exactly as D§10 (`Dispatchable`, `ShouldDispatchAfterCommit`).
+- [x] `lang/ar/special_programs.php` and `lang/en/special_programs.php`: program names, subject names, level names, attempt statuses, exam types, common buttons.
+- [x] `tests/Unit/SpecialPrograms/PerformanceLevelsTest.php`: defaults per program, school override via the repository, boundaries (64.99 → مقبول/ضعيف for tahsili, 95 → ممتاز).
 
 **Outcome:** models and constants usable by every later task. **Dependencies:** T1.1 (column names). Can run in parallel with T1.1 if both follow D§2 exactly.
 
 ### T1.3 Wiring (the only task that edits shared files)
-- [ ] `routes/web.php`: append after the Counseling require: `foreach (glob(__DIR__.'/../app/Modules/SpecialPrograms/Routes/*.php') as $spRoutes) { require $spRoutes; }`
-- [ ] `app/Providers/RepositoryServiceProvider.php`: bind all 8 contracts → `Eloquent*` (Settings, Enrollment, Group, QuestionPool, Exam, Attempt, Report, Bank)
-- [ ] `app/Modules/Users/Support/PermissionCatalog.php`: add `'special_programs' => ['label' => 'البرامج التعليمية الخاصة', 'actions' => ['view','manage','exams','questions','reports','settings']]` next to `counseling`
-- [ ] `resources/views/components/sidebar.blade.php`: add `$canViewSpecialPrograms`. Point `:609` and `:543` at `Route::has('manage.special-programs.index') ? … : route('programs.coming-soon')`. Add one **query-free** `<li>` (`Route::has()` only) in each of the teacher, student and parent blocks (D§11.4). Keep the order. Do not query `sp_*` tables in the sidebar: existing tests render layouts without the 368 migrations.
-- [ ] `lang/ar/shell.php` and `lang/en/shell.php`: the new nav keys, plus the missing English `section_academic`, `nav_special_programs` and `nav_alawwal`
-- [ ] `routes/console.php`: `Schedule::command('special-programs:finalize-overdue')->everyFiveMinutes();`
-- [ ] `app/Modules/QuestionBanks/Repositories/EloquentQuestionBankRepository.php` `visibleBankIds()`: exclude `category_type = 'special_program'` (D9)
-- [ ] `database/seeders/RoleSeeder.php`: add the `special_programs` grants (school-admin: view, manage, exams, reports, settings; teacher: view, exams, reports). Without this, a fresh seed wipes them; rawaniedu was fresh-seeded.
-- [ ] `app/Models/QuestionBank.php`: `CATEGORY_SPECIAL_PROGRAM = 'special_program'`. In `app/Modules/QuestionBanks/Controllers/QuestionBankController.php:572`, add it to the `category_type` validation list.
-- [ ] Run `RbacSuperAdminRoutesTest` (green)
+- [x] `routes/web.php`: append after the Counseling require: `foreach (glob(__DIR__.'/../app/Modules/SpecialPrograms/Routes/*.php') as $spRoutes) { require $spRoutes; }`
+- [x] `app/Providers/RepositoryServiceProvider.php`: bind all 8 contracts → `Eloquent*` (Settings, Enrollment, Group, QuestionPool, Exam, Attempt, Report, Bank)
+- [x] `app/Modules/Users/Support/PermissionCatalog.php`: add `'special_programs' => ['label' => 'البرامج التعليمية الخاصة', 'actions' => ['view','manage','exams','questions','reports','settings']]` next to `counseling`
+- [x] `resources/views/components/sidebar.blade.php`: add `$canViewSpecialPrograms`. Point `:609` and `:543` at `Route::has('manage.special-programs.index') ? … : route('programs.coming-soon')`. Add one **query-free** `<li>` (`Route::has()` only) in each of the teacher, student and parent blocks (D§11.4). Keep the order. Do not query `sp_*` tables in the sidebar: existing tests render layouts without the 368 migrations.
+- [x] `lang/ar/shell.php` and `lang/en/shell.php`: the new nav keys, plus the missing English `section_academic`, `nav_special_programs` and `nav_alawwal`
+- [x] `routes/console.php`: `Schedule::command('special-programs:finalize-overdue')->everyFiveMinutes();`
+- [x] `app/Modules/QuestionBanks/Repositories/EloquentQuestionBankRepository.php` `visibleBankIds()`: exclude `category_type = 'special_program'` (D9)
+- [x] `database/seeders/RoleSeeder.php`: add the `special_programs` grants (school-admin: view, manage, exams, reports, settings; teacher: view, exams, reports). Without this, a fresh seed wipes them; rawaniedu was fresh-seeded.
+- [x] `app/Models/QuestionBank.php`: `CATEGORY_SPECIAL_PROGRAM = 'special_program'`. In `app/Modules/QuestionBanks/Controllers/QuestionBankController.php:572`, add it to the `category_type` validation list.
+- [x] Run `RbacSuperAdminRoutesTest` (green)
 
 **Outcome:** the app boots with zero program route files, and each later route file is picked up automatically. **Dependencies:** T1.2 (contract class names for the bindings).
 
@@ -334,7 +334,7 @@ If a feature task finds a shared-file change it needs, it appends the request he
 
 | Phase | Tasks | Completed | Status |
 |-------|-------|-----------|--------|
-| 1. Schema, models, wiring | 3 | 0 | Not Started |
+| 1. Schema, models, wiring | 3 | 3 | Done |
 | 2. Import | 2 | 0 | Not Started |
 | 3. Staff setup screens | 4 | 0 | Not Started |
 | 4. Exam building | 2 | 0 | Not Started |
@@ -342,4 +342,4 @@ If a feature task finds a shared-file change it needs, it appends the request he
 | 6. Reports | 3 | 0 | Not Started |
 | 7. Teacher & parent | 2 | 0 | Not Started |
 | 9. Verification & rollout | 3 | 0 | Not Started |
-| **Total** | **21** | **0** | **0%** |
+| **Total** | **21** | **3** | **14%** |

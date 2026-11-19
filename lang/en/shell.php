@@ -199,4 +199,10 @@ return [
     'portal_exams' => 'Exams',
     'nav_my_points' => 'My points',
     'nav_children_points' => "Children's points",
+
+    // Special programs (#368) + sidebar-restructure keys that were missing in English
+    'section_academic' => 'Academic affairs & plans',
+    'nav_special_programs' => 'Special educational programs',
+    'nav_special_programs_teacher' => 'Special programs',
+    'nav_my_programs' => 'Educational programs',
 ];

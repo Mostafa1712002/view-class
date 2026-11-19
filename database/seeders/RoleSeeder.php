@@ -34,6 +34,10 @@ class RoleSeeder extends Seeder
             'users', 'sections', 'classes', 'subjects', 'academic-years',
             'schedules', 'weekly-plans', 'exams', 'grades', 'attendance', 'reports'
         ])->pluck('id');
+        $schoolAdminPermissions = $schoolAdminPermissions->merge(Permission::whereIn('slug', [
+            'special_programs.view', 'special_programs.manage', 'special_programs.exams',
+            'special_programs.reports', 'special_programs.settings',
+        ])->pluck('id'));
         $schoolAdmin->permissions()->sync($schoolAdminPermissions);
 
         // المعلم
@@ -54,6 +58,7 @@ class RoleSeeder extends Seeder
             'grades.view', 'grades.create', 'grades.edit',
             'attendance.view', 'attendance.create', 'attendance.edit',
             'reports.view',
+            'special_programs.view', 'special_programs.exams', 'special_programs.reports',
         ])->pluck('id');
         $teacher->permissions()->sync($teacherPermissions);
 

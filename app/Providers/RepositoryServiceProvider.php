@@ -163,6 +163,15 @@ class RepositoryServiceProvider extends ServiceProvider
         \App\Modules\Gamification\Repositories\Contracts\PointLedgerRepository::class => \App\Modules\Gamification\Repositories\EloquentPointLedgerRepository::class,
         \App\Modules\Gamification\Repositories\Contracts\PointSettingsRepository::class => \App\Modules\Gamification\Repositories\EloquentPointSettingsRepository::class,
         \App\Modules\Gamification\Repositories\Contracts\RewardRepository::class => \App\Modules\Gamification\Repositories\EloquentRewardRepository::class,
+        // Special programs (#368) — implementations land with their feature tasks.
+        \App\Modules\SpecialPrograms\Repositories\Contracts\SettingsRepository::class     => \App\Modules\SpecialPrograms\Repositories\EloquentSettingsRepository::class,
+        \App\Modules\SpecialPrograms\Repositories\Contracts\EnrollmentRepository::class   => \App\Modules\SpecialPrograms\Repositories\EloquentEnrollmentRepository::class,
+        \App\Modules\SpecialPrograms\Repositories\Contracts\GroupRepository::class        => \App\Modules\SpecialPrograms\Repositories\EloquentGroupRepository::class,
+        \App\Modules\SpecialPrograms\Repositories\Contracts\QuestionPoolRepository::class => \App\Modules\SpecialPrograms\Repositories\EloquentQuestionPoolRepository::class,
+        \App\Modules\SpecialPrograms\Repositories\Contracts\ExamRepository::class         => \App\Modules\SpecialPrograms\Repositories\EloquentExamRepository::class,
+        \App\Modules\SpecialPrograms\Repositories\Contracts\AttemptRepository::class      => \App\Modules\SpecialPrograms\Repositories\EloquentAttemptRepository::class,
+        \App\Modules\SpecialPrograms\Repositories\Contracts\ReportRepository::class       => \App\Modules\SpecialPrograms\Repositories\EloquentReportRepository::class,
+        \App\Modules\SpecialPrograms\Repositories\Contracts\BankRepository::class         => \App\Modules\SpecialPrograms\Repositories\EloquentBankRepository::class,
     ];
 
     public function register(): void

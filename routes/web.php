@@ -1324,3 +1324,8 @@ require __DIR__.'/../app/Modules/TeacherMaterials/Routes/web.php';
 
 require __DIR__.'/../app/Modules/Counseling/Routes/web.php';
 require __DIR__.'/../app/Modules/Gamification/Routes/web.php';
+
+// البرامج التعليمية الخاصة (قدرات · تحصيلي · نافس) — Trello #368: one route file per feature task.
+foreach (glob(__DIR__.'/../app/Modules/SpecialPrograms/Routes/*.php') as $spRoutes) {
+    require $spRoutes;
+}

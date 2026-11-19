@@ -19,6 +19,7 @@ final class PermissionCatalog
     public const MODULES = [
         'points' => ['label' => 'النقاط والمكافآت', 'actions' => ['view','manage_rules','adjust','manage_rewards']],
         'counseling' => ['label' => 'الإرشاد الطلابي', 'actions' => ['view','manage']],
+        'special_programs' => ['label' => 'البرامج التعليمية الخاصة', 'actions' => ['view','manage','exams','questions','reports','settings']],
         'users'           => ['label' => 'المستخدمون',         'actions' => ['view','create','edit','delete','export','import','print','send_notifications','manage_permissions']],
         'students'        => ['label' => 'الطلاب',             'actions' => ['view','create','edit','delete','archive','export','import','print','view_details','send_notifications']],
         'parents'         => ['label' => 'أولياء الأمور',      'actions' => ['view','create','edit','delete','export','send_notifications','send_whatsapp']],
