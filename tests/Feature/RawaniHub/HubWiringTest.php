@@ -20,7 +20,7 @@ class HubWiringTest extends TestCase
     public function test_disabled_by_default_no_routes_no_schedule(): void
     {
         $this->assertFalse(config('rawani_hub.enabled'));
-        foreach (['admin.hub.packages.index', 'admin.hub.payments.index', 'admin.hub.directory.index', 'hub.register',
+        foreach (['admin.hub.packages.index', 'admin.hub.payments.index', 'admin.hub.directory.index', 'admin.hub.platforms.overview', 'hub.register',
             'my.packages.index', 'my.packages.accounts.open', 'hub.moyasar.webhook'] as $name) {
             $this->assertFalse(Route::has($name), $name);
         }

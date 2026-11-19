@@ -4,9 +4,15 @@ use App\Modules\RawaniHub\Controllers\Admin\DirectoryController;
 use App\Modules\RawaniHub\Controllers\Admin\PackagesController;
 use App\Modules\RawaniHub\Controllers\Admin\PaymentsController;
 use App\Modules\RawaniHub\Controllers\Admin\PeopleController;
+use App\Modules\RawaniHub\Controllers\Admin\PlatformOverviewController;
 use App\Modules\RawaniHub\Controllers\Admin\PlatformsController;
 use App\Modules\RawaniHub\Controllers\Admin\SubscriptionsController;
 use Illuminate\Support\Facades\Route;
+
+// Overview: super-admin + school-admin (the controller narrows what each sees).
+Route::middleware(['auth', 'role:super-admin,school-admin'])->group(function () {
+    Route::get('admin/hub/platforms/{platform:slug}/overview', [PlatformOverviewController::class, 'show'])->name('admin.hub.platforms.overview');
+});
 
 Route::middleware(['auth', 'role:super-admin'])->prefix('admin/hub')->name('admin.hub.')->group(function () {
     Route::get('platforms', [PlatformsController::class, 'index'])->name('platforms.index');
