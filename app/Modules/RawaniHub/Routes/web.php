@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\RawaniHub\Controllers\Admin\PackagesController;
+use App\Modules\RawaniHub\Controllers\Admin\PaymentsController;
 use App\Modules\RawaniHub\Controllers\Admin\PeopleController;
 use App\Modules\RawaniHub\Controllers\Admin\PlatformsController;
 use App\Modules\RawaniHub\Controllers\Admin\SubscriptionsController;
@@ -27,6 +28,10 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('admin/hub')->name('admi
     Route::get('subscriptions/grant', [SubscriptionsController::class, 'grantForm'])->name('subscriptions.grant');
     Route::post('subscriptions/grant', [SubscriptionsController::class, 'grant'])->name('subscriptions.grant.store');
     Route::post('subscriptions/{subscription}/cancel', [SubscriptionsController::class, 'cancel'])->whereNumber('subscription')->name('subscriptions.cancel');
+
+    Route::get('payments', [PaymentsController::class, 'index'])->name('payments.index');
+    Route::post('payments/{payment}/refund', [PaymentsController::class, 'refund'])->whereNumber('payment')->name('payments.refund');
+    Route::get('payments/{payment}/receipt', [PaymentsController::class, 'receipt'])->whereNumber('payment')->name('payments.receipt');
 
     Route::get('people/{user}', [PeopleController::class, 'show'])->whereNumber('user')->name('people.show');
     Route::prefix('accounts/{account}')->whereNumber('account')->name('accounts.')->group(function () {
