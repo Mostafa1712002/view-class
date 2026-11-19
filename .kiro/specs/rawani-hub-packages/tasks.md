@@ -236,20 +236,22 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 - [x] Tests per design §9
 
 ### Task 3.4: «باقاتي» (parent and student) + add child
-- [ ] `lang/{ar,en}/hub_my.php`
-- [ ] List, buy (child picker or self), add-child form (national ID required when the package includes Al-Awwal), return/status page polling account statuses, credentials view
-- [ ] Tests, including another parent's child → 403
+- [x] `lang/{ar,en}/hub_my.php`
+- [x] List, buy (child picker or self), add-child form (national ID required when the package includes Al-Awwal), return/status page polling account statuses, credentials view
+- [x] Tests, including another parent's child → 403
 
 ### Task 3.5: Payments admin + manual refund
-- [ ] `lang/{ar,en}/hub_payments.php`
-- [ ] Payments list with flags, «تحقق» (re-fetch) and «تسجيل استرداد»
-- [ ] Tests
+- [x] `lang/{ar,en}/hub_payments.php`
+- [x] Payments list with flags, «تحقق» (re-fetch) and «تسجيل استرداد»
+- [x] Tests
 
 ### Task 3.6: Wiring
-- [ ] Webhook route in the hub `api.php` require
-- [ ] `hub:reconcile-payments` schedule
-- [ ] «باقاتي» route names in the sidebar
-- [ ] Mark `.kiro/specs/moyasar-payments/tasks.md` Phase 2 as delivered by this spec
+- [x] Webhook route in the hub `api.php` require
+- [x] `hub:reconcile-payments` schedule
+- [x] «باقاتي» route names in the sidebar
+- [x] Mark `.kiro/specs/moyasar-payments/tasks.md` Phase 2 as delivered by this spec
+
+Wiring notes (3.6/4.4/5.1, 2026-11-19): `routes/web.php` requires `Routes/web.php`, `my.php` (public `hub.register*` under `guest`+`throttle:6,1`; `my.packages.*` under `auth`+`role:student,parent`) and `my_open.php`; `routes/api.php` requires `Routes/api.php` (webhook: `api` group only, `throttle:60,1`, no CSRF). Commands `hub:reconcile-payments` (every 10 min) and `hub:mirror` (02:30 nightly; Friday `--full` instead), all `withoutOverlapping()`. Sidebar: المدفوعات and دليل المستخدمين in «منصات رواني», «باقاتي» for students and parents, «سجّل واشترِ» under the login form; «افتح» shows on active, enabled, managed or admin-confirmed accounts. Everything gated by `Route::has`.
 
 **Outcome:** paid purchases activate and provision without relying on the browser. Refunds are recorded.
 **Dependencies:** Phase 1. Task 0.5 must be live on aafaq before live payments.
@@ -278,8 +280,8 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 Notes (4.1–4.3): `hub:mirror {--platform=} {--full} {--sync} {--per=}`; walk state on `hub_platforms.mirror_*` (migration 100400, also `platform_active` + index (platform_id, parent_external_id)). Teacher rows are view-only (contract writes students/parents). **Unlink: deferred (not shipped, 2026-11-19).** rawani/v1 has no detach call, and a later re-provision of the same person would get stuck on the (platform, role, user_id) unique key; the route, button and action were removed until the contract gains a detach. Phone matching uses `SaudiPhone::canonical()` (`9665XXXXXXXX` from 05…, 5…, +9665…, 009665…): mirror rows store it, `users.phone` is matched by its spellings, and the directory search canonicalises the query. Create-person does not attach parent↔child links.
 
 ### Task 4.4: Wiring
-- [ ] `hub:mirror` schedule
-- [ ] Sidebar item
+- [x] `hub:mirror` schedule
+- [x] Sidebar item
 
 **Outcome:** every platform person is visible in Rawani and linkable without auto-merge.
 **Dependencies:** Phase 2 (for live data), Phase 1.
@@ -289,8 +291,8 @@ Notes (4.1–4.3): `hub:mirror {--platform=} {--full} {--sync} {--per=}`; walk s
 ## Phase 5: SSO-lite in Rawani (viewclass repo)
 
 ### Task 5.1: «افتح المنصة»
-- [ ] `IssueSsoLink` + `my/packages/accounts/{a}/open`: ownership check (self, or parent of the beneficiary); linked accounts need `link_confirmed_by`; a 501 shows the credentials fallback with the app links
-- [ ] Tests
+- [x] `IssueSsoLink` + `my/packages/accounts/{a}/open`: ownership check (self, or parent of the beneficiary); linked accounts need `link_confirmed_by`; a 501 shows the credentials fallback with the app links
+- [x] Tests
 
 **Outcome:** one click from Rawani into alawal and anawlqdrat.
 **Dependencies:** 2A.3, 2Q.3 and 2Q.5 live. 5.1 adds its strings to `hub_my.php`, so it runs after 3.4.
