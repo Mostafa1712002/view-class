@@ -808,7 +808,8 @@
                 var code = el.getAttribute(attr);
                 if (!code || code.indexOf('confirm(') < 0) return;
                 var m = code.match(/confirm\(\s*['"]([\s\S]*?)['"]/);
-                var msg = m ? m[1] : T.sure;
+                // Blade js-escaping writes non-ASCII as \uXXXX escapes; decode them so the dialog shows the text, not the escapes.
+                var msg = m ? m[1].replace(/\\u([0-9a-fA-F]{4})/g, function (_, h) { return String.fromCharCode(parseInt(h, 16)); }) : T.sure;
                 el.removeAttribute(attr);
                 var isForm = (attr === 'onsubmit');
                 el.addEventListener(isForm ? 'submit' : 'click', function (e) {
