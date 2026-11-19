@@ -268,6 +268,7 @@ class ScheduleController extends Controller
         }
 
         $schedule = Schedule::create($validated);
+        app(\App\Modules\Gamification\Hooks\SchedulePointHooks::class)->scheduleCreated($schedule, auth()->user());
 
         return redirect()->route('manage.schedules.edit', $schedule)
             ->with('success', 'تم إنشاء الجدول بنجاح، يمكنك الآن إضافة الحصص');
@@ -341,6 +342,7 @@ class ScheduleController extends Controller
         $this->authorizeAccess();
 
         $schedule->delete();
+        app(\App\Modules\Gamification\Hooks\SchedulePointHooks::class)->scheduleDeleted($schedule->id);
 
         return redirect()->route('manage.schedules.list')
             ->with('success', 'تم حذف الجدول بنجاح');
