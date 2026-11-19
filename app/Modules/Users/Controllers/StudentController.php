@@ -161,7 +161,8 @@ class StudentController extends Controller
         $schoolId = $this->writeSchoolId($request);
 
         $user = DB::transaction(function () use ($data, $schoolId) {
-            $plain = ($data['password'] ?? null) ?: ($data['national_id'] ?? str()->random(8));
+            // The username may now default to the national ID, so a blank password never does: it gets a random one (printed on the student card).
+            $plain = ($data['password'] ?? null) ?: str()->random(8);
             $user = User::create($this->withoutNulls([
                 'school_id' => $schoolId,
                 'section_id' => $data['section_id'] ?? null,

@@ -119,7 +119,7 @@ class ParentController extends Controller
             ->get();
 
         // Upcoming exams
-        $upcomingExams = $class ? $class->exams()
+        $upcomingExams = $class ? $class->exams()->visibleToStudent($child->id)
             ->where('academic_year_id', $academicYear?->id)
             ->where('start_time', '>=', now())
             ->where('is_published', true)
