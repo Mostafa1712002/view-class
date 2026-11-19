@@ -222,18 +222,18 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 ## Phase 3: Online purchase (viewclass repo)
 
 ### Task 3.1: `MoyasarGateway`
-- [ ] createInvoice, fetchInvoice, fetchPayment through `Http::withBasicAuth`
-- [ ] Verify the invoice field semantics against the Moyasar docs first and note the findings in design §6
-- [ ] Unit tests with `Http::fake`
+- [x] createInvoice, fetchInvoice, fetchPayment through `Http::withBasicAuth`
+- [x] Verify the invoice field semantics against the Moyasar docs first and note the findings in design §6
+- [x] Unit tests with `Http::fake`
 
 ### Task 3.2: Checkout + return + `ApplyPaidPayment`
-- [ ] `StartCheckout` (metadata `{site, rawani_payment_id}` only), the return page and `ApplyPaidPayment` (re-fetch, compare amount, currency and invoice, lock, apply once, stacking, afterCommit dispatch)
-- [ ] Tests
+- [x] `StartCheckout` (metadata `{site, rawani_payment_id}` only), the return page and `ApplyPaidPayment` (re-fetch, compare amount, currency and invoice, lock, apply once, stacking, afterCommit dispatch)
+- [x] Tests
 
 ### Task 3.3: Webhook + reconcile
-- [ ] `MoyasarWebhookController`: hash_equals, strip the secret, record the event, site filter, match
-- [ ] `hub:reconcile-payments`
-- [ ] Tests per design §9
+- [x] `MoyasarWebhookController`: hash_equals, strip the secret, record the event, site filter, match
+- [x] `hub:reconcile-payments`
+- [x] Tests per design §9
 
 ### Task 3.4: «باقاتي» (parent and student) + add child
 - [ ] `lang/{ar,en}/hub_my.php`
