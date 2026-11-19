@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'My packages', 'available_packages' => 'Available packages', 'my_subscriptions' => 'My subscriptions', 'no_packages' => 'No packages are available right now.',
+    'price' => ':price SAR incl. VAT', 'days' => ':days days', 'buy' => 'Buy', 'pay' => 'Pay now', 'add_child' => 'Add a child',
+    'children' => 'Children', 'no_children' => 'You have not added a child yet.', 'no_subscriptions' => 'No subscriptions.',
+    'package' => 'Package', 'status' => 'Status', 'starts_at' => 'Starts', 'ends_at' => 'Ends', 'platform' => 'Platform', 'role' => 'Role',
+    'role_student' => 'Student', 'role_parent' => 'Parent', 'login' => 'Login', 'password' => 'Password',
+    'accounts' => 'Accounts', 'my_accounts' => 'My accounts', 'credentials' => 'Login details', 'show_credentials' => 'Show login details',
+    'credentials_note' => 'Keep these details safe and do not share them.',
+    'sub_status_pending' => 'Awaiting payment', 'sub_status_active' => 'Active', 'sub_status_expired' => 'Expired', 'sub_status_cancelled' => 'Cancelled', 'sub_status_refunded' => 'Refunded',
+    'status_pending' => 'Creating the account', 'status_needs_info' => 'Missing data, we will contact you', 'status_active' => 'Ready', 'status_conflict' => 'Under review',
+    'status_failed' => 'Could not be created, retrying', 'status_disabled' => 'Disabled', 'status_missing' => 'Unavailable', 'status_unlinked' => 'Not linked',
+    'buy_title' => 'Buy package: :name', 'choose_child' => 'Choose who it is for', 'ready' => 'Details complete', 'complete_data' => 'Complete the required details before paying',
+    'complete_first' => 'Complete the required details first.', 'saved' => 'Details saved.', 'save' => 'Save', 'contact_support' => 'Please contact support',
+    'needs_support' => 'Some required details cannot be completed here. Please contact support before paying.',
+    'student_needs_parent' => 'This package needs a linked parent with a national ID. Please contact support.',
+    'name' => 'Name', 'gender' => 'Gender', 'male' => 'Male', 'female' => 'Female', 'national_id' => 'National ID', 'parent_national_id' => 'Parent national ID',
+    'stage' => 'Stage', 'grade' => 'Grade', 'stage_primary' => 'Primary', 'stage_intermediate' => 'Intermediate', 'stage_secondary' => 'Secondary',
+    'child_added' => 'Child added.', 'child_title' => 'Add a child',
+    'return_title' => 'Your order', 'payment_pending' => 'Confirming payment…', 'payment_paid' => 'Payment received', 'payment_failed' => 'The payment did not complete.',
+    'payment_refunded' => 'The payment was refunded.', 'creating_accounts' => 'Creating accounts…', 'all_ready' => 'Setup complete. Your login details are below.',
+    'slow' => 'This is taking longer than usual. You can close the page and check «My packages» later.', 'back_to_packages' => 'Back to My packages',
+    'register_title' => 'Register and buy', 'register_intro' => 'Create a parent account, add your children and pick a package.', 'register_btn' => 'Create account',
+    'email' => 'Email', 'phone' => 'Mobile (05XXXXXXXX)', 'password_confirmation' => 'Confirm password',
+    'have_account' => 'Already have an account? Sign in', 'sign_in' => 'Sign in',
+];
