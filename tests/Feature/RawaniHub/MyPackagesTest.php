@@ -139,6 +139,14 @@ class MyPackagesTest extends TestCase
         $this->post('/register', $this->registerData(['phone' => '0412345678', 'national_id' => '12']))->assertSessionHasErrors(['phone', 'national_id']);
     }
 
+    public function test_register_surfaces_a_database_error_instead_of_claiming_an_existing_account(): void
+    {
+        User::creating(fn () => throw new \Illuminate\Database\QueryException('sqlite', 'insert', [], new \PDOException('disk full')));
+        $this->withoutExceptionHandling();
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->post('/register', $this->registerData());
+    }
+
     public function test_register_is_rate_limited_and_not_for_logged_in_users(): void
     {
         for ($i = 0; $i < 6; $i++) {

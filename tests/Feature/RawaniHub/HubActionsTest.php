@@ -276,6 +276,7 @@ class HubActionsTest extends TestCase
         $admin = $this->admin();
         $p = $this->platform('alawal');
         $s = User::factory()->create();
+        $s->roles()->attach(\App\Models\Role::firstOrCreate(['slug' => 'student'], ['name' => 'student'])); // a link needs the account's role
         $conflict = HubPlatformAccount::create(['platform_id' => $p->id, 'role' => 'student', 'user_id' => $s->id, 'status' => 'conflict', 'password' => 'x']);
         $mirror = HubPlatformAccount::create(['platform_id' => $p->id, 'role' => 'student', 'external_id' => '77', 'status' => 'unlinked']);
 
