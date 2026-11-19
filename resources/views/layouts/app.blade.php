@@ -815,7 +815,7 @@
                 el.addEventListener(isForm ? 'submit' : 'click', function (e) {
                     if (el.dataset.vcOk === '1') { el.dataset.vcOk = ''; return; }
                     e.preventDefault(); e.stopPropagation();
-                    window.vcConfirm({ title: msg }).then(function (r) {
+                    window.vcConfirm({ titleText: msg }) /* text, not HTML: the decoded message may contain < */.then(function (r) {
                         if (!r.isConfirmed) return;
                         if (isForm) { el.submit(); }      // bypasses listeners → no loop
                         else { el.dataset.vcOk = '1'; el.click(); }
