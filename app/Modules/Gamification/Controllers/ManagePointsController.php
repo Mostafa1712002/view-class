@@ -30,16 +30,24 @@ class ManagePointsController extends Controller
             'name' => ['nullable', 'string', 'max:100'],
         ]);
         $type = $f['type'] ?? 'student';
+
+        // Filter ids must belong to the active school; anything else is dropped (no cross-school class names).
+        $sections = Section::query()->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get(['id', 'name']);
+        if (! $sections->contains('id', $f['section_id'] ?? null)) {
+            unset($f['section_id']);
+        }
+        $classes = ClassRoom::whereIn('section_id', isset($f['section_id']) ? [$f['section_id']] : $sections->pluck('id'))
+            ->orderBy('name')->get(['id', 'name', 'division']);
+        if (! $classes->contains('id', $f['class_id'] ?? null)) {
+            unset($f['class_id']);
+        }
+
         $rows = $this->ledger->balances($schoolId, array_merge($f, ['type' => $type, 'month' => now()->format('Y-m')]))->withQueryString();
 
         // Behaviour points: separate, read-only (students and teachers only).
         $behaviour = $type === 'vice' ? collect() : BehaviorRecord::where('scope', $type)
             ->whereIn('subject_user_id', $rows->pluck('id'))->groupBy('subject_user_id')
             ->selectRaw('subject_user_id, SUM(points) as total')->pluck('total', 'subject_user_id');
-
-        $sections = Section::query()->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get(['id', 'name']);
-        $classes = ClassRoom::whereIn('section_id', $f['section_id'] ?? null ? [$f['section_id']] : $sections->pluck('id'))
-            ->orderBy('name')->get(['id', 'name', 'division']);
 
         return view('points.manage.index', compact('rows', 'behaviour', 'sections', 'classes', 'type'));
     }

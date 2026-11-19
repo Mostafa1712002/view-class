@@ -74,6 +74,22 @@ class PointsManageAccessTest extends TestCase
         $this->assertSame(0, PointTransaction::count());
     }
 
+    public function test_filter_ids_from_another_school_are_ignored(): void
+    {
+        $a = School::factory()->create();
+        $b = School::factory()->create();
+        $foreignSection = \App\Models\Section::factory()->create(['school_id' => $b->id]);
+        $foreignClass = \App\Models\ClassRoom::factory()->create(['section_id' => $foreignSection->id, 'name' => 'ForeignClassXYZ']);
+        $mine = $this->createStudent($a);
+        $this->row($mine);
+        $this->actingAs($this->createSchoolAdmin($a));
+
+        $this->get(route('manage.points.index', ['section_id' => $foreignSection->id]))
+            ->assertOk()->assertDontSee('ForeignClassXYZ')->assertSee($mine->name);
+        $this->get(route('manage.points.index', ['class_id' => $foreignClass->id]))
+            ->assertOk()->assertDontSee('ForeignClassXYZ')->assertSee($mine->name);
+    }
+
     public function test_adjust_needs_reason_and_is_blocked_on_self(): void
     {
         $school = School::factory()->create();
