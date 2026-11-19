@@ -321,4 +321,52 @@ class HubMoyasarTest extends TestCase
 
         $this->assertSame('paid', $payment->fresh()->status);
     }
+
+    public function test_late_payment_revives_only_a_reconcile_give_up_and_flags_every_other_subscription_state(): void
+    {
+        // Reconcile gave up → a verified late payment still activates.
+        $payment = $this->pending(['status' => 'failed']);
+        $payment->subscription->update(['status' => 'cancelled', 'note' => ReconcilePaymentsCommand::GAVE_UP_NOTE]);
+        $this->fakeMoyasar([], $this->remotePayment());
+        $this->assertSame(ApplyPaidPayment::APPLIED, app(ApplyPaidPayment::class)->execute($payment, 'pay_1'));
+        $this->assertSame(['paid', 'active'], [$payment->fresh()->status, $payment->subscription->fresh()->status]);
+        Bus::assertDispatchedTimes(SyncPlatformAccountJob::class, 1);
+
+        foreach (['cancelled', 'refunded', 'expired', 'active'] as $i => $status) {
+            HubPayment::query()->delete();
+            HubSubscription::query()->delete();
+            $p = $this->pending(['moyasar_invoice_id' => 'inv_1']);
+            $ends = now()->addDays(5)->startOfSecond();
+            $p->subscription->update(['status' => $status, 'note' => 'admin', 'starts_at' => now()->subDays(5), 'ends_at' => $ends]);
+
+            $this->assertSame(ApplyPaidPayment::NEEDS_REVIEW, app(ApplyPaidPayment::class)->execute($p, 'pay_1'), $status);
+            $sub = $p->subscription->fresh();
+            $this->assertSame(['paid', $status], [$p->fresh()->status, $sub->status], $status);
+            $this->assertTrue($sub->ends_at->equalTo($ends), $status);
+            // An active purchase row with an unpaid payment has no code path; only the audit row marks it.
+            $this->assertSame($status === 'active' ? 0 : 1, $this->paymentsFlaggedForReview(), $status);
+        }
+        $this->assertSame(4, DB::table('activity_logs')->where('action', 'hub.payment.needs_review')->count());
+        Bus::assertDispatchedTimes(SyncPlatformAccountJob::class, 1); // only the revival above
+    }
+
+    public function test_admin_cancel_fails_the_pending_payment_and_a_later_webhook_lands_in_review(): void
+    {
+        $payment = $this->pending();
+        $admin = $this->user('super-admin');
+        app(\App\Modules\RawaniHub\Actions\CancelSubscription::class)->execute($admin, $payment->subscription_id, 'buyer changed mind');
+        $this->assertSame(['failed', 'cancelled'], [$payment->fresh()->status, $payment->subscription->fresh()->status]);
+
+        $this->fakeMoyasar([], $this->remotePayment());
+        $this->webhook(['type' => 'payment_paid', 'data' => $this->remotePayment()])->assertOk()->assertJsonPath('data.outcome', 'needs_review');
+
+        $this->assertSame(['paid', 'cancelled'], [$payment->fresh()->status, $payment->subscription->fresh()->status]);
+        $this->assertSame(1, $this->paymentsFlaggedForReview());
+        Bus::assertNotDispatched(SyncPlatformAccountJob::class);
+    }
+
+    private function paymentsFlaggedForReview(): int
+    {
+        return app(PaymentRepository::class)->paginate(['flag' => 'paid_without_active'])->total();
+    }
 }

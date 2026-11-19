@@ -18,6 +18,9 @@ class ReconcilePaymentsCommand extends Command
 {
     public const GIVE_UP_HOURS = 48;
 
+    /** Written on a subscription reconcile cancels; ApplyPaidPayment revives only this kind of cancellation. */
+    public const GAVE_UP_NOTE = 'unpaid: invoice not paid within 48 hours';
+
     protected $signature = 'hub:reconcile-payments';
 
     protected $description = 'Check pending hub payments with Moyasar and give up on stale ones';
@@ -30,7 +33,7 @@ class ReconcilePaymentsCommand extends Command
         foreach ($payments->pendingCreatedBefore(now()->subMinutes(10)) as $payment) {
             $outcome = $check->execute($payment);
             // Gateway down: try again next run rather than fail a payment we couldn't see.
-            if (! in_array($outcome, [ApplyPaidPayment::APPLIED, ApplyPaidPayment::DUPLICATE, CheckInvoice::ERROR], true)
+            if (! in_array($outcome, [ApplyPaidPayment::APPLIED, ApplyPaidPayment::DUPLICATE, ApplyPaidPayment::NEEDS_REVIEW, CheckInvoice::ERROR], true)
                 && $payment->created_at->lessThanOrEqualTo($giveUpBefore)) {
                 $outcome = $this->giveUp($payment->id, $payments, $subscriptions) ? 'failed' : $outcome;
             }
@@ -52,7 +55,7 @@ class ReconcilePaymentsCommand extends Command
             $payments->update($row, ['status' => 'failed']);
             $sub = $subscriptions->findForUpdate($row->subscription_id);
             if ($sub && $sub->status === 'pending') {
-                $subscriptions->update($sub, ['status' => 'cancelled']);
+                $subscriptions->update($sub, ['status' => 'cancelled', 'note' => self::GAVE_UP_NOTE]);
             }
 
             return true;

@@ -5,6 +5,7 @@ namespace App\Modules\RawaniHub\Actions;
 use App\Models\ActivityLog;
 use App\Models\User;
 use App\Modules\RawaniHub\Models\HubSubscription;
+use App\Modules\RawaniHub\Repositories\Contracts\PaymentRepository;
 use App\Modules\RawaniHub\Repositories\Contracts\PlatformAccountRepository;
 use App\Modules\RawaniHub\Repositories\Contracts\SubscriptionRepository;
 use App\Modules\RawaniHub\Services\AccountSyncDispatcher;
@@ -23,6 +24,7 @@ final class CancelSubscription
         private PlatformAccountRepository $accounts,
         private SubscriptionAccounts $subscriptionAccounts,
         private AccountSyncDispatcher $dispatcher,
+        private PaymentRepository $payments,
     ) {}
 
     public function execute(User $actor, int $subscriptionId, ?string $note = null): HubSubscription
@@ -30,6 +32,9 @@ final class CancelSubscription
         $this->authorizeHubAdmin($actor);
 
         return DB::transaction(function () use ($actor, $subscriptionId, $note) {
+            // Lock order payment → subscription, the same as ApplyPaidPayment, so the two can't deadlock.
+            $paymentId = $this->subscriptions->find($subscriptionId)?->payment?->id;
+            $payment = $paymentId ? $this->payments->findForUpdate($paymentId) : null;
             $sub = $this->subscriptions->findForUpdate($subscriptionId);
             if (! $sub) {
                 throw ValidationException::withMessages(['subscription' => 'not found']);
@@ -42,6 +47,11 @@ final class CancelSubscription
                 'status' => 'cancelled',
                 'note' => $note ? mb_substr(trim(($sub->note ? $sub->note.' | ' : '').$note), 0, 500) : $sub->note,
             ]);
+            // An unpaid checkout stops here; if Moyasar still confirms it later, ApplyPaidPayment records the money
+            // for refund review and leaves this cancelled subscription alone. (hub_payments has no `cancelled` status.)
+            if ($payment && $payment->status === 'pending') {
+                $this->payments->update($payment, ['status' => 'failed']);
+            }
             $ids = $this->subscriptionAccounts->forBeneficiary($sub->user_id, $sub->items, create: false);
             $this->accounts->markDirty($ids);
             $this->dispatcher->afterCommit($ids);

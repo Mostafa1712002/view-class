@@ -63,8 +63,8 @@ final class StartCheckout
                 // success_url is the browser redirect; callback_url would be a server POST we don't need (webhook + reconcile).
                 'success_url' => route('my.packages.return', $payment->id),
                 'back_url' => route('my.packages.index'),
-                // Unpayable once reconcile gives up on it, so money can't arrive for a cancelled row unnoticed.
-                'expired_at' => now()->addHours(ReconcilePaymentsCommand::GIVE_UP_HOURS)->toIso8601String(),
+                // Unpayable an hour before reconcile gives up, so an attempt still in 3DS can't complete on a failed row unnoticed.
+                'expired_at' => now()->addHours(ReconcilePaymentsCommand::GIVE_UP_HOURS - 1)->toIso8601String(),
                 // Only these two keys: never `email`/`app` (aafaq's webhook acts on them).
                 'metadata' => ['site' => (string) config('moyasar.site'), 'rawani_payment_id' => (string) $payment->id],
             ]);

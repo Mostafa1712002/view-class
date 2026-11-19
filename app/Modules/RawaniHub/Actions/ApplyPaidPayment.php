@@ -3,6 +3,7 @@
 namespace App\Modules\RawaniHub\Actions;
 
 use App\Models\ActivityLog;
+use App\Modules\RawaniHub\Console\ReconcilePaymentsCommand;
 use App\Modules\RawaniHub\Models\HubPayment;
 use App\Modules\RawaniHub\Repositories\Contracts\PaymentRepository;
 use App\Modules\RawaniHub\Repositories\Contracts\PlatformAccountRepository;
@@ -25,6 +26,9 @@ final class ApplyPaidPayment
 
     public const REJECTED = 'rejected';
 
+    /** Money arrived for a subscription that must not be (re)activated: payment recorded paid, subscription untouched. */
+    public const NEEDS_REVIEW = 'needs_review';
+
     public function __construct(
         private MoyasarGateway $gateway,
         private PaymentRepository $payments,
@@ -34,7 +38,7 @@ final class ApplyPaidPayment
         private AccountSyncDispatcher $dispatcher,
     ) {}
 
-    /** @return string applied | duplicate | rejected */
+    /** @return string applied | duplicate | rejected | needs_review */
     public function execute(HubPayment $payment, string $moyasarPaymentId): string
     {
         $remote = $this->gateway->fetchPayment($moyasarPaymentId); // outside the transaction: no lock held over HTTP
@@ -52,6 +56,18 @@ final class ApplyPaidPayment
                 return self::DUPLICATE;
             }
             $sub = $this->subscriptions->findForUpdate($row->subscription_id);
+
+            // Only a never-started purchase, or one reconcile gave up on as unpaid, may be activated. An admin-cancelled,
+            // refunded, expired or active subscription is left alone; the paid row then shows in the payments admin
+            // flag «مدفوعة بدون اشتراك فعّال» for a manual refund decision.
+            $revivable = $sub->status === 'pending'
+                || ($sub->status === 'cancelled' && $sub->note === ReconcilePaymentsCommand::GAVE_UP_NOTE);
+            if (! $revivable) {
+                $this->payments->update($row, ['status' => 'paid', 'moyasar_payment_id' => $moyasarPaymentId, 'paid_at' => now()]);
+                ActivityLog::log('hub.payment.needs_review', "دفع Moyasar {$moyasarPaymentId} وصل لاشتراك #{$sub->id} حالته {$sub->status}؛ لم يُفعَّل ويحتاج مراجعة استرداد", $row, null, $row->toArray());
+
+                return self::NEEDS_REVIEW;
+            }
             $items = $sub->items ?? [];
 
             // Stack after the latest active window per item, as GrantPackage does.
@@ -65,7 +81,7 @@ final class ApplyPaidPayment
 
             $this->payments->update($row, ['status' => 'paid', 'moyasar_payment_id' => $moyasarPaymentId, 'paid_at' => now()]);
             $this->subscriptions->update($sub, [
-                'status' => 'active', 'starts_at' => $start,
+                'status' => 'active', 'starts_at' => $start, 'note' => $sub->status === 'cancelled' ? null : $sub->note,
                 'ends_at' => $start->copy()->addDays((int) $sub->package->duration_days),
             ]);
 
