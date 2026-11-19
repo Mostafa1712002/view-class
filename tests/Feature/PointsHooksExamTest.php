@@ -160,4 +160,25 @@ class PointsHooksExamTest extends TestCase
 
         $this->assertSame('host write kept', DB::table('exams')->where('id', $exam->id)->value('title'));
     }
+
+    public function test_hook_inside_a_transaction_awards_after_commit_and_nothing_on_rollback(): void
+    {
+        [$exam, , $a] = $this->fixture();
+        $this->attempt($exam, $a, 2);
+
+        try {
+            DB::transaction(function () use ($exam, $a) {
+                app(ExamPointHooks::class)->examAttemptChanged($exam, $a->id);
+                throw new \RuntimeException('host failed');
+            });
+        } catch (\RuntimeException) {
+        }
+        $this->assertSame(0, $this->balance($a));
+
+        DB::transaction(function () use ($exam, $a) {
+            app(ExamPointHooks::class)->examAttemptChanged($exam, $a->id);
+            $this->assertSame(0, $this->balance($a)); // not before the host commits
+        });
+        $this->assertSame(20, $this->balance($a));
+    }
 }

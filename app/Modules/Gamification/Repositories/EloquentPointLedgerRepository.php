@@ -5,6 +5,7 @@ namespace App\Modules\Gamification\Repositories;
 use App\Models\User;
 use App\Modules\Gamification\Models\PointTransaction;
 use App\Modules\Gamification\Repositories\Contracts\PointLedgerRepository;
+use App\Modules\Gamification\Support\ClassStudents;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -42,7 +43,7 @@ class EloquentPointLedgerRepository implements PointLedgerRepository
         $query = User::query()
             ->when($schoolId, fn (Builder $q) => $q->where('users.school_id', $schoolId))
             ->when($filters['section_id'] ?? null, fn (Builder $q, $v) => $q->where('users.section_id', $v))
-            ->when($filters['class_id'] ?? null, fn (Builder $q, $v) => $q->where('users.class_room_id', $v))
+            ->when($filters['class_id'] ?? null, fn (Builder $q, $v) => ClassStudents::constrain($q, [(int) $v]))
             ->when($filters['name'] ?? null, fn (Builder $q, $v) => $q->where('users.name', 'like', '%'.$v.'%'));
 
         match ($filters['type'] ?? null) {
