@@ -27,26 +27,30 @@ final class EvaluationPointHooks
     /** After an evaluation was submitted / reopened / rejected: re-sync both keys (a reopen/reject drops them to 0). */
     public function evaluationChanged(Evaluation $evaluation): void
     {
-        $evaluation->loadMissing('form', 'classVisit');
-        $submitted = $this->isSubmitted($evaluation);
+        HostSafe::run(function () use ($evaluation) {
+            $evaluation->loadMissing('form', 'classVisit');
+            $submitted = $this->isSubmitted($evaluation);
 
-        if ($evaluation->evaluator_id && $evaluation->form?->usage_domain === UsageDomain::JobPerformance) {
-            $close = $evaluation->form->close_date;
-            // ponytail: a form without close_date has no deadline to meet, so it earns nothing.
-            $onTime = $submitted && $close && $evaluation->submitted_at && $evaluation->submitted_at->lte($close);
-            $this->send(self::JOB, (int) $evaluation->evaluator_id, 'evaluation', $evaluation->id, $onTime ? 1.0 : 0.0);
-        }
+            if ($evaluation->evaluator_id && $evaluation->form?->usage_domain === UsageDomain::JobPerformance) {
+                $close = $evaluation->form->close_date;
+                // ponytail: a form without close_date has no deadline to meet, so it earns nothing.
+                $onTime = $submitted && $close && $evaluation->submitted_at && $evaluation->submitted_at->lte($close);
+                $this->send(self::JOB, (int) $evaluation->evaluator_id, 'evaluation', $evaluation->id, $onTime ? 1.0 : 0.0);
+            }
 
-        if ($visit = $evaluation->classVisit) {
-            $this->send(self::VISITS, (int) $visit->supervisor_id, 'class_visit', $visit->id,
-                $submitted && $this->visitCounts($visit) ? 1.0 : 0.0);
-        }
+            if ($visit = $evaluation->classVisit) {
+                $this->send(self::VISITS, (int) $visit->supervisor_id, 'class_visit', $visit->id,
+                    $submitted && $this->visitCounts($visit) ? 1.0 : 0.0);
+            }
+        });
     }
 
     /** Call AFTER the delete succeeded. */
     public function classVisitDeleted(int $visitId): void
     {
-        $this->revoke->execute('class_visit', $visitId, 'حذف الزيارة الصفية');
+        HostSafe::run(function () use ($visitId) {
+            $this->revoke->execute('class_visit', $visitId, 'حذف الزيارة الصفية');
+        });
     }
 
     private function send(string $rule, int $userId, string $type, int $id, float $units): void

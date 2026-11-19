@@ -7,6 +7,7 @@ use App\Models\StudentExam;
 use App\Modules\Gamification\Actions\RevokeSourcePoints;
 use App\Modules\Gamification\Actions\SyncActivityPoints;
 use App\Modules\Gamification\DTOs\ActivityPoints;
+use App\Modules\Gamification\Support\ClassStudents;
 use App\Modules\Gamification\Support\RuleSettings;
 use Illuminate\Support\Facades\DB;
 
@@ -18,26 +19,30 @@ final class ExamPointHooks
     /** After an attempt was submitted / auto-ended / reopened: re-sync the student's key and the teacher's key. */
     public function examAttemptChanged(Exam $exam, int $studentId): void
     {
-        $best = $this->bestCorrect($exam->id);
-        $actor = auth()->id();
+        HostSafe::run(function () use ($exam, $studentId) {
+            $best = $this->bestCorrect($exam->id);
+            $actor = auth()->id();
 
-        $this->sync->execute(new ActivityPoints(
-            'student.correct_answers.subjects', $studentId, 'exam', $exam->id,
-            (float) ($best[$studentId] ?? 0), $actor,
-        ));
-
-        if ($exam->teacher_id) {
             $this->sync->execute(new ActivityPoints(
-                'teacher.exams', (int) $exam->teacher_id, 'exam', $exam->id,
-                $this->teacherUnits($exam, $best), $actor,
+                'student.correct_answers.subjects', $studentId, 'exam', $exam->id,
+                (float) ($best[$studentId] ?? 0), $actor,
             ));
-        }
+
+            if ($exam->teacher_id) {
+                $this->sync->execute(new ActivityPoints(
+                    'teacher.exams', (int) $exam->teacher_id, 'exam', $exam->id,
+                    $this->teacherUnits($exam, $best), $actor,
+                ));
+            }
+        });
     }
 
     /** Call AFTER the delete succeeded. */
     public function examDeleted(int $examId): void
     {
-        $this->revoke->execute('exam', $examId, 'حذف الاختبار');
+        HostSafe::run(function () use ($examId) {
+            $this->revoke->execute('exam', $examId, 'حذف الاختبار');
+        });
     }
 
     /** @return array<int,int> student_id => best correct count over submitted attempts */
@@ -62,15 +67,16 @@ final class ExamPointHooks
     /** Ratio in [0,1]; basis interaction = submitted ÷ targeted, correct = avg(best correct ÷ questions). */
     private function teacherUnits(Exam $exam, array $best): float
     {
-        $targeted = $exam->class_id
-            ? DB::table('class_student')->where('class_id', $exam->class_id)->distinct()->count('student_id')
-            : 0;
+        $schoolId = (int) ($exam->teacher?->school_id ?? 0);
+        $ids = ClassStudents::ids($exam->class_id ? (int) $exam->class_id : null, $schoolId ?: null);
+        $targeted = count($ids);
+        // only targeted students count, so the ratio can't pass 1 or mix in outsiders
+        $best = array_intersect_key($best, array_flip($ids));
         $submitted = count($best);
         if ($targeted === 0 || $submitted === 0) {
             return 0.0;
         }
 
-        $schoolId = (int) ($exam->teacher?->school_id ?? 0);
         $basis = $this->settings->effective('teacher.exams', $schoolId)['options']['basis'] ?? 'interaction';
 
         if ($basis === 'correct') {

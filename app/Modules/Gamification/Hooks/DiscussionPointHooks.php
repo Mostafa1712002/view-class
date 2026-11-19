@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Gamification\Actions\RevokeSourcePoints;
 use App\Modules\Gamification\Actions\SyncActivityPoints;
 use App\Modules\Gamification\DTOs\ActivityPoints;
+use App\Modules\Gamification\Support\ClassStudents;
 use Illuminate\Database\Eloquent\Model;
 
 /** teacher.discussion_participation: distinct targeted-student commenters / targeted students. Source = the room. */
@@ -20,34 +21,40 @@ final class DiscussionPointHooks
 
     public function discussionRoomChanged(int $roomId): void
     {
-        $room = DiscussionRoom::find($roomId);
-        if (! $room) {
-            return;
-        }
+        HostSafe::run(function () use ($roomId) {
+            $room = DiscussionRoom::find($roomId);
+            if (! $room) {
+                return;
+            }
 
-        $targeted = self::targetedStudentIds($room);
-        $units = 0.0;
-        if ($targeted !== []) {
-            $commenters = DiscussionComment::whereHas('topic', fn ($t) => $t->where('room_id', $roomId))
-                ->whereIn('user_id', $targeted)->distinct()->count('user_id');
-            $units = min(1.0, $commenters / count($targeted));
-        }
+            $targeted = self::targetedStudentIds($room);
+            $units = 0.0;
+            if ($targeted !== []) {
+                $commenters = DiscussionComment::whereHas('topic', fn ($t) => $t->where('room_id', $roomId))
+                    ->whereIn('user_id', $targeted)->distinct()->count('user_id');
+                $units = min(1.0, $commenters / count($targeted));
+            }
 
-        $this->sync->execute(new ActivityPoints('teacher.discussion_participation', (int) $room->created_by, self::SOURCE, $room->id, $units, auth()->id()));
+            $this->sync->execute(new ActivityPoints('teacher.discussion_participation', (int) $room->created_by, self::SOURCE, $room->id, $units, auth()->id()));
+        });
     }
 
     /** For comment add/delete where the host only has the topic id. */
     public function discussionTopicChanged(int $topicId): void
     {
-        $roomId = DiscussionTopic::withTrashed()->where('id', $topicId)->value('room_id');
-        if ($roomId) {
-            $this->discussionRoomChanged((int) $roomId);
-        }
+        HostSafe::run(function () use ($topicId) {
+            $roomId = DiscussionTopic::withTrashed()->where('id', $topicId)->value('room_id');
+            if ($roomId) {
+                $this->discussionRoomChanged((int) $roomId);
+            }
+        });
     }
 
     public function discussionRoomDeleted(int $roomId): void
     {
-        $this->revoke->execute(self::SOURCE, $roomId, 'حذف غرفة النقاش');
+        HostSafe::run(function () use ($roomId) {
+            $this->revoke->execute(self::SOURCE, $roomId, 'حذف غرفة النقاش');
+        });
     }
 
     /**
@@ -84,10 +91,6 @@ final class DiscussionPointHooks
             return fn ($q) => $q;
         }
 
-        return fn ($q) => $q->where(function ($n) use ($classIds, $grades) {
-            $n->whereIn('class_room_id', $classIds ?: [0])
-                ->orWhereHas('enrolledClasses', fn ($c) => $c->whereIn('classes.id', $classIds ?: [0]))
-                ->orWhereHas('classRoom', fn ($c) => $c->whereIn('grade_level', $grades ?: [0]));
-        });
+        return fn ($q) => ClassStudents::constrain($q, array_map('intval', $classIds), $grades);
     }
 }

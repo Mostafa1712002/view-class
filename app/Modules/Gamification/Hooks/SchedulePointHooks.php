@@ -18,19 +18,23 @@ final class SchedulePointHooks
     /** The beneficiary check (وكيل only) lives in SyncActivityPoints. */
     public function scheduleCreated(Schedule $schedule, ?User $actor): void
     {
-        if (! $actor) {
-            return;
-        }
+        HostSafe::run(function () use ($schedule, $actor) {
+            if (! $actor) {
+                return;
+            }
 
-        $deadline = $this->settings->effective('vice.school_schedule_on_time', (int) $actor->school_id)['options']['deadline'] ?? null;
-        $onTime = ! $deadline || ($schedule->created_at ?? now())->lte(Carbon::parse($deadline));
+            $deadline = $this->settings->effective('vice.school_schedule_on_time', (int) $actor->school_id)['options']['deadline'] ?? null;
+            $onTime = ! $deadline || ($schedule->created_at ?? now())->lte(Carbon::parse($deadline));
 
-        $this->sync->execute(new ActivityPoints('vice.school_schedule_on_time', $actor->id, 'schedule', $schedule->id, $onTime ? 1.0 : 0.0, $actor->id));
+            $this->sync->execute(new ActivityPoints('vice.school_schedule_on_time', $actor->id, 'schedule', $schedule->id, $onTime ? 1.0 : 0.0, $actor->id));
+        });
     }
 
     /** Call AFTER the delete succeeded. */
     public function scheduleDeleted(int $scheduleId): void
     {
-        $this->revoke->execute('schedule', $scheduleId, 'حذف الجدول');
+        HostSafe::run(function () use ($scheduleId) {
+            $this->revoke->execute('schedule', $scheduleId, 'حذف الجدول');
+        });
     }
 }

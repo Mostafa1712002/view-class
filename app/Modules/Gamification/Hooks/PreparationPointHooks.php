@@ -14,12 +14,16 @@ final class PreparationPointHooks
 
     public function planSaved(WeeklyPlan $plan): void
     {
-        $this->sync->execute(new ActivityPoints('teacher.preparation', (int) $plan->teacher_id, 'weekly_plan', $plan->id, 1.0, auth()->id()));
+        HostSafe::run(function () use ($plan) {
+            $this->sync->execute(new ActivityPoints('teacher.preparation', (int) $plan->teacher_id, 'weekly_plan', $plan->id, 1.0, auth()->id()));
+        });
     }
 
     /** Call AFTER the delete succeeded. */
     public function planDeleted(int $planId): void
     {
-        $this->revoke->execute('weekly_plan', $planId, 'حذف التحضير');
+        HostSafe::run(function () use ($planId) {
+            $this->revoke->execute('weekly_plan', $planId, 'حذف التحضير');
+        });
     }
 }

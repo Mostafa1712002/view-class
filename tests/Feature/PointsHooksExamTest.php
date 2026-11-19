@@ -127,4 +127,37 @@ class PointsHooksExamTest extends TestCase
         $this->assertSame(0, $this->balance($a));
         $this->assertSame(0, $this->balance($teacher));
     }
+
+    public function test_targeted_students_union_class_room_id_and_pivot_once_and_ignore_outsiders(): void
+    {
+        [$exam, $teacher, $a, $b] = $this->fixture();
+        $school = School::find($a->school_id);
+        // c: linked only through users.class_room_id; a: linked both ways (counted once)
+        $c = User::factory()->create(['school_id' => $school->id, 'class_room_id' => $exam->class_id]);
+        $c->roles()->attach(Role::where('slug', 'student')->first());
+        $a->forceFill(['class_room_id' => $exam->class_id])->save();
+        $outsider = User::factory()->create(['school_id' => $school->id]);
+        $outsider->roles()->attach(Role::where('slug', 'student')->first());
+
+        $this->attempt($exam, $c, 1);
+        $this->attempt($exam, $outsider, 2);
+        app(ExamPointHooks::class)->examAttemptChanged($exam, $c->id);
+
+        $this->assertSame(3, $this->balance($teacher)); // 1 targeted submitter of 3 targeted = 3.33 -> 3
+    }
+
+    public function test_a_failing_hook_never_breaks_the_host_transaction(): void
+    {
+        [$exam, , $a] = $this->fixture();
+        $this->attempt($exam, $a, 2);
+        $this->mock(\App\Modules\Gamification\Support\RuleSettings::class)
+            ->shouldReceive('effective')->andThrow(new \RuntimeException('points down'));
+
+        DB::transaction(function () use ($exam, $a) {
+            app(ExamPointHooks::class)->examAttemptChanged($exam, $a->id);
+            DB::table('exams')->where('id', $exam->id)->update(['title' => 'host write kept']);
+        });
+
+        $this->assertSame('host write kept', DB::table('exams')->where('id', $exam->id)->value('title'));
+    }
 }
