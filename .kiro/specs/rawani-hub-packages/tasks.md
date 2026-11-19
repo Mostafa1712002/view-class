@@ -259,21 +259,23 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 ## Phase 4: Master directory (viewclass repo)
 
 ### Task 4.1: Mirror
-- [ ] `MirrorPlatformPeopleJob` + `hub:mirror`: nightly for all pages, plus a weekly pass that marks rows not seen as `missing`
-- [ ] Upsert by (platform, role, external_id) and fill the mirror columns
-- [ ] Never overwrite provisioning fields
-- [ ] Tests against `FakePlatform` paging
+- [x] `MirrorPlatformPeopleJob` + `hub:mirror`: nightly for all pages, plus a weekly pass that marks rows not seen as `missing`
+- [x] Upsert by (platform, role, external_id) and fill the mirror columns
+- [x] Never overwrite provisioning fields
+- [x] Tests against `FakePlatform` paging
 
 ### Task 4.2: Directory screen + person page links
-- [ ] `lang/{ar,en}/hub_directory.php` (4.3 runs after 4.2 and reuses it)
-- [ ] Two tabs, filters and server pagination (design §3.5)
-- [ ] The person page shows the parent↔child links on both the Rawani and platform sides
+- [x] `lang/{ar,en}/hub_directory.php` (4.3 runs after 4.2 and reuses it)
+- [x] Two tabs, filters and server pagination (design §3.5)
+- [x] The person page shows the parent↔child links on both the Rawani and platform sides
 
 ### Task 4.3: Link / create-person / unlink
-- [ ] Candidates by national ID, then real email, then phone (`PhoneNormalizer`); never by name
-- [ ] Confirm-link sets `link_confirmed_by` and pushes `link_external_id`
-- [ ] Create a Rawani person from an external row
-- [ ] Tests
+- [x] Candidates by national ID, then real email, then phone (`PhoneNormalizer`); never by name
+- [x] Confirm-link sets `link_confirmed_by` and pushes `link_external_id`
+- [x] Create a Rawani person from an external row
+- [x] Tests
+
+Notes (4.1–4.3): `hub:mirror {--platform=} {--full} {--sync} {--per=}`; walk state on `hub_platforms.mirror_*` (migration 100400, also `platform_active` + index (platform_id, parent_external_id)). Teacher rows are view-only (contract writes students/parents). Unlink is Rawani-only: rawani/v1 has no detach, so the platform keeps its stored Rawani id and Rawani grants until they end. Phone candidates use `PhoneNormalizer` (digits only), so 05… and +9665… do not meet. Create-person does not attach parent↔child links.
 
 ### Task 4.4: Wiring
 - [ ] `hub:mirror` schedule
