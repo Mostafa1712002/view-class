@@ -688,7 +688,9 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                     </ul>
                 </li>
                 @endif
+                @can('viewStaff', \App\Modules\Gamification\Models\PointTransaction::class)
                 <li class="nav-item {{ request()->routeIs('manage.points.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('manage.points.index') ? route('manage.points.index') : route('programs.coming-soon') }}"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_points_rewards')</span></a></li>
+                @endcan
                 @if($canViewCertificates)
                 <li class="nav-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}" data-section="support"><a href="{{ Route::has('admin.certificates.index') ? route('admin.certificates.index') : '#' }}"><x-svg-icon name="award" class="vc-ico" /><span class="menu-title">@lang('shell.nav_certificates')</span></a></li>
                 @endif
