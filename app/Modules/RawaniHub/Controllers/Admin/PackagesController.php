@@ -4,6 +4,8 @@ namespace App\Modules\RawaniHub\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\RawaniHub\Actions\CreatePackage;
+use App\Modules\RawaniHub\Actions\DeletePackage;
+use App\Modules\RawaniHub\Actions\TogglePackage;
 use App\Modules\RawaniHub\Actions\UpdatePackage;
 use App\Modules\RawaniHub\Http\Requests\PackageRequest;
 use App\Modules\RawaniHub\Models\HubPackage;
@@ -52,20 +54,16 @@ class PackagesController extends Controller
         return redirect()->route('admin.hub.packages.index')->with('success', __('hub_admin.saved'));
     }
 
-    public function toggle(Request $request, int $package)
+    public function toggle(Request $request, int $package, TogglePackage $toggle)
     {
-        $package = $this->packages->find($package) ?? abort(404);
-        $this->packages->update($package, ['is_active' => ! $package->is_active]);
-        \App\Models\ActivityLog::log('hub.package.toggle', "تبديل حالة باقة: {$package->name_ar}", $package);
+        $toggle->execute($request->user(), $this->packages->find($package) ?? abort(404));
 
         return back()->with('success', __('hub_admin.saved'));
     }
 
-    public function destroy(int $package)
+    public function destroy(Request $request, int $package, DeletePackage $delete)
     {
-        $package = $this->packages->find($package) ?? abort(404);
-        $this->packages->delete($package); // soft delete: subscriptions keep their snapshot
-        \App\Models\ActivityLog::log('hub.package.delete', "حذف باقة: {$package->name_ar}", $package);
+        $delete->execute($request->user(), $this->packages->find($package) ?? abort(404));
 
         return redirect()->route('admin.hub.packages.index')->with('success', __('hub_admin.deleted'));
     }

@@ -139,8 +139,14 @@ class AdminScreensTest extends TestCase
 
         $this->patch("/admin/hub/packages/{$pkg->id}/toggle");
         $this->assertTrue($pkg->refresh()->is_active); // update without the checkbox made it inactive, toggle flips it back
+        $toggleLog = \App\Models\ActivityLog::where('action', 'hub.package.toggle')->sole();
+        $this->assertSame([false, true], [$toggleLog->old_values['is_active'], $toggleLog->new_values['is_active']]);
         $this->delete("/admin/hub/packages/{$pkg->id}")->assertRedirect();
         $this->assertSoftDeleted('hub_packages', ['id' => $pkg->id]);
+        $this->assertSame($pkg->id, \App\Models\ActivityLog::where('action', 'hub.package.delete')->sole()->old_values['id']);
+
+        $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
+        app(\App\Modules\RawaniHub\Actions\TogglePackage::class)->execute(User::factory()->create(), $pkg);
     }
 
     public function test_grant_to_existing_and_new_student_then_cancel(): void
