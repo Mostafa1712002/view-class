@@ -146,75 +146,78 @@ Tasks 1.1–1.7 can run in parallel, and only 1.8 touches shared files. Until 1.
 Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring task (x.4). Each repo also receives a copy of design §4 and §5.
 
 ### Task 2A.1 (alawal): Migrations and placement
-- [ ] Nullable unique `rawani_user_id` on `students` and `my__parents`
-- [ ] `is_active` on `my__parents`
-- [ ] `rawani_disabled` on both
-- [ ] `rawani_access_until` on `students`
-- [ ] `rawani_placements` table and `rawani_sso_tokens` table
+- [x] Nullable unique `rawani_user_id` on `students` and `my__parents`
+- [x] `is_active` on `my__parents`
+- [x] `rawani_disabled` on both
+- [x] `rawani_access_until` on `students`
+- [x] `rawani_placements` table and `rawani_sso_tokens` table
 
 ### Task 2A.2 (alawal): Signature middleware + endpoints
-- [ ] `ping`, `PUT accounts/{role}/{id}` (parent upsert first, student placement, restore trashed, 409 rules, link rules), `GET people`
-- [ ] Use the design §4.2 envelope
-- [ ] Add the login gate `is_active AND (not managed OR rawani_access_until >= now)` and the parent `is_active` check
-- [ ] Feature tests per design §9, including the shared vector
+- [x] `ping`, `PUT accounts/{role}/{id}` (parent upsert first, student placement, restore trashed, 409 rules, link rules), `GET people`
+- [x] Use the design §4.2 envelope
+- [x] Add the login gate `is_active AND (not managed OR rawani_access_until >= now)` and the parent `is_active` check
+- [x] Feature tests per design §9, including the shared vector
 
 ### Task 2A.3 (alawal): SSO
-- [ ] `POST accounts/{role}/{id}/sso` and `GET /rawani/sso/{token}` (single use, 60 s, hashed, re-runs the login gates)
-- [ ] Tests
+- [x] `POST accounts/{role}/{id}/sso` and `GET /rawani/sso/{token}` (single use, 60 s, hashed, re-runs the login gates)
+- [x] Tests
 
 ### Task 2A.4 (alawal): Wiring
-- [ ] Register the middleware alias in `Kernel`, routes in `routes/api.php` + `web.php`, `.env.example` `RAWANI_HUB_SECRET(_PREVIOUS)`
+- [x] Register the middleware alias in `Kernel`, routes in `routes/api.php` + `web.php`, `.env.example` `RAWANI_HUB_SECRET(_PREVIOUS)`
 
 ### Task 2Q.1 (anawlqdrat): Migrations
-- [ ] Nullable unique `users.rawani_user_id`
-- [ ] `users.rawani_disabled`
-- [ ] Unique `subscribes.rawani_ref`
-- [ ] `rawani_sso_codes` (or reuse `temporary_passwords` if it fits cleanly)
-- [ ] Every migration under a dedicated `--path`
+- [x] Nullable unique `users.rawani_user_id`
+- [x] `users.rawani_disabled`
+- [x] Unique `subscribes.rawani_ref`
+- [x] `rawani_sso_codes` (or reuse `temporary_passwords` if it fits cleanly)
+- [x] Every migration under a dedicated `--path`
 
 ### Task 2Q.2 (anawlqdrat): Signature middleware + endpoints
-- [ ] `ping`, `PUT accounts/student/{id}` (username `rw<id>`, 3-column collision check, verified and active, `subscribes` row tagged with `rawani_ref`, token revoke on disable or a past window), `GET people`
-- [ ] Routes in a new `app/Application/Api/routes/V1/Modules/Rawani/*.php`
-- [ ] Feature tests
+- [x] `ping`, `PUT accounts/student/{id}` (username `rw<id>`, 3-column collision check, verified and active, `subscribes` row tagged with `rawani_ref`, token revoke on disable or a past window), `GET people`
+- [x] Routes in a new `app/Application/Api/routes/V1/Modules/Rawani/*.php`
+- [x] Feature tests
 
 ### Task 2Q.3 (anawlqdrat backend): SSO
-- [ ] `POST …/sso`, then the public `POST user/auth/sso/exchange` (throttled, re-runs the login checks, logs `login_type='sso'`)
-- [ ] Tests
+- [x] `POST …/sso`, then the public `POST user/auth/sso/exchange` (throttled, re-runs the login checks, logs `login_type='sso'`)
+- [x] Tests
 
-### Task 2Q.5 (anawlqdrat-front, branch `deploy-symmetry-fix`): SSO route
-- [ ] Route `/sso`: exchange → `auth/attempt` → clear exam localStorage → `/`
-- [ ] Local build check. The dist is copied to live by hand by the orchestrator.
+### Task 2Q.5 (anawlqdrat-front — built + pushed on branch rawani/sso, NOT copied to live dist yet, branch `deploy-symmetry-fix`): SSO route
+- [x] Route `/sso`: exchange → `auth/attempt` → clear exam localStorage → `/`
+- [x] Local build check. The dist is copied to live by hand by the orchestrator.
 
 ### Task 2Q.4 (anawlqdrat): Wiring
-- [ ] Require the Rawani route file in `Api/routes/api.php`
-- [ ] Middleware alias
-- [ ] `.env.example`
+- [x] Require the Rawani route file in `Api/routes/api.php`
+- [x] Middleware alias
+- [x] `.env.example`
 
 ### Task 2F.1 (aafaq): Schema
-- [ ] Nullable unique `reg_students.rawani_user_id`, `is_active` default 1, `rawani_disabled`
-- [ ] `rawani_nonces` table
-- [ ] SQL migration file in the repo's existing style
+- [x] Nullable unique `reg_students.rawani_user_id`, `is_active` default 1, `rawani_disabled`
+- [x] `rawani_nonces` table
+- [x] SQL migration file in the repo's existing style
 
 ### Task 2F.2 (aafaq): Bridge endpoints
-- [ ] Slim route group `/rawani/v1` with signature verification, using the logical path after `/rawani/v1` (works for both `/api/` and `/api/public/index.php/`)
-- [ ] `ping` and `PUT accounts/student/{id}`:
+- [x] Slim route group `/rawani/v1` with signature verification, using the logical path after `/rawani/v1` (works for both `/api/` and `/api/public/index.php/`)
+- [x] `ping` and `PUT accounts/student/{id}`:
   - email rule and `passwordForStorage`
   - both `school` columns via `getDefaultSchoolId()`
   - one `subscriptions` row per product with `payment_id='rawani:<id>:<product>'`, then `applySubscriptionToUsers`
   - `[]` deactivates only those rows
-- [ ] `GET people` with no password columns
-- [ ] `sso` returns 501
-- [ ] `is_active` checked in `login`, `editedLogin`, `editedLogin2` and `checkUserPass`
-- [ ] PHP CLI test script covering design §9
+- [x] `GET people` with no password columns
+- [x] `sso` returns 501
+- [x] `is_active` checked in `login`, `editedLogin`, `editedLogin2` and `checkUserPass`
+- [x] PHP CLI test script covering design §9
 
 ### Task 2F.3 (aafaq): Wiring
-- [ ] Register the group in `api/public/index.php` (the only edit to that file beyond the login checks in 2F.2: coordinate by doing 2F.2's login edits here instead if they would conflict)
-- [ ] Document `rawani_hub_secret` in the gitignored `api/config/config.php` template/README
+- [x] Register the group in `api/public/index.php` (the only edit to that file beyond the login checks in 2F.2: coordinate by doing 2F.2's login edits here instead if they would conflict)
+- [x] Document `rawani_hub_secret` in the gitignored `api/config/config.php` template/README
 
 **Outcome:** all three platforms implement `rawani/v1` and pass the shared test vector.
 **Dependencies:** Phase 0 of the same platform must be live before its bridge goes live.
 
 ---
+
+
+**Deployed live 2026-11-19 ~15:20 UTC (patch-applied; backups /root/backups/{alawal,anaw,aafaq}-phase2-*, hub-link-*):** alawal rawani/phase2-api @354271f (migrate --path=database/migrations/rawani, rawani:setup-placement → «مجمع رواني» 6 schools / 36 placements); anawlqdrat backend rawani/phase2-api (migrate --path rawani; front /sso NOT deployed); aafaq rawani/phase2-api (SQL migrations/rawani_bridge.sql applied, reg_students 62,233 rows, all is_active=1). Secrets generated server-side (never printed) into alawal/anawlqdrat .env RAWANI_HUB_SECRET (+RAWANI_SPA_URL) and aafaq api/config/config.php; hub_platforms 1 alawal, 2 anawlqdrat, 3 aafaq enabled; signed ping = ok on all three. Branches pushed: aafaq + anawlqdrat `rawani/phase2-api`, front `rawani/sso`; alawal remote is read-only (code only in ~/www/alawal branch + live tree). aafaq default_school_id=5398 is not under any school/complex/company subscription → safe.
 
 ## Phase 3: Online purchase (viewclass repo)
 
