@@ -26,52 +26,54 @@ Rules for every implementer:
 The three repos are independent and can run in parallel.
 
 ### Task 0.1 (alawal): Close the forgot-password takeover (P0-AL-1)
-- [ ] Remove the public `forgot-password` → `verifyIdentity` → `reset-password/{token}` routes and their views/links
-- [ ] Change the login page link to «تواصل مع إدارة المدرسة»
-- [ ] Test: `POST /forgot-password` returns 404/405, and the admin temp-password flow still works
+- [x] Remove the public `forgot-password` → `verifyIdentity` → `reset-password/{token}` routes and their views/links
+- [x] Change the login page link to «تواصل مع إدارة المدرسة»
+- [x] Test: `POST /forgot-password` returns 404/405, and the admin temp-password flow still works
 
 ### Task 0.2 (alawal): Auth on the routes after the auth group, plus a login throttle (P0-AL-2, P0-AL-3)
-- [ ] Move `promotions/*` and `reports/*` inside `auth:web` and delete the debug routes
-- [ ] Add `throttle:5,1` on `POST /login`
-- [ ] Test: unauthenticated hits redirect to login, and the 6th bad login in a minute returns 429
+- [x] Move `promotions/*` and `reports/*` inside `auth:web` and delete the debug routes
+- [x] Add `throttle:5,1` on `POST /login`
+- [x] Test: unauthenticated hits redirect to login, and the 6th bad login in a minute returns 429
 
 ### Task 0.3 (alawal): Enforce `students.is_active` (P0-AL-4)
-- [ ] Add the check to `LoginController::login`
-- [ ] Add a middleware on `auth:student` that logs out inactive students
-- [ ] Test
+- [x] Add the check to `LoginController::login`
+- [x] Add a middleware on `auth:student` that logs out inactive students
+- [x] Test
 
 ### Task 0.4 (aafaq): Close the open user endpoints (P0-AF-1, P0-AF-4)
-- [ ] **Precondition (orchestrator, read-only):** find how `cron/*.php` and `update_payments.php` actually run on live: crontab, an external URL ping with `?key=`, or not at all. If they are triggered by URL, the CLI-only guard must not ship until the trigger is moved to a crontab CLI entry.
-- [ ] Grep `afaq_reading`, `afaq_abilities_app` and the aafaq web pages for callers of each endpoint, and record the findings in the PR body
-- [ ] `getAllStudents` and `deleteStudentByEmail` require an admin session or are removed
-- [ ] `getStudentData` and `updateProfile` require credential material, or return reduced fields where the apps can't send it
-- [ ] Use prepared statements in `register`, `editedRegister` and `forgetPass`
-- [ ] Add a CLI-only guard on `update_payments.php` and `cron/*.php` (P0-AF-5)
-- [ ] Add a PHP CLI test script under `tests/` that drives these endpoints against a local DB copy
+- [x] **Precondition (orchestrator, read-only):** find how `cron/*.php` and `update_payments.php` actually run on live: crontab, an external URL ping with `?key=`, or not at all. If they are triggered by URL, the CLI-only guard must not ship until the trigger is moved to a crontab CLI entry.
+- [x] Grep `afaq_reading`, `afaq_abilities_app` and the aafaq web pages for callers of each endpoint, and record the findings in the PR body
+- [x] `getAllStudents` and `deleteStudentByEmail` require an admin session or are removed
+- [x] `getStudentData` and `updateProfile` require credential material, or return reduced fields where the apps can't send it
+- [x] Use prepared statements in `register`, `editedRegister` and `forgetPass`
+- [x] Add a CLI-only guard on `update_payments.php` and `cron/*.php` (P0-AF-5)
+- [x] Add a PHP CLI test script under `tests/` that drives these endpoints against a local DB copy
 
 ### Task 0.5 (aafaq): Webhook site filter (P0-AF-3)
-- [ ] `moyasar-webhook.php`: if `metadata.site` is set and is not aafaq's, record `ignored` in `payment_events` and return 200 without applying
-- [ ] Test with a recorded payload of each kind
-- [ ] **Must be live before Task 3.x goes live**
+- [x] `moyasar-webhook.php`: if `metadata.site` is set and is not aafaq's, record `ignored` in `payment_events` and return 200 without applying
+- [x] Test with a recorded payload of each kind
+- [x] **Must be live before Task 3.x goes live**
 
-### Task 0.6 (aafaq): Decide and implement the `updatePaymentStatus` check (P0-AF-2)
-- [ ] If a RevenueCat secret is available, verify the app user's entitlement server-side before setting the flag
-- [ ] Otherwise document risk R9 and stop
+### Task 0.6 (aafaq) — NOT IMPLEMENTED: no RevenueCat secret; risk R9 stays open (updatePaymentStatus can still unlock any email): Decide and implement the `updatePaymentStatus` check (P0-AF-2)
+- [x] If a RevenueCat secret is available, verify the app user's entitlement server-side before setting the flag
+- [x] Otherwise document risk R9 and stop
 
 ### Task 0.7 (anawlqdrat): Make blocking mean blocked (P0-AQ-1..3)
-- [ ] **Precondition (orchestrator, read-only):** on prod, count users with `status='inactive'`, `blocked=0` and not deleted, plus how many of them have an active subscription or logged in within 90 days. Self-registration creates `inactive` users, and login never checked the status before. The local snapshot (2025-10) has 6 such users, 1 of them with a recent login.
-  - If the active-use count is 0, ship as written.
-  - Otherwise, either set those users to `active` (the list goes to the client first) or limit the new rule to `blocked` and document `inactive` as "pending admin review". Decide before merging.
-- [ ] Refuse login for `status='inactive'`, the same as `blocked`
-- [ ] Revoke tokens on block, inactive, admin delete and self-delete
-- [ ] Add an `auth:api` middleware that returns 401 for blocked, inactive or soft-deleted users
-- [ ] Optional: unregister the MyFatoorah demo routes
-- [ ] Feature tests
+- [x] **Precondition (done 2026-11-19, live read-only):** 940 users are `status='inactive'`, not blocked, not deleted. Decision: limit the rule to `blocked`. `inactive` means **"pending admin review"** and is NOT refused at login or on the API.
+- [x] Login already refused `blocked` (`LoginWithTemporaryPasswordAction`); `inactive` stays allowed
+- [x] Revoke tokens on block, admin delete and self-delete (`User::booted()` hooks: `saved` when `blocked` flips on, `deleted`)
+- [x] `EnsureApiUserNotBlocked` in the `api` middleware group returns 401 for blocked users (covers tokens issued before the fix and the password-reset token). Soft-deleted users already fail `auth:api` (default scope).
+- [x] Optional: unregister the MyFatoorah demo routes. NOT done: the vendor package registers them in `register()`; removing needs `dont-discover` in composer.json plus a composer step on deploy.
+- [x] Feature tests (`tests/Feature/Auth/BlockedUserTokenTest.php`)
+- Branch `security/phase0-2026-11-19` in `~/www/anawlqdrat-wt-phase0` (not pushed).
 
 **Outcome:** the known takeover, PII and blocking holes are closed live on all three platforms.
 **Dependencies:** none. Deploy notes are in design §7.
 
 ---
+
+
+**Deployed live 2026-11-19 (patch-applied on the Tarweig VPS, backups /root/backups/phase0-*):** alawal security/phase0-2026-11-19 @c40ece6, aafaq @5d5be34 (worktree ~/www/aafaq-wt-phase0), anawlqdrat @4740a8e1 (worktree ~/www/anawlqdrat-wt-phase0, dashboard.anawlqdrat.com). Smoke: alawal forgot 404, promotions unauth 302, debug 404, logins 200; aafaq cron/update_payments URL 403, getAllStudents w/o auth refused; anawlqdrat dashboard 302 OK (pre-existing: /api/user uses undefined guard user-api → 500, untouched).
 
 ## Phase 1: Rawani hub core (viewclass repo, this worktree)
 
