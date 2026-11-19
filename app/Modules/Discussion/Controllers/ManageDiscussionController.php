@@ -93,6 +93,7 @@ class ManageDiscussionController extends Controller
             'requires_approval' => $request->boolean('requires_approval', false),
         ]), $targets);
 
+        app(\App\Modules\Gamification\Hooks\DiscussionPointHooks::class)->discussionRoomChanged($id);
         ActivityLog::logUpdate($room->fresh(), 'تعديل غرفة نقاش: '.$room->title, $old);
 
         return redirect()

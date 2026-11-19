@@ -79,7 +79,7 @@ Status: **EXISTS** = activity exists and a hook point is clear; **PARTIAL** = ac
 - Teacher aggregate rules (`teacher.assignments`, `teacher.exams`, `teacher.discussion_participation`, `teacher.live_rooms_attendance`) SHALL use the calc mode chosen by the admin per rule: «نسبة تفاعل الطلاب» (students who acted ÷ targeted students) or «الإجابات الصحيحة» (average correct ratio of those who acted), × rule points, per source item.
 
 ### US-006 وكيل
-- WHEN a وكيل submits a job-performance evaluation on or before the form's `close_date` THE SYSTEM SHALL award the rule points per evaluated person (so the total grows with the number of teachers evaluated); late or no-deadline submissions earn nothing.
+- WHEN a وكيل submits a job-performance evaluation on or before the form's `close_date` THE SYSTEM SHALL award the rule points per evaluated person (so the total grows with the number of teachers evaluated); late submissions earn nothing; a form with no `close_date` counts as on time (round 2).
 - WHEN a وكيل completes a class visit within the configured window THE SYSTEM SHALL award points per visit, up to the configured visits-per-term target.
 - WHEN a وكيل adds a school schedule on or before the configured deadline THE SYSTEM SHALL award the rule points once per schedule; deleting it reverses.
 - «جميع ما يتم تحديده يظهر للشخص المحدد له على حسابه»: the وكيل's «نقاطي» page SHALL show his rules' deadlines/targets next to his balance.

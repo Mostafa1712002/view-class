@@ -123,4 +123,14 @@ class PointsHooksEvaluationTest extends TestCase
         $hooks->classVisitDeleted($v1->id);
         $this->assertSame(0, $this->balance($vice));
     }
+
+    public function test_job_performance_without_close_date_counts_as_on_time(): void
+    {
+        $school = School::factory()->create();
+        $vice = $this->vice($school);
+        $this->rule('vice.job_performance_on_time');
+
+        app(EvaluationPointHooks::class)->evaluationChanged($this->evaluation($vice, 'job_performance', null));
+        $this->assertSame(5, $this->balance($vice));
+    }
 }

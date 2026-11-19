@@ -181,4 +181,18 @@ class PointsHooksExamTest extends TestCase
         });
         $this->assertSame(20, $this->balance($a));
     }
+
+    public function test_editing_the_exam_resyncs_the_teacher(): void
+    {
+        [$exam, $teacher, $a, $b] = $this->fixture();
+        PointRuleSetting::where('rule_key', 'teacher.exams')->update(['options' => ['basis' => 'correct']]);
+        $this->attempt($exam, $a, 2);
+        $hooks = app(ExamPointHooks::class);
+        $hooks->examAttemptChanged($exam, $a->id);
+        $this->assertSame(10, $this->balance($teacher));  // 2/2
+
+        DB::table('exam_questions')->insert(['exam_id' => $exam->id, 'question' => 'q3', 'type' => 'true_false', 'marks' => 1, 'created_at' => now(), 'updated_at' => now()]);
+        $hooks->examChanged($exam->fresh());
+        $this->assertSame(7, $this->balance($teacher));   // 2/3 -> 6.67 -> 7
+    }
 }

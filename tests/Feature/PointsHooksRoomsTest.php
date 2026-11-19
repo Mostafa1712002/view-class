@@ -114,4 +114,20 @@ class PointsHooksRoomsTest extends TestCase
         $hooks->virtualClassRecalculated($vc);
         $this->assertSame(7, $this->balance($teacher)); // 2 of 3 -> 6.67 -> 7
     }
+
+    public function test_changing_the_audience_resyncs_room_and_live_session(): void
+    {
+        [$school, $class, $teacher, [$s1, $s2, $s3]] = $this->fixture();
+        $room = DiscussionRoom::create(['school_id' => $school->id, 'title' => 'R', 'created_by' => $teacher->id,
+            'target_type' => 'students', 'class_ids' => [$class->id]]);
+        $topic = DiscussionTopic::create(['room_id' => $room->id, 'school_id' => $school->id, 'created_by' => $teacher->id, 'title' => 'T', 'body' => 'b']);
+        DiscussionComment::create(['topic_id' => $topic->id, 'school_id' => $school->id, 'user_id' => $s1->id, 'body' => 'x']);
+        $hooks = app(DiscussionPointHooks::class);
+        $hooks->discussionRoomChanged($room->id);
+        $this->assertSame(5, $this->balance($teacher));   // 1 of 2
+
+        $room->update(['class_ids' => null, 'target_type' => 'all']);   // widened to 3 students
+        $hooks->discussionRoomChanged($room->id);
+        $this->assertSame(3, $this->balance($teacher));   // 1 of 3
+    }
 }

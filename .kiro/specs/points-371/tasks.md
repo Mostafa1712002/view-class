@@ -150,3 +150,10 @@ Files: `Hooks/SchedulePointHooks.php`, `app/Http/Controllers/Admin/ScheduleContr
 - Portfolio approval flows (student by teacher, teacher by complex supervisor), التحفيز, video tracking, worksheets, separate preparation upload, complex-supervisor ownership of visit targets — wait for client answers; rules already in the catalog as unwired.
 - `points:reconcile` / backfill command — only if the client asks (rawaniedu only).
 - Frozen monthly honour list snapshot, cached balance table — only when measured need.
+
+## Round 2 (2026-11-19)
+- [x] Missing deadline = on time (EvaluationPointHooks + test)
+- [x] Recalc hooks: assignment edit, exam edit/questions, discussion room update, live room update (+ tests)
+- [x] «نقاطي» sidebar link for the وكيل
+- [x] Kept: weekly-plan duplicate awards per copy
+- [ ] Manual exam grading / assignment resubmit after grading: no such host path exists — nothing to hook

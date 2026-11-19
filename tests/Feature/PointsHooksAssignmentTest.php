@@ -88,4 +88,18 @@ class PointsHooksAssignmentTest extends TestCase
         app(AssignmentPointHooks::class)->assignmentChanged($a, $s2->id);
         $this->assertSame(8, $this->balance($teacher));   // avg 0.75 x 10 = 7.5 -> 8
     }
+
+    public function test_editing_the_assignment_resyncs_students_and_teacher(): void
+    {
+        [$a, $teacher, [$s1, $s2]] = $this->fixture();
+        $hooks = app(AssignmentPointHooks::class);
+        AssignmentSubmission::create(['assignment_id' => $a->id, 'student_id' => $s1->id, 'status' => 'graded', 'score' => 10]);
+        $hooks->assignmentChanged($a, $s1->id);
+        $this->assertSame(5, $this->balance($s1));        // 10/20
+
+        $a->update(['max_score' => 10]);                  // edited: now full marks
+        $hooks->assignmentEdited($a->fresh());
+        $this->assertSame(10, $this->balance($s1));
+        $this->assertSame(5, $this->balance($teacher));   // 1 of 2 submitted
+    }
 }

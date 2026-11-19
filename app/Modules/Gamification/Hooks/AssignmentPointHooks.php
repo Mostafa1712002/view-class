@@ -33,6 +33,17 @@ final class AssignmentPointHooks
         });
     }
 
+    /** After the assignment itself was edited (max score, class): re-sync every student with a submission + the teacher. */
+    public function assignmentEdited(Assignment $assignment): void
+    {
+        HostSafe::run(function () use ($assignment) {
+            foreach (AssignmentSubmission::where('assignment_id', $assignment->id)->pluck('student_id') as $studentId) {
+                $this->assignmentChanged($assignment, (int) $studentId);
+            }
+            $this->assignmentChanged($assignment, null);
+        });
+    }
+
     public function assignmentDeleted(int $assignmentId): void
     {
         HostSafe::run(function () use ($assignmentId) {

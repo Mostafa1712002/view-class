@@ -119,7 +119,7 @@ Each entry: `key => [beneficiary, calc_mode, unit, wired(bool), label key, optio
 | `teacher.media_video` | وسائط متعددة — فيديو (مشاهدة – لايك – تعليق) | teacher | ratio | — | no |
 | `teacher.media_worksheet` | وسائط متعددة — ورق عمل (تحميل – رفع – تصحيح المعلم) | teacher | ratio | — | no |
 | `teacher.preparation` | التحضير | teacher | per_event: 1 per weekly plan | `weekly_plan` / `weekly_plans.teacher_id` | yes (partial) |
-| `vice.job_performance_on_time` | تقييم الأداء الوظيفي (التسليم في الموعد) | vice | per_event: 1 per evaluation submitted with `submitted_at ≤ form.close_date` (form in job-performance domain); else 0 | `evaluation` / `evaluations.evaluator_id` | yes (partial) |
+| `vice.job_performance_on_time` | تقييم الأداء الوظيفي (التسليم في الموعد) | vice | per_event: 1 per evaluation submitted with `submitted_at ≤ form.close_date` (form in job-performance domain) (no close_date = on time, round 2); else 0 | `evaluation` / `evaluations.evaluator_id` | yes (partial) |
 | `vice.class_visits` | زيارات صفية | vice | per_event: 1 per visit whose evaluation is submitted, `visit_date` inside `options.window_start..window_end` (default: current term), while awarded visits this term < `options.visits_per_term` (null = no cap) | `class_visit` / `class_visits.supervisor_id` | yes (partial) |
 | `vice.school_schedule_on_time` | إضافة الجدول المدرسي (في الوقت المحدد) | vice | per_event: 1 if created on/before `options.deadline` | `schedule` / acting user | yes (partial) |
 
@@ -249,3 +249,11 @@ Glob `2026_11_19_371*` plus the base globs Counseling uses; each hook test names
 - **Data** → `rawaniedu.com` ONLY (user 2026-11-19): setting rule values, reward periods, any demo points, any backfill/import. Never on viewclass.newaves-systems.com. The catalog is in code and the defaults are 0/disabled, so the migration itself seeds no rule data; only the permission rows (schema-level RBAC, same as Counseling) run on both.
 - No backfill of past activity by default (rules start disabled; first-award-only). ponytail: a `points:reconcile` command is skipped — add it if the client asks for backfill or a swallowed hook failure is reported; it would replay `PointHooks` over existing sources (rawaniedu only).
 - Live check after deploy (both): `/manage/points`, `/manage/points/rules` open; `/my/points` opens for a student; on rawaniedu only, with a test rule enabled: submit an exam as a test student → row appears, balance updates.
+
+## 14. Round 2 (2026-11-19)
+- Missing deadline = on time for every deadline rule (job-performance evaluation now like the school schedule).
+- Recalc on edits (one host line each, after the save): `AssignmentController::update` → `assignmentEdited` (all students with a submission + teacher); `Admin\ExamController::update` and `ExamQuestionController::updateExamTotalMarks` (every question add/edit/delete/duplicate/bank path) → `examChanged` (teacher key); `ManageDiscussionController::update` → `discussionRoomChanged`; `VirtualClassController::update` → `virtualClassRecalculated`.
+- Not applicable: no manual exam grading path exists (answers are auto-graded only; essays stay null); a graded/returned assignment submission is locked for the student, so "resubmit after grading" cannot happen.
+- Kept: duplicating a weekly plan awards preparation points per copy.
+- Sidebar: «نقاطي» also shown to the وكيل (job title `vice`), same `Route::has` gate.
+- Known edge: reassigning a live session/room to another teacher leaves the old teacher's row until his next sync.

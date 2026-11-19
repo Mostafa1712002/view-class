@@ -387,5 +387,6 @@ class ExamQuestionController extends Controller
     {
         $totalMarks = $exam->questions()->sum('marks');
         $exam->update(['total_marks' => $totalMarks]);
+        app(\App\Modules\Gamification\Hooks\ExamPointHooks::class)->examChanged($exam);
     }
 }

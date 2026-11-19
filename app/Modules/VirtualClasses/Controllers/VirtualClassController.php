@@ -149,6 +149,7 @@ class VirtualClassController extends Controller
         }
 
         $this->repo->update($vc->id, $data, $targets);
+        app(\App\Modules\Gamification\Hooks\VirtualClassPointHooks::class)->virtualClassRecalculated($vc->fresh());
         ActivityLog::logUpdate($vc->fresh(), "تعديل فصل افتراضي: {$vc->title}", $old);
 
         return redirect()

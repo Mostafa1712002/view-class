@@ -37,6 +37,19 @@ final class ExamPointHooks
         });
     }
 
+    /** After the exam or its questions were edited (class, question count): re-sync the teacher's key. */
+    public function examChanged(Exam $exam): void
+    {
+        HostSafe::run(function () use ($exam) {
+            if ($exam->teacher_id) {
+                $this->sync->execute(new ActivityPoints(
+                    'teacher.exams', (int) $exam->teacher_id, 'exam', $exam->id,
+                    $this->teacherUnits($exam, $this->bestCorrect($exam->id)), auth()->id(),
+                ));
+            }
+        });
+    }
+
     /** Call AFTER the delete succeeded. */
     public function examDeleted(int $examId): void
     {

@@ -255,6 +255,7 @@ class ExamController extends Controller
         $validated['show_results'] = $request->boolean('show_results');
 
         $exam->update($validated);
+        app(\App\Modules\Gamification\Hooks\ExamPointHooks::class)->examChanged($exam);
 
         return redirect()->route($this->routePrefix() . '.show', $exam)
             ->with('success', 'تم تحديث الاختبار بنجاح.');
