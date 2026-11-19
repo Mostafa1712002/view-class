@@ -10,6 +10,7 @@
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="alert alert-danger">{{ $errors->first() }}</div>@endif
 
+    @if(auth()->user()->canDo('qr.link_devices'))
     <div class="card mb-3"><div class="card-body">
         <h5 class="mb-2">تسجيل جهاز جديد</h5>
         <form method="POST" action="{{ route('admin.qr.devices.store') }}" class="form-row align-items-end">@csrf
@@ -18,6 +19,7 @@
             <div class="col-md-3 mb-2"><button class="btn btn-primary"><x-svg-icon name="plus-lg" /> تسجيل الجهاز</button></div>
         </form>
     </div></div>
+    @endif
 
     <div class="card mb-3"><div class="card-body"><form method="GET" class="form-row align-items-end">
         <div class="col-md-4 mb-2"><label>اسم الجهاز</label><input type="text" name="name" value="{{ request('name') }}" class="form-control"></div>
@@ -32,10 +34,10 @@
         <tbody>@foreach($devices as $d)<tr>
             <td>{{ $d->name }}</td>
             <td>{{ $d->location ?? '—' }}</td>
-            <td><code>{{ $d->device_key }}</code></td>
+            <td><code>{{ auth()->user()->canDo('qr.link_devices') ? $d->device_key : \Illuminate\Support\Str::mask($d->device_key, '*', 4) }}</code></td>
             <td>{{ optional($d->last_seen_at)?->format('Y-m-d H:i') ?? '—' }}</td>
             <td>@if($d->is_active)<span class="badge badge-success">مفعّل</span>@else<span class="badge badge-secondary">معطل</span>@endif</td>
-            <td>
+            <td>@if(auth()->user()->canDo('qr.link_devices'))
                 <form method="POST" action="{{ route('admin.qr.devices.toggle', $d->id) }}" class="d-inline">@csrf
                     <button class="btn btn-sm btn-outline-{{ $d->is_active?'warning':'success' }}" title="{{ $d->is_active?'تعطيل':'تفعيل' }}"><x-svg-icon name="power" /></button>
                 </form>
@@ -44,7 +46,7 @@
                 </form>
                 <form method="POST" action="{{ route('admin.qr.devices.destroy', $d->id) }}" class="d-inline" onsubmit="return confirm('حذف الجهاز؟');">@csrf @method('DELETE')
                     <button class="btn btn-sm btn-outline-danger" title="حذف"><x-svg-icon name="trash" /></button>
-                </form>
+                </form>@endif
             </td>
         </tr>@endforeach</tbody></table>
         {{ $devices->links() }}

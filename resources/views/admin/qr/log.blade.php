@@ -36,6 +36,7 @@
     </div></div>
 
     {{-- Day close --}}
+    @if(auth()->user()->canDo('qr.close_day'))
     <div class="card border-warning"><div class="card-body">
         <h5 class="mb-3"><x-svg-icon name="lock" /> إغلاق اليوم</h5>
         <form method="POST" action="{{ route('admin.qr.close-day') }}" class="form-row align-items-end" onsubmit="return confirm('سيتم منع تسجيل مسحات جديدة وتسجيل غير الممسوحين كغياب. متابعة؟');">
@@ -46,5 +47,6 @@
             <div class="col-md-3 mb-2"><button class="btn btn-warning"><x-svg-icon name="lock" /> تنفيذ إغلاق اليوم</button></div>
         </form>
     </div></div>
+    @endif
 </div>
 @endsection

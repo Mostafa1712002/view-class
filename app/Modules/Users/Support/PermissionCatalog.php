@@ -70,7 +70,7 @@ final class PermissionCatalog
         // `create` kept for backward-compat (legacy permission_role grants exist) — pure EXTEND.
         'attendance'         => ['label' => 'حضور الطلاب',          'actions' => ['view','create','record_present','record_absent','record_late','record_excuse','edit','delete','add_excuse','add_note','bulk_present','bulk_absent','bulk_late','notify_parent','view_reports','export','print']],
         'teacher_attendance' => ['label' => 'حضور المعلمين',        'actions' => ['view','record_present','record_absent','record_late','record_excuse','record_period','edit','export','send_message']],
-        'qr'                 => ['label' => 'خدمات QR للحضور',      'actions' => ['view','create_card','print_card','export_cards','scan','view_log','close_day','group_create','group_edit','group_delete','link_students','link_devices']],
+        'qr'                 => ['label' => 'خدمات QR للحضور',      'actions' => ['view','create_card','print_card','export_cards','scan','view_scanner','view_log','close_day','group_create','group_edit','group_delete','link_students','view_link','link_devices','view_devices']],
         'certificates'       => ['label' => 'الشهادات',             'actions' => ['view','template_create','template_edit','template_delete','create','edit','delete','issue','upload_file','preview','send','copy_link']],
         // `support` is EXTENDED on top of the legacy view/create/edit/delete.
         // `edit` kept for backward-compat with the pre-Sprint-10 support group — pure EXTEND.

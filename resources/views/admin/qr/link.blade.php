@@ -32,7 +32,7 @@
                     @foreach($groups as $g)<option value="{{ $g->id }}">{{ $g->title }}</option>@endforeach
                 </select>
             </div>
-            <div class="col-md-4 mb-2"><button type="submit" class="btn btn-primary"><x-svg-icon name="link-45deg" /> ربط الطلاب المحددين</button></div>
+            @if(auth()->user()->canDo('qr.link_students'))<div class="col-md-4 mb-2"><button type="submit" class="btn btn-primary"><x-svg-icon name="link-45deg" /> ربط الطلاب المحددين</button></div>@endif
         </div></div></div>
 
         <div class="card"><div class="card-body table-responsive">

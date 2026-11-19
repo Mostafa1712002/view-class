@@ -30,7 +30,7 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
 
         // Scanner + scan endpoint + log + day-close
         Route::get('scanner', [QrScannerController::class, 'scanner'])
-            ->middleware('permission:qr.scan')->name('scanner');
+            ->middleware('permission:qr.view_scanner')->name('scanner');
         Route::post('scan', [QrScannerController::class, 'scan'])
             ->middleware('permission:qr.scan')->name('scan');
         Route::get('log', [QrScannerController::class, 'log'])
@@ -54,13 +54,13 @@ Route::middleware(['auth', 'role:super-admin,school-admin'])
 
         // Link students to attendance groups / issue cards
         Route::get('link', [QrLinkController::class, 'index'])
-            ->middleware('permission:qr.link_students')->name('link.index');
+            ->middleware('permission:qr.view_link')->name('link.index');
         Route::post('link', [QrLinkController::class, 'assign'])
             ->middleware('permission:qr.link_students')->name('link.assign');
 
         // IoT scanner devices registry
         Route::get('devices', [QrDeviceController::class, 'index'])
-            ->middleware('permission:qr.link_devices')->name('devices.index');
+            ->middleware('permission:qr.view_devices')->name('devices.index');
         Route::post('devices', [QrDeviceController::class, 'store'])
             ->middleware('permission:qr.link_devices')->name('devices.store');
         Route::post('devices/{device}/toggle', [QrDeviceController::class, 'toggle'])
