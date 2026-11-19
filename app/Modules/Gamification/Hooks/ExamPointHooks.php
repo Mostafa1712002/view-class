@@ -81,7 +81,9 @@ final class ExamPointHooks
     private function teacherUnits(Exam $exam, array $best): float
     {
         $schoolId = (int) ($exam->teacher?->school_id ?? 0);
-        $ids = ClassStudents::ids($exam->class_id ? (int) $exam->class_id : null, $schoolId ?: null);
+        // an exam aimed at chosen students is measured against those students only
+        $targets = $exam->targetStudents()->pluck('users.id')->map(fn ($id) => (int) $id)->all();
+        $ids = $targets ?: ClassStudents::ids($exam->class_id ? (int) $exam->class_id : null, $schoolId ?: null);
         $targeted = count($ids);
         // only targeted students count, so the ratio can't pass 1 or mix in outsiders
         $best = array_intersect_key($best, array_flip($ids));

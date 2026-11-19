@@ -97,8 +97,12 @@ class Exam extends Model
     /** Exams open to this student: class-wide ones plus those that name them. */
     public function scopeVisibleToStudent($query, int $studentId)
     {
-        return $query->where(fn ($q) => $q->whereDoesntHave('targetStudents')
-            ->orWhereHas('targetStudents', fn ($t) => $t->where('users.id', $studentId)));
+        // Straight on the pivot: going through the users relation would apply its
+        // soft-delete scope, turning an exam whose targets were all deleted class-wide.
+        $pivot = fn ($q) => $q->selectRaw('1')->from('exam_students')->whereColumn('exam_students.exam_id', 'exams.id');
+
+        return $query->where(fn ($q) => $q->whereNotExists($pivot)
+            ->orWhereExists(fn ($e) => $pivot($e)->where('exam_students.student_id', $studentId)));
     }
 
     public function isVisibleTo(User $student): bool

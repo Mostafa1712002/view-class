@@ -109,6 +109,19 @@ class Meeting4BooksExamsTest extends TestCase
         $this->actingAs($b)->get(route('student.exams.show', $classWide))->assertOk();
     }
 
+    public function test_targeted_exam_stays_hidden_when_its_only_target_is_soft_deleted(): void
+    {
+        $school = School::factory()->create();
+        $class = ClassRoom::factory()->create();
+        $a = $this->student($school, $class);
+        $b = $this->student($school, $class);
+        $targeted = $this->exam($class, [$a->id]);
+        $a->delete();
+
+        $this->assertFalse($targeted->isVisibleTo($b));
+        $this->assertSame([], Exam::visibleToStudent($b->id)->pluck('id')->all());
+    }
+
     public function test_admin_targets_students_and_rejects_cross_school_ids(): void
     {
         $school = School::factory()->create();
