@@ -294,6 +294,8 @@ Notes (4.1–4.3): `hub:mirror {--platform=} {--full} {--sync} {--per=}`; walk s
 - [x] `IssueSsoLink` + `my/packages/accounts/{a}/open`: ownership check (self, or parent of the beneficiary); linked accounts need `link_confirmed_by`; a 501 shows the credentials fallback with the app links
 - [x] Tests
 
+Review + local E2E of Phases 3–5 (2026-11-19): independent review fixed — reconcile no longer gives up on captured money that fails the checks (audited once as `hub.payment.rejected`); SSO URL followed only on the platform's own site; only the primary parent completes the parent national ID; register throttles the POST only on its own key and adding children is throttled; link requires the account's role; register reports only a unique-key race as an existing account. E2E also found and fixed: Arabic confirm dialogs showed raw `\uXXXX` (layout decoder). Local E2E (headless Chromium, fake rawani/v1 on :8789): «سجّل واشترِ» → parent → child → buy → hosted Moyasar invoice (TEST) → Visa 4111… + ACS emulator → return page → paid (re-fetched: amount 1000, SAR, invoice_id matches, **metadata null**) → account active on the fake (signed PUT) → «افتح» lands on the fake SSO; webhook wrong secret 401 / duplicate / foreign site ignored; admin payments + receipt + «تحقق» (on_hold) + manual refund (entitlements pushed `[]`); `hub:reconcile-payments` kept the on_hold invoice pending; `hub:mirror --sync` → «دليل المستخدمين» phone search 0550001122 finds the +966 55 000 1122 row → candidate «نفس الجوال» → link after review pushed `link_external_id`, no password. Screenshots: `claudedocs/rawani-hub-p345-local/` (not committed).
+
 **Outcome:** one click from Rawani into alawal and anawlqdrat.
 **Dependencies:** 2A.3, 2Q.3 and 2Q.5 live. 5.1 adds its strings to `hub_my.php`, so it runs after 3.4.
 
@@ -315,14 +317,14 @@ Notes (4.1–4.3): `hub:mirror {--platform=} {--full} {--sync} {--per=}`; walk s
 
 | Phase | Tasks | Completed | Status |
 |-------|-------|-----------|--------|
-| 0. Security prerequisites | 7 | 0 | Not started |
+| 0. Security prerequisites | 7 | 7 | Live 2026-11-19 (0.6 documented, not implemented) |
 | 1. Rawani hub core | 9 | 9 | Done (local E2E 2026-11-19) |
-| 2. Contract on sub-platforms | 12 | 0 | Not started |
-| 3. Online purchase | 6 | 0 | Not started |
-| 4. Master directory | 4 | 0 | Not started |
-| 5. SSO-lite | 1 | 0 | Not started |
+| 2. Contract on sub-platforms | 12 | 12 | Live 2026-11-19 (anawlqdrat front /sso not live) |
+| 3. Online purchase | 6 | 6 | Done (local E2E with a Moyasar test payment 2026-11-19) |
+| 4. Master directory | 4 | 4 | Done (unlink deferred) |
+| 5. SSO-lite | 1 | 1 | Done locally |
 | 6. Live rollout | 7 | 0 | Not started |
-| **Total** | **46** | **9** | **20%** |
+| **Total** | **46** | **39** | **85%** |
 
 Waiting on the client (design §11): Q1–Q8.
 - Phases 1–2 can start without any answers.
