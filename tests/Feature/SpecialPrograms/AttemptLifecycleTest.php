@@ -224,6 +224,23 @@ class AttemptLifecycleTest extends TestCase
         }
     }
 
+    public function test_deleting_a_program_exam_takes_its_points_back(): void
+    {
+        $this->student->roles()->attach(\App\Models\Role::where('slug', 'student')->value('id'));
+        \App\Modules\Gamification\Models\PointRuleSetting::create(['school_id' => 0, 'rule_key' => \App\Modules\SpecialPrograms\Listeners\AwardProgramPoints::RULES['qiyas'], 'points' => 2, 'is_enabled' => true]);
+        [$es] = $this->exam('qiyas');
+        $a = $this->start($es);
+        $this->answerAll($a, 3);
+        app(FinishAttempt::class)->execute($a->id);
+        $this->assertSame(6, (int) DB::table('point_transactions')->where('user_id', $this->student->id)->sum('points'));
+
+        $admin = $this->createSuperAdmin();
+        app(\App\Modules\SpecialPrograms\Actions\Exams\DeleteProgramExam::class)->execute(\App\Modules\SpecialPrograms\Models\SpExam::findOrFail($a->exam_id), $admin);
+
+        $this->assertSame(0, (int) DB::table('point_transactions')->where('user_id', $this->student->id)->sum('points'));
+        $this->assertSame(2, DB::table('point_transactions')->where('source_type', 'program_test')->where('source_id', $a->id)->count());
+    }
+
     public function test_disabled_program_rule_awards_nothing(): void
     {
         $this->student->roles()->attach(\App\Models\Role::where('slug', 'student')->value('id'));
