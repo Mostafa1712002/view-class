@@ -3,7 +3,8 @@
 @section('page-title', __('special_programs/settings.title'))
 @section('content')
 <div class="card"><div class="card-body">
-@include('special-programs.staff.settings._tabs')
+@include('special-programs.partials.program-tabs', ['program' => $program, 'active' => 'settings'])
+@include('special-programs.staff.settings._tabs', ['tabs' => false])
 @unless($editable)<div class="alert alert-warning" role="alert">{{ __('special_programs/settings.read_only') }}</div>@endunless
 <form method="POST" action="{{ route('manage.special-programs.settings.update', $program) }}">
 @csrf @method('PUT')

@@ -2,8 +2,8 @@
 @php
     $tabDefs = [
         'enrollments' => ['manage.special-programs.enrollments.index', 'special_programs.view'],
-        'groups' => ['manage.special-programs.groups.index', 'special_programs.view'],
-        'teachers' => ['manage.special-programs.teachers.index', 'special_programs.view'],
+        'groups' => ['manage.special-programs.groups.index', 'special_programs.manage'],
+        'teachers' => ['manage.special-programs.teachers.index', 'special_programs.manage'],
         'exams' => ['manage.special-programs.exams.index', 'special_programs.exams'],
         'bank' => ['manage.special-programs.bank.index', 'special_programs.questions'],
         'reports' => ['manage.special-programs.reports.index', 'special_programs.reports'],

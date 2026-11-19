@@ -204,5 +204,6 @@ return [
     'section_academic' => 'Academic affairs & plans',
     'nav_special_programs' => 'Special educational programs',
     'nav_special_programs_teacher' => 'Special programs',
+    'nav_special_programs_teacher_reports' => 'Special programs reports',
     'nav_my_programs' => 'Educational programs',
 ];
