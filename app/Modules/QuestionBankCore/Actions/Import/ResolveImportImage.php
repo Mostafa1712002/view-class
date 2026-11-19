@@ -64,7 +64,12 @@ final class ResolveImportImage
                 // connect to the address we just checked, not a fresh lookup
                 $curl[CURLOPT_RESOLVE] = ["{$host}:{$port}:".(str_contains($ip, ':') ? "[{$ip}]" : $ip)];
             }
-            $response = Http::timeout(15)->connectTimeout(5)->withoutRedirecting()->withOptions(['curl' => $curl])->get($ref);
+            // decode_content off: a gzip body would otherwise inflate past the cap
+            // (the progress counter only sees wire bytes); compressed bytes then
+            // simply fail the image check below.
+            $response = Http::timeout(15)->connectTimeout(5)->withoutRedirecting()
+                ->withHeaders(['Accept-Encoding' => 'identity'])
+                ->withOptions(['decode_content' => false, 'curl' => $curl])->get($ref);
         } catch (\Throwable $e) {
             throw new \RuntimeException("تعذر تحميل الصورة (حتى 5 ميجابايت): {$ref}");
         }

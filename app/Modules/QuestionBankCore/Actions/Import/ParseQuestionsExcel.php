@@ -115,8 +115,9 @@ final class ParseQuestionsExcel
             // "public:" refs are only ever minted by extractEmbeddedImages(); a typed one
             // would point the question at an arbitrary public-disk file, so strip the
             // prefix and let validateImageRef() reject it like any bare filename.
-            foreach ($cells as $letter => $value) {
-                if (ResolveImportImage::isEmbedded(ltrim((string) $value))) {
+            foreach ($colByHeader as $header => $letter) {
+                $value = $cells[$letter] ?? '';
+                if (str_ends_with($header, '_image') && ResolveImportImage::isEmbedded(ltrim((string) $value))) {
                     $cells[$letter] = substr(ltrim((string) $value), 7);
                 }
             }
