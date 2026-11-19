@@ -5,7 +5,7 @@ namespace App\Modules\RawaniHub\Services;
 use App\Models\User;
 use App\Modules\RawaniHub\Models\HubPlatformAccount;
 use App\Modules\RawaniHub\Repositories\Contracts\PlatformAccountRepository;
-use App\Modules\Whatsapp\Support\PhoneNormalizer;
+use App\Modules\RawaniHub\Support\SaudiPhone;
 use Illuminate\Support\Collection;
 
 /**
@@ -24,12 +24,14 @@ class LinkCandidates
         }
         $found = collect();
         foreach ($this->identifiers($account->national_id, $account->email, $account->phone) as $column => $value) {
-            $found = $found->merge($this->people($account, fn ($q) => $q->where($column, $value))->map(fn ($u) => ['user' => $u, 'reason' => $column]));
+            $match = $column === 'phone' ? fn ($q) => $q->whereIn('phone', SaudiPhone::spellings($value)) : fn ($q) => $q->where($column, $value);
+            $found = $found->merge($this->people($account, $match)->map(fn ($u) => ['user' => $u, 'reason' => $column]));
         }
         $lookup = trim((string) $lookup);
         if ($lookup !== '') { // the admin's own exact identifier (still never a name)
             $found = $found->merge($this->people($account, fn ($q) => $q->where(fn ($w) => $w->where('national_id', $lookup)
-                ->orWhere('email', mb_strtolower($lookup))->orWhere('username', $lookup)->orWhere('phone', $lookup)))
+                ->orWhere('email', mb_strtolower($lookup))->orWhere('username', $lookup)
+                ->when(SaudiPhone::canonical($lookup), fn ($p, $c) => $p->orWhereIn('phone', SaudiPhone::spellings($c)))))
                 ->map(fn ($u) => ['user' => $u, 'reason' => 'lookup']));
         }
 
@@ -69,7 +71,7 @@ class LinkCandidates
         return array_filter([
             'national_id' => trim((string) $nationalId) ?: null,
             'email' => self::realEmail($email),
-            'phone' => PhoneNormalizer::normalize($phone), // digits only: 05… and +9665… do not meet
+            'phone' => SaudiPhone::canonical($phone), // mirror rows store this form; users.phone is matched by its spellings
         ]);
     }
 

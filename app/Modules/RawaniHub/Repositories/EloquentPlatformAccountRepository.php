@@ -4,7 +4,7 @@ namespace App\Modules\RawaniHub\Repositories;
 
 use App\Modules\RawaniHub\Models\HubPlatformAccount;
 use App\Modules\RawaniHub\Repositories\Contracts\PlatformAccountRepository;
-use App\Modules\Whatsapp\Support\PhoneNormalizer;
+use App\Modules\RawaniHub\Support\SaudiPhone;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -72,7 +72,7 @@ class EloquentPlatformAccountRepository implements PlatformAccountRepository
                 $digits = preg_replace('/[\s\-+]/', '', $v);
                 $q->where(function ($w) use ($v, $digits) {
                     if (ctype_digit($digits)) {
-                        $w->where('national_id', $digits)->orWhere('phone', PhoneNormalizer::normalize($v)); // both indexed
+                        $w->where('national_id', $digits)->orWhere('phone', SaudiPhone::canonical($v)); // both indexed
                     } elseif (str_contains($v, '@')) {
                         $w->where('email', mb_strtolower($v));
                     } else {
@@ -160,7 +160,7 @@ class EloquentPlatformAccountRepository implements PlatformAccountRepository
             'platform_id' => $platformId, 'role' => $role, 'external_id' => $ext,
             'name' => self::cut($item['name'] ?? null, 255),
             'email' => $email === null ? null : mb_strtolower($email),
-            'phone' => self::cut(PhoneNormalizer::normalize(is_scalar($item['phone'] ?? null) ? (string) $item['phone'] : null), 64),
+            'phone' => self::cut(SaudiPhone::canonical(is_scalar($item['phone'] ?? null) ? (string) $item['phone'] : null), 64),
             'national_id' => self::cut($item['national_id'] ?? null, 64),
             'parent_external_id' => self::cut($item['parent_external_id'] ?? null, 64),
             'org_label' => self::cut($item['org'] ?? null, 255),

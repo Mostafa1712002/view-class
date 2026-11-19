@@ -269,13 +269,13 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 - [x] Two tabs, filters and server pagination (design §3.5)
 - [x] The person page shows the parent↔child links on both the Rawani and platform sides
 
-### Task 4.3: Link / create-person / unlink
-- [x] Candidates by national ID, then real email, then phone (`PhoneNormalizer`); never by name
+### Task 4.3: Link / create-person (unlink deferred)
+- [x] Candidates by national ID, then real email, then phone (`SaudiPhone`, one canonical Saudi form); never by name
 - [x] Confirm-link sets `link_confirmed_by` and pushes `link_external_id`
 - [x] Create a Rawani person from an external row
 - [x] Tests
 
-Notes (4.1–4.3): `hub:mirror {--platform=} {--full} {--sync} {--per=}`; walk state on `hub_platforms.mirror_*` (migration 100400, also `platform_active` + index (platform_id, parent_external_id)). Teacher rows are view-only (contract writes students/parents). Unlink is Rawani-only: rawani/v1 has no detach, so the platform keeps its stored Rawani id and Rawani grants until they end. Phone candidates use `PhoneNormalizer` (digits only), so 05… and +9665… do not meet. Create-person does not attach parent↔child links.
+Notes (4.1–4.3): `hub:mirror {--platform=} {--full} {--sync} {--per=}`; walk state on `hub_platforms.mirror_*` (migration 100400, also `platform_active` + index (platform_id, parent_external_id)). Teacher rows are view-only (contract writes students/parents). **Unlink: deferred (not shipped, 2026-11-19).** rawani/v1 has no detach call, and a later re-provision of the same person would get stuck on the (platform, role, user_id) unique key; the route, button and action were removed until the contract gains a detach. Phone matching uses `SaudiPhone::canonical()` (`9665XXXXXXXX` from 05…, 5…, +9665…, 009665…): mirror rows store it, `users.phone` is matched by its spellings, and the directory search canonicalises the query. Create-person does not attach parent↔child links.
 
 ### Task 4.4: Wiring
 - [ ] `hub:mirror` schedule

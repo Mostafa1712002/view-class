@@ -127,7 +127,7 @@ class DirectoryTest extends TestCase
         $this->assertTrue($rows->every(fn ($r) => $r->status === 'unlinked' && $r->user_id === null && ! $r->managed && $r->seen_at));
         $five = $this->row('5');
         $this->assertSame('a@x.test', $five->email);
-        $this->assertSame('+966501234567', $five->phone);
+        $this->assertSame('966501234567', $five->phone);
         $this->assertSame([['product' => 'main', 'until' => null, 'source' => 'other']], $five->access);
         $this->assertStringNotContainsString('leak-me', json_encode(DB::table('hub_platform_accounts')->get()));
         $p = $this->platform->refresh();
@@ -252,6 +252,33 @@ class DirectoryTest extends TestCase
         $this->person('student', ['email' => 'rw42@rawaniedu.com']);
         $placeholder = HubPlatformAccount::create(['platform_id' => $this->platform->id, 'role' => 'student', 'external_id' => '6', 'status' => 'unlinked', 'email' => 'rw42@rawaniedu.com']);
         $this->assertCount(0, app(LinkCandidates::class)->peopleFor($placeholder));
+    }
+
+    public function test_phone_matching_uses_one_saudi_form_on_both_sides(): void
+    {
+        $this->as('super-admin');
+        $local = $this->person('student', ['phone' => '0501234567']);
+        $intl = $this->person('student', ['phone' => '00966501234567']);
+        $this->person('student', ['phone' => '0551234567']); // a different number
+        $this->fake->people = [$this->item(5, ['phone' => '+966 50 123 4567'])];
+        $this->mirror();
+        $row = $this->row('5');
+        $this->assertSame('966501234567', $row->phone);
+
+        $found = app(LinkCandidates::class)->peopleFor($row)->map(fn ($c) => [$c['user']->id, $c['reason']])->all();
+        $this->assertEqualsCanonicalizing([[$local->id, 'phone'], [$intl->id, 'phone']], $found);
+        $noPhone = HubPlatformAccount::create(['platform_id' => $this->platform->id, 'role' => 'student', 'external_id' => '6', 'status' => 'unlinked']);
+        $this->assertEqualsCanonicalizing([$local->id, $intl->id],
+            app(LinkCandidates::class)->peopleFor($noPhone, '+966501234567')->map(fn ($c) => $c['user']->id)->all()); // admin lookup
+
+        // a person's conflict row finds the mirrored account typed another way
+        $conflict = HubPlatformAccount::create(['platform_id' => $this->platform->id, 'role' => 'student', 'user_id' => $local->id, 'status' => 'conflict']);
+        $this->assertSame([$row->id], app(LinkCandidates::class)->accountsFor($conflict)->map(fn ($c) => $c['account']->id)->all());
+
+        foreach (['0501234567', '501234567', '+966501234567', '00966501234567'] as $q) {
+            $this->get('/admin/hub/directory?'.http_build_query(['q' => $q]))->assertOk()->assertSee('شخص 5');
+        }
+        $this->get('/admin/hub/directory?q=0551234567')->assertOk()->assertDontSee('شخص 5');
     }
 
     public function test_admin_link_sets_confirmer_and_the_sync_pushes_link_external_id(): void
