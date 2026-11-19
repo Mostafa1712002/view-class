@@ -281,6 +281,30 @@ class MyPackagesTest extends TestCase
         $this->actingAs($this->user('student'))->get("/my/packages/return/{$payment->id}")->assertForbidden();
     }
 
+    public function test_open_button_only_on_openable_accounts_and_sidebar_link(): void
+    {
+        Route::middleware('web')->group(base_path('app/Modules/RawaniHub/Routes/my_open.php'));
+        app('router')->getRoutes()->refreshNameLookups();
+        $p = $this->alawal();
+        $parent = $this->user('parent');
+        $student = $this->child($parent);
+        $open = HubPlatformAccount::create(['platform_id' => $p->id, 'role' => 'student', 'user_id' => $student->id, 'external_id' => '9', 'login' => 'l', 'managed' => true, 'status' => 'active']);
+        $unconfirmed = HubPlatformAccount::create(['platform_id' => $p->id, 'role' => 'parent', 'user_id' => $parent->id, 'external_id' => '8', 'login' => 'l2', 'managed' => false, 'status' => 'active']);
+
+        $html = $this->actingAs($parent)->get('/my/packages')->assertOk()->getContent();
+        $this->assertStringContainsString(route('my.packages.accounts.open', $open->id), $html);
+        $this->assertStringNotContainsString(route('my.packages.accounts.open', $unconfirmed->id), $html); // linked, not admin-confirmed
+        $this->assertStringContainsString('data-label="'.__('shell.nav_my_packages').'"', $html);
+
+        $open->update(['status' => 'pending']);
+        $this->get('/my/packages')->assertDontSee(route('my.packages.accounts.open', $open->id));
+    }
+
+    public function test_login_page_links_to_register_and_buy(): void
+    {
+        $this->get('/login')->assertOk()->assertSee(route('hub.register'))->assertSee(__('hub_my.register_title'));
+    }
+
     public function test_return_status_polls_account_statuses_without_credentials(): void
     {
         $p = $this->alawal();

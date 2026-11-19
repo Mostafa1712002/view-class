@@ -186,6 +186,8 @@ class RepositoryServiceProvider extends ServiceProvider
             $this->commands([
                 \App\Modules\RawaniHub\Console\SyncPendingAccountsCommand::class,
                 \App\Modules\RawaniHub\Console\ExpireSubscriptionsCommand::class,
+                \App\Modules\RawaniHub\Console\ReconcilePaymentsCommand::class,
+                \App\Modules\RawaniHub\Console\MirrorPlatformPeopleCommand::class,
             ]);
         }
     }

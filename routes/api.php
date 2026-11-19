@@ -55,3 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/weekly-plans', [StudentApiController::class, 'weeklyPlans']);
     });
 });
+
+// Rawani hub Moyasar webhook — only when the module is enabled. No web/CSRF: it verifies its own secret_token.
+if (config('rawani_hub.enabled')) {
+    require __DIR__.'/../app/Modules/RawaniHub/Routes/api.php';
+}

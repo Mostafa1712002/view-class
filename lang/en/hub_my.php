@@ -24,4 +24,5 @@ return [
     'register_title' => 'Register and buy', 'register_intro' => 'Create a parent account, add your children and pick a package.', 'register_btn' => 'Create account',
     'email' => 'Email', 'phone' => 'Mobile (05XXXXXXXX)', 'password_confirmation' => 'Confirm password',
     'have_account' => 'Already have an account? Sign in', 'sign_in' => 'Sign in',
+    'open' => 'Open',
 ];

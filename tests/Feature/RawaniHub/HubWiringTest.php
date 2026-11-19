@@ -20,8 +20,17 @@ class HubWiringTest extends TestCase
     public function test_disabled_by_default_no_routes_no_schedule(): void
     {
         $this->assertFalse(config('rawani_hub.enabled'));
-        $this->assertFalse(Route::has('admin.hub.packages.index'));
+        foreach (['admin.hub.packages.index', 'admin.hub.payments.index', 'admin.hub.directory.index', 'hub.register',
+            'my.packages.index', 'my.packages.accounts.open', 'hub.moyasar.webhook'] as $name) {
+            $this->assertFalse(Route::has($name), $name);
+        }
         $this->get('/admin/hub/packages')->assertNotFound();
+        $this->get('/register')->assertNotFound();
+        $this->get('/my/packages')->assertNotFound();
+        $this->post('/api/hub/moyasar/webhook', ['secret_token' => 'x'])->assertNotFound();
+        $this->get('/login')->assertOk()->assertDontSee('/register');
+        $this->assertArrayNotHasKey('hub:reconcile-payments', \Illuminate\Support\Facades\Artisan::all());
+        $this->assertArrayNotHasKey('hub:mirror', \Illuminate\Support\Facades\Artisan::all());
 
         $commands = collect(app(Schedule::class)->events())->pluck('command')->implode(' ');
         $this->assertStringNotContainsString('hub:', $commands);

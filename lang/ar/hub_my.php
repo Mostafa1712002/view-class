@@ -28,4 +28,5 @@ return [
     'register_title' => 'سجّل واشترِ', 'register_intro' => 'أنشئ حساب ولي أمر، أضف أبناءك، واختر الباقة المناسبة.', 'register_btn' => 'إنشاء الحساب',
     'email' => 'البريد الإلكتروني', 'phone' => 'رقم الجوال (05XXXXXXXX)', 'password_confirmation' => 'تأكيد كلمة المرور',
     'have_account' => 'لديك حساب؟ سجّل الدخول', 'sign_in' => 'تسجيل الدخول',
+    'open' => 'افتح',
 ];

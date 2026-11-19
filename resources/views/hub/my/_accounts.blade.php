@@ -9,7 +9,9 @@
 <details><summary>{{ __('hub_my.show_credentials') }}</summary>
 <dl class="mb-0"><dt>{{ __('hub_my.login') }}</dt><dd><code dir="ltr">{{ $a->login }}</code></dd>
 @if($a->managed && $a->password)<dt>{{ __('hub_my.password') }}</dt><dd><code dir="ltr">{{ $a->password }}</code></dd>@endif</dl>
-<small class="text-muted">{{ __('hub_my.credentials_note') }}</small></details>@else—@endif</td>@endif</tr>
+<small class="text-muted">{{ __('hub_my.credentials_note') }}</small></details>@else—@endif
+@if(Route::has('my.packages.accounts.open') && $a->status === 'active' && $a->enabled && ($a->managed || $a->link_confirmed_by))
+<a class="btn btn-sm btn-primary mt-1" href="{{ route('my.packages.accounts.open', $a->id) }}" target="_blank" rel="noopener">{{ __('hub_my.open') }}</a>@endif</td>@endif</tr>
 @endforeach
 </tbody></table></div>
 @endif

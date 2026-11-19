@@ -1332,5 +1332,7 @@ foreach (glob(__DIR__.'/../app/Modules/SpecialPrograms/Routes/*.php') as $spRout
 
 // Rawani hub — only on instances that switch it on (rawaniedu.com); routes must not exist elsewhere.
 if (config('rawani_hub.enabled')) {
-    require __DIR__.'/../app/Modules/RawaniHub/Routes/web.php';
+    require __DIR__.'/../app/Modules/RawaniHub/Routes/web.php';     // super-admin screens
+    require __DIR__.'/../app/Modules/RawaniHub/Routes/my.php';      // public «سجّل واشترِ» + «باقاتي» (student/parent)
+    require __DIR__.'/../app/Modules/RawaniHub/Routes/my_open.php'; // «افتح» one-time SSO (student/parent)
 }

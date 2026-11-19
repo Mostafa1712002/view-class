@@ -584,6 +584,12 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if(Route::has('admin.hub.subscriptions.index'))
                 <li class="nav-item {{ request()->routeIs('admin.hub.subscriptions.*') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.subscriptions.index') }}"><x-svg-icon name="card-checklist" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_subscriptions')</span></a></li>
                 @endif
+                @if(Route::has('admin.hub.payments.index'))
+                <li class="nav-item {{ request()->routeIs('admin.hub.payments.*') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.payments.index') }}"><x-svg-icon name="credit-card" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_payments')</span></a></li>
+                @endif
+                @if(Route::has('admin.hub.directory.index'))
+                <li class="nav-item {{ request()->routeIs('admin.hub.directory.*') || request()->routeIs('admin.hub.accounts.link.form') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.directory.index') }}"><x-svg-icon name="person-lines-fill" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_directory')</span></a></li>
+                @endif
                 @if(Route::has('admin.hub.platforms.index'))
                 <li class="nav-item {{ request()->routeIs('admin.hub.platforms.*') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.platforms.index') }}"><x-svg-icon name="diagram-3" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_platforms')</span></a></li>
                 @endif
@@ -1153,6 +1159,11 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-student-subjects">
+                @if(Route::has('my.packages.index'))
+                <li class="nav-item {{ request()->routeIs('my.packages.*') ? 'active' : '' }}" data-section="student">
+                    <a href="{{ route('my.packages.index') }}" data-label="@lang('shell.nav_my_packages')"><x-svg-icon name="bag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_packages')</span></a>
+                </li>
+                @endif
                 @if(Route::has('my.points.index'))
                 <li class="nav-item {{ request()->routeIs('my.points.*') ? 'active' : '' }}" data-section="student">
                     <a href="{{ route('my.points.index') }}" data-label="@lang('shell.nav_my_points')"><x-svg-icon name="gift" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_points')</span></a>
@@ -1293,6 +1304,11 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <svg class="gp-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
             </div>
             <div class="gp-section-content" id="gp-sec-parent">
+                @if(Route::has('my.packages.index'))
+                <li class="nav-item {{ request()->routeIs('my.packages.*') ? 'active' : '' }}" data-section="parent">
+                    <a href="{{ route('my.packages.index') }}" data-label="@lang('shell.nav_my_packages')"><x-svg-icon name="bag" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_packages')</span></a>
+                </li>
+                @endif
                 <li class="nav-item {{ request()->routeIs('parent.contact-teacher') ? 'active' : '' }}" data-section="parent"><a href="{{ route('parent.contact-teacher') }}" data-label="@lang('shell.portal_contact_teacher')"><x-svg-icon name="envelope" class="vc-ico" /><span class="menu-title">@lang('shell.portal_contact_teacher')</span></a></li>
                 @if(Route::has('parent.programs.index'))<li class="nav-item {{ request()->routeIs('parent.programs.*') ? 'active' : '' }}" data-section="parent"><a href="{{ route('parent.programs.index') }}" data-label="@lang('shell.nav_my_programs')"><x-svg-icon name="heart-pulse" class="vc-ico" /><span class="menu-title">@lang('shell.nav_my_programs')</span></a></li>@endif
                 <li class="nav-item {{ request()->routeIs('my.appointments.*') ? 'active' : '' }}" data-section="parent">

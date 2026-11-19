@@ -222,6 +222,9 @@
 
                     <button type="submit" class="btn btn-primary w-100">@lang('auth.sign_in')</button>
                 </form>
+                @if(Route::has('hub.register'))
+                <p class="text-center mt-3 mb-0"><a href="{{ route('hub.register') }}">@lang('hub_my.register_title')</a></p>
+                @endif
             </div>
         </div>
     </div>

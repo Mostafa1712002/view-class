@@ -209,4 +209,7 @@ return [
     'nav_hub_packages' => 'Packages',
     'nav_hub_subscriptions' => 'Subscriptions',
     'nav_hub_platforms' => 'Linked platforms',
+    'nav_hub_payments' => 'Payments',
+    'nav_hub_directory' => 'User directory',
+    'nav_my_packages' => 'My packages',
 ];

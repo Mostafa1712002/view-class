@@ -28,4 +28,8 @@ Schedule::command('special-programs:finalize-overdue')->everyFiveMinutes();
 if (config('rawani_hub.enabled')) {
     Schedule::command('hub:sync-pending')->everyFiveMinutes()->withoutOverlapping();
     Schedule::command('hub:expire')->hourly()->withoutOverlapping();
+    Schedule::command('hub:reconcile-payments')->everyTenMinutes()->withoutOverlapping();
+    // Directory mirror: a nightly walk, and once a week a full walk that also marks unseen rows missing.
+    Schedule::command('hub:mirror')->dailyAt('02:30')->days([0, 1, 2, 3, 4, 6])->withoutOverlapping();
+    Schedule::command('hub:mirror --full')->fridays()->at('02:30')->withoutOverlapping();
 }
