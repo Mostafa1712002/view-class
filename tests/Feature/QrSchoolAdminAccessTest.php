@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-/** School admins can use the QR attendance pages; writes stay on granular qr.* grants. */
+/** School admins get the QR pages through their role; every page/write keeps its own qr.* permission (qr.view never opens devices/print). */
 class QrSchoolAdminAccessTest extends TestCase
 {
     private const PAGES = ['admin.qr.scanner', 'admin.qr.log', 'admin.qr.link.index', 'admin.qr.devices.index', 'admin.qr.cards.print'];
@@ -35,6 +35,7 @@ class QrSchoolAdminAccessTest extends TestCase
     private function runQrSeed(): void
     {
         (require database_path('migrations/'.self::SEED))->up();
+        (require database_path('migrations/2026_11_21_100002_grant_qr_pages_to_school_admin_role.php'))->up();
     }
 
     private function user(string $role, ?JobTitle $title = null): User
@@ -76,47 +77,22 @@ class QrSchoolAdminAccessTest extends TestCase
         ];
     }
 
-    public function test_school_admin_opens_pages_and_gains_writes_from_the_seed(): void
+    public function test_school_admin_role_opens_the_five_pages_after_the_seed(): void
     {
         $admin = $this->user('school-admin');
-        $this->assertPages($admin, 200);
-        $this->assertSame([403], array_values(array_unique($this->writes($admin))));
-
+        $this->assertPages($admin, 403);
         $this->runQrSeed();
-        foreach ($this->writes($admin->fresh()) as $route => $status) {
-            $this->assertNotSame(403, $status, $route);
-        }
-        // Writes outside the five pages stay ungranted.
+        $this->assertPages($admin->fresh(), 200);
+        $this->assertNotSame(403, $this->writes($admin->fresh())['scan']);
         $this->actingAs($admin->fresh())->post(route('admin.qr.groups.store'))->assertForbidden();
     }
 
-    public function test_school_admin_with_a_configured_title_uses_the_role_grant(): void
+    public function test_qr_view_alone_never_opens_devices_or_print(): void
     {
-        $admin = $this->user('school-admin', $this->title('vice', 'students.view'));
-        $this->assertPages($admin, 403);
-
-        $this->runQrSeed();
-        $this->assertPages($admin->fresh(), 200);
-    }
-
-    public function test_seed_maps_old_qr_grants_and_leaves_other_titles_alone(): void
-    {
-        $scanner = $this->title('gate', 'qr.scan');
-        $plain = $this->title('canteen', 'students.view');
-        $this->runQrSeed();
-
-        $this->assertTrue($scanner->fresh()->hasPermission('qr.view'));
-        $this->assertFalse($plain->fresh()->permissions()->where('slug', 'like', 'qr.%')->exists());
-    }
-
-    public function test_seed_never_overrides_a_configured_school_admin_role(): void
-    {
-        $role = Role::firstOrCreate(['slug' => 'school-admin'], ['name' => 'school-admin']);
-        $role->permissions()->attach(Permission::where('slug', 'qr.view')->value('id'));
-        $this->runQrSeed();
-
-        $this->assertFalse($role->fresh()->hasPermission('qr.scan'));
-        $this->assertSame(403, $this->writes($this->user('school-admin'))['scan']);
+        $user = $this->user('school-admin', $this->title('viewer', 'qr.view'));
+        foreach (['admin.qr.devices.index', 'admin.qr.cards.print', 'admin.qr.scanner', 'admin.qr.log', 'admin.qr.link.index'] as $route) {
+            $this->actingAs($user)->get(route($route))->assertForbidden();
+        }
     }
 
     public function test_teachers_and_students_stay_out(): void

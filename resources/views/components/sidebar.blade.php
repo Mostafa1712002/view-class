@@ -827,7 +827,7 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 <li class="nav-item" data-section="support"><a href="{{ route('manage.counseling.index') }}"><x-svg-icon name="compass" class="vc-ico" /><span class="menu-title">@lang('shell.nav_counseling')</span></a></li>
                 @endcan
                 {{-- خدمات حضور QR (Card #265) — has-sub group; parent gated by qr.view,
-                     every child by qr.view too (its read route is gated by qr.view). Caret is JS-injected
+                     each child by its own qr.* permission via canDo(). Caret is JS-injected
                      (#276) so the <a> carries no caret span. --}}
                 @if(!$sidebarUser || !$isStaff || $sidebarUser->canViewModule('qr'))
                 <li class="nav-item has-sub {{ request()->routeIs('admin.qr.*') ? 'active open' : '' }}" data-section="support">
@@ -836,22 +836,22 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                         @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
                         <li class="{{ request()->routeIs('admin.qr.cards.index') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.index') ? route('admin.qr.cards.index') : '#' }}"><x-svg-icon name="person-vcard" class="vc-ico" /><span class="menu-item">بطاقات QR</span></a></li>
                         @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.scan'))
                         <li class="{{ request()->routeIs('admin.qr.scanner') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.scanner') ? route('admin.qr.scanner') : '#' }}"><x-svg-icon name="qr-code-scan" class="vc-ico" /><span class="menu-item">ماسح QR</span></a></li>
                         @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view_log'))
                         <li class="{{ request()->routeIs('admin.qr.log') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.log') ? route('admin.qr.log') : '#' }}"><x-svg-icon name="list-ul" class="vc-ico" /><span class="menu-item">سجل المسحات</span></a></li>
                         @endif
                         @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
                         <li class="{{ request()->routeIs('admin.qr.groups.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.groups.index') ? route('admin.qr.groups.index') : '#' }}"><x-svg-icon name="collection" class="vc-ico" /><span class="menu-item">المجموعات</span></a></li>
                         @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_students'))
                         <li class="{{ request()->routeIs('admin.qr.link.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.link.index') ? route('admin.qr.link.index') : '#' }}"><x-svg-icon name="link-45deg" class="vc-ico" /><span class="menu-item">ربط الطلاب</span></a></li>
                         @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.link_devices'))
                         <li class="{{ request()->routeIs('admin.qr.devices.*') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.devices.index') ? route('admin.qr.devices.index') : '#' }}"><x-svg-icon name="cpu" class="vc-ico" /><span class="menu-item">أجهزة IoT</span></a></li>
                         @endif
-                        @if(!$sidebarUser || $sidebarUser->canDo('qr.view'))
+                        @if(!$sidebarUser || $sidebarUser->canDo('qr.print_card'))
                         <li class="{{ request()->routeIs('admin.qr.cards.print') ? 'active' : '' }}"><a href="{{ Route::has('admin.qr.cards.print') ? route('admin.qr.cards.print') : '#' }}"><x-svg-icon name="printer" class="vc-ico" /><span class="menu-item">طباعة بطاقات QR</span></a></li>
                         @endif
                     </ul>
