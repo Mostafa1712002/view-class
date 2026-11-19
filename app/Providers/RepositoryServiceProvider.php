@@ -160,6 +160,9 @@ class RepositoryServiceProvider extends ServiceProvider
         EducationalSiteRepository::class         => EloquentEducationalSiteRepository::class,
         EnrollmentResultRepository::class        => EloquentEnrollmentResultRepository::class,
         \App\Modules\Promotion\Repositories\Contracts\PromotionRepository::class => \App\Modules\Promotion\Repositories\EloquentPromotionRepository::class,
+        \App\Modules\Gamification\Repositories\Contracts\PointLedgerRepository::class => \App\Modules\Gamification\Repositories\EloquentPointLedgerRepository::class,
+        \App\Modules\Gamification\Repositories\Contracts\PointSettingsRepository::class => \App\Modules\Gamification\Repositories\EloquentPointSettingsRepository::class,
+        \App\Modules\Gamification\Repositories\Contracts\RewardRepository::class => \App\Modules\Gamification\Repositories\EloquentRewardRepository::class,
     ];
 
     public function register(): void
