@@ -4,8 +4,8 @@
 @section('content')
 <div class="card"><div class="card-body">
 @if($errors->any())<div class="alert alert-danger" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
-<form method="GET" class="mb-3"><label for="parent_national_id">{{ __('hub_admin.parent_lookup') }}</label>
-<div class="input-group"><input class="form-control" id="parent_national_id" name="parent_national_id" value="{{ $parentNationalId }}" dir="ltr">
+<form method="GET" class="mb-3"><label for="parent_lookup">{{ __('hub_admin.parent_lookup') }}</label>
+<div class="input-group"><input class="form-control" id="parent_lookup" name="parent_national_id" value="{{ $parentNationalId }}" dir="ltr">
 <div class="input-group-append"><button class="btn btn-light">{{ __('hub_admin.search') }}</button></div></div></form>
 <form method="POST" action="{{ route('admin.hub.subscriptions.grant.store') }}">
 @csrf
