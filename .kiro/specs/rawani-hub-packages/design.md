@@ -608,3 +608,10 @@ Defaults in place, no answer needed unless the client disagrees:
 - Only super-admins manage the hub.
 - No teacher packages.
 - aafaq's own 40 SAR payment and the iOS purchase stay.
+
+## Decisions 2026-11-19 (user)
+- Phase 0 starts now.
+- Q1: public «سجّل واشترِ» page on rawaniedu.com (anyone, usually a parent, registers → picks package → pays via Moyasar); admin free grants stay.
+- Q3: existing account on a sub-platform (same national id / email) → "conflict", linked only after admin review; no auto-link.
+- Q5: آفاق = show login + generated password inside Rawani; no one-tap login / no new app releases now.
+- Precondition checks (read-only, live, 2026-11-19): aafaq `cron/resync_subscriptions.php` runs from root crontab via CLI (no URL trigger seen in access logs) → CLI-only guard is safe. anawlqdrat: **940** users `status='inactive'`, not blocked, not deleted → do NOT refuse `inactive` at login; Phase 0 limits enforcement to `blocked` (+ token revoke) and documents `inactive` as "pending admin review". Rawani "disable" uses `blocked`.
