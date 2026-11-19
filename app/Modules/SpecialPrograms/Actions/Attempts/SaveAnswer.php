@@ -33,7 +33,7 @@ class SaveAnswer
             if ($option < 0 || $option >= count($item->options ?? [])) {
                 throw new AttemptException('invalid_option');
             }
-            $item->update(['answer_index' => $option, 'is_correct' => $option === (int) $item->correct_index, 'answered_at' => now()]);
+            $item->update(['answer_index' => $option, 'is_correct' => $item->correct_index !== null && $option === (int) $item->correct_index, 'answered_at' => now()]);
             $attempt->update(['last_seen_at' => now()]);
 
             return ['saved' => true, 'remaining_seconds' => max(0, (int) now()->diffInSeconds($attempt->deadline_at, false))];
