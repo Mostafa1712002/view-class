@@ -212,6 +212,13 @@ class EntitlementStateTest extends TestCase
         $this->assertSame(['national_id'], $this->build($p, $this->account('parent'), $this->user(['national_id' => null]))->missing);
     }
 
+    public function test_viewclass_placeholder_email_is_sent_as_null(): void
+    {
+        $p = $this->platform('alawal', ['parent' => ['national_id']], ['parents' => true]);
+        $this->assertNull($this->build($p, $this->account('parent'), $this->user(['email' => 'rwpabc12345@viewclass.local']))->profile['email']);
+        $this->assertSame('real@x.com', $this->build($p, $this->account('parent'), $this->user(['email' => 'real@x.com']))->profile['email']);
+    }
+
     public function test_parent_id_only_on_platforms_with_parents(): void
     {
         $parent = $this->user();

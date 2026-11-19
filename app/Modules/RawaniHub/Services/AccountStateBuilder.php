@@ -50,6 +50,10 @@ class AccountStateBuilder
                 $values['email'] = 'rw'.$user->id.'@'.self::AAFAQ_PLACEHOLDER_DOMAIN;
             }
         }
+        // The contract wants a real email or null; {username}@viewclass.local is ViewClass's own login placeholder.
+        if (is_string($values['email']) && str_ends_with(strtolower($values['email']), '@viewclass.local')) {
+            $values['email'] = null;
+        }
         foreach ($values as $k => $v) {
             $values[$k] = ($v === '' || $v === null) ? null : $v;
         }
