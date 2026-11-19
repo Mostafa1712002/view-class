@@ -39,8 +39,9 @@ final class RegisterBuyer
 
                 return $user;
             });
-        } catch (QueryException) {
-            throw new NationalIdCollision('exists'); // lost a race on a unique column
+        } catch (QueryException $e) {
+            // Only a unique-key race is a clash; any other DB failure must surface, not tell a new buyer they have an account.
+            ($e->errorInfo[0] ?? null) === '23000' ? throw new NationalIdCollision('exists') : throw $e;
         }
     }
 }
