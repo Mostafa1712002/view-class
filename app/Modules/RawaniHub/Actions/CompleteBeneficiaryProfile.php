@@ -5,6 +5,7 @@ namespace App\Modules\RawaniHub\Actions;
 use App\Models\ActivityLog;
 use App\Models\User;
 use App\Modules\RawaniHub\Models\HubProfile;
+use App\Modules\RawaniHub\Services\CheckoutReadiness;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 final class CompleteBeneficiaryProfile
 {
+    public function __construct(private CheckoutReadiness $readiness) {}
+
     /** @param array<string,mixed> $data keys: national_id, gender, stage, grade, parent_national_id */
     public function execute(User $actor, User $beneficiary, array $data): void
     {
@@ -28,7 +31,7 @@ final class CompleteBeneficiaryProfile
             }
             $profile->save();
 
-            if ($actor->id !== $beneficiary->id) {
+            if ($actor->id !== $beneficiary->id && $actor->id === $this->readiness->primaryParent($beneficiary)?->id) {
                 $this->fill($actor, ['national_id' => $data['parent_national_id'] ?? null]);
             }
             ActivityLog::log('hub.beneficiary.complete', "استكمال بيانات: {$beneficiary->name}", $beneficiary, null, ['by' => $actor->id]);

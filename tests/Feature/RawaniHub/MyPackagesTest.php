@@ -191,6 +191,25 @@ class MyPackagesTest extends TestCase
         $this->assertSame([[$parent->id, $child->id, $pkg->id]], $this->checkoutCalls);
     }
 
+    public function test_only_the_primary_parent_can_fill_the_parent_national_id(): void
+    {
+        $pkg = $this->package($this->alawal());
+        $primary = $this->user('parent'); // no national ID: the account provisioning uses
+        $child = $this->child($primary, ['national_id' => '2012345678', 'gender' => 'male']);
+        HubProfile::create(['user_id' => $child->id, 'stage' => 'primary', 'grade' => 3]);
+        $second = $this->user('parent');
+        DB::table('parent_student')->insert(['parent_id' => $second->id, 'student_id' => $child->id, 'relationship' => 'parent',
+            'is_primary' => 0, 'can_receive_notifications' => 1, 'created_at' => now(), 'updated_at' => now()]);
+
+        $this->actingAs($second)->get("/my/packages/{$pkg->id}/buy")->assertOk()
+            ->assertDontSee('name="parent_national_id"', false)->assertSee(__('hub_my.needs_support'));
+        $this->post("/my/packages/children/{$child->id}/complete", ['package_id' => $pkg->id, 'parent_national_id' => '1098765432']);
+        $this->assertNull($second->refresh()->national_id);
+        $this->assertNull($primary->refresh()->national_id);
+
+        $this->actingAs($primary)->get("/my/packages/{$pkg->id}/buy")->assertSee('name="parent_national_id"', false);
+    }
+
     public function test_complete_does_not_overwrite_or_steal_a_national_id(): void
     {
         $pkg = $this->package($this->alawal());

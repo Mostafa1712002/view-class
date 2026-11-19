@@ -24,7 +24,7 @@ class CheckoutReadiness
     /** @return array{student: list<string>, parent: list<string>} missing field names per role, empty when ready */
     public function missing(HubPackage $package, User $beneficiary): array
     {
-        $parent = $beneficiary->parents()->orderByDesc('parent_student.is_primary')->orderBy('parent_student.id')->first();
+        $parent = $this->primaryParent($beneficiary);
         $profile = HubProfile::find($beneficiary->id);
         $out = ['student' => [], 'parent' => []];
 
@@ -57,8 +57,14 @@ class CheckoutReadiness
         if (array_diff($missing['student'], self::FIXABLE_STUDENT) !== []) {
             return false;
         }
-        // Only a parent can complete the parent's own ID; a student buyer is told to contact support.
+        // Only the parent provisioning uses (the primary one) can complete their own ID; anyone else is told to contact support.
         return $missing['parent'] === []
-            || (array_diff($missing['parent'], self::FIXABLE_PARENT) === [] && $viewer->id !== $beneficiary->id);
+            || (array_diff($missing['parent'], self::FIXABLE_PARENT) === [] && $viewer->id === $this->primaryParent($beneficiary)?->id);
+    }
+
+    /** The parent whose account the platforms with parents get (same order as provisioning). */
+    public function primaryParent(User $beneficiary): ?User
+    {
+        return $beneficiary->parents()->orderByDesc('parent_student.is_primary')->orderBy('parent_student.id')->first();
     }
 }
