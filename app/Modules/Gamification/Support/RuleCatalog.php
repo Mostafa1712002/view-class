@@ -21,10 +21,10 @@ final class RuleCatalog
     public const RULES = [
         'student.correct_answers.alawwal' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => false, 'options' => []],
         'student.correct_answers.alawwal_plus' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => false, 'options' => []],
-        // Awarded by card #368 through SyncActivityPoints; nothing here hooks them.
-        'student.correct_answers.ana_wal_qudurat' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => false, 'options' => []],
-        'student.correct_answers.nafes' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => false, 'options' => []],
-        'student.correct_answers.tahsili' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => false, 'options' => []],
+        // Awarded by #368: SpecialPrograms\Listeners\AwardProgramPoints (one key per attempt).
+        'student.correct_answers.ana_wal_qudurat' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => true, 'options' => []],
+        'student.correct_answers.nafes' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => true, 'options' => []],
+        'student.correct_answers.tahsili' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => true, 'options' => []],
         'student.correct_answers.subjects' => ['beneficiary' => 'student', 'calc_mode' => 'per_correct_answer', 'wired' => true, 'options' => []],
         'student.assignments' => ['beneficiary' => 'student', 'calc_mode' => 'ratio', 'wired' => true, 'options' => []],
         'student.portfolio_approved' => ['beneficiary' => 'student', 'calc_mode' => 'per_event', 'wired' => false, 'options' => []],

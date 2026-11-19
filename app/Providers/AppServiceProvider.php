@@ -22,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
 
         \Illuminate\Support\Facades\Gate::policy(\App\Modules\Gamification\Models\PointTransaction::class, \App\Modules\Gamification\Policies\PointsPolicy::class);
 
+        \Illuminate\Support\Facades\Event::listen(\App\Modules\SpecialPrograms\Events\ProgramAttemptCompleted::class, \App\Modules\SpecialPrograms\Listeners\AwardProgramPoints::class);
+
         RateLimiter::for('auth-login', fn (Request $request) => [
             Limit::perMinute(5)->by($request->ip()),
         ]);

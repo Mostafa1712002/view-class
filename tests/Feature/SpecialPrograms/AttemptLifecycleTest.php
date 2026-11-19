@@ -196,6 +196,45 @@ class AttemptLifecycleTest extends TestCase
         Event::assertDispatchedTimes(ProgramAttemptCompleted::class, 3);
     }
 
+    public function test_completed_attempt_awards_program_points_once_per_attempt(): void
+    {
+        $this->student->roles()->attach(\App\Models\Role::where('slug', 'student')->value('id'));
+        foreach (\App\Modules\SpecialPrograms\Listeners\AwardProgramPoints::RULES as $rule) {
+            \App\Modules\Gamification\Models\PointRuleSetting::create(['school_id' => 0, 'rule_key' => $rule, 'points' => 2, 'is_enabled' => true]);
+        }
+
+        foreach (['qiyas' => 2, 'nafis' => 3, 'tahsili' => 1] as $program => $correct) {
+            [$es] = $this->exam($program);
+            $a = $this->start($es);
+            $this->answerAll($a, $correct);
+            app(FinishAttempt::class)->execute($a->id);
+            app(FinishAttempt::class)->execute($a->id); // already closed: no second event
+
+            $rows = DB::table('point_transactions')->where('source_type', 'program_test')->where('source_id', $a->id)->get();
+            $this->assertCount(1, $rows, $program);
+            $this->assertSame(\App\Modules\SpecialPrograms\Listeners\AwardProgramPoints::RULES[$program], $rows[0]->rule_key);
+            $this->assertSame($this->student->id, (int) $rows[0]->user_id);
+            $this->assertSame($correct * 2, (int) $rows[0]->points);
+
+            // a re-fired event (same attempt, same count) writes nothing new
+            $a = $a->fresh();
+            event(new ProgramAttemptCompleted($a->id, $a->student_id, $a->school_id, $program, $a->exam_id, $a->exam_subject_id,
+                'x', $correct, 4, 0.0, 'completed', true, new \DateTimeImmutable));
+            $this->assertSame(1, DB::table('point_transactions')->where('source_id', $a->id)->where('source_type', 'program_test')->count());
+        }
+    }
+
+    public function test_disabled_program_rule_awards_nothing(): void
+    {
+        $this->student->roles()->attach(\App\Models\Role::where('slug', 'student')->value('id'));
+        [$es] = $this->exam('qiyas');
+        $a = $this->start($es);
+        $this->answerAll($a, 4);
+        app(FinishAttempt::class)->execute($a->id);
+
+        $this->assertSame(0, DB::table('point_transactions')->count());
+    }
+
     public function test_overdue_closes_on_read_path(): void
     {
         Event::fake([ProgramAttemptCompleted::class]);
