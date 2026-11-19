@@ -1329,3 +1329,8 @@ require __DIR__.'/../app/Modules/Gamification/Routes/web.php';
 foreach (glob(__DIR__.'/../app/Modules/SpecialPrograms/Routes/*.php') as $spRoutes) {
     require $spRoutes;
 }
+
+// Rawani hub — only on instances that switch it on (rawaniedu.com); routes must not exist elsewhere.
+if (config('rawani_hub.enabled')) {
+    require __DIR__.'/../app/Modules/RawaniHub/Routes/web.php';
+}

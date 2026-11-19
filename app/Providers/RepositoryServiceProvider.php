@@ -172,7 +172,23 @@ class RepositoryServiceProvider extends ServiceProvider
         \App\Modules\SpecialPrograms\Repositories\Contracts\AttemptRepository::class      => \App\Modules\SpecialPrograms\Repositories\EloquentAttemptRepository::class,
         \App\Modules\SpecialPrograms\Repositories\Contracts\ReportRepository::class       => \App\Modules\SpecialPrograms\Repositories\EloquentReportRepository::class,
         \App\Modules\SpecialPrograms\Repositories\Contracts\BankRepository::class         => \App\Modules\SpecialPrograms\Repositories\EloquentBankRepository::class,
+        // Rawani hub
+        \App\Modules\RawaniHub\Repositories\Contracts\PackageRepository::class => \App\Modules\RawaniHub\Repositories\EloquentPackageRepository::class,
+        \App\Modules\RawaniHub\Repositories\Contracts\SubscriptionRepository::class => \App\Modules\RawaniHub\Repositories\EloquentSubscriptionRepository::class,
+        \App\Modules\RawaniHub\Repositories\Contracts\PaymentRepository::class => \App\Modules\RawaniHub\Repositories\EloquentPaymentRepository::class,
+        \App\Modules\RawaniHub\Repositories\Contracts\PlatformRepository::class => \App\Modules\RawaniHub\Repositories\EloquentPlatformRepository::class,
+        \App\Modules\RawaniHub\Repositories\Contracts\PlatformAccountRepository::class => \App\Modules\RawaniHub\Repositories\EloquentPlatformAccountRepository::class,
     ];
+
+    public function boot(): void
+    {
+        if (config('rawani_hub.enabled')) {
+            $this->commands([
+                \App\Modules\RawaniHub\Console\SyncPendingAccountsCommand::class,
+                \App\Modules\RawaniHub\Console\ExpireSubscriptionsCommand::class,
+            ]);
+        }
+    }
 
     public function register(): void
     {

@@ -206,4 +206,7 @@ return [
     'nav_special_programs_teacher' => 'Special programs',
     'nav_special_programs_teacher_reports' => 'Special programs reports',
     'nav_my_programs' => 'Educational programs',
+    'nav_hub_packages' => 'Packages',
+    'nav_hub_subscriptions' => 'Subscriptions',
+    'nav_hub_platforms' => 'Linked platforms',
 ];

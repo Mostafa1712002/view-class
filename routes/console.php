@@ -23,3 +23,9 @@ Schedule::command('attendance:send-daily-absence-messages')->hourly();
 
 // البرامج التعليمية الخاصة (#368) — finalize attempts whose server deadline has passed.
 Schedule::command('special-programs:finalize-overdue')->everyFiveMinutes();
+
+// Rawani hub — only when the module is enabled on this instance.
+if (config('rawani_hub.enabled')) {
+    Schedule::command('hub:sync-pending')->everyFiveMinutes()->withoutOverlapping();
+    Schedule::command('hub:expire')->hourly()->withoutOverlapping();
+}

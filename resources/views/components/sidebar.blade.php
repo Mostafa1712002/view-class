@@ -578,6 +578,15 @@ body.sidebar-mini .main-menu .navigation li.nav-item:hover > a::before { opacity
                 @if($sidebarUser?->isSuperAdmin())
                 <li class="nav-item" data-section="extras"><a href="{{ route('admin.promotion.landing') }}"><x-svg-icon name="arrow-repeat" class="vc-ico" /><span class="menu-title">@lang('shell.nav_promotion')</span></a></li>
                 <li class="nav-item" data-section="extras"><a href="{{ route('admin.terms-weeks.landing') }}"><x-svg-icon name="calendar-range" class="vc-ico" /><span class="menu-title">@lang('shell.nav_terms_weeks')</span></a></li>
+                @if(Route::has('admin.hub.packages.index'))
+                <li class="nav-item {{ request()->routeIs('admin.hub.packages.*') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.packages.index') }}"><x-svg-icon name="box-seam" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_packages')</span></a></li>
+                @endif
+                @if(Route::has('admin.hub.subscriptions.index'))
+                <li class="nav-item {{ request()->routeIs('admin.hub.subscriptions.*') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.subscriptions.index') }}"><x-svg-icon name="card-checklist" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_subscriptions')</span></a></li>
+                @endif
+                @if(Route::has('admin.hub.platforms.index'))
+                <li class="nav-item {{ request()->routeIs('admin.hub.platforms.*') ? 'active' : '' }}" data-section="extras"><a href="{{ route('admin.hub.platforms.index') }}"><x-svg-icon name="diagram-3" class="vc-ico" /><span class="menu-title">@lang('shell.nav_hub_platforms')</span></a></li>
+                @endif
                 @endif
             </div>{{-- /gp-sec-extras --}}
 
