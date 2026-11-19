@@ -313,6 +313,9 @@ Review + local E2E of Phases 3–5 (2026-11-19): independent review fixed — re
 
 ---
 
+**Rollout done 2026-11-19 (orchestrator):** main @2507f711 on both servers (hub OFF on viewclass, ON on rawaniedu; backups /root/backups/pre-hub-p345-*). Rawani Moyasar → LIVE: `MOYASAR_LIVE_SECRET_KEY` copied server-side from aafaq `config/config.php` (never printed), `MOYASAR_SITE=rawani`, `MOYASAR_MODE=live`; live smoke invoice 6faa6440… created → fetched (site=rawani) → cancelled. No publishable key needed (hosted invoices). Webhook NOT registered in Moyasar (activation = return page + `hub:reconcile-payments` */10); `MOYASAR_WEBHOOK_SECRET` empty → webhook 401. aafaq webhook with a metadata-null Rawani payment verified locally: 200, `applied=0` row only. anawlqdrat front `/sso` NOT deployed: live dist ≠ any git branch (4 chunks newer) → hub platform `anawlqdrat` capabilities.sso=false (credentials fallback, commit 2507f711) until the front owner pushes. aafaq app_links (Google Play, both 200) set. First `hub:mirror` finished: aafaq 62,055 students + 178 teachers; alawal 5,669 students + 4,849 parents + 296 teachers; anawlqdrat 5,632 students + 117 teachers.
+Still open: no live purchase/grant tested (needs a real card / user go); «مجمع رواني» manager in الأول; RevenueCat key for aafaq updatePaymentStatus; rawani mail (MAIL_MAILER=log → credentials only on screen; set no-reply@rawaniedu.com SMTP); captured-but-mismatched payment not flagged on payments screen; unlink deferred.
+
 ## Progress Tracking
 
 | Phase | Tasks | Completed | Status |
