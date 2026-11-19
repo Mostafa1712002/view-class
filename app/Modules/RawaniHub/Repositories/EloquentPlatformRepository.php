@@ -39,4 +39,15 @@ class EloquentPlatformRepository implements PlatformRepository
 
         return $platform;
     }
+
+    public function advanceMirror(int $platformId, string $run, ?string $from, ?string $next): bool
+    {
+        $values = $next === null
+            ? ['mirror_cursor' => null, 'mirror_started_at' => null, 'mirror_full' => false, 'mirror_finished_at' => now()]
+            : ['mirror_cursor' => $next];
+
+        return HubPlatform::whereKey($platformId)->where('mirror_started_at', $run)
+            ->where(fn ($q) => $from === null ? $q->whereNull('mirror_cursor') : $q->where('mirror_cursor', $from))
+            ->toBase()->update($values) === 1;
+    }
 }

@@ -18,6 +18,7 @@ class HubPlatformAccount extends Model
         'needs_sync' => 'boolean',
         'password_reset_pending' => 'boolean',
         'access' => 'array',
+        'platform_active' => 'boolean',
         'synced_at' => 'datetime',
         'seen_at' => 'datetime',
     ];

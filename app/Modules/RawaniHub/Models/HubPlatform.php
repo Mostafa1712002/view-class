@@ -17,5 +17,8 @@ class HubPlatform extends Model
         'required_fields' => 'array',
         'is_enabled' => 'boolean',
         'last_ok_at' => 'datetime',
+        'mirror_full' => 'boolean',
+        'mirror_started_at' => 'datetime',
+        'mirror_finished_at' => 'datetime',
     ];
 }
