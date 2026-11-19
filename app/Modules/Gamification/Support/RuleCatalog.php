@@ -58,7 +58,7 @@ final class RuleCatalog
     /** Rule keys contain dots, so __('points.rules.<key>') can't reach them; read the array instead. */
     public static function label(string $key): string
     {
-        return (string) (trans('points.rules')[$key] ?? $key);
+        return (string) (trans('points.rules')[$key] ?? ($key === 'manual' ? trans('points.kinds.manual') : $key));
     }
 
     public static function has(string $key): bool

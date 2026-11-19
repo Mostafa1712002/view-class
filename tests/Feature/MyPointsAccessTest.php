@@ -93,6 +93,7 @@ class MyPointsAccessTest extends TestCase
 
     public function test_every_catalog_rule_has_a_translated_label(): void
     {
+        $this->assertSame(__('points.kinds.manual'), \App\Modules\Gamification\Support\RuleCatalog::label('manual'));
         foreach (array_keys(\App\Modules\Gamification\Support\RuleCatalog::RULES) as $key) {
             $this->assertNotSame($key, \App\Modules\Gamification\Support\RuleCatalog::label($key));
         }
