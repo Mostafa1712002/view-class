@@ -133,8 +133,8 @@ Tasks 1.1–1.7 can run in parallel, and only 1.8 touches shared files. Until 1.
 - [x] Test: flag off gives 404 on every hub route and no hub schedule. Flag on gives a working sidebar.
 
 ### Task 1.9: Review + local E2E
-- [ ] Opus or `/code-review` pass on the Phase 1 diff
-- [ ] Locally, with the flag on: create a platform pointing at a local contract stub, create a package, grant it to a new student with a parent, see the accounts go `active`, cancel, and see the entitlement push
+- [x] Opus or `/code-review` pass on the Phase 1 diff (2026-11-19). Fixed: package toggle/delete through audited Actions; a password reset landing mid-call is no longer cleared; `uniqueFor` 8 h on the sync job; enabled platform without a secret is skipped; audit rows on every `conflict`/`failed` transition; `@viewclass.local` placeholder sent as `email: null`; duplicate input id on the grant page. Kept on purpose (tested): 401 retries with backoff (a mis-set secret self-heals once fixed) and 409 `IDENTIFIER_TAKEN` → `failed` (§3.3), not `conflict`, so it is never offered «ربط».
+- [x] Locally, with the flag on: create a platform pointing at a local contract stub, create a package, grant it to a new student with a parent, see the accounts go `active`, cancel, and see the entitlement push. Also run: secret shown once, test connection, reset password (pushed once, flag cleared), disable/enable, 409 → «ربط بعد المراجعة» (PUT carries `link_external_id`, no password), `hub:expire` → entitlements `[]`. All 13 stub requests verified HMAC + nonce. No secret or password in the logs, jobs, failed_jobs or activity_logs.
 
 **Outcome:** packages and free grants work end to end against a fake platform. The code is deployable to both instances.
 **Dependencies:** none (1.8 after 1.1–1.7 merge).
@@ -309,13 +309,13 @@ Each repo does its feature tasks (x.1–x.3) in parallel and then one wiring tas
 | Phase | Tasks | Completed | Status |
 |-------|-------|-----------|--------|
 | 0. Security prerequisites | 7 | 0 | Not started |
-| 1. Rawani hub core | 9 | 8 | In progress (1.9 review + E2E left) |
+| 1. Rawani hub core | 9 | 9 | Done (local E2E 2026-11-19) |
 | 2. Contract on sub-platforms | 12 | 0 | Not started |
 | 3. Online purchase | 6 | 0 | Not started |
 | 4. Master directory | 4 | 0 | Not started |
 | 5. SSO-lite | 1 | 0 | Not started |
 | 6. Live rollout | 7 | 0 | Not started |
-| **Total** | **46** | **8** | **17%** |
+| **Total** | **46** | **9** | **20%** |
 
 Waiting on the client (design §11): Q1–Q8.
 - Phases 1–2 can start without any answers.
