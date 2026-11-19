@@ -1,0 +1,45 @@
+<?php
+
+return [
+    'platforms' => 'المنصات المرتبطة', 'packages' => 'الباقات', 'subscriptions' => 'الاشتراكات',
+    'new_platform' => 'منصة جديدة', 'new_package' => 'باقة جديدة', 'grant_package' => 'منح باقة',
+    'edit' => 'تعديل', 'save' => 'حفظ', 'back' => 'رجوع', 'delete' => 'حذف', 'cancel' => 'إلغاء', 'filter' => 'تصفية', 'all' => 'الكل',
+    'saved' => 'تم الحفظ', 'deleted' => 'تم الحذف', 'cancelled' => 'تم إلغاء الاشتراك', 'linked' => 'تم الربط وسيُزامَن الحساب',
+    'granted' => 'تم منح الباقة لعدد :count',
+    'unknown_national_ids' => 'أرقام هوية غير موجودة: :ids',
+    // platforms
+    'slug' => 'المعرّف', 'name_ar' => 'الاسم', 'name_en' => 'الاسم بالإنجليزية', 'base_url' => 'رابط الواجهة (base URL)',
+    'is_enabled' => 'مفعّلة', 'products' => 'المنتجات (JSON)', 'capabilities' => 'الإمكانات (JSON)', 'required_fields' => 'الحقول المطلوبة (JSON)',
+    'last_ok' => 'آخر اتصال ناجح', 'last_error' => 'آخر خطأ', 'secret' => 'السر المشترك',
+    'secret_configured' => 'السر مُعدّ (لا يُعرض)', 'secret_missing' => 'لا يوجد سر بعد',
+    'generate_secret' => 'توليد السر', 'secret_once' => 'انسخ السر الآن وضعه في المنصة، لن يظهر مرة أخرى:',
+    'test_connection' => 'اختبار الاتصال', 'test_ok' => 'الاتصال ناجح', 'test_failed' => 'فشل الاتصال (:code)',
+    'platform_save_first' => 'احفظ المنصة أولاً لتوليد السر واختبار الاتصال.',
+    // packages
+    'description_ar' => 'الوصف', 'price' => 'السعر (ر.س، شامل الضريبة 15%)', 'duration_days' => 'المدة (يوم)',
+    'items' => 'المنتجات', 'is_purchasable' => 'متاحة للشراء', 'is_active' => 'مفعّلة', 'sort' => 'الترتيب', 'toggle' => 'تفعيل/تعطيل',
+    'confirm_delete' => 'حذف هذه الباقة؟ الاشتراكات القائمة لا تتأثر.', 'empty' => 'لا توجد بيانات',
+    // subscriptions
+    'package' => 'الباقة', 'person' => 'المستفيد', 'status' => 'الحالة', 'source' => 'المصدر', 'from' => 'من', 'to' => 'إلى',
+    'starts_at' => 'يبدأ', 'ends_at' => 'ينتهي', 'price_paid' => 'السعر', 'note' => 'ملاحظة', 'start_date' => 'تاريخ البداية (افتراضيًا اليوم)',
+    'sub_status_pending' => 'قيد الانتظار', 'sub_status_active' => 'فعّال', 'sub_status_expired' => 'منتهي', 'sub_status_cancelled' => 'ملغي', 'sub_status_refunded' => 'مُسترد',
+    'source_purchase' => 'شراء', 'source_grant' => 'منح',
+    'mode_existing' => 'مستفيد موجود', 'mode_new' => 'طالب جديد',
+    'national_ids' => 'أرقام الهوية (واحد في كل سطر)', 'parent_lookup' => 'أو ابحث بهوية ولي الأمر لاختيار أبنائه', 'search' => 'بحث',
+    'children' => 'الأبناء', 'no_children' => 'لا يوجد أبناء لهذه الهوية',
+    'name' => 'الاسم', 'gender' => 'الجنس', 'male' => 'ذكر', 'female' => 'أنثى', 'national_id' => 'رقم الهوية',
+    'stage' => 'المرحلة', 'stage_primary' => 'ابتدائي', 'stage_intermediate' => 'متوسط', 'stage_secondary' => 'ثانوي', 'grade' => 'الصف',
+    'parent_name' => 'اسم ولي الأمر (اختياري)', 'parent_national_id' => 'هوية ولي الأمر (اختياري)',
+    // person page
+    'person_page' => 'ملف الشخص', 'accounts' => 'حسابات المنصات', 'platform' => 'المنصة', 'role' => 'الدور', 'login' => 'اسم الدخول',
+    'last_sync' => 'آخر مزامنة', 'error' => 'الخطأ', 'managed' => 'أنشأه رواني', 'linked_acct' => 'حساب مربوط',
+    'show_password' => 'إظهار كلمة المرور', 'password' => 'كلمة المرور', 'retry' => 'إعادة المحاولة', 'retry_queued' => 'أُعيدت المحاولة',
+    'disable' => 'تعطيل', 'enable' => 'تفعيل', 'reset_password' => 'إعادة تعيين كلمة المرور', 'password_reset' => 'تمت إعادة التعيين، انسخ كلمة المرور الآن',
+    'password_once' => 'كلمة المرور (تُعرض الآن فقط):', 'confirm_reset' => 'سيتم توليد كلمة مرور جديدة. متابعة؟',
+    'conflict_notice' => 'يوجد حساب سابق بنفس البيانات على المنصة. لن يُربط تلقائيًا؛ راجعه ثم اختر «ربط بعد المراجعة».',
+    'link_after_review' => 'ربط بعد المراجعة', 'external_id' => 'معرّف الحساب على المنصة',
+    'parent_of' => 'أبناؤه', 'child_of' => 'أولياء الأمور', 'no_accounts' => 'لا توجد حسابات بعد',
+    'status_pending' => 'قيد الإنشاء', 'status_needs_info' => 'بيانات ناقصة', 'status_active' => 'فعّال', 'status_conflict' => 'تعارض',
+    'status_failed' => 'فشل', 'status_disabled' => 'معطّل', 'status_missing' => 'مفقود', 'status_unlinked' => 'غير مربوط',
+    'role_student' => 'طالب', 'role_parent' => 'ولي أمر', 'role_teacher' => 'معلم',
+];

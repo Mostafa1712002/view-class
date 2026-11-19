@@ -13,7 +13,7 @@ interface SubscriptionRepository
 
     public function findForUpdate(int $id): ?HubSubscription;
 
-    /** Filters: package_id, status, source, from, to. */
+    /** Filters: package_id, user_id, status, source, from, to. */
     public function paginate(array $filters = [], int $perPage = 20): LengthAwarePaginator;
 
     public function create(array $attributes): HubSubscription;

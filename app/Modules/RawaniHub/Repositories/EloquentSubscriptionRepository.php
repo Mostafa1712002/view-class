@@ -24,6 +24,7 @@ class EloquentSubscriptionRepository implements SubscriptionRepository
     {
         return HubSubscription::with(['user', 'buyer', 'package'])
             ->when($filters['package_id'] ?? null, fn ($q, $v) => $q->where('package_id', $v))
+            ->when($filters['user_id'] ?? null, fn ($q, $v) => $q->where('user_id', $v))
             ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
             ->when($filters['source'] ?? null, fn ($q, $v) => $q->where('source', $v))
             ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
