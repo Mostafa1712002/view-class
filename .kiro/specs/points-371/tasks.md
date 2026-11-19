@@ -65,18 +65,18 @@ Phase 1 (wiring, 1 agent)
 
 ### Task 2A: Staff screens
 Files: `Controllers/{ManagePointsController,PointRulesController,RewardsController}.php`, `Actions/{AdjustPoints,SaveRuleSettings,DeliverReward}.php`, `Http/Requests/*`, `resources/views/points/manage/*.blade.php`, `lang/{ar,en}/points_manage.php`, `tests/Feature/PointsManageAccessTest.php`
-- [ ] Balances (tabs طلاب/معلمون/وكلاء, filters grade/class/name, behaviour balance column read-only from `behavior_records`, scoped `scopedSchoolId()`)
-- [ ] Person ledger + manual adjust (reason required; not self)
-- [ ] Rules matrix: platform columns (super-admin), override columns (school admin, only allowed rules), unwired rules greyed with badge; options inputs per rule (basis / visits_per_term / window / deadline)
-- [ ] Reward periods CRUD (overlap warning), rewards list + deliver, honour list (month, type, grade)
-- [ ] Tests: staff cases of design §12 `PointsAccessTest`
+- [x] Balances (tabs طلاب/معلمون/وكلاء, filters grade/class/name, behaviour balance column read-only from `behavior_records`, scoped `scopedSchoolId()`)
+- [x] Person ledger + manual adjust (reason required; not self)
+- [x] Rules matrix: platform columns (super-admin), override columns (school admin, only allowed rules), unwired rules greyed with badge; options inputs per rule (basis / visits_per_term / window / deadline)
+- [x] Reward periods CRUD (overlap warning), rewards list + deliver, honour list (month, type, grade)
+- [x] Tests: staff cases of design §12 `PointsAccessTest`
 **Dependencies:** 1.1
 
 ### Task 2B: «نقاطي» / «نقاط أبنائي»
 Files: `Controllers/MyPointsController.php`, `resources/views/points/my/*.blade.php`, `lang/{ar,en}/points_my.php`, `tests/Feature/MyPointsAccessTest.php`
-- [ ] Balance, history (rule label, source label, ±, reason, date), rewards with status, behaviour balance (read-only, separate card)
-- [ ] Parent: child switcher limited to `children()`; foreign `?child=` → 404
-- [ ] وكيل: list his `vice.*` rules with effective deadline / target / window («جميع ما يتم تحديده يظهر للشخص المحدد له على حسابه»)
+- [x] Balance, history (rule label, source label, ±, reason, date), rewards with status, behaviour balance (read-only, separate card)
+- [x] Parent: child switcher limited to `children()`; foreign `?child=` → 404
+- [x] وكيل: list his `vice.*` rules with effective deadline / target / window («جميع ما يتم تحديده يظهر للشخص المحدد له على حسابه»)
 **Dependencies:** 1.1
 
 ## Phase 3 — Hooks (6 agents in parallel; each owns its hook class, host files and test file)
@@ -84,34 +84,34 @@ Every host edit = one line after the save (deletes: after the delete succeeds; p
 
 ### Task 3.1: Exams
 Files: `Hooks/ExamPointHooks.php`, `app/Http/Controllers/StudentExamController.php` (after txn ~:171, `autoEndAttempt` ~:300), `app/Http/Controllers/Admin/ExamController.php` (`reopenAttempt` :411, `destroy` after delete :268), `tests/Feature/PointsHooksExamTest.php`
-- [ ] `student.correct_answers.subjects` (best submitted attempt, `is_correct` count) + `teacher.exams` (basis interaction/correct); delete → revoke
+- [x] `student.correct_answers.subjects` (best submitted attempt, `is_correct` count) + `teacher.exams` (basis interaction/correct); delete → revoke
 **Dependencies:** Phase 0
 
 ### Task 3.2: Assignments
 Files: `Hooks/AssignmentPointHooks.php`, `app/Http/Controllers/StudentAssignmentController.php` (:81), `app/Http/Controllers/Admin/AssignmentController.php` (:215 grade, after delete :190), `tests/Feature/PointsHooksAssignmentTest.php`
-- [ ] `student.assignments` (score ratio on grade/re-grade) + `teacher.assignments`; delete → revoke
+- [x] `student.assignments` (score ratio on grade/re-grade) + `teacher.assignments`; delete → revoke
 **Dependencies:** Phase 0
 
 ### Task 3.3: Discussion rooms + live rooms
 Files: `Hooks/DiscussionPointHooks.php`, `Hooks/VirtualClassPointHooks.php`, `app/Modules/Discussion/Controllers/DiscussionController.php` (:149, :164), `app/Modules/Discussion/Controllers/ManageDiscussionController.php` (:103, :236, :251), `app/Modules/VirtualClasses/Actions/RecalcAttendanceAction.php` (end of `execute`), `tests/Feature/PointsHooksRoomsTest.php`
-- [ ] `teacher.discussion_participation` (distinct student commenters ÷ targeted) and `teacher.live_rooms_attendance` (present+late ÷ targeted); room delete → revoke
+- [x] `teacher.discussion_participation` (distinct student commenters ÷ targeted) and `teacher.live_rooms_attendance` (present+late ÷ targeted); room delete → revoke
 **Dependencies:** Phase 0
 
 ### Task 3.4: Preparation (weekly plans)
 Files: `Hooks/PreparationPointHooks.php`, `app/Http/Controllers/Admin/WeeklyPlanController.php` (:410, :604, after delete :508), `tests/Feature/PointsHooksPreparationTest.php`
-- [ ] `teacher.preparation` 1 per plan; delete → reverse («في حال حذف تحضير تحذف الدرجة»)
+- [x] `teacher.preparation` 1 per plan; delete → reverse («في حال حذف تحضير تحذف الدرجة»)
 **Dependencies:** Phase 0
 
 ### Task 3.5: Job performance + class visits (وكيل)
 Files: `Hooks/EvaluationPointHooks.php`, `app/Modules/Evaluation/Actions/{SubmitEvaluation,ReopenEvaluation,RejectEvaluation}.php` (:104/:298, :49, :53), `app/Modules/Evaluation/Controllers/ClassVisitController.php` (:159), `tests/Feature/PointsHooksEvaluationTest.php`
-- [ ] `vice.job_performance_on_time` (submitted ≤ `close_date`, job-performance forms only, evaluator is وكيل)
-- [ ] `vice.class_visits` (window + per-term target from rule options; term from `academic_terms` via the school's current `academic_years`)
-- [ ] reopen/reject/visit delete → 0
+- [x] `vice.job_performance_on_time` (submitted ≤ `close_date`, job-performance forms only, evaluator is وكيل)
+- [x] `vice.class_visits` (window + per-term target from rule options; term from `academic_terms` via the school's current `academic_years`)
+- [x] reopen/reject/visit delete → 0
 **Dependencies:** Phase 0
 
 ### Task 3.6: School schedule (وكيل)
 Files: `Hooks/SchedulePointHooks.php`, `app/Http/Controllers/Admin/ScheduleController.php` (:270, after delete :343), `tests/Feature/PointsHooksScheduleTest.php`
-- [ ] `vice.school_schedule_on_time` (actor is وكيل, created ≤ `options.deadline`); delete → revoke
+- [x] `vice.school_schedule_on_time` (actor is وكيل, created ≤ `options.deadline`); delete → revoke
 **Dependencies:** Phase 0
 
 ## Phase 4 — Review, verify, ship
@@ -141,10 +141,10 @@ Files: `Hooks/SchedulePointHooks.php`, `app/Http/Controllers/Admin/ScheduleContr
 |-------|-------|-----------|--------|
 | 0. Core ledger + contract | 5 | 5 | Done (not yet merged to main) |
 | 1. Wiring | 1 | 1 | Done |
-| 2. Screens | 2 | 0 | Not Started |
-| 3. Hooks | 6 | 0 | Not Started |
+| 2. Screens | 2 | 2 | Done |
+| 3. Hooks | 6 | 6 | Done |
 | 4. Review / verify / ship | 4 | 0 | Not Started |
-| **Total** | **18** | **6** | **33%** |
+| **Total** | **18** | **14** | **78%** |
 
 ## Deferred (not in this card)
 - Portfolio approval flows (student by teacher, teacher by complex supervisor), التحفيز, video tracking, worksheets, separate preparation upload, complex-supervisor ownership of visit targets — wait for client answers; rules already in the catalog as unwired.
