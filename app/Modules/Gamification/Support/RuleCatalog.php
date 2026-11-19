@@ -55,6 +55,12 @@ final class RuleCatalog
         return self::RULES[$key] ?? null;
     }
 
+    /** Rule keys contain dots, so __('points.rules.<key>') can't reach them; read the array instead. */
+    public static function label(string $key): string
+    {
+        return (string) (trans('points.rules')[$key] ?? $key);
+    }
+
     public static function has(string $key): bool
     {
         return isset(self::RULES[$key]);

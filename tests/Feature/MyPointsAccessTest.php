@@ -84,10 +84,17 @@ class MyPointsAccessTest extends TestCase
             'is_enabled' => true, 'options' => ['visits_per_term' => 6]]);
 
         $this->actingAs($vice)->get(route('my.points.index'))->assertOk()
-            ->assertSee('2026-12-01 10:00')->assertSee(__('points.rules.vice.class_visits'))->assertSee(__('points_my.current_term'))
-            ->assertDontSee(__('points.rules.vice.job_performance_on_time'));
+            ->assertSee('2026-12-01 10:00')->assertSee(\App\Modules\Gamification\Support\RuleCatalog::label('vice.class_visits'))->assertSee(__('points_my.current_term'))
+            ->assertDontSee(\App\Modules\Gamification\Support\RuleCatalog::label('vice.job_performance_on_time'));
 
         $this->actingAs($this->createTeacher($school))->get(route('my.points.index'))->assertOk()
             ->assertDontSee(__('points_my.vice_rules'));
+    }
+
+    public function test_every_catalog_rule_has_a_translated_label(): void
+    {
+        foreach (array_keys(\App\Modules\Gamification\Support\RuleCatalog::RULES) as $key) {
+            $this->assertNotSame($key, \App\Modules\Gamification\Support\RuleCatalog::label($key));
+        }
     }
 }

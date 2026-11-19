@@ -27,7 +27,7 @@
 </tr></thead><tbody>
 @forelse($history as $t)
 <tr><td>{{ $t->created_at?->format('Y-m-d H:i') }}</td>
-<td>{{ $t->rule_key === 'manual' ? __('points.kinds.manual') : __('points.rules.'.$t->rule_key) }}</td>
+<td>{{ $t->rule_key === 'manual' ? __('points.kinds.manual') : \App\Modules\Gamification\Support\RuleCatalog::label($t->rule_key) }}</td>
 <td>{{ __('points.sources.'.$t->source_type) }}</td><td dir="ltr" class="text-right">{{ $t->points > 0 ? '+' : '' }}{{ $t->points }}</td><td>{{ $t->reason }}</td></tr>
 @empty<tr><td colspan="5">{{ __('points_manage.empty') }}</td></tr>@endforelse
 </tbody></table></div>{{ $history->links() }}

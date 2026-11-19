@@ -66,7 +66,7 @@
                 @foreach($viceRules as $r)
                     @php $o = $r['options'] ?? []; $isVisits = $r['key'] === 'vice.class_visits'; @endphp
                     <tr>
-                        <td>@lang('points.rules.'.$r['key'])</td>
+                        <td>{{ \App\Modules\Gamification\Support\RuleCatalog::label($r['key']) }}</td>
                         <td>{{ $r['points'] }}</td>
                         <td>{{ $r['key'] === 'vice.school_schedule_on_time' ? ($o['deadline'] ?? __('points_my.none')) : '—' }}</td>
                         <td>{{ $isVisits ? ($o['visits_per_term'] ?? __('points_my.none')) : '—' }}</td>
@@ -97,7 +97,7 @@
                     <tbody>
                     @foreach($history as $t)
                         <tr>
-                            <td>{{ \Illuminate\Support\Facades\Lang::has('points.rules.'.$t->rule_key) ? __('points.rules.'.$t->rule_key) : $t->rule_key }}</td>
+                            <td>{{ \App\Modules\Gamification\Support\RuleCatalog::label($t->rule_key) }}</td>
                             <td>{{ \Illuminate\Support\Facades\Lang::has('points.sources.'.$t->source_type) ? __('points.sources.'.$t->source_type) : $t->source_type }}</td>
                             <td>
                                 @if($t->points > 0)<span class="badge badge-success">+{{ $t->points }}</span>

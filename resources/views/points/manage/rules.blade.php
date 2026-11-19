@@ -26,7 +26,7 @@
 @php($editable = $wired && ($canPlatform || (($p?->allow_school_override ?? false) && ! ($isVice && $beneficiary === 'vice'))))
 @php($row = $canPlatform ? $p : $s)
 <tr class="{{ $wired ? '' : 'text-muted' }}" style="{{ $wired ? '' : 'opacity:.6' }}">
-<td>{{ __('points.rules.'.$key) }}@unless($wired) <span class="badge badge-secondary">{{ __('points.unwired_badge') }}</span>@endunless</td>
+<td>{{ \App\Modules\Gamification\Support\RuleCatalog::label($key) }}@unless($wired) <span class="badge badge-secondary">{{ __('points.unwired_badge') }}</span>@endunless</td>
 <td>{{ __('points.calc_modes.'.$rule['calc_mode']) }}</td>
 <td><input type="number" min="0" class="form-control form-control-sm" style="min-width:5rem" name="rules[{{ $key }}][points]" value="{{ $row?->points }}" @disabled(! $editable)></td>
 <td><input type="number" min="0" class="form-control form-control-sm" style="min-width:5rem" name="rules[{{ $key }}][period_points]" value="{{ $row?->period_points }}" @disabled(! $editable)></td>
