@@ -24,6 +24,8 @@ class FakePlatform
     public array $people = [];
     public array $capabilities = ['sso' => true, 'parents' => true];
     public array $requests = [];
+    /** Runs inside an authenticated request, before it is answered (simulates a change landing mid-call). */
+    public ?\Closure $during = null;
     private array $nonces = [];
     private int $nextId = 1000;
 
@@ -60,6 +62,9 @@ class FakePlatform
 
         if ($err = $this->authError($r, $method, $logical.$query)) {
             return $err;
+        }
+        if ($this->during) {
+            ($this->during)();
         }
         if ($this->failures) {
             $f = array_shift($this->failures);

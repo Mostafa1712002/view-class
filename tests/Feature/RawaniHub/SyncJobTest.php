@@ -187,6 +187,34 @@ class SyncJobTest extends TestCase
         $this->assertStringContainsString('ACCOUNT_EXISTS', $acc->last_error);
         $this->assertFalse($acc->needs_sync);
         $this->assertCount(1, $this->fake->requests);
+        $log = \App\Models\ActivityLog::where('action', 'hub.account.conflict')->sole();
+        $this->assertSame(['pending', 'conflict'], [$log->old_values['status'], $log->new_values['status']]);
+    }
+
+    public function test_a_reset_landing_during_the_call_is_not_cleared(): void
+    {
+        $p = $this->platform();
+        $acc = $this->account($p, $this->student());
+        $this->runJob($acc);
+        $sent = $acc->fresh()->password;
+        $acc->refresh()->update(['needs_sync' => true, 'password_reset_pending' => true]);
+        $this->fake->during = fn () => HubPlatformAccount::find($acc->id)->update(['password' => 'newer-reset', 'password_reset_pending' => true, 'needs_sync' => true]);
+        $this->runJob($acc);
+        $acc->refresh();
+        $this->assertNotSame('newer-reset', $sent);
+        $this->assertSame('newer-reset', $acc->password);
+        $this->assertTrue($acc->password_reset_pending); // still owed to the platform
+        $this->assertTrue($acc->needs_sync);
+        $this->assertSame('active', $acc->status);
+    }
+
+    public function test_enabled_platform_without_a_secret_is_skipped(): void
+    {
+        $p = $this->platform(['secret' => null]);
+        $acc = $this->account($p, $this->student());
+        $this->runJob($acc);
+        $this->assertCount(0, $this->fake->requests);
+        $this->assertTrue($acc->fresh()->needs_sync);
     }
 
     public function test_invalid_is_stored_as_failed_error(): void
@@ -230,6 +258,7 @@ class SyncJobTest extends TestCase
         $acc->refresh();
         $this->assertSame('failed', $acc->status);
         $this->assertSame(6, (int) $acc->attempts);
+        $this->assertSame(1, \App\Models\ActivityLog::where('action', 'hub.account.failed')->count());
     }
 
     public function test_recovery_after_a_retry_succeeds_and_resets_attempts(): void

@@ -2,6 +2,7 @@
 
 namespace App\Modules\RawaniHub\Jobs;
 
+use App\Models\ActivityLog;
 use App\Models\User;
 use App\Modules\RawaniHub\DTOs\PlatformResult;
 use App\Modules\RawaniHub\Models\HubPlatformAccount;
@@ -31,6 +32,9 @@ class SyncPlatformAccountJob implements ShouldBeUnique, ShouldQueue
 
     public const BACKOFF = [60, 300, 900, 3600, 21600];
 
+    /** Lock outlives the whole backoff chain (~7.4 h), but a lost job no longer blocks the account forever. */
+    public int $uniqueFor = 28800;
+
     public function __construct(public int $accountId) {}
 
     public function backoff(): array
@@ -51,8 +55,8 @@ class SyncPlatformAccountJob implements ShouldBeUnique, ShouldQueue
             return;
         }
         $platform = $account->platform;
-        if (! $platform || ! $platform->is_enabled) {
-            return; // stays dirty; picked up once the platform is switched on
+        if (! $platform || ! $platform->is_enabled || ! $platform->secret) {
+            return; // stays dirty; picked up once the platform is switched on and has a secret
         }
         $user = User::find($account->user_id);
         if (! $user) {
@@ -94,10 +98,10 @@ class SyncPlatformAccountJob implements ShouldBeUnique, ShouldQueue
         $client = new PlatformClient((string) $platform->base_url, (string) $platform->secret);
         $result = $client->putAccount($account->role, $user->id, $state->toPayload());
 
-        $this->apply($account, $result, $accounts);
+        $this->apply($account, $result, $accounts, $state->password !== null);
     }
 
-    private function apply(HubPlatformAccount $account, PlatformResult $r, PlatformAccountRepository $accounts): void
+    private function apply(HubPlatformAccount $account, PlatformResult $r, PlatformAccountRepository $accounts, bool $sentPassword): void
     {
         $platform = $account->platform;
 
@@ -107,8 +111,13 @@ class SyncPlatformAccountJob implements ShouldBeUnique, ShouldQueue
                 'external_id' => $r->data['external_id'] ?? $account->external_id,
                 'login' => $r->data['login'] ?? $account->login,
                 'managed' => $r->data['managed'] ?? $account->managed,
-                'attempts' => 0, 'last_error' => null, 'synced_at' => now(), 'password_reset_pending' => false,
+                'attempts' => 0, 'last_error' => null, 'synced_at' => now(),
             ]);
+            if ($sentPassword) {
+                // Clear the reset flag only if no newer reset landed during the call (the stored ciphertext is the one sent).
+                HubPlatformAccount::whereKey($account->id)->where('password', $account->getRawOriginal('password'))
+                    ->update(['password_reset_pending' => false]);
+            }
             $platform->forceFill(['last_ok_at' => now(), 'last_error' => null])->save();
             if ($account->role === 'parent' && $account->status === 'active') {
                 $this->wakeChildren($account, $accounts);
@@ -155,7 +164,18 @@ class SyncPlatformAccountJob implements ShouldBeUnique, ShouldQueue
 
     private function settle(HubPlatformAccount $account, array $attributes): void
     {
+        $from = $account->status;
         $account->forceFill($attributes)->save();
+        if (in_array($account->status, ['conflict', 'failed'], true) && $from !== $account->status) {
+            self::audit($account, $from);
+        }
+    }
+
+    /** Design §3.7: every transition into conflict or failed leaves an audit row (no user: the queue did it). */
+    private static function audit(HubPlatformAccount $account, string $from): void
+    {
+        ActivityLog::log("hub.account.{$account->status}", "حساب #{$account->id} على المنصة #{$account->platform_id}: {$account->status}",
+            $account, ['status' => $from], ['status' => $account->status, 'last_error' => $account->last_error]);
     }
 
     private function describe(PlatformResult $r): string
@@ -166,6 +186,14 @@ class SyncPlatformAccountJob implements ShouldBeUnique, ShouldQueue
 
     public function failed(Throwable $e): void
     {
-        HubPlatformAccount::whereKey($this->accountId)->update(['status' => 'failed', 'last_error' => 'job crashed: '.class_basename($e)]);
+        $account = HubPlatformAccount::find($this->accountId);
+        if (! $account) {
+            return;
+        }
+        $from = $account->status;
+        $account->forceFill(['status' => 'failed', 'last_error' => 'job crashed: '.class_basename($e)])->save();
+        if ($from !== 'failed') {
+            self::audit($account, $from);
+        }
     }
 }

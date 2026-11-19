@@ -16,6 +16,7 @@ class HubPlatformAccount extends Model
         'managed' => 'boolean',
         'enabled' => 'boolean',
         'needs_sync' => 'boolean',
+        'password_reset_pending' => 'boolean',
         'access' => 'array',
         'synced_at' => 'datetime',
         'seen_at' => 'datetime',
