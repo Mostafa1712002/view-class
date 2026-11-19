@@ -30,11 +30,13 @@ final class SaveRuleSettings
     public function school(int $schoolId, array $input, int $actorId): void
     {
         $platform = $this->settings->allFor(PointRuleSetting::PLATFORM);
-        foreach ($this->wired($input) as $key => $row) {
-            if (! ($platform[$key]->allow_school_override ?? false)) {
-                continue; // not overridable: ignored, never an error
-            }
+        // not overridable: ignored, never an error
+        $rows = array_filter($this->wired($input), fn ($key) => (bool) ($platform[$key]->allow_school_override ?? false), ARRAY_FILTER_USE_KEY);
+        // authorize every rule before the first write, so a 403 never leaves a half-saved matrix
+        foreach (array_keys($rows) as $key) {
             Gate::authorize('editRuleOverride', [\App\Modules\Gamification\Models\PointTransaction::class, $key]);
+        }
+        foreach ($rows as $key => $row) {
             $this->settings->save($schoolId, $key, [
                 'points' => $this->int($row['points'] ?? null, $key, 'points'),
                 'period_points' => $this->int($row['period_points'] ?? null, $key, 'period_points'),
