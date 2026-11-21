@@ -11,6 +11,7 @@ use App\Modules\QuestionBankCore\Models\Passage;
 use App\Modules\SpecialPrograms\Models\SpQuestion;
 use App\Modules\SpecialPrograms\Models\SpSkill;
 use App\Modules\SpecialPrograms\Models\SpSubject;
+use App\Modules\SpecialPrograms\Repositories\Contracts\BankRepository;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -19,23 +20,28 @@ use InvalidArgumentException;
  * D§4: imports the «الأول» qiyas / tahsili / nafis bank into bank_questions + sp_*.
  * Pass 1 (always) reads, normalises, dedupes and checks images in memory.
  * Pass 2 (real run only) writes, one transaction per surviving source row.
+ * Pass 3 deactivates imported items whose source question / sub-question is gone (after a completed pass 2 only).
  */
 final class ImportAlAwwalBank
 {
     private const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'jfif'];
+
+    /** More stale items than this share of a program's active imported items = probably a wrong source DB. */
+    public const MASS_DEACTIVATE_RATIO = 0.2;
 
     public function __construct(
         private AlAwwalRowNormalizer $normalizer,
         private AlAwwalLevelMap $levelMap,
         private MapAnswerData $mapAnswers,
         private CreateQuestion $createQuestion,
+        private BankRepository $bank,
     ) {}
 
     /**
      * @param  list<string>  $programs
      * @return array<string,array> report per program
      */
-    public function execute(ConnectionInterface $src, string $imagesDir, array $programs, bool $dryRun, ?callable $log = null): array
+    public function execute(ConnectionInterface $src, string $imagesDir, array $programs, bool $dryRun, ?callable $log = null, bool $allowMassDeactivate = false): array
     {
         $log ??= fn () => null;
         $report = [];
@@ -49,6 +55,8 @@ final class ImportAlAwwalBank
             } else {
                 $this->classifyDryRun($program, $subjects->all(), $plan);
             }
+            // Reached only when pass 2 finished: a throw above leaves every item of this program as it was.
+            $this->deactivateStale($program, $plan, $dryRun, $allowMassDeactivate);
 
             $report[$program] = $this->summarise($plan);
         }
@@ -78,6 +86,7 @@ final class ImportAlAwwalBank
                 'images_missing' => 0, 'image_conflicts' => 0,
             ],
             'errors' => [], 'missing_images' => [], 'dedupe_groups' => [],
+            'source_ext' => [],    // every source id read => its external ids (null = undecodable, keep all)
         ];
         $targets = []; // image target path => md5 (conflict detection)
 
@@ -100,9 +109,11 @@ final class ImportAlAwwalBank
                             $plan['stats'][str_contains($e->getMessage(), 'image target') ? 'image_conflicts' : 'decode_failures']++;
                         }
                         $plan['errors'][] = $e->getMessage();
+                        $plan['source_ext'][(int) $raw->id] = null;
 
                         continue;
                     }
+                    $plan['source_ext'][$norm['source_id']] = array_map(fn ($it) => $this->externalId($norm, $it), $norm['items']);
                     $plan['stats']['items_before_dedupe'] += count($norm['items']);
                     $plan['stats']['passages_before_dedupe'] += $norm['is_passage'] ? 1 : 0;
                     if ($norm['image'] && ! $image['exists']) {
@@ -283,7 +294,7 @@ final class ImportAlAwwalBank
 
         $counts = ['created' => 0, 'updated' => 0, 'unchanged' => 0];
         foreach ($norm['items'] as $it) {
-            $ext = $norm['is_passage'] ? $norm['source_id'].':'.$it['sub_index'] : (string) $norm['source_id'];
+            $ext = $this->externalId($norm, $it);
             $sig = $this->signature($row, $it);
             $existing = BankQuestion::withTrashed()->where('question_bank_id', $bank->id)
                 ->where('external_platform', 'al_awwal')->where('external_id', $ext)->first();
@@ -352,6 +363,36 @@ final class ImportAlAwwalBank
         return ['image' => $imageResult, 'items' => $counts];
     }
 
+    private function externalId(array $norm, array $item): string
+    {
+        return $norm['is_passage'] ? $norm['source_id'].':'.$item['sub_index'] : (string) $norm['source_id'];
+    }
+
+    // ───────────────────────────── pass 3 ─────────────────────────────
+
+    /**
+     * Active imported items whose external id is no longer produced by the source are deactivated, never deleted:
+     * attempts keep their snapshots. Duplicates still count as present; an undecodable row protects all its items.
+     * ponytail: a source question that comes back later stays inactive (same as a staff deactivation).
+     */
+    private function deactivateStale(string $program, array &$plan, bool $dryRun, bool $allowMass): void
+    {
+        $active = $this->bank->activeImportedItems($program);
+        $stale = [];
+        foreach ($active as $spId => $ext) {
+            $sourceId = (int) explode(':', $ext)[0];
+            if (! array_key_exists($sourceId, $plan['source_ext'])
+                || ($plan['source_ext'][$sourceId] !== null && ! in_array($ext, $plan['source_ext'][$sourceId], true))) {
+                $stale[$spId] = $ext;
+            }
+        }
+        $blocked = count($stale) > self::MASS_DEACTIVATE_RATIO * count($active) && ! $allowMass;
+        if (! $dryRun && ! $blocked && $stale) {
+            $this->bank->deactivate(array_keys($stale));
+        }
+        $plan['deactivate'] = ['items' => $blocked ? [] : $stale, 'blocked' => $blocked ? count($stale) : 0, 'active' => count($active)];
+    }
+
     private function copyImage(array $image): string
     {
         if (! $image['target']) {
@@ -403,7 +444,7 @@ final class ImportAlAwwalBank
             $bankId = $bankBySubject[$row['sp_subject_id']] ?? null;
             $counts = ['created' => 0, 'updated' => 0, 'unchanged' => 0];
             foreach ($row['norm']['items'] as $it) {
-                $ext = $row['norm']['is_passage'] ? $id.':'.$it['sub_index'] : (string) $id;
+                $ext = $this->externalId($row['norm'], $it);
                 $existing = $bankId ? BankQuestion::withTrashed()->where('question_bank_id', $bankId)
                     ->where('external_platform', 'al_awwal')->where('external_id', $ext)->first() : null;
                 $key = ! $existing ? 'created' : (($existing->trashed() || ($existing->metadata['sp_sig'] ?? null) === $this->signature($row, $it)) ? 'unchanged' : 'updated');
@@ -455,6 +496,9 @@ final class ImportAlAwwalBank
         $out['dedupe_group_list'] = $plan['dedupe_groups'];
         $out['missing_images'] = $plan['missing_images'];
         $out['errors'] = $plan['errors'];
+        $out['deactivated'] = count($plan['deactivate']['items']);
+        $out['deactivate_blocked'] = $plan['deactivate']['blocked'];
+        $out['deactivated_items'] = $plan['deactivate']['items']; // sp_question id => external_id, to undo by hand
 
         return $out;
     }

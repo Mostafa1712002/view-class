@@ -45,4 +45,10 @@ interface BankRepository
 
     /** Which of the given bank_question ids appear in attempt snapshots. @return int[] */
     public function usedBankQuestionIds(array $bankQuestionIds): array;
+
+    /** Active «الأول»-imported items of the program. @return array<int,string> sp_question id => external_id */
+    public function activeImportedItems(string $program): array;
+
+    /** @param  int[]  $spQuestionIds */
+    public function deactivate(array $spQuestionIds): void;
 }

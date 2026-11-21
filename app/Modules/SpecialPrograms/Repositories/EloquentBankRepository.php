@@ -131,6 +131,23 @@ final class EloquentBankRepository implements BankRepository
             ->distinct()->pluck('bank_question_id')->map(fn ($v) => (int) $v)->all();
     }
 
+    public function activeImportedItems(string $program): array
+    {
+        return DB::table('sp_questions as s')
+            ->join('sp_subjects as sub', 'sub.id', '=', 's.sp_subject_id')
+            ->join('bank_questions as b', 'b.id', '=', 's.bank_question_id')
+            ->where('sub.program', $program)->where('s.is_active', true)
+            ->where('b.external_platform', 'al_awwal')->whereNull('b.deleted_at')
+            ->pluck('b.external_id', 's.id')->map(fn ($v) => (string) $v)->all();
+    }
+
+    public function deactivate(array $spQuestionIds): void
+    {
+        foreach (array_chunk($spQuestionIds, 500) as $chunk) {
+            SpQuestion::whereIn('id', $chunk)->update(['is_active' => false]);
+        }
+    }
+
     /** @return int[] */
     private function levelsOf(array $spIds): array
     {

@@ -18,6 +18,7 @@ class SpecialProgramsImportAlAwwal extends Command
         {--images= : dir that contains uploads/questions/… (default env ALAWWAL_IMAGES_PATH)}
         {--program=* : qiyas|tahsili|nafis (default all)}
         {--dry-run : read, normalise, dedupe and check images; write nothing}
+        {--allow-mass-deactivate : deactivate stale items even when they exceed 20% of a program}
         {--report= : JSON report path (default storage/logs/sp-import-<timestamp>.json)}';
 
     protected $description = 'Import the «الأول» qiyas / tahsili / nafis question bank (read-only source DB)';
@@ -54,7 +55,7 @@ class SpecialProgramsImportAlAwwal extends Command
         $dry = (bool) $this->option('dry-run');
         $this->info(($dry ? 'DRY RUN' : 'IMPORT').' → '.config('database.connections.'.config('database.default').'.database').' from '.$database);
 
-        $report = $import->execute(DB::connection('alawwal'), $images, $programs, $dry, fn ($m) => $this->line($m));
+        $report = $import->execute(DB::connection('alawwal'), $images, $programs, $dry, fn ($m) => $this->line($m), (bool) $this->option('allow-mass-deactivate'));
 
         $rows = [];
         foreach ($report as $program => $r) {
@@ -64,14 +65,20 @@ class SpecialProgramsImportAlAwwal extends Command
                 "{$r['items']['created']}/{$r['items']['updated']}/{$r['items']['unchanged']}",
                 "{$r['images']['copied']}/{$r['images']['unchanged']}/{$r['images_missing']}",
                 $r['orphan_links'], $r['decode_failures'] + $r['unknown_skill'] + $r['image_conflicts'],
+                $r['deactivate_blocked'] ? "refused ({$r['deactivate_blocked']})" : $r['deactivated'],
             ];
         }
-        $this->table(['program', 'rows', 'items pre', 'dedupe grp/rows', 'items post', 'passages/subq', 'new/upd/same', 'img copy/same/miss', 'orphan links', 'errors'], $rows);
+        $this->table(['program', 'rows', 'items pre', 'dedupe grp/rows', 'items post', 'passages/subq', 'new/upd/same', 'img copy/same/miss', 'orphan links', 'errors', 'deactivated'], $rows);
+        foreach ($report as $program => $r) {
+            if ($r['deactivate_blocked']) {
+                $this->warn("{$program}: {$r['deactivate_blocked']} items no longer in the source is more than ".(ImportAlAwwalBank::MASS_DEACTIVATE_RATIO * 100).'% of the program — nothing deactivated. Check the source DB, then re-run with --allow-mass-deactivate.');
+            }
+        }
 
         $path = $this->option('report') ?: storage_path('logs/sp-import-'.now()->format('Ymd-His').($dry ? '-dry' : '').'.json');
         file_put_contents($path, json_encode(['dry_run' => $dry, 'programs' => $report], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
         $this->info("Report: {$path}");
 
-        return collect($report)->sum(fn ($r) => $r['decode_failures'] + $r['unknown_skill'] + $r['image_conflicts']) ? self::FAILURE : self::SUCCESS;
+        return collect($report)->sum(fn ($r) => $r['decode_failures'] + $r['unknown_skill'] + $r['image_conflicts'] + $r['deactivate_blocked']) ? self::FAILURE : self::SUCCESS;
     }
 }
