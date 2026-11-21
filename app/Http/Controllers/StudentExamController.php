@@ -47,7 +47,7 @@ class StudentExamController extends Controller
             return redirect()->route('student.exams.result', $exam);
         }
 
-        $exam->load(['subject', 'questions']);
+        $exam->load(['subject', 'questions.sourceBankQuestion.passage']);
 
         // Resume an in-progress attempt or present the intro to start one.
         $attempt = $exam->studentExams()
@@ -341,7 +341,7 @@ class StudentExamController extends Controller
         $attempt = $exam->studentExams()
             ->where('student_id', $student->id)
             ->whereNotNull('submitted_at')
-            ->with(['answers.question', 'exam.subject'])
+            ->with(['answers.question.sourceBankQuestion.passage', 'exam.subject'])
             ->latest('submitted_at')
             ->first();
 

@@ -96,6 +96,10 @@
                             </thead>
                             <tbody>
                                 @foreach($bankQuestions as $bq)
+                                    @if ($bq->passage && $bq->passage_id !== ($shownPassageId ?? null))
+                                        <tr class="table-info"><td></td><td colspan="5"><span class="badge bg-primary">قطعة</span> {{ \Illuminate\Support\Str::limit($bq->passage->passage_text, 160) }}</td></tr>
+                                    @endif
+                                    @php $shownPassageId = $bq->passage_id; @endphp
                                     <tr>
                                         <td>
                                             <input type="checkbox"

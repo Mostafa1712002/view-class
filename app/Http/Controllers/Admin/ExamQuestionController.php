@@ -32,7 +32,7 @@ class ExamQuestionController extends Controller
      */
     public function index(Exam $exam)
     {
-        $questions = $exam->questions()->orderBy('order')->get();
+        $questions = $exam->questions()->with('sourceBankQuestion.passage')->orderBy('order')->get();
         $totalMarks = $questions->sum('marks');
         $routePrefix = $this->routePrefix();
 
@@ -196,7 +196,7 @@ class ExamQuestionController extends Controller
         $query = BankQuestion::query()
             ->whereIn('question_bank_id', $bankIds ?: [0])
             ->where('status', BankQuestion::STATUS_APPROVED)
-            ->with(['bank:id,name_ar,name_en', 'lesson:id,name_ar']);
+            ->with(['bank:id,name_ar,name_en', 'lesson:id,name_ar', 'passage:id,passage_text']);
 
         // Optional filters for UX
         if ($bankId = $request->integer('bank_id')) {
@@ -254,6 +254,7 @@ class ExamQuestionController extends Controller
             ->whereIn('id', $ids)
             ->where('status', BankQuestion::STATUS_APPROVED)
             ->whereIn('question_bank_id', $bankIds ?: [0])
+            ->orderBy('id') // creation order keeps a passage's sub-questions in sequence
             ->get();
 
         if ($bankQuestions->isEmpty()) {

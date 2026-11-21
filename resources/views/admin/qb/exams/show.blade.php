@@ -56,6 +56,11 @@
                 <thead><tr><th>#</th><th>السؤال (Snapshot)</th><th>النوع</th><th>الدرجة</th><th>المصدر</th>@if($canEdit)<th></th>@endif</tr></thead>
                 <tbody>
                 @foreach ($exam->questions as $i => $q)
+                    @php $snap = $q->question_snapshot ?? []; @endphp
+                    @if (! empty($snap['passage_id']) && $snap['passage_id'] !== ($shownPassageId ?? null))
+                        <tr><td colspan="{{ $canEdit ? 6 : 5 }}">@include('partials.qb-passage', ['passageText' => $snap['passage_text'] ?? '', 'passageImage' => $snap['passage_image'] ?? null])</td></tr>
+                    @endif
+                    @php $shownPassageId = $snap['passage_id'] ?? null; @endphp
                     <tr>
                         <td>{{ $i + 1 }}</td>
                         <td>{{ \Illuminate\Support\Str::limit(strip_tags($q->body ?? ''), 120) }}</td>

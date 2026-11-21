@@ -94,6 +94,12 @@ class BankQuestion extends Model
         return $this->belongsTo(QuestionBank::class, 'question_bank_id');
     }
 
+    /** Reading passage (القطعة) this question belongs to; kept even if the passage is soft-deleted. */
+    public function passage(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\QuestionBankCore\Models\Passage::class)->withTrashed();
+    }
+
     public function lesson(): BelongsTo
     {
         return $this->belongsTo(SubjectLesson::class, 'lesson_id');

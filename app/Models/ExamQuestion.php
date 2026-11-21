@@ -45,7 +45,14 @@ class ExamQuestion extends Model
      */
     public function sourceBankQuestion(): BelongsTo
     {
-        return $this->belongsTo(BankQuestion::class, 'source_bank_question_id');
+        // withTrashed: an exam keeps its provenance (and passage) after the bank copy is deleted.
+        return $this->belongsTo(BankQuestion::class, 'source_bank_question_id')->withTrashed();
+    }
+
+    /** Passage of the source bank question; eager-load sourceBankQuestion.passage. */
+    public function sourcePassage(): ?\App\Modules\QuestionBankCore\Models\Passage
+    {
+        return $this->sourceBankQuestion?->passage;
     }
 
     public function answers(): HasMany

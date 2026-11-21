@@ -288,7 +288,9 @@ class ExamController extends Controller
         $nextOrder = (int) ($exam->questions()->max('sort_order') ?? 0) + 1;
         $added = 0;
 
-        foreach ($request->input('bank_question_ids') as $bqId) {
+        // Ascending id = creation order, so a passage's sub-questions land in their order.
+        $ids = collect($request->input('bank_question_ids'))->map(fn ($id) => (int) $id)->sort()->values();
+        foreach ($ids as $bqId) {
             // Re-scope each id and require APPROVED — never trust the posted list.
             $bq = $this->questions->findScoped((int) $bqId, $schoolId);
             if (! $bq || $bq->status !== BankQuestion::STATUS_APPROVED) {
@@ -307,8 +309,8 @@ class ExamController extends Controller
                 'answer_snapshot' => $bq->answer_data, // frozen answers
                 'question_snapshot' => $bq->only([
                     'id', 'question_code', 'type', 'body_ar', 'body_en', 'difficulty',
-                    'points', 'question_category', 'subject_id', 'skill_id', 'explanation',
-                ]),
+                    'points', 'question_category', 'subject_id', 'skill_id', 'explanation', 'passage_id',
+                ]) + ['passage_text' => $bq->passage?->passage_text, 'passage_image' => $bq->passage?->passage_image],
                 'marks' => (float) ($bq->points ?? 1),
                 'sort_order' => $nextOrder++,
             ]);

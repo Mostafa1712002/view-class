@@ -130,6 +130,31 @@ class QuestionImportTest extends TestCase
         $this->assertNull(BankQuestion::where('question_code', 'N1')->value('passage_id'));
     }
 
+    public function test_student_exam_shows_the_passage_once_above_its_sub_questions(): void
+    {
+        $bank = $this->bank();
+        $this->runImport($bank, $this->clientFile($bank, [
+            ['question_type' => 'قطعة', 'question_text' => 'نص القطعة التجريبي'],
+            ['question_category' => 'passage', 'question_type' => 'true_false', 'question_text' => 'الفرعي الأول', 'correct_answer' => 'صح'],
+            ['question_category' => 'passage', 'question_type' => 'true_false', 'question_text' => 'الفرعي الثاني', 'correct_answer' => 'خطأ'],
+        ]));
+        $class = \App\Models\ClassRoom::factory()->create();
+        $student = \App\Models\User::factory()->create(['school_id' => $bank->school_id]);
+        $student->roles()->attach(\App\Models\Role::where('slug', 'student')->first());
+        \DB::table('class_student')->insert(['class_id' => $class->id, 'student_id' => $student->id]);
+        $exam = \App\Models\Exam::factory()->create(['academic_year_id' => \App\Models\AcademicYear::factory()->create()->id, 'class_id' => $class->id,
+            'start_time' => now()->subHour(), 'end_time' => now()->addDay(), 'status' => 'active', 'is_published' => true, 'attempts_allowed' => 1]);
+        foreach (BankQuestion::whereNotNull('passage_id')->orderBy('id')->get() as $i => $bq) {
+            $exam->questions()->create(['question' => $bq->body_ar, 'type' => 'true_false', 'correct_answer' => 'صح', 'marks' => 1,
+                'order' => $i + 1, 'source_bank_question_id' => $bq->id]);
+        }
+        \App\Models\StudentExam::create(['exam_id' => $exam->id, 'student_id' => $student->id, 'started_at' => now(), 'status' => 'in_progress', 'attempt_number' => 1]);
+
+        $html = $this->actingAs($student)->get(route('student.exams.show', $exam))->assertOk()
+            ->assertSeeInOrder(['نص القطعة التجريبي', 'الفرعي الأول', 'الفرعي الثاني'])->getContent();
+        $this->assertSame(1, substr_count($html, 'نص القطعة التجريبي'));
+    }
+
     public function test_passage_structure_errors_name_the_rows(): void
     {
         $bank = $this->bank();

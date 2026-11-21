@@ -60,6 +60,11 @@
         <form method="POST" action="{{ route('student.exams.submit', $exam) }}" id="exam-form">
             @csrf
             @foreach($exam->questions as $index => $question)
+                @php $passage = $question->sourcePassage(); @endphp
+                @if ($passage && $passage->id !== ($shownPassageId ?? null))
+                    @include('partials.qb-passage', ['passageText' => $passage->passage_text, 'passageImage' => $passage->passage_image])
+                @endif
+                @php $shownPassageId = $passage?->id; @endphp
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">

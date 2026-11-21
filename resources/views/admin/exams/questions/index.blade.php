@@ -72,6 +72,11 @@
             @if($questions->count() > 0)
                 <div id="questions-list">
                     @foreach($questions as $question)
+                        @php $passage = $question->sourcePassage(); @endphp
+                        @if ($passage && $passage->id !== ($shownPassageId ?? null))
+                            @include('partials.qb-passage', ['passageText' => $passage->passage_text, 'passageImage' => $passage->passage_image])
+                        @endif
+                        @php $shownPassageId = $passage?->id; @endphp
                         <div class="border rounded p-3 mb-3 question-item" data-id="{{ $question->id }}">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div class="d-flex align-items-center gap-2">

@@ -15,7 +15,7 @@ class EloquentQuestionRepository implements QuestionRepository
     public function paginate(?int $schoolId, array $filters, int $perPage = 25): LengthAwarePaginator
     {
         $query = BankQuestion::query()
-            ->with(['bank:id,name_ar,name_en,school_id', 'creator:id,name,username', 'lesson:id,name_ar'])
+            ->with(['bank:id,name_ar,name_en,school_id', 'creator:id,name,username', 'lesson:id,name_ar', 'passage:id,passage_text'])
             ->whereHas('bank', fn (Builder $q) => $this->scopeBank($q, $schoolId));
 
         $this->applyFilters($query, $filters);

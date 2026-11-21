@@ -19,6 +19,10 @@
         @endif
     </div>
 
+    @if($question->passage)
+        @include('partials.qb-passage', ['passageText' => $question->passage->passage_text, 'passageImage' => $question->passage->passage_image])
+    @endif
+
     {{-- Question body / image (content-type aware) --}}
     @if($isFull)
         {{-- Full-image: image is the question; show code header + full-width image --}}

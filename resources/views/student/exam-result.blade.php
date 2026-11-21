@@ -47,6 +47,11 @@
             <div class="card-body">
                 @foreach($attempt->answers->sortBy(fn ($a) => $a->question->order) as $index => $ans)
                     @php $q = $ans->question; @endphp
+                    @php $passage = $q->sourcePassage(); @endphp
+                    @if ($passage && $passage->id !== ($shownPassageId ?? null))
+                        @include('partials.qb-passage', ['passageText' => $passage->passage_text, 'passageImage' => $passage->passage_image])
+                    @endif
+                    @php $shownPassageId = $passage?->id; @endphp
                     <div class="border rounded p-3 mb-3">
                         <div class="d-flex justify-content-between">
                             <h6 class="mb-2">{{ $loop->iteration }}. {{ $q->question }}</h6>

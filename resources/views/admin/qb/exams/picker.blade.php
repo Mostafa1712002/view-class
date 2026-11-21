@@ -83,6 +83,10 @@
                     <thead><tr><th style="width:36px"></th><th>الكود</th><th>السؤال</th><th>البنك</th><th>النوع</th><th>الصعوبة</th><th>الدرجة</th></tr></thead>
                     <tbody>
                     @foreach ($bankQuestions as $q)
+                        @if ($q->passage && $q->passage_id !== ($shownPassageId ?? null))
+                            <tr class="table-info"><td></td><td colspan="6"><span class="badge bg-primary">قطعة</span> {{ \Illuminate\Support\Str::limit($q->passage->passage_text, 160) }}</td></tr>
+                        @endif
+                        @php $shownPassageId = $q->passage_id; @endphp
                         @php $added = in_array($q->id, $alreadyIds, true); @endphp
                         <tr class="{{ $added ? 'table-light text-muted' : '' }}">
                             <td>

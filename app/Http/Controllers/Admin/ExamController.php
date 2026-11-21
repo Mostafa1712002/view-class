@@ -243,7 +243,7 @@ class ExamController extends Controller
      */
     public function show(Exam $exam)
     {
-        $exam->load(['teacher', 'subject', 'classRoom', 'academicYear', 'questions', 'studentExams.student']);
+        $exam->load(['teacher', 'subject', 'classRoom', 'academicYear', 'questions.sourceBankQuestion.passage', 'studentExams.student']);
 
         $statistics = [
             'total_students' => $exam->studentExams->count(),
