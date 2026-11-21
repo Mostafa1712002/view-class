@@ -26,6 +26,9 @@
     <div class="row mt-3">
         <div class="col"><div class="rs-stat"><div class="n text-success">{{ $result->imported }}</div>تم استيرادها</div></div>
         <div class="col"><div class="rs-stat"><div class="n text-danger">{{ $result->failed }}</div>فشلت / متخطاة</div></div>
+        @if (($result->passages ?? 0) > 0)
+            <div class="col"><div class="rs-stat"><div class="n text-primary">{{ $result->passages }}</div>قطع</div></div>
+        @endif
         <div class="col"><div class="rs-stat"><div class="n">{{ $result->total }}</div>الإجمالي</div></div>
     </div>
 

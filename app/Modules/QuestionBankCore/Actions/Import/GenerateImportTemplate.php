@@ -12,11 +12,11 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
  * #254 — builds the downloadable Excel template for the QB-rebuild importer.
  *
  * The "Questions" sheet carries the full منصة الأول column set from the card,
- * plus an Instructions and an Allowed-Values sheet. SCOPE: only the Questions
- * sheet is built/consumed. The card's separate TahsiliQuestions / Passages /
- * PassageQuestions sheets are NOT generated here and the parser does not read them
- * (a question_category=tahsili row in Questions still imports as a normal question
- * with no domain/standard handling). See the spec real-vs-stub note.
+ * plus an Instructions and an Allowed-Values sheet. Only the Questions sheet is
+ * consumed. Passages live in the same sheet: a «قطعة» row followed by its
+ * sub-questions (question_category = passage) — see ParseQuestionsExcel. A
+ * question_category=tahsili row still imports as a normal question with no
+ * domain/standard handling.
  * PhpSpreadsheet 5.x: string-coordinate setCellValue('A1', …).
  */
 final class GenerateImportTemplate
@@ -88,7 +88,7 @@ final class GenerateImportTemplate
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // Two illustrative sample rows (mcq + true_false).
+        // Sample rows: mcq, true_false, then a passage («قطعة») with two sub-questions.
         $samples = [
             [
                 'Q001', 'normal', 'الرياضيات', '5', '', '1', '', '',
@@ -101,6 +101,24 @@ final class GenerateImportTemplate
                 'متوسط', 'true_false', 'العدد 7 عدد أولي.', '', 'no', '1',
                 '', '', '', '', '', '', '', '', '', '',
                 'true', '', '', '',
+            ],
+            [
+                'P001', '', 'الرياضيات', '5', '', '1', '', '',
+                'متوسط', 'قطعة', 'اشترى أحمد 3 أقلام بسعر 2 ريال للقلم، ودفع للبائع 10 ريالات.', '', '', '',
+                '', '', '', '', '', '', '', '', '', '',
+                '', '', '', '',
+            ],
+            [
+                'Q003', 'passage', 'الرياضيات', '5', '', '1', '', '',
+                'سهل', 'mcq', 'كم دفع أحمد ثمنًا للأقلام؟', '', 'no', '1',
+                '5', '', '6', '', '8', '', '', '', '', '',
+                'ب', '3 × 2 = 6', '', '',
+            ],
+            [
+                'Q004', 'passage', 'الرياضيات', '5', '', '1', '', '',
+                'متوسط', 'short', 'كم الباقي الذي استرده أحمد؟', '', 'no', '1',
+                '', '', '', '', '', '', '', '', '', '',
+                '4 ريالات', '10 − 6 = 4', '', '',
             ],
         ];
         foreach ($samples as $r => $row) {
@@ -130,7 +148,7 @@ final class GenerateImportTemplate
             '',
             '1. أضف الأسئلة في ورقة "Questions" بدءًا من الصف الثاني. لا تحذف صف العناوين.',
             '2. question_code: كود مرجعي للسؤال (إلزامي لأسئلة الصورة الكاملة).',
-            '3. question_category: normal أو tahsili أو passage.',
+            '3. question_category: normal أو tahsili أو passage (أو بالعربي: عادي / تحصيلي / قطعة).',
             '4. subject: اسم المادة كما هو مسجّل في النظام (مطابقة بالاسم).',
             '5. grade: رقم الصف (grade_level). class / semester / week / skill اختيارية.',
             '6. difficulty_level: سهل | متوسط | صعب أو 1 | 2 | 3.',
@@ -145,6 +163,13 @@ final class GenerateImportTemplate
             '    - fill_blank: إجابات الفراغات مفصولة بـ |',
             '    - matching: أزواج بصيغة يمين=>يسار مفصولة بـ |',
             '12. score: درجة السؤال (رقم). explanation / tags / notes اختيارية.',
+            '',
+            'القطعة (نص قرائي تتبعه أسئلة):',
+            '- اكتب صف القطعة أولًا: question_type = قطعة، ونص القطعة في question_text (أو صورتها في question_image). question_code هنا كود القطعة (اختياري). أعمدة الإجابات تُترك فارغة.',
+            '- اكتب أسئلة القطعة في الصفوف التالية مباشرة، وفي كل سؤال منها question_category = passage. لكل سؤال اختياراته وإجابته الصحيحة كأي سؤال عادي.',
+            '- تنتهي القطعة عند أول صف ليس passage. الأسئلة تُحفظ بنفس ترتيبها في الملف.',
+            '- قطعة بلا أسئلة بعدها، أو سؤال passage بلا قطعة قبله = خطأ. وإذا كان في أحد أسئلة القطعة خطأ لا تُستورد القطعة كلها حتى يُصحَّح.',
+            '- مثال: الصفوف 4 و5 و6 في ورقة Questions.',
             '',
             'ملاحظات:',
             '- لا يتم حفظ أي سؤال قبل الفحص والمعاينة.',
@@ -171,6 +196,7 @@ final class GenerateImportTemplate
             ['essay', 'مقالي'],
             ['matching', 'توصيل'],
             ['fill_blank', 'املأ الفراغ'],
+            ['قطعة', 'صف قطعة (نص قرائي) — أسئلتها في الصفوف التالية مع question_category = passage'],
             [null, null],
             ['difficulty_level', null],
             ['سهل', '1'],
@@ -180,7 +206,7 @@ final class GenerateImportTemplate
             ['question_category', null],
             ['normal', 'عادي'],
             ['tahsili', 'تحصيلي'],
-            ['passage', 'قطعة'],
+            ['passage', 'سؤال تابع للقطعة التي فوقه'],
             [null, null],
             ['correct_answer — التنسيق', null],
             ['mcq', 'A/B/C/D/E أو 1..5'],

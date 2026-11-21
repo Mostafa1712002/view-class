@@ -7,6 +7,7 @@ use App\Models\QuestionBank;
 use App\Models\QuestionImportBatch;
 use App\Models\QuestionImportError;
 use App\Modules\QuestionBankCore\Actions\CreateQuestion;
+use App\Modules\QuestionBankCore\Models\Passage;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\DB;
  * bank_questions row AND the normalized question_answers rows (+ answer_data JSON
  * via MapAnswerData) — exactly like a manual create. Invalid/duplicate rows are
  * skipped and recorded in question_import_errors. Updates the batch counters.
+ * Passage rows are not questions: the Passage is created with its first imported
+ * sub-question and each sub-question is attached in sheet order (passage_questions).
  */
 final class ImportFromPreview
 {
@@ -35,11 +38,22 @@ final class ImportFromPreview
     ): object {
         $imported = 0;
         $failed = 0;
+        $passageRows = collect($previewRows)->filter(fn ($r) => ! empty($r['is_passage']))->keyBy('rowNumber')->all();
+        $passages = []; // passage rowNumber => created Passage
 
         $batch->update(['status' => 'pending', 'started_at' => now()]);
 
         foreach ($previewRows as $pr) {
             $rowStatus = $pr['status'] ?? 'valid';
+
+            if (! empty($pr['is_passage'])) {
+                if ($rowStatus !== 'valid') {
+                    $failed++;
+                    $this->recordError($batch, $pr);
+                }
+
+                continue;
+            }
 
             // Duplicate rows: honour the policy. Only skip|new are supported (the
             // request rejects "update"). policy=new turns a duplicate into a fresh
@@ -57,17 +71,26 @@ final class ImportFromPreview
             }
 
             try {
-                DB::transaction(function () use ($bank, $batch, $pr, $statusChoice, $importedBy) {
+                $passageRow = $pr['passage_row'] ?? null;
+                $passage = DB::transaction(function () use ($bank, $batch, $pr, $statusChoice, $importedBy, $passageRow, $passageRows, $passages) {
                     $data = $this->buildPayload($bank, $pr, $statusChoice);
                     $data = $this->resolveImages($bank, $pr, $data);
+                    $passage = $passageRow ? ($passages[$passageRow] ?? $this->createPassage($bank, $passageRows[$passageRow], $importedBy)) : null;
+                    $data['passage_id'] = $passage?->id;
                     $question = $this->createQuestion->execute($bank, $data);
+                    $passage?->questions()->attach($question->id, ['sort_order' => (int) $pr['passage_sort']]);
                     // Tag provenance (CreateQuestion defaults source=manual).
                     $question->update([
                         'source' => 'imported',
                         'import_batch_id' => $batch->id,
                         'imported_by' => $importedBy,
                     ]);
+
+                    return $passage;
                 });
+                if ($passage) {
+                    $passages[$passageRow] = $passage; // only after commit, so a rolled-back row never leaves a stale id
+                }
                 $imported++;
             } catch (\Throwable $e) {
                 $failed++;
@@ -92,6 +115,7 @@ final class ImportFromPreview
             'total' => count($previewRows),
             'imported' => $imported,
             'failed' => $failed,
+            'passages' => count($passages),
             'status' => 'completed',
         ];
     }
@@ -136,6 +160,28 @@ final class ImportFromPreview
             'matching_left' => $pr['matching_left'] ?? [],
             'matching_right' => $pr['matching_right'] ?? [],
         ];
+    }
+
+    /**
+     * Mirrors PassageController::store (status rule included).
+     *
+     * @param  array<string,mixed>  $row  parsed passage row
+     */
+    private function createPassage(QuestionBank $bank, array $row, ?int $importedBy): Passage
+    {
+        return Passage::create([
+            'question_bank_id' => $bank->id,
+            'passage_code' => $row['passage_code'] ?? null,
+            'passage_text' => $row['passage_text'] ?? '',
+            'passage_image' => ! empty($row['attachment_url']) ? $this->images->execute($row['attachment_url'], $bank->id) : null,
+            'subject_id' => $row['subject_id'] ?? null,
+            'semester_id' => $row['semester_id'] ?? null,
+            'week_id' => $row['week_id'] ?? null,
+            'skill_id' => $row['skill_id'] ?? null,
+            'difficulty_level' => $row['difficulty'] ?? 1,
+            'status' => $bank->requires_approval ? 'draft' : 'approved',
+            'created_by' => $importedBy,
+        ]);
     }
 
     /**

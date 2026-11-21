@@ -210,13 +210,18 @@ class ImportController extends Controller
 
     /**
      * @param  array<int,array<string,mixed>>  $rows
-     * @return array{valid:int,invalid:int,duplicate:int}
+     * @return array{valid:int,invalid:int,duplicate:int,passages:int}
      */
     private function countStatuses(array $rows): array
     {
-        $c = ['valid' => 0, 'invalid' => 0, 'duplicate' => 0];
+        $c = ['valid' => 0, 'invalid' => 0, 'duplicate' => 0, 'passages' => 0];
         foreach ($rows as $r) {
             $s = $r['status'] ?? 'valid';
+            if (! empty($r['is_passage']) && $s === 'valid') {
+                $c['passages']++; // a passage is not a question: keep it out of the "import N questions" count
+
+                continue;
+            }
             if (isset($c[$s])) {
                 $c[$s]++;
             }

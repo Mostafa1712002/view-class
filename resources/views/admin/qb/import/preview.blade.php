@@ -12,6 +12,7 @@
     .pv-row-valid{background:#f0fdf4}.pv-row-invalid{background:#fef2f2}.pv-row-duplicate{background:#fffbeb}
     .pv-badge{padding:2px 8px;border-radius:999px;font-size:11px}
     .pv-b-valid{background:#dcfce7;color:#166534}.pv-b-invalid{background:#fee2e2;color:#991b1b}.pv-b-duplicate{background:#fef3c7;color:#92400e}
+    .pv-b-passage{background:#dbeafe;color:#1e40af}.pv-passage td{font-weight:600}
     .pv-err{color:#991b1b;font-size:11.5px}
 </style>
 @endpush
@@ -34,6 +35,9 @@
     <div class="col"><div class="pv-stat"><div class="n text-success">{{ $counts['valid'] }}</div>صالحة</div></div>
     <div class="col"><div class="pv-stat"><div class="n text-danger">{{ $counts['invalid'] }}</div>خاطئة</div></div>
     <div class="col"><div class="pv-stat"><div class="n text-warning">{{ $counts['duplicate'] }}</div>مكررة</div></div>
+    @if (($counts['passages'] ?? 0) > 0)
+        <div class="col"><div class="pv-stat"><div class="n text-primary">{{ $counts['passages'] }}</div>قطع</div></div>
+    @endif
 </div>
 
 <div class="pv-card">
@@ -63,8 +67,17 @@
             <tbody>
             @foreach ($rows as $r)
                 @php $st = $r['status'] ?? 'valid'; @endphp
+                @if (! empty($r['is_passage']))
+                    <tr class="pv-row-{{ $st }} pv-passage">
+                        <td>{{ $r['rowNumber'] }}</td>
+                        <td>{{ $r['raw']['question_code'] ?? '' }}</td>
+                        <td colspan="8"><span class="pv-badge pv-b-passage">قطعة</span> {{ \Illuminate\Support\Str::limit($r['passage_text'] ?? '', 220) }}</td>
+                        <td class="pv-err">{{ implode(' • ', $r['errors'] ?? []) }}</td>
+                    </tr>
+                    @continue
+                @endif
                 <tr class="pv-row-{{ $st }}">
-                    <td>{{ $r['rowNumber'] }}</td>
+                    <td>{{ $r['rowNumber'] }}@if (! empty($r['passage_row'])) <small class="text-muted">↳ {{ $r['passage_row'] }}</small>@endif</td>
                     <td>{{ $r['raw']['question_code'] ?? '' }}</td>
                     <td>{{ $r['raw']['subject'] ?? '' }}</td>
                     <td>{{ $r['raw']['grade'] ?? '' }}</td>

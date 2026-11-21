@@ -11,6 +11,7 @@ use App\Modules\QuestionBankCore\Actions\Import\GenerateImportTemplate;
 use App\Modules\QuestionBankCore\Actions\Import\ImportFromPreview;
 use App\Modules\QuestionBankCore\Actions\Import\ParseQuestionsExcel;
 use App\Modules\QuestionBankCore\Actions\Import\ResolveImportImage;
+use App\Modules\QuestionBankCore\Models\Passage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -51,7 +52,7 @@ class QuestionImportTest extends TestCase
     {
         $spreadsheet = IOFactory::load((new GenerateImportTemplate)->execute($bank));
         $sheet = $spreadsheet->getSheetByName('Questions');
-        $sheet->removeRow(2, 2); // drop the template's sample rows
+        $sheet->removeRow(2, $sheet->getHighestRow() - 1); // drop the template's sample rows
         $cols = GenerateImportTemplate::QUESTION_COLUMNS;
         foreach ($rows as $i => $row) {
             foreach ($row as $header => $value) {
@@ -100,6 +101,60 @@ class QuestionImportTest extends TestCase
         $this->assertSame(2.0, (float) $mcq->points);
         $this->assertTrue((bool) $mcq->answers()->where('answer_text', '٥')->first()->is_correct);
         $this->assertTrue((bool) BankQuestion::where('question_code', 'A2')->first()->answers()->where('answer_text', 'z')->first()->is_correct);
+        $this->assertSame(0, Passage::count());
+        $this->assertSame(0, BankQuestion::whereNotNull('passage_id')->count());
+    }
+
+    public function test_passage_with_three_sub_questions_imports_in_order(): void
+    {
+        $bank = $this->bank();
+        $file = $this->clientFile($bank, [
+            ['question_code' => 'P1', 'question_type' => 'قطعة', 'subject' => 'الرياضيات', 'question_text' => 'اشترى أحمد ٣ أقلام بـ ٦ ريالات.'],
+            ['question_code' => 'S1', 'question_category' => 'passage', 'question_type' => 'mcq', 'question_text' => 'كم قلمًا؟',
+                'answer_1_text' => '٢', 'answer_2_text' => '٣', 'correct_answer' => 'ب'],
+            ['question_code' => 'S2', 'question_category' => 'قطعة', 'question_type' => 'true_false', 'question_text' => 'سعر القلم ريالان', 'correct_answer' => 'صح'],
+            ['question_code' => 'S3', 'question_category' => 'passage', 'question_type' => 'short', 'question_text' => 'كم دفع؟', 'correct_answer' => '٦'],
+            ['question_code' => 'N1', 'question_type' => 'true_false', 'question_text' => 'سؤال عادي بعد القطعة', 'correct_answer' => 'خطأ'],
+        ]);
+
+        [$rows, $result] = $this->runImport($bank, $file);
+
+        $this->assertSame([], collect($rows)->where('status', '!=', 'valid')->map(fn ($r) => $r['errors'])->all());
+        $this->assertSame(4, $result->imported); // the passage row is not a question
+        $this->assertSame(1, $result->passages);
+        $passage = Passage::sole();
+        $this->assertSame(['P1', 'اشترى أحمد ٣ أقلام بـ ٦ ريالات.', $bank->id], [$passage->passage_code, $passage->passage_text, $passage->question_bank_id]);
+        $this->assertSame(['S1', 'S2', 'S3'], $passage->questions->pluck('question_code')->all());
+        $this->assertSame([1, 2, 3], $passage->questions->pluck('pivot.sort_order')->map(fn ($v) => (int) $v)->all());
+        $this->assertSame(3, BankQuestion::where('passage_id', $passage->id)->where('question_category', 'passage')->count());
+        $this->assertNull(BankQuestion::where('question_code', 'N1')->value('passage_id'));
+    }
+
+    public function test_passage_structure_errors_name_the_rows(): void
+    {
+        $bank = $this->bank();
+        $file = $this->clientFile($bank, [
+            ['question_type' => 'قطعة', 'question_text' => 'قطعة بلا أسئلة'],                                                  // row 2
+            ['question_type' => 'true_false', 'question_text' => 'عادي', 'correct_answer' => 'صح'],                              // row 3
+            ['question_category' => 'passage', 'question_type' => 'true_false', 'question_text' => 'يتيم', 'correct_answer' => 'صح'], // row 4
+            ['question_type' => 'passage', 'question_text' => 'قطعة سؤالها الثاني خاطئ'],                                       // row 5
+            ['question_category' => 'passage', 'question_type' => 'true_false', 'question_text' => 'سليم', 'correct_answer' => 'صح'], // row 6
+            ['question_category' => 'passage', 'question_type' => 'mcq', 'question_text' => 'بلا خيارات', 'correct_answer' => 'أ'],  // row 7
+        ]);
+
+        [$rows, $result] = $this->runImport($bank, $file);
+        $byRow = collect($rows)->keyBy('rowNumber');
+
+        $this->assertSame('valid', $byRow[3]['status']);
+        foreach ([2, 4, 5, 6, 7] as $r) {
+            $this->assertSame('invalid', $byRow[$r]['status'], "row {$r}");
+        }
+        $this->assertStringContainsString('قطعة بدون أسئلة فرعية', implode(' ', $byRow[2]['errors']));
+        $this->assertStringContainsString('بدون صف قطعة قبله', implode(' ', $byRow[4]['errors']));
+        $this->assertStringContainsString('(الصف 5)', implode(' ', $byRow[6]['errors']));
+        $this->assertStringContainsString('7', implode(' ', $byRow[5]['errors']));
+        $this->assertSame(1, $result->imported);
+        $this->assertSame(0, Passage::count());
     }
 
     /** Hermetic DNS: every host resolves to $ips. */

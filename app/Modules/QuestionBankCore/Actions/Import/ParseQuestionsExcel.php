@@ -29,6 +29,12 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
  *       options_ar[], correct_index, correct, short_answer, essay_answer,
  *       blanks[], matching_left[], matching_right[]
  *
+ * Passages (القطعة): a row whose question_type is «قطعة» (or "passage") opens a
+ * passage; the rows right after it with question_category = passage are its
+ * sub-questions, in sheet order. Any other row closes the passage. The passage row
+ * carries is_passage=true; each sub-question carries passage_row (the passage's Excel
+ * row) + passage_sort. A passage and its sub-questions are accepted or rejected together.
+ *
  * Image support: the parser records *_image URLs (Method 1 — links) and validates
  * extension/URL shape. ZIP image bundles (Method 2) are NOT consumed here — see the
  * real-vs-stub note in the spec.
@@ -38,6 +44,11 @@ final class ParseQuestionsExcel
     private const ALLOWED_TYPES = ['mcq', 'true_false', 'short', 'essay', 'matching', 'fill_blank'];
 
     private const ALLOWED_CATEGORIES = ['normal', 'tahsili', 'passage'];
+
+    private const CATEGORY_ALIASES = ['عادي' => 'normal', 'تحصيلي' => 'tahsili', 'قطعة' => 'passage', 'قطعه' => 'passage'];
+
+    /** question_type values that mark a passage row. */
+    private const PASSAGE_TYPES = ['قطعة', 'قطعه', 'passage'];
 
     private const ALLOWED_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp']; // no svg: it can carry script
 
@@ -102,6 +113,7 @@ final class ParseQuestionsExcel
 
         $seenInFile = [];
         $out = [];
+        $openPassage = null; // index in $out of the passage whose sub-questions we are reading
 
         foreach ($rows as $rowNum => $cells) {
             if ($rowNum === 1) {
@@ -147,8 +159,18 @@ final class ParseQuestionsExcel
                 $errors[] = "عمود مفقود في الملف: {$mc}";
             }
 
+            if (in_array($this->norm($get('question_type')), self::PASSAGE_TYPES, true)) {
+                $out[] = $this->passageRow($rowNum, $raw, $errors, $get);
+                $openPassage = array_key_last($out);
+
+                continue;
+            }
+
             $code = $get('question_code');
             $category = $this->resolveCategory($get('question_category'), $errors);
+            if ($category !== 'passage') {
+                $openPassage = null;
+            }
             $type = mb_strtolower($get('question_type'));
             if (! in_array($type, self::ALLOWED_TYPES, true)) {
                 $errors[] = 'نوع سؤال غير مدعوم: '.($type ?: '(فارغ)');
@@ -229,7 +251,86 @@ final class ParseQuestionsExcel
                 'semester_id' => $semesterId,
                 'week_id' => $weekId,
                 'skill_id' => $skillId,
-            ], $answerPayload);
+            ], $answerPayload, $category === 'passage' ? [
+                'passage_row' => $openPassage !== null ? $out[$openPassage]['rowNumber'] : null,
+                'passage_sort' => $openPassage !== null ? ++$out[$openPassage]['children'] : null,
+            ] : []);
+        }
+
+        return $this->checkPassages($out);
+    }
+
+    // ── passages ────────────────────────────────────────────────────────────
+
+    private function passageRow(int $rowNum, array $raw, array $errors, callable $get): array
+    {
+        $text = $get('question_text');
+        $image = $get('question_image');
+        if ($image !== '') {
+            $this->validateImageRef($image, 'question_image', $errors);
+        }
+        if ($text === '' && $image === '') {
+            $errors[] = 'قطعة بدون نص وبدون صورة.';
+        }
+        $payload = [
+            'is_passage' => true,
+            'children' => 0,
+            'passage_code' => $get('question_code') !== '' ? $get('question_code') : null,
+            'passage_text' => $text,
+            'attachment_url' => $image !== '' ? $image : null,
+            'subject_id' => $this->resolveLookup($this->subjects, $get('subject'), 'مادة', $errors, optional: true),
+            'semester_id' => $this->resolveLookup($this->semesters, $get('semester'), 'فصل دراسي', $errors, optional: true),
+            'week_id' => $this->resolveLookup($this->weeks, $get('week'), 'أسبوع', $errors, optional: true),
+            'skill_id' => $this->resolveLookup($this->skills, $get('skill'), 'مهارة', $errors, optional: true),
+            'difficulty' => $this->resolveDifficulty($get('difficulty_level'), $errors),
+        ];
+
+        return ['rowNumber' => $rowNum, 'status' => 'valid', 'errors' => $errors, 'raw' => $raw] + $payload;
+    }
+
+    /**
+     * Structural checks once every row is read: orphan sub-questions, empty passages,
+     * and all-or-nothing per passage so a passage never imports with a hole in it.
+     *
+     * @param  array<int,array<string,mixed>>  $out
+     * @return array<int,array<string,mixed>>
+     */
+    private function checkPassages(array $out): array
+    {
+        $blocks = []; // passage rowNumber => [indexes in $out]
+        foreach ($out as $i => $r) {
+            if (! empty($r['is_passage'])) {
+                $blocks[$r['rowNumber']] = [$i];
+                if ($r['children'] === 0) {
+                    $out[$i]['errors'][] = 'قطعة بدون أسئلة فرعية: اكتب أسئلتها في الصفوف التالية مباشرة مع question_category = passage.';
+                }
+            } elseif (($r['question_category'] ?? null) === 'passage') {
+                if ($r['passage_row'] === null) {
+                    $out[$i]['errors'][] = 'سؤال قطعة (question_category = passage) بدون صف قطعة قبله.';
+                } else {
+                    $blocks[$r['passage_row']][] = $i;
+                }
+            }
+        }
+
+        foreach ($out as $i => $r) {
+            if (! empty($out[$i]['errors']) && $out[$i]['status'] === 'valid') {
+                $out[$i]['status'] = 'invalid';
+            }
+        }
+
+        foreach ($blocks as $passageRow => $idx) {
+            $bad = array_values(array_filter($idx, fn ($i) => $out[$i]['status'] === 'invalid'));
+            if ($bad === []) {
+                continue;
+            }
+            $badRows = implode('، ', array_map(fn ($i) => $out[$i]['rowNumber'], $bad));
+            foreach ($idx as $i) {
+                if (! in_array($i, $bad, true)) {
+                    $out[$i]['errors'][] = "لم تُستورد القطعة (الصف {$passageRow}) لأن صفوفها بها أخطاء: {$badRows}.";
+                    $out[$i]['status'] = 'invalid';
+                }
+            }
         }
 
         return $out;
@@ -491,6 +592,7 @@ final class ParseQuestionsExcel
     private function resolveCategory(string $value, array &$errors): string
     {
         $value = $this->norm($value);
+        $value = self::CATEGORY_ALIASES[$value] ?? $value;
         if ($value === '') {
             return 'normal';
         }
