@@ -307,6 +307,7 @@ final class ParseQuestionsExcel
             } elseif (($r['question_category'] ?? null) === 'passage') {
                 if ($r['passage_row'] === null) {
                     $out[$i]['errors'][] = 'سؤال قطعة (question_category = passage) بدون صف قطعة قبله.';
+                    $out[$i]['status'] = 'invalid'; // even a duplicate: policy "new" must not import it standalone
                 } else {
                     $blocks[$r['passage_row']][] = $i;
                 }

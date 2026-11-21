@@ -391,7 +391,7 @@ class ExamController extends Controller
             ->with(['columns' => fn ($q) => $q->where('type', 'numeric')])->get();
 
         $exam->load(['questions', 'studentExams' => function ($query) {
-            $query->with(['student', 'answers.question', 'exitAttempts' => function ($q) {
+            $query->with(['student', 'answers.question.sourceBankQuestion.passage', 'exitAttempts' => function ($q) {
                 $q->orderBy('occurred_at');
             }])->orderBy('score', 'desc');
         }]);

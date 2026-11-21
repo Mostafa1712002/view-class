@@ -165,21 +165,35 @@ class QuestionImportTest extends TestCase
             ['question_type' => 'passage', 'question_text' => 'قطعة سؤالها الثاني خاطئ'],                                       // row 5
             ['question_category' => 'passage', 'question_type' => 'true_false', 'question_text' => 'سليم', 'correct_answer' => 'صح'], // row 6
             ['question_category' => 'passage', 'question_type' => 'mcq', 'question_text' => 'بلا خيارات', 'correct_answer' => 'أ'],  // row 7
+            ['question_code' => 'D1', 'question_type' => 'true_false', 'question_text' => 'عادي', 'correct_answer' => 'صح'],     // row 8
+            ['question_code' => 'D1', 'question_category' => 'passage', 'question_type' => 'true_false', 'question_text' => 'يتيم مكرر', 'correct_answer' => 'صح'], // row 9
         ]);
 
         [$rows, $result] = $this->runImport($bank, $file);
         $byRow = collect($rows)->keyBy('rowNumber');
 
         $this->assertSame('valid', $byRow[3]['status']);
-        foreach ([2, 4, 5, 6, 7] as $r) {
+        foreach ([2, 4, 5, 6, 7, 9] as $r) {
             $this->assertSame('invalid', $byRow[$r]['status'], "row {$r}");
         }
         $this->assertStringContainsString('قطعة بدون أسئلة فرعية', implode(' ', $byRow[2]['errors']));
         $this->assertStringContainsString('بدون صف قطعة قبله', implode(' ', $byRow[4]['errors']));
         $this->assertStringContainsString('(الصف 5)', implode(' ', $byRow[6]['errors']));
         $this->assertStringContainsString('7', implode(' ', $byRow[5]['errors']));
-        $this->assertSame(1, $result->imported);
+        $this->assertSame(2, $result->imported);
         $this->assertSame(0, Passage::count());
+    }
+
+    public function test_template_example_passage_is_well_formed(): void
+    {
+        $bank = $this->bank();
+        $path = (new GenerateImportTemplate)->execute($bank);
+        $rows = collect(app(ParseQuestionsExcel::class)->execute(new UploadedFile($path, 't.xlsx', null, null, true), $bank, $bank->school_id))->keyBy('rowNumber');
+
+        $this->assertTrue($rows[4]['is_passage'] ?? false);
+        $this->assertSame([4, 4], [$rows[5]['passage_row'], $rows[6]['passage_row']]);
+        $this->assertSame([1, 2], [$rows[5]['passage_sort'], $rows[6]['passage_sort']]);
+        $this->assertSame([], preg_grep('/قطعة/u', $rows->pluck('errors')->flatten()->all()));
     }
 
     /** Hermetic DNS: every host resolves to $ips. */

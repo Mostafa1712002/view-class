@@ -200,7 +200,13 @@
                                                 <button type="button" class="btn-close" data-dismiss="modal" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
+                                                @php $shownPassageId = null; @endphp
                                                 @foreach($studentExam->answers as $answer)
+                                                    @php $passage = $answer->question->sourcePassage(); @endphp
+                                                    @if ($passage && $passage->id !== $shownPassageId)
+                                                        @include('partials.qb-passage', ['passageText' => $passage->passage_text, 'passageImage' => $passage->passage_image])
+                                                    @endif
+                                                    @php $shownPassageId = $passage?->id; @endphp
                                                     <div class="border rounded p-3 mb-3">
                                                         <div class="d-flex justify-content-between mb-2">
                                                             <span class="badge bg-secondary">السؤال {{ $loop->iteration }}</span>
