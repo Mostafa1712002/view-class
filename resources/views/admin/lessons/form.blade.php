@@ -93,10 +93,10 @@
         <div class="ls-grid">
             <div class="ls-field">
                 <label>@lang('lessons_admin.form.class')<span class="req">*</span></label>
-                <select name="class_id" class="form-control {{ $errors->has('class_id') ? 'is-invalid' : '' }}" required>
+                <select name="class_id" data-grade-source="subject_id" class="form-control {{ $errors->has('class_id') ? 'is-invalid' : '' }}" required>
                     <option value="">@lang('lessons_admin.form.choose')</option>
                     @foreach($classes as $c)
-                        <option value="{{ $c->id }}" @selected((string) $cur['class_id'] === (string) $c->id)>
+                        <option value="{{ $c->id }}" data-grade="{{ $c->grade_level }}" @selected((string) $cur['class_id'] === (string) $c->id)>
                             {{ optional($c->section)->name ? $c->section->name . ' — ' : '' }}{{ $c->name }}
                         </option>
                     @endforeach
@@ -129,7 +129,7 @@
                 <select name="subject_id" class="form-control {{ $errors->has('subject_id') ? 'is-invalid' : '' }}" required>
                     <option value="">@lang('lessons_admin.form.choose')</option>
                     @foreach($subjects as $sub)
-                        <option value="{{ $sub->id }}" @selected((string) $cur['subject_id'] === (string) $sub->id)>{{ $sub->name }}</option>
+                        <option value="{{ $sub->id }}" data-grades="{{ implode(',', (array) $sub->grade_levels) }}" @selected((string) $cur['subject_id'] === (string) $sub->id)>{{ $sub->name }}</option>
                     @endforeach
                 </select>
                 @error('subject_id') <div class="err">{{ $message }}</div> @enderror

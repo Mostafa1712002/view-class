@@ -259,10 +259,10 @@
                 </div>
                 <div class="col-md-3 col-sm-6 mb-1">
                     <label class="form-label">@lang('schedule.class')</label>
-                    <select name="class_id" class="form-control">
+                    <select name="class_id" data-grade-source="subject_id" class="form-control">
                         <option value="">@lang('schedule.all')</option>
                         @foreach($classes as $class)
-                            <option value="{{ $class->id }}" {{ ($filters['class_id'] ?? null) == $class->id ? 'selected' : '' }}>
+                            <option value="{{ $class->id }}" data-grade="{{ $class->grade_level }}" {{ ($filters['class_id'] ?? null) == $class->id ? 'selected' : '' }}>
                                 {{ $class->name }}{{ $class->division ? ' - ' . $class->division : '' }}
                                 @if($class->section) ({{ $class->section->name }}) @endif
                             </option>
@@ -285,7 +285,7 @@
                     <select name="subject_id" class="form-control">
                         <option value="">@lang('schedule.all')</option>
                         @foreach($subjects as $subject)
-                            <option value="{{ $subject->id }}" {{ ($filters['subject_id'] ?? null) == $subject->id ? 'selected' : '' }}>
+                            <option value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}" {{ ($filters['subject_id'] ?? null) == $subject->id ? 'selected' : '' }}>
                                 {{ $subject->name }}
                             </option>
                         @endforeach

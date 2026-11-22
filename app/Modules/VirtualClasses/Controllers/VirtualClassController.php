@@ -404,7 +404,7 @@ class VirtualClassController extends Controller
         $subjects = Subject::query()
             ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'grade_levels']);
 
         $roles = Role::orderBy('name')->get(['id', 'name', 'slug']);
 

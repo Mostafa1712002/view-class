@@ -36,7 +36,7 @@ class StudentSubjectController extends Controller
      */
     private function studentSubjects($student)
     {
-        $gradeLevel = optional($student->classRoom)->grade_level;
+        $gradeLevel = $student->gradeLevel();
 
         $query = Subject::where('school_id', $student->school_id)
             ->where('is_active', true);
@@ -141,7 +141,7 @@ class StudentSubjectController extends Controller
 
         // ── Books ─────────────────────────────────────────────────────────────
         // Book has subject_id, school_id, grade_level, is_active.
-        $gradeLevel = optional($student->classRoom)->grade_level;
+        $gradeLevel = $student->gradeLevel();
         $books = Book::where('subject_id', $subject->id)
             ->where('school_id', $student->school_id)
             ->where('is_active', true)

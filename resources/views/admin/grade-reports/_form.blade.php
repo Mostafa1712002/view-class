@@ -47,10 +47,10 @@
             </div>
             <div class="col-md-3 mb-3">
                 <label class="form-label">{{ trans('grades_admin.class') }}</label>
-                <select name="class_id" class="form-control">
+                <select name="class_id" data-grade-source="subject_id" class="form-control">
                     <option value="">{{ trans('grades_admin.pick') }}</option>
                     @foreach($classes as $c)
-                        <option value="{{ $c->id }}" @selected($val('class_id') == $c->id)>{{ $c->name }} ({{ $c->grade_level }})</option>
+                        <option value="{{ $c->id }}" data-grade="{{ $c->grade_level }}" @selected($val('class_id') == $c->id)>{{ $c->name }} ({{ $c->grade_level }})</option>
                     @endforeach
                 </select>
             </div>
@@ -59,7 +59,7 @@
                 <select name="subject_id" class="form-control">
                     <option value="">{{ trans('grades_admin.pick') }}</option>
                     @foreach($subjects as $s)
-                        <option value="{{ $s->id }}" @selected($val('subject_id') == $s->id)>{{ $s->name }}</option>
+                        <option value="{{ $s->id }}" data-grades="{{ implode(',', (array) $s->grade_levels) }}" @selected($val('subject_id') == $s->id)>{{ $s->name }}</option>
                     @endforeach
                 </select>
             </div>

@@ -179,7 +179,7 @@ class StudentLibraryController extends Controller
      */
     private function studentSubjectIds($student): array
     {
-        $gradeLevel = optional($student->classRoom)->grade_level;
+        $gradeLevel = $student->gradeLevel();
 
         $query = Subject::where('school_id', $student->school_id)
             ->where('is_active', true);
@@ -209,7 +209,7 @@ class StudentLibraryController extends Controller
         }
 
         $classIds   = $student->enrolledClassIds();
-        $gradeLevel = optional($student->classRoom)->grade_level;
+        $gradeLevel = $student->gradeLevel();
         $studentId  = (int) $student->id;
 
         return Library::query()

@@ -182,10 +182,10 @@
                 <option value="{{ $s->id }}" @selected(($filters['section_id'] ?? '') == $s->id)>{{ $s->name }}</option>
             @endforeach
         </select>
-        <select name="class_id" class="form-control">
+        <select name="class_id" data-grade-source="subject_id" class="form-control">
             <option value="">@lang('lessons_admin.filter.class') — @lang('lessons_admin.filter.all')</option>
             @foreach($classes as $c)
-                <option value="{{ $c->id }}" @selected(($filters['class_id'] ?? '') == $c->id)>{{ $c->name }}</option>
+                <option value="{{ $c->id }}" data-grade="{{ $c->grade_level }}" @selected(($filters['class_id'] ?? '') == $c->id)>{{ $c->name }}</option>
             @endforeach
         </select>
         <select name="teacher_id" class="form-control">
@@ -197,7 +197,7 @@
         <select name="subject_id" class="form-control">
             <option value="">@lang('lessons_admin.filter.subject') — @lang('lessons_admin.filter.all')</option>
             @foreach($subjects as $sub)
-                <option value="{{ $sub->id }}" @selected(($filters['subject_id'] ?? '') == $sub->id)>{{ $sub->name }}</option>
+                <option value="{{ $sub->id }}" data-grades="{{ implode(',', (array) $sub->grade_levels) }}" @selected(($filters['subject_id'] ?? '') == $sub->id)>{{ $sub->name }}</option>
             @endforeach
         </select>
         <select name="day_of_week" class="form-control">

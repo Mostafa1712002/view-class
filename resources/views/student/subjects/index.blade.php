@@ -105,7 +105,7 @@
                                 <small class="text-muted d-block mb-1">{{ $subject->code }}</small>
                             @endif
                             @php
-                                $gradeLevel = optional($student->classRoom)->grade_level;
+                                $gradeLevel ??= $student->gradeLevel();
                             @endphp
                             @if($gradeLevel)
                                 <span class="grade-chip">الصف {{ $gradeLevel }}</span>

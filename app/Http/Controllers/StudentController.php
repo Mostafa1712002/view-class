@@ -559,7 +559,7 @@ class StudentController extends Controller
      */
     private function studentSubjectsForFilter($student)
     {
-        $gradeLevel = optional($student->classRoom)->grade_level;
+        $gradeLevel = $student->gradeLevel();
 
         return \App\Models\Subject::where('school_id', $student->school_id)
             ->where('is_active', true)

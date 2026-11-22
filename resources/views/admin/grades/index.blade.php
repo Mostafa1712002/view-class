@@ -33,10 +33,10 @@
             <form method="GET" class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">الصف <span class="text-danger">*</span></label>
-                    <select name="class_id" class="form-select" required>
+                    <select name="class_id" data-grade-source="subject_id" class="form-select" required>
                         <option value="">اختر الصف</option>
                         @foreach($classes as $class)
-                            <option value="{{ $class->id }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>
+                            <option value="{{ $class->id }}" data-grade="{{ $class->grade_level }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>
                                 {{ $class->name }}
                             </option>
                         @endforeach
@@ -47,7 +47,7 @@
                     <select name="subject_id" class="form-select" required>
                         <option value="">اختر المادة</option>
                         @foreach($subjects as $subject)
-                            <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
+                            <option value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
                                 {{ $subject->name }}
                             </option>
                         @endforeach
