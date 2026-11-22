@@ -107,4 +107,17 @@ class CertificateAgentComplexManagerTest extends TestCase
         $this->assertTrue($check(['agent_user_id' => 'none']));
         $this->assertTrue($check([]));
     }
+
+    public function test_complex_manager_candidates_are_staff_plus_current_manager(): void
+    {
+        $school = School::factory()->create();
+        $staff = $this->vice($school, 'Staff');
+        $student = User::factory()->create(['school_id' => $school->id]);
+        $repo = app(\App\Modules\QuestionBankCore\Repositories\Contracts\CompoundRepository::class);
+
+        $ids = $repo->managerCandidates()->pluck('id');
+        $this->assertTrue($ids->contains($staff->id));
+        $this->assertFalse($ids->contains($student->id));
+        $this->assertTrue($repo->managerCandidates($student->id)->pluck('id')->contains($student->id));
+    }
 }

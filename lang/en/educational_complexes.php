@@ -14,4 +14,6 @@ return [
     'all_companies' => 'All companies',
     'search_placeholder' => 'Search by name...',
     'no_complexes' => 'No educational complexes yet. Add the first one to get started.',
+    'manager' => 'Complex manager',
+    'manager_hint' => 'Printed on certificates of students in the complex\'s schools',
 ];

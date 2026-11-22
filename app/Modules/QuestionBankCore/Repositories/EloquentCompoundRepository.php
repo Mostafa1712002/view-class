@@ -2,6 +2,7 @@
 
 namespace App\Modules\QuestionBankCore\Repositories;
 
+use App\Models\User;
 use App\Modules\QuestionBankCore\Models\Compound;
 use App\Modules\QuestionBankCore\Repositories\Contracts\CompoundRepository;
 use Illuminate\Support\Collection;
@@ -55,5 +56,23 @@ class EloquentCompoundRepository implements CompoundRepository
     public function syncSchools(Compound $compound, array $schoolIds): void
     {
         $compound->schools()->sync($schoolIds);
+    }
+
+    /**
+     * Staff who can manage a complex: any user holding a job title or the
+     * school-admin role (no dedicated complex-manager title exists).
+     */
+    public function managerCandidates(?int $keepUserId = null): Collection
+    {
+        return User::query()
+            ->where(function ($q) use ($keepUserId) {
+                $q->whereNotNull('job_title_id')
+                    ->orWhereHas('roles', fn ($r) => $r->where('slug', 'school-admin'));
+                if ($keepUserId) {
+                    $q->orWhere('users.id', $keepUserId);
+                }
+            })
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 }

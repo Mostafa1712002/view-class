@@ -52,6 +52,7 @@
                             <th>@lang('educational_complexes.logo')</th>
                             <th>@lang('common.name')</th>
                             <th>@lang('educational_complexes.company')</th>
+                            <th>@lang('educational_complexes.manager')</th>
                             <th>@lang('educational_complexes.schools_count')</th>
                             <th>@lang('common.actions')</th>
                         </tr>
@@ -71,6 +72,7 @@
                                 <strong>{{ app()->getLocale() === 'en' ? ($complex->name_en ?: $complex->name_ar) : ($complex->name_ar ?: $complex->name_en) }}</strong>
                             </td>
                             <td>{{ $complex->company?->name_ar ?: $complex->company?->name_en ?: __('educational_complexes.no_company') }}</td>
+                            <td>{{ $complex->manager?->name ?? '—' }}</td>
                             <td>{{ $complex->schools_count }}</td>
                             <td>
                                 <div class="d-flex gap-1">
@@ -86,7 +88,7 @@
 
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">{{ __('educational_complexes.no_complexes') }}</td>
+                            <td colspan="7" class="text-center">{{ __('educational_complexes.no_complexes') }}</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -131,6 +133,19 @@
                                                         <option value="{{ $c->id }}" @selected($complex->educational_company_id == $c->id)>{{ $c->name_ar ?: $c->name_en }}</option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">@lang('educational_complexes.manager')</label>
+                                                <select class="form-control" name="manager_user_id">
+                                                    <option value="">—</option>
+                                                    @if($complex->manager && ! $managerCandidates->contains('id', $complex->manager_user_id))
+                                                        <option value="{{ $complex->manager_user_id }}" selected>{{ $complex->manager->name }}</option>
+                                                    @endif
+                                                    @foreach($managerCandidates as $person)
+                                                        <option value="{{ $person->id }}" @selected($complex->manager_user_id == $person->id)>{{ $person->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="text-muted">@lang('educational_complexes.manager_hint')</small>
                                             </div>
                                             <div class="mb-0">
                                                 <label class="form-label">@lang('educational_complexes.logo')</label>
@@ -177,6 +192,16 @@
                                 <option value="{{ $c->id }}" @selected((string) $companyId === (string) $c->id)>{{ $c->name_ar ?: $c->name_en }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@lang('educational_complexes.manager')</label>
+                        <select class="form-control" name="manager_user_id">
+                            <option value="">—</option>
+                            @foreach($managerCandidates as $person)
+                                <option value="{{ $person->id }}" @selected(old('manager_user_id') == $person->id)>{{ $person->name }}</option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">@lang('educational_complexes.manager_hint')</small>
                     </div>
                     <div class="mb-0">
                         <label class="form-label">@lang('educational_complexes.logo')</label>
