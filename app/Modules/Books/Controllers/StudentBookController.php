@@ -15,8 +15,7 @@ class StudentBookController extends Controller
     {
         $user = auth()->user();
         $schoolId = (int) $user->school_id;
-        // Try to infer student's grade from their profile; fall back to 0 (will only show grade-null books)
-        $gradeLevel = (int) ($user->grade_level ?? data_get($user, 'studentProfile.grade_level') ?? 0);
+        $gradeLevel = $this->gradeLevel();
 
         $books = $this->books->forStudent($schoolId, $gradeLevel);
 
@@ -26,13 +25,16 @@ class StudentBookController extends Controller
         ]);
     }
 
+    /** Student's grade comes from their class (users.class_room_id); 0 = no class, ungraded books only. */
+    private function gradeLevel(): int
+    {
+        return (int) optional(auth()->user()->classRoom)->grade_level;
+    }
+
     private function accessibleBook(int $id)
     {
-        $user = auth()->user();
-        $gradeLevel = (int) ($user->grade_level ?? data_get($user, 'studentProfile.grade_level') ?? 0);
-
         // Same access rules as the list: never reachable outside school/grade.
-        $book = $this->books->forStudent((int) $user->school_id, $gradeLevel)->firstWhere('id', $id);
+        $book = $this->books->forStudent((int) auth()->user()->school_id, $this->gradeLevel())->firstWhere('id', $id);
         abort_if(! $book, 404);
 
         return $book;

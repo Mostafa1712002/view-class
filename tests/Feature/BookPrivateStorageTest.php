@@ -84,6 +84,22 @@ class BookPrivateStorageTest extends TestCase
         $this->actingAs($outsider)->get(route('student.books.download', $book->id))->assertNotFound();
     }
 
+    public function test_graded_book_follows_the_students_class_grade(): void
+    {
+        $school = School::factory()->create();
+        $book = $this->book($school);
+        $book->update(['grade_level' => 2]);
+        $inGrade = fn (int $grade) => tap($this->user('student', $school))->update(['class_room_id' => \App\Models\ClassRoom::factory()->create(['grade_level' => $grade])->id]);
+
+        $student = $inGrade(2);
+        $this->actingAs($student)->get(route('student.books.index'))->assertOk()->assertSee(route('student.books.read', $book->id));
+        $this->actingAs($student)->get(route('student.books.read', $book->id))->assertOk();
+        $this->actingAs($student)->get(route('student.books.file', $book->id))->assertOk();
+
+        $this->actingAs($inGrade(3))->get(route('student.books.read', $book->id))->assertNotFound();
+        $this->actingAs($this->user('student', $school))->get(route('student.books.read', $book->id))->assertNotFound();
+    }
+
     public function test_staff_preview_is_school_scoped_and_role_gated(): void
     {
         $school = School::factory()->create();
