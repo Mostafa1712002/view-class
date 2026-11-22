@@ -26,4 +26,10 @@ interface CompoundRepository
 
     /** Sync the schools linked to a compound. */
     public function syncSchools(Compound $compound, array $schoolIds): void;
+
+    /**
+     * Accounts selectable as «مدير المجمع» (id, name). $keepUserId (the current
+     * manager) is always included so editing never drops it.
+     */
+    public function managerCandidates(?int $keepUserId = null): Collection;
 }

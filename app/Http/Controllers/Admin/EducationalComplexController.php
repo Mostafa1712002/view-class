@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EducationalCompany;
 use App\Modules\QuestionBankCore\Models\Compound;
+use App\Modules\QuestionBankCore\Repositories\Contracts\CompoundRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -17,13 +19,15 @@ use Illuminate\View\View;
  */
 class EducationalComplexController extends Controller
 {
+    public function __construct(private CompoundRepository $compounds) {}
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
         $companyId = $request->get('company');
 
         $complexes = Compound::query()
-            ->with('company:id,name_ar,name_en')
+            ->with(['company:id,name_ar,name_en', 'manager:id,name'])
             ->withCount('schools')
             ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
                 ->where('name_ar', 'like', "%{$q}%")
@@ -39,6 +43,7 @@ class EducationalComplexController extends Controller
         return view('admin.educational-complexes.index', [
             'complexes' => $complexes,
             'companies' => $companies,
+            'managerCandidates' => $this->compounds->managerCandidates(),
             'q' => $q,
             'companyId' => $companyId,
         ]);
@@ -59,7 +64,7 @@ class EducationalComplexController extends Controller
 
     public function update(Request $request, Compound $complex): RedirectResponse
     {
-        $data = $this->validateComplex($request);
+        $data = $this->validateComplex($request, $complex->manager_user_id);
 
         if ($request->hasFile('logo')) {
             $data['logo'] = $request->file('logo')->store('educational-complexes', 'public');
@@ -98,13 +103,14 @@ class EducationalComplexController extends Controller
         return response()->json($complexes);
     }
 
-    private function validateComplex(Request $request): array
+    private function validateComplex(Request $request, ?int $currentManagerId = null): array
     {
         return $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
             'logo' => 'nullable|image|max:2048',
             'educational_company_id' => 'nullable|exists:educational_companies,id',
+            'manager_user_id' => ['nullable', Rule::in($this->compounds->managerCandidates($currentManagerId)->pluck('id')->all())],
         ]);
     }
 }

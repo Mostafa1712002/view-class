@@ -5,7 +5,6 @@ namespace App\Modules\QuestionBankCore\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\School;
-use App\Models\User;
 use App\Modules\QuestionBankCore\Models\Compound;
 use App\Modules\QuestionBankCore\Repositories\Contracts\CompoundRepository;
 use Illuminate\Http\RedirectResponse;
@@ -131,25 +130,9 @@ class CompoundController extends Controller
         ]);
     }
 
-    /**
-     * Staff who can manage a complex: any user holding a job title or the
-     * school-admin role (the meeting names no specific title). The current
-     * manager is always kept so editing never drops it.
-     */
     private function managerCandidates($compoundId = null)
     {
-        $keep = $compoundId ? Compound::find($compoundId)?->manager_user_id : null;
-
-        return User::query()
-            ->where(function ($q) use ($keep) {
-                $q->whereNotNull('job_title_id')
-                    ->orWhereHas('roles', fn ($r) => $r->where('slug', 'school-admin'));
-                if ($keep) {
-                    $q->orWhere('users.id', $keep);
-                }
-            })
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        return $this->compounds->managerCandidates($compoundId ? Compound::find($compoundId)?->manager_user_id : null);
     }
 
     private function schools()
