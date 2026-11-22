@@ -158,7 +158,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">@lang('question_banks.batch_grade')</label>
-                        <select name="grade_level"
+                        <select name="grade_level" data-grade-source="subject_ids[]"
                                 class="form-control @error('grade_level') is-invalid @enderror">
                             <option value="">@lang('question_banks.grade_any')</option>
                             @foreach($grades as $g => $label)
@@ -202,7 +202,7 @@
                             <label class="qb-batch-subject-chip">
                                 <input type="checkbox"
                                        name="subject_ids[]"
-                                       value="{{ $subject->id }}"
+                                       value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}"
                                        class="qb-subject-check"
                                        {{ in_array($subject->id, old('subject_ids', [])) ? 'checked' : '' }}>
                                 <span>{{ $subject->name }}</span>

@@ -8,6 +8,7 @@ use App\Models\ClassRoom;
 use App\Models\Exam;
 use App\Models\Role;
 use App\Models\School;
+use App\Models\Section;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -138,15 +139,15 @@ class Meeting4BooksExamsTest extends TestCase
     {
         $school = School::factory()->create();
         $other = School::factory()->create();
-        $class = ClassRoom::factory()->create();
+        $class = ClassRoom::factory()->create(['section_id' => Section::factory()->create(['school_id' => $school->id])->id]);
         $mine = $this->student($school, $class);
         $foreign = $this->student($other, $class);
         $admin = User::factory()->create(['school_id' => $school->id]);
         $admin->roles()->attach(Role::where('slug', 'super-admin')->first());
 
         $payload = fn (array $ids) => [
-            'title' => 'T', 'subject_id' => Subject::factory()->create()->id, 'class_id' => $class->id,
-            'academic_year_id' => AcademicYear::factory()->create()->id, 'type' => 'quiz', 'total_marks' => 10,
+            'title' => 'T', 'subject_id' => Subject::factory()->create(['school_id' => $school->id])->id, 'class_id' => $class->id,
+            'academic_year_id' => AcademicYear::factory()->create(['school_id' => $school->id])->id, 'type' => 'quiz', 'total_marks' => 10,
             'attempts_allowed' => 1, 'max_exit_attempts' => 3, 'target_mode' => 'students', 'student_ids' => $ids,
         ];
 
@@ -156,5 +157,22 @@ class Meeting4BooksExamsTest extends TestCase
         $this->actingAs($admin)->post(route('admin.exams.store'), $payload([$mine->id]));
         $exam = Exam::firstOrFail();
         $this->assertSame([$mine->id], $exam->targetStudents()->pluck('users.id')->all());
+    }
+
+    public function test_exam_store_rejects_another_schools_subject_class_and_year(): void
+    {
+        $school = School::factory()->create();
+        $other = School::factory()->create();
+        $admin = User::factory()->create(['school_id' => $school->id]);
+        // super-admin whose active school is $school (no header override)
+        $admin->roles()->attach(Role::where('slug', 'super-admin')->first());
+        $class = ClassRoom::factory()->create(['section_id' => Section::factory()->create(['school_id' => $other->id])->id]);
+
+        $this->actingAs($admin)->post(route('admin.exams.store'), [
+            'title' => 'T', 'subject_id' => Subject::factory()->create(['school_id' => $other->id])->id, 'class_id' => $class->id,
+            'academic_year_id' => AcademicYear::factory()->create(['school_id' => $other->id])->id, 'type' => 'quiz', 'total_marks' => 10,
+            'attempts_allowed' => 1, 'max_exit_attempts' => 3,
+        ])->assertSessionHasErrors(['subject_id', 'class_id', 'academic_year_id']);
+        $this->assertSame(0, Exam::count());
     }
 }

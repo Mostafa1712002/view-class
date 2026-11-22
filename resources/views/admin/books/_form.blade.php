@@ -36,14 +36,14 @@
         <select name="subject_id" class="form-select" required>
             <option value="">@lang('books_admin.choose_subject')</option>
             @foreach($subjects as $s)
-                <option value="{{ $s->id }}" @selected((string)old('subject_id', $book->subject_id)===(string)$s->id)>{{ $s->name }}</option>
+                <option value="{{ $s->id }}" data-grades="{{ implode(',', (array) $s->grade_levels) }}" @selected((string)old('subject_id', $book->subject_id)===(string)$s->id)>{{ $s->name }}</option>
             @endforeach
         </select>
     </div>
 
     <div class="col-md-4">
         <label class="form-label">@lang('books_admin.fields.grade')</label>
-        <select name="grade_level" class="form-select">
+        <select name="grade_level" data-grade-source="subject_id" class="form-select">
             <option value="">@lang('books_admin.choose_grade')</option>
             @foreach($grades as $val => $label)
                 <option value="{{ $val }}" @selected((string)old('grade_level', $book->grade_level)===(string)$val)>{{ $label }}</option>

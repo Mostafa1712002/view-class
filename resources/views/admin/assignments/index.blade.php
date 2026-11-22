@@ -29,7 +29,7 @@
                     <select name="subject_id" class="form-select">
                         <option value="">الكل</option>
                         @foreach($subjects as $subject)
-                            <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
+                            <option value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
                                 {{ $subject->name }}
                             </option>
                         @endforeach
@@ -37,10 +37,10 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">الصف</label>
-                    <select name="class_id" class="form-select">
+                    <select name="class_id" data-grade-source="subject_id" class="form-select">
                         <option value="">الكل</option>
                         @foreach($classes as $class)
-                            <option value="{{ $class->id }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>
+                            <option value="{{ $class->id }}" data-grade="{{ $class->grade_level }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>
                                 {{ $class->name }}
                             </option>
                         @endforeach

@@ -13,10 +13,12 @@ use App\Models\StudentExam;
 use App\Models\Subject;
 use App\Models\ClassRoom;
 use App\Models\AcademicYear;
+use App\Models\Section;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ExamController extends Controller
 {
@@ -37,8 +39,10 @@ class ExamController extends Controller
      */
     public function index(Request $request)
     {
+        $schoolId = $this->scopedSchoolId();
         $query = Exam::with(['teacher', 'subject', 'classRoom', 'academicYear'])
-            ->withCount('questions');
+            ->withCount('questions')
+            ->when($schoolId, fn ($q) => $q->whereHas('classRoom.section', fn ($s) => $s->where('school_id', $schoolId)));
 
         // Filter by teacher for non-admin users
         if (!Auth::user()->hasAnyRole(['super-admin', 'school-admin'])) {
@@ -77,7 +81,8 @@ class ExamController extends Controller
         $exams = $query->latest()->paginate(15)->withQueryString();
 
         // Stats — show the same totals regardless of filters so tiles stay stable.
-        $statsBase = Exam::query();
+        $statsBase = Exam::query()
+            ->when($schoolId, fn ($q) => $q->whereHas('classRoom.section', fn ($s) => $s->where('school_id', $schoolId)));
         if (! Auth::user()->hasAnyRole(['super-admin', 'school-admin'])) {
             $statsBase->where('teacher_id', Auth::id());
         }
@@ -88,9 +93,9 @@ class ExamController extends Controller
             'upcoming'  => (clone $statsBase)->where('start_time', '>', now())->count(),
         ];
 
-        $subjects = Subject::orderBy('name')->get();
-        $classes  = ClassRoom::orderBy('name')->get();
+        [$subjects, $classes] = $this->formOptions($schoolId);
         $teachers = User::whereHas('roles', fn ($q) => $q->where('slug', 'teacher'))
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
             ->orderBy('name')->get(['id', 'name']);
 
         $routePrefix = $this->routePrefix();
@@ -183,13 +188,46 @@ class ExamController extends Controller
     }
 
     /**
+     * Subject / class / academic-year lists of one school — the header's active
+     * school, or every school when a super-admin has none selected.
+     */
+    private function formOptions(?int $schoolId): array
+    {
+        return [
+            Subject::when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get(),
+            ClassRoom::when($schoolId, fn ($q) => $q->whereHas('section', fn ($s) => $s->where('school_id', $schoolId)))->orderBy('name')->get(),
+            AcademicYear::when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('start_date', 'desc')->get(),
+        ];
+    }
+
+    /** Server-side twin of formOptions(): the picked ids must belong to that school. */
+    private function schoolRules(?int $schoolId): array
+    {
+        if (! $schoolId) {
+            return [];
+        }
+
+        return [
+            'subject_id' => ['required', Rule::exists('subjects', 'id')->where('school_id', $schoolId)],
+            'class_id' => ['required', Rule::exists('classes', 'id')->whereIn('section_id', Section::where('school_id', $schoolId)->pluck('id')->all())],
+            'academic_year_id' => ['required', Rule::exists('academic_years', 'id')->where('school_id', $schoolId)],
+        ];
+    }
+
+    /** A super-admin may open an exam of another school than the header one — keep that exam's own school. */
+    private function examSchoolId(Exam $exam): ?int
+    {
+        return auth()->user()->isSuperAdmin()
+            ? ($exam->classRoom?->section?->school_id ?? $this->scopedSchoolId())
+            : $this->scopedSchoolId();
+    }
+
+    /**
      * Show the form for creating a new exam.
      */
     public function create()
     {
-        $subjects = Subject::orderBy('name')->get();
-        $classes = ClassRoom::orderBy('name')->get();
-        $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
+        [$subjects, $classes, $academicYears] = $this->formOptions($this->scopedSchoolId());
         $routePrefix = $this->routePrefix();
 
         $studentOptions = $this->studentOptions();
@@ -202,7 +240,7 @@ class ExamController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validated = $request->validate($this->schoolRules($this->scopedSchoolId()) + [
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
             'class_id' => 'required|exists:classes,id',
@@ -268,9 +306,7 @@ class ExamController extends Controller
      */
     public function edit(Exam $exam)
     {
-        $subjects = Subject::orderBy('name')->get();
-        $classes = ClassRoom::orderBy('name')->get();
-        $academicYears = AcademicYear::orderBy('start_date', 'desc')->get();
+        [$subjects, $classes, $academicYears] = $this->formOptions($this->examSchoolId($exam));
         $routePrefix = $this->routePrefix();
 
         $studentOptions = $this->studentOptions();
@@ -284,7 +320,7 @@ class ExamController extends Controller
      */
     public function update(Request $request, Exam $exam)
     {
-        $validated = $request->validate([
+        $validated = $request->validate($this->schoolRules($this->examSchoolId($exam)) + [
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
             'class_id' => 'required|exists:classes,id',

@@ -51,7 +51,7 @@
                         <select name="subject_id" class="form-select">
                             <option value="">-- اختر المادة --</option>
                             @foreach($subjects as $subject)
-                                <option value="{{ $subject->id }}" {{ old('subject_id', $file->subject_id) == $subject->id ? 'selected' : '' }}>
+                                <option value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}" {{ old('subject_id', $file->subject_id) == $subject->id ? 'selected' : '' }}>
                                     {{ $subject->name }}
                                 </option>
                             @endforeach
@@ -60,10 +60,10 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">الصف</label>
-                        <select name="class_id" class="form-select">
+                        <select name="class_id" data-grade-source="subject_id" class="form-select">
                             <option value="">-- اختر الصف --</option>
                             @foreach($classes as $class)
-                                <option value="{{ $class->id }}" {{ old('class_id', $file->class_id) == $class->id ? 'selected' : '' }}>
+                                <option value="{{ $class->id }}" data-grade="{{ $class->grade_level }}" {{ old('class_id', $file->class_id) == $class->id ? 'selected' : '' }}>
                                     {{ $class->name }} - {{ $class->section->name }}
                                 </option>
                             @endforeach
