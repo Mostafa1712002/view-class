@@ -952,6 +952,7 @@
     })();
     </script>
 
+    @include('partials.subject-grade-filter')
     @stack('scripts')
 </body>
 </html>

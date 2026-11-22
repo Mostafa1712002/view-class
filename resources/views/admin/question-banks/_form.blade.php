@@ -12,7 +12,7 @@
                     class="form-control @error('subject_id') is-invalid @enderror" required>
                 <option value="">— @lang('question_banks.subject_for_bank') —</option>
                 @foreach($subjects as $subject)
-                    <option value="{{ $subject->id }}"
+                    <option value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}"
                             data-name="{{ $subject->name }}"
                             @selected($selectedSubjectId == $subject->id)>
                         {{ $subject->name }}@if($subject->name_en) ({{ $subject->name_en }})@endif
@@ -109,7 +109,7 @@
     <div class="row">
         <div class="col-md-6 mb-3">
             <label class="form-label">@lang('question_banks.form.grade_level')</label>
-            <select name="grade_level" class="form-control @error('grade_level') is-invalid @enderror">
+            <select name="grade_level" data-grade-source="subject_id" class="form-control @error('grade_level') is-invalid @enderror">
                 <option value="">@lang('question_banks.grade_any')</option>
                 @foreach($grades as $g => $label)
                     <option value="{{ $g }}" @selected((string)old('grade_level', $bank->grade_level) === (string)$g)>{{ $label }}</option>
@@ -136,7 +136,7 @@
                 <div class="qb-subject-grid">
                     @foreach($subjects as $subject)
                         <label class="qb-subject-chip">
-                            <input type="checkbox" name="subject_ids[]" value="{{ $subject->id }}"
+                            <input type="checkbox" name="subject_ids[]" value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}"
                                    {{ in_array($subject->id, $selectedSubjects) ? 'checked' : '' }}>
                             <span>{{ $subject->name }}@if($subject->name_en) <small class="text-muted">({{ $subject->name_en }})</small>@endif</span>
                         </label>

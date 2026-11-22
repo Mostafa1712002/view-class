@@ -596,7 +596,7 @@ class QuestionBankController extends Controller
 
     private function subjectsForSchool(?int $schoolId): \Illuminate\Support\Collection
     {
-        $query = Subject::query()->select('id', 'name', 'name_en')->where('is_active', true);
+        $query = Subject::query()->select('id', 'name', 'name_en', 'grade_levels')->where('is_active', true);
         if ($schoolId !== null) {
             $query->where('school_id', $schoolId);
         }

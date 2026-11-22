@@ -49,13 +49,13 @@
                         <select name="subject_id" class="custom-select custom-select-sm">
                             <option value="">@lang('books_admin.all')</option>
                             @foreach($subjects as $s)
-                                <option value="{{ $s->id }}" @selected((string)($filters['subject_id'] ?? '')===(string)$s->id)>{{ $s->name }}</option>
+                                <option value="{{ $s->id }}" data-grades="{{ implode(',', (array) $s->grade_levels) }}" @selected((string)($filters['subject_id'] ?? '')===(string)$s->id)>{{ $s->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small">@lang('books_admin.filters.grade')</label>
-                        <select name="grade_level" class="custom-select custom-select-sm">
+                        <select name="grade_level" data-grade-source="subject_id" class="custom-select custom-select-sm">
                             <option value="">@lang('books_admin.all')</option>
                             @foreach($grades as $val => $label)
                                 <option value="{{ $val }}" @selected((string)($filters['grade_level'] ?? '')===(string)$val)>{{ $label }}</option>

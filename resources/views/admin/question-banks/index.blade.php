@@ -362,11 +362,11 @@
             <select name="subject_id" class="form-control" onchange="this.form.submit()">
                 <option value="">@lang('question_banks.filter_subject') — @lang('question_banks.filter_all')</option>
                 @foreach($subjects as $s)
-                    <option value="{{ $s->id }}" @selected((string)($filters['subject_id'] ?? '') === (string)$s->id)>{{ $s->name }}</option>
+                    <option value="{{ $s->id }}" data-grades="{{ implode(',', (array) $s->grade_levels) }}" @selected((string)($filters['subject_id'] ?? '') === (string)$s->id)>{{ $s->name }}</option>
                 @endforeach
             </select>
 
-            <select name="grade_level" class="form-control" onchange="this.form.submit()">
+            <select name="grade_level" data-grade-source="subject_id" class="form-control" onchange="this.form.submit()">
                 <option value="">@lang('question_banks.filter_grade') — @lang('question_banks.filter_all')</option>
                 @foreach($grades as $g => $label)
                     <option value="{{ $g }}" @selected((string)($filters['grade_level'] ?? '') === (string)$g)>{{ $label }}</option>

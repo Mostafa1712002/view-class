@@ -181,7 +181,7 @@
         <div class="row g-2 align-items-end">
             <div class="col-md-2 col-6">
                 <label class="form-label">@lang('exams_admin.filters.grade_level')</label>
-                <select name="grade_level" class="form-select">
+                <select name="grade_level" data-grade-source="subject_id" class="form-select">
                     <option value="">@lang('exams_admin.filters.all_grades')</option>
                     @for ($g = 1; $g <= 12; $g++)
                         <option value="{{ $g }}" {{ (string) ($filters['grade_level'] ?? '') === (string) $g ? 'selected' : '' }}>{{ $g }}</option>
@@ -202,16 +202,16 @@
                 <select name="subject_id" class="form-select">
                     <option value="">@lang('exams_admin.filters.all_subjects')</option>
                     @foreach ($subjects as $subject)
-                        <option value="{{ $subject->id }}" {{ (string) ($filters['subject_id'] ?? '') === (string) $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
+                        <option value="{{ $subject->id }}" data-grades="{{ implode(',', (array) $subject->grade_levels) }}" {{ (string) ($filters['subject_id'] ?? '') === (string) $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-2 col-6">
                 <label class="form-label">@lang('exams_admin.filters.class')</label>
-                <select name="class_id" class="form-select">
+                <select name="class_id" data-grade-source="subject_id" class="form-select">
                     <option value="">@lang('exams_admin.filters.all_classes')</option>
                     @foreach ($classes as $class)
-                        <option value="{{ $class->id }}" {{ (string) ($filters['class_id'] ?? '') === (string) $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
+                        <option value="{{ $class->id }}" data-grade="{{ $class->grade_level }}" {{ (string) ($filters['class_id'] ?? '') === (string) $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
                     @endforeach
                 </select>
             </div>
