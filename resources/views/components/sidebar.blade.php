@@ -9,7 +9,7 @@
     $sidebarStudentSubjects = collect();
     if ($sidebarUser && $sidebarUser->isStudent()) {
         try {
-            $gradeLevel = optional($sidebarUser->classRoom)->grade_level;
+            $gradeLevel = $sidebarUser->gradeLevel();
             $q = \App\Models\Subject::where('school_id', $sidebarUser->school_id)
                 ->where('is_active', true);
             if ($gradeLevel !== null) {

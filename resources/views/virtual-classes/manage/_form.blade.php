@@ -87,10 +87,10 @@
     {{-- Class --}}
     <div class="col-12 col-md-4 form-group">
         <label>@lang('virtual_classes.field_class')</label>
-        <select name="class_id" class="form-control @error('class_id') is-invalid @enderror">
+        <select name="class_id" data-grade-source="subject_id" class="form-control @error('class_id') is-invalid @enderror">
             <option value="">— @lang('virtual_classes.select_class') —</option>
             @foreach(($classes ?? []) as $c)
-            <option value="{{ $c->id }}" {{ (int) old('class_id', $vc?->class_id) === $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+            <option value="{{ $c->id }}" data-grade="{{ $c->grade_level }}" {{ (int) old('class_id', $vc?->class_id) === $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
             @endforeach
         </select>
         @error('class_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -103,7 +103,7 @@
         <select name="subject_id" class="form-control @error('subject_id') is-invalid @enderror">
             <option value="">— @lang('virtual_classes.select_subject') —</option>
             @foreach(($subjects ?? []) as $s)
-            <option value="{{ $s->id }}" {{ (int) old('subject_id', $vc?->subject_id) === $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+            <option value="{{ $s->id }}" data-grades="{{ implode(',', (array) $s->grade_levels) }}" {{ (int) old('subject_id', $vc?->subject_id) === $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
             @endforeach
         </select>
         @error('subject_id') <div class="invalid-feedback">{{ $message }}</div> @enderror

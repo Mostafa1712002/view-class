@@ -36,7 +36,7 @@
                         <select name="subject_id" class="form-select" required>
                             <option value="">—</option>
                             @foreach($subjects as $s)
-                                <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                <option value="{{ $s->id }}" data-grades="{{ implode(',', (array) $s->grade_levels) }}">{{ $s->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -46,10 +46,10 @@
                     </div>
                     <div class="col-md-9 mb-3">
                         <label class="form-label">@lang('sprint4.class_periods.form.classroom') <span class="text-danger">*</span></label>
-                        <select name="class_id" class="form-select" required>
+                        <select name="class_id" data-grade-source="subject_id" class="form-select" required>
                             <option value="">—</option>
                             @foreach($classes as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->grade_level }}/{{ $c->division }})</option>
+                                <option value="{{ $c->id }}" data-grade="{{ $c->grade_level }}">{{ $c->name }} ({{ $c->grade_level }}/{{ $c->division }})</option>
                             @endforeach
                         </select>
                     </div>

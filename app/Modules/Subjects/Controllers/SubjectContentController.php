@@ -238,7 +238,7 @@ class SubjectContentController extends Controller
             // Enrollment: the subject's grade_levels must contain the student's
             // class grade level (mirrors StudentSubjectController). Prevents a
             // student pulling content from a subject they are not enrolled in.
-            $gradeLevel = optional($user->classRoom)->grade_level;
+            $gradeLevel = $user->gradeLevel();
             if ($gradeLevel === null) {
                 return false;
             }

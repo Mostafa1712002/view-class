@@ -159,6 +159,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Grade (1–12) of the student's class — the home class (class_room_id) or,
+     * for students enrolled only through class_student, their first enrolled class.
+     */
+    public function gradeLevel(): ?int
+    {
+        $level = $this->classRoom?->grade_level ?? $this->enrolledClasses()->value('classes.grade_level');
+
+        return $level === null ? null : (int) $level;
+    }
+
+    /**
      * All class IDs this student belongs to.
      *
      * Enrollment is written in two places that are not always kept in sync:

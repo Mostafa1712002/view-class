@@ -37,7 +37,7 @@
             var keep = all.filter(function (o) {
                 if (!allowed || !o.value) return true;
                 if (initial && o.value === current) return true; // never drop a saved/filtered value on load
-                return allowed.indexOf(o.getAttribute('data-grade') || o.value) !== -1;
+                return allowed.indexOf(o.hasAttribute('data-grade') ? o.getAttribute('data-grade') : o.value) !== -1;
             });
             // ponytail: legacy classes whose grade_level doesn't match the subject's grades would leave an
             // empty list — show everything instead of blocking the form. Fix the data, not this fallback.
