@@ -6,4 +6,4 @@
 - [x] PDF: one line per agent; manager also shown when a signer name overrides; school fallback to the student's school
 - [x] Tests: CertificateAgentComplexManagerTest (sqlite, hand-picked migrations)
 - [x] Local E2E (school edit → issue all / none → PDF checked)
-- [ ] Deploy viewclass + rawaniedu, verify, Trello comments → testing prompt
+- [x] Deploy viewclass + rawaniedu (d0d68a8f), verify, Trello comments → testing prompt (11-24)
