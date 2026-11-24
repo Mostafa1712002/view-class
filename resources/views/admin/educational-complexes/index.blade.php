@@ -76,6 +76,7 @@
                             <td>{{ $complex->schools_count }}</td>
                             <td>
                                 <div class="d-flex gap-1">
+                                    <a href="{{ route('admin.schools.index', ['compound_id' => $complex->id]) }}" class="btn btn-sm btn-outline-info" title="@lang('common.view')"><x-svg-icon name="eye" /></a>
                                     <button type="button" class="btn btn-sm btn-outline-primary" title="@lang('common.edit')" data-toggle="modal" data-bs-toggle="modal" data-target="#editComplexModal{{ $complex->id }}" data-bs-target="#editComplexModal{{ $complex->id }}"><x-svg-icon name="pencil" /></button>
                                     <form action="{{ route('admin.educational-complexes.destroy', $complex) }}" method="POST" onsubmit="return confirm(@json(__('common.confirm_delete')))">
                                         @csrf
