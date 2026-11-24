@@ -63,8 +63,8 @@
                             <td>{{ $school->manager?->name ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <th>@lang('schools.agent_user_id')</th>
-                            <td>{{ $school->agent?->name ?? '-' }}</td>
+                            <th>@lang('schools.agent_user_ids')</th>
+                            <td>{{ $school->agents->pluck('name')->join('، ') ?: '-' }}</td>
                         </tr>
                         <tr>
                             <th>@lang('schools.stamp')</th>

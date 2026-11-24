@@ -22,7 +22,7 @@ class SchoolController extends Controller
         $gender = in_array($request->get('gender'), ['boys', 'girls', 'mixed'], true) ? $request->get('gender') : null;
 
         $schools = School::query()
-            ->with(['educationalCompany:id,name_ar,name_en', 'compounds:id,name_ar,name_en', 'manager:id,name', 'agent:id,name'])
+            ->with(['educationalCompany:id,name_ar,name_en', 'compounds:id,name_ar,name_en', 'manager:id,name', 'agents:users.id,users.name'])
             ->withCount(['users', 'sections', 'classes'])
             ->withCount([
                 'users as students_count' => function ($q) {
@@ -84,10 +84,13 @@ class SchoolController extends Controller
         // Auto-generate code if not given (e.g. DEMO-AUTO-3).
         $validated['code'] = $validated['code'] ?? $this->generateCode($validated['name_ar']);
 
+        $agents = $this->pullAgents($validated);
+
         $school = School::create($validated);
         // Single source of truth = compound_school pivot (no schools.complex_id column).
         // sync() with at most one id enforces "one complex per school".
         $school->compounds()->sync(array_filter([$compoundId]));
+        $school->agents()->sync($agents);
 
         return redirect()->route('admin.schools.index')
             ->with('success', __('common.created_successfully'));
@@ -95,7 +98,7 @@ class SchoolController extends Controller
 
     public function show(School $school)
     {
-        $school->load(['sections', 'academicYears', 'educationalCompany', 'manager:id,name', 'agent:id,name']);
+        $school->load(['sections', 'academicYears', 'educationalCompany', 'manager:id,name', 'agents:users.id,users.name']);
         return view('admin.schools.show', compact('school'));
     }
 
@@ -110,8 +113,8 @@ class SchoolController extends Controller
         $cities = config('saudi_cities', []);
         $timezones = $this->timezoneOptions();
         $selectedComplexId = $school->compounds->first()?->id;
-        $managerCandidates = $this->staffCandidates('manager', $school->manager_user_id);
-        $agentCandidates = $this->staffCandidates('agent', $school->agent_user_id);
+        $managerCandidates = $this->staffCandidates('manager', [$school->manager_user_id]);
+        $agentCandidates = $this->staffCandidates('agent', $school->agents()->pluck('users.id')->all());
         return view('admin.schools.edit', compact('school', 'companies', 'complexes', 'branches', 'cities', 'timezones', 'selectedComplexId', 'managerCandidates', 'agentCandidates'));
     }
 
@@ -130,8 +133,11 @@ class SchoolController extends Controller
 
         $validated['name'] = $validated['name'] ?? $validated['name_ar'];
 
+        $agents = $this->pullAgents($validated);
+
         $school->update($validated);
         $school->compounds()->sync(array_filter([$compoundId]));
+        $school->agents()->sync($agents);
 
         return redirect()->route('admin.schools.index')
             ->with('success', __('common.updated_successfully'));
@@ -187,11 +193,29 @@ class SchoolController extends Controller
             'instagram' => 'nullable|url|max:255',
             'linkedin' => 'nullable|url|max:255',
             'logo' => 'nullable|image|max:2048',
-            'stamp' => 'nullable|image|max:2048',
-            'manager_user_id' => ['nullable', Rule::in($this->staffCandidates('manager', $schoolId ? School::find($schoolId)?->manager_user_id : null)->pluck('id')->all())],
-            'agent_user_id' => ['nullable', Rule::in($this->staffCandidates('agent', $schoolId ? School::find($schoolId)?->agent_user_id : null)->pluck('id')->all())],
+            'stamp' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'manager_user_id' => ['nullable', Rule::in($this->staffCandidates('manager', [School::find($schoolId)?->manager_user_id])->pluck('id')->all())],
+            'agent_user_ids' => 'nullable|array',
+            'agent_user_ids.*' => ['nullable', Rule::in($agentIds = $this->staffCandidates('agent', $schoolId ? DB::table('school_agents')->where('school_id', $schoolId)->pluck('user_id')->all() : [])->pluck('id')->all())],
+            'print_agent_ids' => 'nullable|array',
+            'print_agent_ids.*' => ['nullable', Rule::in($agentIds)],
             'is_active' => 'sometimes|boolean',
         ]);
+    }
+
+    /**
+     * Take the agent fields out of the validated data and return the
+     * school_agents sync payload: id => [print_on_certificate].
+     * schools.agent_user_id keeps mirroring the first agent for old readers.
+     */
+    private function pullAgents(array &$validated): array
+    {
+        $ids = array_values(array_unique(array_filter($validated['agent_user_ids'] ?? [])));
+        $print = array_filter($validated['print_agent_ids'] ?? []);
+        unset($validated['agent_user_ids'], $validated['print_agent_ids']);
+        $validated['agent_user_id'] = $ids[0] ?? null;
+
+        return collect($ids)->mapWithKeys(fn ($id) => [$id => ['print_on_certificate' => in_array($id, $print)]])->all();
     }
 
     /**
@@ -200,16 +224,18 @@ class SchoolController extends Controller
      * Not limited to the school's own users: a new school has none yet.
      * The currently linked user is always kept so editing never drops it.
      */
-    private function staffCandidates(string $kind, ?int $keepId = null)
+    private function staffCandidates(string $kind, array $keepIds = [])
     {
+        $keepIds = array_filter($keepIds);
+
         return User::query()
-            ->where(function ($q) use ($kind, $keepId) {
+            ->where(function ($q) use ($kind, $keepIds) {
                 $q->whereHas('jobTitle', fn ($j) => $j->where('slug', $kind === 'manager' ? 'school_manager' : 'vice'));
                 if ($kind === 'manager') {
                     $q->orWhereHas('roles', fn ($r) => $r->where('slug', 'school-admin'));
                 }
-                if ($keepId) {
-                    $q->orWhere('users.id', $keepId);
+                if ($keepIds) {
+                    $q->orWhereIn('users.id', $keepIds);
                 }
             })
             ->with('school:id,name,name_ar')

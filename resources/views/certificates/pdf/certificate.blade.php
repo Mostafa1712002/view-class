@@ -229,9 +229,12 @@
                             @endif
                         </td>
                         <td width="30%" style="text-align:center;">
-                            @if(! empty($fields['agent']))
-                                <div class="meta">@lang('certificates.pdf.agent'): {{ $fields['agent'] }}</div>
+                            @if($signerName && ! empty($fields['manager']))
+                                <div class="meta">@lang('certificates.pdf.manager'): {{ $fields['manager'] }}</div>
                             @endif
+                            @foreach($fields['agents'] ?? [] as $agentName)
+                                <div class="meta">@lang('certificates.pdf.agent'): {{ $agentName }}</div>
+                            @endforeach
                             @if(! empty($fields['complex_manager']))
                                 <div class="meta">@lang('certificates.pdf.complex_manager'): {{ $fields['complex_manager'] }}</div>
                             @endif

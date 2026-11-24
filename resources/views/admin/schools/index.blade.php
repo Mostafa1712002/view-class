@@ -84,7 +84,7 @@
                             <th>@lang('schools.educational_stage')</th>
                             <th>@lang('schools.gender')</th>
                             <th>@lang('schools.manager_user_id')</th>
-                            <th>@lang('schools.agent_user_id')</th>
+                            <th>@lang('schools.agent_user_ids')</th>
                             <th>@lang('schools.branch')</th>
                             <th>@lang('schools.sort_order')</th>
                             <th>@lang('schools.sections_count')</th>
@@ -110,7 +110,7 @@
                             <td>{{ $school->stage ? __('schools.stage_' . $school->stage) : '-' }}</td>
                             <td>{{ $school->student_gender ? __('schools.gender_' . $school->student_gender) : '-' }}</td>
                             <td>{{ $school->manager?->name ?? '-' }}</td>
-                            <td>{{ $school->agent?->name ?? '-' }}</td>
+                            <td>{{ $school->agents->pluck('name')->join('، ') ?: '-' }}</td>
                             <td>{{ $school->branch ?? '-' }}</td>
                             <td>{{ $school->sort_order ?? '-' }}</td>
                             <td>{{ $school->sections_count }}</td>

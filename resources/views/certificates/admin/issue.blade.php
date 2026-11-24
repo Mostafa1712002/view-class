@@ -88,15 +88,22 @@
                     <label>@lang('certificates.fields.signer_name')</label>
                     <input type="text" name="signer_name" class="form-control" maxlength="255" value="{{ old('signer_name') }}">
                 </div>
-                <div class="col-md-4 mb-1">
-                    <label>@lang('certificates.fields.agent')</label>
-                    <select name="agent_user_id" class="form-control">
-                        <option value="">@lang('certificates.fields.agent_default')</option>
+                <div class="col-md-8 mb-1">
+                    <label class="d-block">@lang('certificates.fields.agents')</label>
+                    @if($agents->isNotEmpty())
+                        <input type="hidden" name="agents_choice" value="1">
+                        @php $tickedAgents = array_map('intval', (array) old('agent_user_ids', $agents->where('pivot.print_on_certificate', true)->pluck('id')->all())); @endphp
                         @foreach($agents as $a)
-                            <option value="{{ $a->id }}" @selected(old('agent_user_id') == $a->id)>{{ $a->name }}@if($a->id == $defaultAgentId) ★@endif</option>
+                            <div class="custom-control custom-checkbox custom-control-inline">
+                                <input type="checkbox" class="custom-control-input" id="agent-{{ $a->id }}" name="agent_user_ids[]" value="{{ $a->id }}" @checked(in_array($a->id, $tickedAgents, true))>
+                                <label class="custom-control-label" for="agent-{{ $a->id }}">{{ $a->name }}</label>
+                            </div>
                         @endforeach
-                        <option value="none" @selected(old('agent_user_id') === 'none')>@lang('certificates.fields.agent_none')</option>
-                    </select>
+                        <small class="form-text text-muted">@lang('certificates.fields.agents_hint')</small>
+                    @else
+                        <small class="form-text text-muted">@lang($schoolId ? 'certificates.fields.agents_empty' : 'certificates.fields.agents_no_school')</small>
+                    @endif
+                    @error('agent_user_ids.*')<div class="text-danger small">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-8 mb-1">
                     <label>@lang('certificates.design.signature_type')</label>

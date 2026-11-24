@@ -113,19 +113,46 @@
         </select>
     </div>
 
-    @foreach(['manager_user_id' => $managerCandidates ?? collect(), 'agent_user_id' => $agentCandidates ?? collect()] as $field => $people)
-        <div class="col-md-6 mb-3">
-            <label for="{{ $field }}" class="form-label">@lang('schools.' . $field)</label>
-            <select class="form-control select2 @error($field) is-invalid @enderror" id="{{ $field }}" name="{{ $field }}">
-                <option value="">—</option>
-                @foreach($people as $person)
-                    <option value="{{ $person->id }}" @selected($val($field) == $person->id)>{{ $person->name }}@if($person->school) — {{ $person->school->name_ar ?: $person->school->name }}@endif</option>
-                @endforeach
-            </select>
-            @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
-            <small class="text-muted">@lang('schools.' . $field . '_hint')</small>
-        </div>
-    @endforeach
+    <div class="col-md-6 mb-3">
+        <label for="manager_user_id" class="form-label">@lang('schools.manager_user_id')</label>
+        <select class="form-control select2 @error('manager_user_id') is-invalid @enderror" id="manager_user_id" name="manager_user_id">
+            <option value="">—</option>
+            @foreach(($managerCandidates ?? collect()) as $person)
+                <option value="{{ $person->id }}" @selected($val('manager_user_id') == $person->id)>{{ $person->name }}@if($person->school) — {{ $person->school->name_ar ?: $person->school->name }}@endif</option>
+            @endforeach
+        </select>
+        @error('manager_user_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <small class="text-muted">@lang('schools.manager_user_id_hint')</small>
+    </div>
+
+    @php
+        $linkedAgents = $isEdit ? $school->agents()->get() : collect();
+        $agentIds = array_map('intval', array_filter((array) old('agent_user_ids', $linkedAgents->pluck('id')->all())));
+        $printIds = array_map('intval', array_filter((array) old('print_agent_ids', $linkedAgents->where('pivot.print_on_certificate', true)->pluck('id')->all())));
+    @endphp
+    <div class="col-md-6 mb-3">
+        <label for="agent_user_ids" class="form-label">@lang('schools.agent_user_ids')</label>
+        <select class="form-control select2 @error('agent_user_ids.*') is-invalid @enderror" id="agent_user_ids" name="agent_user_ids[]" multiple>
+            @foreach(($agentCandidates ?? collect()) as $person)
+                <option value="{{ $person->id }}" @selected(in_array($person->id, $agentIds, true))>{{ $person->name }}@if($person->school) — {{ $person->school->name_ar ?: $person->school->name }}@endif</option>
+            @endforeach
+        </select>
+        @error('agent_user_ids.*')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <small class="text-muted">@lang('schools.agent_user_ids_hint')</small>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="print_agent_ids" class="form-label">@lang('schools.print_agent_ids')</label>
+        {{-- Empty marker so «no agent printed» survives a submit with nothing selected. --}}
+        <input type="hidden" name="print_agent_ids[]" value="">
+        <select class="form-control select2" id="print_agent_ids" name="print_agent_ids[]" multiple>
+            @foreach(($agentCandidates ?? collect()) as $person)
+                @if(in_array($person->id, $agentIds, true))
+                    <option value="{{ $person->id }}" @selected(in_array($person->id, $printIds, true))>{{ $person->name }}</option>
+                @endif
+            @endforeach
+        </select>
+        <small class="text-muted">@lang('schools.print_agent_ids_hint')</small>
+    </div>
 
     <div class="col-md-6 mb-3">
         <label for="phone" class="form-label">@lang('common.phone')</label>
@@ -243,5 +270,23 @@
         });
     });
 })();
+</script>
+@endpush
+
+@push('scripts')
+<script>
+    // Keep «printed on the certificate» limited to the linked agents; a newly linked agent prints by default.
+    $(function () {
+        var $agents = $('#agent_user_ids'), $print = $('#print_agent_ids');
+        $agents.on('select2:select', function (e) {
+            if (!$print.find('option[value="' + e.params.data.id + '"]').length) {
+                $print.append(new Option(e.params.data.text.split(' — ')[0], e.params.data.id, true, true));
+            }
+            $print.trigger('change');
+        }).on('select2:unselect', function (e) {
+            $print.find('option[value="' + e.params.data.id + '"]').remove();
+            $print.trigger('change');
+        });
+    });
 </script>
 @endpush

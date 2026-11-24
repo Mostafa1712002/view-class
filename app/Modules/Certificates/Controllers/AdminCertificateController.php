@@ -69,9 +69,9 @@ class AdminCertificateController extends Controller
         return view('certificates.admin.issue', [
             'templates' => $this->templates->allForSchool($schoolId),
             'students'  => $this->getSchoolStudents($schoolId),
-            'agents'    => \App\Models\User::where('school_id', $schoolId ?? 0)
-                ->whereHas('jobTitle', fn ($j) => $j->where('slug', 'vice'))->orderBy('name')->get(['id', 'name']),
-            'defaultAgentId' => $schoolId ? \App\Models\School::find($schoolId)?->agent_user_id : null,
+            'schoolId'  => $schoolId,
+            // The school's linked agents (وكلاء); pivot.print_on_certificate = pre-ticked.
+            'agents'    => $schoolId ? (\App\Models\School::find($schoolId)?->agents()->get(['users.id', 'users.name']) ?? collect()) : collect(),
         ]);
     }
 
@@ -93,8 +93,11 @@ class AdminCertificateController extends Controller
             'issued_by'   => auth()->id(),
             'status'      => 'published',
             'signer_name'    => $data['signer_name'] ?? null,
-            'agent_user_id'  => is_numeric($data['agent_user_id'] ?? null) ? (int) $data['agent_user_id'] : null,
-            'print_agent'    => ($data['agent_user_id'] ?? null) !== 'none',
+            // agents_choice = the agent checkboxes were on the form; none ticked = print no agent.
+            // Without it (no school picked / no linked agents) the school's default agents print.
+            'agent_user_ids' => ! empty($data['agents_choice']) ? array_map('intval', $data['agent_user_ids'] ?? []) : null,
+            'agent_user_id'  => ! empty($data['agents_choice']) ? ((int) ($data['agent_user_ids'][0] ?? 0) ?: null) : null,
+            'print_agent'    => empty($data['agents_choice']) || ! empty($data['agent_user_ids']),
             'signature_type' => $data['signature_type'] ?? null,
             // body_html only carries meaning for the free-text 'general' type.
             'body_html'      => $data['type'] === 'general' ? ($data['body_html'] ?? null) : null,

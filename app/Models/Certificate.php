@@ -25,6 +25,7 @@ class Certificate extends Model
         'note',
         'signer_name',
         'agent_user_id',
+        'agent_user_ids',
         'print_agent',
         'signature_type',
         'signature_path',
@@ -40,6 +41,7 @@ class Certificate extends Model
         'issue_date' => 'date',
         'progress'   => 'integer',
         'print_agent' => 'boolean',
+        'agent_user_ids' => 'array',
     ];
 
     public function recipient(): BelongsTo

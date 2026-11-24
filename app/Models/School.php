@@ -58,10 +58,16 @@ class School extends Model
         return $this->belongsTo(User::class, 'manager_user_id')->withTrashed();
     }
 
-    /** School vice principal (الوكيل) — printed on student certificates. */
-    public function agent(): BelongsTo
+    /**
+     * School agents (الوكلاء). pivot.print_on_certificate = printed on
+     * certificates by default. schools.agent_user_id only mirrors the first one.
+     */
+    public function agents(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'agent_user_id')->withTrashed();
+        return $this->belongsToMany(User::class, 'school_agents', 'school_id', 'user_id')
+            ->withPivot('print_on_certificate')
+            ->withTimestamps()
+            ->orderBy('users.name');
     }
 
     public function educationalCompany(): BelongsTo

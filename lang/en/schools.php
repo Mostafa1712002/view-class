@@ -339,6 +339,10 @@ return [
     'manager_user_id_hint' => 'Staff with the “School Manager” job title or school-admin role — printed on student certificates',
     'agent_user_id' => 'Vice principal',
     'agent_user_id_hint' => 'Staff with the “Vice Principal” job title — printed on student certificates',
+    'agent_user_ids' => 'Vice principals',
+    'agent_user_ids_hint' => 'Staff with the “Vice Principal” job title — you can pick more than one',
+    'print_agent_ids' => 'Vice principals printed on certificates',
+    'print_agent_ids_hint' => 'Default choice when issuing a certificate; it can be changed on each issue. Leave empty to print none.',
     'stamp' => 'School stamp',
     'stamp_hint' => 'Stamp image (transparent PNG preferred) — max 2 MB, shown on student certificates',
 ];

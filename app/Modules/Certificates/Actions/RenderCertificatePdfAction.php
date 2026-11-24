@@ -15,7 +15,7 @@ final class RenderCertificatePdfAction
     /** Return the PDF as a binary string. */
     public function execute(Certificate $certificate): string
     {
-        $certificate->loadMissing(['recipient:id,name', 'issuer:id,name', 'template']);
+        $certificate->loadMissing(['recipient:id,name,school_id,class_room_id', 'issuer:id,name', 'template']);
         $template = $certificate->template;
 
         $orientation = $template && $template->orientation === 'portrait' ? 'P' : 'L';
@@ -80,22 +80,29 @@ final class RenderCertificatePdfAction
             'grade'        => $grade ?? '',
             'date'         => optional($certificate->issue_date)->format('Y-m-d') ?? now()->format('Y-m-d'),
             'manager'      => $school?->manager?->name ?? '',
-            'agent'        => $this->agentName($certificate, $school),
+            'agents'       => $agents = $this->agentNames($certificate, $school),
+            'agent'        => implode('، ', $agents),
             'complex_manager' => $school?->compounds->first()?->manager?->name ?? '',
         ];
     }
 
-    /** Chosen agent (a vice of the school) wins; none when disabled; else the school's default agent. */
-    private function agentName(Certificate $certificate, ?\App\Models\School $school): string
+    /**
+     * Agents chosen at issue time win (older certificates: the single agent_user_id);
+     * none when disabled; else the school's agents flagged «print on certificate».
+     *
+     * @return array<int,string>
+     */
+    private function agentNames(Certificate $certificate, ?\App\Models\School $school): array
     {
         if ($certificate->print_agent === false) {
-            return '';
+            return [];
         }
-        if ($certificate->agent_user_id) {
-            return \App\Models\User::withTrashed()->whereKey($certificate->agent_user_id)->value('name') ?? '';
+        $ids = $certificate->agent_user_ids ?? ($certificate->agent_user_id ? [$certificate->agent_user_id] : null);
+        if ($ids !== null) {
+            return \App\Models\User::withTrashed()->whereKey($ids)->orderBy('name')->pluck('name')->all();
         }
 
-        return $school?->agent?->name ?? '';
+        return $school ? $school->agents->where('pivot.print_on_certificate', true)->pluck('name')->values()->all() : [];
     }
 
     /**
@@ -126,14 +133,18 @@ final class RenderCertificatePdfAction
 
     private ?\App\Models\School $school = null;
 
-    /** The certificate's school (with manager + agent), loaded once per render. */
+    /**
+     * The certificate's school (with manager, agents, complex manager), loaded once per render.
+     * A super-admin issuing with «all schools» stores no school_id → use the student's school.
+     */
     private function school(Certificate $certificate): ?\App\Models\School
     {
-        if ($certificate->school_id && $this->school?->id !== (int) $certificate->school_id) {
-            $this->school = \App\Models\School::with(['manager:id,name', 'agent:id,name', 'compounds.manager:id,name'])->find($certificate->school_id);
+        $schoolId = (int) ($certificate->school_id ?: $certificate->recipient?->school_id);
+        if ($schoolId && $this->school?->id !== $schoolId) {
+            $this->school = \App\Models\School::with(['manager:id,name', 'agents', 'compounds.manager:id,name'])->find($schoolId);
         }
 
-        return $certificate->school_id ? $this->school : null;
+        return $schoolId ? $this->school : null;
     }
 
     /** Absolute filesystem path for a public-disk file, or null if unset/missing. */

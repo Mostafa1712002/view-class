@@ -24,7 +24,7 @@ class CertificateAgentComplexManagerTest extends TestCase
             '2026_06_13_000001_create_certificates*', '2026_06_15_500001_qbcore_create_compounds*',
             '2026_07_04_110000_add_design_fields_to_certificates*',
             '2026_07_09_*', '2026_07_11_*', '2026_07_25_*',
-            '2026_10_22_160000_add_manager_agent_stamp*', '2026_11_19_400001_*',
+            '2026_10_22_160000_add_manager_agent_stamp*', '2026_11_19_400001_*', '2026_11_24_100000_*',
         ];
         $paths = [];
         foreach ($patterns as $pattern) {
@@ -66,7 +66,7 @@ class CertificateAgentComplexManagerTest extends TestCase
         $school = School::factory()->create();
         $default = $this->vice($school, 'الوكيل الافتراضي');
         $other = $this->vice($school, 'وكيل آخر');
-        $school->update(['agent_user_id' => $default->id]);
+        $school->agents()->sync([$default->id => ['print_on_certificate' => true], $other->id => ['print_on_certificate' => false]]);
         $boss = User::factory()->create(['name' => 'مدير المجمع س']);
         $compound = Compound::create(['name_ar' => 'مجمع', 'status' => 'active', 'manager_user_id' => $boss->id]);
         $compound->schools()->sync([$school->id]);
@@ -77,6 +77,35 @@ class CertificateAgentComplexManagerTest extends TestCase
 
         $this->assertSame('وكيل آخر', $this->fields($this->cert($school, ['agent_user_id' => $other->id]))['agent']);
         $this->assertSame('', $this->fields($this->cert($school, ['print_agent' => false]))['agent']);
+        // Several agents chosen at issue time → all printed.
+        $this->assertSame(['الوكيل الافتراضي', 'وكيل آخر'], $this->fields($this->cert($school, ['agent_user_ids' => [$other->id, $default->id]]))['agents']);
+        // School default = every agent flagged «print on certificate».
+        $school->agents()->updateExistingPivot($other->id, ['print_on_certificate' => true]);
+        $this->assertSame(['الوكيل الافتراضي', 'وكيل آخر'], $this->fields($this->cert($school))['agents']);
+    }
+
+    public function test_super_admin_certificate_without_school_uses_the_students_school(): void
+    {
+        $school = School::factory()->create();
+        $vice = $this->vice($school, 'وكيل الطالب');
+        $school->agents()->sync([$vice->id]);
+        $student = User::factory()->create(['school_id' => $school->id]);
+        $c = Certificate::create(['school_id' => null, 'type' => 'thanks', 'title' => 't', 'recipient_user_id' => $student->id, 'issue_date' => '2026-11-24']);
+
+        $this->assertSame('وكيل الطالب', $this->fields($c)['agent']);
+    }
+
+    public function test_migration_backfills_the_single_agent_into_the_pivot(): void
+    {
+        $school = School::factory()->create();
+        $vice = $this->vice($school, 'قديم');
+        \Illuminate\Support\Facades\Schema::drop('school_agents');
+        \Illuminate\Support\Facades\Schema::table('certificates', fn ($t) => $t->dropColumn('agent_user_ids'));
+        $school->forceFill(['agent_user_id' => $vice->id])->saveQuietly();
+        (require database_path('migrations/2026_11_24_100000_create_school_agents_table.php'))->up();
+
+        $this->assertSame([$vice->id], $school->agents()->pluck('users.id')->all());
+        $this->assertTrue((bool) $school->agents()->first()->pivot->print_on_certificate);
     }
 
     public function test_complex_manager_empty_without_complex(): void
@@ -98,13 +127,17 @@ class CertificateAgentComplexManagerTest extends TestCase
             $req = IssueCertificateRequest::create('/x', 'POST', $input);
             $req->setUserResolver(fn () => $admin);
 
-            return Validator::make($input, ['agent_user_id' => $req->rules()['agent_user_id']])->passes();
-        };
+            $rules = $req->rules();
 
-        $this->assertFalse($check(['agent_user_id' => $viceB->id]));
-        $this->assertFalse($check(['agent_user_id' => $admin->id]));
-        $this->assertTrue($check(['agent_user_id' => $viceA->id]));
-        $this->assertTrue($check(['agent_user_id' => 'none']));
+            return Validator::make($input, array_intersect_key($rules, array_flip(['agents_choice', 'agent_user_ids', 'agent_user_ids.*'])))->passes();
+        };
+        $a->agents()->sync([$viceA->id]);
+        $b->agents()->sync([$viceB->id]);
+
+        $this->assertFalse($check(['agent_user_ids' => [$viceB->id]]));
+        $this->assertFalse($check(['agent_user_ids' => [$admin->id]]));
+        $this->assertTrue($check(['agent_user_ids' => [$viceA->id]]));
+        $this->assertTrue($check(['agents_choice' => 1]));
         $this->assertTrue($check([]));
     }
 
