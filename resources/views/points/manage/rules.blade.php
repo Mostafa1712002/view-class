@@ -11,6 +11,7 @@
 <form method="POST" action="{{ route('manage.points.rules.school') }}">@method('PUT')
 @else<div>@endif
 @csrf
+<p class="text-muted small">{{ __('points_manage.rules_help') }}</p>
 @foreach($groups as $beneficiary => $rules)
 <h2 class="h5 mt-3">{{ __('points.beneficiaries.'.$beneficiary) }}</h2>
 <div class="table-responsive"><table class="table"><thead><tr>
