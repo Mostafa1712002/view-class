@@ -76,6 +76,16 @@ final class SetScopeAction
             $termId = null;
         }
 
+        // A non-super-admin tied to ONE school cannot change company/complex/school (server-side,
+        // so a hand-crafted POST can't either): they always sit on their own school.
+        if ($locked = $this->repo->lockedSchoolFor($user)) {
+            $schoolId = $locked->id;
+            $companyId = $locked->educational_company_id ?: null;
+            if (! $locked->compounds->contains('id', $compoundId)) {
+                $compoundId = null;
+            }
+        }
+
         $resolved = [
             'company_id' => $companyId,
             'compound_id' => $compoundId,

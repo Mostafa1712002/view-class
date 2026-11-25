@@ -24,6 +24,7 @@ return [
     'rewards_title' => 'المكافآت', 'student' => 'الطالب', 'period' => 'الفترة', 'points_at_award' => 'النقاط عند الاستحقاق',
     'status' => 'الحالة', 'statuses' => ['earned' => 'مستحقة', 'delivered' => 'تم التسليم'], 'deliver' => 'تسليم', 'delivered' => 'تم تسليم المكافأة',
     'delivered_at' => 'تاريخ التسليم',
+    'subject' => 'المادة', 'grade_col' => 'الصف', 'category' => 'الفئة',
     'honour_title' => 'قائمة المتميزين', 'month' => 'الشهر', 'rank' => 'الترتيب', 'pick_school' => 'اختر مدرسة من أعلى الصفحة لعرض هذه القائمة.',
     'my_points' => 'نقاطي',
 ];

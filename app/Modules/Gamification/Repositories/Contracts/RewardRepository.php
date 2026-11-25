@@ -36,5 +36,5 @@ interface RewardRepository
     public function deliver(PointReward $reward, int $deliveredBy): PointReward;
 
     /** Top $limit by points earned in $month (Y-m); type student|teacher|vice. */
-    public function honourList(int $schoolId, string $month, string $type, ?int $sectionId = null, int $limit = 10): Collection;
+    public function honourList(int $schoolId, string $month, string $type, ?int $sectionId = null, int $limit = 10, ?int $classId = null, ?int $subjectId = null): Collection;
 }

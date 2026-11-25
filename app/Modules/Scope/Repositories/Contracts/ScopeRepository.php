@@ -2,6 +2,7 @@
 
 namespace App\Modules\Scope\Repositories\Contracts;
 
+use App\Models\School;
 use App\Models\User;
 
 interface ScopeRepository
@@ -20,7 +21,10 @@ interface ScopeRepository
      * Complexes (المجمعات) belonging to a company — the complex selector
      * cascades from company, so no company (null or 'none') yields none.
      */
-    public function complexesFor(int|string|null $companyId): array;
+    public function complexesFor(int|string|null $companyId, ?User $user = null): array;
+
+    /** The single school a non-super-admin account is tied to (header company/complex/school are then fixed), else null. */
+    public function lockedSchoolFor(User $user): ?School;
 
     /** Academic years/semesters for a school the user can access. */
     public function yearsFor(User $user, ?int $schoolId): array;

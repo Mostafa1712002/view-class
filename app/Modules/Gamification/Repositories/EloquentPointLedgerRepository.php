@@ -42,8 +42,9 @@ class EloquentPointLedgerRepository implements PointLedgerRepository
 
         $query = User::query()
             ->when($schoolId, fn (Builder $q) => $q->where('users.school_id', $schoolId))
-            ->when($filters['section_id'] ?? null, fn (Builder $q, $v) => $q->where('users.section_id', $v))
+            ->when($filters['section_id'] ?? null, fn (Builder $q, $v) => ClassStudents::inSection($q, (int) $v))
             ->when($filters['class_id'] ?? null, fn (Builder $q, $v) => ClassStudents::constrain($q, [(int) $v]))
+            ->when($filters['subject_id'] ?? null, fn (Builder $q, $v) => $q->whereHas('subjects', fn ($s) => $s->where('subjects.id', $v)))
             ->when($filters['name'] ?? null, fn (Builder $q, $v) => $q->where('users.name', 'like', '%'.$v.'%'));
 
         match ($filters['type'] ?? null) {

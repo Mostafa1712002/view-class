@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\BehaviorRecord;
 use App\Models\ClassRoom;
 use App\Models\Section;
+use App\Models\Subject;
 use App\Modules\Gamification\Actions\AdjustPoints;
 use App\Modules\Gamification\Http\Requests\AdjustPointsRequest;
 use App\Modules\Gamification\Models\PointTransaction;
 use App\Modules\Gamification\Repositories\Contracts\PointLedgerRepository;
+use App\Modules\Gamification\Support\ClassStudents;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -27,6 +29,7 @@ class ManagePointsController extends Controller
             'type' => ['nullable', 'in:student,teacher,vice'],
             'section_id' => ['nullable', 'integer'],
             'class_id' => ['nullable', 'integer'],
+            'subject_id' => ['nullable', 'integer'],
             'name' => ['nullable', 'string', 'max:100'],
         ]);
         $type = $f['type'] ?? 'student';
@@ -42,14 +45,23 @@ class ManagePointsController extends Controller
             unset($f['class_id']);
         }
 
+        $subjects = Subject::query()->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get(['id', 'name']);
+        if (! $subjects->contains('id', $f['subject_id'] ?? null)) {
+            unset($f['subject_id']);
+        }
+        if ($type === 'vice') {
+            unset($f['name']); // the وكلاء list has no filters
+        }
+
         $rows = $this->ledger->balances($schoolId, array_merge($f, ['type' => $type, 'month' => now()->format('Y-m')]))->withQueryString();
+        $rows->getCollection()->load($type === 'student' ? ClassStudents::PLACEMENT_WITH : ($type === 'teacher' ? ['subjects:subjects.id,name'] : []));
 
         // Behaviour points: separate, read-only (students and teachers only).
         $behaviour = $type === 'vice' ? collect() : BehaviorRecord::where('scope', $type)
             ->whereIn('subject_user_id', $rows->pluck('id'))->groupBy('subject_user_id')
             ->selectRaw('subject_user_id, SUM(points) as total')->pluck('total', 'subject_user_id');
 
-        return view('points.manage.index', compact('rows', 'behaviour', 'sections', 'classes', 'type'));
+        return view('points.manage.index', compact('rows', 'behaviour', 'sections', 'classes', 'subjects', 'type'));
     }
 
     public function show(Request $request, int $user)

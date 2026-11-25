@@ -3,11 +3,15 @@
 namespace App\Modules\Gamification\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClassRoom;
 use App\Models\Section;
+use App\Models\Subject;
+use App\Models\User;
 use App\Modules\Gamification\Actions\DeliverReward;
 use App\Modules\Gamification\Http\Requests\PeriodRequest;
 use App\Modules\Gamification\Models\PointReward;
 use App\Modules\Gamification\Repositories\Contracts\RewardRepository;
+use App\Modules\Gamification\Support\ClassStudents;
 use App\Modules\Users\Controllers\Concerns\HasSchoolScope;
 use Illuminate\Http\Request;
 
@@ -74,14 +78,22 @@ class RewardsController extends Controller
         $schoolId = $this->scopedSchoolId();
         $f = $request->validate([
             'month' => ['nullable', 'date_format:Y-m'], 'type' => ['nullable', 'in:student,teacher,vice'],
-            'section_id' => ['nullable', 'integer'],
+            'section_id' => ['nullable', 'integer'], 'class_id' => ['nullable', 'integer'], 'subject_id' => ['nullable', 'integer'],
         ]);
         $month = $f['month'] ?? now()->format('Y-m');
         $type = $f['type'] ?? 'student';
-        $list = $schoolId ? $this->rewards->honourList($schoolId, $month, $type, $f['section_id'] ?? null) : collect();
         $sections = $this->sections($schoolId);
+        // Filter ids must belong to the active school; anything else is dropped.
+        $sectionId = $sections->contains('id', $f['section_id'] ?? null) ? (int) $f['section_id'] : null;
+        $classes = ClassRoom::whereIn('section_id', $sectionId ? [$sectionId] : $sections->pluck('id'))->orderBy('name')->get(['id', 'name', 'division']);
+        $classId = $classes->contains('id', $f['class_id'] ?? null) ? (int) $f['class_id'] : null;
+        $subjects = Subject::query()->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))->orderBy('name')->get(['id', 'name']);
+        $subjectId = $subjects->contains('id', $f['subject_id'] ?? null) ? (int) $f['subject_id'] : null;
 
-        return view('points.manage.honour', compact('list', 'month', 'type', 'sections', 'schoolId'));
+        $list = $schoolId ? $this->rewards->honourList($schoolId, $month, $type, $sectionId, 10, $classId, $subjectId) : collect();
+        $people = User::with(array_merge(ClassStudents::PLACEMENT_WITH, ['subjects:subjects.id,name']))->whereIn('id', $list->pluck('user_id'))->get()->keyBy('id');
+
+        return view('points.manage.honour', compact('list', 'month', 'type', 'sections', 'classes', 'subjects', 'people', 'schoolId'));
     }
 
     /** Writes need a concrete school (a super-admin on "all schools" must pick one first). */

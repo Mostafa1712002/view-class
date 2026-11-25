@@ -67,7 +67,7 @@ final class EloquentScopeRepository implements ScopeRepository
      * Complex selector cascades from company only (educational-companies-complexes
      * card, header Option A): no real company chosen → no complexes to offer.
      */
-    public function complexesFor(int|string|null $companyId): array
+    public function complexesFor(int|string|null $companyId, ?User $user = null): array
     {
         if (! $companyId || $companyId === 'none') {
             return [];
@@ -75,10 +75,18 @@ final class EloquentScopeRepository implements ScopeRepository
 
         return Compound::query()
             ->where('educational_company_id', $companyId)
+            ->when($user && ! $user->isSuperAdmin(), fn ($q) => $q->whereHas('schools', fn ($s) => $s->whereIn('schools.id', $user->managedSchoolIds())))
             ->orderBy('sort_order')
             ->orderBy('name_ar')
             ->get(['id', 'name_ar', 'name_en'])
             ->toArray();
+    }
+
+    public function lockedSchoolFor(User $user): ?School
+    {
+        $ids = $user->isSuperAdmin() ? [] : $user->managedSchoolIds();
+
+        return count($ids) === 1 ? School::with('compounds:compounds.id,name_ar,name_en')->find($ids[0]) : null;
     }
 
     public function yearsFor(User $user, ?int $schoolId): array
@@ -126,7 +134,7 @@ final class EloquentScopeRepository implements ScopeRepository
             return EducationalCompany::whereKey($companyId)->exists();
         }
 
-        return optional($user->school)->educational_company_id === $companyId;
+        return in_array($companyId, array_map('intval', array_column($this->companiesFor($user), 'id')), true);
     }
 
     public function schoolExistsFor(User $user, int $schoolId): bool

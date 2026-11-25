@@ -2,9 +2,11 @@
 
 namespace App\Modules\Gamification\Repositories;
 
+use App\Models\User;
 use App\Modules\Gamification\Models\PointReward;
 use App\Modules\Gamification\Models\PointRewardPeriod;
 use App\Modules\Gamification\Repositories\Contracts\RewardRepository;
+use App\Modules\Gamification\Support\ClassStudents;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -93,7 +95,7 @@ class EloquentRewardRepository implements RewardRepository
         return $reward;
     }
 
-    public function honourList(int $schoolId, string $month, string $type, ?int $sectionId = null, int $limit = 10): Collection
+    public function honourList(int $schoolId, string $month, string $type, ?int $sectionId = null, int $limit = 10, ?int $classId = null, ?int $subjectId = null): Collection
     {
         $from = $month.'-01 00:00:00';
         $to = date('Y-m-d', strtotime($month.'-01 +1 month')).' 00:00:00';
@@ -102,7 +104,9 @@ class EloquentRewardRepository implements RewardRepository
             ->join('users as u', 'u.id', '=', 't.user_id')
             ->where('t.school_id', $schoolId)->where('t.created_at', '>=', $from)->where('t.created_at', '<', $to)
             ->whereNull('u.deleted_at')
-            ->when($sectionId && $type === 'student', fn ($q) => $q->where('u.section_id', $sectionId));
+            ->when($sectionId && $type === 'student', fn ($q) => $q->whereIn('u.id', ClassStudents::inSection(User::query()->select('users.id'), $sectionId)))
+            ->when($classId && $type === 'student', fn ($q) => $q->whereIn('u.id', ClassStudents::constrain(User::query()->select('users.id'), [$classId])))
+            ->when($subjectId && $type === 'teacher', fn ($q) => $q->whereExists(fn ($e) => $e->from('subject_teacher as st')->whereColumn('st.user_id', 'u.id')->where('st.subject_id', $subjectId)));
 
         match ($type) {
             'vice' => $query->whereExists(fn ($q) => $q->from('job_titles as j')->whereColumn('j.id', 'u.job_title_id')->where('j.slug', 'vice')),

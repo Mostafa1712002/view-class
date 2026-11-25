@@ -17,19 +17,29 @@
 <div class="col-md-3 col-6 mb-2"><label for="class_id">{{ __('points_manage.class') }}</label>
 <select class="form-control" id="class_id" name="class_id"><option value="">{{ __('points_manage.all') }}</option>
 @foreach($classes as $c)<option value="{{ $c->id }}" @selected(request('class_id') == $c->id)>{{ $c->name }}{{ $c->division ? ' - '.$c->division : '' }}</option>@endforeach</select></div>
+@elseif($type === 'teacher')
+<div class="col-md-3 col-6 mb-2"><label for="subject_id">{{ __('points_manage.subject') }}</label>
+<select class="form-control" id="subject_id" name="subject_id"><option value="">{{ __('points_manage.all') }}</option>
+@foreach($subjects as $sub)<option value="{{ $sub->id }}" @selected(request('subject_id') == $sub->id)>{{ $sub->name }}</option>@endforeach</select></div>
 @endif
+@if($type !== 'vice')
 <div class="col-md-3 col-6 mb-2"><label for="name">{{ __('points_manage.name') }}</label><input class="form-control" id="name" name="name" value="{{ request('name') }}" placeholder="{{ __('points_manage.search_name') }}"></div>
 <div class="col-md-3 col-6 mb-2"><button class="btn btn-primary">{{ __('points_manage.filter') }}</button> <a class="btn btn-light" href="{{ route('manage.points.index', ['type' => $type]) }}">{{ __('points_manage.reset') }}</a></div>
+@endif
 </div></form>
 <div class="table-responsive"><table class="table"><thead><tr>
-<th scope="col">{{ __('points_manage.name') }}</th><th scope="col">{{ __('points_manage.balance') }}</th><th scope="col">{{ __('points_manage.month_points') }}</th>
+<th scope="col">{{ __('points_manage.name') }}</th>
+@if($type === 'student')<th scope="col">{{ __('points_manage.grade_col') }}</th><th scope="col">{{ __('points_manage.class') }}</th>@elseif($type === 'teacher')<th scope="col">{{ __('points_manage.subject') }}</th>@endif
+<th scope="col">{{ __('points_manage.balance') }}</th><th scope="col">{{ __('points_manage.month_points') }}</th>
 @if($type !== 'vice')<th scope="col">{{ __('points_manage.behaviour_balance') }}</th>@endif
 <th scope="col"></th></tr></thead><tbody>
 @forelse($rows as $row)
-<tr><td>{{ $row->name }}</td><td>{{ (int) $row->balance }}</td><td>{{ (int) $row->month_points }}</td>
+<tr><td>{{ $row->name }}</td>
+@if($type === 'student')@php($place = \App\Modules\Gamification\Support\ClassStudents::placement($row))<td>{{ $place['grade'] ?? '—' }}</td><td>{{ $place['class'] ?? '—' }}</td>@elseif($type === 'teacher')<td>{{ $row->subjects->pluck('name')->implode('، ') ?: '—' }}</td>@endif
+<td>{{ (int) $row->balance }}</td><td>{{ (int) $row->month_points }}</td>
 @if($type !== 'vice')<td class="text-muted">{{ (int) ($behaviour[$row->id] ?? 0) }}</td>@endif
 <td><a class="btn btn-sm btn-light" href="{{ route('manage.points.show', $row->id) }}">{{ __('points_manage.details') }}</a></td></tr>
-@empty<tr><td colspan="5">{{ __('points_manage.empty') }}</td></tr>@endforelse
+@empty<tr><td colspan="8">{{ __('points_manage.empty') }}</td></tr>@endforelse
 </tbody></table></div>{{ $rows->links() }}
 </div></div>
 @endsection

@@ -24,6 +24,7 @@ return [
     'rewards_title' => 'Rewards', 'student' => 'Student', 'period' => 'Period', 'points_at_award' => 'Points at award',
     'status' => 'Status', 'statuses' => ['earned' => 'Earned', 'delivered' => 'Delivered'], 'deliver' => 'Deliver', 'delivered' => 'Reward delivered',
     'delivered_at' => 'Delivered at',
+    'subject' => 'Subject', 'grade_col' => 'Grade', 'category' => 'Category',
     'honour_title' => 'Honour list', 'month' => 'Month', 'rank' => 'Rank', 'pick_school' => 'Pick a school in the header to see this list.',
     'my_points' => 'My points',
 ];

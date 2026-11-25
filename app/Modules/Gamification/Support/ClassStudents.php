@@ -39,4 +39,26 @@ final class ClassStudents
 
         return self::constrain($q, [$classId])->pluck('users.id')->map(fn ($v) => (int) $v)->all();
     }
+
+    /** Narrows a users query to students whose grade (section) is $sectionId: own section_id or their class's section. */
+    public static function inSection(Builder $q, int $sectionId): Builder
+    {
+        return $q->where(fn (Builder $n) => $n->where('users.section_id', $sectionId)
+            ->orWhereHas('classRoom', fn ($c) => $c->where('section_id', $sectionId))
+            ->orWhereHas('enrolledClasses', fn ($c) => $c->where('classes.section_id', $sectionId)));
+    }
+
+    /** Eager loads for placement(). */
+    public const PLACEMENT_WITH = ['section:id,name', 'classRoom.section:id,name', 'enrolledClasses.section:id,name'];
+
+    /** @return array{grade: ?string, class: ?string} the student's grade (section) and class, home class first. */
+    public static function placement(User $u): array
+    {
+        $class = $u->classRoom ?? $u->enrolledClasses->first();
+
+        return [
+            'grade' => $class?->section?->name ?? $u->section?->name,
+            'class' => $class ? trim($class->name.($class->division ? ' - '.$class->division : '')) : null,
+        ];
+    }
 }

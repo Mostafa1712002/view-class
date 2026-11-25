@@ -20,7 +20,7 @@ class PointsManageAccessTest extends TestCase
         $paths = [];
         foreach (['0001_01_01_000000_*', '2025_11_30_*', '2026_04_21_*', '2026_04_26_*', '2026_04_27_*',
             '2026_05_17_100001_create_school_branches*', '2026_05_17_100002_add_card51*', '2026_06_04_150000_*',
-            '2026_06_14_300000_*', '2026_07_11_*', '2026_07_25_000100_*', '2026_11_19_371*'] as $pattern) {
+            '2026_06_14_300000_*', '2026_04_28_100001_*', '2026_05_18_120061_*', '2026_05_25_120000_*', '2026_07_11_*', '2026_07_25_000100_*', '2026_11_19_371*'] as $pattern) {
             $paths = array_merge($paths, glob(database_path('migrations/'.$pattern.'.php')));
         }
         sort($paths);
@@ -88,6 +88,38 @@ class PointsManageAccessTest extends TestCase
             ->assertOk()->assertDontSee('ForeignClassXYZ')->assertSee($mine->name);
         $this->get(route('manage.points.index', ['class_id' => $foreignClass->id]))
             ->assertOk()->assertDontSee('ForeignClassXYZ')->assertSee($mine->name);
+    }
+
+    public function test_balances_and_honour_show_grade_class_subject_and_filter_by_them(): void
+    {
+        $school = School::factory()->create();
+        $section = \App\Models\Section::factory()->create(['school_id' => $school->id, 'name' => 'GradeOneXYZ']);
+        $class = \App\Models\ClassRoom::factory()->create(['section_id' => $section->id, 'name' => 'ClassAlphaXYZ']);
+        $otherSection = \App\Models\Section::factory()->create(['school_id' => $school->id, 'name' => 'GradeTwoXYZ']);
+        $student = $this->createStudent($school);
+        $student->update(['class_room_id' => $class->id, 'name' => 'StudentInClass']);
+        $stranger = User::factory()->create(['school_id' => $school->id, 'name' => 'StudentElsewhere']);
+        $stranger->roles()->attach(\App\Models\Role::where('slug', 'student')->first());
+        $teacher = $this->createTeacher($school);
+        $teacher->update(['name' => 'TeacherMath']);
+        $subject = \App\Models\Subject::create(['name' => 'MathSubjectXYZ', 'school_id' => $school->id, 'code' => 'M1']);
+        $teacher->subjects()->attach($subject->id);
+        foreach ([$student, $stranger, $teacher] as $u) {
+            $this->row($u);
+        }
+        $this->actingAs($this->createSchoolAdmin($school));
+
+        $this->get(route('manage.points.index', ['section_id' => $section->id]))->assertOk()
+            ->assertSee('StudentInClass')->assertSee('GradeOneXYZ')->assertSee('ClassAlphaXYZ')->assertDontSee('StudentElsewhere');
+        $this->get(route('manage.points.index', ['section_id' => $otherSection->id]))->assertOk()->assertDontSee('StudentInClass');
+        $this->get(route('manage.points.index', ['type' => 'teacher', 'subject_id' => $subject->id]))->assertOk()
+            ->assertSee('TeacherMath')->assertSee('MathSubjectXYZ');
+        $this->get(route('manage.points.index', ['type' => 'vice']))->assertOk()->assertDontSee('name="name"', false);
+
+        $this->get(route('manage.points.honour', ['class_id' => $class->id]))->assertOk()
+            ->assertSee('StudentInClass')->assertSee('GradeOneXYZ')->assertSee('ClassAlphaXYZ')->assertDontSee('StudentElsewhere');
+        $this->get(route('manage.points.honour', ['type' => 'teacher', 'subject_id' => $subject->id]))->assertOk()
+            ->assertSee('TeacherMath')->assertSee('MathSubjectXYZ');
     }
 
     public function test_adjust_needs_reason_and_is_blocked_on_self(): void
