@@ -144,6 +144,9 @@
                         <div class="card bg-warning text-dark text-center"><div class="card-body py-2"><h4 class="mb-0">{{ $auto['examResults']->count() }}</h4><small>نتائج اختبارات حديثة</small></div></div>
                     </div>
                 </div>
+                <small class="text-muted d-block mt-2">
+                    المواد الدراسية: عدد المواد التي لها درجات منشورة في العام الدراسي الحالي. المعدل العام: متوسط إجمالي الدرجات المنشورة (%). نسبة الحضور: (أيام الحضور + أيام التأخر) ÷ إجمالي أيام التسجيل في العام الحالي. نتائج اختبارات حديثة: عدد الاختبارات الإلكترونية المسلّمة (آخر 10).
+                </small>
             @endif
         </div>
     </div>
