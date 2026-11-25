@@ -30,19 +30,7 @@
                 @method('PUT')
 
                 <div class="row">
-                    {{-- Student --}}
-                    <div class="col-12 col-md-6 form-group">
-                        <label class="required">@lang('special_education.field_student')</label>
-                        <select name="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
-                            <option value="">@lang('special_education.select_student')</option>
-                            @foreach($schoolUsers as $user)
-                                <option value="{{ $user->id }}" {{ old('student_id', $seStudent->student_id) == $user->id ? 'selected' : '' }}>
-                                    {{ $isRtl && $user->name_ar ? $user->name_ar : $user->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('student_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
+                    @include('special-education._student_picker', ['selectedStudent' => $seStudent->student_id])
 
                     {{-- Category --}}
                     <div class="col-12 col-md-6 form-group">
@@ -90,7 +78,7 @@
                         <label>@lang('special_education.field_assigned_specialist')</label>
                         <select name="assigned_specialist" class="form-control @error('assigned_specialist') is-invalid @enderror">
                             <option value="">@lang('special_education.select_specialist')</option>
-                            @foreach($schoolUsers as $user)
+                            @foreach($teachers as $user)
                                 <option value="{{ $user->id }}" {{ old('assigned_specialist', $seStudent->assigned_specialist) == $user->id ? 'selected' : '' }}>
                                     {{ $isRtl && $user->name_ar ? $user->name_ar : $user->name }}
                                 </option>

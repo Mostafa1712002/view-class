@@ -3,6 +3,8 @@
 namespace App\Modules\SpecialEducation\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClassRoom;
+use App\Models\Section;
 use App\Models\User;
 use App\Modules\SpecialEducation\Http\Requests\StoreSpecialEducationNoteRequest;
 use App\Modules\SpecialEducation\Http\Requests\StoreSpecialEducationPlanRequest;
@@ -41,9 +43,8 @@ class SpecialEducationController extends Controller
     public function create(): View
     {
         $schoolId  = $this->activeSchoolId();
-        $schoolUsers = $this->schoolUsers($schoolId);
 
-        return view('special-education.create', compact('schoolUsers'));
+        return view('special-education.create', $this->pickerData($schoolId));
     }
 
     public function store(StoreSpecialEducationStudentRequest $request): RedirectResponse
@@ -66,9 +67,8 @@ class SpecialEducationController extends Controller
     {
         $seStudent = $this->resolveOwned($id);
         $schoolId  = $this->activeSchoolId();
-        $schoolUsers = $this->schoolUsers($schoolId);
 
-        return view('special-education.edit', compact('seStudent', 'schoolUsers'));
+        return view('special-education.edit', ['seStudent' => $seStudent] + $this->pickerData($schoolId));
     }
 
     public function update(UpdateSpecialEducationStudentRequest $request, int $id): RedirectResponse
@@ -177,10 +177,28 @@ class SpecialEducationController extends Controller
         return $seStudent;
     }
 
-    private function schoolUsers(int $schoolId): \Illuminate\Support\Collection
+    /** Students (role student only) with their grade/class ids, plus teachers, grades and classes of the school. */
+    private function pickerData(?int $schoolId): array
     {
-        return User::where('school_id', $schoolId)
-            ->orderBy('name')
-            ->get(['id', 'name', 'name_ar']);
+        $inRole = fn (string $slug) => User::query()
+            ->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->whereHas('roles', fn ($q) => $q->where('slug', $slug))
+            ->orderBy('name');
+        $sections = Section::query()->when($schoolId, fn ($q) => $q->where('school_id', $schoolId))
+            ->orderBy('name')->get(['id', 'name']);
+
+        return [
+            'teachers' => $inRole('teacher')->get(['id', 'name', 'name_ar']),
+            'sections' => $sections,
+            'classes' => ClassRoom::whereIn('section_id', $sections->pluck('id'))->orderBy('name')->get(['id', 'name', 'division', 'section_id']),
+            // Same grade/class rules as the counseling picker: users.class_room_id or the class_student pivot.
+            'studentOptions' => $inRole('student')->with(['classRoom:id,section_id', 'enrolledClasses:classes.id,section_id'])->get(['id', 'name', 'name_ar', 'class_room_id', 'section_id'])
+                ->map(fn (User $s) => [
+                    'id' => $s->id,
+                    'name' => (app()->getLocale() === 'ar' && $s->name_ar) ? $s->name_ar : $s->name,
+                    'classes' => $s->enrolledClasses->pluck('id')->push($s->class_room_id)->filter()->unique()->values(),
+                    'sections' => $s->enrolledClasses->pluck('section_id')->push($s->classRoom?->section_id, $s->section_id)->filter()->unique()->values(),
+                ])->values(),
+        ];
     }
 }

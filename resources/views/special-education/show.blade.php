@@ -173,6 +173,14 @@
                                 </form>
                             </td>
                         </tr>
+                        @if($plan->goals || $plan->accommodations)
+                        <tr>
+                            <td colspan="5" class="bg-light">
+                                @if($plan->goals)<div class="mb-1"><strong>@lang('special_education.field_goals'):</strong> {!! nl2br(e($plan->goals)) !!}</div>@endif
+                                @if($plan->accommodations)<div><strong>@lang('special_education.field_accommodations'):</strong> {!! nl2br(e($plan->accommodations)) !!}</div>@endif
+                            </td>
+                        </tr>
+                        @endif
                         @endforeach
                     </tbody>
                 </table>

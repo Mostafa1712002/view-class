@@ -49,6 +49,8 @@
                     <div class="border rounded p-2 mb-2">
                         <div class="fw-bold">{{ $plan->title ?? $plan->goal ?? __('student.special_ed.plan') }}</div>
                         @if (!empty($plan->description))<div class="text-muted small">{{ $plan->description }}</div>@endif
+                        @if ($plan->goals)<div class="small mt-1"><strong>@lang('special_education.field_goals'):</strong> {!! nl2br(e($plan->goals)) !!}</div>@endif
+                        @if ($plan->accommodations)<div class="small"><strong>@lang('special_education.field_accommodations'):</strong> {!! nl2br(e($plan->accommodations)) !!}</div>@endif
                     </div>
                 @empty
                     <div class="text-muted">@lang('student.special_ed.no_plans')</div>

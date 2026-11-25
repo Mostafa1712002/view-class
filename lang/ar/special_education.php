@@ -104,4 +104,8 @@ return [
     'select_specialist' => 'اختر المختص (اختياري)',
     'select_status'     => 'اختر الحالة',
     'select_plan_status'=> 'اختر حالة الخطة',
+    'field_grade'  => 'الصف الدراسي',
+    'field_class'  => 'الفصل',
+    'all_grades'   => 'كل الصفوف',
+    'all_classes'  => 'كل الفصول',
 ];

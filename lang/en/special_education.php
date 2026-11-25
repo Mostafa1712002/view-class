@@ -104,4 +104,8 @@ return [
     'select_specialist' => 'Select Specialist (optional)',
     'select_status'     => 'Select Status',
     'select_plan_status'=> 'Select Plan Status',
+    'field_grade'  => 'Grade',
+    'field_class'  => 'Class',
+    'all_grades'   => 'All grades',
+    'all_classes'  => 'All classes',
 ];

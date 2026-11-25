@@ -21,7 +21,7 @@ class UpdateSpecialEducationStudentRequest extends FormRequest
             'student_id'          => [
                 'required',
                 'integer',
-                Rule::exists('users', 'id')->where('school_id', $schoolId),
+                Rule::exists('users', 'id')->where('school_id', $schoolId)->where(fn ($q) => $q->whereIn('id', StoreSpecialEducationStudentRequest::roleUserIds('student'))),
                 Rule::unique('special_education_students', 'student_id')
                     ->where('school_id', $schoolId)
                     ->ignore($studentId),
@@ -32,7 +32,7 @@ class UpdateSpecialEducationStudentRequest extends FormRequest
             'assigned_specialist' => [
                 'nullable',
                 'integer',
-                Rule::exists('users', 'id')->where('school_id', $schoolId),
+                Rule::exists('users', 'id')->where('school_id', $schoolId)->where(fn ($q) => $q->whereIn('id', StoreSpecialEducationStudentRequest::roleUserIds('teacher'))),
             ],
             'status'              => ['required', 'string', 'in:active,inactive,graduated'],
             'notes'               => ['nullable', 'string'],
